@@ -306,12 +306,12 @@ mzSample* mzFileIO::parseMzData(QString fileName) {
 
                      if (taglist.at(taglist.size()-2) == "mzArrayBinary") {
                       currentScan->mz=
-                               base64::decode_base64(xml.readElementText().toStdString(),precision/8,false);
+                               base64::decode_base64(xml.readElementText().toStdString(),precision/8,false,false);
                      }
 
                      if (taglist.at(taglist.size()-2) == "intenArrayBinary") {
                         currentScan->intensity =
-                                base64::decode_base64(xml.readElementText().toStdString(),precision/8,false);
+                                base64::decode_base64(xml.readElementText().toStdString(),precision/8,false,false);
                      }
                 }
 
