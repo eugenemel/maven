@@ -557,7 +557,7 @@ long nchoosek(int n, int k) {
 	return (factorial(n)/(factorial(n-k)*factorial(k))); 
 }
 */
-long nchoosek(int n, int k) { 
+long long nchoosek(int n, int k) {
 
 		int n_k = n - k;
 
@@ -567,7 +567,7 @@ long nchoosek(int n, int k) {
 				n_k = n - k;
 		}
 
-		int  nchsk = 1;
+        long long  nchsk = 1;
 		for ( int i = 1; i <= n_k; i++)
 		{
 				nchsk *= (++k);
@@ -831,8 +831,6 @@ std::string decompress_string(const std::string& str)
     z_stream zs;                        // z_stream is zlib's control structure
     memset(&zs, 0, sizeof(zs));
 
-
-
     if (inflateInit(&zs) != Z_OK)
         throw(std::runtime_error("inflateInit failed while decompressing."));
 
@@ -856,8 +854,6 @@ std::string decompress_string(const std::string& str)
 
     } while (ret == Z_OK);
 
-    cerr << "B..." << "ret=" << ret;
-
     inflateEnd(&zs);
 
    if (ret != Z_STREAM_END) {          // an error occurred that was not EOF
@@ -867,73 +863,9 @@ std::string decompress_string(const std::string& str)
        // throw(std::runtime_error(oss.str()));
     }
 
-    cerr << "C...";
 #endif
     return outstring;
 }
 
-bool gzipInflate( const std::string& compressedBytes, std::string& uncompressedBytes ) {
-#ifdef ZLIB
-  if ( compressedBytes.size() == 0 ) {
-    uncompressedBytes = compressedBytes ;
-    return true ;
-  }
-
-  uncompressedBytes.clear() ;
-
-  unsigned full_length = compressedBytes.size() ;
-  unsigned half_length = compressedBytes.size() / 2;
-
-  unsigned uncompLength = full_length ;
-  char* uncomp = (char*) calloc( sizeof(char), uncompLength );
-
-  z_stream strm;
-  strm.next_in = (Bytef *) compressedBytes.c_str();
-  strm.avail_in = compressedBytes.size() ;
-  strm.total_out = 0;
-  strm.zalloc = Z_NULL;
-  strm.zfree = Z_NULL;
-
-  bool done = false ;
-
-  if (inflateInit2(&strm, (16+MAX_WBITS)) != Z_OK) {
-    free( uncomp );
-    return false;
-  }
-
-  while (!done) {
-    // If our output buffer is too small
-    if (strm.total_out >= uncompLength ) {
-      // Increase size of output buffer
-      char* uncomp2 = (char*) calloc( sizeof(char), uncompLength + half_length );
-      memcpy( uncomp2, uncomp, uncompLength );
-      uncompLength += half_length ;
-      free( uncomp );
-      uncomp = uncomp2 ;
-    }
-
-    strm.next_out = (Bytef *) (uncomp + strm.total_out);
-    strm.avail_out = uncompLength - strm.total_out;
-
-    // Inflate another chunk.
-    int err = inflate (&strm, Z_SYNC_FLUSH);
-    if (err == Z_STREAM_END) done = true;
-    else if (err != Z_OK)  {
-      break;
-    }
-  }
-
-  if (inflateEnd (&strm) != Z_OK) {
-    free( uncomp );
-    return false;
-  }
-
-  for ( size_t i=0; i<strm.total_out; ++i ) {
-    uncompressedBytes += uncomp[ i ];
-  }
-  free( uncomp );
-#endif
-  return true ;
-}
 } //namespace end
 

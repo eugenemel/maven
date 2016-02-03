@@ -181,11 +181,10 @@ void stasum(double *x, int n, double *xbar, double *sd, int flag)
 
 /*
 	least squares polynomial fit - for polynomials
-	of degree 5 or less
 */
 void leasqu(int n, double *x, double *y, int degree, double *w, int wdim, double *r)
 {
-    double b[50]; //why 11?
+    double b[degree+1]; //why 11?
     double sumy1, sumy2, ybar, ysdev, stemp, rsqu;
     double xbar, xsdev;
     int i, j, k;

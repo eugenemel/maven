@@ -66,6 +66,43 @@ class mzPoint {
         double x,y,z;
 };
 
+struct FragmentationMatchScore {
+
+    double fractionMatched;
+    double spearmanRankCorrelation;
+    double ticMatched;
+    double numMatches;
+    double ppmError;
+    double mzFragError;
+    double mergedScore;
+    double dotProduct;
+
+    FragmentationMatchScore() {
+        fractionMatched=0;
+        spearmanRankCorrelation=0;
+        ticMatched=0;
+        numMatches=0;
+        ppmError=1000;
+        mzFragError=1000;
+        mergedScore=0;
+        dotProduct=0;
+    }
+
+    FragmentationMatchScore& operator=(const FragmentationMatchScore& b) {
+        fractionMatched= b.fractionMatched;
+        spearmanRankCorrelation=b.spearmanRankCorrelation;
+        ticMatched=b.ticMatched;
+        numMatches=b.numMatches;
+        ppmError=b.ppmError;
+        mzFragError=b.mzFragError;
+        mergedScore=b.mergedScore;
+        dotProduct=b.dotProduct;
+        return *this;
+    }
+
+};
+
+
 class Scan { 
     public:
 
@@ -76,7 +113,9 @@ class Scan {
     inline unsigned int nobs() { return mz.size(); }
     inline mzSample* getSample() { return sample; }
     vector<int> findMatchingMzs(float mzmin, float mzmax);
-    int findHighestIntensityPos(float mz, float ppm);
+    int findHighestIntensityPos(float mz, float ppm);		//higest intensity pos
+    int findClosestHighestIntensityPos(float mz, float ppm);	//highest intensity pos nearest to the cente mz
+
     bool hasMz(float mz, float ppm);
     bool isCentroided() { return centroided; }
     bool isProfile()    { return !centroided; }
@@ -84,24 +123,36 @@ class Scan {
     void  setPolarity(int x) { polarity = x; }
 
     int totalIntensity(){ int sum=0; for(unsigned int i=0;i<intensity.size();i++) sum += intensity[i]; return sum; }
-    vector<pair<float,float> > getTopPeaks(float minFracCutoff);
+    float maxIntensity()  { float max=0; for(unsigned int i=0;i<intensity.size();i++) if(intensity[i] > max) max=intensity[i]; return max; }
+    float minMz()  { if(nobs() > 0) return mz[0]; return 0; }
+    float maxMz()  { if(nobs() > 0) return mz[nobs()-1]; return 0; }
+    float baseMz();
+
+    vector<int> intensityOrderDesc(); //return postion in a scan from higest to lowerst intensity
+    vector<pair<float,float> > getTopPeaks(float minFracCutoff,float minSigNoiseRatio,int dropTopX);
+    vector<int>assignCharges(float ppmTolr);
 
     vector<float> chargeSeries(float Mx, unsigned int Zx);
     ChargedSpecies* deconvolute(float mzfocus, float noiseLevel, float ppmMerge, float minSigNoiseRatio, int minDeconvolutionCharge, int maxDeconvolutionCharge, int minDeconvolutionMass, int maxDeconvolutionMass, int minChargedStates );
-
-
+	string toMGF();
 
     void  simpleCentroid();
     void  intensityFilter( int minIntensity);
     void  quantileFilter(int minQuantile);
     void  summary();
-    float rt;
-    int   scannum;
-    float precursorMz;
-    float productMz;
-    float collisionEnergy;
+
     int mslevel;
     bool centroided;
+    float rt;
+    int   scannum;
+
+    float precursorMz;
+    float precursorIntensity;
+    int precursorCharge;
+    string activationMethod;
+    int precursorScanNum;
+    float productMz;
+    float collisionEnergy;
 
     vector <float> intensity;
     vector <float> mz;
@@ -179,7 +230,7 @@ public:
     void parseMzCSV(const char*);			// load data from mzCSV file
     void parseMzXML(const char*);			// load data from mzXML file
     void parseMzML(const char*);			// load data from mzML file
-    int  parseCDF (const char *filename, int is_verbose);     // load netcdf files
+    int  parseCDF (char *filename, int is_verbose);     // load netcdf files
     void parseMzXMLScan(const xml_node& scan, int scannum);		// parse individual scan
     void writeMzCSV(const char*);
 
@@ -203,6 +254,7 @@ public:
     EIC* getEIC(string srmId);	//get eic based on srmId
     EIC* getEIC(float precursorMz, float collisionEnergy, float productMz, float amuQ1, float amuQ2 );
     EIC* getTIC(float,float,int);		//get Total Ion Chromatogram
+    EIC* getBIC(float,float,int);		//get Base Peak Chromatogram
 
 
     deque <Scan*> scans;
@@ -229,9 +281,12 @@ public:
     map<string,string> instrumentInfo;		//tags associated with this sample
 
     //saving and restoring retention times
-    vector<float>originalRetentionTimes;        //saved retention times prior to alignment
+    vector<float>originalRetentionTimes;       			//saved retention times prior to alignment
+	vector<double>polynomialAlignmentTransformation;		//parameters for polynomial transform
+
     void saveOriginalRetentionTimes();
     void restoreOriginalRetentionTimes();       
+	void applyPolynomialTransform();
 
     //class functions
     void addScan(Scan*s);
@@ -249,6 +304,7 @@ public:
     bool N15Labeled(){ return _N15Labeled; }
 
     static bool compSampleOrder(const mzSample* a, const mzSample* b ) { return a->_sampleOrder < b->_sampleOrder; }
+    static bool compSampleName(const mzSample* a, const mzSample* b ) { return a->sampleName < b->sampleName; }
     static mzSlice getMinMaxDimentions(const vector<mzSample*>& samples);
 
 
@@ -270,8 +326,8 @@ public:
         static int filter_minIntensity;
         static bool filter_centroidScans;
         static int filter_intensityQuantile;
-	static int filter_mslevel;
-	static int filter_polarity;
+		static int filter_mslevel;
+		static int filter_polarity;
 
 };
 
@@ -293,6 +349,7 @@ class EIC {
     };
 
 		~EIC();
+
 
         enum SmootherType { GAUSSIAN=0, AVG=1, SAVGOL=2 };
         vector <int> scannum;
@@ -326,12 +383,18 @@ class EIC {
 		void findPeakBounds(Peak& peak);
 		void getPeakStatistics();
 		void checkGaussianFit(Peak& peak);
+		vector<Scan*> getFragmenationEvents();
+		void subtractBaseLine();
+		void removeOverlapingPeaks();
+		EIC* clone(); //make a copy of self
+
 
 		vector<mzPoint> getIntensityVector(Peak& peak);
 		void summary();
         void setSmootherType(EIC::SmootherType x) { smootherType=x; }
         void setBaselineSmoothingWindow(int x) { baselineSmoothingWindow=x;}
         void setBaselineDropTopX(int x) { baselineDropTopX=x; }
+        void interpolate();
 
 		inline unsigned int size() { return intensity.size();}
 		inline mzSample* getSample() { return sample; } 
@@ -352,7 +415,7 @@ class Peak {
 	public:
 		Peak();
 		Peak(EIC* e, int p);
-                Peak(const Peak& p);
+        Peak(const Peak& p);
 		Peak& operator=(const Peak& o);
                 void copyObj(const Peak& o);
 
@@ -374,29 +437,34 @@ class Peak {
 
 		float peakArea;                    //non corrected sum of all intensities
 		float peakAreaCorrected;           //baseline substracted area
-        	float peakAreaTop;                  //top 3points of the peak
-                float peakAreaFractional;          //area of the peak dived by total area in the EIC
-                float peakRank;                     //peak rank (sorted by peakAreaCorrected)
+		float peakAreaTop;                  //top 3points of the peak
+		float peakAreaFractional;          //area of the peak dived by total area in the EIC
+		float peakRank;                     //peak rank (sorted by peakAreaCorrected)
 
 		float peakIntensity;               //not corrected intensity at top of the pek
-                float peakBaseLineLevel;            //baseline level below the highest point
+		float peakBaseLineLevel;            //baseline level below the highest point
 
 		float peakMz;	//mz value at the top of the peak
 		float medianMz;	//averaged mz value across all points in the peak
 		float baseMz;	//mz value across base of the peak
 
 		float quality;	//from 0 to 1. indicator of peak goodness
-                unsigned int width;		//width of the peak at the baseline
+		unsigned int width;		//width of the peak at the baseline
 		float gaussFitSigma;	//fit to gaussian curve
 		float gaussFitR2;		//fit to gaussian curve
-                int groupNum;
+		int groupNum;
 
 		unsigned int noNoiseObs; 
-                float noNoiseFraction;
-                float symmetry;
-                float signalBaselineRatio;
+		float noNoiseFraction;
+		float symmetry;
+		float signalBaselineRatio;
 		float groupOverlap;			// 0 no overlap, 1 perfect overlap
 		float groupOverlapFrac;		
+
+		int   	chargeState;		    	
+		int   	ms2EventCount;
+		float   selectionScore;
+		bool    isMonoIsotopic;
 
 		bool localMaxFlag;
 		bool fromBlankSample;		//true if peak is from blank sample
@@ -412,6 +480,9 @@ class Peak {
 		inline EIC*	 getEIC() { return eic;    }
 		inline bool hasEIC() { return eic != NULL; }
 		Scan* getScan() { if(sample) return sample->getScan(scan); else return NULL; }	
+		vector<Scan*> getFragmenationEvents(float ppmWindow);
+
+		int getChargeState();
 
 		void   setSample(mzSample* s ) { sample=s; }
 		inline mzSample* getSample() { return sample; }
@@ -420,6 +491,7 @@ class Peak {
 		void setLabel(char label) { this->label=label;}
 		inline char getLabel() { return label;}
 		
+        static bool compRtMin(const Peak& a, const Peak& b ) { return a.rtmin < b.rtmin; }
 		static bool compRt(const Peak& a, const Peak& b ) { return a.rt < b.rt; }
 		static bool compIntensity(const Peak& a, const Peak& b ) { return b.peakIntensity < a.peakIntensity; }
 		static bool compArea(const Peak& a, const Peak& b ) { return b.peakAreaFractional < a.peakAreaFractional; }
@@ -427,14 +499,14 @@ class Peak {
 		static bool compSampleName(const Peak& a, const Peak& b ) { return a.sample->getSampleName() < b.sample->getSampleName(); }
 		static bool compSampleOrder(const Peak& a, const Peak& b ) { return a.sample->getSampleOrder() < b.sample->getSampleOrder(); }
 		inline static float overlap(const Peak& a, const Peak& b) {	return( checkOverlap(a.rtmin, a.rtmax, b.rtmin, b.rtmax)); }
-                vector<mzLink> findCovariants();
+		vector<mzLink> findCovariants();
 };
 
 class PeakGroup {
 
 	public:
 		enum GroupType {None=0, C13=1, Adduct=2, Fragment=3, Covariant=4, Isotope=5 };     //group types
-		enum QType	   {AreaTop=0, Area=1, Height=2, RetentionTime=3, Quality=4, SNRatio=5 };
+        enum QType	   {AreaTop=0, Area=1, Height=2, AreaNotCorrected=3, RetentionTime=4, Quality=5, SNRatio=6, MS2Count=7 };
 		PeakGroup();
 		PeakGroup(const PeakGroup& o);
 		PeakGroup& operator=(const PeakGroup& o);
@@ -448,57 +520,60 @@ class PeakGroup {
 		Compound* compound;
 
 		vector<Peak> peaks;
-        deque<PeakGroup> children;
+        vector<PeakGroup> children;
 
-		string srmId;
-		string tagString;
-		char label;			//classification label
-                string getName();               //compound name + tagString + srmid
+        string srmId;
+        string tagString;
+        char label;			//classification label
+        string getName();               //compound name + tagString + srmid
 
-                bool isFocused;
+        bool isFocused;
 
-		int groupId;
-		int metaGroupId;
+        int groupId;
+        int metaGroupId;
 
-		float maxIntensity;
-		float meanRt;
-		float meanMz; 
-		int totalSampleCount;
+        float maxIntensity;
+        float meanRt;
+        float meanMz;
+        int totalSampleCount;
 
-                //isotopic information
-                float expectedAbundance;
-                int   isotopeC13count;
+        //isotopic information
+        float expectedAbundance;
+        int   isotopeC13count;
+        
+        //Flag for deletion
+        bool deletedFlag;
 
-		float minRt;
-		float maxRt;
-                float minMz;
-                float maxMz;
+        float minRt;
+        float maxRt;
+        float minMz;
+        float maxMz;
 
-		float blankMax;
-		float blankMean;
-		unsigned int blankSampleCount;
+        float blankMax;
+        float blankMean;
+        unsigned int blankSampleCount;
 
-		int sampleCount;
-		float sampleMean;
-		float sampleMax;
+        int sampleCount;
+        float sampleMean;
+        float sampleMax;
 
-		unsigned int maxNoNoiseObs;
-                unsigned int  maxPeakOverlap;
-		float maxQuality;
-                float maxPeakFracionalArea;
-                float maxSignalBaseRatio;
-                float maxSignalBaselineRatio;
-                int goodPeakCount;
-                float expectedRtDiff;
-                unsigned int groupRank;
+        unsigned int maxNoNoiseObs;
+        unsigned int  maxPeakOverlap;
+        float maxQuality;
+        float maxPeakFracionalArea;
+        float maxSignalBaseRatio;
+        float maxSignalBaselineRatio;
+        int goodPeakCount;
+        float expectedRtDiff;
+        float groupRank;
 
-                //for sample contrasts  ratio and pvalue
-		float changeFoldRatio;	
-		float changePValue;
+        //for sample contrasts  ratio and pvalue
+        float changeFoldRatio;
+        float changePValue;
 
-		bool  	hasSrmId()  { return srmId.empty(); }
-		void  	setSrmId(string id)	  { srmId=id; }
-		inline  string getSrmId() { return srmId; }
+        bool  	hasSrmId()  { return srmId.empty(); }
+        void  	setSrmId(string id)	  { srmId=id; }
+        inline  string getSrmId() { return srmId; }
 
 		bool isPrimaryGroup();
 		inline bool hasCompoundLink()  { if(compound != NULL) return true ; return false; }
@@ -510,7 +585,11 @@ class PeakGroup {
 		inline PeakGroup* getParent() { return parent; }
 
 		inline vector<Peak>& getPeaks() { return peaks; } 
-		inline deque<PeakGroup>& getChildren()  { return children; }
+        inline vector<PeakGroup>& getChildren()  { return children; }
+
+        vector<Scan*> getRepresentativeFullScans();
+        vector<Scan*> getFragmenationEvents();
+        Scan* getAverageFragmenationScan(float resolution);
 
 		inline void setParent(PeakGroup* p) {parent=p;}
 		inline void setLabel(char label) { this->label=label;}
@@ -540,6 +619,7 @@ class PeakGroup {
 		void groupOverlapMatrix();
 
 		Peak* getSamplePeak(mzSample* sample);
+        FragmentationMatchScore fragMatchScore;
 
 		void deletePeaks();
 		bool deletePeak(unsigned int index);
@@ -554,18 +634,17 @@ class PeakGroup {
 		void reorderSamples();
 
 		static bool compRt(const PeakGroup& a, const PeakGroup& b ) { return(a.meanRt < b.meanRt); }
-                static bool compMz(const PeakGroup& a, const PeakGroup& b ) { return(a.meanMz > b.meanMz); }
-                static bool compIntensity(const PeakGroup& a, const PeakGroup& b ) { return(a.maxIntensity > b.maxIntensity); }
+		static bool compMz(const PeakGroup& a, const PeakGroup& b ) { return(a.meanMz > b.meanMz); }
+		static bool compIntensity(const PeakGroup& a, const PeakGroup& b ) { return(a.maxIntensity > b.maxIntensity); }
 		static bool compArea(const PeakGroup& a, const PeakGroup& b ) { return(a.maxPeakFracionalArea > b.maxPeakFracionalArea); }
 		static bool compQuality(const PeakGroup& a, const PeakGroup& b ) { return(a.maxQuality > b.maxQuality); }
-		//static bool compInfoScore(const PeakGroup& a, const PeakGroup& b ) { return(a.informationScore > b.informationScore); }
-                static bool compRank(const PeakGroup& a, const PeakGroup& b ) { return(a.groupRank > b.groupRank); }
-                static bool compRankPtr(const PeakGroup* a, const PeakGroup* b ) { return(a->groupRank > b->groupRank); }
+		static bool compRankPtr(const PeakGroup* a, const PeakGroup* b ) { return(a->groupRank < b->groupRank); }
 		static bool compRatio(const PeakGroup& a, const PeakGroup& b ) { return(a.changeFoldRatio < b.changeFoldRatio); }
 		static bool compPvalue(const PeakGroup* a, const PeakGroup* b ) { return(a->changePValue< b->changePValue); }
-                static bool compC13(const PeakGroup* a, const PeakGroup* b) { return(a->isotopeC13count < b->isotopeC13count); }
-                static bool compMetaGroup(const PeakGroup& a, const PeakGroup& b) { return(a.metaGroupId < b.metaGroupId); }
-                bool operator< (const PeakGroup* b) { return this->maxIntensity < b->maxIntensity; }
+		static bool compC13(const PeakGroup* a, const PeakGroup* b) { return(a->isotopeC13count < b->isotopeC13count); }
+		static bool compMetaGroup(const PeakGroup& a, const PeakGroup& b) { return(a.metaGroupId < b.metaGroupId); }
+		//static bool operator< (const PeakGroup* b) { return this->maxIntensity < b->maxIntensity; }
+        static bool compMaxIntensity(const PeakGroup* a, const PeakGroup* b) { return(a->maxIntensity > b->maxIntensity); }
 };
 
 class Compound { 
@@ -595,19 +674,23 @@ class Compound {
             string pubchem_id;
             string hmdb_id;
             string alias;
+			string title;
+            string comment;
+            string smileString;
 
             string srmId;
             float expectedRt;
+			bool isPeptide;
 
             int charge;
             float mass;
-            float massDelta;
 
             //QQQ mapping
             string method_id;
             float precursorMz;	//QQQ parent ion
             float productMz;	//QQQ child ion
             float collisionEnergy; //QQQ collision energy
+            float logP;
 
             string db;			//name of database for example KEGG, ECOCYC.. etc..
 
@@ -615,6 +698,7 @@ class Compound {
             vector<float>fragment_mzs;
             vector<float>fragment_intensity;
             vector<string> category;
+            vector<string> aliases;
 
             float ajustedMass(int charge);
             void addReaction(Reaction* r) { reactions.push_back(r); }
@@ -708,7 +792,8 @@ class Aligner {
 		void doAlignment(vector<PeakGroup*>& peakgroups);
 		vector<double> groupMeanRt();
 		double checkFit();
-		void Fit();
+        void Fit(int ideg);
+		void PolyFit(int maxdegree);
 		void saveFit();
 		void restoreFit();
 		void setMaxItterations(int x) { maxItterations=x; }

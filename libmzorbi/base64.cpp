@@ -1,4 +1,6 @@
 #include "base64.h"
+#include "mzUtils.h"
+
 using namespace std;
 
 namespace base64 { 
@@ -18,7 +20,7 @@ char encode(unsigned char u) {
  *   */
 
 
-unsigned char decode(char c){
+char decode(char c){
 		if(c >= 'A' && c <= 'Z') return(c - 'A');
 		if(c >= 'a' && c <= 'z') return(c - 'a' + 26);
 		if(c >= '0' && c <= '9') return(c - '0' + 52);
@@ -38,13 +40,12 @@ int is_base64(char c) {
 		return false;
 }
 
-vector<float> decode_base64(const string& src, int float_size, bool neworkorder) {
+char* decode_base64(const string& src) {
 
     int k, l= src.length();
-
-    unsigned char *buf= (unsigned char*) calloc(sizeof(unsigned char), l);
-    unsigned char *dest = (unsigned char*) calloc(sizeof(unsigned char), l);
-    unsigned char *p= dest;
+    char *buf= (char*) calloc(sizeof(char), l);
+    char *dest = (char*) calloc(sizeof(char), l);
+    char *p= dest;
 
     /* Ignore non base64 chars as per the POSIX standard */
     for(k=0, l=0; src[k]; k++) {
@@ -73,13 +74,29 @@ vector<float> decode_base64(const string& src, int float_size, bool neworkorder)
         if(c4 != '=') *p++=(((b3&0x3)<<6)|b4 );
     }
 
-    int size = 1+(src.length() * 3/4 - 4)/float_size;
+	free(buf);
+	return dest;
+}
 
-    /*
-		cout << "Dest=" << dest << endl;
-		cout << "src.length()=" << src.length() << endl;
-		cout << "size=" << size << endl;
-		*/
+
+vector<float> decode_base64(const string& src, int float_size, bool neworkorder, bool decompress) {
+
+	char* dest=decode_base64(src);
+   	int size = 1+(src.length() * 3/4 - 4)/float_size;
+
+	if (decompress) {
+#ifdef ZLIB
+		string decodedStr(dest);
+		string uncompStr(mzUtils::decompress_string(decodedStr));
+
+		free(dest);
+		dest = (char*) calloc(sizeof(char), uncompStr.size());
+		for(int i=0; i<uncompStr.size();i++) dest[i] = uncompStr[i];
+   		size = 1+(uncompStr.size() * 3/4 - 4)/float_size;
+#endif 
+	}
+	
+
 
 #if (LITTLE_ENDIAN == 1)
 	 cerr << "WARNING: LITTLE_ENDIAN.. Inverted network order";
@@ -115,15 +132,16 @@ vector<float> decode_base64(const string& src, int float_size, bool neworkorder)
                 decodedArray[i] = data;
             }
         }
-    }
-
+    } 
     //for debuging
     //for(int i=0; i < size; i++ ) { cout << "\tok.." << i << " " << size <<" " << decodedArray[i] << endl; }
 
-    free(buf);
     free(dest);
     return decodedArray;
 }
+
+
+
 
 unsigned char *encode_base64(const vector<float>& farray) {
 

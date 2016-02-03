@@ -85,7 +85,7 @@ class StatisticsVector : public std::vector<T>
   StatisticsVector(unsigned int i, T val) : std::vector<T> (i,val) {}
 
   /*copy std:vector */
-  StatisticsVector(const std::vector<T>o) : std::vector<T>(o) {}
+  StatisticsVector(const std::vector<T>& o) : std::vector<T>(o) {}
 
   /**
    * Destructor.  Virtual so we can derive from the \p StatisticsVector
@@ -97,6 +97,11 @@ class StatisticsVector : public std::vector<T>
    * Returns the l2 norm of the data set.
    */
   virtual Real l2_norm() const;
+
+  /**
+   * Returns the sum value in the data set.
+   */
+  virtual T sum() const;
 
   /**
    * Returns the minimum value in the data set.

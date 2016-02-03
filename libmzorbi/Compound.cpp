@@ -6,9 +6,10 @@ Compound::Compound(string id, string name, string formula, int charge ) {
 		this->formula = formula;
 		this->charge = charge;
         this->mass =  mcalc->computeNeutralMass(formula);
-		this->massDelta = FLT_MAX;
 		this->expectedRt = -1;
+        this->logP = 0;
 
+		isPeptide=false;
 		precursorMz=0;
 		productMz=0;
 		collisionEnergy=0;

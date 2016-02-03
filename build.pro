@@ -7,5 +7,3 @@ SUBDIRS += \
 		libmzorbi\
         	mzroll \
 		peakdetector\
-		mzWatcher
-
