@@ -11,7 +11,7 @@ CONFIG -= network gui opengl
 INCLUDEPATH += ../pugixml/src/ ../sqlite ../libmzorbi ../pugixml/src ../libneural ../zlib/
 LDFLAGS     +=  $$OUTPUT_DIR/lib
 
-LIBS += -L.  -lmzorbi -lpugixml -lneural
+LIBS += -L.  -lmzorbi -lpugixml -lneural -lz
 
 SOURCES= peakdetector.cpp  \
 		options.cpp \

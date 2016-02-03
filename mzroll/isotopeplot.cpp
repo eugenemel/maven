@@ -118,8 +118,6 @@ void IsotopePlot::showBars() {
 
             if(_mw) {
                 connect(rect,SIGNAL(groupSelected(PeakGroup*)),_mw, SLOT(setPeakGroup(PeakGroup*)));
-                connect(rect,SIGNAL(groupUpdated(PeakGroup*)),_mw->pathwayWidget, SLOT(updateCompoundConcentrations()));
-                //connect(rect,SIGNAL(showInfo(QString,int,int)),_mw->getEicWidget(),SLOT(setStatus(QString,int,int)));
             }
             xcoord += length;
         }

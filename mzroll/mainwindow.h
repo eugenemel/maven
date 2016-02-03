@@ -7,10 +7,8 @@
 #include "scatterplot.h"
 #include "eicwidget.h"
 #include "settingsform.h"
-#include "pathwaywidget.h"
 #include "spectrawidget.h"
 #include "masscalcgui.h"
-#include "adductwidget.h"
 #include "ligandwidget.h"
 #include "isotopeswidget.h"
 #include "treedockwidget.h"
@@ -20,18 +18,13 @@
 //#include "rconsoledialog.h"
 #include "background_peaks_update.h"
 #include "heatmap.h"
-#include "treemap.h"
 #include "note.h"
 #include "history.h"
 #include "suggest.h"
-#include "animationcontrol.h"
-#include "noteswidget.h"
 #include "gallerywidget.h"
 #include "projectdockwidget.h"
 #include "spectramatching.h"
 #include "mzfileio.h"
-#include "logwidget.h"
-#include "qdownloader.h"
 #include "spectralhit.h"
 #include "rconsolewidget.h"
 #include "spectralhitstable.h"
@@ -44,9 +37,7 @@ class PeakDetectionDialog;
 class AlignmentDialog;
 //class RConsoleDialog;
 class SpectraWidget;
-class AdductWidget;
 class LigandWidget;
-class PathwayWidget;
 class IsotopeWidget;
 class MassCalcWidget;
 class TreeDockWidget;
@@ -91,21 +82,17 @@ public:
     QComboBox		  *quantType;
     QLabel			  *statusText;
 
-    PathwayWidget     *pathwayWidget;
     SpectraWidget     *spectraWidget;
     SpectraWidget     *fragmenationSpectraWidget;
     MassCalcWidget       *massCalcWidget;
-    AdductWidget     *adductWidget;
     LigandWidget     *ligandWidget;
     IsotopeWidget    *isotopeWidget;
     TreeDockWidget 	*covariantsPanel;
     TreeDockWidget	 *fragPanel;
-    TreeDockWidget	 *pathwayPanel;
     TreeDockWidget	 *srmDockWidget;
     //TreeDockWidget   *peaksPanel;
     QDockWidget         *spectraDockWidget;
     QDockWidget         *fragmenationSpectraDockWidget;
-    QDockWidget         *pathwayDockWidget;
     QDockWidget		 *heatMapDockWidget;
     QDockWidget		 *scatterDockWidget;
     QDockWidget		 *treeMapDockWidget;
@@ -133,7 +120,6 @@ public:
     int sampleCount() { return samples.size(); }
     EicWidget* getEicWidget() { return eicWidget; }
     SpectraWidget*  getSpectraWidget() { return spectraWidget; }
-    PathwayWidget* getPathwayWidget() { return pathwayWidget; }
     ProjectDockWidget* getProjectWidget() { return projectDockWidget; }
     RconsoleWidget*    getRconsoleWidget() { return rconsoleDockWidget; }
     TableDockWidget*    getBookmarkedPeaks() { return bookmarkedPeaks; }
@@ -170,7 +156,6 @@ public slots:
     void loadCompoundsFile();
     void loadCompoundsFile(QString filename);
     void loadMethodsFolder(QString& methodsFolder);
-    void loadPathwaysFolder(QString& pathwaysFolder);
 
     bool addSample(mzSample* sample);
     void compoundDatabaseSearch();
@@ -183,7 +168,6 @@ public slots:
     void spectaFocused(Peak* _peak);
     bool checkCompoundExistance(Compound* c);
     void setCompoundFocus(Compound* c);
-    void setPathwayFocus(Pathway* p);
     void showFragmentationScans(float pmz);
     QString groupTextExport(PeakGroup* group);
     PeakGroup* bookmarkPeakGroup(PeakGroup* group);
@@ -224,7 +208,6 @@ public slots:
     SpectralHitsDockWidget* addSpectralHitsTable(QString title);
     BackgroundPeakUpdate* newWorkerThread(QString funcName);
     QWidget* eicWidgetController();
-    QWidget* pathwayWidgetController();
 
 private slots:
     void createMenus();

@@ -168,8 +168,6 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     toolBar->addWidget(btnX);
 
     setTitleBarWidget(toolBar);
-    setupFiltersDialog();
-
 
     setAcceptDrops(true);
 
@@ -280,16 +278,6 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
     if (group->label == 'g' ) item->setIcon(0,QIcon(":/images/good.png"));
     if (group->label == 'b' ) item->setIcon(0,QIcon(":/images/bad.png"));
 
-    if (filtersDialog->isVisible()) {
-        float minG = sliders["GoodPeakCount"]->minBoundValue();
-        float maxG = sliders["GoodPeakCount"]->maxBoundValue();
-
-        if ( group->goodPeakCount < minG  || group->goodPeakCount > maxG ) {
-            item->setHidden(true);
-        } else {
-            item->setHidden(false);
-        }
-    }
 }
 
 void TableDockWidget::heatmapBackground(QTreeWidgetItem* item) {
@@ -1366,42 +1354,6 @@ void TableDockWidget::clusterGroups() {
 
     _mainwindow->setProgressBar("Clustering., done!",allgroups.size(),allgroups.size());
     showAllGroups();
-}
-
-void TableDockWidget::setupFiltersDialog() {
-
-    filtersDialog = new QDialog(this);
-    QVBoxLayout *layout = new QVBoxLayout(filtersDialog);
-
-    sliders["PeakQuality"] =  new QHistogramSlider(this);
-    sliders["PeakIntensity"] =  new QHistogramSlider(this);
-    sliders["PeakWidth"] =  new QHistogramSlider(this);
-    sliders["GaussianFit"] =  new QHistogramSlider(this);
-    sliders["PeakAreaFractional"] =  new QHistogramSlider(this);
-    sliders["PeakAreaTop"] =  new QHistogramSlider(this);
-    sliders["S/N Ratio"] =  new QHistogramSlider(this);
-    sliders["GoodPeakCount"] =  new QHistogramSlider(this);
-
-    foreach(QHistogramSlider* slider, sliders) {
-        connect(slider,SIGNAL(minBoundChanged(double)),SLOT(filterPeakTable()));
-        connect(slider,SIGNAL(maxBoundChanged(double)),SLOT(filterPeakTable()));
-        layout->addWidget(slider);
-    }
-
-    filtersDialog->setLayout(layout);
-}
-
-void TableDockWidget::showFiltersDialog() {
-    filtersDialog->setVisible(! filtersDialog->isVisible() );
-    if (filtersDialog->isVisible() == false) return;
-
-    foreach(QHistogramSlider* slider, sliders) { slider->clearData(); }
-
-    for(int i=0; i <100; i++ ) sliders["PeakQuality"]->addDataPoint(QPointF((float)i/100.00,i));
-    for(int i=0; i <50; i++ ) sliders["GoodPeakCount"]->addDataPoint(QPointF(i,5));
-    for(int i=0; i <100; i++ ) sliders["PeakIntensity"]->addDataPoint(QPointF(i,i));
-    sliders["PeakQuality"]->setPrecision(2);
-    foreach(QHistogramSlider* slider, sliders) slider->recalculatePlotBounds();
 }
 
 void TableDockWidget::filterPeakTable() {

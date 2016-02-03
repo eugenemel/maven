@@ -6,7 +6,6 @@
 #include "traindialog.h"
 #include "clusterdialog.h"
 #include "numeric_treewidgetitem.h"
-#include "QHistogramSlider.h"
 
 class MainWindow;
 class TrainDialog;
@@ -80,7 +79,6 @@ public slots:
 	  void deleteAll();
           void clusterGroups();
 	  void findMatchingCompounds();
-	  void showFiltersDialog();
 	  void filterPeakTable();
           int loadSpreadsheet(QString fileName);
           int loadCSVFile(QString filename, QString sep);
@@ -102,7 +100,6 @@ private:
 	  PeakGroup* readGroupXML(QXmlStreamReader& xml,PeakGroup* parent);
           void writeGroupXML(QXmlStreamWriter& stream, PeakGroup* g);
 	  void readPeakXML(QXmlStreamReader& xml,PeakGroup* parent);
-	  void setupFiltersDialog();
 	  QString groupTagString(PeakGroup* group);
 
           MainWindow* _mainwindow;
@@ -111,7 +108,6 @@ private:
           TrainDialog* traindialog;
           ClusterDialog*       clusterDialog;
           QDialog* 	 filtersDialog;
-          QMap<QString, QHistogramSlider*> sliders;
 
           enum tableViewType{ groupView=0, peakView=1 };
           tableViewType viewType;

@@ -199,17 +199,7 @@ void EicWidget::mouseDoubleClickEvent(QMouseEvent* event){
 	}
 }
 
-void EicWidget::selectionChangedAction() {
- //qDebug <<" EicWidget::selectionChangedAction()";
-	QList<QGraphicsItem*>items = scene()->selectedItems();
-	if (items.size()) { 
-		if (QGraphicsPixmapItem *note = qgraphicsitem_cast<QGraphicsPixmapItem *>(items[0])) {
-			QVariant v = note->data(0);
-			int noteid = v.value<int>();
-			getMainWindow()->notesDockWidget->showNote(noteid);
-		}
-	}
-}
+void EicWidget::selectionChangedAction() {}
 
 void EicWidget::setFocusLine(float rt) { 
  //qDebug <<" EicWidget::setFocusLine(float rt)";
@@ -870,7 +860,6 @@ void EicWidget::replot(PeakGroup* group ) {
     if(_showTicLine or _showBicLine)   addTicLine();    //qDebug() << "\tshowTic msec=" << timerX.elapsed();
     if(_showMergedEIC) addMergedEIC();
     if(_focusLineRt >0) setFocusLine(_focusLineRt);  //qDebug() << "\tsetFocusLine msec=" << timerX.elapsed();
-    if(_showNotes)	 getNotes(_slice.mzmin,_slice.mzmax);	//get notes that fall withing this mzrange
     if(_showMS2Events && _slice.mz>0) { addMS2Events(_slice.mzmin, _slice.mzmax); }
 
     addAxes();
@@ -1460,33 +1449,6 @@ void EicWidget::updateNote(Note* note) {
  //qDebug <<"EicWidget::updateNote(Note* note) "; 
 	if (note == NULL) return;
 	//getMainWindow()->notesDockWidgeth->updateNote(Note* note);
-}
-
-void EicWidget::getNotes(float mzmin, float mzmax) { 
- //qDebug <<"EicWidget::getNotes(float mzmin, float mzmax) "; 
-
-        QSettings* settings = getMainWindow()->getSettings();
-
-	if (getMainWindow()->notesDockWidget->isVisible() == false ) return;
-	QList<UserNote*> notes = getMainWindow()->notesDockWidget->getNotes(mzmin,mzmax);
-	foreach( UserNote* usernote, notes ) {
-
-                float xpos = toX(usernote->rt);
-                float ypos  = toY(usernote->intensity);
-                if ( ypos < 10 ) ypos=10;
-                if ( ypos > scene()->height()) ypos=scene()->height()+10;
-                if ( xpos < 10 ) xpos=10;
-                if ( xpos > scene()->width()) xpos=scene()->width()-10;
-
-                Note* note = new Note(usernote);
-
-                if ( settings->contains("data_server_url"))
-                    note->setRemoteNoteLink(usernote,settings->value("data_server_url").toString());
-
-                note->setStyle(Note::showNoteIcon);
-                scene()->addItem(note);
-                note->setPos(xpos,ypos);
-	}
 }
 
 void EicWidget::contextMenuEvent(QContextMenuEvent * event) {

@@ -15,7 +15,6 @@
 #include "database.h"
 #include "classifier.h"
 #include "classifierNeuralNet.h"
-#include "classifierNaiveBayes.h"
 
 //non gui qt classes
 #include <QString>

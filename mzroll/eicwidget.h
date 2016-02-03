@@ -210,10 +210,6 @@ private:
     MainWindow* getMainWindow();		//return parent 
     void zoomPeakGroup( PeakGroup* group );
 
-    //function to add and remove notes
-    void getNotes(float mzmin, float mzmax);
-
-
 };
 
 

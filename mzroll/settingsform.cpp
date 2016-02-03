@@ -56,13 +56,6 @@ void SettingsForm::recomputeIsotopes() {
         cerr << "recomputeIsotopes() " << group << endl;
         mainwindow->isotopeWidget->setPeakGroup(group);
     }
-
-    //update isotopes in pathwayview
-    if (mainwindow->pathwayWidget ) {
-        if ( mainwindow->pathwayWidget->isVisible()) {
-            mainwindow->pathwayWidget->recalculateConcentrations();
-        }
-    }
 }
 
 void SettingsForm::recomputeEIC() { 

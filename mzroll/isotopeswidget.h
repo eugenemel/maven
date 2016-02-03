@@ -13,6 +13,7 @@ class QAction;
 class QMenu;
 class QTextEdit;
 class MainWindow;
+class BackgroundPeakUpdate;
 
 using namespace std;
 

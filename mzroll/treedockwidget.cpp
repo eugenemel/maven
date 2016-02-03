@@ -93,12 +93,6 @@ void TreeDockWidget::showInfo() {
 				
                         } else if (itemType == EICType ) {
                                 mainwindow->getEicWidget()->setSrmId(text.toStdString());
-                        } else if ( itemType == PathwayType ) {
-                                        mainwindow->pathwayDockWidget->setVisible(true);
-                                        mainwindow->getPathwayWidget()->setPathway( v.toString() );
-                        } else if (itemType == mzLinkType ) {
-                                float mz = item->text(0).toFloat();
-                                        if (mz>0)mainwindow->setMzValue(mz);
                         } else if (itemType == mzSliceType ) {
                                         mzSlice slice =  v.value<mzSlice>();
                                         mainwindow->getEicWidget()->setMzSlice(slice);
@@ -178,8 +172,6 @@ void TreeDockWidget::unlinkGroup() {
 	}
 
 	treeWidget->update();
-    mainwindow->getPathwayWidget()->updateCompoundConcentrations();
-
 	return;
 }
 

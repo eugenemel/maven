@@ -144,10 +144,6 @@ void EicPoint::mousePressEvent (QGraphicsSceneMouseEvent* event) {
         _mw->getLinks(_peak);
     }
 
-    if (_peak && _mw->adductWidget->isVisible()) {
-        _mw->adductWidget->setPeak(_peak);
-    }
-
     //scene()->update();
 }
 
@@ -215,9 +211,6 @@ void EicPoint::linkCompound() {
             _mw->ligandWidget->setDatabaseAltered(dbname,true);
             //_mw->ligandWidget->updateTable();
             _mw->ligandWidget->updateCurrentItemData();
-
-            //update pathway widget with new concentration information
-            _mw->pathwayWidget->updateCompoundConcentrations();
 	}
 }
 

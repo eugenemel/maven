@@ -6,6 +6,7 @@
 #include "mainwindow.h"
 #include "tabledockwidget.h"
 #include "statistics.h"
+#include "tinyplot.h"
 
 
 class GalleryWidget : public QGraphicsView

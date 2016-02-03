@@ -8,8 +8,6 @@ QDataStream &operator<<( QDataStream &out, const PeakGroup* ) { return out; }
 QDataStream &operator>>( QDataStream &in, PeakGroup* ) { return in; }
 QDataStream &operator<<( QDataStream &out, const Scan* ) { return out; }
 QDataStream &operator>>( QDataStream &in, Scan* ) { return in; }
-QDataStream &operator<<( QDataStream &out, const Pathway* ) { return out; }
-QDataStream &operator>>( QDataStream &in, Pathway* ) { return in; }
 QDataStream &operator<<( QDataStream &out, const mzSlice* ) { return out; }
 QDataStream &operator>>( QDataStream &in, mzSlice* ) { return in; }
 QDataStream &operator<<( QDataStream &out, const mzSlice& ) { return out; }
@@ -32,9 +30,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
  qRegisterMetaType<PeakGroup*>("PeakGroup*");
  qRegisterMetaTypeStreamOperators<PeakGroup*>("PeakGroup*");
-
- qRegisterMetaType<Pathway*>("Pathway*");
- qRegisterMetaTypeStreamOperators<Pathway*>("Pathway*");
 
  qRegisterMetaType<mzSlice*>("mzSlice*");
  qRegisterMetaTypeStreamOperators<mzSlice*>("mzSlice*");
@@ -80,12 +75,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     QString methodsFolder =      settings->value("methodsFolder").value<QString>();
     if (!QFile::exists(methodsFolder)) methodsFolder =  dataDir +  "/" + "methods";
 
-    QString pathwaysFolder =     settings->value("pathwaysFolder").value<QString>();
-    if (!QFile::exists(pathwaysFolder)) pathwaysFolder =  dataDir +  "/" + "pathways";
-
-    QString ligandDbFilename =  pathwaysFolder + "/" +  settings->value("ligandDbFilename").value<QString>();
-    if(QFile::exists(ligandDbFilename)) { DB.connect(ligandDbFilename.toStdString()); DB.loadAll(); }
-
     QString commonFragments =   dataDir + "/" + "FRAGMENTS.csv";
     if(QFile::exists(commonFragments)) DB.loadFragments(commonFragments.toStdString());
 
@@ -125,47 +114,34 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     setCentralWidget(eicWidgetController());
 
     spectraWidget = new SpectraWidget(this);
-    pathwayWidget = new PathwayWidget(this);
-    adductWidget =  new AdductWidget(this);
     isotopeWidget =  new IsotopeWidget(this);
     massCalcWidget =  new MassCalcWidget(this);
     covariantsPanel= new TreeDockWidget(this,"Covariants",3);
     fragPanel	= new TreeDockWidget(this,"Fragmentation", 5);
-    pathwayPanel	= new TreeDockWidget(this,"Pathways", 1);
     srmDockWidget 	= new TreeDockWidget(this,"SRM List", 1);
     ligandWidget = new LigandWidget(this);
     heatmap	 = 	  new HeatMap(this);
     galleryWidget = new GalleryWidget(this);
     bookmarkedPeaks = new TableDockWidget(this,"Bookmarked Groups",0);
-    //treemap	 = 	  new TreeMap(this);
-    //peaksPanel	= new TreeDockWidget(this,"Group Information", 1);
     spectraDockWidget =  createDockWidget("Spectra",spectraWidget);
-    pathwayDockWidget =  createDockWidget("PathwayViewer", pathwayWidget);
     heatMapDockWidget =  createDockWidget("HeatMap",heatmap);
     galleryDockWidget =  createDockWidget("Gallery",galleryWidget);
     scatterDockWidget =  new ScatterPlot(this);
-    notesDockWidget  =   new NotesWidget(this);
     projectDockWidget =  new ProjectDockWidget(this);
-    logWidget         =  new LogWidget(this,std::cout);
     rconsoleDockWidget =  new RconsoleWidget(this);
     spectralHitsDockWidget =  new SpectralHitsDockWidget(this, "Spectral Hits");
 
     ligandWidget->setVisible(false);
-    pathwayPanel->setVisible(false);
     covariantsPanel->setVisible(false);
-    adductWidget->setVisible(false);
     isotopeWidget->setVisible(false);
     massCalcWidget->setVisible(false);
     fragPanel->setVisible(false);
     bookmarkedPeaks->setVisible(false);
-    pathwayDockWidget->setVisible(false);
     spectraDockWidget->setVisible(false);
     scatterDockWidget->setVisible(false);
-    notesDockWidget->setVisible(false);
     heatMapDockWidget->setVisible(false);
     galleryDockWidget->setVisible(false);
     projectDockWidget->setVisible(false);
-    logWidget->setVisible(false);
     rconsoleDockWidget->setVisible(false);
     spectralHitsDockWidget->setVisible(false);
     //treemap->setVisible(false);
@@ -196,28 +172,21 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
 
     connect(scatterDockWidget, SIGNAL(groupSelected(PeakGroup*)), SLOT(setPeakGroup(PeakGroup*)));
-    pathwayWidgetController();
 
     addDockWidget(Qt::LeftDockWidgetArea,ligandWidget,Qt::Vertical);
-    addDockWidget(Qt::LeftDockWidgetArea,pathwayPanel,Qt::Vertical);
     addDockWidget(Qt::LeftDockWidgetArea,projectDockWidget,Qt::Vertical);
 
     ligandWidget->setAllowedAreas(Qt::LeftDockWidgetArea);
-    pathwayPanel->setAllowedAreas(Qt::LeftDockWidgetArea);
     projectDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea);
 
 
     addDockWidget(Qt::BottomDockWidgetArea,spectraDockWidget,Qt::Horizontal);
-    addDockWidget(Qt::BottomDockWidgetArea,pathwayDockWidget,Qt::Horizontal);
-    addDockWidget(Qt::BottomDockWidgetArea,adductWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,covariantsPanel,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,fragPanel,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,scatterDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,bookmarkedPeaks,Qt::Horizontal);
-    addDockWidget(Qt::BottomDockWidgetArea,notesDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,galleryDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,srmDockWidget,Qt::Horizontal);
-    addDockWidget(Qt::BottomDockWidgetArea,logWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,rconsoleDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,spectralHitsDockWidget,Qt::Horizontal);
 
@@ -225,22 +194,17 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     //addDockWidget(Qt::BottomDockWidgetArea,treeMapDockWidget,Qt::Horizontal);
     //addDockWidget(Qt::BottomDockWidgetArea,heatMapDockWidget,Qt::Horizontal);
 
-    tabifyDockWidget(ligandWidget,pathwayPanel);
     tabifyDockWidget(ligandWidget,projectDockWidget);
 
     tabifyDockWidget(spectraDockWidget,massCalcWidget);
     tabifyDockWidget(spectraDockWidget,isotopeWidget);
     tabifyDockWidget(spectraDockWidget,massCalcWidget);
-    tabifyDockWidget(spectraDockWidget,pathwayDockWidget);
     tabifyDockWidget(spectraDockWidget,fragPanel);
     tabifyDockWidget(spectraDockWidget,covariantsPanel);
-    tabifyDockWidget(spectraDockWidget,notesDockWidget);
     tabifyDockWidget(spectraDockWidget,galleryDockWidget);
-    tabifyDockWidget(spectraDockWidget,logWidget);
-    tabifyDockWidget(rconsoleDockWidget,logWidget);
+    tabifyDockWidget(spectraDockWidget,rconsoleDockWidget);
 
     setContextMenuPolicy(Qt::NoContextMenu);
-    pathwayPanel->setInfo(DB.pathwayDB);
 
     if (settings->contains("windowState")) {
         restoreState(settings->value("windowState").toByteArray());
@@ -278,7 +242,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     createMenus();
     createToolBars();
     if (ligandWidget) loadMethodsFolder(methodsFolder);
-    if (pathwayWidget) loadPathwaysFolder(pathwaysFolder);
 
     if (ligandWidget) {
         if ( settings->contains("lastDatabaseFile") ) {
@@ -313,7 +276,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
                 "Woops.. did the program crash last time? Would you like to report a bug?");
     } 
 
-    logWidget->append( "Initiaalization complete..\n");
     versionCheck();
 
     settings->setValue("closeEvent", 0 );
@@ -480,13 +442,6 @@ void MainWindow::setFormulaFocus(QString formula) {
     isotopeWidget->setFormula(formula);
 }
 
-void MainWindow::setPathwayFocus(Pathway* p) {
-    if(p && pathwayWidget) {
-        pathwayWidget->setVisible(true);
-        pathwayWidget->setPathway(p->id.c_str());
-    }
-}
-
 void MainWindow::setCompoundFocus(Compound*c) {
     if (c == NULL ) return;
 
@@ -497,11 +452,6 @@ void MainWindow::setCompoundFocus(Compound*c) {
 
     float mz = c->mass;
     if (!c->formula.empty() && charge) mz = c->ajustedMass(charge);
-
-    //if (pathwayWidget != NULL && pathwayWidget->isVisible() ) {
-    //  pathwayWidget->clear();
-    //    pathwayWidget->setCompound(c);
-    //}
 
     if ( isotopeWidget && isotopeWidget->isVisible() ) isotopeWidget->setCompound(c);
     if ( massCalcWidget && massCalcWidget->isVisible() ) { massCalcWidget->setMass(mz); }
@@ -545,7 +495,6 @@ void MainWindow::doSearch(QString needle) {
 
     if ( needle.contains(words) || needle.isEmpty()) {
         ligandWidget->setFilterString(needle);
-        pathwayPanel->filterTree(needle);
     }
 
     if (needle.contains(formula) ) {
@@ -713,24 +662,6 @@ void MainWindow::loadMethodsFolder(QString& methodsFolder) {
 }
 
 
-void MainWindow::loadPathwaysFolder(QString& pathwaysFolder) {
-    cerr << "LOADING PATHWAYS FROM:" << pathwaysFolder.toStdString() << endl;
-    QDir dir(pathwaysFolder);
-    if (dir.exists()) {
-        dir.setFilter(QDir::Files );
-        QFileInfoList list = dir.entryInfoList();
-            for (int i = 0; i < list.size(); ++i) {
-                QFileInfo fileInfo = list.at(i);
-                if(fileInfo.fileName().endsWith("xml",Qt::CaseInsensitive)) {
-                //std::cerr << qPrintable(QString("%1 %2").arg(fileInfo.size(), 10).arg(fileInfo.fileName())) << endl;
-                    pathwayWidget->loadModelFile(fileInfo.absoluteFilePath());
-                }
-        }
-    }
-}
-
-
-
 BackgroundPeakUpdate* MainWindow::newWorkerThread(QString funcName) {
     BackgroundPeakUpdate* workerThread = new BackgroundPeakUpdate(this);
     workerThread->setMainWindow(this);
@@ -824,9 +755,6 @@ void MainWindow::readSettings() {
 
     if( ! settings->contains("methodsFolder") )
         settings->setValue("methodsFolder", "methods");
-
-    if( ! settings->contains("pathwaysFolder") )
-        settings->setValue("pathwaysFolder", "pathways");
 
     if( ! settings->contains("ligandDbFilename") )
         settings->setValue("ligandDbFilename",QString("ligand.db"));
@@ -960,12 +888,6 @@ void MainWindow::createMenus() {
     connect(hideWidgets, SIGNAL(triggered()), SLOT(hideDockWidgets()));
     widgetsMenu->addAction(hideWidgets);
 
-    QAction* logWidgetAction = new QAction(tr("Log Widget"), this);
-    logWidgetAction->setShortcut(tr("Ctrl+L"));
-    logWidgetAction->setCheckable(true);  logWidgetAction->setChecked(false);
-    connect(logWidgetAction, SIGNAL(toggled(bool)),logWidget,SLOT(setVisible(bool)));
-    widgetsMenu->addAction(logWidgetAction);
-
     QAction* ak = widgetsMenu->addAction("Spectral Hits Widget");
     ak->setCheckable(true);  ak->setChecked(false);
     connect(ak,SIGNAL(toggled(bool)),spectralHitsDockWidget,SLOT(setVisible(bool)));
@@ -1090,9 +1012,6 @@ void MainWindow::createToolBars() {
     suggestPopup = new SuggestPopup(searchText);
     connect(suggestPopup,SIGNAL(compoundSelected(Compound*)),this, SLOT(setCompoundFocus(Compound*)));
     connect(suggestPopup,SIGNAL(compoundSelected(Compound*)),ligandWidget,SLOT(setCompoundFocus(Compound*)));
-    connect(suggestPopup,SIGNAL(pathwaySelected(Pathway*)),pathwayPanel,SLOT(show()));
-    connect(suggestPopup,SIGNAL(pathwaySelected(Pathway*)),pathwayDockWidget,SLOT(show()));
-    connect(suggestPopup,SIGNAL(pathwaySelected(Pathway*)),this,SLOT(setPathwayFocus(Pathway*)));
     connect(ligandWidget,SIGNAL(databaseChanged(QString)),suggestPopup,SLOT(setDatabase(QString)));
     layout->addSpacing(10);
 
@@ -1127,8 +1046,6 @@ void MainWindow::createToolBars() {
     QToolButton* btnIsotopes = addDockWidgetButton(sideBar,isotopeWidget,QIcon(rsrcPath + "/isotope.png"), "Show Isotopes Widget (F5)");
     QToolButton* btnFindCompound = addDockWidgetButton(sideBar,massCalcWidget,QIcon(rsrcPath + "/findcompound.png"), "Show Match Compound Widget (F6)");
     QToolButton* btnCovariants = addDockWidgetButton(sideBar,covariantsPanel,QIcon(rsrcPath + "/covariants.png"), "Find Covariants Widget (F7)");
-    QToolButton* btnPathways = addDockWidgetButton(sideBar,pathwayDockWidget,QIcon(rsrcPath + "/pathway.png"), "Show Pathway Widget (F8)");
-    QToolButton* btnNotes = addDockWidgetButton(sideBar,notesDockWidget,QIcon(rsrcPath + "/note.png"), "Show Notes Widget (F9)");
     QToolButton* btnBookmarks = addDockWidgetButton(sideBar,bookmarkedPeaks,QIcon(rsrcPath + "/showbookmarks.png"), "Show Bookmarks (F10)");
     QToolButton* btnGallery = addDockWidgetButton(sideBar,galleryDockWidget,QIcon(rsrcPath + "/gallery.png"), "Show Gallery Widget");
     QToolButton* btnScatter = addDockWidgetButton(sideBar,scatterDockWidget,QIcon(rsrcPath + "/scatterplot.png"), "Show Scatter Plot Widget");
@@ -1143,13 +1060,10 @@ void MainWindow::createToolBars() {
     btnIsotopes->setShortcut(Qt::Key_F5);
     btnFindCompound->setShortcut(Qt::Key_F6);
     btnCovariants->setShortcut(Qt::Key_F7);
-    btnPathways->setShortcut(Qt::Key_F8);
-    btnNotes->setShortcut(Qt::Key_F9);
     btnBookmarks->setShortcut(Qt::Key_F10);
     btnSRM->setShortcut(Qt::Key_F12);
 
 
-    connect(pathwayDockWidget,SIGNAL(visibilityChanged(bool)),pathwayPanel,SLOT(setVisible(bool)));
     connect(btnSRM,SIGNAL(clicked(bool)),SLOT(showSRMList()));
 
     sideBar->setOrientation(Qt::Vertical);
@@ -1161,8 +1075,6 @@ void MainWindow::createToolBars() {
     sideBar->addWidget(btnIsotopes);
     sideBar->addWidget(btnFindCompound);
     sideBar->addWidget(btnCovariants);
-    sideBar->addWidget(btnPathways);
-    sideBar->addWidget(btnNotes);
     sideBar->addWidget(btnSRM);
     sideBar->addWidget(btnGallery);
     sideBar->addWidget(btnScatter);
@@ -1535,7 +1447,6 @@ void MainWindow::reorderSamples(PeakGroup* group ) {
     std::sort(samples.begin(), samples.end(), mzSample::compSampleOrder);
     if ( projectDockWidget) projectDockWidget->updateSampleList();
     if ( eicWidget ) eicWidget->update();
-    if ( pathwayWidget ) pathwayWidget->updateCompoundConcentrations();
 }
 
 bool MainWindow::checkCompoundExistance(Compound* c) { 
@@ -1716,95 +1627,6 @@ QWidget* MainWindow::eicWidgetController() {
     return window;
 }
 
-QWidget* MainWindow::pathwayWidgetController() { 
-
-    QToolBar *toolBar = new QToolBar(this);
-    toolBar->setFloatable(false);
-    toolBar->setMovable(false);
-
-    QToolButton *btnResetZoom = new QToolButton(toolBar);
-    btnResetZoom->setIcon(QIcon(rsrcPath + "/resetzoom.png"));
-    btnResetZoom->setToolTip(tr("ResetZoom"));
-    connect(btnResetZoom, SIGNAL(clicked()), pathwayWidget, SLOT(resetZoom()));
-
-    QToolButton *btnZoomIn = new QToolButton(toolBar);
-    btnZoomIn->setIcon(QIcon(rsrcPath + "/zoomin.png"));
-    btnZoomIn->setToolTip(tr("Zoom In"));
-    connect(btnZoomIn, SIGNAL(clicked()), pathwayWidget, SLOT(zoomIn()));
-
-    QToolButton *btnZoomOut = new QToolButton(toolBar);
-    btnZoomOut->setIcon(QIcon(rsrcPath + "/zoomout.png"));
-    btnZoomOut->setToolTip(tr("Zoom Out"));
-    connect(btnZoomOut, SIGNAL(clicked()), pathwayWidget, SLOT(zoomOut()));
-
-    QToolButton *btnTextZoomIn = new QToolButton(toolBar);
-    btnTextZoomIn->setIcon(QIcon(rsrcPath + "/zoomInText.png"));
-    btnTextZoomIn->setToolTip(tr("Increase Font Size"));
-    connect(btnTextZoomIn, SIGNAL(clicked()), pathwayWidget, SLOT(increaseLabelSize()));
-
-    QToolButton *btnTextZoomOut = new QToolButton(toolBar);
-    btnTextZoomOut->setIcon(QIcon(rsrcPath + "/zoomOutText.png"));
-    btnTextZoomOut->setToolTip(tr("Decrease Font Size"));
-    connect(btnTextZoomOut, SIGNAL(clicked()), pathwayWidget, SLOT(decreaseLabelSize()));
-
-    QToolButton *btnNodeZoomIn = new QToolButton(toolBar);
-    btnNodeZoomIn->setIcon(QIcon(rsrcPath + "/zoomInNode.png"));
-    btnNodeZoomIn->setToolTip(tr("Increase Node Size"));
-    connect(btnNodeZoomIn, SIGNAL(clicked()), pathwayWidget, SLOT(increaseNodeSize()));
-
-    QToolButton *btnNodeZoomOut = new QToolButton(toolBar);
-    btnNodeZoomOut->setIcon(QIcon(rsrcPath + "/zoomOutNode.png"));
-    btnNodeZoomOut->setToolTip(tr("Decrease Node Size"));
-    connect(btnNodeZoomOut, SIGNAL(clicked()), pathwayWidget, SLOT(decreaseNodeSize()));
-
-    QToolButton *btnEdgeZoomIn = new QToolButton(toolBar);
-    btnEdgeZoomIn->setIcon(QIcon(rsrcPath + "/zoomInEdge.png"));
-    btnEdgeZoomIn->setToolTip(tr("Increase Edge Size"));
-    connect(btnEdgeZoomIn, SIGNAL(clicked()), pathwayWidget, SLOT(increaseEdgeSize()));
-
-    QToolButton *btnEdgeZoomOut = new QToolButton(toolBar);
-    btnEdgeZoomOut->setIcon(QIcon(rsrcPath + "/zoomOutEdge.png"));
-    btnEdgeZoomOut->setToolTip(tr("Decrease Edge Size"));
-    connect(btnEdgeZoomOut, SIGNAL(clicked()), pathwayWidget, SLOT(decreaseEdgeSize()));
-
-    QToolButton *btnLoad = new QToolButton(toolBar);
-    btnLoad->setIcon(QIcon(rsrcPath + "/fileopen.png"));
-    btnLoad->setToolTip(tr("Load Pathway"));
-    connect(btnLoad, SIGNAL(clicked()), pathwayWidget, SLOT(loadModelFile()));
-
-    QToolButton *btnSave = new QToolButton(toolBar);
-    btnSave->setIcon(QIcon(rsrcPath + "/filesave.png"));
-    btnSave->setToolTip(tr("Save Layout"));
-    connect(btnSave, SIGNAL(clicked()), pathwayWidget, SLOT(saveLayout()));
-
-    QToolButton *btnReculculte = new QToolButton(toolBar);
-    btnReculculte->setIcon(QIcon(rsrcPath + "/refresh.png"));
-    btnReculculte->setToolTip(tr("Update Compound Concentrations"));
-    connect(btnReculculte, SIGNAL(clicked()), pathwayWidget, SLOT(recalculateConcentrations()));
-
-    AnimationControl* animationControl = new AnimationControl(this);
-    connect(animationControl->slider,SIGNAL(valueChanged(int)), pathwayWidget, SLOT(showSample(int)));
-    connect(pathwayWidget,SIGNAL(titleChanged(QString)), animationControl->titleLabel, SLOT(setText(QString)));
-    animationControl->adjustSize();
-    pathwayWidget->setAnimationControl(animationControl);
-
-    toolBar->addWidget(btnResetZoom);
-    toolBar->addWidget(btnZoomIn);
-    toolBar->addWidget(btnZoomOut);
-    toolBar->addWidget(btnNodeZoomIn);
-    toolBar->addWidget(btnNodeZoomOut);
-    toolBar->addWidget(btnEdgeZoomIn);
-    toolBar->addWidget(btnEdgeZoomOut);
-    toolBar->addWidget(btnTextZoomIn);
-    toolBar->addWidget(btnTextZoomOut);
-    toolBar->addWidget(btnReculculte);
-    toolBar->addWidget(btnSave);
-    toolBar->addWidget(btnLoad);
-    toolBar->addWidget(animationControl);
-    pathwayDockWidget->setTitleBarWidget(toolBar);
-
-    return toolBar;
-}
 void MainWindow::getLinks(Peak* peak ) {
     if (!peak) return;
 
@@ -1840,7 +1662,6 @@ void MainWindow::getLinks(Peak* peak ) {
     for(int i=0; i < links.size(); i++ ) { if(links[i].correlation > 0.5)  subset.push_back(links[i]); }
     if(subset.size())    covariantsPanel->setInfo(subset);
     if(subset.size() && galleryDockWidget->isVisible()) galleryWidget->addEicPlots(subset);
-    if (adductWidget->isVisible()) adductWidget->setPeak(peak);
 }
 
 
@@ -1866,28 +1687,7 @@ void MainWindow::markGroup(PeakGroup* group, char label) {
     //getPlotWidget()->scene()->update();
 }
 
-int MainWindow::versionCheck() {
-
-//define a MACRO for converting DEFINES to strings.. jfc!
-#define xstr(s) str(s)
-#define str(s) #s
-
-    QString hostname = "http://genomics-pubs.princeton.edu";
-    QString path = "/mzroll/vercheck.php?";
-    QString os  = "os="  + QString(xstr(PLATFORM));
-    //QString ver = "ver=" + QString::number(MAVEN_VERSION);
-    QString ver = "ver=620";
-    QString query =  os + "&" + ver;
-
-    logWidget->append("Latest version check: " + hostname + path + query );
-
-    QDownloader* downloader = new QDownloader(this);
-    downloader->getPage(hostname + path + query);
-    connect(downloader,SIGNAL(downloadResult(QString)),logWidget,SLOT(append(QString)));
-
-    return 0;
-}
-
+int MainWindow::versionCheck() {}
 
 MatrixXf MainWindow::getIsotopicMatrix(PeakGroup* group) {
 
