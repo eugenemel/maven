@@ -90,8 +90,9 @@ class PlotScene : public QGraphicsScene
 class PlotAxes : public QGraphicsItem
 {
 public:
-	PlotAxes(int type, int nticks, PlotScene *scene):QGraphicsItem(0,scene){ 
+    PlotAxes(int type, int nticks, PlotScene *scene):QGraphicsItem(0){
         this->type = type; this->nticks=nticks; offset=0; tickLinesFlag=false; logTrasformed=false;
+        if(scene) scene->addItem(this);
     };
 
     QRectF boundingRect() const;
@@ -149,7 +150,7 @@ class PlotDockWidget: public QDockWidget {
 				QWidget* mainWidget;
 				QGraphicsView *myView;
 				PlotScene *myScene;
-				QToolBar*	toolBar;
+                QToolBar* toolBar;
 				QMenu*	    contextMenu;
 
 };

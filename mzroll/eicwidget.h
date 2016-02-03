@@ -31,6 +31,8 @@ public:
     vector<PeakGroup>& getPeakGroups() { return peakgroups; }
     PeakGroup* getSelectedGroup() 	  {  return selectedGroup; }
     mzSlice&   getMzSlice() 		  {	 return _slice; }
+    QString eicToTextBuffer();
+
 
 public slots:
     void setMzSlice(float mz);
@@ -46,7 +48,9 @@ public slots:
     void setCompound(Compound* c );
     void setSelectedGroup(PeakGroup* group);
     void addEICLines(bool showSpline);
+    void addCubicSpline();
     void addBaseLine();
+    void addBaseline(PeakGroup* group);
     void addTicLine();
     void addMergedEIC();
     void setFocusLine(float rt);
@@ -56,6 +60,7 @@ public slots:
     void addBoxPlot(PeakGroup*);
     void addIsotopicPlot(PeakGroup*);
     void addFitLine(PeakGroup*);
+    void addMS2Events(float mzmin, float mzmax);
     void integrateRegion(float rtmin, float rtmax);
     void recompute();
     void replot(PeakGroup*);
@@ -69,7 +74,6 @@ public slots:
     void updateNote(Note*);
     void saveRetentionTime();
     void setGallaryToEics();
-    void align();
 
     void selectGroupNearRt(float rt);
     void addPeakGroup(PeakGroup& group);
@@ -78,8 +82,14 @@ public slots:
     void showSpline(bool f) { _showSpline=f; }
     void showPeaks(bool f)  { _showPeaks=f; }
     void showTicLine(bool f) { _showTicLine=f; }
+    void showBicLine(bool f) { _showBicLine=f; }
     void showBaseLine(bool f) { _showBaseline=f; }
     void showNotes(bool f) { _showNotes=f; }
+    void showMergedEIC(bool f) { _showMergedEIC=f; }
+    void showEICLines(bool f) { _showEICLines=f; }
+    void automaticPeakGrouping(bool f) { _groupPeaks=f; }
+    void showMS2Events(bool f) { _showMS2Events=f; }
+
 
     void startAreaIntegration() { toggleAreaIntegration(true); }
     void startSpectralAveraging() { toggleSpectraAveraging(true); }
@@ -123,6 +133,7 @@ protected:
 
 signals:
     void viewSet(float,float,float,float);
+    void scanChanged(Scan*);
 
 private:
 
@@ -150,10 +161,14 @@ private:
     bool _showSpline;
     bool _showBaseline;
     bool _showTicLine;
+    bool _showBicLine;
     bool _showMergedEIC;
     bool _showNotes;
     bool _showPeaks;
+    bool _showEICLines;
     bool _autoZoom;
+    bool _groupPeaks;
+    bool _showMS2Events;
 
     bool _areaIntegration;
     bool _spectraAveraging;

@@ -112,7 +112,7 @@ void SpectralHitsDockWidget::setupPeakTable() {
     colNames << "precursorMz" << "charge" << "scannum" << "score" << "matchCount" << "compoundId" << "fragmentId" << "rank";
     treeWidget->setColumnCount(colNames.size());
     treeWidget->setHeaderLabels(colNames);
-    treeWidget->header()->setResizeMode(QHeaderView::ResizeToContents);
+    treeWidget->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     treeWidget->header()->adjustSize();
     treeWidget->setSortingEnabled(false);
 }

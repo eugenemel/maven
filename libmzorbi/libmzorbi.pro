@@ -5,7 +5,7 @@ TEMPLATE=lib
 CONFIG += staticlib warn_on console silent
 TARGET = mzorbi
 
-LIBS += -L.
+LIBS += -L. -lcdfread -lnetcdf
 
 
 INCLUDEPATH += ../pugixml/src/ ../libcdfread/ ../zlib/

@@ -444,26 +444,30 @@ vector<mzSample*> MainWindow::getVisibleSamples() {
 }
 
 
-void MainWindow::bookmarkPeakGroup() { 
+PeakGroup* MainWindow::bookmarkPeakGroup() {
     //qDebug() << "MainWindow::bookmarkPeakGroup()";
-    if ( eicWidget ) bookmarkPeakGroup(eicWidget->getSelectedGroup() );
+    if ( eicWidget ) {
+       return bookmarkPeakGroup(eicWidget->getSelectedGroup() );
+    }
 }
 
 
 
-void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
+PeakGroup* MainWindow::bookmarkPeakGroup(PeakGroup* group) {
 
-    if ( bookmarkedPeaks == NULL ) return;
+    if ( bookmarkedPeaks == NULL ) return NULL;
 
     if ( bookmarkedPeaks->isVisible() == false ) {
         bookmarkedPeaks->setVisible(true);
     }
 
+    PeakGroup* bookmarkedGroup=NULL;
     if ( bookmarkedPeaks->hasPeakGroup(group) == false) {
-        bookmarkedPeaks->addPeakGroup(group);
+        bookmarkedGroup = bookmarkedPeaks->addPeakGroup(group);
         bookmarkedPeaks->showAllGroups();
     }
     bookmarkedPeaks->updateTable();
+    return bookmarkedGroup;
 }
 
 void MainWindow::setFormulaFocus(QString formula) {

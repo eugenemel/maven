@@ -1,12 +1,13 @@
 #include "line.h"
 
-EicLine::EicLine(QGraphicsItem* parent, QGraphicsScene *scene):QGraphicsItem(parent,scene)
+EicLine::EicLine(QGraphicsItem* parent, QGraphicsScene *scene):QGraphicsItem(parent)
 {
     setHighlighted(false);
-   setAcceptsHoverEvents(false);
     _endsFixed=false;
     _fillPath=false;
     _closePath=true;
+    _eic=NULL;
+    if(scene) scene->addItem(this);
 }
 
 QRectF EicLine::boundingRect() const

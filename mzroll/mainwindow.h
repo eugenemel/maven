@@ -93,6 +93,7 @@ public:
 
     PathwayWidget     *pathwayWidget;
     SpectraWidget     *spectraWidget;
+    SpectraWidget     *fragmenationSpectraWidget;
     MassCalcWidget       *massCalcWidget;
     AdductWidget     *adductWidget;
     LigandWidget     *ligandWidget;
@@ -103,6 +104,7 @@ public:
     TreeDockWidget	 *srmDockWidget;
     //TreeDockWidget   *peaksPanel;
     QDockWidget         *spectraDockWidget;
+    QDockWidget         *fragmenationSpectraDockWidget;
     QDockWidget         *pathwayDockWidget;
     QDockWidget		 *heatMapDockWidget;
     QDockWidget		 *scatterDockWidget;
@@ -184,9 +186,9 @@ public slots:
     void setPathwayFocus(Pathway* p);
     void showFragmentationScans(float pmz);
     QString groupTextExport(PeakGroup* group);
-    void bookmarkPeakGroup(PeakGroup* group);
+    PeakGroup* bookmarkPeakGroup(PeakGroup* group);
     void setClipboardToGroup(PeakGroup* group);
-    void bookmarkPeakGroup();
+    PeakGroup* bookmarkPeakGroup();
     void reorderSamples(PeakGroup* group);
     void findCovariants(Peak* _peak);
     void reportBugs();

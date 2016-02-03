@@ -315,7 +315,7 @@ void SpectraWidget::drawGraph() {
         if(pos < 0 || pos >= scan->mz.size()) continue;
 
         //create label
-        QGraphicsTextItem* text = new QGraphicsTextItem(QString::number(scan->mz[pos],'f',6),0,0);
+        QGraphicsTextItem* text = new QGraphicsTextItem(QString::number(scan->mz[pos],'f',6),0);
         text->setFont(font);
         scene()->addItem(text);
         _items.push_back(text);
@@ -559,10 +559,10 @@ void SpectraWidget::mouseDoubleClickEvent(QMouseEvent* event){
 }
 
 void SpectraWidget::addLabel(QString text,float x, float y) {
-    QFont f("Helvetica");
-    f.setPixelSize(10);
-    QGraphicsTextItem* _label = scene()->addText(text, f); 
-    _label->translate(toX(x), toY(y));
+    QFont font = QApplication::font(); font.setPointSizeF(font.pointSize()*0.8);
+
+    QGraphicsTextItem* _label = scene()->addText(text, font);
+    _label->setPos(toX(x), toY(y));
 }
 
 void SpectraWidget::mouseMoveEvent(QMouseEvent* event){
@@ -646,8 +646,8 @@ void SpectraWidget::drawArrow(float mz1, float intensity1, float mz2, float inte
         _varrow->hide(); _vnote->hide();
     }
 
-    QString sign; if ( distance > 0 ) sign="+"; if (distance < 0) sign="-";
-    QString note = tr("%1 [%2%3]").arg( QString::number(mz1,'f',4), sign, QString::number(distance,'f',4));
+
+    QString note = tr("m/z: %1 &Delta;%2").arg( QString::number(mz1,'f',6),QString::number(distance,'f',3));
 
     if (_note  != NULL ) {
         _note->setPos(x2+1,y2-30);

@@ -234,42 +234,62 @@ void IsotopeWidget::setClipboard() {
 void IsotopeWidget::setClipboard(QList<PeakGroup*>& groups) {
     QString clipboardText;
 
+    unsigned int groupCount=0;
+    bool includeSampleHeader=true;
     foreach(PeakGroup* group, groups) {
         if(!group) continue;
-         QString infoText = groupIsotopeMatrixExport(group);
+        if (groupCount>0) includeSampleHeader=false;
+         QString infoText = groupIsotopeMatrixExport(group,includeSampleHeader);
          clipboardText += infoText;
+         groupCount++;
     }
     QClipboard *clipboard = QApplication::clipboard();
     clipboard->setText( clipboardText );
 }
 
 void IsotopeWidget::setClipboard(PeakGroup* group) {
-    QString infoText = groupIsotopeMatrixExport(group);
+    bool includeSampleHeader=true;
+    QString infoText = groupIsotopeMatrixExport(group,includeSampleHeader);
     QClipboard *clipboard = QApplication::clipboard();
     clipboard->setText( infoText );
 }
 
-QString IsotopeWidget::groupIsotopeMatrixExport(PeakGroup* group) {
+QString IsotopeWidget::groupIsotopeMatrixExport(PeakGroup* group, bool includeSampleHeader) {
     if (group == NULL ) return "";
 		//header line
 		QString tag(group->tagString.c_str());
-		if ( tag.isEmpty() && group->compound != NULL ) tag = QString(group->compound->name.c_str()); 
-		if ( tag.isEmpty() && group->srmId.length()   ) tag = QString(group->srmId.c_str());
-		if ( tag.isEmpty() )  tag = QString::number(group->groupId);
-		QString isotopeInfo = tag;
+        if ( tag.isEmpty() && group->compound != NULL ) tag = QString(group->compound->name.c_str());
+        if ( tag.isEmpty() && group->srmId.length()   ) tag = QString(group->srmId.c_str());
+        if ( tag.isEmpty() && group->meanMz > 0 )       tag = QString::number(group->meanMz,'f',6) + "@" +  QString::number(group->meanRt,'f',2);
+        if ( tag.isEmpty() )  tag = QString::number(group->groupId);
+        QString isotopeInfo;
 
-		vector <mzSample*> vsamples = _mw->getVisibleSamples();
-    	sort(vsamples.begin(), vsamples.end(), mzSample::compSampleOrder);
-		for(int i=0; i < vsamples.size(); i++ ) { 
-			isotopeInfo += "\t" + QString(vsamples[i]->sampleName.c_str());
-		}
-		isotopeInfo += "\n";
+       vector <mzSample*> vsamples = _mw->getVisibleSamples();
+       sort(vsamples.begin(), vsamples.end(), mzSample::compSampleOrder);
 
-		//get isotopic groups
+        //include header
+       if (includeSampleHeader) {
+           for(int i=0; i < vsamples.size(); i++ ) {
+               isotopeInfo += "\t" + QString(vsamples[i]->sampleName.c_str());
+           }
+           isotopeInfo += "\n";
+
+
+           bool includeSetNamesLine=true;
+           if (includeSetNamesLine){
+               for(int i=0; i < vsamples.size(); i++ ) {
+                   isotopeInfo += "\t" + QString(vsamples[i]->getSetName().c_str());
+               }
+               isotopeInfo += "\n";
+           }
+       }
+
+       //get isotopic groups
 		vector<PeakGroup*>isotopes;
 		for(int i=0; i < group->childCount(); i++ ) {
 			if (group->children[i].isIsotope() ) {
-				PeakGroup* isotope = &(group->children[i]); isotopes.push_back(isotope);
+                PeakGroup* isotope = &(group->children[i]);
+                isotopes.push_back(isotope);
 			}
 		}
 		std::sort(isotopes.begin(), isotopes.end(), PeakGroup::compC13);
@@ -279,7 +299,7 @@ QString IsotopeWidget::groupIsotopeMatrixExport(PeakGroup* group) {
 				///qDebug() << "MM row=" << MM.rows() << " " << MM.cols() << " " << isotopes.size() <<  " " << vsamples.size() << endl;
 				for (int i=0; i < isotopes.size(); i++ ) {
 						QStringList groupInfo;
-						groupInfo << QString(isotopes[i]->tagString.c_str());
+                        groupInfo << tag + " " + QString(isotopes[i]->tagString.c_str());
 						for( unsigned int j=0; j < vsamples.size(); j++) {
 								//qDebug() << i << " " << j << " " << MM(j,i);
 								groupInfo << QString::number(MM(j,i), 'f', 2 );
@@ -288,7 +308,7 @@ QString IsotopeWidget::groupIsotopeMatrixExport(PeakGroup* group) {
 				}
 				_mw->setStatusText("Clipboard set to isotope summary");
 		} else {
-				isotopeInfo += groupTextEport(group) + "\n";
+                isotopeInfo += tag + groupTextEport(group) + "\n";
 				_mw->setStatusText("Clipboard to group summary");
 		}
         return isotopeInfo;
@@ -298,13 +318,17 @@ QString IsotopeWidget::groupIsotopeMatrixExport(PeakGroup* group) {
 void IsotopeWidget::showTable() {
 	QTreeWidget *p = treeWidget;
 	p->clear();
- 	p->setColumnCount( 5 );
-	p->setHeaderLabels(  QStringList() << "Isotope Name" << "m/z" << "Intensity" << "%Labeling" << "%Expected");	
+    p->setColumnCount( 6);
+    p->setHeaderLabels(  QStringList() << "Isotope Name" << "m/z" << "Intensity" << "%Labeling" << "%Expected" << "%Relative");
 	p->setUpdatesEnabled(true);
 	p->setSortingEnabled(true);
 	
-	float isotopeIntensitySum=0;
-	for(unsigned int i=0;  i < links.size(); i++ )  isotopeIntensitySum += links[i].value2; 
+    double isotopeIntensitySum=0;
+    double maxIntensity=0;
+    for(unsigned int i=0;  i < links.size(); i++ )  {
+        isotopeIntensitySum += links[i].value2;
+        if( links[i].value1 > maxIntensity) maxIntensity=links[i].value1;
+    }
 
 	for(unsigned int i=0;  i < links.size(); i++ ) {
 		float frac=0;
@@ -313,16 +337,19 @@ void IsotopeWidget::showTable() {
 		NumericTreeWidgetItem *item = new NumericTreeWidgetItem(treeWidget,mzSliceType);
 		QString item1 = QString( links[i].note.c_str() );
 		QString item2 = QString::number( links[i].mz2, 'f', 5 );
-		QString item3 = QString::number( links[i].value2, 'f', 2 );
-		QString item4 = QString::number(frac, 'f', 1 );
-		QString item5 = QString::number(links[i].value1*100, 'f', 2 );
-	
+        QString item3 = QString::number( links[i].value2, 'f', 4 );
+        QString item4 = QString::number(frac, 'f',4 );
+        QString item5 = QString::number(links[i].value1*100, 'f', 4 );
+        QString item6 = QString::number(links[i].value1/maxIntensity*100, 'f', 4 );
+
 		item->setText(0,item1);
 		item->setText(1,item2);
 		item->setText(2,item3);
 		item->setText(3,item4);
 		item->setText(4,item5);
+        item->setText(5,item6);
 	}
+
 	p->resizeColumnToContents(0);
 	p->setSortingEnabled(true);
     p->sortByColumn(1,Qt::AscendingOrder);

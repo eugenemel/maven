@@ -26,6 +26,8 @@
 #include "stable.h"
 #include "mainwindow.h"
 #include "numeric_treewidgetitem.h"
+#include <QtNetwork>
+#include <QNetworkReply>
 
 class QAction;
 class QMenu;
@@ -71,7 +73,7 @@ private slots:
       void showLigand();
       void showTable();
       void databaseChanged(int index);
-      void readRemoteData(const QHttpResponseHeader &);
+      void readRemoteData(QNetworkReply* reply);
       void fetchRemoteCompounds();
       QList<Compound*> parseXMLRemoteCompounds();
 
@@ -93,8 +95,9 @@ private:
     QTreeWidgetItem* addItem(QTreeWidgetItem* parentItem, string key , string value);
 
     //fetching of compounds from remote database
+    QNetworkAccessManager* m_manager;
+
     int connectionId;
-    QHttp http;
     QXmlStreamReader xml;
 
 };

@@ -70,16 +70,6 @@ PathwayWidget::PathwayWidget(MainWindow* parent)
     connect(workerThread, SIGNAL(finished()), this, SLOT(updateCompoundConcentrations()));
     connect(workerThread, SIGNAL(updateProgressBar(QString,int,int)), parent, SLOT(setProgressBar(QString, int,int)));
 
-    animationProgress = new QProg(0,scene());
-    animationProgress->setMinValue(0);
-    animationProgress->setMaxValue(1.0);
-    animationProgress->setValue(0.0);
-    animationProgress->setFlag(QGraphicsItem::ItemIsMovable);
-    animationProgress->setPos(0,0);
-    animationProgress->scale(.5,.5);
-    animationProgress->hide();
-
-
     QSettings* settings = mw->getSettings();
     if( settings->contains("pathwayId") ) {
         QString pathwayId = mw->getSettings()->value("pathwayId").toString();
@@ -143,9 +133,7 @@ void PathwayWidget::clear() {
 	setBackgroundImage(QString());	//empty background image
 	if( !scene() ) return;
 
-	if (animationProgress && animationProgress->scene() == scene()) { scene()->removeItem(animationProgress); }
 	if (tinyPlot && tinyPlot->scene() == scene() ) { scene()->removeItem(tinyPlot); }
-	if (animationProgress) animationProgress->hide();
 	GraphWidget::clear();
 }
 
@@ -506,12 +494,12 @@ void PathwayWidget::setReactions(vector<string>& reactions) {
 MetaboliteNode* PathwayWidget::addMetabolite(QString id, Compound* c) {
 	Node* n = locateNode(id);
 	if (!n || cofactorCheck(id) ) {
-	//	qDebug() << "addMetabolite() " << id;
+        //qDebug() << "addMetabolite() " << id;
 		MetaboliteNode* n = new MetaboliteNode(0,scene());
 		n->setId(id);
 		n->setNote(id);
-                if (c) { n->setCompound(c); n->setNote(c->name.c_str()); }
-                if (cofactorCheck(id)) n->setCofactor(true);
+       if (c) { n->setCompound(c); n->setNote(c->name.c_str()); }
+       if (cofactorCheck(id)) n->setCofactor(true);
 		n->setGraphWidget(this);
                 nodelist[id]=n;
 
@@ -1237,7 +1225,6 @@ void PathwayWidget::resetSimulation() {
 
 void PathwayWidget::stopSimulation() { 
     if(_timerId !=0) killTimer(_timerId); _timerId=0;
-	if(animationProgress) animationProgress->hide();
 	if(_encodeVideo) encodeVideo();
 	setTimerStep(0);
 }
@@ -1248,7 +1235,6 @@ void PathwayWidget::startSimulation() {
 	cleanTempVideoDir();
 	resetSimulation();
 
-	if(animationProgress) animationProgress->show();
     _timerId = startTimer(_timerSpeed); // in ms
 }
 
@@ -1375,7 +1361,6 @@ void PathwayWidget::showAnimationStep(float fraction ) {
 	if ( fraction <= 0 ) fraction = 0; 
 
 	if(tinyPlot) tinyPlot->setCurrentXCoord(fraction);
-	if(animationProgress) animationProgress->setValue(fraction);
 
 	
 	if (getTimerMaxSteps() == 0 ) return;
@@ -1660,14 +1645,15 @@ void PathwayWidget::showAtomTrasformations(Compound* c, int atomNumber) {
 
 void PathwayWidget::dropEvent(QDropEvent * event ) {
     QGraphicsView::dropEvent(event);
-
+    /*
     qDebug() << "dropEvent:" << event->mimeData()->text();
     qDebug() << "source: " << event->source()->windowTitle();
     qDebug() << "type" << event->type();
     qDebug() << "format" << event->format();
     qDebug() << "encodedData" << event->encodedData(event->format());
+    */
 
-    QByteArray encoded = event->encodedData(event->format());
+    QByteArray encoded = event->mimeData()->data("BUG"); //BUG NEED MIME TYPE?
     QDataStream stream(&encoded, QIODevice::ReadOnly);
     QGraphicsView::dropEvent(event);
 

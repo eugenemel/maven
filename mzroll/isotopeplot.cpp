@@ -6,12 +6,12 @@ using namespace Eigen;
 
 
 IsotopePlot::IsotopePlot(QGraphicsItem* parent, QGraphicsScene *scene)
-    :QGraphicsItem(parent, scene) {
-
-    if ( scene != NULL ) {
-        _width = scene->width()*0.25;
-        _height = 10;
-    }
+    :QGraphicsItem(parent) {
+	_barwidth=10;
+	_mw=NULL;
+	_group=NULL;
+	if ( scene != NULL ) { _width = scene->width()*0.25; }
+	_height = 10;
 }
 
 void IsotopePlot::setMainWindow(MainWindow* mw) { _mw = mw; }

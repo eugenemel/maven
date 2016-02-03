@@ -5,7 +5,7 @@ QMAKE_STRIP=echo
 PRECOMPILED_HEADER  = stable.h
 
 #add version information during compilation
-VERSION="766"
+VERSION="20160118"
 DEFINES += "MAVEN_VERSION=$$VERSION"
 DEFINES += "PLATFORM=\"$$QMAKE_HOST.os\""
 
@@ -18,13 +18,14 @@ ICON = images/icon.icns
 
 DESTDIR = ../bin
 
-QT += sql network xml svg
-DEFINES += QT_CORE_LIB QT_DLL QT_NETWORK_LIB QT_SQL_LIB QT_THREAD_LIB
+QT += sql xml printsupport opengl
+QT += network
 
-INCLUDEPATH +=  /usr/include/qt4/QtXml/ /usr/include/qt/QtSql 
-INCLUDEPATH += ../libmzorbi ../mzorbi ../pugixml/src ../libneural ../zlib/
-#LIBS += -L.  -lmzorbi -lpugixml -lneural  #32bit windows
-LIBS += -L.  -lmzorbi -lpugixml -lneural                     #64bit
+#DEFINES += QT_CORE_LIB QT_DLL QT_NETWORK_LIB QT_SQL_LIB QT_THREAD_LIB
+#INCLUDEPATH +=  /usr/include/qt4/QtXml/ /usr/include/qt/QtSql
+
+INCLUDEPATH += ../libmzorbi ../mzorbi ../pugixml/src ../libneural
+LIBS += -L. -L../lib -L../build/lib -lmzorbi -lpugixml -lneural -lz
 message($$LIBS)
 
 INSTALLS += sources target

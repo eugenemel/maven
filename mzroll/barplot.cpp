@@ -3,7 +3,8 @@
 PeakGroup::QType BarPlot::qtype = PeakGroup::AreaTop;
 
 BarPlot::BarPlot(QGraphicsItem* parent, QGraphicsScene *scene)
-    :QGraphicsItem(parent, scene) {
+    :QGraphicsItem(parent) {
+	_mw=NULL;
     _width = 0;
     _height = 0;
     _barwidth=10;

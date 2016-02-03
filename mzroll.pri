@@ -36,10 +36,10 @@ win32 {
 
 mac {
     message("using mac config")
-    DEFINES += CDFPARSER
+    DEFINES -= CDFPARSER
     DEFINES += ZLIB
-    DEFINES += unix
-    LIBS += -lz -lcdfread -lnetcdf
+#    DEFINES += unix
+#    LIBS += -lz -lcdfread -lnetcdf
 }
 
 unix {

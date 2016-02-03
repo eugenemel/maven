@@ -65,10 +65,17 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   setWindowTitle("Compounds");
 
 
+  //disconnect(&http, SIGNAL(readyRead(const QHttpResponseHeader &)));
+  //connect(&http, SIGNAL(readyRead(const QHttpResponseHeader &)), SLOT(readRemoteData(const QHttpResponseHeader &)));
 
-  connect(&http, SIGNAL(readyRead(const QHttpResponseHeader &)), this,
-          SLOT(readRemoteData(const QHttpResponseHeader &)));
+  //disconnect(_mw->settingsForm->fetchCompounds,SIGNAL(clicked()));
+  //connect(_mw->settingsForm->fetchCompounds,SIGNAL(clicked()),this,SLOT(fetchRemoteCompounds()));
 
+  m_manager = new QNetworkAccessManager(this);
+  //connect(m_manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(readRemoteData(QNetworkReply*)));
+
+  //get list of methods from central database
+  //http://data_server_url?action=fetchcompounds&format=xml
   //fetchRemoteCompounds();
 
 }
@@ -413,25 +420,31 @@ void LigandWidget::fetchRemoteCompounds()
 
     if ( settings->contains("data_server_url")) {
         QUrl url(settings->value("data_server_url").toString());
-        url.addQueryItem("action", "fetchcompounds");
-        url.addQueryItem("format", "xml");
-        http.setHost(url.host());
-        connectionId = http.get(url.toEncoded());
-       // qDebug() << " ConnectionId=" << connectionId;
-    }
+        QUrlQuery query;
+        query.addQueryItem("action", "fetchcompounds");
+        query.addQueryItem("format", "xml");
+        url.setQuery(query);
+
+        QNetworkRequest request;
+        request.setUrl(url);
+
+        QNetworkReply *reply = m_manager->get(request);
+        qDebug() << url.toEncoded();
+   }
 }
 
-void LigandWidget::readRemoteData(const QHttpResponseHeader &resp)
+void LigandWidget::readRemoteData(QNetworkReply* reply)
 {
     //qDebug() << "readRemoteData() << " << resp.statusCode();
 
-    if (resp.statusCode() == 302 || resp.statusCode() == 200 ) { //redirect
-        xml.addData(http.readAll());
-        parseXMLRemoteCompounds();
-        setDatabaseNames();
+    if (reply) { //redirect
+        xml.addData(reply->readAll());
     } else {
-        http.abort();
+        reply->abort();
     }
+
+    parseXMLRemoteCompounds();
+    setDatabaseNames();
 }
 
 QList<Compound*> LigandWidget::parseXMLRemoteCompounds()
@@ -508,9 +521,12 @@ QList<Compound*> LigandWidget::parseXMLRemoteCompounds()
         }
     }
 
-    if (xml.error() && xml.error() != QXmlStreamReader::PrematureEndOfDocumentError) {
-        qWarning() << "XML ERROR:" << xml.lineNumber() << ": " << xml.errorString();
-        http.abort();
+    if (xml.error()) {
+        if ( xml.error() != QXmlStreamReader::PrematureEndOfDocumentError) {
+            qWarning() << "XML ERROR: BAD END TO DOCUMENT" << xml.lineNumber() << ": " << xml.errorString();
+        } else {
+            qWarning() << "XML ERROR:" << xml.lineNumber() << ": " << xml.errorString();
+        }
     }
 
 

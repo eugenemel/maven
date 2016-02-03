@@ -57,7 +57,7 @@ private:
 	  MassCalculator mcalc;
 	  Compound* tempCompound;
 
-     QString groupIsotopeMatrixExport(PeakGroup* group);
+     QString groupIsotopeMatrixExport(PeakGroup* group, bool includeSampleHeader);
       
 };
 
