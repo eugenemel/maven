@@ -39,6 +39,8 @@
 #define C13_MASS	 13.0033548378
 #define HMASS  		 1.007825032
 #define EMASS 		 0.00054857971 //(6.022141×10^23 ⋅ 9.10938×10^-28 )
+#define PROTON 		 1.00727645229
+
 #if defined _WIN32 && !defined __CYGWIN__
    /* Use Windows separators on all _WIN32 defining
 	*       environments, except Cygwin. */
@@ -87,7 +89,7 @@ int countBelow(vector<float>& y, float ymax);
 float correlation(const vector<float>&a, const vector<float>&b);
 void gaussFit(const vector<float>& yobs, float* sigmal, float* R2);
 inline unsigned long factorial(int n);
-long nchoosek(int n, int k); 
+long long nchoosek(int n, int k);
 double beta(double x, double y);
 double gamma(double z);
 double betaPDF(double x, double a, double b);
@@ -135,7 +137,7 @@ inline float checkOverlap(float a, float b, float c, float d) {
 template <typename T>
 void shuffle(vector<T>& my_vector) {
     int N = my_vector.size()-1; if (N <= 0) return;
-	for (unsigned int i = 0; i < my_vector.size(); i++ ) { 
+    for (int i = 0; i < my_vector.size(); i++ ) {
 		int j = ((double) rand()/RAND_MAX)*N;
 		if (i == j) continue;
 		T tmp = my_vector[i];
@@ -158,49 +160,49 @@ void printF(vector<T>& my_vector) {
 //deallocated elements fo array from memory
 template <typename T>
 void delete_all(vector<T>& my_vector) {
-		if (my_vector.empty()) return;
-        for (unsigned int i = 0; i < my_vector.size(); i++ ) { 
-              if (  my_vector[i] != NULL ) { 
-					  try {
-						  delete(my_vector[i]);  
-						  my_vector[i] = NULL; 
-							  
-					  }
-					  catch(...) {
-						  cerr << "delete_all() sigfaulting.. ";
-					  }
-			  }
-        }
-        my_vector.clear(); 
-}  
+	for (unsigned int i = 0; i < my_vector.size(); i++ ) { 
+		if (  my_vector[i] != NULL ) { 
+			try { delete(my_vector[i]);  my_vector[i] = NULL; }
+			catch(...) { cerr << "delete_all() sigfaulting.. "; }
+		}
+	}
+	my_vector.clear(); 
+}
 
 //deallocated elements fo array from memory
 template <typename T>
 inline void delete_all(deque<T>& my_vector) {
-		if (my_vector.empty()) return;
-        for (unsigned int i = 0; i < my_vector.size(); i++ ) { 
-              if (  my_vector[i] != NULL ) { delete(my_vector[i]);  my_vector[i] = NULL; }
-        }
-        my_vector.clear(); 
-}  
-
+	for (unsigned int i = 0; i < my_vector.size(); i++ ) { 
+		if (  my_vector[i] != NULL ) { 
+			try { delete(my_vector[i]);  my_vector[i] = NULL; }
+			catch(...) { cerr << "delete_all() sigfaulting.. "; }
+		}
+	}
+	my_vector.clear(); 
 }
+
 //deallocated single element
 template <typename T>
 void delete_one(vector<T> & my_vector, unsigned int idx) {
-		if ( my_vector.size() == 0 ) return;
+	if ( my_vector.size() == 0 ) return;
         if ( idx < 0 || idx > my_vector.size()-1) return; 
-        if ( my_vector[idx] != NULL ) delete(my_vector[idx]); my_vector[idx] = NULL;
+        if ( my_vector[idx] != NULL ) { 
+		try { delete(my_vector[idx]);  my_vector[idx] = NULL; }
+		catch(...) { cerr << "delete_one() sigfaulting.. "; }
+	}
         my_vector.erase( my_vector.begin()+idx );
 }
 
 //deallocated single element
 template <typename T>
 void delete_one(deque<T> & my_vector, unsigned int idx) {
-		if ( my_vector.size() == 0 ) return;
+	if ( my_vector.size() == 0 ) return;
         if ( idx > my_vector.size()-1) return; 
-        if ( my_vector[idx] != NULL ) delete(my_vector[idx]); my_vector[idx] = NULL;
-        my_vector.erase( my_vector.begin()+idx );
+        if ( my_vector[idx] != NULL ) {
+		try { delete(my_vector[idx]);  my_vector[idx] = NULL; }
+		catch(...) { cerr << "delete_one() sigfaulting.. "; }
+       	} 
+	my_vector.erase( my_vector.begin()+idx );
 }
 
 
@@ -211,5 +213,19 @@ void shrink_vector(vector& v) {
 
 }
 
+template <typename T>
+bool isBetween(T x, T lb, T ub) {
+	return (x>lb && x<ub) || (x>ub && x <lb);	
+}
+
+template <typename T>
+bool isBetweenInclusive(T x, T lb, T ub) {
+    return (x>=lb && x<=ub) || (x>=ub && x <=lb);
+}
+
+
+
+
+} // end mzutils
 
 #endif

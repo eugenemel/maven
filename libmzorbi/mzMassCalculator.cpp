@@ -38,8 +38,8 @@ double MassCalculator::getElementMass(string elmnt){
 	/* Check for atoms */
 	if (elmnt == "H"){
 		val_atome = 1.0078250321;
-        } else if ( elmnt == "D") {
-                val_atome =  2.01410178;
+    } else if ( elmnt == "D") {
+        val_atome =  2.01410178;
 	} else if (elmnt == "C") {
 		val_atome = 12.00000000;
 	} else if (elmnt == "N") {
@@ -64,9 +64,9 @@ double MassCalculator::getElementMass(string elmnt){
 		val_atome = 39.9625912;
 	} else if (elmnt == "Se") {
 		val_atome = 79.916521;
-    	} else if (elmnt == "As") {
+    } else if (elmnt == "As") {
 		val_atome = 74.921596;
-    	} else if (elmnt == "Si") {
+    } else if (elmnt == "Si") {
 		val_atome = 27.9769265325;
 	}
 	return(val_atome);
@@ -135,16 +135,11 @@ double MassCalculator::computeNeutralMass(string formula) {
 double MassCalculator::adjustMass(double mass,int charge) {
 
     if (MassCalculator::ionizationType == EI and charge !=0) {
-       return ((mass - charge*EMASS)/charge); // lost of electrons
+       return ((mass - charge*EMASS)/charge); // loss of electrons
 	}
 
-	if ( charge < 0 ) { 
-		return ((mass - -charge*HMASS + -charge*EMASS)/-charge); //-nH + nelectron
-	} else if ( charge > 0 ) { 
-		return ((mass + charge*HMASS -  charge*EMASS)/charge); // +nH - nelectron
-	} else {
-		return mass;
-	} 
+    if (charge == 0 ) return mass;
+    else return   (mass+charge*PROTON)/abs(charge);
 }
 
 
@@ -162,46 +157,46 @@ vector<Isotope> MassCalculator::computeIsotopes(string formula, int charge) {
 	int SatomCount  =  atoms["S"];
     int HatomCount  =  atoms["H"];
 
-	double parentMass=computeMass(formula,charge);
-	charge = abs(charge);
-	if (charge == 0 ) charge=1;
-	
-	const double abC12 = 0.988930;
-	const double abC13 = 0.011070;
-	const double abN14 = 0.996337;
-	const double abN15=  0.003663;
-	const double abS32=  0.9502;
-	const double abS34=  0.0421;
+
+    const double abC12 = 0.9893;
+    const double abC13 = 0.0107;
+    const double abN14 = 0.9963620;
+    const double abN15=  0.0036420;
+    const double abS32=  0.949926;
+    const double abS34=  0.042524;
     const double abH  =  0.999885;
-    const double abH2  =  0.000115;
+    const double abH2  =  0.00011570;
+    //const double abO16  = 0.9975716;
+    //const double abO18  = 0.0020514;
 
     const double D_Delta = 2.014101778-1.0078250321;
     const double C_Delta = 13.0033548378-12.0;
 	const double N_Delta = 15.0001088984-14.003074052;
-	const double S_Delta = 33.96786690-31.97207100;
+    const double S_Delta = 33.9678669012-31.9720710015;
 
-       vector<Isotope> isotopes;
+     vector<Isotope> isotopes;
+     double parentMass=computeNeutralMass(formula);
 
       Isotope parent("C12 PARENT", parentMass);
       isotopes.push_back(parent);
 
 	for (int i=1; i <= CatomCount; i++ ) {
-            Isotope x("C13-label-"+integer2string(i), parentMass + (i*C_Delta)/charge,i,0,0,0);
+            Isotope x("C13-label-"+integer2string(i), parentMass + (i*C_Delta),i,0,0,0);
             isotopes.push_back(x);
 	}
 
 	for (int i=1; i <= NatomCount; i++ ) {
-            Isotope x("N15-label-"+integer2string(i), parentMass + (i*N_Delta)/charge,0,i,0,0);
+            Isotope x("N15-label-"+integer2string(i), parentMass + (i*N_Delta),0,i,0,0);
             isotopes.push_back(x);
 	}
 
 	for (int i=1; i <= SatomCount; i++ ) {
-            Isotope x("S34-label-"+integer2string(i), parentMass + (i*S_Delta)/charge,0,0,i,0);
+            Isotope x("S34-label-"+integer2string(i), parentMass + (i*S_Delta),0,0,i,0);
             isotopes.push_back(x);
 	}
 
    for (int i=1; i <= HatomCount; i++ ) {
-           Isotope x("D-label-"+integer2string(i), parentMass + (i*D_Delta)/charge,0,0,0,i);
+           Isotope x("D-label-"+integer2string(i), parentMass + (i*D_Delta),0,0,0,i);
            isotopes.push_back(x);
    }
 
@@ -209,7 +204,7 @@ vector<Isotope> MassCalculator::computeIsotopes(string formula, int charge) {
 	for (int i=1; i <= CatomCount; i++ ) {
 		for (int j=1; j <= NatomCount; j++ ) {
 			string name ="C13N15-label-"+integer2string(i)+"-"+integer2string(j);
-		    double mass = parentMass + (j*N_Delta)/charge + (i*C_Delta)/charge;
+            double mass = parentMass + (j*N_Delta) + (i*C_Delta);
                 Isotope x(name,mass,i,j,0,0);
                 isotopes.push_back(x);
 		}
@@ -218,7 +213,7 @@ vector<Isotope> MassCalculator::computeIsotopes(string formula, int charge) {
 	for (int i=1; i <= CatomCount; i++ ) {
 		for (int j=1; j <= SatomCount; j++ ) {
             string name ="C13S34-label-"+integer2string(i)+"-"+integer2string(j);
-		    double mass = parentMass + (j*S_Delta)/charge + (i*C_Delta)/charge;
+            double mass = parentMass + (j*S_Delta) + (i*C_Delta);
             Isotope x(name,mass,i,0,j,0);
             isotopes.push_back(x);
 		}
@@ -231,6 +226,8 @@ vector<Isotope> MassCalculator::computeIsotopes(string formula, int charge) {
                 int n=x.N15;
                 int s=x.S34;
                 int d=x.H2;
+
+        isotopes[i].mass = adjustMass(isotopes[i].mass,charge);
 
 		isotopes[i].abundance=
                  mzUtils::nchoosek(CatomCount,c)*pow(abC12,CatomCount-c)*pow(abC13,c) 

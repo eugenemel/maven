@@ -295,6 +295,16 @@ std::vector<unsigned int> StatisticsVector<T>::cut_above(Real cut) const
 
 
 
+template <typename T>
+T StatisticsVector<T>::sum() const
+{
+  T v_sum=0;
+  for (unsigned int i=0; i<this->size(); i++) v_sum += (*this)[i];
+  return v_sum;
+}
+
+
+
 
 //------------------------------------------------------------
 // Explicit Instantions

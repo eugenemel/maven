@@ -36,6 +36,8 @@ mzSample::~mzSample() {
 void mzSample::addScan(Scan*s ) {
         if (!s) return;
 
+    //cerr << "addScan=" << "\tms="<< s->mslevel << "\tprecMz=" << s->precursorMz << "\trt=" << s->rt << endl;
+
 	//skip scans that do not match mslevel
 	if (mzSample::filter_mslevel and s->mslevel != mzSample::filter_mslevel ) {
 		return;
@@ -68,33 +70,31 @@ void mzSample::addScan(Scan*s ) {
 }
 
 void mzSample::loadSample(const char* filename) {
-		if (mystrcasestr(filename,"mzCSV") != NULL ) {
-                        parseMzCSV(filename);
-		} else if(mystrcasestr(filename,"mzdata") != NULL ) {
-                        parseMzData(filename);
-                } else if(mystrcasestr(filename,"mzxml") != NULL ) {
-                    parseMzXML(filename);
-                } else if(mystrcasestr(filename,"mzml") != NULL ) {
-                    parseMzML(filename);
-                } else if(mystrcasestr(filename,"cdf") != NULL ) {
-                    parseCDF(filename,1);
-                } else {
-                    parseMzData(filename);
-                }
 
-		enumerateSRMScans();
+    string filenameString = string(filename);
+    this->fileName = filenameString;
 
-		//set min and max values for rt
-		calculateMzRtRange();
+    if (mystrcasestr(filename,".mzCSV") != NULL ) {
+        parseMzCSV(filename);
+    } else if(mystrcasestr(filename,".mzdata") != NULL or mystrcasestr(filename,".mzdata.gz") != NULL ) {
+        parseMzData(filename);
+    } else if(mystrcasestr(filename,".mzxml") != NULL or mystrcasestr(filename,".mzxml.gz") != NULL ) {
+        parseMzXML(filename);
+    } else if(mystrcasestr(filename,".mzml") != NULL or mystrcasestr(filename,".mzml.gz") != NULL ) {
+        parseMzML(filename);
+    } else if(mystrcasestr(filename,".cdf") != NULL ) {
+        parseCDF((char*) filename,1);
+    } else {
+        parseMzXML(filename);
+    }
 
-		//check if this is a blank sample
-		string filenameString = string(filename);
-		this->fileName = filenameString;
-		makeLowerCase(filenameString);
-		if ( filenameString.find("blan") != string::npos) { 
-			this->isBlank = true;
-			cerr << "Found Blank: " << filenameString << endl; 
-		}
+    //set min and max values for rt
+    calculateMzRtRange();
+
+    if (mystrcasestr(filename,"blan") != NULL) {
+        this->isBlank = true;
+        cerr << "Found Blank: " << filename << endl;
+    }
 }
 
 void mzSample::parseMzCSV(const char* filename) {
@@ -225,7 +225,7 @@ void mzSample::parseMzMLChromatogromList(xml_node chromatogramList) {
                                 if(attr.count("32-bit float")) precision=32;
 
                                 string binaryDataStr = binaryDataArray.child("binary").child_value();
-                                vector<float>binaryData = base64::decode_base64(binaryDataStr,precision/8,false);
+                                vector<float>binaryData = base64::decode_base64(binaryDataStr,precision/8,false,false);
 
                                 if(attr.count("time array")) { timeVector = binaryData; }
                                 if(attr.count("intensity array")) { intsVector = binaryData; }
@@ -315,7 +315,7 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
 
             string binaryDataStr = binaryDataArray.child("binary").child_value();
             if (!binaryDataStr.empty()) {
-                vector<float>binaryData = base64::decode_base64(binaryDataStr,precision/8,false);
+                vector<float>binaryData = base64::decode_base64(binaryDataStr,precision/8,false,false);
                 if(attr.count("m/z array")) { mzVector = binaryData; }
                 if(attr.count("intensity array")) { intsVector = binaryData; }
             }
@@ -359,14 +359,19 @@ void mzSample::parseMzData(const char* filename) {
     //Get a spectrumstore node
     xml_node spectrumstore = doc.first_child().child("spectrumList");
 
+	if(!spectrumstore) { 
+		spectrumstore = doc.first_element_by_path("ExperimentCollection/Experiment/mzData/spectrumList");
+	}
+
     //Iterate through spectrums
     int scannum=0;
 
     for (xml_node spectrum = spectrumstore.child("spectrum"); spectrum; spectrum = spectrum.next_sibling("spectrum")) {
-
         scannum++;
         float rt = 0;
         float precursorMz = 0;
+		int   precursorCharge=0;
+        float collisionEnergy=0;
         char scanpolarity = 0;	//default case
 
         xml_node spectrumInstrument = spectrum.first_element_by_path("spectrumDesc/spectrumSettings/spectrumInstrument");
@@ -374,7 +379,7 @@ void mzSample::parseMzData(const char* filename) {
         //cerr << mslevel << " " << spectrum.attribute("msLevel").value() << endl;
 
         for( xml_node cvParam= spectrumInstrument.child("cvParam"); cvParam; cvParam= cvParam.next_sibling("cvParam")) {
-            //	cout << "cvParam=" << cvParam.attribute("name").value() << endl;
+            //cout << "cvParam=" << cvParam.attribute("name").value() << endl;
             //
             if (strncasecmp(cvParam.attribute("name").value(),"TimeInMinutes",10) == 0 ) {
                 rt=cvParam.attribute("value").as_float();
@@ -386,29 +391,55 @@ void mzSample::parseMzData(const char* filename) {
                 //cout << "rt=" << rt << endl;
             }
 
-
             if (strncasecmp(cvParam.attribute("name").value(),"polarity",5) == 0 ) {
                 if ( cvParam.attribute("value").value()[0] == 'p' || cvParam.attribute("value").value()[0] == 'P') {
                     scanpolarity = +1;
                 } else {
                     scanpolarity = -1;
                 }
+
             }
         }
+
+		xml_node ionSelection = spectrum.first_element_by_path("spectrumDesc/precursorList/precursor/ionSelection");
+		for( xml_node cvParam= ionSelection.child("cvParam"); cvParam; cvParam= cvParam.next_sibling("cvParam")) {
+			if (strncasecmp(cvParam.attribute("name").value(),"MassToChargeRatio",10) == 0 ) {
+				precursorMz=cvParam.attribute("value").as_float();
+			}
+
+			if (strncasecmp(cvParam.attribute("accession").value(),"MS:1000744",10) == 0 ) {
+				precursorMz=cvParam.attribute("value").as_float();
+			}
+
+			if (strncasecmp(cvParam.attribute("accession").value(),"MS:1000041",10) == 0 ) {
+				precursorCharge=cvParam.attribute("value").as_float();
+			}
+
+		}
+
+        xml_node activation = spectrum.first_element_by_path("spectrumDesc/precursorList/precursor/activation");
+		for( xml_node cvParam= activation.child("cvParam"); cvParam; cvParam= cvParam.next_sibling("cvParam")) {
+			if (strncasecmp(cvParam.attribute("name").value(),"CollisionEnergy",10) == 0 ) {
+				collisionEnergy=cvParam.attribute("value").as_float();
+			}
+		}
+
 
         //cout << spectrum.first_element_by_path("spectrumDesc/spectrumSettings/spectrumInstrument").child_value() << endl
         if (mslevel <= 0 ) mslevel=1;
         Scan* scan = new Scan(this,scannum,mslevel,rt,precursorMz,scanpolarity);
+        scan->collisionEnergy=collisionEnergy;
+		scan->precursorCharge=precursorCharge;
         addScan(scan);
 
         int precision1 = spectrum.child("intenArrayBinary").child("data").attribute("precision").as_int();
         string b64intensity = spectrum.child("intenArrayBinary").child("data").child_value();
-        scan->intensity = base64::decode_base64(b64intensity,precision1/8,false);
+        scan->intensity = base64::decode_base64(b64intensity,precision1/8,false,false);
 
         //cout << "mz" << endl;
         int precision2 = spectrum.child("mzArrayBinary").child("data").attribute("precision").as_int();
         string b64mz = spectrum.child("mzArrayBinary").child("data").child_value();
-        scan->mz = base64::decode_base64(b64mz,precision2/8,false);
+        scan->mz = base64::decode_base64(b64mz,precision2/8,false,false);
 
         //cout << "spectrum " << spectrum.attribute("title").value() << endl;
     }
@@ -417,7 +448,6 @@ void mzSample::parseMzData(const char* filename) {
 void mzSample::parseMzXML(const char* filename) { 
 	    xml_document doc;
             try {
-
                 bool loadok = doc.load_file(filename,pugi::parse_minimal);
 
                 if (!loadok ) {
@@ -469,7 +499,7 @@ void mzSample::parseMzXML(const char* filename) {
             }
 }
 
-void mzSample::parseMzXMLScan(const xml_node& scan, int scannum) { 
+void mzSample::parseMzXMLScan(const xml_node& mzxml_scan_node, int scannum) {
 
     float rt = 0;
     float precursorMz = 0;
@@ -478,10 +508,11 @@ void mzSample::parseMzXMLScan(const xml_node& scan, int scannum) {
     int scanpolarity = 0;	//default case
     int msLevel=1;
     bool networkorder = false;
+	int centroided=0;
     string filterLine;
     string scanType;
 
-    for(xml_attribute attr = scan.first_attribute(); attr; attr=attr.next_attribute()) {
+    for(xml_attribute attr = mzxml_scan_node.first_attribute(); attr; attr=attr.next_attribute()) {
         if (strncasecmp(attr.name(), "retentionTime",10) == 0 ) {
             if (strncasecmp(attr.value(),"PT",2) == 0 ) {
                 rt=string2float( string(attr.value()+2));
@@ -510,6 +541,7 @@ void mzSample::parseMzXMLScan(const xml_node& scan, int scannum) {
         if (strncasecmp(attr.name(),"basePeakMz",9) == 0 ) productMz = string2float(attr.value());
         if (strncasecmp(attr.name(),"collisionEnergy",12) == 0 ) collisionEnergy= string2float(attr.value());
         if (strncasecmp(attr.name(),"scanType",8) == 0 ) scanType = attr.value();
+        if (strncasecmp(attr.name(),"centroided",10) == 0 ) centroided = string2integer(attr.value());
 
     }
 
@@ -522,38 +554,50 @@ void mzSample::parseMzXMLScan(const xml_node& scan, int scannum) {
         }
     }
 
-    precursorMz = string2float(string(scan.child_value("precursorMz")));
-    //cout << "precursorMz=" << precursorMz << endl;
+    if (msLevel <= 0 or msLevel > 100) msLevel=1;
 
-    xml_node peaks =  scan.child("peaks");
+    //add new scan
+    Scan* _scan = new Scan(this,scannum,msLevel,rt,precursorMz,scanpolarity);
+
+    // cerr << "newScan=" << msLevel << " " << precursorMz << endl;
+    if(centroided==1) {
+        _scan->centroided=true;
+    } else {
+        _scan->centroided=false;
+    }
+
+
+    xml_node precursor = mzxml_scan_node.child("precursorMz");
+    if (precursor) {
+        _scan->precursorMz = string2float(mzxml_scan_node.child_value("precursorMz"));
+
+        for(xml_attribute attr = precursor.first_attribute(); attr; attr=attr.next_attribute()) {
+            if (strncasecmp(attr.name(),"precursorIntensity",15) == 0) _scan->precursorIntensity = string2float(attr.value());
+            else if (strncasecmp(attr.name(),"precursorCharge",15) == 0) _scan->precursorCharge = string2integer(attr.value());
+            else if (strncasecmp(attr.name(),"activationMethod",15) == 0) _scan->activationMethod = string(attr.value());
+            else if (strncasecmp(attr.name(),"precursorScanNum",15) == 0) _scan->precursorScanNum = string2integer(attr.value());
+         }
+    /*
+        cerr << "mzLevel=" << _scan->mslevel << endl;
+        cerr << "precursorMz=" << _scan->precursorMz << endl;
+        cerr << "precursorCharge=" << _scan->precursorCharge << endl;
+        cerr << "activationMethod=" << _scan->activationMethod << endl;
+        cerr << "precursorIntensity=" << _scan->precursorIntensity << endl;
+    */
+
+    }
+    addScan(_scan);
+
+    xml_node peaks =  mzxml_scan_node.child("peaks");
     if ( ! peaks.empty() ) {
         string b64String(peaks.child_value());
         if ( b64String.empty()) return;  //no m/z intensity values
+		bool decompress = false;
 
-
-#ifdef ZLIB
         //decompress
         if(strncasecmp(peaks.attribute("compressionType").value(),"zlib",4) == 0) {
-            /*
-            const char* sampleEncoded32LittleZlib_ = "eJzjYfBwZgACGSitA6VtoLSTtCeYDoLSSVC6CEo3AenL2skuk4D0PI95LouA9CrnuS6bgPRxoxCXQ1B1l6D0IyjNADWfgWEakG6wZ2A4AaQVHBkYfgHpE04MDGIuDAxVLgB7LB3q";
-            const char* sampleEncoded32BigZlib_ = "eJxz9mDgYQACZw8GGSitA6VtwLSntBOUDoLSSVC6CEo3uSRrXwbSk1zmecwD0otc5jqvAtKbXEKMjgPpQ1B1l6D0I6j5YOA8jYHBvgFIn2BgcFQA0r8YGJyAbBcxIK5iYAAAfLkd6g==";
-            const char* sampleEncoded64LittleZlib_ = "eJz7Lz63i5Eh04EBClora9uYkfhLtOOaWJH48Xr2dexI/HXsZqYZygj+6j07zLKQ+HMOW1vkIPGbZPZb5iHxo447WRdA+AlVqT0OqkeO2RRB+AeET052eCrkbVcC4TuUrpjsMGPzefsyCP9BRFuXg/2yEMcKJPNuv7rpVIXEz2yMd6lB4kNFUfkHiqD8D/YQuhLKV4HQDvVQfiSEPtAEFe93AACmsz1+";
-            const char* sampleEncoded64BigZlib_ = "eJxzyGRg7Jor/p8BChwyGZjbaitbkfisTXHaS5D47HX2evEIvnKGqRn7OiR+ltmOPauR+DkW1ofnIPHzLPfLNCHxC6ydjkc59KRWJUD4RTbHjqg6TD4pfADCL7HzFnrqMHlFqQOEX2Z/fvMMh662iAcQfoVjyDJ7JPOqnG6+uo3Er3GJb8xEcj8KcCg6AKbtP0D5lVBaBUrXO0DoSCi/CaLeoR8iDgC0Qj1+";
-
-            string testStr(sampleEncoded64LittleZlib_);
-
-            string uncompressed;
-            //gzipInflate( testStr, uncompressed );
-            uncompressed = mzUtils::decompress_string(testStr);
-            //b64String = uncompressed;
-
-             cerr << "Uncompressed : " << uncompressed << endl;
-            */
-        }
-#endif
-
-        if (msLevel <= 0 ) msLevel=1;
-        Scan* _scan = new Scan(this,scannum,msLevel,rt,precursorMz,scanpolarity);
+			decompress=true;
+		}
 
         if (!filterLine.empty()) _scan->filterLine=filterLine;
         if (!scanType.empty())   _scan->scanType= scanType;
@@ -570,9 +614,8 @@ void mzSample::parseMzXMLScan(const xml_node& scan, int scannum) {
        // cerr << "new scan=" << scannum << " msL=" << msLevel << " rt=" << rt << " precMz=" << precursorMz << " polar=" << scanpolarity
        //    << " prec=" << precision << endl;
 
-        vector<float> mzint = base64::decode_base64(b64String,precision/8,networkorder);
+        vector<float> mzint = base64::decode_base64(b64String,precision/8,networkorder,decompress);
         int size = mzint.size()/2;
-
 
         _scan->mz.resize(size);
         _scan->intensity.resize(size);
@@ -597,11 +640,10 @@ void mzSample::parseMzXMLScan(const xml_node& scan, int scannum) {
 
         if (filterLine.empty() && precursorMz > 0 ) {
             _scan->filterLine = scanType + ":" + float2string(_scan->precursorMz,4) + " [" + float2string(_scan->productMz,4) + "]";
+            cerr << " addScan:" << _scan->filterLine << endl;
+        } else if (scanType  == "MRM") {
+            _scan->filterLine = scanType + ":" + float2string(_scan->precursorMz,4) + " [" + float2string(_scan->productMz,4) + "]";
         }
-
-        //cerr << _scan->scanType << " " << _scan->precursorMz << " " << _scan->productMz;
-        //cerr << " addScan:" << _scan->filterLine << endl;
-        addScan(_scan);
     }
 }
 
@@ -761,8 +803,8 @@ EIC* mzSample::getEIC(float precursorMz, float collisionEnergy, float productMz,
     float scale = getNormalizationConstant();
     if(scale != 1.0) for (unsigned int j=0; j < e->size(); j++) { e->intensity[j] *= scale; }
 
-    if(e->size() == 0) cerr << "getEIC(Q1,CE,Q3): is empty" << precursorMz << " " << collisionEnergy << " " << productMz << endl;
-    std::cerr << "getEIC(Q1,CE,Q3): srm"  << precursorMz << " " << e->intensity.size() << endl;
+    //if(e->size() == 0) cerr << "getEIC(Q1,CE,Q3): is empty" << precursorMz << " " << collisionEnergy << " " << productMz << endl;
+    //std::cerr << "getEIC(Q1,CE,Q3): srm"  << precursorMz << " " << e->intensity.size() << endl;
     return e;
 }
 
@@ -811,7 +853,7 @@ EIC* mzSample::getEIC(string srm) {
 	float scale = getNormalizationConstant();
 	if(scale != 1.0) for (unsigned int j=0; j < e->size(); j++) { e->intensity[j] *= scale; }
 	if(e->size() == 0) cerr << "getEIC(SRM STRING): is empty" << srm << endl;
-         std::cerr << "getEIC: srm"  << srm << " " << e->intensity.size() << endl;
+    //std::cerr << "getEIC: srm"  << srm << " " << e->intensity.size() << endl;
 
 	return e;
 }
@@ -830,13 +872,13 @@ EIC* mzSample::getEIC(float mzmin,float mzmax, float rtmin, float rtmax, int msl
 	EIC* e = new EIC();
 	e->sampleName = sampleName;
 	e->sample = this;
-        e->mzmin = mzmin;
-        e->mzmax = mzmax;
-        e->totalIntensity=0;
-        e->maxIntensity = 0;
+	e->mzmin = mzmin;
+	e->mzmax = mzmax;
+	e->totalIntensity=0;
+	e->maxIntensity = 0;
 
 	int scanCount = scans.size();
-	if ( scanCount == 0 ) return e;
+	if (scanCount == 0) return e;
 
 	if ( mzmin < minMz && mzmax < maxMz ) {
 			cerr << "getEIC(): mzmin and mzmax are out of range" << endl;
@@ -848,15 +890,18 @@ EIC* mzSample::getEIC(float mzmin,float mzmax, float rtmin, float rtmax, int msl
 
         //binary search rt domain iterator
         Scan tmpScan(this,0,1,rtmin-0.1,0,-1);
-	deque<Scan*>::iterator scanItr = lower_bound(scans.begin(), scans.end(),&tmpScan, Scan::compRt);
+        deque<Scan*>::iterator scanItr = lower_bound(scans.begin(), scans.end(),&tmpScan, Scan::compRt);
         if (scanItr >= scans.end() ) { return e; }
 
-	//preallocated memory for arrays [ this should really be corrected for mslevel type ]
+        //preallocated memory for arrays [ this should really be corrected for mslevel type ]
         int estimatedScans=scans.size();
 
         if (this->maxRt-this->minRt > 0 && (rtmax-rtmin)/(this->maxRt-this->minRt) <= 1 ) {
-            estimatedScans=float (rtmax-rtmin)/(this->maxRt-this->minRt)*scans.size()+10;
+            estimatedScans=float (rtmax-rtmin)/(this->maxRt-this->minRt)*scans.size();
         }
+
+	if (estimatedScans < 512 ) estimatedScans=512;
+	if (estimatedScans > scans.size() ) estimatedScans=scans.size();
 
 	e->scannum.reserve(estimatedScans);
 	e->rt.reserve(estimatedScans);
@@ -864,12 +909,17 @@ EIC* mzSample::getEIC(float mzmin,float mzmax, float rtmin, float rtmax, int msl
 	e->mz.reserve(estimatedScans);
 
 	int scanNum=scanItr-scans.begin()-1;
-	for(; scanItr != scans.end(); scanItr++ ) {
+	for(; scanItr != scans.end(); ++scanItr) {
             Scan* scan = *(scanItr);
+
             scanNum++;
             if (scan->mslevel != mslevel) continue;
             if (scan->rt < rtmin) continue;
+            if (scan->mz.size() == 0) continue;
             if (scan->rt > rtmax) break;
+
+            //sim scan outside the range
+            if (mslevel == 1 && (scan->mz.front() > mzmax || scan->mz.back() < mzmin)) continue;
 
             float __maxMz=0;
             float __maxIntensity=0;
@@ -896,11 +946,11 @@ EIC* mzSample::getEIC(float mzmin,float mzmax, float rtmin, float rtmax, int msl
 
 	}
 
-	//cerr << "estimatedScans=" << estimatedScans << " actul=" << e->scannum.size() << endl;
+    //cerr << "estimatedScans=" << estimatedScans << " actul=" << e->scannum.size() << endl;
 	if ( e->rt.size() > 0 ) { 
-            e->rtmin = e->rt[0];
-            e->rtmax = e->rt[ e->size()-1];
-            //cerr << "getEIC()" << e->scannum[0] << " " << e->scannum[e->scannum.size()-1] << " " << scans.size() << endl;
+          e->rtmin = e->rt[0];
+          e->rtmax = e->rt[ e->size()-1];
+         //cerr << "getEIC()" << e->scannum[0] << " " << e->scannum[e->scannum.size()-1] << " " << scans.size() << endl;
 	}
 
 	//scale EIC by normalization constant
@@ -910,10 +960,10 @@ EIC* mzSample::getEIC(float mzmin,float mzmax, float rtmin, float rtmax, int msl
 	//cerr << "getEIC: maxIntensity=" << e->maxIntensity << endl;
 	//e->summary();
 
-	if(e->size() == 0) cerr << "getEIC(mzrange,rtrange,mslevel): is empty" << mzmin << " " << mzmax << " " << rtmin << " " << rtmax << endl;
+	if(e->size() == 0) cerr << "getEIC(mzrange,rtrange,mslevel): is empty: " << mzmin << " " << mzmax << " " << rtmin << " " << rtmax << endl;
 
 	return(e);
-    }
+}
 
 
 EIC* mzSample::getTIC(float rtmin, float rtmax, int mslevel) { 
@@ -955,6 +1005,50 @@ EIC* mzSample::getTIC(float rtmin, float rtmax, int mslevel) {
     return(e);
 }
 
+EIC* mzSample::getBIC(float rtmin, float rtmax, int mslevel) { 
+
+    //ajust EIC retention time window to match sample retentention times
+    if (rtmin < this->minRt ) rtmin =this->minRt;
+    if (rtmax > this->maxRt ) rtmax =this->maxRt;
+
+    //cerr << "getEIC()" << setprecision(7) << mzmin << " " << mzmax << " " << rtmin << " " << rtmax << endl;
+
+    EIC* e = new EIC();
+    e->sampleName = sampleName;
+    e->sample = this;
+    e->mzmin = 0;
+    e->mzmax = 0;
+    e->totalIntensity=0;
+    e->maxIntensity = 0;
+
+    int scanCount = scans.size();
+    if ( scanCount == 0 ) return e;
+
+    for(int i=0;  i < scanCount; i++)
+    {
+        if (scans[i]->mslevel == mslevel) {
+            Scan* scan = scans[i];
+			float maxMz=0;
+			float maxIntensity=0;
+    		for(unsigned int i=0;i<scan->intensity.size();i++)  {
+					if(scan->intensity[i] >maxIntensity) { maxIntensity=scan->intensity[i]; maxMz=scan->mz[i] ; }
+			}
+            e->mz.push_back(maxMz);
+            e->scannum.push_back(i);
+            e->rt.push_back(scan->rt);
+            e->intensity.push_back(maxIntensity);
+            e->totalIntensity += maxIntensity;
+            if (maxIntensity>e->maxIntensity) e->maxIntensity=maxIntensity;
+        }
+    }
+    if ( e->rt.size() > 0 ) {
+        e->rtmin = e->rt[0];
+        e->rtmax = e->rt[ e->size()-1];
+    }
+    return(e);
+}
+
+
 //compute correlation between two mzs within some retention time window
 float mzSample::correlation(float mz1,  float mz2, float ppm, float rt1, float rt2 ) { 
     
@@ -967,7 +1061,7 @@ float mzSample::correlation(float mz1,  float mz2, float ppm, float rt1, float r
 }
 
 
-int mzSample::parseCDF (const char* filename, int is_verbose)
+int mzSample::parseCDF (char* filename, int is_verbose)
 {
     #ifdef CDFPARSER
     int cdf=0;
@@ -1165,7 +1259,7 @@ int mzSample::parseCDF (const char* filename, int is_verbose)
                 myscan->intensity[i]=inty_pt;
                 myscan->mz[i]=mass_pt;
 
-                if (raw_data.flags > 0) printf("\nWarning: There are flags in scan %ld (ignored).", scan);
+               // if (raw_data.flags > 0) printf("\nWarning: There are flags in scan %ld (ignored).", scan);
             }       /* i loop */
 
 
@@ -1224,7 +1318,7 @@ Scan* mzSample::getAverageScan(float rtmin, float rtmax, int mslevel, int polari
 void mzSample::saveOriginalRetentionTimes() {
     if ( originalRetentionTimes.size() > 0 ) return;
 
-    originalRetentionTimes.resize(scans.size());
+    originalRetentionTimes=vector<float>(scans.size(),0);
     for(unsigned int ii=0; ii < scans.size(); ii++ ) {
         originalRetentionTimes[ii]=scans[ii]->rt;
     }
@@ -1254,3 +1348,15 @@ vector<float> mzSample::getIntensityDistribution(int mslevel) {
     return(quantileDistribution(allintensities));
 }
 
+
+void mzSample::applyPolynomialTransform() { 
+	int poly_align_degree = polynomialAlignmentTransformation.size()-1;
+	if (poly_align_degree <= 0) return;
+
+	double* transform = &polynomialAlignmentTransformation.front();
+	for(int i=0; i<scans.size(); i++ ) {
+		float newrt = leasev(transform, poly_align_degree, scans[i]->rt);
+		//cerr << "applyPolynomialTransform() " << scans[i]->rt << "\t" << newrt << endl;
+		scans[i]->rt = newrt;
+	}
+}

@@ -44,6 +44,12 @@ Peak::Peak(EIC* e, int p) {
 		gaussFitSigma=10;
 		gaussFitR2=FLT_MAX;
 		peakRank=INT_MAX;
+
+		chargeState=0;
+		isMonoIsotopic=false;
+		selectionScore=0;
+		ms2EventCount=0;
+
 		if (sample == NULL && eic != NULL ) sample = eic->sample;
 }
 
@@ -56,7 +62,7 @@ void Peak::copyObj(const Peak& o ) {
 		fromBlankSample= o.fromBlankSample;
 		groupOverlap= o.groupOverlap;
 		groupOverlapFrac= o.groupOverlapFrac;
-                groupNum=o.groupNum;
+        groupNum=o.groupNum;
 		label= o.label;
 		localMaxFlag= o.localMaxFlag;
 		maxpos= o.maxpos;
@@ -86,6 +92,11 @@ void Peak::copyObj(const Peak& o ) {
 		gaussFitSigma=o.gaussFitSigma;
 		gaussFitR2= o.gaussFitR2;
 		peakRank=o.peakRank;
+
+		chargeState=o.chargeState;
+		isMonoIsotopic=o.isMonoIsotopic;
+		ms2EventCount=o.ms2EventCount;
+		selectionScore=o.selectionScore;
 }
 
 Peak& Peak::operator=(const Peak& o)  {
@@ -94,6 +105,45 @@ Peak& Peak::operator=(const Peak& o)  {
 }
 
 Peak::Peak(const Peak& o ) { copyObj(o); }
+
+//test
+int Peak::getChargeState() {
+	Scan* s = this->getScan();
+	int peakPos = -1;
+	if (s) peakPos = s->findHighestIntensityPos(peakMz,0.5);
+
+	if (s and peakPos > 0 and peakPos < s->nobs() ) {
+        float ppm = peakMz/1e6*10;
+		vector<int> parentPeaks = s->assignCharges(ppm);
+		cerr << "pos=" << peakPos << endl; //peakPos
+		cerr << "peakMz=" << peakMz << endl;
+		cerr << "peakMzscan=" << s->mz[peakPos] << endl;
+		cerr << "chargeState=" << parentPeaks[peakPos] << endl;
+        this->chargeState=parentPeaks[peakPos];
+
+        return parentPeaks[peakPos];
+	} else {
+		return 0;
+	}
+}
+
+vector<Scan*> Peak::getFragmenationEvents(float ppmWindow) {
+    vector<Scan*>matchedscans;
+    if ( sample == NULL ) return matchedscans;
+
+	float amuTol = peakMz/1e6*ppmWindow;
+
+    for( unsigned int j=0; j < sample->scans.size(); j++ ) {
+         	Scan* scan = sample->scans[j];
+            if (scan->mslevel <= 1) continue; //ms2 + scans only
+       		if (scan->rt < rtmin) continue;
+            if (scan->rt > rtmax) break;
+            if( scan->precursorMz >= peakMz-amuTol and scan->precursorMz <= peakMz+amuTol)  matchedscans.push_back(scan);
+    }
+    return matchedscans;
+}
+
+
 
 vector<mzLink> Peak::findCovariants() {
 
@@ -128,7 +178,7 @@ vector<mzLink> Peak::findCovariants() {
 
 		//merge ajacent slices
 		int lastMz=0;
-		for(itr = M.begin(); itr != M.end(); itr++) {
+		for(itr = M.begin(); itr != M.end(); ++itr) {
 				float rmz = (*itr).first;
 				if ( lastMz != 0 && rmz-lastMz < 2 ) {//merge
 						for (int j=0; j < scanCount; j++ ) { 
@@ -157,7 +207,7 @@ vector<mzLink> Peak::findCovariants() {
 		cerr << "Reference" << endl;
 		for (int j=0; j<scanCount; j++ ) cerr << yref[j]; cerr << endl;
 
-		for(itr = M.begin(); itr != M.end(); itr++) { 
+		for(itr = M.begin(); itr != M.end(); ++itr) { 
 				int rmz = (*itr).first;
 				vector<float> y =  (*itr).second;
 				//float score=matchScore(yref, y );

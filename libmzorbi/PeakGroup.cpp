@@ -177,7 +177,7 @@ bool PeakGroup::deleteChild(unsigned int index) {
 bool PeakGroup::deleteChild(PeakGroup* child ) {
     if (!child) return false;
 
-    deque<PeakGroup>::iterator it;
+    vector<PeakGroup>::iterator it;
     it = find(children.begin(),children.end(),child);
     if ( *it == child ) {
         cerr << "deleteChild: setting child to empty";
@@ -214,9 +214,11 @@ vector<float> PeakGroup::getOrderedIntensityVector(vector<mzSample*>& samples, Q
             case AreaTop: y = peak.peakAreaTop; break;
             case Area: y = peak.peakAreaCorrected; break;
             case Height: y = peak.peakIntensity; break;
+            case AreaNotCorrected: y = peak.peakArea; break;
             case RetentionTime: y = peak.rt; break;
             case Quality: y = peak.quality; break;
             case SNRatio: y = peak.signalBaselineRatio; break;
+            case MS2Count: y = peak.ms2EventCount; break;
             default: y = peak.peakAreaTop; break;
             }
 
@@ -355,7 +357,7 @@ void PeakGroup::reduce() { // make sure there is only one peak per sample
     }
 
     peaks.clear();
-    for( itr = maxPeaks.begin(); itr != maxPeaks.end(); itr++ ){
+    for( itr = maxPeaks.begin(); itr != maxPeaks.end(); ++itr){
         const Peak& peak = (*itr).second;
         addPeak(peak);
     }
@@ -534,3 +536,99 @@ string PeakGroup::getName() {
     return tag;
 }
 
+vector<Scan*> PeakGroup::getRepresentativeFullScans() {
+    vector<Scan*>matchedscans;
+    for(unsigned int i=0; i < peaks.size(); i++ ) {
+        mzSample* sample = peaks[i].getSample();
+        if ( sample == NULL ) continue;
+        Scan* scan = sample->getScan(peaks[i].scan);
+        if (scan and scan->mslevel == 1) matchedscans.push_back(scan);
+    }
+    return matchedscans;
+}
+
+vector<Scan*> PeakGroup::getFragmenationEvents() {
+    vector<Scan*>matchedscans;
+    for(unsigned int i=0; i < peaks.size(); i++ ) {
+        mzSample* sample = peaks[i].getSample();
+        if ( sample == NULL ) continue;
+
+        for( unsigned int j=0; j < sample->scans.size(); j++ ) {
+            Scan* scan = sample->scans[j];
+            if (scan->mslevel <= 1) continue; //ms2 + scans only
+            if (scan->rt < peaks[i].rtmin) continue;
+            if (scan->rt > peaks[i].rtmax) break;
+            if( scan->precursorMz >= minMz and scan->precursorMz <= maxMz) {
+                matchedscans.push_back(scan);
+            }
+        }
+    }
+    return matchedscans;
+}
+
+
+Scan* PeakGroup::getAverageFragmenationScan(float resolution) {
+
+    int scanCount=0;
+    map<float,double> mz_intensity_map;
+    map<float,double> mz_bin_map;
+    map<float,int> mz_count;
+
+    vector<Scan*> scans = getFragmenationEvents();
+    if (scans.size() == 0 ) return NULL;
+
+    Scan* avgScan = new Scan(NULL,0,0,0,0,0);
+    avgScan->deepcopy(scans[0]);
+
+    if (scans.size() == 1) return avgScan;
+
+    for(unsigned int s=0; s < scans.size(); s++) {
+        Scan* scan = scans[s];
+        scanCount++;
+
+        //vector<int>positions = scan->intensityOrderDesc();
+        //for(unsigned int p=0; p <positions.size() and p<100; p++ ) {
+        for(unsigned int i=0; i < scan->nobs(); i++ ) {
+            int pos = avgScan->findClosestHighestIntensityPos(scan->mz[i],resolution);
+            float bin;
+            if (pos >= 0) {
+                bin = FLOATROUND(avgScan->mz[pos],1000);
+            } else {
+                bin = FLOATROUND(scan->mz[i],1000);
+            }
+            mz_intensity_map[bin] += ((double) scan->intensity[i]);
+            mz_bin_map[bin] += ((double)(scan->intensity[i])*(scan->mz[i]));
+            mz_count[bin]++;
+        }
+
+
+        //resort
+        vector<float> avgmzs;
+        vector<float> avgints;
+        map<float,double>::iterator itr;
+         for(itr = mz_intensity_map.begin(); itr != mz_intensity_map.end(); ++itr ) {
+             avgmzs.push_back((*itr).first);
+             avgints.push_back((*itr).second);
+         }
+         avgScan->mz = avgmzs;
+         avgScan->intensity = avgints;
+    }
+
+   //average
+   vector<float> avgmzs;
+   vector<float> avgints;
+    map<float,double>::iterator itr;
+    for(itr = mz_intensity_map.begin(); itr != mz_intensity_map.end(); ++itr ) {
+        float bin = (*itr).first;
+        double totalIntensity=(*itr).second;
+        double avgMz =  mz_bin_map[bin] / totalIntensity;
+        avgmzs.push_back((float)avgMz);
+        avgints.push_back((float) totalIntensity / scanCount);
+    }
+
+    avgScan->mz = avgmzs;
+    avgScan->intensity = avgints;
+
+    //cout << "getAverageScan() from:" << from << " to:" << to << " scanCount:" << scanCount << "scans. mzs=" << avgScan->nobs() << endl;
+    return avgScan;
+}
