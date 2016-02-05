@@ -156,7 +156,6 @@ int mzFileIO::loadNISTLibrary(QString fileName) {
              comment = line.mid(8,line.length()).simplified();
              if (comment.contains(formulaMatch)){
                  formula=formulaMatch.capturedTexts().at(0);
-                 qDebug() << "Formula=" << formula;
              }
          } else if (line.startsWith("Num Peaks:",Qt::CaseInsensitive) || line.startsWith("NumPeaks:",Qt::CaseInsensitive)) {
              peaks = line.mid(11,line.length()).simplified().toInt();

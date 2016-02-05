@@ -129,8 +129,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     scatterDockWidget =  new ScatterPlot(this);
     projectDockWidget =  new ProjectDockWidget(this);
     rconsoleDockWidget =  new RconsoleWidget(this);
-    spectralHitsDockWidget =  new SpectralHitsDockWidget(this, "Spectral Hits");
-
+    spectralHitsDockWidget =  new SpectralHitsDockWidget(this, "Spectral Hits"); 
+     fragmenationSpectraWidget = new SpectraWidget(this);
+     fragmenationSpectraDockWidget =  createDockWidget("Fragmentation Spectra",fragmenationSpectraWidget);
     ligandWidget->setVisible(false);
     covariantsPanel->setVisible(false);
     isotopeWidget->setVisible(false);
@@ -144,7 +145,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     projectDockWidget->setVisible(false);
     rconsoleDockWidget->setVisible(false);
     spectralHitsDockWidget->setVisible(false);
-    //treemap->setVisible(false);
+ fragmenationSpectraDockWidget->setVisible(false);    //treemap->setVisible(false);
     //peaksPanel->setVisible(false);
     //treeMapDockWidget =  createDockWidget("TreeMap",treemap);
 
