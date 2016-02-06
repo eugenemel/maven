@@ -31,5 +31,5 @@ parallel {
 
 
 
-SOURCES= peakdetector.cpp  options.cpp ../mzroll/classifier.cpp ../mzroll/classifierNeuralNet.cpp parallelMassSlicer.cpp 
-HEADERS= ../mzroll/classifier.h  ../mzroll/classifierNeuralNet.h  options.h  parallelMassSlicer.h
+SOURCES= peakdetector.cpp  options.cpp ../mzroll/classifier.cpp ../mzroll/classifierNeuralNet.cpp parallelMassSlicer.cpp ../mzroll/projectDB.cpp
+HEADERS= ../mzroll/classifier.h  ../mzroll/classifierNeuralNet.h  options.h  parallelMassSlicer.h ../mzroll/projectDB.h

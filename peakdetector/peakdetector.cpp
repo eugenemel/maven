@@ -11,6 +11,7 @@
 #include "mzSample.h"
 #include "mzMassSlicer.h"
 #include "parallelMassSlicer.h"
+#include "../mzroll/projectDB.h"
 #include "options.h"
 //include "omp.h"
 
@@ -22,7 +23,6 @@
 
 
 #include <QtCore>
-#include <QtSql>
 #include <QCoreApplication>
 
 using namespace std;
@@ -60,7 +60,7 @@ bool mustHaveMS2=false;
 bool writeConsensusMS2=false;
 bool pullIsotopesFlag=true;
 bool samplesC13Labeled=true;
-bool saveSqlLiteProject=false;
+bool saveSqlLiteProject=true;
 bool writePDFReport=false;
 bool searchAdductsFlag=true;
 
@@ -118,7 +118,6 @@ void processMassSlices(int limit=0);
 void reduceGroups();
 void writeReport(string setName);
 void writeCSVReport(string filename);
-void writeParametersXML(xml_node& parent);
 void writeQEInclusionList(string filename);
 void writeConsensusMS2Spectra(string filename);
 void classConsensusMS2Spectra(string filename);
@@ -135,15 +134,6 @@ bool isMonoisotope(PeakGroup* grp);
 
 vector<mzSlice*> getSrmSlices();
 string cleanSampleName( string sampleName);
-
-void openProjectDB(QString fileName);
-void writeSearchResultsToDB();
-void writeGroupSqlite(PeakGroup* g);
-void writeSamplesSqlite(vector<mzSample *>& samples);
-
-void writePeakTableXML(QXmlStreamWriter& stream);
-void writeGroupXML(QXmlStreamWriter& stream, PeakGroup* g);
-void writeParametersXML(QXmlStreamWriter& stream);
 
 void matchFragmentation();
 void writeMS2SimilarityMatrix(string filename);
@@ -971,10 +961,14 @@ void writeReport(string setName) {
     mzUtils::createDir(outputdir.c_str());
     string projectDBfilenane=outputdir + setName + ".sqlite";
 
-    if (saveSqlLiteProject)  openProjectDB(projectDBfilenane.c_str());
+    if (saveSqlLiteProject)  {
+        ProjectDB project = ProjectDB(projectDBfilenane.c_str());
+        project.saveSamples(samples);
+        project.saveGroups(allgroups);
+    }
+
     cerr << "writeReport() " << allgroups.size() << " groups ";
     writeCSVReport   (outputdir + setName + ".tsv");
-    writeSearchResultsToDB();
     //writeMS2SimilarityMatrix(outputdir + setName + ".fragMatrix.tsv");
     //writeQEInclusionList(outputdir + setName + ".txt");
     if(writeConsensusMS2) writeConsensusMS2Spectra(outputdir + setName + ".msp");
@@ -1380,278 +1374,6 @@ void writeGroupInfoCSV(PeakGroup* group,  ofstream& groupReport) {
         writeGroupInfoCSV(&group->children[k],groupReport);
         //writePeakInfo(&group->children[k]);
     }
-}
-
-void openProjectDB(QString fileName) {
-    projectDB = QSqlDatabase::addDatabase("QSQLITE", "projectDB");
-    projectDB.setDatabaseName(fileName);
-    projectDB.open();
-    if (!projectDB.isOpen()) { qDebug()  << "Failed to open " + fileName; }
-
-}
-
-void writeSearchResultsToDB() { 
-	if (saveSqlLiteProject == false) return;
-    if (!projectDB.isOpen()) { qDebug()  << "project database is not openned "; }
-
-    QSqlQuery query(projectDB);
-    query.exec("begin transaction");
-        writeSamplesSqlite(samples);
-    query.exec("end transaction");
-
-    query.exec("begin transaction");
-        for(unsigned int i=0; i < allgroups.size(); i++ )  writeGroupSqlite(&allgroups[i]);
-	query.exec("end transaction");
-}
-
-void writeSamplesSqlite(vector<mzSample *> &sampleSet) {
-    QSqlQuery query0(projectDB);
-
-    if(!query0.exec("create table IF NOT EXISTS samples( \
-                    sampleId int primary key, \
-                    name varchar(255), \
-                    filename varchar(255), \
-                    setName varchar(255), \
-                    color_red float, \
-                    color_blue float, \
-                    color_green float, \
-                    color_alpha float, \
-                    transform_a0 float, \
-                    transform_a1 float, \
-                    transform_a2 float, \
-                    transform_a4 float, \
-                    transform_a5 float \
-                    )"))  qDebug() << "Ho... " << query0.lastError();
-
-        QSqlQuery query1(projectDB);
-        query1.prepare("insert into samples values(?,?,?,?,?,?,?,?,?,?,?,?,?)");
-
-        for(mzSample* s : sampleSet) {
-            query1.bindValue( 0, s->getSampleOrder() );
-            query1.bindValue( 1, QString(s->getSampleName().c_str()) );
-            query1.bindValue( 2, QString(s->fileName.c_str()));
-            query1.bindValue( 3, QString(s->getSetName().c_str()));
-            query1.bindValue( 4, s->color[0] );
-            query1.bindValue( 5, s->color[1] );
-            query1.bindValue( 6, s->color[2] );
-            query1.bindValue( 7, s->color[3] );
-            query1.bindValue( 8,  0);
-            query1.bindValue( 9,  0);
-            query1.bindValue( 10,  0);
-            query1.bindValue( 11,  0);
-            query1.bindValue( 12,  0);
-            if(!query1.exec())  qDebug() << query1.lastError();
-        }
-}
-
-void writeGroupSqlite(PeakGroup* g) {
-	if (!g) return;
-
-     QSqlQuery query0(projectDB);
-     if(!query0.exec("create table IF NOT EXISTS peakgroups( \
-                        groupId int primary key, \
-                        tagString varchar(255), \
-                        metaGroupId int, \
-                        expectedRtDiff float, \
-                        groupRank int, \
-                        label varchar(10),\
-                        type int,\
-                        srmId varchar(255),\
-                        compoundId varchar(255),\
-                        compoundName varchar(255),\
-						compoundDB varchar(255)\ 
-                        )"))  qDebug() << query0.lastError();
-
-     //cerr << "inserting .. " << g->groupId << endl;
-	 QSqlQuery query1(projectDB);
-		query1.prepare("insert into peakgroups values(?,?,?,?,?,?,?,?,?,?,?)");
-        query1.bindValue( 0, QString::number(g->groupId)  );
-		query1.bindValue( 1, QString(g->tagString.c_str()) );
-		query1.bindValue( 2, QString::number(g->metaGroupId ));
-		query1.bindValue( 3, QString::number(g->expectedRtDiff,'f',2));
-		query1.bindValue( 4, QString::number(g->groupRank));
-		query1.bindValue( 5, QString(g->label)  );
-		query1.bindValue( 6,QString::number(g->type()));
-		query1.bindValue( 7, QString(g->srmId.c_str()));
-
-		if (g->compound != NULL) {
-			query1.bindValue( 8, QString(g->compound->id.c_str()) );
-			query1.bindValue( 9, QString(g->compound->name.c_str()) );
-			query1.bindValue( 10, QString(g->compound->db.c_str()) );
-		} else{
-			query1.bindValue(8,  "" );
-			query1.bindValue(9, "" );
-			query1.bindValue(10, "" );
-		}
-    	if(!query1.exec())  qDebug() << query1.lastError();
-
-     QSqlQuery query2(projectDB);
-     if(!query2.exec("create table IF NOT EXISTS peaks( \
-                    peakId integer primary key AUTOINCREMENT, \
-                    groupId int,\
-                    sampleId int, \
-                    pos int, \
-					minpos int, \
-					maxpos int, \
-					rt float, \
-					rtmin float, \
-					rtmax float, \
-					mzmin float, \
-					mzmax float, \
-					scan int,	\ 
-					minscan int, \
-					maxscan int,\
-					peakArea float,\
-					peakAreaCorrected float,\
-					peakAreaTop float,\
-					peakAreaFractional float,\
-					peakRank float,\
-					peakIntensity float,\
-					peakBaseLineLevel float,\
-					peakMz float,\
-					medianMz float,\
-					baseMz float,\
-					quality float,\
-					width int,\
-					gaussFitSigma float,\
-					gaussFitR2 float,\
-					noNoiseObs int,\
-					noNoiseFraction float,\
-					symmetry float,\
-					signalBaselineRatio float,\
-					groupOverlap float,\
-					groupOverlapFrac float,\
-					localMaxFlag float,\
-                    fromBlankSample int,\
-                    label int)"))  qDebug() << query2.lastError();
-			
-	 		QSqlQuery query3(projectDB); 
-            query3.prepare("insert into peaks values(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-		
-			for(int j=0; j < g->peaks.size(); j++ ) { 
-					Peak& p = g->peaks[j];
-                    query3.addBindValue(QString::number(g->groupId));
-                    query3.addBindValue(p.getSample()->getSampleOrder());
-                    query3.addBindValue(QString::number(p.pos));
-					query3.addBindValue(QString::number(p.minpos));
-					query3.addBindValue(QString::number(p.maxpos));
-					query3.addBindValue(QString::number(p.rt));
-					query3.addBindValue(QString::number(p.rtmin));
-					query3.addBindValue(QString::number(p.rtmax));
-					query3.addBindValue(QString::number(p.mzmin));
-					query3.addBindValue(QString::number(p.mzmax));
-					query3.addBindValue(QString::number((int) p.scan));
-					query3.addBindValue(QString::number((int) p.minscan));
-					query3.addBindValue(QString::number((int) p.maxscan));
-					query3.addBindValue(QString::number(p.peakArea));
-					query3.addBindValue(QString::number(p.peakAreaCorrected));
-					query3.addBindValue(QString::number(p.peakAreaTop));
-					query3.addBindValue(QString::number(p.peakAreaFractional));
-					query3.addBindValue(QString::number(p.peakRank));
-					query3.addBindValue(QString::number(p.peakIntensity));;
-					query3.addBindValue(QString::number(p.peakBaseLineLevel));
-					query3.addBindValue(QString::number(p.peakMz));
-					query3.addBindValue(QString::number(p.medianMz));
-					query3.addBindValue(QString::number(p.baseMz));
-					query3.addBindValue(QString::number(p.quality));
-					query3.addBindValue(QString::number((int) p.width));
-					query3.addBindValue(QString::number(p.gaussFitSigma));
-					query3.addBindValue(QString::number(p.gaussFitR2));
-					query3.addBindValue(QString::number((int) p.noNoiseObs));
-					query3.addBindValue(QString::number(p.noNoiseFraction));
-					query3.addBindValue(QString::number(p.symmetry));
-					query3.addBindValue(QString::number(p.signalBaselineRatio));
-					query3.addBindValue(QString::number(p.groupOverlap));
-					query3.addBindValue(QString::number(p.groupOverlapFrac));
-					query3.addBindValue(QString::number(p.localMaxFlag));
-					query3.addBindValue(QString::number(p.fromBlankSample));
-					query3.addBindValue(QString::number(p.label));
-    				if(!query3.exec())  qDebug() << query3.lastError();
-		}
-
-        if ( g->childCount() ) {
-           for(int i=0; i < g->children.size(); i++ ) {
-                PeakGroup* child = &(g->children[i]);
-				writeGroupSqlite(child);
-            }	
-        }
-}
-
-void writeGroupXML(QXmlStreamWriter& stream, PeakGroup* g) { 
-    if (!g)return;
-
-    stream.writeStartElement("PeakGroup");
-    stream.writeAttribute("groupId",  QString::number(g->groupId) );
-    stream.writeAttribute("tagString",  QString(g->tagString.c_str()) );
-    stream.writeAttribute("metaGroupId",  QString::number(g->metaGroupId) );
-    stream.writeAttribute("expectedRtDiff",  QString::number(g->expectedRtDiff,'f',4) );
-    stream.writeAttribute("groupRank",  QString::number(g->groupRank,'f',4) );
-    stream.writeAttribute("label",  QString::number(g->label ));
-    stream.writeAttribute("type",  QString::number((int)g->type()));
-    stream.writeAttribute("changeFoldRatio",  QString::number(g->changeFoldRatio,'f',4 ));
-    stream.writeAttribute("changePValue",  QString::number(g->changePValue,'e',6 ));
-    if(g->srmId.length())	stream.writeAttribute("srmId",  QString(g->srmId.c_str()));
-
-    //for sample contrasts  ratio and pvalue
-    if ( g->hasCompoundLink() ) {
-        Compound* c = g->compound;
-		stream.writeAttribute("compoundId",  QString(c->id.c_str()));
-        stream.writeAttribute("compoundDB",  QString(c->db.c_str()) );
-		stream.writeAttribute("compoundName",  QString(c->name.c_str()));
-    }
-
-    for(int j=0; j < g->peaks.size(); j++ ) {
-        Peak& p = g->peaks[j];
-        stream.writeStartElement("Peak");
-        stream.writeAttribute("pos",  QString::number(p.pos));
-        stream.writeAttribute("minpos",  QString::number(p.minpos));
-        stream.writeAttribute("maxpos",  QString::number(p.maxpos));
-        stream.writeAttribute("rt",  QString::number(p.rt,'f',4));
-        stream.writeAttribute("rtmin",  QString::number(p.rtmin,'f',4));
-        stream.writeAttribute("rtmax",  QString::number(p.rtmax,'f',4));
-        stream.writeAttribute("mzmin",  QString::number(p.mzmin,'f',4));
-        stream.writeAttribute("mzmax",  QString::number(p.mzmax,'f',4));
-        stream.writeAttribute("scan",   QString::number(p.scan));
-        stream.writeAttribute("minscan",   QString::number(p.minscan));
-        stream.writeAttribute("maxscan",   QString::number(p.maxscan));
-        stream.writeAttribute("peakArea",  QString::number(p.peakArea,'f',4));
-        stream.writeAttribute("peakAreaCorrected",  QString::number(p.peakAreaCorrected,'f',4));
-        stream.writeAttribute("peakAreaTop",  QString::number(p.peakAreaTop,'f',4));
-        stream.writeAttribute("peakAreaFractional",  QString::number(p.peakAreaFractional,'f',4));
-        stream.writeAttribute("peakRank",  QString::number(p.peakRank,'f',4));
-        stream.writeAttribute("peakIntensity",  QString::number(p.peakIntensity,'f',4));
-
-        stream.writeAttribute("peakBaseLineLevel",  QString::number(p.peakBaseLineLevel,'f',4));
-        stream.writeAttribute("peakMz",  QString::number(p.peakMz,'f',4));
-        stream.writeAttribute("medianMz",  QString::number(p.medianMz,'f',4));
-        stream.writeAttribute("baseMz",  QString::number(p.baseMz,'f',4));
-        stream.writeAttribute("quality",  QString::number(p.quality,'f',4));
-        stream.writeAttribute("width",  QString::number(p.width));
-        stream.writeAttribute("gaussFitSigma",  QString::number(p.gaussFitSigma,'f',4));
-        stream.writeAttribute("gaussFitR2",  QString::number(p.gaussFitR2,'f',4));
-        stream.writeAttribute("groupNum",  QString::number(g->groupId));
-        stream.writeAttribute("noNoiseObs",  QString::number(p.noNoiseObs));
-        stream.writeAttribute("noNoiseFraction",  QString::number(p.noNoiseFraction,'f',4));
-        stream.writeAttribute("symmetry",  QString::number(p.symmetry,'f',4));
-        stream.writeAttribute("signalBaselineRatio",  QString::number(p.signalBaselineRatio, 'f', 4));
-        stream.writeAttribute("groupOverlap",  QString::number(p.groupOverlap,'f',4));
-        stream.writeAttribute("groupOverlapFrac",  QString::number(p.groupOverlapFrac,'f',4));
-        stream.writeAttribute("localMaxFlag",  QString::number(p.localMaxFlag));
-        stream.writeAttribute("fromBlankSample",  QString::number(p.fromBlankSample));
-        stream.writeAttribute("label",  QString::number(p.label));
-        stream.writeAttribute("sample",  QString(p.getSample()->sampleName.c_str()));
-        stream.writeEndElement();
-    }
-
-    if ( g->childCount() ) {
-        stream.writeStartElement("children");
-        for(int i=0; i < g->children.size(); i++ ) {
-            PeakGroup* child = &(g->children[i]);
-            writeGroupXML(stream,child);
-        }
-        stream.writeEndElement();
-    }
-    stream.writeEndElement();
 }
 
 double get_wall_time(){
