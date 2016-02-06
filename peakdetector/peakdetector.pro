@@ -3,23 +3,33 @@ include(../mzroll.pri)
 TEMPLATE = app
 TARGET = peakdetector
 DESTDIR = ../bin
-CONFIG += warn_off xml
+CONFIG -= network gui opengl
+CONFIG += warn_off xml sql qt std++14
 
-QT -= network gui opengl 
-CONFIG -= network gui opengl 
+QT += sql
+QT -= network gui opengl std++14
 
-INCLUDEPATH += ../pugixml/src/ ../sqlite ../libmzorbi ../pugixml/src ../libneural ../zlib/
-LDFLAGS     +=  $$OUTPUT_DIR/lib
+INCLUDEPATH += ../pugixml/src/ ../sqlite ../libmzorbi ../pugixml/src ../libneural ../zlib/ ../libharu/include
 
-LIBS += -L.  -lmzorbi -lpugixml -lneural -lz
+LDFLAGS  +=  $$OUTPUT_DIR/lib 
 
-SOURCES= peakdetector.cpp  \
-		options.cpp \
-		../mzroll/classifier.cpp \  
-		../mzroll/classifierNeuralNet.cpp\
+LIBS += -L. -L../build/lib  -lmzorbi -lpugixml -lneural -lz
 
-HEADERS += ../mzroll/classifier.h \
-		../mzroll/classifierNeuralNet.h \
-		options.h
+contains (DEFINES,CDFPARSER) {
+    LIBS +=  -lcdfread -lnetcdf
+}
 
 
+#BUILD OPENMP PARALLEL VERSION
+#TO ACTIVE BUILD RUN: qmake CONFIG+=parallel 
+parallel {
+	message("Building OpenMP peakdetector_parallel")
+	TARGET = peakdetector_parallel
+	QMAKE_CXXFLAGS += -DOMP_PARALLEL -fopenmp
+	LIBS += -fopenmp
+}
+
+
+
+SOURCES= peakdetector.cpp  options.cpp ../mzroll/classifier.cpp ../mzroll/classifierNeuralNet.cpp parallelMassSlicer.cpp 
+HEADERS= ../mzroll/classifier.h  ../mzroll/classifierNeuralNet.h  options.h  parallelMassSlicer.h
