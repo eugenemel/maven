@@ -29,7 +29,7 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   databaseSelect = new QComboBox(toolBar);
   databaseSelect->setObjectName(QString::fromUtf8("databaseSelect"));
   databaseSelect->setDuplicatesEnabled(false);
-  databaseSelect->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::MinimumExpanding);
+  //databaseSelect->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::MinimumExpanding);
 
 
   galleryButton = new QToolButton(toolBar);
