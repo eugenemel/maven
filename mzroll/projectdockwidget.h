@@ -4,6 +4,7 @@
 #include "stable.h"
 #include "mzSample.h"
 #include "mainwindow.h"
+#include "projectDB.h"
 
 
 class ProjectDockWidget : public QDockWidget
@@ -17,15 +18,16 @@ signals:
 
 public slots:
     void showInfo();
-    QString getProjectDescription();
-    void setProjectDescription(QString text);
     void setInfo(vector<mzSample*>&samples);
     void changeSampleOrder();
     void updateSampleList();
     void loadProject();
     void saveProject();
-    void loadProject(QString filename);
-    void saveProject(QString filename, TableDockWidget* peakTable = 0);
+    void loadProjectSQLITE(QString filename);
+    void saveProjectSQLITE(QString filename, TableDockWidget* peakTable = 0);
+
+    void loadProjectXML(QString filename);
+    void saveProjectXML(QString filename, TableDockWidget* peakTable = 0);
 
 protected slots:
       void keyPressEvent( QKeyEvent *e );
@@ -47,14 +49,14 @@ private slots:
 private:
     QTreeWidgetItem* getParentFolder(QString filename);
     QMap<QString,QTreeWidgetItem*> parentMap;
-    QTextEdit* _editor;
     MainWindow* _mainwindow;
     QTreeWidget* _treeWidget;
-    QSplitter*  _splitter;
 
     QString lastOpennedProject;
     QString lastSavedProject;
     QColor  lastUsedSampleColor;
+
+    ProjectDB* currentProject;
 
 
 };

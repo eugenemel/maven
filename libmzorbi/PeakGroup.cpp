@@ -412,11 +412,11 @@ void PeakGroup::groupStatistics() {
         if(minRt == 0 || peaks[i].rtmin < minRt) minRt = peaks[i].rtmin;
         if(maxRt == 0 || peaks[i].rtmax > maxRt) maxRt = peaks[i].rtmax;
         if(minMz == 0 || peaks[i].mzmin < minMz) minMz = peaks[i].mzmin;
-        if(maxMz == 0 || peaks[i].mzmax> maxMz) maxMz = peaks[i].mzmax;
+        if(maxMz == 0 || peaks[i].mzmax > maxMz) maxMz = peaks[i].mzmax;
         if(peaks[i].peakAreaFractional > maxPeakFracionalArea) maxPeakFracionalArea=peaks[i].peakAreaFractional;
         if(peaks[i].quality > maxQuality) maxQuality = peaks[i].quality;
         if(peaks[i].quality > 0.5) goodPeakCount++;
-        if ( peaks[i].signalBaselineRatio > maxSignalBaselineRatio) maxSignalBaselineRatio =  peaks[i].signalBaselineRatio;
+        if(peaks[i].signalBaselineRatio > maxSignalBaselineRatio) maxSignalBaselineRatio =  peaks[i].signalBaselineRatio;
 
 
         if(peaks[i].fromBlankSample) {
@@ -430,10 +430,14 @@ void PeakGroup::groupStatistics() {
     }
 
     if (sampleCount>0) sampleMean = sampleMean/sampleCount;
+
     if ( nonZeroCount ) {
         meanRt = rtSum/nonZeroCount;
         meanMz = mzSum/nonZeroCount;
     }
+
+    //if number of samples == 1, assume minimum variation around measurment
+    if (sampleCount <= 1 or minMz == maxMz) { minMz=meanMz-0.001; maxMz=meanMz+0.001; }
 
     groupOverlapMatrix();
 }

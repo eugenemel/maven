@@ -32,7 +32,6 @@ INSTALLS += sources target
 
 FORMS = forms/settingsform.ui  \
 		forms/masscalcwidget.ui \
-#		forms/ligandwidget.ui \
 		forms/isotopeswidget.ui \
 		forms/peakdetectiondialog.ui \
         forms/comparesamplesdialog.ui \
@@ -82,8 +81,9 @@ HEADERS +=  stable.h \
                     spectramatching.h \
                     mzfileio.h \
                     spectralhit.h \
-                   spectralhitstable.h\
-                    clusterdialog.h
+                    spectralhitstable.h\
+                    clusterdialog.h \
+                    projectDB.h
 
 
 SOURCES += mainwindow.cpp  \
@@ -125,7 +125,8 @@ csvreports.cpp \
  projectdockwidget.cpp \
  spectramatching.cpp \
  mzfileio.cpp \
- spectralhitstable.cpp
+ spectralhitstable.cpp \
+projectDB.cpp
 
 
 sources.files =  $$HEADERS \

@@ -49,7 +49,6 @@ public:
     void setDatabaseNames();
     QString getDatabaseName();
     void clear() { treeWidget->clear(); }
-    void showMatches(QString needle);
     void showNext();
     void showLast();
     void setDatabaseAltered(QString dbame,bool altered);
@@ -59,6 +58,7 @@ public slots:
     void setDatabase(QString dbname);
     void setFilterString(QString s);
     void showGallery();
+    void showMatches(QString needle);
     void saveCompoundList();
     void updateTable() { showTable(); }
     void updateCurrentItemData();

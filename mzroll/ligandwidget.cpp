@@ -45,15 +45,23 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   connect(this, SIGNAL(compoundFocused(Compound*)), mw, SLOT(setCompoundFocus(Compound*)));
   connect(this, SIGNAL(urlChanged(QString)), mw, SLOT(setUrl(QString)));
 
+
+
+
   saveButton = new QToolButton(toolBar);
   saveButton->setIcon(QIcon(rsrcPath + "/filesave.png"));
   saveButton->setToolTip("Save Compound List");
   connect(saveButton,SIGNAL(clicked()), SLOT(saveCompoundList()));
 
+  QLineEdit*  filterEditor = new QLineEdit(toolBar);
+  filterEditor->setMinimumWidth(10);
+  filterEditor->setPlaceholderText("Compound Name Filter");
+  connect(filterEditor, SIGNAL(textEdited(QString)), this, SLOT(showMatches(QString)));
 
   saveButton->setEnabled(false);
 
   //toolBar->addWidget(new QLabel("Compounds: "));
+  toolBar->addWidget(filterEditor);
   toolBar->addWidget(databaseSelect);
   toolBar->addWidget(loadButton);
   toolBar->addWidget(saveButton);
@@ -401,15 +409,6 @@ void LigandWidget::showLigand() {
             if (c)  _mw->setCompoundFocus(c);
 
     }
-            //} else {
-                //if ( itemType == PathwayType ) {
-                //	_mw->pathwayDockWidget->setVisible(true);
-                //	_mw->getPathwayWidget()->setPathway(text);
-                //	//qDebug() << "SETPATHWAY=" << text;
-                //}
-            //}
-
-
 }
 
 void LigandWidget::fetchRemoteCompounds()

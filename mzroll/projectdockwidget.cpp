@@ -1,4 +1,5 @@
 #include "projectdockwidget.h"
+#include "projectDB.h"
 
 ProjectDockWidget::ProjectDockWidget(QMainWindow *parent):
     QDockWidget("Samples", parent,Qt::Widget)
@@ -18,12 +19,6 @@ ProjectDockWidget::ProjectDockWidget(QMainWindow *parent):
 
    // _splitter = new QSplitter(Qt::Vertical,this);
 
-    _editor = new QTextEdit(this);
-    _editor->setFont(font);
-    _editor->setToolTip("Project Description.");
-    _editor->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::MinimumExpanding);
-    _editor->hide();
-
     _treeWidget=new QTreeWidget(this);
     _treeWidget->setColumnCount(4);
     _treeWidget->setObjectName("Samples");
@@ -31,13 +26,6 @@ ProjectDockWidget::ProjectDockWidget(QMainWindow *parent):
     connect(_treeWidget,SIGNAL(itemSelectionChanged()), SLOT(showInfo()));
    // _treeWidget->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::MaximumExpanding);
 
-    //_splitter->addWidget(_treeWidget);
-    //_splitter->addWidget(_editor);
-    //_splitter->setChildrenCollapsible(true);
-    //_splitter->setCollapsible(0,false);
-    // _splitter->setCollapsible(1,true);
-    // QList<int> sizes; sizes << 100 << 0;
-    //_splitter->setSizes(sizes);
     QToolBar *toolBar = new QToolBar(this);
     toolBar->setFloatable(false);
     toolBar->setMovable(false);
@@ -59,10 +47,9 @@ ProjectDockWidget::ProjectDockWidget(QMainWindow *parent):
 
     QLineEdit*  filterEditor = new QLineEdit(toolBar);
     filterEditor->setMinimumWidth(10);
-    //filterEditor->setPlaceholderText("Sample name filter"); -- support in qt4.7+  
+    filterEditor->setPlaceholderText("Sample name filter");
     connect(filterEditor, SIGNAL(textEdited(QString)), this, SLOT(filterTreeItems(QString)));
-    //toolBar->addWidget(new QLabel("Compounds: "));
-    //toolBar->addWidget(databaseSelect);
+
     toolBar->addWidget(filterEditor);
     toolBar->addWidget(colorButton);
     toolBar->addWidget(loadButton);
@@ -70,15 +57,6 @@ ProjectDockWidget::ProjectDockWidget(QMainWindow *parent):
 
     setTitleBarWidget(toolBar);
     setWidget(_treeWidget);
-}
-
-QString ProjectDockWidget::getProjectDescription() {
-    return _editor->toPlainText();
-}
-
-
-void ProjectDockWidget::setProjectDescription(QString text) {
-    return _editor->setPlainText(text);
 }
 
 void ProjectDockWidget::changeSampleColor(QTreeWidgetItem* item, int col) {
@@ -102,8 +80,10 @@ void ProjectDockWidget::changeSampleColor(QTreeWidgetItem* item, int col) {
 
       _treeWidget->update();
       _mainwindow->getEicWidget()->replot();
+      currentProject = 0;
 
 }
+
 
 void ProjectDockWidget::changeSampleSet(QTreeWidgetItem* item, int col) {
 
@@ -124,6 +104,7 @@ void ProjectDockWidget::changeSampleSet(QTreeWidgetItem* item, int col) {
     }
 }
 
+
 void ProjectDockWidget::changeNormalizationConstant(QTreeWidgetItem* item, int col) {
     if (item && item->type() == SampleType && col == 2 ) {
         QVariant v = item->data(0,Qt::UserRole);
@@ -137,6 +118,7 @@ void ProjectDockWidget::changeNormalizationConstant(QTreeWidgetItem* item, int c
     }
 }
 
+
 void ProjectDockWidget::updateSampleList() {
 
     _mainwindow->setupSampleColors();
@@ -149,6 +131,7 @@ void ProjectDockWidget::updateSampleList() {
     }
 
 }
+
 
 void ProjectDockWidget::selectSample(QTreeWidgetItem* item, int col) {
     if (item && item->type() == SampleType ) {
@@ -167,6 +150,7 @@ void ProjectDockWidget::showInfo() {
     QTreeWidgetItem* item = _treeWidget->currentItem();
     if(item != NULL and item->type() == SampleType) showSample(item,0);
 }
+
 
 void ProjectDockWidget::changeSampleOrder() {
 
@@ -191,6 +175,7 @@ void ProjectDockWidget::changeSampleOrder() {
         _mainwindow->getEicWidget()->replot();
     }
 }
+
 
 void ProjectDockWidget::filterTreeItems(QString filterString) {
     QRegExp regexp(filterString,Qt::CaseInsensitive,QRegExp::RegExp);
@@ -409,14 +394,14 @@ void ProjectDockWidget::saveProject() {
     QString fileName = lastOpennedProject;
 
     if ( !fileName.isEmpty() && lastSavedProject == fileName ) {
-	    saveProject(fileName);
+        saveProjectSQLITE(fileName);
     } else {
 	    QString fileName = QFileDialog::getSaveFileName( this,
-			    "Save Project (.mzroll)", dir, "mzRoll Project(*.mzroll)");
+                "Save Project (.mzrollDB)", dir, "mzRoll Project(*.mzrollDB)");
 
-	    if(!fileName.endsWith(".mzroll",Qt::CaseInsensitive)) fileName = fileName + ".mzroll";
+        if(!fileName.endsWith(".mzrollDB",Qt::CaseInsensitive)) fileName = fileName + ".mzrollDB";
 
-	    saveProject(fileName);
+        saveProjectSQLITE(fileName);
     }
 }
 
@@ -426,12 +411,131 @@ void ProjectDockWidget::loadProject() {
     QString dir = ".";
     if ( settings->contains("lastDir") ) dir = settings->value("lastDir").value<QString>();
 
-    QString fileName = QFileDialog::getOpenFileName( this, "Select Project To Open", dir, "All Files(*.mzroll *.mzRoll)");
+    QString fileName = QFileDialog::getOpenFileName( this, "Select Project To Open", dir, "All Files(*.mzrollDB)");
     if (fileName.isEmpty()) return;
-    loadProject(fileName);
+
 }
 
-void ProjectDockWidget::loadProject(QString fileName) {
+void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
+
+    QSettings* settings = _mainwindow->getSettings();
+
+    QFileInfo fileinfo(fileName);
+    QString projectPath = fileinfo.path();
+    QString projectName = fileinfo.fileName();
+
+    ProjectDB* selectedProject = new ProjectDB(fileName);
+    if (!selectedProject->open()) return;
+
+    if (currentProject == 0) {
+        currentProject = selectedProject;
+    } else {
+        //currentProject->close();
+        currentProject = selectedProject;
+    }
+
+    QStringList pathlist;
+    pathlist << projectPath
+             << "."
+             << ".."
+             << settings->value("lastDir").value<QString>();
+
+    QSqlQuery query(currentProject->projectDB);
+    query.exec("select * from samples");
+
+    int currentSampleCount=0;
+    while (query.next()) {
+             QString fname   = query.value("filename").toString();
+             QString sname   = query.value("name").toString();
+             QString setname   = query.value("setName").toString();
+             QString sampleOrder   = query.value("sampleOrder").toString();
+             QString isSelected   = query.value("isSelected").toString();
+             QString color_red   = query.value("color_red").toString();
+             QString color_blue  = query.value("color_blue").toString();
+             QString color_green = query.value("color_green").toString();
+             QString color_alpha  = query.value("color_alpha").toString();
+
+             _mainwindow->setStatusText(tr("Loading sample: %1").arg(sname));
+             _mainwindow->setProgressBar(tr("Loading Sample Number %1").arg(++currentSampleCount),currentSampleCount,currentSampleCount+1);
+
+             //skip files that have been loaded already
+             bool checkLoaded=false;
+             foreach(mzSample* loadedFile, _mainwindow->getSamples()) {
+                  if (QString(loadedFile->fileName.c_str())== fname) checkLoaded=true;
+             }
+             if(checkLoaded == true) continue;  // skip files that have been loaded already
+
+             //find location of the file
+              QFileInfo sampleFile(fname);
+              if (!sampleFile.exists()) {
+                  foreach(QString path, pathlist) {
+                      fname= path + QDir::separator() + sampleFile.fileName();
+                       qDebug() << "Checking if exists:" << fname;
+                       if (sampleFile.exists())  break;
+                   }
+              }
+
+                if ( !fname.isEmpty() ) {
+                    mzFileIO* fileLoader = new mzFileIO(this);
+                    fileLoader->setMainWindow(_mainwindow);
+                    mzSample* sample = fileLoader->loadSample(fname);
+                    delete(fileLoader);
+
+                    if (sample) {
+                        _mainwindow->addSample(sample);
+                        if (!sname.isEmpty() )  		sample->sampleName = sname.toStdString();
+                        if (!setname.isEmpty() )  		sample->setSetName(setname.toStdString());
+                        if (!sampleOrder.isEmpty())     sample->setSampleOrder(sampleOrder.toInt());
+                        if (!isSelected.isEmpty()) 		sample->isSelected = isSelected.toInt();
+                        sample->color[0]   = color_red.toDouble();
+                        sample->color[1]   = color_green.toDouble();
+                        sample->color[2]   = color_blue.toDouble();
+                        sample->color[3]   = color_alpha.toDouble();
+                    }
+                }
+    }
+
+    // update other widget
+    vector<mzSample*> samples = _mainwindow->getSamples();
+    int sampleCount = _mainwindow->sampleCount();
+    updateSampleList();
+
+    //if(_mainwindow->srmDockWidget->isVisible()) _mainwindow->showSRMList();
+    if(_mainwindow->bookmarkedPeaks)
+        _mainwindow->bookmarkedPeaks->loadPeakTableSQLITE(fileName);
+
+    if(_mainwindow->spectraWidget && sampleCount)
+        _mainwindow->spectraWidget->setScan(samples[0]->getScan(0));
+
+    lastOpennedProject = fileName;
+}
+
+void ProjectDockWidget::saveProjectSQLITE(QString filename, TableDockWidget* peakTable) {
+    if (filename.isEmpty() ) return;
+
+    std::vector<mzSample*> sampleSet = _mainwindow->getSamples();
+    if(sampleSet.size() == 0) return;
+
+    ProjectDB* project = 0;
+    if (currentProject) {
+        project = currentProject;
+    } else {
+        project= new ProjectDB(filename);
+        if(! project->open() ) {
+            qDebug() << "Can't open " + filename;
+        }
+    }
+    project->saveSamples(sampleSet);
+    foreach(PeakGroup* group, peakTable->getGroups()) {
+        project->writeGroupSqlite(group);
+    }
+    project->close();
+
+    //project->saveGroups(peakTable->getGroups());
+}
+
+
+void ProjectDockWidget::loadProjectXML(QString fileName) {
 
     QSettings* settings = _mainwindow->getSettings();
 
@@ -526,19 +630,16 @@ void ProjectDockWidget::loadProject(QString fileName) {
     }
     data.close();
 
-    setProjectDescription(projectDescription);
-
     // update other widget
     vector<mzSample*> samples = _mainwindow->getSamples();
     int sampleCount = _mainwindow->sampleCount();
     updateSampleList();
     if(_mainwindow->srmDockWidget->isVisible()) _mainwindow->showSRMList();
-    if(_mainwindow->bookmarkedPeaks) _mainwindow->bookmarkedPeaks->loadPeakTable(fileName);
+    if(_mainwindow->bookmarkedPeaks) _mainwindow->bookmarkedPeaks->loadPeakTableSQLITE(fileName);
     if(_mainwindow->spectraWidget && sampleCount) _mainwindow->spectraWidget->setScan(samples[0]->getScan(0));
     lastOpennedProject = fileName;
 }
-
-void ProjectDockWidget::saveProject(QString filename, TableDockWidget* peakTable) {
+void ProjectDockWidget::saveProjectXML(QString filename, TableDockWidget* peakTable) {
 
 
     if (filename.isEmpty() ) return;
@@ -576,10 +677,6 @@ void ProjectDockWidget::saveProject(QString filename, TableDockWidget* peakTable
         stream.writeEndElement();
 
     }
-    stream.writeEndElement();
-
-    stream.writeStartElement("projectDescription");
-    stream.writeCharacters(getProjectDescription());
     stream.writeEndElement();
 
     if( peakTable ){

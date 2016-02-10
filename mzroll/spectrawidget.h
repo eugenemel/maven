@@ -105,7 +105,6 @@ public:
                     void mouseMoveEvent(QMouseEvent * mouseEvent);
                     void mouseDoubleClickEvent ( QMouseEvent * event );
                     void wheelEvent(QWheelEvent *event);
-                    void timerEvent(QTimerEvent* event);
                     void contextMenuEvent(QContextMenuEvent * event);
 
 

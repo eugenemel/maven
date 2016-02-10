@@ -95,7 +95,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     QToolButton *btnLoad = new QToolButton(toolBar);
     btnLoad->setIcon(QIcon(rsrcPath + "/fileopen.png"));
     btnLoad->setToolTip("Load Peaks");
-    connect(btnLoad, SIGNAL(clicked()), SLOT(loadPeakTable()));
+    connect(btnLoad, SIGNAL(clicked()), SLOT(loadPeakTableSQLITE()));
 
     QToolButton *btnGood = new QToolButton(toolBar);
     btnGood->setIcon(QIcon(rsrcPath + "/markgood.png"));
@@ -1175,11 +1175,11 @@ void TableDockWidget::savePeakTable() {
     if ( settings->contains("lastDir") ) dir = settings->value("lastDir").value<QString>();
 
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save to Project File"),dir,
-            "Maven Project File(*.mzroll)");
+            "Maven Project File(*.mzrollDB)");
     if (fileName.isEmpty()) return;
     if(!fileName.endsWith(".mzroll",Qt::CaseInsensitive)) fileName = fileName + ".mzroll";
 
-    _mainwindow->getProjectWidget()->saveProject(fileName,this);
+    _mainwindow->getProjectWidget()->saveProjectSQLITE(fileName,this);
 
     //savePeakTable(fileName);
 }
@@ -1206,8 +1206,8 @@ void TableDockWidget::loadPeakTable() {
     if ( settings->contains("lastDir") ) dir = settings->value("lastDir").value<QString>();
     QString selFilter;
     QStringList filters;
-    filters << "Maven Project File(*.mzroll)"
-            << "mzPeaks XML(*.mzPeaks *.mzpeaks)"
+    filters << "Maven Project File(*.mzrollDB)"
+            << "Maven XML Project File(*.mzroll)"
             << "XCMS peakTable Tab Delimited(*.tab *.csv *.txt *.tsv)";
 
     QString fileName = QFileDialog::getOpenFileName(this,
@@ -1216,10 +1216,13 @@ void TableDockWidget::loadPeakTable() {
                                                     filters.join(";;"),
                                                     &selFilter);
     if (fileName.isEmpty()) return;
-    if (selFilter == filters[2]) {
+
+    if (selFilter == filters[0]) {
+        loadPeakTableSQLITE(fileName);
+    } else if (selFilter == filters[1]) {
+        loadPeakTableXML(fileName);
+    } else if (selFilter == filters[2]) {
         loadCSVFile(fileName,"\t");
-    } else {
-        loadPeakTable(fileName);
     }
 }
 
@@ -1241,8 +1244,21 @@ void TableDockWidget::runScript() {
 
 }
 
-void TableDockWidget::loadPeakTable(QString fileName) {
+void TableDockWidget::loadPeakTableSQLITE(QString fileName) {
 
+    ProjectDB* selectedProject = new ProjectDB(fileName);
+    if (!selectedProject->open()) return;
+
+    selectedProject->setSamples(_mainwindow->getSamples());
+    selectedProject->loadPeakGroups("peakgroups");
+
+    foreach(PeakGroup g, selectedProject->allgroups) allgroups.append(g);
+    for(int i=0; i < allgroups.size(); i++ ) allgroups[i].groupStatistics();
+    selectedProject->close();
+    showAllGroups();
+}
+
+void TableDockWidget::loadPeakTableXML(QString fileName) {
 
     QFile data(fileName);
     if ( !data.open(QFile::ReadOnly) ) {

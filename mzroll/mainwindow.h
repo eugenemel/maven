@@ -74,9 +74,6 @@ public:
     vector <mzSample*> samples;		//list of loadded samples
     static mzSample* loadSample(QString filename);
 
-
-
-    QSqlDatabase localDB;					//local database
     QDoubleSpinBox 	  *ppmWindowBox;
     QLineEdit         *searchText;
     QComboBox		  *quantType;
@@ -135,7 +132,6 @@ public:
 
     PeakGroup::QType getUserQuantType();
 
-    QSqlDatabase* getLocalDB() { return &localDB; }
     int versionCheck();
     bool isSampleFileType(QString filename);
     bool isProjectFileType(QString filename);

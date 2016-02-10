@@ -11,20 +11,49 @@ class ProjectDB {
 
 	public: 
             QSqlDatabase projectDB;
+            QString projectFilename;
+
+            vector<PeakGroup> allgroups;
+            vector<mzSample*> samples;
+
             void saveSamples(vector<mzSample *> &sampleSet);
             void saveGroups(vector<PeakGroup>   &allgroups);
             void writeSearchResultsToDB();
-            void writeGroupSqlite(PeakGroup* g);
+            void writeGroupSqlite(PeakGroup* group);
+            void loadPeakGroups(QString tableName);
+            void loadGroupPeaks(PeakGroup* group);
 
-            ProjectDB( QString dbfilename) { openProjectDB(dbfilename); }
-
-            void openProjectDB(QString fileName) {
-                projectDB = QSqlDatabase::addDatabase("QSQLITE", "projectDB");
-                projectDB.setDatabaseName(fileName);
-                projectDB.open();
-                if (!projectDB.isOpen()) { qDebug()  << "Failed to open " + fileName; }
-
+            ProjectDB(QString dbfilename) {
+                projectFilename = dbfilename;
+                open();
             }
+
+            void setSamples(vector<mzSample*>set) {
+                samples = set;
+            }
+
+            bool open() {
+                projectDB = QSqlDatabase::addDatabase("QSQLITE", "projectDB");
+                projectDB.setDatabaseName(projectFilename);
+                projectDB.open();
+
+               if (!projectDB.isOpen()) {
+                    qDebug()  << "Failed to open project" + projectFilename;
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+
+            bool close() {
+                if (projectFilename.isEmpty()) {
+                    //projectDB.close();
+                    projectFilename = QString();
+                }
+                return true;
+            }
+
+
 };
 
 #endif

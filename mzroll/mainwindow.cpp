@@ -553,12 +553,12 @@ void MainWindow::open(){
     QStringList filelist = QFileDialog::getOpenFileNames(
             this, "Select projects, peaks, samples to open:",
             dir,  
-                  tr("All Known Formats(*.mzroll *.mzPeaks *.mzXML *.mzxml *.mzdata *.mzData *.mzData.xml *.cdf *.nc *.mzML);;")+
+                  tr("All Known Formats(*.mzroll *.mzrollDB *.mzPeaks *.mzXML *.mzxml *.mzdata *.mzData *.mzData.xml *.cdf *.nc *.mzML);;")+
                   tr("mzXML Format(*.mzXML *.mzxml);;")+
                   tr("mzData Format(*.mzdata *.mzData *.mzData.xml);;")+
                   tr("mzML Format(*.mzml *.mzML);;")+
                   tr("NetCDF Format(*.cdf *.nc);;")+
-                  tr("Maven Project File (*.mzroll);;")+
+                  tr("Maven Project File (*.mzroll *.mzrollDB);;")+
                   tr("Maven Peaks File (*.mzPeaks);;")+
                   tr("All Files(*.*)"));
 
@@ -586,8 +586,12 @@ void MainWindow::open(){
         }
     }
 
+
     if (projects.size() > 0 ) {
-        projectDockWidget->loadProject(projects[0]);
+        foreach(QString filename, projects) {
+            if (filename.endsWith("mzroll"))   projectDockWidget->loadProjectXML(filename);
+            if (filename.endsWith("mzrollDB"))  projectDockWidget->loadProjectSQLITE(filename);
+        }
         return;
     }
 
@@ -595,7 +599,7 @@ void MainWindow::open(){
         foreach(QString filename, peaks ) {
             QFileInfo fileInfo(filename);
             TableDockWidget* tableX = addPeaksTable("Group Set " + fileInfo.fileName());
-            tableX->loadPeakTable(filename);
+            tableX->loadPeakTableSQLITE(filename);
         }
     }
 
@@ -1156,9 +1160,15 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
         setUrl(group->compound);
     }
 
+    if(fragmenationSpectraWidget->isVisible()) {
+        fragmenationSpectraWidget->setScan(group->getAverageFragmenationScan(0.01));
+    }
+
+    /*
     if ( scatterDockWidget->isVisible() ) {
         ((ScatterPlot*)scatterDockWidget)->showSimilar(group);
     }
+    */
 
     if (group->peaks.size() > 0) {
         showPeakInfo(&(group->peaks[0]));
@@ -1795,7 +1805,7 @@ void MainWindow::dropEvent(QDropEvent *event)
     }
 
     if (projects.size() > 0 ) {
-        projectDockWidget->loadProject(projects[0]);
+
         return;
     }
 
@@ -1824,8 +1834,7 @@ bool MainWindow::isSampleFileType(QString filename) {
 
 
 bool MainWindow::isProjectFileType(QString filename) {
-    if (filename.endsWith("mzroll",Qt::CaseInsensitive)) {
-       return 1;
-    }
+    if (filename.endsWith("mzrollDB",Qt::CaseInsensitive))  return 1;
+    if (filename.endsWith("mzroll",Qt::CaseInsensitive))  return 1;
     return 0;
 }
