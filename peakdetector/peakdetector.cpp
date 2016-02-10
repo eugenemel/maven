@@ -73,6 +73,7 @@ string fragmentsDbFilename = "FRAGMENTS.csv";
 string adductDbFilename =  "ADDUCTS.csv";
 string clsfModelFilename = "default.model";
 string outputdir = "reports" + string(DIR_SEPARATOR_STR);
+string nameSuffix = "peakdetector";
 
 int  ionizationMode = -1;
 
@@ -342,7 +343,7 @@ void processMassSlices(int limit) {
         if (reduceGroupsFlag) reduceGroups();
 		string setName = "allslices";
         double functionStartTime = getTime();
-		processSlices(goodslices,setName);
+		processSlices(goodslices,nameSuffix);
         printf("Execution time (processSlices) : %f seconds \n",((float)getTime() - (float)functionStartTime) );
 		delete_all(massSlices.slices); 
 		massSlices.slices.clear();
@@ -536,15 +537,14 @@ void processOptions(int argc, char* argv[]) {
                                 "g?grouping_maxRtWindow <float>",
                                 "h?help",
                                 "i?minGroupIntensity <float>",
-                                "j?saveToJson <int>",
-                                "k?peptideFragmenatationMatch<float>",
-                                "l?list  <string>",
+                                "k?productAmuToll <float>",
                                 "m?methodsFolder <string>",
                                 "n?eicMaxGroups <int>",
                                 "o?outputdir <string>",
                                 "p?ppmMerge <float>",
                                 "q?minQuality <float>",
                                 "r?rtStepSize <float>",
+                                "s?nameSuffix <string>",
                                 "v?ver",
                                 "w?minPeakWidth <int>",
                                 "x?minPrecursorCharge <int>",
@@ -569,7 +569,6 @@ void processOptions(int argc, char* argv[]) {
             case 'g' : grouping_maxRtWindow=atof(optarg); break;
             case 'h' : opts.usage(cerr, "files ..."); exit(0); break;
             case 'i' : minGroupIntensity=atof(optarg); break;
-            case 'j' : saveJsonEIC=atoi(optarg); break;
             case 'k' : productAmuToll=atof(optarg); break;
             case 'm' : methodsFolder = optarg; break;
             case 'n' : eicMaxGroups=atoi(optarg); break;
@@ -577,6 +576,7 @@ void processOptions(int argc, char* argv[]) {
             case 'p' : precursorPPM=atof(optarg); break;
             case 'q' : minQuality=atof(optarg); break;
             case 'r' : rtStepSize=atof(optarg); break;
+            case 's' : nameSuffix=string(optarg); break;
             case 'w' : minNoNoiseObs=atoi(optarg); break;
             case 'x' : minPrecursorCharge=atoi(optarg); break;
             case 'y' : eic_smoothingWindow=atoi(optarg); break;
@@ -959,12 +959,15 @@ void writeReport(string setName) {
 
     //create an output folder
     mzUtils::createDir(outputdir.c_str());
-    string projectDBfilenane=outputdir + setName + ".sqlite";
+    string projectDBfilenane=outputdir + setName + ".mzrollDB";
 
     if (saveSqlLiteProject)  {
         ProjectDB project = ProjectDB(projectDBfilenane.c_str());
-        project.saveSamples(samples);
-        project.saveGroups(allgroups);
+
+        if ( project.open() ) {
+            project.saveSamples(samples);
+            project.saveGroups(allgroups);
+        }
     }
 
     cerr << "writeReport() " << allgroups.size() << " groups ";
