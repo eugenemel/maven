@@ -17,5 +17,5 @@ SOURCES=base64.cpp mzMassCalculator.cpp mzSample.cpp  mzUtils.cpp statistics.cpp
        SavGolSmoother.cpp \
        PolyAligner.cpp
 
-HEADERS += base64.h mzFit.h mzMassSlicer.h mzSample.h  mzMassCalculator.h mzPatterns.h mzUtils.h  statistics.h SavGolSmoother.h PolyAligner.h
+HEADERS += base64.h mzFit.h mzMassSlicer.h mzSample.h  mzMassCalculator.h mzPatterns.h mzUtils.h  statistics.h SavGolSmoother.h PolyAligner.h Fragment.h
 message($$LIBS)

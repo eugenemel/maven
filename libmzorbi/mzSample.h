@@ -49,6 +49,7 @@ class mzLink;
 class Reaction;
 class MassCalculator;
 class ChargedSpecies;
+class Fragment;
 
 using namespace pugi;
 using namespace mzUtils;
@@ -618,7 +619,7 @@ class PeakGroup {
 		void computeAvgBlankArea(const vector<EIC*>& eics);
 		void groupOverlapMatrix();
 
-		Peak* getSamplePeak(mzSample* sample);
+        Peak* getSamplePeak(mzSample* sample);
         FragmentationMatchScore fragMatchScore;
 
 		void deletePeaks();
@@ -663,7 +664,8 @@ class Compound {
 			bool hasGroup()    { if(_group.meanMz != 0 ) return true; return false; } 
 			void clearGroup()  { _group.clear(); }
 			void unlinkGroup() { _group.clear(); _groupUnlinked = true; }
-			bool groupUnlinked() { return _groupUnlinked; }
+            bool groupUnlinked() { return _groupUnlinked; }
+            FragmentationMatchScore scoreCompoundHit(Fragment* f, float productAmuToll);
 
             vector<Reaction*>reactions;
             string id;

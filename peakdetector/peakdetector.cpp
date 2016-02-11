@@ -6,7 +6,6 @@
 #include <ctime>
 #include <limits.h>
 #include<sstream>
-#include "Fragment.h"
 
 #include "mzSample.h"
 #include "mzMassSlicer.h"
@@ -1535,33 +1534,6 @@ set<Compound*> findSpeciesByMass(float mz, float ppm) {
         return uniqset;
 }
 
-FragmentationMatchScore scoreCompoundHit(Compound* cpd, Fragment* f) {
-        FragmentationMatchScore s;
-        if (!cpd or cpd->fragment_mzs.size() == 0) return s;
-
-        Fragment t;
-        t.precursorMz = cpd->precursorMz;
-        t.mzs = cpd->fragment_mzs;
-        t.intensity_array = cpd->fragment_intensity;
-
-        int N = t.mzs.size();
-        for(int i=0; i<N;i++) {
-            t.mzs.push_back( t.mzs[i] + PROTON);
-            t.intensity_array.push_back( t.intensity_array[i] );
-            t.mzs.push_back( t.mzs[i] - PROTON );
-            t.intensity_array.push_back( t.intensity_array[i] );
-        }
-
-        t.sortByIntensity();
-        s = t.scoreMatch(f,productAmuToll);
-
-        if(s.numMatches>0)  {
-            vector<int>ranks = Fragment::compareRanks(&t,f,productAmuToll);
-            for(int i=0; i< ranks.size(); i++ ) if(ranks[i]>0) cerr << t.mzs[i] << " "; cerr << endl;
-        }
-        return s;
-}
-
 string possibleClasses(set<Compound*>matches) {
     map<string,int>names;
     for(Compound* cpd : matches) {
@@ -1661,10 +1633,7 @@ void matchFragmentation() {
             vector<Scan*>ms2events =g->getFragmenationEvents();
             string possibleClass = possibleClasses(matches);
 
-            cerr << g->meanMz << " compoundMatches=" << matches.size()
-                              << " msCount=" << ms2events.size()
-                              << " possibleClasses=" << possibleClass << endl;
-
+            cerr << g->meanMz << " compoundMatches=" << matches.size() << " msCount=" << ms2events.size() << " possibleClasses=" << possibleClass << endl;
             g->tagString = possibleClass;
 
             if(ms2events.size() == 0) continue;
@@ -1679,7 +1648,7 @@ void matchFragmentation() {
             FragmentationMatchScore bestScore;
 
             for(Compound* cpd : matches) {
-                FragmentationMatchScore s = scoreCompoundHit(cpd,f);
+                FragmentationMatchScore s = cpd->scoreCompoundHit(f,productAmuToll);
                 s.mergedScore = s.ticMatched;
                 if (s.numMatches == 0 ) continue;
                 cerr << "\t"; cerr << cpd->name << "\t" << cpd->precursorMz << "\t num=" << s.numMatches << "\t tic" << s.ticMatched <<  " s=" << s.mergedScore << endl;
