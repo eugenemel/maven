@@ -81,7 +81,6 @@ HEADERS +=  stable.h \
                     spectramatching.h \
                     mzfileio.h \
                     spectralhit.h \
-                    spectralhitstable.h\
                     clusterdialog.h \
                     projectDB.h
 
@@ -125,7 +124,6 @@ csvreports.cpp \
  projectdockwidget.cpp \
  spectramatching.cpp \
  mzfileio.cpp \
- spectralhitstable.cpp \
 projectDB.cpp
 
 

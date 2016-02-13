@@ -45,9 +45,6 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   connect(this, SIGNAL(compoundFocused(Compound*)), mw, SLOT(setCompoundFocus(Compound*)));
   connect(this, SIGNAL(urlChanged(QString)), mw, SLOT(setUrl(QString)));
 
-
-
-
   saveButton = new QToolButton(toolBar);
   saveButton->setIcon(QIcon(rsrcPath + "/filesave.png"));
   saveButton->setToolTip("Save Compound List");
@@ -72,26 +69,13 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   setTitleBarWidget(toolBar);
   setWindowTitle("Compounds");
 
-
-  //disconnect(&http, SIGNAL(readyRead(const QHttpResponseHeader &)));
-  //connect(&http, SIGNAL(readyRead(const QHttpResponseHeader &)), SLOT(readRemoteData(const QHttpResponseHeader &)));
-
-  //disconnect(_mw->settingsForm->fetchCompounds,SIGNAL(clicked()));
-  //connect(_mw->settingsForm->fetchCompounds,SIGNAL(clicked()),this,SLOT(fetchRemoteCompounds()));
-
-  m_manager = new QNetworkAccessManager(this);
-  //connect(m_manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(readRemoteData(QNetworkReply*)));
-
-  //get list of methods from central database
-  //http://data_server_url?action=fetchcompounds&format=xml
-  //fetchRemoteCompounds();
-
 }
+
 QString LigandWidget::getDatabaseName() {
 	return databaseSelect->currentText();
 }
 
-void LigandWidget::setDatabaseNames() {
+void LigandWidget::reloadCompounds() {
 	databaseSelect->disconnect(SIGNAL(currentIndexChanged(QString)));
 	databaseSelect->clear();
 	QSet<QString>set;
@@ -239,7 +223,7 @@ void LigandWidget::showTable() {
     //	treeWidget->clear();
     treeWidget->clear();
     treeWidget->setColumnCount(4);
-    QStringList header; header << "name" << "m/z" << "rt" << "category";
+    QStringList header; header << "name" << "M" << "rt" << "formula" << "category";
     treeWidget->setHeaderLabels( header );
     treeWidget->setSortingEnabled(false);
 
@@ -252,15 +236,15 @@ void LigandWidget::showTable() {
         NumericTreeWidgetItem *parent  = new NumericTreeWidgetItem(treeWidget,CompoundType);
 
         QString name(compound->name.c_str() );
-       // QString id( compound->id.c_str() );
         parent->setText(0,name.toUpper());  //Feng note: sort names after capitalization
         parent->setText(1,QString::number(compound->mass));
         if(compound->expectedRt > 0) parent->setText(2,QString::number(compound->expectedRt));
+        if (compound->formula.length())parent->setText(3,compound->formula.c_str());
+
         parent->setData(0, Qt::UserRole, QVariant::fromValue(compound));
         parent->setFlags(Qt::ItemIsSelectable|Qt::ItemIsDragEnabled|Qt::ItemIsEnabled);
 
         if (compound->charge) addItem(parent,"Charge", compound->charge);
-        if (compound->formula.length()) addItem(parent,"Formula", compound->formula.c_str());
         if (compound->precursorMz) addItem(parent,"Precursor Mz", compound->precursorMz);
         if (compound->productMz) addItem(parent,"Product Mz", compound->productMz);
         if (compound->collisionEnergy) addItem(parent,"Collision Energy", compound->collisionEnergy);
@@ -268,12 +252,11 @@ void LigandWidget::showTable() {
 
         if(compound->category.size() > 0) {
             QStringList catList;
-            for(unsigned int i=0; i<compound->category.size();i++) {
-                catList << compound->category[i].c_str();
-            }
-            parent->setText(3,catList.join(";"));
+            for(string c : compound->category) catList << c.c_str();
+            parent->setText(4,catList.join(";"));
         }
 
+        /*
         if (compound->fragment_mzs.size()) {
             QStringList mzList;
             for(unsigned int i=0; i<compound->fragment_mzs.size();i++) {
@@ -282,14 +265,7 @@ void LigandWidget::showTable() {
             QTreeWidgetItem* child = addItem(parent,"Fragments",compound->fragment_mzs[0]);
             child->setText(1,mzList.join(";"));
         }
-
-
-        /*for(int i=0; i <compound->category.size(); i++ ) {
-                QTreeWidgetItem *item = new QTreeWidgetItem(parent, PathwayType);
-                item->setText(0,QString(compound->category[i].c_str()));
-                //parent->setData(0,Qt::UserRole,QVariant::fromValue(QString(pathway_id.c_str())));
-
-            }*/
+        */
 
     }
     treeWidget->setSortingEnabled(true);
@@ -410,128 +386,4 @@ void LigandWidget::showLigand() {
 
     }
 }
-
-void LigandWidget::fetchRemoteCompounds()
-{
-    qDebug() << "fetchRemoteCompounds()";
-    xml.clear();
-    QSettings *settings = _mw->getSettings();
-
-    if ( settings->contains("data_server_url")) {
-        QUrl url(settings->value("data_server_url").toString());
-        QUrlQuery query;
-        query.addQueryItem("action", "fetchcompounds");
-        query.addQueryItem("format", "xml");
-        url.setQuery(query);
-
-        QNetworkRequest request;
-        request.setUrl(url);
-
-        QNetworkReply *reply = m_manager->get(request);
-        qDebug() << url.toEncoded();
-   }
-}
-
-void LigandWidget::readRemoteData(QNetworkReply* reply)
-{
-    //qDebug() << "readRemoteData() << " << resp.statusCode();
-
-    if (reply) { //redirect
-        xml.addData(reply->readAll());
-    } else {
-        reply->abort();
-    }
-
-    parseXMLRemoteCompounds();
-    setDatabaseNames();
-}
-
-QList<Compound*> LigandWidget::parseXMLRemoteCompounds()
-{
-    //qDebug() << "LigandWidget::parseXMLRemoteCompounds()";
-    Compound *remoteCompound=NULL;
-    QString currentTag;
-    QList<Compound*>remoteCompounds;
-
-
-    while (!xml.atEnd()) {
-        xml.readNext();
-        if (xml.isStartElement()) {
-            if (xml.name() == "item"){
-                remoteCompound = new Compound("Unknown","Unknown","",0);
-            }
-            currentTag = xml.name().toString().toLower();
-        } else if (xml.isEndElement()) {
-            if (xml.name() == "item") {
-                if (remoteCompound !=NULL) {
-                    if (!remoteCompound->formula.empty())
-                        remoteCompound->mass=remoteCompound->ajustedMass(0);
-
-                    if (!remoteCompound->id.empty()) {
-                         DB.addCompound(remoteCompound);
-                         qDebug() << "new remote compound..: " << remoteCompound->id.c_str();
-                    }
-                }
-         }
-
-        }  else if (xml.isCharacters() && !xml.isWhitespace()) {
-
-            if (remoteCompound == NULL ){
-                qDebug() << "Parse Error: " << currentTag; continue;
-                //return remoteCompounds;
-            } else if (currentTag == "metabolite_id")
-                remoteCompound->id = xml.text().toString().toStdString();
-
-            else if (currentTag == "metabolite_name")
-                remoteCompound->name = xml.text().toString().toStdString();
-
-            else if (currentTag == "formula")
-                remoteCompound->formula = xml.text().toString().toStdString();
-
-            else if (currentTag == "kegg_id")
-                remoteCompound->kegg_id = xml.text().toString().toStdString();
-
-            else if (currentTag == "pubmed_id")
-                remoteCompound->pubchem_id = xml.text().toString().toStdString();
-
-            else if (currentTag == "hmdb_id")
-                remoteCompound->hmdb_id = xml.text().toString().toStdString();
-
-            else if (currentTag == "precursormz") {
-                remoteCompound->precursorMz = xml.text().toString().toDouble();
-                remoteCompound->mass = remoteCompound->precursorMz;
-            }
-            else if (currentTag == "productmz")
-                remoteCompound->productMz = xml.text().toString().toDouble();
-
-            else if (currentTag == "ce")
-                remoteCompound->collisionEnergy = xml.text().toString().toDouble();
-
-            else if (currentTag == "retentiontime")
-                remoteCompound->expectedRt = xml.text().toString().toDouble();
-
-            else if (currentTag == "method_id") {
-                remoteCompound->db = xml.text().toString().toStdString();
-                remoteCompound->method_id = xml.text().toString().toStdString();
-
-            } else if (currentTag == "transition_id")
-                remoteCompound->transition_id = xml.text().toString().toInt();
-
-        }
-    }
-
-    if (xml.error()) {
-        if ( xml.error() != QXmlStreamReader::PrematureEndOfDocumentError) {
-            qWarning() << "XML ERROR: BAD END TO DOCUMENT" << xml.lineNumber() << ": " << xml.errorString();
-        } else {
-            qWarning() << "XML ERROR:" << xml.lineNumber() << ": " << xml.errorString();
-        }
-    }
-
-
-    return remoteCompounds;
-}
-
-
-
 

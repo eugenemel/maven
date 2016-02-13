@@ -5,6 +5,7 @@
 #include "ui_spectramatching.h"
 #include "mainwindow.h"
 #include "numeric_treewidgetitem.h"
+#include "Fragment.h"
 
 class MainWindow;
 

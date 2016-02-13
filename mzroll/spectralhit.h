@@ -20,7 +20,7 @@ class SpectralHit {
 		int massdiff;
  		int scannum;
 		QString compoundId;
-		QString fragmentId;
+        QString fragmentId;
 
 
 	SpectralHit() { 

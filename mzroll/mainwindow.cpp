@@ -12,8 +12,6 @@ QDataStream &operator<<( QDataStream &out, const mzSlice* ) { return out; }
 QDataStream &operator>>( QDataStream &in, mzSlice* ) { return in; }
 QDataStream &operator<<( QDataStream &out, const mzSlice& ) { return out; }
 QDataStream &operator>>( QDataStream &in, mzSlice& ) { return in; }
-QDataStream &operator<<( QDataStream &out, const SpectralHit* ) { return out; }
-QDataStream &operator>>( QDataStream &in, SpectralHit* ) { return in; }
 
 using namespace mzUtils;
 
@@ -36,9 +34,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
  qRegisterMetaType<mzSlice>("mzSlice");
  qRegisterMetaTypeStreamOperators<mzSlice>("mzSlice");
-
- qRegisterMetaType<SpectralHit*>("SpectralHit*");
- qRegisterMetaTypeStreamOperators<SpectralHit*>("SpectralHit*");
 
  qRegisterMetaType<UserNote*>("UserNote*");
  //qRegisterMetaTypeStreamOperators<UserNote*>("UserNote*");
@@ -71,22 +66,28 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
     setWindowTitle(programName + " " + QString::number(MAVEN_VERSION));
 
+    //CONNECT TO DATABASE
+    QString storageLocation =   QStandardPaths::displayName(QStandardPaths::AppDataLocation);
+
     //locations of common files and directories
     QString methodsFolder =      settings->value("methodsFolder").value<QString>();
     if (!QFile::exists(methodsFolder)) methodsFolder =  dataDir +  "/" + "methods";
+    DB.connect( methodsFolder + "/ligand.db");
+    //DB.loadMethodsFolder(methodsFolder);
+    DB.loadCompoundsSQL();
 
-    QString commonFragments =   dataDir + "/" + "FRAGMENTS.csv";
-    if(QFile::exists(commonFragments)) DB.loadFragments(commonFragments.toStdString());
+    //QString commonFragments =   methodsFolder + "/" + "FRAGMENTS.csv";
+    //if(QFile::exists(commonFragments)) DB.fragmentsDB = DB.loadAdducts(commonFragments.toStdString());
 
-    QString commonAdducts =     dataDir + "/" + "ADDUCTS.csv";
-    if(QFile::exists(commonAdducts))   DB.loadFragments(commonAdducts.toStdString());
+    QString commonAdducts =     methodsFolder + "/" + "ADDUCTS.csv";
+    if(QFile::exists(commonAdducts))   DB.adductsDB = DB.loadAdducts(commonAdducts.toStdString());
 
     clsf = new ClassifierNeuralNet();    //clsf = new ClassifierNaiveBayes();
     QString clsfModelFilename = dataDir +  "/"  +       settings->value("clsfModelFilename").value<QString>();
     if(QFile::exists(clsfModelFilename)) clsf->loadModel(clsfModelFilename.toStdString());
 
-    //QString storageLocation =   QDesktopServices::storageLocation(QDesktopServices::DataLocation);
-
+    qDebug() << "Data Folder=" << dataDir;
+    qDebug() << "Method Folder=" << methodsFolder;
 
     //progress Bar on the bottom of the page
     statusText  = new QLabel(this);
@@ -129,7 +130,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     scatterDockWidget =  new ScatterPlot(this);
     projectDockWidget =  new ProjectDockWidget(this);
     rconsoleDockWidget =  new RconsoleWidget(this);
-    spectralHitsDockWidget =  new SpectralHitsDockWidget(this, "Spectral Hits"); 
      fragmenationSpectraWidget = new SpectraWidget(this);
      fragmenationSpectraDockWidget =  createDockWidget("Fragmentation Spectra",fragmenationSpectraWidget);
     ligandWidget->setVisible(false);
@@ -144,7 +144,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     galleryDockWidget->setVisible(false);
     projectDockWidget->setVisible(false);
     rconsoleDockWidget->setVisible(false);
-    spectralHitsDockWidget->setVisible(false);
  fragmenationSpectraDockWidget->setVisible(false);    //treemap->setVisible(false);
     //peaksPanel->setVisible(false);
     //treeMapDockWidget =  createDockWidget("TreeMap",treemap);
@@ -189,7 +188,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     addDockWidget(Qt::BottomDockWidgetArea,galleryDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,srmDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,rconsoleDockWidget,Qt::Horizontal);
-    addDockWidget(Qt::BottomDockWidgetArea,spectralHitsDockWidget,Qt::Horizontal);
 
     //addDockWidget(Qt::BottomDockWidgetArea,peaksPanel,Qt::Horizontal);
     //addDockWidget(Qt::BottomDockWidgetArea,treeMapDockWidget,Qt::Horizontal);
@@ -242,22 +240,10 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
     createMenus();
     createToolBars();
-    if (ligandWidget) loadMethodsFolder(methodsFolder);
 
-    if (ligandWidget) {
-        if ( settings->contains("lastDatabaseFile") ) {
-            QString lfile = settings->value("lastDatabaseFile").value<QString>();
-            QFile testf(lfile);
-            qDebug() << "Loading last database" << lfile;
-            if (testf.exists()) loadCompoundsFile(lfile);
-        }
-
-        if (settings->contains("lastCompoundDatabase")) {
-            ligandWidget->setDatabase(settings->value("lastCompoundDatabase").toString());
-        } else {
-            ligandWidget->setDatabase("KNOWNS");
-        }
-    }
+    ligandWidget->reloadCompounds();
+    if(settings->contains("lastDatabaseFile"))
+        ligandWidget->setDatabase("lastDatabaseFile");
 
     setAcceptDrops(true);
 
@@ -328,23 +314,6 @@ void MainWindow::setUrl(Compound* c) {
     setUrl(url,link);
 }
 
-void MainWindow::setUrl(Reaction* r) { 
-    if(r==NULL) return;
-    //QString url = wikiUrl+tr("n=Reaction.%1").arg(r->id.c_str());
-    QString biocycURL="http://biocyc.org/ECOLI/NEW-IMAGE?type=NIL&object";
-    QString keggURL= "http://www.genome.jp/dbget-bin/www_bget?";
-    QString url;
-    if ( r->db == "MetaCyc" ) {
-    	url = biocycURL+tr("=%1").arg(r->id.c_str());
-    } else if ( r->db == "KEGG" ) {
-    	url = keggURL+tr("%1").arg(r->id.c_str());
-    } else {
-        url = keggURL+tr("%1").arg(r->id.c_str());
-    }
-    QString link(r->name.c_str());
-    setUrl(url,link);
-}
-
 TableDockWidget* MainWindow::addPeaksTable(QString title) { 
     //TableDockWidget* panel	 = new TableDockWidget(this,"Bookmarked Groups",0);
     QPointer<TableDockWidget> panel	 = new TableDockWidget(this,"Bookmarked Groups",0);
@@ -362,24 +331,6 @@ TableDockWidget* MainWindow::addPeaksTable(QString title) {
         sideBar->addWidget(btnTable);
     }
 
-    return panel;
-}
-
-SpectralHitsDockWidget* MainWindow::addSpectralHitsTable(QString title) { 
-    QPointer<SpectralHitsDockWidget> panel	 = new SpectralHitsDockWidget(this,"Spectral Hits Table");
-    addDockWidget(Qt::BottomDockWidgetArea,panel,Qt::Horizontal);
-    //groupTables.push_back(panel);
-
-    if (sideBar) {
-        QToolButton *btnTable = new QToolButton(sideBar);
-        btnTable->setIcon(QIcon(rsrcPath + "/spreadsheet.png"));
-        btnTable->setChecked( panel->isVisible() );
-        btnTable->setCheckable(true);
-        btnTable->setToolTip(title);
-        connect(btnTable,SIGNAL(clicked(bool)),panel, SLOT(setVisible(bool)));
-        connect(panel,SIGNAL(visibilityChanged(bool)),btnTable,SLOT(setChecked(bool)));
-        sideBar->addWidget(btnTable);
-    }
     return panel;
 }
 
@@ -461,6 +412,9 @@ void MainWindow::setCompoundFocus(Compound*c) {
         eicWidget->setCompound(c);
     }
 
+    if(c->fragment_mzs.size()) {
+        fragmenationSpectraWidget->overlayCompound(c);
+    }
     /*
         if( peaksPanel->isVisible() && c->hasGroup() ) {
             peaksPanel->setInfo(c->getPeakGroup());
@@ -617,26 +571,18 @@ void MainWindow::loadModel(){
 }
 
 void MainWindow::loadCompoundsFile(QString filename){
-
     string dbfilename = filename.toStdString();
     string dbname = mzUtils::cleanFilename(dbfilename);
-    int compoundCount=0;
 
-    if ( filename.endsWith("pepXML",Qt::CaseInsensitive)) {
-        mzFileIO fileLoader(this);
-        compoundCount=fileLoader.loadPepXML(filename);
-    } else if ( filename.endsWith("msp",Qt::CaseInsensitive) || filename.endsWith("sptxt",Qt::CaseInsensitive)) {
-        mzFileIO fileLoader(this);
-        compoundCount=fileLoader.loadNISTLibrary(filename);
-    } else {
-        compoundCount = DB.loadCompoundCSVFile(dbfilename);
-    }
+    int compoundCount = DB.loadCompoundsFile(filename);
+    DB.loadCompoundsSQL();
 
     if (compoundCount > 0 && ligandWidget) {
-        ligandWidget->setDatabaseNames();
+        ligandWidget->reloadCompounds();
         if( ligandWidget->isVisible() )
             ligandWidget->setDatabase(QString(dbname.c_str()));
     }
+
 
     settings->setValue("lastDatabaseFile",filename);
     setStatusText(tr("loadCompounds: done after loading %1 compounds").arg(QString::number(compoundCount)));
@@ -650,20 +596,6 @@ void MainWindow::loadCompoundsFile() {
 
     if ( filelist.size() == 0 || filelist[0].isEmpty() ) return;
     loadCompoundsFile(filelist[0]);
-}
-
-void MainWindow::loadMethodsFolder(QString& methodsFolder) {
-    cerr << "LOADING METHODS FROM:" << methodsFolder.toStdString() << endl;
-    QDir dir(methodsFolder);
-    if (dir.exists()) {
-        dir.setFilter(QDir::Files );
-        QFileInfoList list = dir.entryInfoList();
-            for (int i = 0; i < list.size(); ++i) {
-                QFileInfo fileInfo = list.at(i);
-                //std::cerr << qPrintable(QString("%1 %2").arg(fileInfo.size(), 10).arg(fileInfo.fileName())) << endl;
-                loadCompoundsFile(fileInfo.absoluteFilePath());
-        }
-    }
 }
 
 
@@ -892,11 +824,6 @@ void MainWindow::createMenus() {
     hideWidgets->setShortcut(tr("F11"));
     connect(hideWidgets, SIGNAL(triggered()), SLOT(hideDockWidgets()));
     widgetsMenu->addAction(hideWidgets);
-
-    QAction* ak = widgetsMenu->addAction("Spectral Hits Widget");
-    ak->setCheckable(true);  ak->setChecked(false);
-    connect(ak,SIGNAL(toggled(bool)),spectralHitsDockWidget,SLOT(setVisible(bool)));
-
 
     QAction* aj = widgetsMenu->addAction("Fragmentation");
     aj->setCheckable(true);  aj->setChecked(false);
@@ -1145,12 +1072,12 @@ void MainWindow::showSRMList() {
 void MainWindow::setPeakGroup(PeakGroup* group) {
     if ( group == NULL ) return;
 
+    qDebug() << "MainWindow::setPeakGroup(PeakGroup)" << group;
     searchText->setText(QString::number(group->meanMz,'f',8));
 
     if ( eicWidget && eicWidget->isVisible() ) {
         eicWidget->setPeakGroup(group);
     }
-
 
     if ( isotopeWidget && isotopeWidget->isVisible() && group->compound != NULL ) {
         isotopeWidget->setCompound(group->compound);
@@ -1162,6 +1089,9 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
 
     if(fragmenationSpectraWidget->isVisible()) {
         fragmenationSpectraWidget->setScan(group->getAverageFragmenationScan(0.01));
+        if ( group->compound != NULL and group->compound->fragment_mzs.size()) {
+           fragmenationSpectraWidget->overlayCompound(group->compound);
+        }
     }
 
     /*

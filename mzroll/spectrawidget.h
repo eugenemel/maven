@@ -30,7 +30,7 @@ public:
                     void spectraToClipboard();
                     void spectraToClipboardTop();
                     void overlaySpectralHit(SpectralHit& hit);
-                    void overlaySpectra(QVector<double> mzs, QVector<double> intensities);
+                    void overlayCompound(Compound* c);
                     void resetZoom();
                     void zoomIn();
                     void zoomOut();
@@ -40,7 +40,6 @@ public:
                     void constructAverageScan(float rtmin, float rtmax);
                     void findSimilarScans();
                     Scan* getCurrentScan() { return _currentScan; }
-
         private:
                     MainWindow* mainwindow;
                     Scan* _currentScan;
@@ -73,12 +72,13 @@ public:
                     QGraphicsLineItem* _varrow;
 
                     vector<QGraphicsItem*> _items;  //graphic items on the plot
-
+                    vector<QGraphicsItem*> overlayItems;  //graphic items on the plot
 
                     void initPlot();
                     void addAxes();
                     void findBounds(bool checkX, bool checkY);
                     void drawGraph();
+                    void drawSpectalHitLines(SpectralHit& hit);
 
                     float toX(float x)  { return( (x-_minX)/(_maxX-_minX) * scene()->width()); }
                     float toY(float y)  { return( scene()->height()- ((y-_minY)/(_maxY-_minY) * scene()->height())); };

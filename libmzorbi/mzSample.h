@@ -668,21 +668,14 @@ class Compound {
             FragmentationMatchScore scoreCompoundHit(Fragment* f, float productAmuToll);
 
             vector<Reaction*>reactions;
+            int    cid;
             string id;
-
             string name;
             string formula;
-            string kegg_id;
-            string pubchem_id;
-            string hmdb_id;
-            string alias;
-			string title;
-            string comment;
             string smileString;
 
             string srmId;
             float expectedRt;
-			bool isPeptide;
 
             int charge;
             float mass;
@@ -696,11 +689,9 @@ class Compound {
 
             string db;			//name of database for example KEGG, ECOCYC.. etc..
 
-            int transition_id;
             vector<float>fragment_mzs;
             vector<float>fragment_intensity;
             vector<string> category;
-            vector<string> aliases;
 
             float ajustedMass(int charge);
             void addReaction(Reaction* r) { reactions.push_back(r); }
@@ -712,13 +703,6 @@ class Compound {
 	
 };
 
-class Pathway { 
-		public:
-		Pathway( string id, string name) {  this->id=id; this->name=name; }
-		string id;
-		string name;
-		vector<Reaction*>reactions;
-};
 
 class Isotope {
 public:
@@ -751,23 +735,6 @@ public:
         N15=b.N15; S34=b.S34; C13=b.C13; H2=b.H2;
         return *this;
     }
-
-};
-
-class  Reaction{ 
-		public:
-		Reaction(string db, string id, string name) { this->db  = db; this->id =  id; this->name = name; reversable=false; }
-		void addReactant(Compound* r, int s) {  reactants.push_back(r); stoichiometry[r] = s; }
-		void addProduct(Compound* p, int s)  {  products.push_back(p); stoichiometry[p] = s; }
-		void setReversable(bool r) { reversable = r; }
-
-		string db;
-		string id;
-		string name;
-		deque<Compound*> reactants;
-		deque<Compound*> products;
-		map<Compound*, int> stoichiometry;
-		bool reversable;
 
 };
 

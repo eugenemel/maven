@@ -6,6 +6,10 @@
 #include <QDebug>
 #include <QString>
 #include "mzSample.h"
+#include "database.h"
+
+class Database;
+extern Database DB;
 
 class ProjectDB {
 
@@ -17,11 +21,12 @@ class ProjectDB {
             vector<mzSample*> samples;
 
             void saveSamples(vector<mzSample *> &sampleSet);
-            void saveGroups(vector<PeakGroup>   &allgroups);
+            void saveGroups(vector<PeakGroup>   &allgroups, QString setName);
             void writeSearchResultsToDB();
             void writeGroupSqlite(PeakGroup* group);
             void loadPeakGroups(QString tableName);
             void loadGroupPeaks(PeakGroup* group);
+            void deleteAll();
 
             ProjectDB(QString dbfilename) {
                 projectFilename = dbfilename;

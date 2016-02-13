@@ -33,7 +33,6 @@ class SettingsForm : public QDialog, public Ui_SettingsForm
 
                  inline void selectScriptsFolder() {   selectFolder("scriptsFolder"); }                 
                  inline void selectMethodsFolder() {   selectFolder("methodsFolder"); }
-                 inline void selectPathwaysFolder() {   selectFolder("pathwaysFolder"); }
                  inline void selectRProgram() {         selectFile("Rprogram"); }
 
 

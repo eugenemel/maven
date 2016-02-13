@@ -1,37 +1,44 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
-#include "stable.h"
+#include <QString>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QDir>
+#include <QRegExp>
+#include <QFile>
+#include <QTextStream>
+#include <QDebug>
+
+
 #include "mzSample.h"
 #include "mzUtils.h"
-class Molecule2D {
-		public:
-			Molecule2D(){}
-			QString id;
-			QVector<QPointF> coord;
-			QVector<QString> atoms;
-};
 
 class Database {
 
     public:
         Database(){ _connected = false; };
-        Database(string filename) { connect(filename); loadAll(); }
+
+        Database(QString filename) {
+            connect(filename);
+            reloadAll();
+        }
         ~Database() { closeAll(); }
 
 		QSqlDatabase& getLigandDB() { return ligandDB; }
-        void loadAll();  //loads all tables
+        void reloadAll();  //loads all tables
         void closeAll();
-        bool connect(string filename);
-        bool isConnected(){ return _connected; }
+        bool connect(QString filename);
     
-        void loadKnowns();
-        void loadAdducts(string filename);
-        void loadFragments(string filename);
-        void loadSpecies(string modelName);
-        int  loadCompoundCSVFile(string filename);
-		void loadCategories();
-		void loadPathways();
+        vector<Adduct*> loadAdducts(string filename);
+        void loadMethodsFolder(QString methodsFolder);
+        int  loadCompoundsFile(QString filename);
+        vector<Compound*> loadCompoundCSVFile(string filename);
+        vector<Compound*> loadNISTLibrary(QString fileName);
+        void loadCompoundsSQL();
+        void saveCompoundsSQL(vector<Compound*> &compoundSet);
+        void deleteCompoundsSQL( QString dbName);
 
 		multimap<string,Compound*> keywordSearch(string needle);
 		vector<string>   getCompoundReactions(string compound_id);
@@ -40,15 +47,11 @@ class Database {
         void loadReactions(string modelName);
 
         vector<Compound*> getCopoundsSubset(string database);
-		vector<Pathway*>  getPathways();
         vector<Compound*> getKnowns();
-
-		vector<string> getPathwayReactions(string pathway_id);
 
         map<string,int>	  getDatabaseNames();
         map<string,int>   getChromotographyMethods();
 
-		Molecule2D* getMolecularCoordinates(QString id);
         Compound* findSpeciesById(string id);
 		Compound* findSpeciesByPrecursor(float precursorMz, float productMz,int polarity,double amuQ1, double amuQ3);
         set<Compound*> findSpeciesByMass(float mz, float ppm);
@@ -63,14 +66,7 @@ class Database {
         vector<Adduct*> fragmentsDB;
 
        	deque<Compound*> compoundsDB;
-        deque<Reaction*> reactionsDB;
-        deque<Pathway*>  pathwayDB;
-		deque<Molecule2D*> coordinatesDB;
-
 		map<string,Compound*> compoundIdMap;
-		map<string,Reaction*> reactionIdMap;
-		map<string,Pathway*>  pathwayIdMap;
-		map<string,Molecule2D*> coordinatesMap;
 
       private:
 		QSqlDatabase ligandDB;

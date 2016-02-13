@@ -1,7 +1,16 @@
 #include "projectDB.h"
 
-void ProjectDB::saveGroups(vector<PeakGroup>& allgroups) { 
-    for(unsigned int i=0; i < allgroups.size(); i++ ) writeGroupSqlite(&allgroups[i]);
+void ProjectDB::saveGroups(vector<PeakGroup>& allgroups, QString setName) {
+    for(unsigned int i=0; i < allgroups.size(); i++ ) {
+        writeGroupSqlite(&allgroups[i]);
+    }
+}
+
+void ProjectDB::deleteAll() {
+    QSqlQuery query(projectDB);
+    query.exec("delete from peakgroups");
+    query.exec("delete from samples");
+    query.exec("delete from peaks");
 }
 
 void ProjectDB::saveSamples(vector<mzSample *> &sampleSet) {
@@ -219,13 +228,13 @@ void ProjectDB::loadPeakGroups(QString tableName) {
         string srmId = query.value("srmId").toString().toStdString();
         if (!srmId.empty()) g.setSrmId(srmId);
 
-        /*if (!compoundId.empty()){
+        if (!compoundId.empty()){
             Compound* c = DB.findSpeciesById(compoundId);
             if (c) g.compound = c;
         } else if (!compoundName.empty() && !compoundDB.empty()) {
             vector<Compound*>matches = DB.findSpeciesByName(compoundName,compoundDB);
             if (matches.size()>0) g.compound = matches[0];
-        }*/
+        }
 
         loadGroupPeaks(&g);
         allgroups.push_back(g);

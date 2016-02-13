@@ -16,6 +16,7 @@
 
 #include "../mzroll/classifierNeuralNet.h"
 #include "../libmzorbi/MersenneTwister.h"
+#include "../mzroll/database.h"
 #include "./Fragment.h"
 #include "pugixml.hpp"
 #include <sys/time.h>
@@ -38,6 +39,7 @@ int minorVersion = 1;
 int modVersion =   2;
 
 
+Database DB;
 QSqlDatabase projectDB;
 ClassifierNeuralNet clsf;
 vector <mzSample*> samples;
@@ -108,8 +110,6 @@ float productAmuToll = 0.01;
 
 void processOptions(int argc, char* argv[]);
 void loadSamples(vector<string>&filenames);
-int loadCompoundCSVFile(string filename);
-int loadNISTLibrary(QString fileName);
 void printSettings();
 void alignSamples();
 void processSlices(vector<mzSlice*>&slices,string setName);
@@ -118,7 +118,6 @@ void processMassSlices(int limit=0);
 void reduceGroups();
 void writeReport(string setName);
 void writeCSVReport(string filename);
-void writeQEInclusionList(string filename);
 void writeConsensusMS2Spectra(string filename);
 void classConsensusMS2Spectra(string filename);
 void pullIsotopes(PeakGroup* parentgroup);
@@ -139,7 +138,6 @@ void matchFragmentation();
 void writeMS2SimilarityMatrix(string filename);
 
 void computeAdducts();
-void loadAdducts(string filename);
 
 vector<EIC*> getEICs(float rtmin, float rtmax, PeakGroup& grp);
 
@@ -170,17 +168,17 @@ int main(int argc, char *argv[]) {
 	//load compound list
 	if (!ligandDbFilename.empty()) {
         //processAllSlices=false;
-             if(ligandDbFilename.find("csv") !=std::string::npos )  loadCompoundCSVFile(ligandDbFilename);
-        else if(ligandDbFilename.find("txt") !=std::string::npos )  loadCompoundCSVFile(ligandDbFilename);
-        else if(ligandDbFilename.find("tab") !=std::string::npos )  loadCompoundCSVFile(ligandDbFilename);
-        else if(ligandDbFilename.find("msp") !=std::string::npos )  loadNISTLibrary(ligandDbFilename.c_str());
+             if(ligandDbFilename.find("csv") !=std::string::npos )  compoundsDB =  DB.loadCompoundCSVFile(ligandDbFilename);
+        else if(ligandDbFilename.find("txt") !=std::string::npos )  compoundsDB =  DB.loadCompoundCSVFile(ligandDbFilename);
+        else if(ligandDbFilename.find("tab") !=std::string::npos )  compoundsDB =  DB.loadCompoundCSVFile(ligandDbFilename);
+        else if(ligandDbFilename.find("msp") !=std::string::npos )  compoundsDB =  DB.loadNISTLibrary(ligandDbFilename.c_str());
         cerr << "Loaded " << compoundsDB.size() << " compounds." << endl;
 	}
 
     //process compound list
     if (compoundsDB.size() and searchAdductsFlag) {
         //processCompounds(compoundsDB, "compounds");
-        loadAdducts(methodsFolder + "/" + adductDbFilename);
+        adductsDB = DB.loadAdducts(methodsFolder + "/" + adductDbFilename);
         computeAdducts();
     }
 
@@ -668,42 +666,6 @@ string cleanSampleName( string sampleName) {
 		
 }
 
-void loadAdducts(string filename) {
-    ifstream myfile(filename.c_str());
-    if (! myfile.is_open()) return;
-
-    string line;
-    while ( getline(myfile,line) ) {
-        if (line.empty()) continue;
-        if (line[0] == '#') continue;
-
-        vector<string>fields;
-        mzUtils::split(line,',', fields);
-
-        //ionization
-
-        if(fields.size() < 2 ) continue;
-        string name=fields[0];
-        int nmol=string2float(fields[1]);
-        int charge=string2float(fields[2]);
-        float mass=string2float(fields[3]);
-
-        //if ( SIGN(charge) != SIGN(ionizationMode) ) continue;
-        if ( name.empty() || nmol < 0 ) continue;
-        cerr << "#ADDUCT: " << name << endl;
-        Adduct* a = new Adduct();
-        a->nmol = nmol;
-        a->name = name;
-        a->mass = mass;
-        a->charge = charge;
-        a->isParent = false;
-        if (abs(abs(a->mass)-HMASS)< 0.01) a->isParent=true;
-        adductsDB.push_back(a);
-    }
-    cerr << "loadAdducts() " << filename << " count=" << adductsDB.size() << endl;
-    myfile.close();
-}
-
 void computeAdducts() {
     MassCalculator mcalc;
     for(Compound* c: compoundsDB) {
@@ -723,139 +685,6 @@ void computeAdducts() {
 
     //resort compound DB, this allows for binary search
     sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
-}
-
-
-int loadCompoundCSVFile(string filename){
-
-    ifstream myfile(filename.c_str());
-    if (! myfile.is_open()) {
-        cerr << "Can't open " << filename << endl;
-        exit(-1);
-    }
-
-    string line;
-    string dbname = mzUtils::cleanFilename(filename);
-    int loadCount=0;
-    int lineCount=0;
-    map<string, int>header;
-    vector<string> headers;
-    MassCalculator mcalc;
-
-    //assume that files are tab delimited, unless  ".csv", then comma delimited
-    char sep='\t';
-    if(filename.find(".csv") != -1 || filename.find(".CSV") != -1) sep=',';
-
-    cerr << filename << " sep=" << sep << endl;
-    while ( getline(myfile,line) ) {
-        if (!line.empty() && line[0] == '#') continue;
-        if (lineCount == 0 and line.find("\t") != std::string::npos) { sep ='\t'; }
-
-        //trim spaces on the left
-        line.erase(line.find_last_not_of(" \n\r\t")+1);
-        lineCount++;
-
-        vector<string>fields;
-        mzUtils::split(line, sep, fields);
-
-        for(unsigned int i=0; i < fields.size(); i++ ) {
-            int n = fields[i].length();
-            if (n>2 && fields[i][0] == '"' && fields[i][n-1] == '"') {
-                fields[i]= fields[i].substr(1,n-2);
-            }
-            if (n>2 && fields[i][0] == '\'' && fields[i][n-1] == '\'') {
-                fields[i]= fields[i].substr(1,n-2);
-            }
-        }
-
-        if (lineCount==1) {
-            headers = fields;
-            for(unsigned int i=0; i < fields.size(); i++ ) {
-                fields[i]=makeLowerCase(fields[i]);
-                header[ fields[i] ] = i;
-            }
-            continue;
-        }
-
-        string id, name, formula;
-        float rt=0;
-        float mz=0;
-        float charge=0;
-        float collisionenergy=0;
-        float precursormz=0;
-        float productmz=0;
-        int N=fields.size();
-        vector<string>categorylist;
-
-        if ( header.count("mz") && header["mz"]<N)  mz = string2float(fields[ header["mz"]]);
-        if ( header.count("rt") && header["rt"]<N)  rt = string2float(fields[ header["rt"]]);
-        if ( header.count("expectedrt") && header["expectedrt"]<N) rt = string2float(fields[ header["expectedrt"]]);
-        if ( header.count("charge")&& header["charge"]<N) charge = string2float(fields[ header["charge"]]);
-        if ( header.count("formula")&& header["formala"]<N) formula = fields[ header["formula"] ];
-        if ( header.count("id")&& header["id"]<N) 	 id = fields[ header["id"] ];
-        if ( header.count("name")&& header["name"]<N) 	 name = fields[ header["name"] ];
-        if ( header.count("compound")&& header["compound"]<N) 	 name = fields[ header["compound"] ];
-
-        if ( header.count("precursormz") && header["precursormz"]<N) precursormz=string2float(fields[ header["precursormz"]]);
-        if ( header.count("productmz") && header["productmz"]<N)  productmz = string2float(fields[header["productmz"]]);
-        if ( header.count("collisionenergy") && header["collisionenergy"]<N) collisionenergy=string2float(fields[ header["collisionenergy"]]);
-
-        if ( header.count("Q1") && header["Q1"]<N) precursormz=string2float(fields[ header["Q1"]]);
-        if ( header.count("Q3") && header["Q3"]<N)  productmz = string2float(fields[header["Q3"]]);
-        if ( header.count("CE") && header["CE"]<N) collisionenergy=string2float(fields[ header["CE"]]);
-
-        //cerr << lineCount << " " << endl;
-        //for(int i=0; i<headers.size(); i++) cerr << headers[i] << ", ";
-        //cerr << "   -> category=" << header.count("category") << endl;
-        if ( header.count("category") && header["category"]<N) {
-            string catstring=fields[header["category"]];
-            if (!catstring.empty()) {
-                mzUtils::split(catstring,';', categorylist);
-                if(categorylist.size() == 0) categorylist.push_back(catstring);
-                //cerr << catstring << " ListSize=" << categorylist.size() << endl;
-            }
-         }
-
-        if ( header.count("polarity") && header["polarity"] <N)  {
-            string x = fields[ header["polarity"]];
-            if ( x == "+" ) {
-                charge = 1;
-            } else if ( x == "-" ) {
-                charge = -1;
-            } else  {
-                charge = string2float(x);
-            }
-
-        }
-
-
-
-        //cerr << "Loading: " << id << " " << formula << "mz=" << mz << " rt=" << rt << " charge=" << charge << endl;
-
-        if (mz == 0) mz=precursormz;
-        if (id.empty()&& !name.empty()) id=name;
-        if (id.empty() && name.empty()) id="cmpd:" + integer2string(loadCount);
-
-        if ( mz > 0 || ! formula.empty() ) {
-            Compound* compound = new Compound(id,name,formula,charge);
-            compound->expectedRt = rt;
-            if (mz == 0) mz = mcalc.computeMass(formula,charge);
-            compound->mass = mz;
-            compound->db = dbname;
-            compound->expectedRt=rt;
-            compound->precursorMz=precursormz;
-            compound->productMz=productmz;
-            compound->collisionEnergy=collisionenergy;
-            for(int i=0; i < categorylist.size(); i++) compound->category.push_back(categorylist[i]);
-            compoundsDB.push_back(compound);
-            loadCount++;
-        }
-    }
-
-    sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
-    cerr << "Loading compound list from file:" << dbname << " Found: " << loadCount << " compounds" << endl;
-    myfile.close();
-    return loadCount;
 }
 
 bool addPeakGroup(PeakGroup& grp1) { 
@@ -964,15 +793,15 @@ void writeReport(string setName) {
         ProjectDB project = ProjectDB(projectDBfilenane.c_str());
 
         if ( project.open() ) {
+            project.deleteAll();
             project.saveSamples(samples);
-            project.saveGroups(allgroups);
+            project.saveGroups(allgroups,setName.c_str());
         }
     }
 
     cerr << "writeReport() " << allgroups.size() << " groups ";
     writeCSVReport   (outputdir + setName + ".tsv");
     //writeMS2SimilarityMatrix(outputdir + setName + ".fragMatrix.tsv");
-    //writeQEInclusionList(outputdir + setName + ".txt");
     if(writeConsensusMS2) writeConsensusMS2Spectra(outputdir + setName + ".msp");
     if(writeConsensusMS2) classConsensusMS2Spectra(outputdir + setName + "CLASS.msp");
 }
@@ -1009,21 +838,6 @@ void writeCSVReport( string filename) {
     }
 
     groupReport.close();
-}
-
-void writeSampleListXML(xml_node& parent ) {
-     xml_node samplesset = parent.append_child();
-     samplesset.set_name("samples");
-
-     for(int i=0; i < samples.size(); i++ ) {
-  	xml_node _sample = samplesset.append_child();
-        _sample.set_name("sample");
-        _sample.append_attribute("name") = samples[i]->sampleName.c_str();
-        _sample.append_attribute("filename") = samples[i]->fileName.c_str();
-        _sample.append_attribute("sampleOrder") = i;
-        _sample.append_attribute("setName") = "A";
-        _sample.append_attribute("sampleName") = samples[i]->sampleName.c_str();
-      }
 }
 
 Peak* getHighestIntensityPeak(PeakGroup* grp) {
@@ -1389,130 +1203,6 @@ double get_wall_time(){
 
 double get_cpu_time(){
     return (double)getTime() / CLOCKS_PER_SEC;
-}
-
-int loadNISTLibrary(QString fileName) {
-    qDebug() << "Loading NIST Libary: " << fileName;
-    QFile data(fileName);
-
-    if (!data.open(QFile::ReadOnly) ) {
-        qDebug() << "Can't open " << fileName; exit(-1);
-        return 0;
-    }
-
-    string dbfilename = fileName.toStdString();
-    string dbname = mzUtils::cleanFilename(dbfilename);
-
-   QTextStream stream(&data);
-
-   /* sample
-   Name: DGDG 8:0; [M-H]-; DGDG(2:0/6:0)
-   MW: 555.22888
-   PRECURSORMZ: 555.22888
-   Comment: Parent=555.22888 Mz_exact=555.22888 ; DGDG 8:0; [M-H]-; DGDG(2:0/6:0); C23H40O15
-   Num Peaks: 2
-   115.07586 999 "sn2 FA"
-   59.01330 999 "sn1 FA"
-   */
-  //Comment: Spec=Consensus Parent=417.2120056 Protein="Michrom_PTD_gi1351907" collisionEnergy=25 AvgMVH=35.73300171 AvgRt=21.34076614 MinRt=20.54099846 MaxRt=22.80683327 StdRt=0.9019529997 SampleName=BSA_run_130202213057.mzXML ConsensusSize=5
-
-   QRegExp whiteSpace("\\s+");
-   QRegExp formulaMatch("(C\\d+H\\d+\\S*)");
-   QRegExp retentionTimeMatch("AvgRt\\=(\\S+)");
-
-   int charge=0;
-   QString line;
-   QString name, comment,formula,id, category,smileString;
-   double retentionTime;
-   double mw=0;
-   double precursor=0;
-   int peaks=0;
-   double logP = 0;
-   vector<float>mzs;
-   vector<float>intest;
-
-   int compoundCount=0;
-   MassCalculator mcalc;
-
-    do {
-        line = stream.readLine();
-
-        if(line.startsWith("Name:",Qt::CaseInsensitive) && !name.isEmpty()) {
-            if (!name.isEmpty()) { //insert new compound
-               Compound* cpd = new Compound( name.toStdString(), name.toStdString(), formula.toStdString(), charge);
-
-               if (precursor>0) { cpd->mass=precursor; cpd->precursorMz=precursor; }
-               else if (mw>0) { cpd->mass=mw; cpd->precursorMz=precursor; }
-               else if(!formula.isEmpty()) { cpd->mass = cpd->precursorMz = mcalc.computeMass(formula.toStdString(),ionizationMode); }
-
-               if(!id.isEmpty()) cpd->id = id.toStdString();
-               cpd->db=dbname;
-               cpd->fragment_mzs = mzs;
-               cpd->fragment_intensity = intest;
-               cpd->expectedRt=retentionTime;
-               cpd->category.push_back(category.toStdString());
-               cpd->logP = logP;
-               cpd->smileString = smileString.toStdString();
-               compoundsDB.push_back(cpd);
-
-            }
-
-            //reset for the next record
-           name = comment = formula = category=id=smileString=QString();
-           mw=precursor=0;
-           retentionTime=0;
-           logP=0;
-           peaks=0;
-           mzs.clear();
-           intest.clear();
-        }
-
-         if(line.startsWith("Name:",Qt::CaseInsensitive)) {
-             name = line.mid(5,line.length()).simplified();
-         } else if (line.startsWith("MW:",Qt::CaseInsensitive)) {
-             mw = line.mid(3,line.length()).simplified().toDouble();
-         } else if (line.startsWith("ID:",Qt::CaseInsensitive)) {
-             id = line.mid(3,line.length()).simplified();
-         } else if (line.startsWith("LOGP:",Qt::CaseInsensitive)) {
-            logP = line.mid(5,line.length()).simplified().toDouble();
-         } else if (line.startsWith("SMILE:",Qt::CaseInsensitive)) {
-             smileString = line.mid(7,line.length()).simplified();
-         } else if (line.startsWith("PRECURSORMZ:",Qt::CaseInsensitive)) {
-             precursor = line.mid(13,line.length()).simplified().toDouble();
-         } else if (line.startsWith("FORMULA:",Qt::CaseInsensitive)) {
-             formula = line.mid(9,line.length()).simplified();
-             formula.replace("\"","",Qt::CaseInsensitive);
-         } else if (line.startsWith("CATEGORY:",Qt::CaseInsensitive)) {
-             category = line.mid(10,line.length()).simplified();
-         } else if (line.startsWith("Comment:",Qt::CaseInsensitive)) {
-             comment = line.mid(8,line.length()).simplified();
-             if (comment.contains(formulaMatch)){
-                 formula=formulaMatch.capturedTexts().at(1);
-                 //qDebug() << "Formula=" << formula;
-             }
-            if (comment.contains(retentionTimeMatch)){
-                 retentionTime=retentionTimeMatch.capturedTexts().at(1).simplified().toDouble();
-                 //qDebug() << "retentionTime=" << retentionTimeString;
-             }
-         } else if (line.startsWith("Num Peaks:",Qt::CaseInsensitive) || line.startsWith("NumPeaks:",Qt::CaseInsensitive)) {
-             peaks = 1;
-         } else if ( peaks ) {
-             QStringList mzintpair = line.split(whiteSpace);
-             if( mzintpair.size() >=2 ) {
-                 bool ok=false; bool ook=false;
-                 float mz = mzintpair.at(0).toDouble(&ok);
-                 float ints = mzintpair.at(1).toDouble(&ook);
-                 if (ok && ook && mz >= 0 && ints >= 0) {
-                     mzs.push_back(mz);
-                     intest.push_back(ints);
-                 }
-             }
-         }
-
-    } while (!line.isNull());
-
-    sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
-    return compoundCount;
 }
 
 

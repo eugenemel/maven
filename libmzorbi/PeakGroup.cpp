@@ -583,6 +583,7 @@ Scan* PeakGroup::getAverageFragmenationScan(float resolution) {
 
     Scan* avgScan = new Scan(NULL,0,0,0,0,0);
     avgScan->deepcopy(scans[0]);
+    avgScan->sample=NULL;
 
     if (scans.size() == 1) return avgScan;
 

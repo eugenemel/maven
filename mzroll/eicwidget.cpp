@@ -433,7 +433,7 @@ void EicWidget::replot() {
 }
 
 void EicWidget::addEICLines(bool showSpline) {	
-    qDebug() <<" EicWidget::addEICLines(bool showSpline)";
+    //qDebug() <<" EicWidget::addEICLines(bool showSpline)";
     QTime timerZ; timerZ.start();
     //sort eics by peak height of selected group
     vector<Peak> peaks;
@@ -489,10 +489,8 @@ void EicWidget::addEICLines(bool showSpline) {
         line->setBrush(brush);
         line->setPen(pen);
         line->setColor(pcolor);
-
         //line->fixEnds();
     }
-    qDebug() << "\t\taddEICLines() done. msec=" << timerZ.elapsed();
 }
 
 
@@ -843,13 +841,9 @@ void EicWidget::replot(PeakGroup* group ) {
 
 
     setSelectedGroup(group);
-    //qDebug() << "\tsetSelectedGroup msec=" << timerX.elapsed();
-
     setTitle();
     addEICLines(false);
-    //qDebug() << "\taddEicLines msec=" << timerX.elapsed();
     showAllPeaks();
-    //qDebug() << "\tshowPeaks msec=" << timerX.elapsed();
 
     if (group) {
         if(group->compound != NULL && group->compound->expectedRt>0)
@@ -863,8 +857,6 @@ void EicWidget::replot(PeakGroup* group ) {
     if(_showMS2Events && _slice.mz>0) { addMS2Events(_slice.mzmin, _slice.mzmax); }
 
     addAxes();
-
-
    //setStatusText("Unknown Expected Retention Time!");
 
     getMainWindow()->addToHistory(_slice);
@@ -875,7 +867,7 @@ void EicWidget::replot(PeakGroup* group ) {
     //qDebug << "\t Number of graphic objects " << scene()->items().size();
     //qDebug << "\t BSP Depth " << scene()->bspTreeDepth();
     //qDebug << "\t EicWidget::replot() done ";
-    qDebug() << "\t replot() DONE msec=" << timerX.elapsed();
+    //qDebug() << "\t replot() DONE msec=" << timerX.elapsed();
 
 }	
 
@@ -1350,7 +1342,8 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
     if (!group->srmId.empty()) {
         setSrmId(group->srmId);
     } else if ( group->compound ) {
-        setCompound(group->compound);
+        //TURNED OFF., behavior is no longer needed
+        //setCompound(group->compound);
     }
 
     if ( _autoZoom && group->parent != NULL ) {
@@ -1725,8 +1718,6 @@ void EicWidget::timerEvent( QTimerEvent * event ) {
 }
 
 void EicWidget::addMS2Events(float mzmin, float mzmax) {
-
-    qDebug() << "addMS2Events() " << mzmin << " " << mzmax;
 
     MainWindow* mw = getMainWindow();
     vector <mzSample*> samples = mw->getVisibleSamples();

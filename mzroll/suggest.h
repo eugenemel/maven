@@ -33,25 +33,21 @@ public slots:
 
 signals:
 	 void compoundSelected(Compound*);
-	 void pathwaySelected(Pathway*);
 
 private:
      QLineEdit *editor;
      QTreeWidget *popup;
      QTimer *timer;
+
 	 QString _currentDatabase;
 	 QMap<QString,int> searchHistory;
 
 
 	void doSearchCompounds(QString needle);
-	void doSearchPathways(QString needle);
 	void doSearchHistory(QString needle);
 
 	QHash<QString,float> scores;
     QHash<QString,Compound*> compound_matches;
-    QHash<QString,Pathway*> pathway_matches;
-
-
 
 
 };

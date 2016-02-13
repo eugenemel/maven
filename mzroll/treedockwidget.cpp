@@ -224,21 +224,6 @@ QTreeWidgetItem* TreeDockWidget::addLink(mzLink* s,QTreeWidgetItem* parent)  {
         return item;
 }
 
-void TreeDockWidget::setInfo(deque<Pathway*>& pathways) {
-
-    treeWidget->clear();
-    QStringList header; header << "Pathway";
-    treeWidget->setHeaderLabels( header );
-    map<string,string>::iterator itr;
-    treeWidget->setSortingEnabled(true);
-
-    for(int i=0; i < pathways.size(); i++ ) {
-        Pathway* p = pathways[i];
-        QTreeWidgetItem *parent = new QTreeWidgetItem(treeWidget, PathwayType);
-        parent->setText(0,QString((p->name +"("+p->id+")").c_str() 	));
-        parent->setData(0,Qt::UserRole,QVariant::fromValue(QString(p->id.c_str())));
-    }
-}
 
 void TreeDockWidget::filterTree(QString needle) {
         int itemCount = treeWidget->topLevelItemCount();

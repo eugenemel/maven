@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     app.processEvents();
 
     MainWindow* mainWindow = new MainWindow();
-    qInstallMessageHandler(customMessageHandler);
+    //qInstallMessageHandler(customMessageHandler);
 
     QStringList filelist;
  	for (int i = 1; i < argc; ++i) {

@@ -46,7 +46,7 @@ class LigandWidget: public QDockWidget {
 public:
     LigandWidget(MainWindow* parent);
 
-    void setDatabaseNames();
+    void reloadCompounds();
     QString getDatabaseName();
     void clear() { treeWidget->clear(); }
     void showNext();
@@ -73,9 +73,6 @@ private slots:
       void showLigand();
       void showTable();
       void databaseChanged(int index);
-      void readRemoteData(QNetworkReply* reply);
-      void fetchRemoteCompounds();
-      QList<Compound*> parseXMLRemoteCompounds();
 
 
 private:
@@ -93,12 +90,6 @@ private:
     QString filterString;
     QTreeWidgetItem* addItem(QTreeWidgetItem* parentItem, string key , float value);
     QTreeWidgetItem* addItem(QTreeWidgetItem* parentItem, string key , string value);
-
-    //fetching of compounds from remote database
-    QNetworkAccessManager* m_manager;
-
-    int connectionId;
-    QXmlStreamReader xml;
 
 };
 

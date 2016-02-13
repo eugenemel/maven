@@ -10,11 +10,10 @@ Compound::Compound(string id, string name, string formula, int charge ) {
 		this->expectedRt = -1;
         this->logP = 0;
 
-		isPeptide=false;
 		precursorMz=0;
 		productMz=0;
 		collisionEnergy=0;
-		_groupUnlinked=false;
+
 }
 
 MassCalculator* Compound::mcalc = new MassCalculator();

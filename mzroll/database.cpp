@@ -1,28 +1,62 @@
 #include "database.h"
 
-
-bool Database::connect(string filename) {
-    QString dbname(filename.c_str());
+bool Database::connect(QString filename) {
     ligandDB = QSqlDatabase::addDatabase("QSQLITE", "ligandDB");
-    ligandDB.setDatabaseName(dbname);
-    return ligandDB.open();
+    ligandDB.setDatabaseName(filename);
+    ligandDB.open();
+
+    if (!ligandDB.isOpen()) {
+        qDebug()  << "Failed to open ligand database" + filename;
+        return false;
+    } else {
+        return true;
+    }
 }
 
-void Database::loadAll() {
+void Database::reloadAll() {
 
 	//compounds subsets
-	const std::string EmptyString;
-    loadSpecies(EmptyString); 
-    loadReactions(EmptyString);
-	loadPathways();
-	loadCategories();
+    const std::string EmptyString;
+    compoundIdMap.clear();
+    compoundsDB.clear();
+    loadCompoundsSQL();
 
     cerr << "compoundsDB=" << compoundsDB.size() << " " << compoundIdMap.size() << endl;
-    cerr << "reactionsDB=" << reactionsDB.size() << endl;
-    cerr << "pathwaysDB=" <<  pathwayDB.size() << endl;
     cerr << "adductsDB=" << adductsDB.size() << endl;
     cerr << "fragmentsDB=" << fragmentsDB.size() << endl;
     cerr << endl;
+}
+
+void Database::loadMethodsFolder(QString methodsFolder) {
+    QDir dir(methodsFolder);
+    if (dir.exists()) {
+        dir.setFilter(QDir::Files );
+        QFileInfoList list = dir.entryInfoList();
+        for (int i = 0; i < list.size(); ++i) {
+            QFileInfo fileInfo = list.at(i);
+            loadCompoundsFile(fileInfo.absoluteFilePath());
+        }
+    }
+
+    loadCompoundsSQL();
+}
+
+int Database::loadCompoundsFile(QString filename) {
+    string dbfilename = filename.toStdString();
+    string dbname = mzUtils::cleanFilename(dbfilename);
+
+    vector<Compound*>compounds;
+
+    if ( filename.endsWith("msp",Qt::CaseInsensitive)
+         || filename.endsWith("sptxt",Qt::CaseInsensitive)) {
+        compounds = loadNISTLibrary(filename);
+    } else {
+        compounds = loadCompoundCSVFile(dbfilename);
+    }
+
+    deleteCompoundsSQL(dbname.c_str());
+    saveCompoundsSQL(compounds);
+    return compounds.size();
 }
 
 
@@ -30,7 +64,6 @@ void Database::closeAll() {
     mzUtils::delete_all(adductsDB);     adductsDB.clear();
     mzUtils::delete_all(compoundsDB);   compoundsDB.clear();
     mzUtils::delete_all(fragmentsDB);   fragmentsDB.clear();
-    mzUtils::delete_all(reactionsDB);   reactionsDB.clear();
 }
 
 multimap<string,Compound*> Database::keywordSearch(string needle) { 
@@ -50,84 +83,53 @@ multimap<string,Compound*> Database::keywordSearch(string needle) {
 	return matches;
 }
 
-void Database::loadCategories() {
-    QSqlQuery query(ligandDB);
-    query.prepare("SELECT * from sets");
-	if(!query.exec()) qDebug() << query.lastError();
-
-    while (query.next()) {
-        std::string keyword  = query.value(0).toString().toStdString();
-        std::string id  = query.value(1).toString().toStdString();
-        Compound* cmpd = findSpeciesById(id);
-        if (cmpd != NULL ) {
-         //   cmpd->category.push_back(keyword);
-        }
-    }
-
-    query.prepare("SELECT P.pathway_id, R.species_id from pathways P, reactions R where P.reaction_id = R.reaction_id");
-	if(!query.exec()) qDebug() << query.lastError();
-
-    while (query.next()) {
-        std::string keyword  = query.value(0).toString().toStdString();
-        std::string id  = query.value(1).toString().toStdString();
-        Compound* cmpd = findSpeciesById(id);
-        if (cmpd != NULL ) {
-         //   cmpd->category.push_back(keyword);
-        }
-    }
-
-	return;
-}
-
 void Database::addCompound(Compound* c) { 
     if(c == NULL) return;
-
-    //new compound id .. insert into compound list
-    if (!compoundIdMap.count(c->id)) {
-        compoundIdMap[c->id] = c;
-        compoundsDB.push_back(c);
-    } else { //compound exists with the same name, match database
-        bool matched=false;
-        for(int i=0; i < compoundsDB.size();i++) {
-            Compound* currentCompound = compoundsDB[i];
-            if ( currentCompound->db == c->db && currentCompound->id==c->id) { //compound from the same database
-                currentCompound->id=c->id;
-                currentCompound->name=c->name;
-                currentCompound->formula = c->formula;
-                currentCompound->srmId = c->srmId;
-                currentCompound->expectedRt = c->expectedRt;
-                currentCompound->charge = c->charge;
-                currentCompound->mass = c->mass;
-                currentCompound->precursorMz = c->precursorMz;
-                currentCompound->productMz = c->productMz;
-                currentCompound->collisionEnergy = c->collisionEnergy;
-                currentCompound->category = c->category;
-                matched=true;
-            }
-        }
-        if(!matched) compoundsDB.push_back(c);
-    }
+    compoundIdMap[c->id]=c;
+    compoundsDB.push_back(c);
 }
 
-void Database::loadSpecies(string db) {
-		map<string,Compound*> species;
-		map<string, int> species_degree;
-		QString sql = "SELECT * from species";
-		if (db.length()) sql += " where database=?";
+void Database::loadCompoundsSQL() {
+        compoundsDB.clear();
+        compoundIdMap.clear();
 
         QSqlQuery query(ligandDB);
+        QString sql = "select * from compounds";
         query.prepare(sql);
-        if(db.length()) query.addBindValue(db.c_str());
-		if(!query.exec()) qDebug() << query.lastError();
+        if(!query.exec()) qDebug() << query.lastError();
+
         while (query.next()) {
-			string id =   query.value(0).toString().toStdString();
-			string name = query.value(1).toString().toStdString();
-			string formula = query.value(2).toString().toStdString();
-			int charge = query.value(3).toInt();
+            string id =   query.value("compoundId").toString().toStdString();
+            string name = query.value("name").toString().toStdString();
+            string formula = query.value("formula").toString().toStdString();
+            int charge = query.value("charge").toInt();
+
 			Compound* compound = new Compound(id,name,formula,charge);
-			compound->db =  query.value(4).toString().toStdString();
-			addCompound(compound);
-		}
+            compound->cid  =  query.value("cid").toInt();
+            compound->db   =  query.value("dbName").toString().toStdString();
+            compound->expectedRt =  query.value("expectedRt").toDouble();
+            compound->precursorMz =  query.value("precursorMz").toDouble();
+            compound->productMz =  query.value("productMz").toDouble();
+            compound->collisionEnergy =  query.value("collisionEnergy").toDouble();
+            compound->smileString=  query.value("smileString").toDouble();
+
+            for(QString f: query.value("category").toString().split(";") ) {
+                compound->category.push_back(f.toStdString());
+            }
+
+            for(QString f: query.value("fragment_mzs").toString().split(";") ) {
+                compound->fragment_mzs.push_back(f.toDouble());
+            }
+
+            for(QString f: query.value("fragment_intensity").toString().split(";") ) {
+                compound->fragment_intensity.push_back(f.toDouble());
+            }
+
+            compoundIdMap[compound->id]=compound;
+            compoundsDB.push_back(compound);
+        }
+        sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
+        qDebug() << "loadCompoundSQL : " << compoundsDB.size();
 }
 
 set<Compound*> Database::findSpeciesByMass(float mz, float ppm) { 
@@ -162,28 +164,6 @@ Compound* Database::findSpeciesById(string id) {
     return c;
 }
 
-Molecule2D* Database::getMolecularCoordinates(QString id) {
-    	if ( coordinatesMap.count(id.toStdString()) ) return coordinatesMap[id.toStdString()];
-
-		QString sql = "select * from atoms";
-		if (id.length()) sql += " where species_id=?";
-
-		QSqlQuery query(ligandDB);
-		query.prepare(sql);
-		if(id.length()) query.addBindValue(id);
-		if(!query.exec()) qDebug() << query.lastError();
-
-		Molecule2D* mol = new Molecule2D();
-		while (query.next()) {
-				mol->id = query.value(0).toString();
-				mol->atoms.push_back(query.value(2).toString());
-				mol->coord.push_back(QPointF( query.value(3).toDouble(), query.value(4).toDouble()));
-		}
-
-		coordinatesDB.push_back(mol);
-		coordinatesMap[id.toStdString()] = mol;
-		return mol;
-}
 
 vector<Compound*> Database::findSpeciesByName(string name, string dbname) {
 		vector<Compound*> set;
@@ -213,77 +193,6 @@ Compound* Database::findSpeciesByPrecursor(float precursorMz, float productMz, i
 		return x;
 }
 
-void Database::loadReactions(string db) { 
-
-		map<string, Reaction*> seenReactions;
-		map<string, bool> seenSpeciesReactions;
-
-		QString sql = "select * from reactions";
-		if (db.length()) sql += " where database=?";
-
-        QSqlQuery query(ligandDB);
-        query.prepare(sql);
-        if(db.length()) query.addBindValue(db.c_str());
-		if(!query.exec()) qDebug() << query.lastError();
- 
-        while (query.next()) {
-			string id = query.value(0).toString().toStdString();
-			string species_id = query.value(1).toString().toStdString();
-			string species_type = query.value(2).toString().toStdString();
-			int stoch = query.value(3).toInt();
-			bool reversable = query.value(4).toInt() > 0;
-			string db = query.value(5).toString().toStdString();
-			Reaction* r = NULL;
-			if ( seenReactions.count(id) == 0 ) { 
-					r = new Reaction(db,id,id);
-					r->setReversable(reversable);
-					reactionsDB.push_back(r);
-					reactionIdMap[r->id]=r;
-					seenReactions[id] = r;
-			} else {
-					r = seenReactions[id];
-			}
-
-			//cerr << id << " " << species << " " << species_type << endl;
-            Compound* c = findSpeciesById(species_id);
-
-			if ( c != NULL && r != NULL && seenSpeciesReactions.count(c->id + r->id) == 0 ) {
-				seenSpeciesReactions[ c->id + r->id ]=true;
-				c->reactions.push_back(r);
-			}
-
-			if ( c != NULL && r != NULL && species_type == "R" )  r->addReactant(c,stoch); 
-			if ( c != NULL && r != NULL && species_type == "P" )  r->addProduct(c,stoch); 
-		}
-}
-
-void Database::loadPathways() { 
-    QSqlQuery query(ligandDB);
-    query.prepare("select pathway_id, pathway_name, reaction_id from pathways");
-	if(!query.exec()) qDebug() << query.lastError();
-    while (query.next()) {
-		string id = query.value(0).toString().toStdString();
-		string name = query.value(1).toString().toStdString();
-		string rid= query.value(2).toString().toStdString();
-
-		if (id.empty() || name.empty() || rid.empty() ) continue;
-
-		Pathway* pathway=NULL;
-		if (pathwayIdMap.count(id) > 0) {
-			pathway = pathwayIdMap[id];
-		}else { 
-			pathway = new Pathway(id,name); 
-			pathwayIdMap[id]=pathway; 
-			pathwayDB.push_back(pathway);
-		}
-		
-		if (pathway && reactionIdMap.count(rid) > 0 ) {
-			Reaction* r = reactionIdMap[rid];
-			pathway->reactions.push_back(r);
-		}
-	}
-}
-
 void Database::saveRetentionTime(Compound* c, float rt, QString method) {
 	if (!c) return;
 
@@ -303,67 +212,6 @@ void Database::saveRetentionTime(Compound* c, float rt, QString method) {
 	query.clear();
 }
 
-
-void Database::loadRetentionTimes(QString method) {
-    QSqlQuery query(ligandDB);
-    query.prepare("select compound_id, rt from knowns_times where method = ?");
-    query.addBindValue(method);
-	if(!query.exec()) qDebug() << query.lastError();
-
- 
-    while (query.next()) {
-		std::string cid = query.value(0).toString().toStdString();
-		float rt = query.value(1).toDouble();
-		Compound* c = findSpeciesById(cid);
-		if (c) c->expectedRt = rt;
-	}
-}
-
-void Database::saveValidation(Peak* p) {
-        QSqlQuery query(ligandDB);
-	query.prepare("insert into validations (rt,mz,class) values(?,?,?)");
-	query.addBindValue(QString::number(p->rt,'f',4) );
-	query.addBindValue(QString::number(p->peakMz,'f',4) );
-	query.addBindValue(QString(p->label));
-	if(!query.exec()) qDebug() << query.lastError();
-	query.clear();
-}
-
-vector<string> Database::getPathwayReactions(string pathway_id) {
-	
-    QSqlQuery query(ligandDB);
-    query.prepare("select reaction_id from pathways where pathway_id = ?");
-    //query.addBindValue(QString(pathway_id.c_str()));
-    query.addBindValue(pathway_id.c_str());
-	if(!query.exec()) qDebug() << query.lastError();
- 
-	vector<string> reactions;
-    while (query.next()) {
-		string reaction_id = query.value(0).toString().toStdString();
-		if (! reaction_id.empty() ) {
-			reactions.push_back(reaction_id);
-		}
-	}
-	return reactions;
-}
-
-
-vector<string> Database::getCompoundReactions(string compound_id) {
-    QSqlQuery query(ligandDB);
-    query.prepare("select reaction_id from reactions where compound_id = ?");
-    query.addBindValue(compound_id.c_str());
-	 if (!query.exec())   qDebug() << query.lastError();
- 
-	vector<string> compounds;
-    while (query.next()) {
-		string id = query.value(0).toString().toStdString();
-		if (! id.empty() ) {
-			compounds.push_back(id);
-		}
-	}
-	return compounds;
-}
-
 vector<Compound*> Database::getCopoundsSubset(string dbname) {
 	vector<Compound*> subset;
 	for (unsigned int i=0; i < compoundsDB.size(); i++ ) {
@@ -374,80 +222,56 @@ vector<Compound*> Database::getCopoundsSubset(string dbname) {
 	return subset;
 }
 
-vector<Compound*> Database::getKnowns() { 
-	return getCopoundsSubset("KNOWNS");
-}
-
 map<string,int> Database::getDatabaseNames() { 
 	map<string,int>dbnames;
 	for (unsigned int i=0; i < compoundsDB.size(); i++ ) dbnames[ compoundsDB[i]->db ]++;
 	return dbnames;
 }
 
-
-void Database::loadAdducts(string filename) {
+vector<Adduct*> Database::loadAdducts(string filename) {
+    vector<Adduct*> adducts;
     ifstream myfile(filename.c_str());
-    if (! myfile.is_open()) return;
+
+    if (! myfile.is_open()) adducts;
 
     string line;
     while ( getline(myfile,line) ) {
-		if (!line.empty() && line[0] == '#') continue;
-      	vector<string>fields;
+        if (line.empty()) continue;
+        if (line[0] == '#') continue;
+
+        vector<string>fields;
         mzUtils::split(line,',', fields);
 
-		if(fields.size() < 2 ) continue;
-		string name=fields[0];
-		int nmol=string2float(fields[1]);
-		int charge=string2float(fields[2]);
-		float mass=string2float(fields[3]);
+        //ionization
+        if(fields.size() < 2 ) continue;
+        string name=fields[0];
+        int nmol=string2float(fields[1]);
+        int charge=string2float(fields[2]);
+        float mass=string2float(fields[3]);
 
-		if ( name.empty() || nmol < 0 ) continue;
-		Adduct* a = new Adduct(); 
-		a->name = name;
-		a->mass = mass;
-		a->nmol = nmol;
-		a->charge = charge;
-		a->isParent = false;
-		if (abs(abs(a->mass)-HMASS)< 0.01) a->isParent=true; 
-		adductsDB.push_back(a);
-	}
-	myfile.close();
+        if ( name.empty() || nmol < 0 ) continue;
+        Adduct* a = new Adduct();
+        a->nmol = nmol;
+        a->name = name;
+        a->mass = mass;
+        a->charge = charge;
+        a->isParent = false;
+        if (abs(abs(a->mass)-HMASS)< 0.01) a->isParent=true;
+        adducts.push_back(a);
+    }
+    cerr << "loadAdducts() " << filename << " count=" << adducts.size() << endl;
+    return adducts;
+    myfile.close();
 }
 
 
 
-void Database::loadFragments(string filename) {
-    ifstream myfile(filename.c_str());
-    if (! myfile.is_open()) return;
+vector<Compound*> Database::loadCompoundCSVFile(string filename){
 
-    string line;
-    while ( getline(myfile,line) ) {
-		if (!line.empty() && line[0] == '#') continue;
-      	vector<string>fields;
-        mzUtils::split(line,',', fields);
- 
-		if(fields.size() < 3 ) continue;
-		string name=fields[0];
-		float mass=string2float(fields[1]);
-		float charge=string2float(fields[2]);
-		if ( mass < 0 || name.empty() ) continue;
-		Adduct* a = new Adduct(); 
-		a->name = name;
-		a->mass = mass;
-		a->nmol = 1;
-		a->charge = charge;
-		a->isParent = false;
-		fragmentsDB.push_back(a);
-	}
-	myfile.close();
-}
-
-
-
-int Database::loadCompoundCSVFile(string filename){
+    vector<Compound*> compoundSet; //return
 
     ifstream myfile(filename.c_str());
-    if (! myfile.is_open()) return 0;
+    if (! myfile.is_open()) return compoundSet;
 
     string line;
     string dbname = mzUtils::cleanFilename(filename);
@@ -540,8 +364,6 @@ int Database::loadCompoundCSVFile(string filename){
 
         }
 
-
-
         //cerr << "Loading: " << id << " " << formula << "mz=" << mz << " rt=" << rt << " charge=" << charge << endl;
 
         if (mz == 0) mz=precursormz;
@@ -560,13 +382,178 @@ int Database::loadCompoundCSVFile(string filename){
             compound->productMz=productmz;
             compound->collisionEnergy=collisionenergy;
             for(int i=0; i < categorylist.size(); i++) compound->category.push_back(categorylist[i]);
-            addCompound(compound);
+            compoundSet.push_back(compound);
+            //addCompound(compound);
             loadCount++;
         }
     }
-    sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
-    cerr << "Loading " << dbname << " " << loadCount << endl;
     myfile.close();
-    return loadCount;
+    return compoundSet;
 }
 
+vector<Compound*> Database::loadNISTLibrary(QString fileName) {
+    qDebug() << "Loading NIST Libary: " << fileName;
+    QFile data(fileName);
+
+    vector<Compound*> compoundSet;
+    if (!data.open(QFile::ReadOnly) ) {
+        qDebug() << "Can't open " << fileName; exit(-1);
+        return compoundSet;
+    }
+
+    string dbfilename = fileName.toStdString();
+    string dbname = mzUtils::cleanFilename(dbfilename);
+
+   QTextStream stream(&data);
+   QRegExp whiteSpace("\\s+");
+   QRegExp formulaMatch("(C\\d+H\\d+\\S*)");
+   QRegExp retentionTimeMatch("AvgRt\\=(\\S+)");
+
+   QString line;
+   MassCalculator mcalc;
+   Compound* cpd = NULL;
+   bool capturePeaks=false;
+
+    do {
+        line = stream.readLine();
+        if(line.startsWith("Name:",Qt::CaseInsensitive)){
+
+            if(cpd) {
+                if (cpd->precursorMz>0) { cpd->mass=cpd->precursorMz; }
+                else if (cpd->mass>0)   { cpd->precursorMz=cpd->mass; }
+                else if(!cpd->formula.empty()) { cpd->mass = cpd->precursorMz = mcalc.computeMass(cpd->formula,0); }
+            }
+
+            //NEW COMPOUND
+            QString name = line.mid(5,line.length()).simplified();
+            cpd = new Compound(name.toStdString(), name.toStdString(),"", 0);
+            cpd->db = dbname;
+
+            compoundSet.push_back(cpd);
+            capturePeaks=false;
+        }
+
+        if(cpd == NULL) continue;
+
+        if (line.startsWith("MW:",Qt::CaseInsensitive)) {
+            cpd->mass = line.mid(3,line.length()).simplified().toDouble();
+         } else if (line.startsWith("CE:",Qt::CaseInsensitive)) {
+            cpd->collisionEnergy = line.mid(3,line.length()).simplified().toDouble();
+         } else if (line.startsWith("ID:",Qt::CaseInsensitive)) {
+            QString id = line.mid(3,line.length()).simplified();
+            if(!id.isEmpty()) cpd->id = id.toStdString();
+         } else if (line.startsWith("LOGP:",Qt::CaseInsensitive)) {
+            cpd->logP = line.mid(5,line.length()).simplified().toDouble();
+         } else if (line.startsWith("SMILE:",Qt::CaseInsensitive)) {
+            QString smileString = line.mid(7,line.length()).simplified();
+            if(!smileString.isEmpty()) cpd->smileString=smileString.toStdString();
+         } else if (line.startsWith("PRECURSORMZ:",Qt::CaseInsensitive)) {
+            cpd->precursorMz = line.mid(13,line.length()).simplified().toDouble();
+         } else if (line.startsWith("FORMULA:",Qt::CaseInsensitive)) {
+             QString formula = line.mid(9,line.length()).simplified();
+             formula.replace("\"","",Qt::CaseInsensitive);
+             if(!formula.isEmpty()) cpd->formula = formula.toStdString();
+         } else if (line.startsWith("CATEGORY:",Qt::CaseInsensitive)) {
+             cpd->category.push_back(line.mid(10,line.length()).simplified().toStdString());
+         } else if (line.startsWith("Comment:",Qt::CaseInsensitive)) {
+             QString comment = line.mid(8,line.length()).simplified();
+             if (comment.contains(formulaMatch)){
+                 cpd->formula=formulaMatch.capturedTexts().at(1).toStdString();
+                 //qDebug() << "Formula=" << formula;
+             }
+            if (comment.contains(retentionTimeMatch)){
+               cpd->expectedRt=retentionTimeMatch.capturedTexts().at(1).simplified().toDouble();
+                 //qDebug() << "retentionTime=" << retentionTimeString;
+             }
+         } else if (line.startsWith("Num Peaks:",Qt::CaseInsensitive) || line.startsWith("NumPeaks:",Qt::CaseInsensitive)) {
+             capturePeaks=true;
+         } else if (capturePeaks ) {
+             QStringList mzintpair = line.split(whiteSpace);
+             if( mzintpair.size() >=2 ) {
+                 bool ok=false; bool ook=false;
+                 float mz = mzintpair.at(0).toDouble(&ok);
+                 float ints = mzintpair.at(1).toDouble(&ook);
+                 if (ok && ook && mz >= 0 && ints >= 0) {
+                     cpd->fragment_intensity.push_back(ints);
+                     cpd->fragment_mzs.push_back(mz);
+                 }
+             }
+         }
+
+    } while (!line.isNull());
+
+    //compoundSet.push_back(compound);
+    qDebug() << "read in" << compoundSet.size()  << " compounds.";
+    sort(compoundSet.begin(),compoundSet.end(), Compound::compMass);
+    return compoundSet;
+}
+
+
+void Database::deleteCompoundsSQL(QString dbName) {
+    QSqlQuery query(ligandDB);
+    query.prepare("delete from compounds where dbName = ?");
+    query.bindValue( 0, dbName );
+    query.exec();
+    qDebug() << "deleteCompoundsSQL" << dbName <<  " " << query.numRowsAffected();
+}
+
+void Database::saveCompoundsSQL(vector<Compound*> &compoundSet) {
+
+    QSqlQuery query0(ligandDB);
+    query0.exec("begin transaction");
+    if(!query0.exec("create table IF NOT EXISTS compounds(\
+                    cid integer primary key AUTOINCREMENT,\
+                    dbName varchar(255),\
+                    compoundId varchar(255),\
+                    name varchar(255),\
+                    formula varchar(255),\
+                    smileString  varchar(255),\
+                    srmId  varchar(255),\
+                    mass float,\
+                    charge  int,\
+                    expectedRt float, \
+                    precursorMz float,\
+                    productMz   float,\
+                    collisionEnergy float,\
+                    logP float,\
+                    category varchar(255),\
+                    fragment_mzs text, \
+                    fragment_intensity text \
+                    )"))  qDebug() << "Ho... " << query0.lastError();
+
+        QSqlQuery query1(ligandDB);
+        query1.prepare("insert into compounds values(NULL,?,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?)");
+
+        for(Compound* c : compoundSet) {
+            QStringList cat;
+            QStringList fragMz;
+            QStringList fragIntensity;
+
+            for(string s : c->category) { cat << s.c_str(); }
+            for(float f :  c->fragment_mzs) { fragMz << QString::number(f,'f',5); }
+            for(float f :  c->fragment_intensity) { fragIntensity << QString::number(f,'f',5); }
+
+            query1.bindValue( 0, QString(c->db.c_str()) );
+            query1.bindValue( 1, QString(c->id.c_str()) );
+            query1.bindValue( 2, QString(c->name.c_str()));
+            query1.bindValue( 3, QString(c->formula.c_str()));
+            query1.bindValue( 4, QString(c->smileString.c_str()));
+            query1.bindValue( 5, QString(c->srmId.c_str()));
+
+            query1.bindValue( 6, c->mass );
+            query1.bindValue( 7, c->charge);
+            query1.bindValue( 8, c->expectedRt);
+            query1.bindValue( 9, c->precursorMz);
+            query1.bindValue( 10, c->productMz);
+
+            query1.bindValue( 11, c->collisionEnergy);
+            query1.bindValue( 12, c->logP);
+            query1.bindValue( 13, cat.join(";"));
+            query1.bindValue( 14, fragMz.join(";"));
+            query1.bindValue( 15, fragIntensity.join(";"));
+
+            if(!query1.exec())  qDebug() << query1.lastError();
+        }
+
+    query0.exec("end transaction");
+}

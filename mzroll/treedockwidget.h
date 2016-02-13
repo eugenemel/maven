@@ -34,7 +34,6 @@ public slots:
 
 	  void setInfo(vector<mzLink>&links);
 	  void setInfo(vector<mzSlice*>&slices);
-	  void setInfo(deque<Pathway*>&pathways);
 
 	  void addScanItem(Scan* scan);
 	  void clearTree();

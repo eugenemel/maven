@@ -27,7 +27,6 @@
 #include "mzfileio.h"
 #include "spectralhit.h"
 #include "rconsolewidget.h"
-#include "spectralhitstable.h"
 
 class SettingsForm;
 class EicWidget;
@@ -59,7 +58,6 @@ class SpectraMatching;
 class LogWidget;
 class RconsoleWidget;
 class SpectralHit;
-class SpectralHitsDockWidget;
 
 extern Database DB; 
 
@@ -105,7 +103,6 @@ public:
     GalleryWidget	 *galleryWidget;
     ScatterPlot		 *scatterplot;
     TreeMap		 *treemap;
-    SpectralHitsDockWidget *spectralHitsDockWidget;
 
     SettingsForm   *settingsForm;
     PeakDetectionDialog *peakDetectionDialog;
@@ -151,13 +148,11 @@ public slots:
     void loadModel();
     void loadCompoundsFile();
     void loadCompoundsFile(QString filename);
-    void loadMethodsFolder(QString& methodsFolder);
 
     bool addSample(mzSample* sample);
     void compoundDatabaseSearch();
     void setUrl(QString url,QString link=QString::null);
     void setUrl(Compound*);
-    void setUrl(Reaction*);
     void setFormulaFocus(QString formula);
     void Align();
     void UndoAlignment();
@@ -201,7 +196,6 @@ public slots:
 
 
     TableDockWidget* addPeaksTable(QString title);
-    SpectralHitsDockWidget* addSpectralHitsTable(QString title);
     BackgroundPeakUpdate* newWorkerThread(QString funcName);
     QWidget* eicWidgetController();
 

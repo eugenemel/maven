@@ -53,7 +53,6 @@ Q_DECLARE_METATYPE(Compound*)
 Q_DECLARE_METATYPE(Scan*)
 Q_DECLARE_METATYPE(PeakGroup*)
 Q_DECLARE_METATYPE(mzSlice*)
-Q_DECLARE_METATYPE(Pathway*)
 Q_DECLARE_METATYPE(UserNote*)
 Q_DECLARE_METATYPE(mzSlice)
 
@@ -64,19 +63,11 @@ enum itemType {
 		ScanType,
 		EICType,
 		PeakType,
-		PathwayType,
 		mzSliceType, 
 		mzLinkType
 };
 
 extern Database DB; 
 
-struct compReactionCounts
-{
-		bool operator()(Compound* s1, Compound* s2) const
-		{
-				return s1->reactions.size() > s2->reactions.size();
-		}
-};
 
 #endif

@@ -27,7 +27,6 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     traindialog = new TrainDialog(this);
     connect(traindialog->saveButton,SIGNAL(clicked(bool)),SLOT(saveModel()));
     connect(traindialog->trainButton,SIGNAL(clicked(bool)),SLOT(Train()));
-    connect(treeWidget, SIGNAL(itemSelectionChanged()),SLOT(showSelectedGroup()));
 
     clusterDialog = new ClusterDialog(this);
     connect(clusterDialog->clusterButton,SIGNAL(clicked(bool)),SLOT(clusterGroups()));
@@ -95,7 +94,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     QToolButton *btnLoad = new QToolButton(toolBar);
     btnLoad->setIcon(QIcon(rsrcPath + "/fileopen.png"));
     btnLoad->setToolTip("Load Peaks");
-    connect(btnLoad, SIGNAL(clicked()), SLOT(loadPeakTableSQLITE()));
+    connect(btnLoad, SIGNAL(clicked()), SLOT(loadPeakTable()));
 
     QToolButton *btnGood = new QToolButton(toolBar);
     btnGood->setIcon(QIcon(rsrcPath + "/markgood.png"));
@@ -537,7 +536,8 @@ void TableDockWidget::exportGroupsToSpreadsheet() {
 }
 
 
-void TableDockWidget::showSelectedGroup() { 
+void TableDockWidget::showSelectedGroup() {
+    qDebug() << "TableDockWidget::showSelectedGroup()";
     //sortBy(treeWidget->header()->sortIndicatorSection());
     QTreeWidgetItem *item = treeWidget->currentItem();
     if (!item) return;
@@ -1210,11 +1210,7 @@ void TableDockWidget::loadPeakTable() {
             << "Maven XML Project File(*.mzroll)"
             << "XCMS peakTable Tab Delimited(*.tab *.csv *.txt *.tsv)";
 
-    QString fileName = QFileDialog::getOpenFileName(this,
-                                                    "Load Saved Peaks",
-                                                    dir,
-                                                    filters.join(";;"),
-                                                    &selFilter);
+    QString fileName = QFileDialog::getOpenFileName(this, "Load Saved Peaks", dir, filters.join(";;"), &selFilter);
     if (fileName.isEmpty()) return;
 
     if (selFilter == filters[0]) {

@@ -20,13 +20,6 @@ void SpectraMatching::findMatches() {
         cerr << "recomputeIsotopes() " << group << endl;
         mainwindow->isotopeWidget->setPeakGroup(group);
     }
-
-    //update isotopes in pathwayview
-    if (mainwindow->pathwayWidget ) {
-        if ( mainwindow->pathwayWidget->isVisible()) {
-            mainwindow->pathwayWidget->recalculateConcentrations();
-        }
-    }
     */
 }
 
@@ -69,7 +62,7 @@ void SpectraMatching::getFormValues() {
                double ints = _mz_int[1].simplified().toDouble();
                double minerr = _mz_int[2].simplified().toDouble();
                double maxerr = _mz_int[3].simplified().toDouble();
-               if (mz > 0 && ints >= 0) {
+              if (mz > 0 && ints >= 0) {
                 _mzsList << mz;
                 _intensityList << ints;
                 _intensityMaxErr << maxerr;
@@ -83,7 +76,7 @@ void SpectraMatching::getFormValues() {
                if (mz > 0 && ints >= 0 && maxerr >= 0) {
                 _mzsList << mz;
                 _intensityList << ints;
-                _intensityMaxErr << maxerr;
+               _intensityMaxErr << maxerr;
                }
            } else if (_mz_int.size() == 2) {
                double mz =   _mz_int[0].simplified().toDouble();
@@ -146,18 +139,15 @@ void SpectraMatching::doSearch() {
         int nscans = samples[i]->scanCount();
         for(int j=0; j< nscans; j++) {
             Scan* scan = samples[i]->scans[j];
-	    //if (scan->scannum != 7925) continue;
             double score=0;
             if(_algorithm == "Isotopic Pattern Search") {
                score = matchPattern(scan);
             } else if ( _algorithm == "Fragment Search") {
                score = scoreScan(scan);
             }
-
             //update progress
             if(j % 10 || j+1 == nscans) progressBar->setValue((j+1)/nscans*100);
         }
-
     }
 
     for(int i=0; i <matches.size(); i++ ) {

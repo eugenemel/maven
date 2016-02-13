@@ -40,20 +40,20 @@ public slots:
           void unhideFocusedGroups();
 
       //input from xml
-          void loadPeakTable();
-          void loadPeakTableXML(QString infile);
-          void loadPeakTableSQLITE(QString filename);
+        void loadPeakTable();
+        void loadPeakTableXML(QString infile);
+        void loadPeakTableSQLITE(QString filename);
 
       //output to xml
-	  void savePeakTable();
-          void savePeakTable(QString fileName);
-	  void writePeakTableXML(QXmlStreamWriter& stream);
+       void savePeakTable();
+       void savePeakTable(QString fileName);
+       void writePeakTableXML(QXmlStreamWriter& stream);
 
       //output to csv file
       void exportGroupsToSpreadsheet();
 	  void showSelectedGroup();
 	  void setGroupLabel(char label);
-	  void showPeakGroup(int row);
+      void showPeakGroup(int row);
 	  void showLastGroup();
 	  void showNextGroup();
 	  void Train();

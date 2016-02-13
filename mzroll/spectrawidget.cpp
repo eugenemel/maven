@@ -20,7 +20,7 @@ void SpectraWidget::initPlot() {
     _zoomFactor = 0;
     setScene(new QGraphicsScene(this));
     scene()->setItemIndexMethod(QGraphicsScene::BspTreeIndex);
-    scene()->setSceneRect(0, 0, width()-0, height()-0);
+    scene()->setSceneRect(10,10,this->width()-10, this->height()-10);
 
     setDragMode(QGraphicsView::RubberBandDrag);
     //setCacheMode(CacheBackground);
@@ -134,7 +134,7 @@ void SpectraWidget::setScan(Peak* peak) {
 
     _focusCoord = QPointF(peak->peakMz,peak->peakIntensity);
     _minX = peak->peakMz-2;
-    _maxX = peak->peakMz+4;
+    _maxX = peak->peakMz+6;
     _maxY = peak->peakIntensity*1.3;
     _minY = 0;
 
@@ -153,64 +153,68 @@ void SpectraWidget::overlaySpectralHit(SpectralHit& hit) {
         drawGraph();
         repaint();
 
-        double focusMz = hit.mzList.first();
-        int pos = _currentScan->findHighestIntensityPos(focusMz,hit.productPPM);
-        if(pos>=0) { 
-                _focusCoord.setX(focusMz);
-                _focusCoord.setY(_currentScan->intensity[pos]); 
-                setMzFocus(focusMz);
+        if(_currentScan) {
+            int pos = _currentScan->findHighestIntensityPos(hit.precursorMz,hit.productPPM);
+            if (pos > 0 && pos <= _currentScan->nobs()) {
+                _focusCoord.setX(hit.precursorMz);
+                _focusCoord.setY(_currentScan->intensity[pos]);
+            }
         }
 }
 
-void SpectraWidget::overlaySpectra(QVector<double>mzs, QVector<double>ints) {
+void SpectraWidget::overlayCompound(Compound* c) {
+   if(!_currentScan) return;
+   if(!c) return;
 
-    float ppmWindow = _spectralHit.productPPM;
-    double maxIntensity=_spectralHit.getMaxIntensity();
+   SpectralHit hit;
+   hit.scan = _currentScan;
+   hit.precursorMz = c->precursorMz;
+   hit.productPPM=1000;
 
-    QPen redpen(Qt::red, 3);
-    QPen bluepen(Qt::blue, 3);
-    for(int i=0; i < mzs.size(); i++) {
-        int pos = _currentScan->findHighestIntensityPos(mzs[i],ppmWindow);
-	int hitIntensity= 0.5;
-	if (i < ints.size() ) hitIntensity= ints[i];
+   for(int i=0; i < c->fragment_mzs.size(); i++) 	   hit.mzList << c->fragment_mzs[i];
+   for(int i=0; i < c->fragment_intensity.size(); i++) hit.intensityList << c->fragment_intensity[i];
+
+   overlaySpectralHit(hit);
+}
 
 
+void SpectraWidget::drawSpectalHitLines(SpectralHit& hit) {
+
+    float ppmWindow =    hit.productPPM;
+    double maxIntensity= hit.getMaxIntensity();
+
+    QPen redpen(Qt::red, 2);
+    QPen graypen(Qt::gray, 1); graypen.setStyle(Qt::DashDotLine);
+
+    for(int i=0; i < hit.mzList.size(); i++) {
+        int hitMz=hit.mzList[i];
+        int hitIntensity= 1;
+        if (i < hit.intensityList.size()) hitIntensity=hit.intensityList[i];
+
+        int x = toX(hitMz);
+        int y = toY(_maxY);
+
+        QGraphicsLineItem* line = new QGraphicsLineItem(x,y,x,toY(0),0);
+        line->setPen(graypen);
+        scene()->addItem(line);
+        _items.push_back(line);
+
+        //matched?
+        int pos = _currentScan->findHighestIntensityPos(hitMz,ppmWindow);
         if (pos > 0 && pos <= _currentScan->nobs()) {
             int x = toX(_currentScan->mz[pos]);
             int y = toY(_currentScan->intensity[pos]);
-            QGraphicsLineItem* line = new QGraphicsLineItem(x,y,x,toY(0),0);
-            line->setPen(bluepen);
-            scene()->addItem(line);
-            _items.push_back(line);
-        } else {
-            int x = toX(mzs[i]);
-            int y = toY(_maxY*0.75*hitIntensity/maxIntensity);
             QGraphicsLineItem* line = new QGraphicsLineItem(x,y,x,toY(0),0);
             line->setPen(redpen);
             scene()->addItem(line);
             _items.push_back(line);
         }
     }
-
-    /*
-    QPen bluepen(Qt::blue,3);
-    for(int i=0; i < mzs.size(); i++) {
-        int x = toX(mzs[i]+0.01);
-        int y = toY(_maxY*0.75);
-        if (i < ints.size()) y = toY(_maxY*0.75*ints[i]);   // qDebug()<< "Overlay: " << x << " " << y;
-        QGraphicsLineItem* line = new QGraphicsLineItem(x,y,x,toY(0),0);
-        line->setPen(bluepen);
-        scene()->addItem(line);
-        _items.push_back(line);
-    }
-    */
-
-    scene()->update();
 }
 
 void SpectraWidget::drawGraph() {
 
-    qDebug() << "showSpectra() mzrange= " << _minX << "-" << _maxX;
+
     //clean up previous plot
     if ( _arrow ) {
         _arrow->setVisible(false);
@@ -224,22 +228,25 @@ void SpectraWidget::drawGraph() {
     scene()->setSceneRect(10,10,this->width()-10, this->height()-10);
     Scan* scan = _currentScan;
     if (scan == NULL ) return;
-    mzSample* sample = scan->sample;
-    if ( sample == NULL ) return;
 
-    string sampleName = sample->sampleName;
-    QString polarity = "0";
-    scan->getPolarity() > 0 ? polarity = "Positive" : polarity = "Negative";
+    QColor sampleColor = QColor::fromRgb(0,0,0,255);
+    string sampleName =  ".";
+    QString polarity;
+    QString title;
 
-    QString title = tr("Sample:%1   Scan:%2   rt:%3   msLevel:%4  Ionization Mode:%5 ").arg(
-            QString(sampleName.c_str()),
-            QString::number(scan->scannum),
-            QString::number(scan->rt,'f',2),
-            QString::number(scan->mslevel),
-            polarity
-	);
-
-    QColor sampleColor = QColor::fromRgbF( sample->color[0], sample->color[1], sample->color[2], 1 );
+    if (scan->sample ) {
+         mzSample* sample = scan->sample;
+         sampleName = sample->sampleName;
+         scan->getPolarity() > 0 ? polarity = "Positive" : polarity = "Negative";
+         sampleColor = QColor::fromRgbF( sample->color[0], sample->color[1], sample->color[2], 1 );
+         title = tr("Sample:%1   Scan:%2   rt:%3   msLevel:%4  Ionization Mode:%5 ").arg(
+                             QString(sampleName.c_str()),
+                             QString::number(scan->scannum),
+                             QString::number(scan->rt,'f',2),
+                             QString::number(scan->mslevel),
+                             polarity
+                             );
+    }
 
     if (scan->precursorMz) {
         QString precursorMzLink= "PrecursorMz: " + QString::number(scan->precursorMz,'f',3);
@@ -250,7 +257,6 @@ void SpectraWidget::drawGraph() {
         QString precursorMzLink= " ProductMz: " + QString::number(scan->productMz,'f',3);
         title += precursorMzLink ;
     }
-
 
     this->setTitle(title);
 
@@ -342,7 +348,8 @@ void SpectraWidget::drawGraph() {
     }
 
     if (_spectralHit.scan != NULL && _spectralHit.scan->scannum == _currentScan->scannum ) {
-        overlaySpectra(_spectralHit.mzList, _spectralHit.intensityList);
+        drawSpectalHitLines(_spectralHit);
+        //overlaySpectra(_spectralHit.mzList, _spectralHit.intensityList);
     }
 
     addAxes();

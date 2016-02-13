@@ -35,7 +35,6 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     //remote url used to fetch compound lists, pathways, and notes
     connect(data_server_url, SIGNAL(textChanged(QString)), SLOT(getFormValues()));
     connect(scriptsFolderSelect, SIGNAL(clicked()), SLOT(selectScriptsFolder()));
-    connect(pathwaysFolderSelect, SIGNAL(clicked()), SLOT(selectPathwaysFolder()));
     connect(methodsFolderSelect, SIGNAL(clicked()), SLOT(selectMethodsFolder()));
     connect(RProgramSelect, SIGNAL(clicked()), SLOT(selectRProgram()));
 
@@ -99,8 +98,8 @@ void SettingsForm::setFormValues() {
 
 
 
-   QStringList folders;       folders << "scriptsFolder" << "methodsFolder" << "pathwaysFolder" << "Rprogram";
-   QList<QLineEdit*> items;    items  << scriptsFolder << methodsFolder << pathwaysFolder << Rprogram;
+   QStringList folders;       folders << "scriptsFolder" << "methodsFolder" << "Rprogram";
+   QList<QLineEdit*> items;    items  << scriptsFolder << methodsFolder << Rprogram;
 
    unsigned int itemCount=0;
     foreach(QString itemName, folders) {
