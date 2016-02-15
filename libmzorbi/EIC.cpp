@@ -728,7 +728,7 @@ vector<Scan*> EIC::getFragmenationEvents() {
 }   
 
 void EIC::removeOverlapingPeaks() { 
-	for(int i=0; i <peaks.size(); i++ ) peaks[i].localMaxFlag=true;
+    for(unsigned int i=0; i <peaks.size(); i++ ) peaks[i].localMaxFlag=true;
 
     for(unsigned int i=0; i < peaks.size(); i++ ) {
 		Peak& a = peaks[i];
@@ -742,7 +742,7 @@ void EIC::removeOverlapingPeaks() {
 		}
 	}
 	vector<Peak>reduced;
-	for(int i=0; i < peaks.size(); i++ ) {
+    for(unsigned int i=0; i < peaks.size(); i++ ) {
 		if (peaks[i].localMaxFlag == true) reduced.push_back(peaks[i]);
 	}
 	peaks = reduced;

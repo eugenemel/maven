@@ -25,13 +25,13 @@ class Fragment {
 		Fragment* consensus; //consensus pattern build on brothers
 		vector<int>obscount; // vector size =  mzs vector size, with counts of number of times mz was observed
         map<int,string> annotations; //mz value annotations.. assume that values are sorted by mz
-		inline int nobs() { return mzs.size(); }
+        inline unsigned int nobs() { return mzs.size(); }
 
 		//empty constructor
         Fragment() { precursorMz = 0; polarity=1; scanNum=0; rt=0; collisionEnergy=0; consensus=NULL; precursorCharge=0; isDecoy=false; sortedBy=None; group=NULL;}
 
 		//build fragment based on MS2 scan
-		Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRatio,int maxFragmentSize) {
+        Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRatio,unsigned int maxFragmentSize) {
 			this->precursorMz = scan->precursorMz;
 			this->collisionEnergy = scan->collisionEnergy;
 			this->polarity = scan->getPolarity();
@@ -84,7 +84,7 @@ class Fragment {
 
 		void appendBrothers(Fragment* other) {
 			//copy other's brothers
-			for(int i=0; i < other->brothers.size(); i++ ) {
+            for(unsigned int i=0; i < other->brothers.size(); i++ ) {
 				this->brothers.push_back( other->brothers[i]);
 			}
 
@@ -126,7 +126,7 @@ class Fragment {
 		}
 
 
-        void printFragment(float productAmuToll,int limitTopX=10) {
+        void printFragment(float productAmuToll,unsigned int limitTopX=10) {
 			cerr << setprecision(10) << " preMz=" << precursorMz << " ce=" << this->collisionEnergy <<  " scan=" << this->scanNum << endl;
 			cerr << " mzs: \t";
             for(unsigned int i=0; i<mzs.size() && i < limitTopX; i++ ) {
@@ -214,14 +214,14 @@ class Fragment {
 		float avgMVH=0;
 		//compute retention time window
 		StatisticsVector<float>retentionTimes; retentionTimes.push_back(this->rt);
-		for(int i=0; i<brothers.size();i++ ) retentionTimes.push_back(brothers[i]->rt);
+        for(unsigned int i=0; i<brothers.size();i++ ) retentionTimes.push_back(brothers[i]->rt);
 
         float precursorMz =  consensus->precursorMz;
         float MW=consensus->precursorMz;
 
         //scan list
         string scanList = this->sampleName + "." + integer2string(this->scanNum);
-        for(int i=0; i<brothers.size();i++ )  scanList += ";" + brothers[i]->sampleName + "." + integer2string(brothers[i]->scanNum);
+        for(unsigned int i=0; i<brothers.size();i++ )  scanList += ";" + brothers[i]->sampleName + "." + integer2string(brothers[i]->scanNum);
 
         int consensusSize = this->brothers.size()+1;
 
@@ -279,7 +279,7 @@ class Fragment {
 
 		//compute retention time window
 		StatisticsVector<float>retentionTimes; retentionTimes.push_back(this->rt);
-		for(int i=0; i<brothers.size();i++ ) retentionTimes.push_back(brothers[i]->rt);
+        for(unsigned int i=0; i<brothers.size();i++ ) retentionTimes.push_back(brothers[i]->rt);
 
 		float medRt = retentionTimes.median();
 		float stdRt	 = sqrt(retentionTimes.variance());
@@ -324,7 +324,7 @@ class Fragment {
         for(int rank: ranks) { if(rank != -1) s.numMatches++; }
         s.fractionMatched = s.numMatches / a->nobs();
         s.spearmanRankCorrelation = spearmanRankCorrelation(ranks);
-        s.ticMatched = ticMatched(ranks,b);
+        s.ticMatched = ticMatched(ranks);
         s.mzFragError =  mzErr(ranks,b);
         s.dotProduct = dotProduct(ranks,b);
 
@@ -341,7 +341,7 @@ class Fragment {
 		vector<int>ranks = compareRanks(a,b,productAmuToll);
 		//return spearmanRankCorrelation(ranks);
 		//return fractionMatched(ranks);
-		return ticMatched(ranks,b);
+        return ticMatched(ranks);
 	}
 
 	static vector<int> compareRanks( Fragment* a, Fragment* b, float productAmuToll) { 
@@ -353,7 +353,8 @@ class Fragment {
 		    	if (abs(a->mzs[i]-b->mzs[j])<productAmuToll) { ranks[i] = j; break; }   //this needs optimization.. 
 		    }
 		}
-		if (verbose) { cerr << " compareranks: "; for(int i=0; i < ranks.size(); i++ ) cerr << ranks[i] << " "; }
+        if (verbose) { cerr << " compareranks: ";
+            for(unsigned int i=0; i < ranks.size(); i++ ) cerr << ranks[i] << " "; }
 		return ranks;
 	}
 
@@ -366,7 +367,7 @@ class Fragment {
 			int pos = b->findClosestHighestIntensityPos(a->mzs[i],productAmuToll);
 			ranks[i] = pos;
 		}
-		if (verbose) { cerr << " compareranks: "; for(int i=0; i < ranks.size(); i++ ) cerr << ranks[i] << " "; }
+        if (verbose) { cerr << " compareranks: "; for(unsigned int i=0; i < ranks.size(); i++ ) cerr << ranks[i] << " "; }
 		return ranks;
 	}
 
@@ -416,10 +417,10 @@ class Fragment {
 	}
 
 
-    vector<int> intensityOrderDesc() {
-        int nobs = intensity_array.size();
+    vector<unsigned int> intensityOrderDesc() {
+        unsigned int nobs = intensity_array.size();
         vector<pair<float,int> > _pairsarray(nobs);
-        vector<int>position(nobs);
+        vector<unsigned int>position(nobs);
         for(unsigned int pos=0; pos < nobs; pos++ ) {
             _pairsarray[pos] = make_pair(intensity_array[pos],pos);
         }
@@ -428,13 +429,13 @@ class Fragment {
        sort(_pairsarray.rbegin(), _pairsarray.rend());
 
        //return positions in order from highest to lowest intenisty
-       for(int i=0; i < _pairsarray.size(); i++) { position[i] = _pairsarray[i].second; }
+       for(unsigned int i=0; i < _pairsarray.size(); i++) { position[i] = _pairsarray[i].second; }
        return position;
     }
 
 
     vector<int> mzOrderInc() {
-        int nobs = mzs.size();
+        unsigned int nobs = mzs.size();
         vector<pair<float,int> > _pairsarray(nobs);
         vector<int>position(nobs);
         for(unsigned int pos=0; pos < nobs; pos++ ) {
@@ -445,13 +446,13 @@ class Fragment {
        sort(_pairsarray.begin(), _pairsarray.end());
 
        //return positions in order from highest to lowest intenisty
-       for(int i=0; i < _pairsarray.size(); i++) { position[i] = _pairsarray[i].second; }
+       for(unsigned int i=0; i < _pairsarray.size(); i++) { position[i] = _pairsarray[i].second; }
        return position;
     }
 
 
     void sortByIntensity() { 
-        vector<int>order = intensityOrderDesc();
+        vector<unsigned int>order = intensityOrderDesc();
         vector<float> a(mzs.size());
 		vector<float> b(intensity_array.size());
 		vector<int> c(obscount.size());
@@ -542,7 +543,7 @@ class Fragment {
 	double fractionMatched(const vector<int>& X) {
 		if (X.size() == 0) return 0;
 		int matchCount=0;
-		for(int i=0; i<X.size();i++ ) {	if (X[i] != -1 ) matchCount++; }
+        for(unsigned int i=0; i<X.size();i++ ) {	if (X[i] != -1 ) matchCount++; }
 		//if (verbose) { cerr << "\t\t fractionMatched:" << matchCount << endl; }
 		return ((double)matchCount / X.size());
 	}
@@ -550,13 +551,13 @@ class Fragment {
     double mzErr(const vector<int>& X, Fragment* other) {
         if (X.size() == 0) return 0;
         double ERR=1000;
-        for(int i=0; i<X.size(); i++ ) if (X[i] != -1) ERR = POW2( mzs[i] - other->mzs[ X[i] ]);
+        for(unsigned int i=0; i<X.size(); i++ ) if (X[i] != -1) ERR = POW2( mzs[i] - other->mzs[ X[i] ]);
         return sqrt(ERR);
     }
 
     double totalIntensity() {
        double TIC=0;
-       for(int i=0; i<this->nobs(); i++) TIC += this->intensity_array[i];
+       for(unsigned int i=0; i<this->nobs(); i++) TIC += this->intensity_array[i];
        return TIC;
     }
 
@@ -566,7 +567,7 @@ class Fragment {
         double thisIntensity = this->totalIntensity();
         double otherIntensity = other->totalIntensity();
 
-        for(int i=0; i<X.size(); i++ )  {
+        for(unsigned int i=0; i<X.size(); i++ )  {
             if (X[i] != -1)  {
                 dotP += (this->intensity_array[i])/thisIntensity * (other->intensity_array[X[i]])/otherIntensity;
             }
@@ -574,12 +575,12 @@ class Fragment {
         return dotP;
     }
 
-	double ticMatched(const vector<int>& X, Fragment* other) {
+    double ticMatched(const vector<int>& X) {
 		if (X.size() == 0) return 0;
         double TIC = this->totalIntensity();
         double matchedTIC=0;
-        for(int i=0; i<this->nobs(); i++) TIC += this->intensity_array[i];
-        for(int i=0; i<X.size(); i++ ) if (X[i] != -1) matchedTIC += this->intensity_array[i];
+        for(unsigned int i=0; i<this->nobs(); i++) TIC += this->intensity_array[i];
+        for(unsigned int i=0; i<X.size(); i++ ) if (X[i] != -1) matchedTIC += this->intensity_array[i];
         /*
 		for(int i=0; i<other->nobs();i++ ) TIC += other->intensity_array[i]; 
         for(int i=0; i<X.size();     i++ ) if (X[i] != -1) matchedTIC += other->intensity_array[ X[i] ];
@@ -588,13 +589,13 @@ class Fragment {
     }
 
     bool hasMz(double mzValue, double amuTolr) {
-        for(int i=0; i < nobs(); i++)  if (abs(mzs[i]-mzValue) < amuTolr) return true;
+        for(unsigned int i=0; i < nobs(); i++)  if (abs(mzs[i]-mzValue) < amuTolr) return true;
         return false;
     }
 
     bool hasNLS(double NLS, double amuTolr) {
         double mzValue = precursorMz-NLS;
-        for(int i=0; i < nobs(); i++)  if (abs(mzs[i]-mzValue) < amuTolr) return true;
+        for(unsigned int i=0; i < nobs(); i++)  if (abs(mzs[i]-mzValue) < amuTolr) return true;
         return false;
     }
 

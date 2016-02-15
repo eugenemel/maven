@@ -73,7 +73,11 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
                 break;
         	case QtFatalMsg:
                 cerr << "Fetal: " << msg.toStdString() << endl;
-				break;
+		break;
+
+                default:
+                cerr << "Debug: " << msg.toStdString() << endl;
+
                 //abort();
         }
         //QFile outFile("debuglog.txt");

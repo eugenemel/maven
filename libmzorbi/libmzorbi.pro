@@ -2,7 +2,7 @@ include(../mzroll.pri)
 DESTDIR = $$OUTPUT_DIR/lib
 
 TEMPLATE=lib
-CONFIG += staticlib warn_on console silent
+CONFIG += staticlib
 TARGET = mzorbi
 
 LIBS += -L. -lcdfread -lnetcdf

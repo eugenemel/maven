@@ -11,11 +11,11 @@ unix {
 INSTALL_PREFIX=$$(DESTDIR)$$INSTALL_PREFIX
 DEFINES += INSTALL_LIBDIR=\\\"$$INSTALL_LIBDIR\\\"
 
-QMAKE_CXXFLAGS_RELEASE += -O3 -Wall -Wextra -Wno-sign-compare
-QMAKE_CXXFLAGS_DEBUG   += -g -Wall -Wextra -Wno-sign-compare
+QMAKE_CXXFLAGS_RELEASE += -O3 -Wall -Wno-sign-conversion -Wno-c++11-extensions -Wno-sign-compare
+QMAKE_CXXFLAGS_DEBUG   += -g  -Wall -Wno-sign-conversion -Wno-c++11-extensions -Wno-sign-compare
 
 QT += core
-CONFIG += silent exceptions
+CONFIG += exceptions
 OBJECTS_DIR = tmp
 MOC_DIR = tmp
 UI_DIR   =  tmp

@@ -1,4 +1,4 @@
-#include "tabledockwidget.h";
+#include "tabledockwidget.h"
 
 TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     setAllowedAreas(Qt::AllDockWidgetAreas);

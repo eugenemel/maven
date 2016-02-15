@@ -283,7 +283,7 @@ vector<Compound*> Database::loadCompoundCSVFile(string filename){
 
     //assume that files are tab delimited, unless matched ".csv", then comma delimited
     char sep='\t';
-    if(filename.find(".csv") != -1 || filename.find(".CSV") != -1) sep=',';
+    if(filename.find(".csv") > 0 || filename.find(".CSV") > 0 ) sep=',';
 
     cerr << filename << " sep=" << sep << endl;
     while ( getline(myfile,line) ) {

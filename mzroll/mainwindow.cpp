@@ -1584,7 +1584,7 @@ void MainWindow::getLinks(Peak* peak ) {
 
     vector<mzLink> links = peak->findCovariants();
     vector<mzLink> linksX = SpectraWidget::findLinks(peak->peakMz, scan, ppm, ionizationMode);
-    for(int i=0; i < linksX.size(); i++ ) links.push_back(linksX[i]);
+    for(unsigned int i=0; i < linksX.size(); i++ ) links.push_back(linksX[i]);
 
     //correlations
     float rtmin = peak->rtmin-1;

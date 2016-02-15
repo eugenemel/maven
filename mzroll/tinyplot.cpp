@@ -8,6 +8,7 @@ TinyPlot::TinyPlot(QGraphicsItem* parent, QGraphicsScene *scene):QGraphicsItem(p
 	//QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect(this);
 	//effect->setOffset(8); 
 	//setGraphicsEffect(effect);
+    if(scene) scene->addItem(this);
 }
 
 

@@ -39,7 +39,6 @@ class SpectralHit {
 		rank=0; 
 		decoy=false;
 		charge=0;
-		int scannum;
 	}
 
         double getMaxIntensity() { 
