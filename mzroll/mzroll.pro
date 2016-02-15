@@ -1,8 +1,8 @@
 include(../mzroll.pri)
 #TEMPLATE = app
-CONFIG += qt thread warn_off sql svg console precompile_header
+CONFIG += qt thread sql svg console std++14
 QMAKE_STRIP=echo
-PRECOMPILED_HEADER  = stable.h
+#PRECOMPILED_HEADER  = stable.h
 
 #add version information during compilation
 VERSION="20160118"
@@ -20,6 +20,7 @@ DESTDIR = ../bin
 
 QT += sql xml printsupport opengl
 QT += network
+
 
 #DEFINES += QT_CORE_LIB QT_DLL QT_NETWORK_LIB QT_SQL_LIB QT_THREAD_LIB
 #INCLUDEPATH +=  /usr/include/qt4/QtXml/ /usr/include/qt/QtSql

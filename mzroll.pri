@@ -11,8 +11,8 @@ unix {
 INSTALL_PREFIX=$$(DESTDIR)$$INSTALL_PREFIX
 DEFINES += INSTALL_LIBDIR=\\\"$$INSTALL_LIBDIR\\\"
 
-QMAKE_CXXFLAGS_RELEASE += -O3 -Wall -Wno-sign-compare
-QMAKE_CXXFLAGS_DEBUG   += -O2 -g -Wall -Wno-sign-compare
+QMAKE_CXXFLAGS_RELEASE += -O3 -Wall -Wextra -Wno-sign-compare
+QMAKE_CXXFLAGS_DEBUG   += -g -Wall -Wextra -Wno-sign-compare
 
 QT += core
 CONFIG += silent exceptions

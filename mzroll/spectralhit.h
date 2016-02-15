@@ -1,6 +1,10 @@
 #ifndef SPECTRALHIT
 #define SPECTRALHIT
 
+#include "mzSample.h"
+#include <QString>
+#include <QVector>
+
 class SpectralHit {
 
 	public: 
@@ -62,5 +66,5 @@ class SpectralHit {
 	static bool compMVH(SpectralHit* a, SpectralHit* b ) { return a->mvh > b->mvh; }
 
 };
-Q_DECLARE_METATYPE(SpectralHit*);
+//Q_DECLARE_METATYPE(SpectralHit*);
 #endif

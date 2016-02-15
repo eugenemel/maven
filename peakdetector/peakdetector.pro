@@ -4,7 +4,7 @@ TEMPLATE = app
 TARGET = peakdetector
 DESTDIR = ../bin
 CONFIG -= network gui opengl
-CONFIG += warn_off xml sql qt std++14
+CONFIG += sql qt std++14
 
 QT += sql
 QT -= network gui opengl std++14
