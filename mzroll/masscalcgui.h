@@ -39,8 +39,7 @@ private slots:
 private:
       MainWindow* _mw;
       MassCalculator mcalc;
-	  std::vector< MassCalculator::Match* > matches;
-      std::vector<Compound*> sortedcompounds;
+      std::vector<MassCalculator::Match> matches;
 
 	  double _mz;
 	  double _charge;
@@ -48,7 +47,6 @@ private:
 
       void pubChemLink(QString formula);
       void keggLink(QString formula);
-      void setupSortedCompoundsDB();
       
 };
 

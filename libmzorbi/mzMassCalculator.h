@@ -11,6 +11,7 @@
 
 class Compound;
 class Isotope;
+class Adduct;
 
 
 using namespace std;
@@ -25,20 +26,21 @@ using namespace std;
 
 class MassCalculator { 
 
-
     public:
         enum IonizationType { ESI=0, EI=1};
         static IonizationType ionizationType;
 
     typedef struct {
         std::string name;
-        double mass;
-        double diff;
-		Compound* compoundLink;
+        std::string formula;
+        double mass=0;
+        double diff=0;
+        Compound* compoundLink=NULL;
+        Adduct*   adductLink=NULL;
     } Match;
 
 
-    MassCalculator(){};
+    MassCalculator(){}
     double computeNeutralMass(string formula);
     double computeMass(string formula, int polarity);
     double computeC13IsotopeMass(string formula);
@@ -47,20 +49,14 @@ class MassCalculator {
     map<string,int> getComposition(string formula);
     void matchMass(double mass, double ppm);
     string prettyName(int c, int h, int n, int o, int p, int s);
-    void enumerateMasses(double inputMass, double charge, double maxdiff, vector<Match*>& matches);
-
-    vector<Isotope> computeIsotopes(string formula, int polarity);
+    vector<Match> enumerateMasses(double inputMass, double charge, double maxdiff);
     double adjustMass(double mass,int charge);
 
-    static bool compDiff(const Match* a, const Match* b ) { return a->diff < b->diff; }
+    vector<Isotope> computeIsotopes(string formula, int polarity);
 
-
+    static bool compDiff(const Match& a, const Match& b ) { return a.diff < b.diff; }
     private:
         double getElementMass(string elmnt);
-
-
-
-
 
 };
 

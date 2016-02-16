@@ -21,16 +21,15 @@ void MassCalcWidget::setMass(float mz) {
 
     lineEdit->setText(QString::number(mz,'f',5)); 
     _mz = mz; 
-    delete_all(matches); 
+    //delete_all(matches);
 	matches.resize(0); //clean up
     getMatches();
     showTable();
 }
 
 void MassCalcWidget::setCharge(float charge) { 
-
-                ionization->setValue(charge);
-                _charge=charge;
+    ionization->setValue(charge);
+    _charge=charge;
 }
 void MassCalcWidget::setPPM(float diff) { maxppmdiff->setValue(diff); _ppm=diff; }
 
@@ -43,13 +42,18 @@ void MassCalcWidget::compute() {
 	 if (!isDouble) return;
 	 cerr << "massCalcGui:: compute() " << _charge << " " << _mz << endl;
 
-     delete_all(matches); 
+     //delete_all(matches);
 	 matches.resize(0); //clean up
 
-	_mw->setStatusText("Searching for formulas..");
-     mcalc.enumerateMasses(_mz,_charge,_ppm, matches);	
-	 getMatches();
-	_mw->setStatusText(tr("Found %1 formulas").arg(matches.size()));
+    matches = DB.findMathchingCompounds(_mz,_ppm,_charge);
+
+    if (_mz>0 and matches.size()==0) {
+        _mw->setStatusText("Searching for formulas..");
+        //matches=mcalc.enumerateMasses(_mz,_charge,_ppm);
+    }
+
+
+    _mw->setStatusText(tr("Found %1 formulas").arg(matches.size()));
 
      showTable(); 
 }
@@ -59,32 +63,24 @@ void MassCalcWidget::showTable() {
     QTableWidget *p = mTable; 
     p->setUpdatesEnabled(false); 
     p->clear(); 
-    p->setColumnCount( 5 );
-    p->setRowCount(  matches.size() ) ; 
-    p->setHorizontalHeaderLabels(  QStringList() << "Formula" << "Compound" << "Mass" << "ppmDiff" << "DB");
+    p->setColumnCount(3);
+    p->setRowCount( matches.size() ) ;
+    p->setHorizontalHeaderLabels(  QStringList() << "Compound" << "Mass" << "ppmDiff");
     p->setSortingEnabled(false);
     p->setUpdatesEnabled(false);
     
     for(unsigned int i=0;  i < matches.size(); i++ ) {
         //no duplicates in the list
-        Compound* c = matches[i]->compoundLink;
-        QString compoundName="";
-        if (c != NULL) compoundName = QString(c->name.c_str());
-        QString databaseName="";
-        if(c != NULL ) databaseName = QString(c->db.c_str());
-        QString item1 = QString(matches[i]->name.c_str() );
-        QString item2 = QString(compoundName);
-        QString item3 = QString::number( matches[i]->mass , 'f', 4);
-        QString item4 = QString::number( matches[i]->diff , 'f', 4);
-        QString item5 = QString(databaseName);
+        Compound* c = matches[i].compoundLink;
+        QString item1 = QString(matches[i].name.c_str() );
+        QString item2 = QString::number( matches[i].mass , 'f', 4);
+        QString item3 = QString::number( matches[i].diff , 'f', 4);
 
-		QTableWidgetItem* item = new QTableWidgetItem(item1,0);
+        QTableWidgetItem* item = new QTableWidgetItem(item1,0);
 
         p->setItem(i,0, item );
         p->setItem(i,1, new QTableWidgetItem(item2,0));
         p->setItem(i,2, new QTableWidgetItem(item3,0)); 
-        p->setItem(i,3, new QTableWidgetItem(item4,0));
-        p->setItem(i,4, new QTableWidgetItem(item5,0));
 		if (c != NULL) item->setData(Qt::UserRole,QVariant::fromValue(c));
     }
 
@@ -94,24 +90,16 @@ void MassCalcWidget::showTable() {
 
 }
 
-void MassCalcWidget::setupSortedCompoundsDB() { 
-    sortedcompounds.clear();
-    sortedcompounds.resize(DB.compoundsDB.size());
-    copy(DB.compoundsDB.begin(), DB.compoundsDB.end(),   sortedcompounds.begin());
-    sort(sortedcompounds.begin(), sortedcompounds.end(), Compound::compMass);
-}
-
 QSet<Compound*> MassCalcWidget::findMathchingCompounds(float mz, float ppm, float charge) {
-	if (sortedcompounds.size() != DB.compoundsDB.size() ) { setupSortedCompoundsDB(); }
 
 	QSet<Compound*>uniqset;
     MassCalculator mcalc;
     Compound x("find", "", "",0);
     x.mass = mz-2;
-    vector<Compound*>::iterator itr = lower_bound(sortedcompounds.begin(), sortedcompounds.end(), &x, Compound::compMass);
+    vector<Compound*>::iterator itr = lower_bound(DB.compoundsDB.begin(), DB.compoundsDB.end(), &x, Compound::compMass);
 
 	//cerr << "findMathchingCompounds() mz=" << mz << " ppm=" << ppm << " charge=" <<  charge;
-    for(;itr != sortedcompounds.end(); itr++ ) {
+    for(;itr != DB.compoundsDB.end(); itr++ ) {
         Compound* c = *itr; if (!c) continue;
         double cmass = mcalc.computeMass(c->formula, charge);
         if ( mzUtils::ppmDist((double) cmass, (double) mz) < ppm && !uniqset.contains(c) ) uniqset << c;
@@ -121,15 +109,7 @@ QSet<Compound*> MassCalcWidget::findMathchingCompounds(float mz, float ppm, floa
 }
 
 void MassCalcWidget::getMatches() {
-	QSet<Compound*> compounds = findMathchingCompounds(_mz,_ppm,_charge);
-	foreach(Compound* c, compounds) {
-          MassCalculator::Match* m = new MassCalculator::Match();
-          m->name = c->formula;
-          m->mass = mcalc.computeMass(c->formula,_charge);
-          m->diff = mzUtils::ppmDist((double) m->mass,(double) _mz);
-          m->compoundLink = c;
-          matches.push_back(m);
-    }
+    matches = DB.findMathchingCompounds(_mz,_ppm,_charge);
 }
 
 void MassCalcWidget::pubChemLink(QString formula){
@@ -149,29 +129,19 @@ void MassCalcWidget::keggLink(QString formula){
 }
 
 void MassCalcWidget::showCellInfo(int row, int col, int lrow, int lcol) {
-	
-	lrow=lcol=0;
-    if ( row < 0 || col < 0 )  return;
-    if ( row < mTable->rowCount()  ) {
 
-		QVariant v = mTable->item(row,0)->data(Qt::UserRole);
-    	Compound*  c =  v.value<Compound*>();
+    int mNum = row-1; //header row
+    if (matches.size() == 0 or mNum<0 or mNum>matches.size()) return;
 
-		if ( c) { 
-			_mw->setCompoundFocus(c); 
-			return;
-		}
+    MassCalculator::Match m = matches[mNum];
+    if(m.mass)  _mw->getEicWidget()->setMzSlice(m.mass);
 
-        QString formula = mTable->item(row,0)->text();
-		if (!formula.isEmpty()) {
-			_mw->setFormulaFocus(formula);
-			return;
-		}
-
+    if (m.compoundLink) {
+        _mw->fragmenationSpectraWidget->overlayCompound(m.compoundLink);
     }
 }
 
 MassCalcWidget::~MassCalcWidget() { 
-    delete_all(matches); 
+    //delete_all(matches);
     matches.resize(0); 
 }

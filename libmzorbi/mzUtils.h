@@ -161,7 +161,7 @@ void printF(vector<T>& my_vector) {
 template <typename T>
 void delete_all(vector<T>& my_vector) {
 	for (unsigned int i = 0; i < my_vector.size(); i++ ) { 
-		if (  my_vector[i] != NULL ) { 
+        if ( my_vector[i] != NULL ) {
 			try { delete(my_vector[i]);  my_vector[i] = NULL; }
 			catch(...) { cerr << "delete_all() sigfaulting.. "; }
 		}

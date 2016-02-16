@@ -543,7 +543,6 @@ void SpectraWidget::setMzFocus(float mz) {
 
     if ( bestMatchDiff < 1 ) {
 		float bestMz = _currentScan->mz[bestMatch];
-
         mainwindow->setMzValue(bestMz);
         mainwindow->massCalcWidget->setCharge(_currentScan->getPolarity());
         mainwindow->massCalcWidget->setMass(bestMz);
@@ -580,9 +579,11 @@ void SpectraWidget::mouseMoveEvent(QMouseEvent* event){
     int nearestPos = findNearestMz(pos);
     if (nearestPos >= 0) {
 		_nearestCoord = QPointF(_currentScan->mz[nearestPos], _currentScan->intensity[nearestPos]);
-		drawArrow(_currentScan->mz[nearestPos], _currentScan->intensity[nearestPos], invX(pos.x()), invY(pos.y()));
-        if (mainwindow->massCalcWidget->isVisible())
-			mainwindow->massCalcWidget->setMass(_currentScan->mz[nearestPos]);
+        drawArrow(_currentScan->mz[nearestPos], _currentScan->intensity[nearestPos], invX(pos.x()), invY(pos.y()));
+
+        //search is too slow
+        //if (mainwindow->massCalcWidget->isVisible())
+        //	  mainwindow->massCalcWidget->setMass(_currentScan->mz[nearestPos]);
     } else {
         _vnote->hide(); _note->hide(); _varrow->hide(); _arrow->hide();
     }

@@ -239,8 +239,9 @@ vector<Isotope> MassCalculator::computeIsotopes(string formula, int charge) {
     return isotopes;
 }
 
-void MassCalculator::enumerateMasses(double inputMass, double charge, double maxdiff, vector<Match*>& matches) {
+vector<MassCalculator::Match> MassCalculator::enumerateMasses(double inputMass, double charge, double maxdiff) {
 
+    vector<MassCalculator::Match>matches;
     if (charge > 0 ) inputMass = inputMass*abs(charge)-HMASS*abs(charge);
     if (charge < 0 ) inputMass = inputMass*abs(charge)+HMASS*abs(charge);
 
@@ -263,11 +264,12 @@ void MassCalculator::enumerateMasses(double inputMass, double charge, double max
 
                             if ( diff < maxdiff) {
                                 string name = prettyName(c,h,n,o,p,s);
-                                MassCalculator::Match* m  = new MassCalculator::Match();
-                                m->name=name;
-                                m->mass=c12;
-                                m->diff= diff;
-                                m->compoundLink = NULL;
+                                MassCalculator::Match m;
+                                m.mass=c12;
+                                m.diff= diff;
+                                m.compoundLink = NULL;
+                                m.adductLink=NULL;
+                                m.formula=m.name=name;
                                 matches.push_back(m);
                             }
                         }

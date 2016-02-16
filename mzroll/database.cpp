@@ -56,6 +56,8 @@ int Database::loadCompoundsFile(QString filename) {
 
     deleteCompoundsSQL(dbname.c_str());
     saveCompoundsSQL(compounds);
+
+    sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
     return compounds.size();
 }
 
@@ -137,7 +139,7 @@ set<Compound*> Database::findSpeciesByMass(float mz, float ppm) {
 
     Compound x("find", "", "",0);
     x.mass = mz-(mz/1e6*ppm);;
-    deque<Compound*>::iterator itr = lower_bound(
+    vector<Compound*>::iterator itr = lower_bound(
             compoundsDB.begin(),compoundsDB.end(), 
             &x, Compound::compMass );
 
@@ -191,6 +193,30 @@ Compound* Database::findSpeciesByPrecursor(float precursorMz, float productMz, i
 				if ( d < dist) { x = compoundsDB[i]; dist=d; }
 		}
 		return x;
+}
+
+
+vector<MassCalculator::Match> Database::findMathchingCompounds(float mz, float ppm, float charge) {
+    vector<MassCalculator::Match>uniqset;
+    MassCalculator mcalc;
+
+    for(Compound* c: compoundsDB) {
+        float parentMass = mcalc.computeNeutralMass(c->formula);
+        for(Adduct* a: adductsDB ) {
+            if (SIGN(a->charge) != SIGN(charge)) continue;
+                float adductMass=a->computeAdductMass(parentMass);
+                if (mzUtils::ppmDist((double) adductMass, (double) mz) < ppm ) {
+                    MassCalculator::Match match;
+                    match.name = c->name + " : " + a->name;
+                    match.adductLink = a;
+                    match.compoundLink = c;
+                    match.mass=adductMass;
+                    match.diff = mzUtils::ppmDist((double) adductMass, (double) mz);
+                    uniqset.push_back(match);
+                }
+        }
+     }
+    return uniqset;
 }
 
 void Database::saveRetentionTime(Compound* c, float rt, QString method) {
@@ -388,6 +414,8 @@ vector<Compound*> Database::loadCompoundCSVFile(string filename){
         }
     }
     myfile.close();
+
+    sort(compoundSet.begin(),compoundSet.end(), Compound::compMass);
     return compoundSet;
 }
 
