@@ -21,16 +21,8 @@ void mzFileIO::loadSamples(QStringList& filenames) {
     start();
 }
 
-mzSample* mzFileIO::loadSample(QString filename){
-
-    //check if file exists
-    QFile file(filename);
-    QString sampleName = file.fileName();	//only name of the file, without folder location
-
-    if (!file.exists() ) { 	//couldn't fine this file.. check localdirectory
-        qDebug() << "Can't find file " << filename; return 0;
-    }
-
+QString mzFileIO::shortSampleName(QString fileName) {
+    QString sampleName = fileName;
     sampleName.replace(QRegExp(".*/"),"");
     sampleName.replace(".mzCSV","",Qt::CaseInsensitive);
     sampleName.replace(".mzdata","",Qt::CaseInsensitive);
@@ -41,8 +33,18 @@ mzSample* mzFileIO::loadSample(QString filename){
     sampleName.replace(".xml","",Qt::CaseInsensitive);
     sampleName.replace(".cdf","",Qt::CaseInsensitive);
     sampleName.replace(".raw","",Qt::CaseInsensitive);
+    return sampleName;
+}
 
-    if (sampleName.isEmpty()) return NULL;
+mzSample* mzFileIO::loadSample(QString filename){
+
+    //check if file exists
+    QFile file(filename);
+
+    if (!file.exists() ) { 	//couldn't fine this file.. check localdirectory
+        qDebug() << "Can't find file " << filename; return 0;
+    }
+
     mzSample* sample = NULL;
     QTime timer; timer.start();
 
@@ -63,14 +65,13 @@ mzSample* mzFileIO::loadSample(QString filename){
     qDebug() << "loadSample time (msec) = " << timer.elapsed();
 
     if ( sample && sample->scans.size() > 0 ) {
-        sample->sampleName = string( sampleName.toLatin1().data() );
         sample->enumerateSRMScans();
 
         //set min and max values for rt
         sample->calculateMzRtRange();
 
         //set file path
-        sample->fileName = filename.toStdString();
+        sample->fileName = file.fileName().toStdString();
 
         if (filename.contains("blan",Qt::CaseInsensitive)) sample->isBlank = true;
         return sample;

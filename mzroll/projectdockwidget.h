@@ -5,7 +5,9 @@
 #include "mzSample.h"
 #include "mainwindow.h"
 #include "projectDB.h"
+#include "mzfileio.h"
 
+class mzFileIO;
 
 class ProjectDockWidget : public QDockWidget
 {
@@ -45,6 +47,7 @@ private slots:
     void dropEvent (QDropEvent*event);
     void unloadSample();
     void filterTreeItems(QString filterString);
+    void getSampleInfoSQLITE();
 
 private:
     QTreeWidgetItem* getParentFolder(QString filename);
@@ -57,6 +60,7 @@ private:
     QColor  lastUsedSampleColor;
 
     ProjectDB* currentProject;
+    mzFileIO*  fileLoader;
 
 
 };

@@ -246,7 +246,7 @@ void ProjectDB::loadGroupPeaks(PeakGroup* parent) {
      QSqlQuery query(projectDB);
      query.prepare("select P.*, S.name as sampleName from peaks P, samples S where P.sampleId = S.sampleId and P.groupId = ?");
      query.bindValue(0,parent->groupId);
-     qDebug() << "loadin peaks for group " << parent->groupId;
+     //qDebug() << "loadin peaks for group " << parent->groupId;
      query.exec();
 
      while (query.next()) {
@@ -292,7 +292,7 @@ void ProjectDB::loadGroupPeaks(PeakGroup* parent) {
             for(int i=0; i< samples.size(); i++ ) {
                 if (samples[i]->sampleName == sampleName ) { p.setSample(samples[i]); break;}
             }
-            cerr << "\t\t\t" << p.getSample() << " " << p.rt << endl;
+            //cerr << "\t\t\t" << p.getSample() << " " << p.rt << endl;
             parent->addPeak(p);
         }
 }

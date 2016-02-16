@@ -69,9 +69,25 @@ void mzSample::addScan(Scan*s ) {
         s->scannum=scans.size()-1;
 }
 
+string mzSample::cleanSampleName(string sampleName) {
+        unsigned int pos =sampleName.find_last_of("/");
+        if (pos != std::string::npos) {
+                sampleName=sampleName.substr(pos+1, sampleName.length());
+        }
+
+        pos=sampleName.find_last_of("\\");
+        if (pos != std::string::npos) {
+                sampleName=sampleName.substr(pos+1, sampleName.length());
+        }
+        return sampleName;
+
+}
+
+
 void mzSample::loadSample(const char* filename) {
 
     string filenameString = string(filename);
+    this->sampleName = cleanSampleName(filename);
     this->fileName = filenameString;
 
     if (mystrcasestr(filename,".mzCSV") != NULL ) {

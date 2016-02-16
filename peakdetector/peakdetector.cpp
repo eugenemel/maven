@@ -132,7 +132,6 @@ bool isC12Parent(Scan* scan, float monoIsotopeMz);
 bool isMonoisotope(PeakGroup* grp);
 
 vector<mzSlice*> getSrmSlices();
-string cleanSampleName( string sampleName);
 
 void matchFragmentation();
 void writeMS2SimilarityMatrix(string filename);
@@ -634,8 +633,7 @@ void loadSamples(vector<string>&filenames) {
 //          cout << "Thread # " << omp_get_thread_num() << endl;
 			cerr << "Loading " << filenames[i] << endl;
 			mzSample* sample = new mzSample();
-			sample->loadSample(filenames[i].c_str());
-			sample->sampleName = cleanSampleName(filenames[i]);
+            sample->loadSample(filenames[i].c_str());
 
             if ( sample->scans.size() >= 1 ) {
                     sample->setSampleOrder(sampleOrder++);
@@ -649,21 +647,6 @@ void loadSamples(vector<string>&filenames) {
 			}
 		}
 		cerr << "loadSamples done: loaded " << samples.size() << " samples\n";
-}
-
-string cleanSampleName( string sampleName) { 
-		unsigned int pos =sampleName.find_last_of("/");
-		if (pos != std::string::npos) { 
-				sampleName=sampleName.substr(pos+1, sampleName.length());
-				
-		}
-
-		pos=sampleName.find_last_of("\\");
-		if (pos != std::string::npos) { 
-				sampleName=sampleName.substr(pos+1, sampleName.length());
-		}
-		return sampleName;
-		
 }
 
 void computeAdducts() {

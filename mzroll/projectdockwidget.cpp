@@ -57,6 +57,10 @@ ProjectDockWidget::ProjectDockWidget(QMainWindow *parent):
 
     setTitleBarWidget(toolBar);
     setWidget(_treeWidget);
+
+    fileLoader = new mzFileIO(this);
+    connect(fileLoader,SIGNAL(finished()),this, SLOT(getSampleInfoSQLITE()));
+    connect(fileLoader,SIGNAL(finished()),this, SLOT(updateSampleList()));
 }
 
 void ProjectDockWidget::changeSampleColor(QTreeWidgetItem* item, int col) {
@@ -129,7 +133,6 @@ void ProjectDockWidget::updateSampleList() {
     if ( _mainwindow->getEicWidget() ) {
         _mainwindow->getEicWidget()->replotForced();
     }
-
 }
 
 
@@ -419,7 +422,6 @@ void ProjectDockWidget::loadProject() {
 void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
 
     QSettings* settings = _mainwindow->getSettings();
-
     QFileInfo fileinfo(fileName);
     QString projectPath = fileinfo.path();
     QString projectName = fileinfo.fileName();
@@ -443,71 +445,75 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
     QSqlQuery query(currentProject->projectDB);
     query.exec("select * from samples");
 
-    int currentSampleCount=0;
+    QStringList filelist;
+
+    while (query.next()) {
+        QString fname   = query.value("filename").toString();
+        QString sname   = query.value("name").toString();
+
+        //skip files that have been loaded already
+        bool checkLoaded=false;
+        foreach(mzSample* loadedFile, _mainwindow->getSamples()) {
+            if (loadedFile->sampleName == sname.toStdString()) checkLoaded=true;
+            if (QString(loadedFile->fileName.c_str())== fname) checkLoaded=true;
+        }
+
+        if(checkLoaded == true) continue;  // skip files that have been loaded already
+
+        //find location of the file
+        QFileInfo sampleFile(fname);
+        if (!sampleFile.exists()) {
+            foreach(QString path, pathlist) {
+                fname= path + QDir::separator() + sampleFile.fileName();
+                if (sampleFile.exists())  break;
+            }
+        }
+
+        if (!fname.isEmpty() ) {
+            filelist << fname;
+        }
+    }
+
+    this->lastOpennedProject = fileName;
+    fileLoader->setMainWindow(_mainwindow);
+    fileLoader->loadSamples(filelist);
+}
+
+void ProjectDockWidget::getSampleInfoSQLITE() {
+
+    QSqlQuery query(currentProject->projectDB);
+    query.exec("select * from samples");
+    qDebug() << "getSampleInfoSQLITE()" << query.numRowsAffected();
+
     while (query.next()) {
              QString fname   = query.value("filename").toString();
              QString sname   = query.value("name").toString();
-             QString setname   = query.value("setName").toString();
-             QString sampleOrder   = query.value("sampleOrder").toString();
+             QString setname  = query.value("setName").toString();
+             QString sampleOrder  = query.value("sampleOrder").toString();
              QString isSelected   = query.value("isSelected").toString();
-             QString color_red   = query.value("color_red").toString();
-             QString color_blue  = query.value("color_blue").toString();
+             QString color_red    = query.value("color_red").toString();
+             QString color_blue   = query.value("color_blue").toString();
              QString color_green = query.value("color_green").toString();
              QString color_alpha  = query.value("color_alpha").toString();
 
-             _mainwindow->setStatusText(tr("Loading sample: %1").arg(sname));
-             _mainwindow->setProgressBar(tr("Loading Sample Number %1").arg(++currentSampleCount),currentSampleCount,currentSampleCount+1);
+            foreach(mzSample* sample, _mainwindow->getSamples()) {
+                if(sample->sampleName != sname.toStdString()) continue;
 
-             //skip files that have been loaded already
-             bool checkLoaded=false;
-             foreach(mzSample* loadedFile, _mainwindow->getSamples()) {
-                  if (QString(loadedFile->fileName.c_str())== fname) checkLoaded=true;
+                if (!sname.isEmpty() )  		sample->sampleName = sname.toStdString();
+                if (!setname.isEmpty() )  		sample->setSetName(setname.toStdString());
+                if (!sampleOrder.isEmpty())     sample->setSampleOrder(sampleOrder.toInt());
+                if (!isSelected.isEmpty()) 		sample->isSelected = isSelected.toInt();
+
+                sample->color[0]   = color_red.toDouble();
+                sample->color[1]   = color_green.toDouble();
+                sample->color[2]   = color_blue.toDouble();
+                sample->color[3]   = color_alpha.toDouble();
              }
-             if(checkLoaded == true) continue;  // skip files that have been loaded already
+         }
 
-             //find location of the file
-              QFileInfo sampleFile(fname);
-              if (!sampleFile.exists()) {
-                  foreach(QString path, pathlist) {
-                      fname= path + QDir::separator() + sampleFile.fileName();
-                       qDebug() << "Checking if exists:" << fname;
-                       if (sampleFile.exists())  break;
-                   }
-              }
-
-                if ( !fname.isEmpty() ) {
-                    mzFileIO* fileLoader = new mzFileIO(this);
-                    fileLoader->setMainWindow(_mainwindow);
-                    mzSample* sample = fileLoader->loadSample(fname);
-                    delete(fileLoader);
-
-                    if (sample) {
-                        _mainwindow->addSample(sample);
-                        if (!sname.isEmpty() )  		sample->sampleName = sname.toStdString();
-                        if (!setname.isEmpty() )  		sample->setSetName(setname.toStdString());
-                        if (!sampleOrder.isEmpty())     sample->setSampleOrder(sampleOrder.toInt());
-                        if (!isSelected.isEmpty()) 		sample->isSelected = isSelected.toInt();
-                        sample->color[0]   = color_red.toDouble();
-                        sample->color[1]   = color_green.toDouble();
-                        sample->color[2]   = color_blue.toDouble();
-                        sample->color[3]   = color_alpha.toDouble();
-                    }
-                }
-    }
-
-    // update other widget
-    vector<mzSample*> samples = _mainwindow->getSamples();
-    int sampleCount = _mainwindow->sampleCount();
-    updateSampleList();
-
-    //if(_mainwindow->srmDockWidget->isVisible()) _mainwindow->showSRMList();
-    if(_mainwindow->bookmarkedPeaks)
-        _mainwindow->bookmarkedPeaks->loadPeakTableSQLITE(fileName);
-
-    if(_mainwindow->spectraWidget && sampleCount)
-        _mainwindow->spectraWidget->setScan(samples[0]->getScan(0));
-
-    lastOpennedProject = fileName;
+    // update other widgets
+    TableDockWidget* peakTable = _mainwindow->addPeaksTable(this->lastOpennedProject);
+    peakTable->loadPeakTableSQLITE(this->lastOpennedProject);
 }
 
 void ProjectDockWidget::saveProjectSQLITE(QString filename, TableDockWidget* peakTable) {
@@ -516,17 +522,14 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename, TableDockWidget* pea
     std::vector<mzSample*> sampleSet = _mainwindow->getSamples();
     if(sampleSet.size() == 0) return;
 
-    ProjectDB* project = 0;
-    if (currentProject) {
-        project = currentProject;
-    } else {
-        project= new ProjectDB(filename);
-        if(! project->open() ) {
-            qDebug() << "Can't open " + filename;
-        }
+    ProjectDB* project = new ProjectDB(filename);
+    if(! project->open() ) {
+          qDebug() << "Can't open " + filename;
     }
     project->saveSamples(sampleSet);
-    foreach(PeakGroup* group, peakTable->getGroups()) {
+
+    if(!peakTable) return;
+    for(PeakGroup* group : peakTable->getGroups()) {
         project->writeGroupSqlite(group);
     }
     project->close();
@@ -637,8 +640,10 @@ void ProjectDockWidget::loadProjectXML(QString fileName) {
     if(_mainwindow->srmDockWidget->isVisible()) _mainwindow->showSRMList();
     if(_mainwindow->bookmarkedPeaks) _mainwindow->bookmarkedPeaks->loadPeakTableSQLITE(fileName);
     if(_mainwindow->spectraWidget && sampleCount) _mainwindow->spectraWidget->setScan(samples[0]->getScan(0));
+
     lastOpennedProject = fileName;
 }
+
 void ProjectDockWidget::saveProjectXML(QString filename, TableDockWidget* peakTable) {
 
 

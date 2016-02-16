@@ -234,6 +234,7 @@ public:
     int  parseCDF (char *filename, int is_verbose);     // load netcdf files
     void parseMzXMLScan(const xml_node& scan, int scannum);		// parse individual scan
     void writeMzCSV(const char*);
+    string cleanSampleName(string fileName);
 
     map<string,string> mzML_cvParams(xml_node node);
     void parseMzMLChromatogromList(xml_node);

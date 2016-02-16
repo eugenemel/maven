@@ -14,8 +14,8 @@ Q_OBJECT
         mzSample* loadSample(QString filename);
         mzSample* parseMzData(QString fileName);
         void setMainWindow(MainWindow*);
-        int loadNISTLibrary(QString filename);
         int loadPepXML(QString filename);
+        static QString shortSampleName(QString filename);
 
     signals:
         void updateProgressBar(QString,int,int);
