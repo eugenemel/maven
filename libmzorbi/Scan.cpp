@@ -510,4 +510,3 @@ float Scan::baseMz() {
     return baseMz;
 }
 
-

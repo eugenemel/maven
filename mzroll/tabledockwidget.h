@@ -103,8 +103,8 @@ private:
 	  void readPeakXML(QXmlStreamReader& xml,PeakGroup* parent);
 	  QString groupTagString(PeakGroup* group);
 
-          MainWindow* _mainwindow;
-          QList<PeakGroup>allgroups;
+         MainWindow* _mainwindow;
+         std::vector<PeakGroup>allgroups;
 
           TrainDialog* traindialog;
           ClusterDialog*       clusterDialog;

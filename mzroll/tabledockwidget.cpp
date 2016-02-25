@@ -5,6 +5,8 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     setFloating(false);
     _mainwindow = mw;
     setObjectName(title);
+    setWindowTitle(title);
+    setAcceptDrops(true);
 
     numColms=11;
     viewType = groupView;
@@ -17,18 +19,14 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     treeWidget->setAcceptDrops(false);    
     treeWidget->setObjectName("PeakGroupTable");
     connect(treeWidget, SIGNAL(itemSelectionChanged()),SLOT(showSelectedGroup()));
-
-    this->setAcceptDrops(true);
-
-    setWidget(treeWidget);
-    setWindowTitle(title);
     setupPeakTable();
 
-    traindialog = new TrainDialog(this);
+       traindialog = new TrainDialog(this);
     connect(traindialog->saveButton,SIGNAL(clicked(bool)),SLOT(saveModel()));
     connect(traindialog->trainButton,SIGNAL(clicked(bool)),SLOT(Train()));
 
     clusterDialog = new ClusterDialog(this);
+    clusterDialog->setWindowFlags( clusterDialog->windowFlags() | Qt::WindowStaysOnTopHint);
     connect(clusterDialog->clusterButton,SIGNAL(clicked(bool)),SLOT(clusterGroups()));
     connect(clusterDialog->clearButton,SIGNAL(clicked(bool)),SLOT(clearClusters()));
 
@@ -73,13 +71,6 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     btnCluster->setIcon(QIcon(rsrcPath + "/cluster.png"));
     btnCluster->setToolTip("Cluster Groups");
     connect(btnCluster, SIGNAL(clicked()),clusterDialog,SLOT(show()));
-
-    /*
-		QToolButton *btnFilter = new QToolButton(toolBar);
-		btnFilter->setIcon(QIcon(rsrcPath + "/filter.png"));
-		btnFilter->setToolTip("Filter Groups");
-		connect(btnFilter, SIGNAL(clicked()), SLOT(showFiltersDialog()));
-		*/
 
     QToolButton *btnTrain = new QToolButton(toolBar);
     btnTrain->setIcon(QIcon(rsrcPath + "/train.png"));
@@ -135,8 +126,6 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     //btnX->setIcon(QIcon(rsrcPath + "/hide.png"));
     connect(btnX, SIGNAL(clicked()),SLOT(hide()));
 
-
-
     QWidget* spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
     toolBar->addWidget(btnSwitchView);
@@ -150,7 +139,6 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     toolBar->addWidget(btnScatter);
     toolBar->addWidget(btnGallery);
     toolBar->addWidget(btnCluster);
-    //toolBar->addWidget(btnFilter);
 
     toolBar->addSeparator();
     toolBar->addWidget(btnPDF);
@@ -163,13 +151,19 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
 
    // toolBar->addWidget(btnMoveTo);
     toolBar->addWidget(spacer);
-
     toolBar->addWidget(btnX);
 
+    ///LAYOUT
     setTitleBarWidget(toolBar);
-
-    setAcceptDrops(true);
-
+    QWidget *content = new QWidget(this);
+    QVBoxLayout *layout = new QVBoxLayout;
+    layout->setMargin(0);
+    layout->setSpacing(0);
+    layout->setContentsMargins(QMargins(0,0,0,0));
+    layout->addWidget(toolBar);
+    layout->addWidget(treeWidget);
+    content->setLayout(layout);
+    setWidget(content);
 }
 
 TableDockWidget::~TableDockWidget() { 
@@ -1245,10 +1239,13 @@ void TableDockWidget::loadPeakTableSQLITE(QString fileName) {
     ProjectDB* selectedProject = new ProjectDB(fileName);
     if (!selectedProject->open()) return;
 
+    allgroups.clear(); //remove existing groups
+
     selectedProject->setSamples(_mainwindow->getSamples());
     selectedProject->loadPeakGroups("peakgroups");
 
-    foreach(PeakGroup g, selectedProject->allgroups) allgroups.append(g);
+    allgroups = selectedProject->allgroups;
+    //for(PeakGroup g: selectedProject->allgroups) allgroups.append(g);
     for(int i=0; i < allgroups.size(); i++ ) allgroups[i].groupStatistics();
     selectedProject->close();
     showAllGroups();
@@ -1296,73 +1293,19 @@ void TableDockWidget::clearClusters() {
 }
 
 void TableDockWidget::clusterGroups() {
-    sort(allgroups.begin(),allgroups.end(), PeakGroup::compRt);
-    qDebug() << "Clustering..";
-    int metaGroupId = 0;
 
-    QSettings* settings = _mainwindow->getSettings();
     double maxRtDiff =  clusterDialog->maxRtDiff_2->value();
     double minSampleCorrelation =  clusterDialog->minSampleCorr->value();
     double minRtCorrelation = clusterDialog->minRt->value();
     double ppm	= _mainwindow->getUserPPM();
 
-    vector<mzSample*> samples = _mainwindow->getSamples();
-
     //clear cluster information
     for(unsigned int i=0; i<allgroups.size(); i++) allgroups[i].metaGroupId=0;
-    map<int,PeakGroup*>parentGroups;
 
+    vector<mzSample*> samples = _mainwindow->getSamples();
 
-    for(unsigned int i=0; i<allgroups.size(); i++) {
-        PeakGroup& grp1 = allgroups[i];
-
-        if (grp1.metaGroupId == 0) {  //create new cluster
-            grp1.metaGroupId=++metaGroupId;
-            parentGroups[metaGroupId]=&grp1;
-        }
-
-        //cluster parent
-        PeakGroup* parent = parentGroups[ metaGroupId ];
-
-        mzSample* largestSample=NULL;
-        double maxIntensity=0;
-
-        for(int i=0; i < grp1.peakCount(); i++ ) {
-            mzSample* sample = grp1.peaks[i].getSample();
-            if ( grp1.peaks[i].peakIntensity > maxIntensity ) largestSample=sample;
-        }
-
-        if (largestSample == NULL ) continue;
-        vector<float>peakIntensityA = grp1.getOrderedIntensityVector(samples,PeakGroup::AreaTop);
-
-        for(unsigned int j=i+1; j<allgroups.size(); j++) {
-            PeakGroup& grp2 = allgroups[j];
-            if (grp2.metaGroupId > 0 ) continue;
-
-            //retention time distance
-            float rtdist  = abs(parent->meanRt-grp2.meanRt);
-            if (rtdist > maxRtDiff*2 ) continue;
-
-            //retention time overlap
-            float rtoverlap = mzUtils::checkOverlap(grp1.minRt, grp1.maxRt, grp2.minRt, grp2.maxRt );
-            if (rtoverlap < 0.1) continue;
-
-            //peak intensity correlation
-            vector<float>peakIntensityB = grp2.getOrderedIntensityVector(samples,PeakGroup::AreaTop);
-            float cor = correlation(peakIntensityA,peakIntensityB);
-            if (cor < minSampleCorrelation) continue;
-
-            //peak shape correlation
-            float cor2 = largestSample->correlation(grp1.meanMz,grp2.meanMz,ppm,grp1.minRt,grp1.maxRt);
-            if (cor2 < minRtCorrelation) continue;
-
-            //passed all the filters.. group grp1 and grp2 into a single metagroup
-            //cerr << rtdist << " " << cor << " " << cor2 << endl;
-            grp2.metaGroupId = grp1.metaGroupId;
-        }
-        if (i%10==0) _mainwindow->setProgressBar("Clustering.,",i+1,allgroups.size());
-
-    }
+    //run clustering
+    PeakGroup::clusterGroups(allgroups,samples,maxRtDiff,minSampleCorrelation,minRtCorrelation,ppm);
 
     _mainwindow->setProgressBar("Clustering., done!",allgroups.size(),allgroups.size());
     showAllGroups();

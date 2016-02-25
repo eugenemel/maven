@@ -17,7 +17,7 @@ PeakGroup::PeakGroup()  {
     sampleCount=0;
     sampleMean=0;
 
-    totalSampleCount=0;
+    ms2EventCount=0;
     maxNoNoiseObs=0;
     maxPeakFracionalArea=0;
     maxSignalBaseRatio=0;
@@ -69,7 +69,7 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     sampleCount=o.sampleCount;
     sampleMean=o.sampleMean;
 
-    totalSampleCount=o.totalSampleCount;
+    ms2EventCount=o.ms2EventCount;
     maxNoNoiseObs=o.maxNoNoiseObs;
     maxPeakFracionalArea=o.maxPeakFracionalArea;
     maxSignalBaseRatio=o.maxSignalBaseRatio;
@@ -96,6 +96,9 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     goodPeakCount=o.goodPeakCount;
     _type = o._type;
     tagString = o.tagString;
+
+    fragMatchScore = o.fragMatchScore;
+    fragmentationPattern = o.fragmentationPattern;
 
     changeFoldRatio = o.changeFoldRatio;
     changePValue    = o.changePValue;
@@ -377,7 +380,7 @@ void PeakGroup::groupStatistics() {
     float rtSum = 0;
     float mzSum = 0;
     maxIntensity = 0;
-    totalSampleCount =  0;
+    ms2EventCount =  0;
 
     blankMax =0;
     blankSampleCount=0;
@@ -400,7 +403,6 @@ void PeakGroup::groupStatistics() {
 
     for(unsigned int i=0; i< peaks.size(); i++) {
         if(peaks[i].pos != 0) { rtSum += peaks[i].rt; mzSum += peaks[i].baseMz; nonZeroCount++; }
-        if(peaks[i].peakIntensity > 0) totalSampleCount++;
 
         if(peaks[i].peakIntensity>maxIntensity) {
             maxIntensity = peaks[i].peakIntensity;
@@ -637,3 +639,64 @@ Scan* PeakGroup::getAverageFragmenationScan(float resolution) {
     //cout << "getAverageScan() from:" << from << " to:" << to << " scanCount:" << scanCount << "scans. mzs=" << avgScan->nobs() << endl;
     return avgScan;
 }
+
+
+
+void PeakGroup::clusterGroups(vector<PeakGroup> &allgroups, vector<mzSample*>samples, double maxRtDiff, double minSampleCorrelation, double minPeakShapeCorrelation, double ppm) {
+    sort(allgroups.begin(),allgroups.end(), PeakGroup::compRt);
+    int metaGroupId = 0;
+
+    //clear cluster information
+    for(unsigned int i=0; i<allgroups.size(); i++) allgroups[i].metaGroupId=0;
+    map<int,PeakGroup*>parentGroups;
+
+    for(unsigned int i=0; i<allgroups.size(); i++) {
+        PeakGroup& grp1 = allgroups[i];
+
+        if (grp1.metaGroupId == 0) {  //create new cluster
+            grp1.metaGroupId=++metaGroupId;
+            parentGroups[metaGroupId]=&grp1;
+        }
+
+        //cluster parent
+        PeakGroup* parent = parentGroups[ metaGroupId ];
+
+        mzSample* largestSample=NULL;
+        double maxIntensity=0;
+
+        for(unsigned int i=0; i < grp1.peakCount(); i++ ) {
+            mzSample* sample = grp1.peaks[i].getSample();
+            if ( grp1.peaks[i].peakIntensity > maxIntensity ) largestSample=sample;
+        }
+
+        if (largestSample == NULL ) continue;
+        vector<float>peakIntensityA = grp1.getOrderedIntensityVector(samples,PeakGroup::AreaTop);
+
+        for(unsigned int j=i+1; j<allgroups.size(); j++) {
+            PeakGroup& grp2 = allgroups[j];
+            if (grp2.metaGroupId > 0 ) continue;
+
+            //retention time distance
+            float rtdist  = abs(parent->meanRt-grp2.meanRt);
+            if (rtdist > maxRtDiff*2 ) continue;
+
+            //retention time overlap
+            float rtoverlap = mzUtils::checkOverlap(grp1.minRt, grp1.maxRt, grp2.minRt, grp2.maxRt );
+            if (rtoverlap < 0.1) continue;
+
+            //peak intensity correlation
+            vector<float>peakIntensityB = grp2.getOrderedIntensityVector(samples,PeakGroup::AreaTop);
+            float cor = correlation(peakIntensityA,peakIntensityB);
+            if (cor < minSampleCorrelation) continue;
+
+            //peak shape correlation
+            float cor2 = largestSample->correlation(grp1.meanMz,grp2.meanMz,ppm,grp1.minRt,grp1.maxRt);
+            if (cor2 < minPeakShapeCorrelation) continue;
+
+            //passed all the filters.. group grp1 and grp2 into a single metagroup
+            //cerr << rtdist << " " << cor << " " << cor2 << endl;
+            grp2.metaGroupId = grp1.metaGroupId;
+        }
+    }
+}
+

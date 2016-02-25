@@ -22,6 +22,7 @@
 #include "mzFit.h"
 #include "mzMassCalculator.h"
 #include "Matrix.h"
+#include "Fragment.h"
 
 #ifdef ZLIB
 #include <zlib.h>
@@ -50,6 +51,7 @@ class Reaction;
 class MassCalculator;
 class ChargedSpecies;
 class Fragment;
+class FragmentationMatchScore;
 
 using namespace pugi;
 using namespace mzUtils;
@@ -67,49 +69,12 @@ class mzPoint {
         double x,y,z;
 };
 
-struct FragmentationMatchScore {
-
-    double fractionMatched;
-    double spearmanRankCorrelation;
-    double ticMatched;
-    double numMatches;
-    double ppmError;
-    double mzFragError;
-    double mergedScore;
-    double dotProduct;
-
-    FragmentationMatchScore() {
-        fractionMatched=0;
-        spearmanRankCorrelation=0;
-        ticMatched=0;
-        numMatches=0;
-        ppmError=1000;
-        mzFragError=1000;
-        mergedScore=0;
-        dotProduct=0;
-    }
-
-    FragmentationMatchScore& operator=(const FragmentationMatchScore& b) {
-        fractionMatched= b.fractionMatched;
-        spearmanRankCorrelation=b.spearmanRankCorrelation;
-        ticMatched=b.ticMatched;
-        numMatches=b.numMatches;
-        ppmError=b.ppmError;
-        mzFragError=b.mzFragError;
-        mergedScore=b.mergedScore;
-        dotProduct=b.dotProduct;
-        return *this;
-    }
-
-};
-
 
 class Scan { 
     public:
 
     Scan(mzSample* sample, int scannum, int mslevel, float rt, float precursorMz, int polarity);
     void deepcopy(Scan* b); //copy constructor
-
 
     inline unsigned int nobs() { return mz.size(); }
     inline mzSample* getSample() { return sample; }
@@ -163,6 +128,7 @@ class Scan {
 
     static bool compRt(Scan* a, Scan* b ) { return a->rt < b->rt; }
     static bool compPrecursor(Scan* a, Scan* b ) { return a->precursorMz < b->precursorMz; }
+    static bool compIntensity(Scan* a, Scan* b ) { return a->totalIntensity() > b->totalIntensity(); }
     bool operator< (const Scan& b) { return rt < b.rt; }  //default comparision operation
 
     private:
@@ -507,7 +473,7 @@ class Peak {
 class PeakGroup {
 
 	public:
-		enum GroupType {None=0, C13=1, Adduct=2, Fragment=3, Covariant=4, Isotope=5 };     //group types
+        enum GroupType {None=0, C13=1, Adduct=2, Covariant=3, Isotope=4 };     //group types
         enum QType	   {AreaTop=0, Area=1, Height=2, AreaNotCorrected=3, RetentionTime=4, Quality=5, SNRatio=6, MS2Count=7 };
 		PeakGroup();
 		PeakGroup(const PeakGroup& o);
@@ -537,7 +503,7 @@ class PeakGroup {
         float maxIntensity;
         float meanRt;
         float meanMz;
-        int totalSampleCount;
+        int  ms2EventCount;
 
         //isotopic information
         float expectedAbundance;
@@ -605,7 +571,6 @@ class PeakGroup {
 		inline GroupType type() { return _type; }
 		inline void setType(GroupType t)  { _type = t; }
 		inline bool isIsotope() { return _type == Isotope; }
-		inline bool isFragment() { return _type == Fragment; }
 		inline bool isAdduct() {  return _type == Adduct; }
 
 
@@ -622,6 +587,7 @@ class PeakGroup {
 
         Peak* getSamplePeak(mzSample* sample);
         FragmentationMatchScore fragMatchScore;
+        Fragment fragmentationPattern;
 
 		void deletePeaks();
 		bool deletePeak(unsigned int index);
@@ -647,6 +613,7 @@ class PeakGroup {
 		static bool compMetaGroup(const PeakGroup& a, const PeakGroup& b) { return(a.metaGroupId < b.metaGroupId); }
 		//static bool operator< (const PeakGroup* b) { return this->maxIntensity < b->maxIntensity; }
         static bool compMaxIntensity(const PeakGroup* a, const PeakGroup* b) { return(a->maxIntensity > b->maxIntensity); }
+        static void clusterGroups(vector<PeakGroup> &allgroups, vector<mzSample*>samples, double maxRtDiff, double minSampleCorrelation, double minPeakShapeCorrelation, double ppm);
 };
 
 class Compound { 

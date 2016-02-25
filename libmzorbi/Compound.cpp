@@ -1,5 +1,5 @@
-#include "mzSample.h"
 #include "Fragment.h"
+#include "mzSample.h"
 
 Compound::Compound(string id, string name, string formula, int charge ) {
 		this->id = id;

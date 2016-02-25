@@ -180,6 +180,7 @@ int main(int argc, char *argv[]) {
         adductsDB = DB.loadAdducts(methodsFolder + "/" + adductDbFilename);
         computeAdducts();
     }
+    qDebug() << "HI.." << endl;
 
     //load files
     double startLoadingTime = getTime();
@@ -435,13 +436,18 @@ void processSlices(vector<mzSlice*>&slices, string setName) {
             if (group.maxIntensity < minGroupIntensity ) continue;
             if (getChargeStateFromMS1(&group) < minPrecursorCharge) continue;
 
-            if (mustHaveMS2) {
-                vector<Scan*>ms2events = group.getFragmenationEvents();
-                //group.MS2Count= ms2events.size();
-                //cerr << "MS2eventCOunt: " << ms2events.size() << endl;
-                if(ms2events.size() == 0) continue;
+            //build consensus ms2 specta
+            vector<Scan*>ms2events = group.getFragmenationEvents();
+            if(ms2events.size()) {
+                sort(ms2events.begin(),ms2events.end(),Scan::compIntensity);
+                Fragment f = Fragment(ms2events[0],0.01,1,1024);
+                for(Scan* s : ms2events) {  f.addFragment(new Fragment(s,0,0.01,1024)); }
+                f.buildConsensus(productAmuToll);
+                group.fragmentationPattern = f.consensus;
+                group.ms2EventCount = ms2events.size();
             }
 
+            if (mustHaveMS2 and group.ms2EventCount == 0 ) continue;
             if (compound) group.compound = compound;
             if (!slice->srmId.empty()) group.srmId=slice->srmId;
 
@@ -652,6 +658,7 @@ void loadSamples(vector<string>&filenames) {
 void computeAdducts() {
     MassCalculator mcalc;
     for(Compound* c: compoundsDB) {
+        qDebug() << "C=" << c;
         float parentMass = mcalc.computeNeutralMass(c->formula);
         for(Adduct* a: adductsDB ) {
             if ( SIGN(a->charge) != SIGN(ionizationMode) ) continue;
@@ -662,10 +669,10 @@ void computeAdducts() {
             compoundAdduct->fragment_intensity = c->fragment_intensity;
             compoundAdduct->fragment_mzs = c->fragment_mzs;
             compoundsDB.push_back(compoundAdduct);
-            //cerr << c->name << " " << a->name << " " << adductMass << endl;
+            //cerr  << "\t" << c->name << " " << a->name << " " << adductMass << endl;
         }
      }
-
+    qDebug() << "DONE..";
     //resort compound DB, this allows for binary search
     sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
 }
@@ -748,10 +755,10 @@ void reduceGroups() {
 void reNumberGroups() {
 
     int groupNum=1;
-    int metaGroupNum=1;
+    int metaGroupNum=0;
     for(PeakGroup &g : allgroups) {
         g.groupId=groupNum++;
-        g.metaGroupId = metaGroupNum++;
+        g.metaGroupId = metaGroupNum;
         for(auto &c : g.children) {
             c.groupId= groupNum++;
             g.metaGroupId = metaGroupNum;
@@ -765,8 +772,14 @@ void writeReport(string setName) {
     printf("\nProfiling writeReport...\n");
 
     reNumberGroups();
-
     matchFragmentation();
+
+    //run clustering
+    double maxRtDiff = 0.2;
+    double minSampleCorrelation= 0.8;
+    double minPeakShapeCorrelation=0.9;
+
+    PeakGroup::clusterGroups(allgroups,samples,maxRtDiff,minSampleCorrelation,minPeakShapeCorrelation,precursorPPM);
 
     //create an output folder
     mzUtils::createDir(outputdir.c_str());
@@ -786,7 +799,7 @@ void writeReport(string setName) {
     writeCSVReport   (outputdir + setName + ".tsv");
     //writeMS2SimilarityMatrix(outputdir + setName + ".fragMatrix.tsv");
     if(writeConsensusMS2) writeConsensusMS2Spectra(outputdir + setName + ".msp");
-    if(writeConsensusMS2) classConsensusMS2Spectra(outputdir + setName + "CLASS.msp");
+    //if(writeConsensusMS2) classConsensusMS2Spectra(outputdir + setName + "CLASS.msp");
 }
 
 void writeCSVReport( string filename) {
@@ -881,50 +894,36 @@ void classConsensusMS2Spectra(string filename) {
         outstream.open(filename.c_str());
         if(! outstream.is_open()) return;
 
-         map<string,Fragment*>compoundClasses;
+         map<string,Fragment>compoundClasses;
 
         for (int i=0; i < allgroups.size(); i++ ) {
             PeakGroup* group = &allgroups[i];
             if (group->compound == NULL) continue; //skip unassinged compounds
+            if (group->fragmentationPattern.nobs() == 0); //skip compounds without fragmentation
 
             vector<string>nameParts; split(group->compound->category[0], ';',nameParts);
             if (nameParts.size() ==0) continue; //skip unassinged compound classes
             string compoundClass = nameParts[0];
 
-            vector<Scan*>ms2events =group->getFragmenationEvents();
-            if (ms2events.size() == 0) continue; //skip groups wihtout MS2 events
-            cerr << "add.." << compoundClass << " " << ms2events.size() << endl;
-
-            Scan* bestScan = 0;
-            for(Scan* s : ms2events) { if(!bestScan or s->totalIntensity() > bestScan->totalIntensity()) bestScan=s; }
-
-            Fragment* f = 0;
+            Fragment f = group->fragmentationPattern;
+            f.addNeutralLosses();
             if (compoundClasses.count(compoundClass) == 0) {
-                f = new Fragment(bestScan,0.01,1,1024);
-                f->addNeutralLosses();
-                f->group = group;
                 compoundClasses[compoundClass] = f;
-                continue;
             } else {
-                Fragment* x = new Fragment(bestScan,0.01,1,1024);
-                x->addNeutralLosses();
-                f = compoundClasses[compoundClass];
-                f->addFragment(x);
+                compoundClasses[compoundClass].addFragment(&f);
             }
-
         }
 
         for(auto pair: compoundClasses) {
                 string compoundClass = pair.first;
-                Fragment* f = pair.second;
-                if(f->brothers.size() < 10) continue;
-                f->buildConsensus(productAmuToll);
+                Fragment& f = pair.second;
+                if(f.brothers.size() < 10) continue;
+                f.buildConsensus(productAmuToll);
 
                 cerr << "Writing " << compoundClass << endl;
-                f->printConsensusNIST(outstream,0.75,productAmuToll,f->group->compound);
+                f.printConsensusNIST(outstream,0.75,productAmuToll,f.group->compound);
                 //f->printMzList();
                 //f->printConsensusNIST(outstream,0.01,productAmuToll);
-                delete(f);
         }
         outstream.close();
 }
@@ -940,13 +939,8 @@ void writeConsensusMS2Spectra(string filename) {
         for (int i=0; i < allgroups.size(); i++ ) {
             //Scan* x = allgroups[i].getAverageFragmenationScan(100);
             PeakGroup* group = &allgroups[i];
-            vector<Scan*>ms2events =group->getFragmenationEvents();
-            if (ms2events.size() > 0) {
-                Fragment* f = new Fragment(ms2events[0],0.01,1,1024);
-                for(Scan* s : ms2events) {  f->addFragment(new Fragment(s,0,0.01,1024)); }
-                f->buildConsensus(productAmuToll);
-                f->printConsensusNIST(outstream,0.01,productAmuToll,group->compound);
-                delete(f);
+            if (group->fragmentationPattern.nobs() > 0 ) {
+                group->fragmentationPattern.printConsensusNIST(outstream,0.01,productAmuToll,group->compound);
             }
         }
         outstream.close();
@@ -1157,8 +1151,7 @@ void writeGroupInfoCSV(PeakGroup* group,  ofstream& groupReport) {
         groupReport << SEP << group->meanMz;
     }
 
-    vector<Scan*>ms2events =group->getFragmenationEvents();
-    groupReport << SEP << ms2events.size();
+    groupReport << SEP << group->ms2EventCount;
     groupReport << SEP << group->fragMatchScore.numMatches;
     groupReport << SEP << group->fragMatchScore.fractionMatched;
     groupReport << SEP << group->fragMatchScore.ticMatched;
@@ -1232,41 +1225,10 @@ void writeMS2SimilarityMatrix(string filename) {
 
    for (int i=0; i< allgroups.size(); i++) {
         PeakGroup* g = &allgroups[i];
-        vector<Scan*>ms2events =g->getFragmenationEvents();
-        if(ms2events.size() == 0 ) continue;
-
-        Fragment* f = new Fragment(ms2events[0],0.01,1,1024);
-        for(Scan* s : ms2events) {  f->addFragment(new Fragment(s,0,0.01,1024)); }
-        f->buildConsensus(productAmuToll);
-
-        //resize consensus to top 10  peaks
-        f->consensus->mzs.resize(10);
-        f->consensus->intensity_array.resize(10);
-
-        f->consensus->group = g;
-
-        //neutral losses .. will not work with double charged
-        float parentMass = g->meanMz;
-        vector<float> nL, nLI;
-        Fragment* z = f->consensus;
-
-        for(int i=0; i < z->mzs.size(); i++) {
-            float nLMass = parentMass- (z->mzs[i]);
-            float nLIntensity = z->intensity_array[i];
-            if( nLMass > 0 ) {
-                nL.push_back(nLMass);
-                nLI.push_back(nLIntensity);
-            }
-        }
-
-        for(int i=0; i < nL.size(); i++ ) {
-            z->mzs.push_back(nL[i]);
-            z->intensity_array.push_back(nLI[i]);
-        }
-
-        z->printFragment(productAmuToll,10);
-        allFragments.push_back(z);
-        delete(f);
+        if (g->fragmentationPattern.nobs() == 0) continue;
+        Fragment f = g->fragmentationPattern;
+        f.addNeutralLosses();
+        allFragments.push_back(f);
     }
 
     for (int i=0; i< allFragments.size(); i++) {
@@ -1300,33 +1262,20 @@ void matchFragmentation() {
 
         for (int i=0; i< allgroups.size(); i++) {
             PeakGroup* g = &allgroups[i];
-            set<Compound*> matches = findSpeciesByMass (g->meanMz,precursorPPM);
-           if(matches.size() == 0) continue;
+            if(g->ms2EventCount == 0) continue;
+            set<Compound*> matches = findSpeciesByMass(g->meanMz,precursorPPM);
+            if(matches.size() == 0) continue;
 
-            vector<Scan*>ms2events =g->getFragmenationEvents();
-            string possibleClass = possibleClasses(matches);
-
-            cerr << g->meanMz << " compoundMatches=" << matches.size() << " msCount=" << ms2events.size() << " possibleClasses=" << possibleClass << endl;
-            g->tagString = possibleClass;
-
-            if(ms2events.size() == 0) continue;
-
-            Fragment* f = new Fragment(ms2events[0],0.01,1,1024);
-            for(Scan* s : ms2events) {  f->addFragment(new Fragment(s,0,0.01,1024)); }
-            f->buildConsensus(productAmuToll);
-
-            //cerr << "Consensus: " << endl;
-            f->consensus->printFragment(productAmuToll,10);
+            g->fragmentationPattern.printFragment(productAmuToll,10);
             Compound* bestHit=0;
             FragmentationMatchScore bestScore;
 
             for(Compound* cpd : matches) {
-                FragmentationMatchScore s = cpd->scoreCompoundHit(f,productAmuToll);
+                FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productAmuToll);
                 s.mergedScore = s.ticMatched;
                 if (s.numMatches == 0 ) continue;
                 cerr << "\t"; cerr << cpd->name << "\t" << cpd->precursorMz << "\t num=" << s.numMatches << "\t tic" << s.ticMatched <<  " s=" << s.mergedScore << endl;
                 if (s.mergedScore > bestScore.mergedScore ) {
-                    //for(auto f: cpd->fragment_mzs) cerr << f << " "; cerr << endl;
                     bestScore = s;
                     bestHit = cpd;
                 }
@@ -1346,7 +1295,6 @@ void matchFragmentation() {
                      << bestScore.ticMatched << endl;
 
             }
-            delete(f);
             cerr << "-------" << endl;
        }
 }
