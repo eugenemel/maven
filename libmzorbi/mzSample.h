@@ -473,7 +473,7 @@ class Peak {
 class PeakGroup {
 
 	public:
-        enum GroupType {None=0, C13=1, Adduct=2, Covariant=3, Isotope=4 };     //group types
+        enum GroupType {None=0, C13Type=1, AdductType=2, CovariantType=3, IsotopeType=4 };     //group types
         enum QType	   {AreaTop=0, Area=1, Height=2, AreaNotCorrected=3, RetentionTime=4, Quality=5, SNRatio=6, MS2Count=7 };
 		PeakGroup();
 		PeakGroup(const PeakGroup& o);
@@ -485,7 +485,8 @@ class PeakGroup {
 		~PeakGroup();
 
 		PeakGroup* parent;
-		Compound* compound;
+        Compound* compound;
+        Adduct*   adduct;
 
 		vector<Peak> peaks;
         vector<PeakGroup> children;
@@ -570,8 +571,8 @@ class PeakGroup {
 		GroupType _type;
 		inline GroupType type() { return _type; }
 		inline void setType(GroupType t)  { _type = t; }
-		inline bool isIsotope() { return _type == Isotope; }
-		inline bool isAdduct() {  return _type == Adduct; }
+        inline bool isIsotope() { return _type == IsotopeType; }
+        inline bool isAdduct() {  return _type == AdductType; }
 
 
 		void summary();

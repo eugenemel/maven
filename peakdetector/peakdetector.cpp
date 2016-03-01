@@ -123,8 +123,6 @@ void classConsensusMS2Spectra(string filename);
 void pullIsotopes(PeakGroup* parentgroup);
 void writeGroupInfoCSV(PeakGroup* group,  ofstream& groupReport);
 
-vector<Adduct*> adductsDB;
-
 bool addPeakGroup(PeakGroup& grp);
 
 int getChargeStateFromMS1(PeakGroup* grp);
@@ -136,7 +134,6 @@ vector<mzSlice*> getSrmSlices();
 void matchFragmentation();
 void writeMS2SimilarityMatrix(string filename);
 
-void computeAdducts();
 
 vector<EIC*> getEICs(float rtmin, float rtmax, PeakGroup& grp);
 
@@ -167,18 +164,18 @@ int main(int argc, char *argv[]) {
 	//load compound list
 	if (!ligandDbFilename.empty()) {
         //processAllSlices=false;
-             if(ligandDbFilename.find("csv") !=std::string::npos )  compoundsDB =  DB.loadCompoundCSVFile(ligandDbFilename);
-        else if(ligandDbFilename.find("txt") !=std::string::npos )  compoundsDB =  DB.loadCompoundCSVFile(ligandDbFilename);
-        else if(ligandDbFilename.find("tab") !=std::string::npos )  compoundsDB =  DB.loadCompoundCSVFile(ligandDbFilename);
-        else if(ligandDbFilename.find("msp") !=std::string::npos )  compoundsDB =  DB.loadNISTLibrary(ligandDbFilename.c_str());
-        cerr << "Loaded " << compoundsDB.size() << " compounds." << endl;
+             if(ligandDbFilename.find("csv") !=std::string::npos )  DB.compoundsDB =  DB.loadCompoundCSVFile(ligandDbFilename);
+        else if(ligandDbFilename.find("txt") !=std::string::npos )  DB.compoundsDB =  DB.loadCompoundCSVFile(ligandDbFilename);
+        else if(ligandDbFilename.find("tab") !=std::string::npos )  DB.compoundsDB =  DB.loadCompoundCSVFile(ligandDbFilename);
+        else if(ligandDbFilename.find("msp") !=std::string::npos )  DB.compoundsDB =  DB.loadNISTLibrary(ligandDbFilename.c_str());
+        sort(DB.compoundsDB.begin(),DB.compoundsDB.end(), Compound::compMass);
+        cerr << "Loaded " << DB.compoundsDB.size() << " compounds." << endl;
 	}
 
     //process compound list
-    if (compoundsDB.size() and searchAdductsFlag) {
+    if (DB.compoundsDB.size() and searchAdductsFlag) {
         //processCompounds(compoundsDB, "compounds");
-        adductsDB = DB.loadAdducts(methodsFolder + "/" + adductDbFilename);
-        computeAdducts();
+        DB.adductsDB = DB.loadAdducts(methodsFolder + "/" + adductDbFilename);
     }
     qDebug() << "HI.." << endl;
 
@@ -424,7 +421,7 @@ void processSlices(vector<mzSlice*>&slices, string setName) {
 
             if ( compound ) {
                 group.compound = compound;
-                group.tagString = compound->name;
+                //group.tagString = compound->name;
             }
 
             if( clsf.hasModel()) { clsf.classify(&group); group.groupStatistics(); }
@@ -653,28 +650,6 @@ void loadSamples(vector<string>&filenames) {
 			}
 		}
 		cerr << "loadSamples done: loaded " << samples.size() << " samples\n";
-}
-
-void computeAdducts() {
-    MassCalculator mcalc;
-    for(Compound* c: compoundsDB) {
-        qDebug() << "C=" << c;
-        float parentMass = mcalc.computeNeutralMass(c->formula);
-        for(Adduct* a: adductsDB ) {
-            if ( SIGN(a->charge) != SIGN(ionizationMode) ) continue;
-            float adductMass=a->computeAdductMass(parentMass);
-            Compound* compoundAdduct = new Compound(c->id, c->name + a->name, c->formula, ionizationMode);
-            compoundAdduct->mass = compoundAdduct->precursorMz = adductMass;
-            compoundAdduct->category = c->category;
-            compoundAdduct->fragment_intensity = c->fragment_intensity;
-            compoundAdduct->fragment_mzs = c->fragment_mzs;
-            compoundsDB.push_back(compoundAdduct);
-            //cerr  << "\t" << c->name << " " << a->name << " " << adductMass << endl;
-        }
-     }
-    qDebug() << "DONE..";
-    //resort compound DB, this allows for binary search
-    sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
 }
 
 bool addPeakGroup(PeakGroup& grp1) { 
@@ -1082,7 +1057,7 @@ void pullIsotopes(PeakGroup* parentgroup) {
         //child.groupId = parentgroup->groupId;
         child.compound = parentgroup->compound;
         child.parent = parentgroup;
-        child.setType(PeakGroup::Isotope);
+        child.setType(PeakGroup::IsotopeType);
         child.groupStatistics();
         if (clsf.hasModel()) { clsf.classify(&child); child.groupStatistics(); }
         parentgroup->addChild(child);
@@ -1100,8 +1075,8 @@ void writeGroupInfoCSV(PeakGroup* group,  ofstream& groupReport) {
     PeakGroup::QType qtype = quantitationType;
     vector<float> yvalues = group->getOrderedIntensityVector(samples,qtype);
 
-    string tagString = group->srmId + group->tagString;
-    tagString = mzUtils::substituteInQuotedString(tagString,"\",'","---");
+    //string tagString = group->srmId + group->tagString;
+    //tagString = mzUtils::substituteInQuotedString(tagString,"\",'","---");
 
     char label[2];
     sprintf(label,"%c",group->label);
@@ -1114,7 +1089,7 @@ void writeGroupInfoCSV(PeakGroup* group,  ofstream& groupReport) {
                 << group->meanMz << SEP
                 << group->meanRt << SEP
                 << group->maxQuality << SEP
-                << tagString;
+                << group->tagString;
 
     string compoundName;
     string compoundCategory;
@@ -1181,25 +1156,6 @@ double get_cpu_time(){
     return (double)getTime() / CLOCKS_PER_SEC;
 }
 
-
-set<Compound*> findSpeciesByMass(float mz, float ppm) {
-        set<Compound*>uniqset;
-        Compound x("find", "", "",0);
-        x.mass = mz-(mz/1e6*ppm);;
-        vector<Compound*>::iterator itr = lower_bound( compoundsDB.begin(),compoundsDB.end(),  &x, Compound::compMass );
-
-        for(;itr != compoundsDB.end(); itr++ ) {
-            Compound* c = *itr;
-            if (c->mass > mz+0.5) break;
-
-            if ( mzUtils::ppmDist(c->mass,mz) < ppm ) {
-                if (uniqset.count(c)) continue;
-                uniqset.insert(c);
-            }
-        }
-        return uniqset;
-}
-
 string possibleClasses(set<Compound*>matches) {
     map<string,int>names;
     for(Compound* cpd : matches) {
@@ -1258,32 +1214,40 @@ void writeMS2SimilarityMatrix(string filename) {
 
 
 void matchFragmentation() {
-        if(compoundsDB.size() == 0) return;
+        if(DB.compoundsDB.size() == 0) return;
 
         for (int i=0; i< allgroups.size(); i++) {
             PeakGroup* g = &allgroups[i];
             if(g->ms2EventCount == 0) continue;
-            set<Compound*> matches = findSpeciesByMass(g->meanMz,precursorPPM);
-            if(matches.size() == 0) continue;
+
+            //set<Compound*> matches = findSpeciesByMass(g->meanMz,precursorPPM);
+            vector<MassCalculator::Match>matchesX = DB.findMathchingCompounds(g->meanMz,precursorPPM,ionizationMode);
+            if(matchesX.size() == 0) continue;
 
             g->fragmentationPattern.printFragment(productAmuToll,10);
+            Adduct* adduct=0;
             Compound* bestHit=0;
             FragmentationMatchScore bestScore;
 
-            for(Compound* cpd : matches) {
+            for(MassCalculator::Match m: matchesX ) {
+                Compound* cpd = m.compoundLink;
                 FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productAmuToll);
-                s.mergedScore = s.ticMatched;
+                s.mergedScore = s.spearmanRankCorrelation;
                 if (s.numMatches == 0 ) continue;
-                cerr << "\t"; cerr << cpd->name << "\t" << cpd->precursorMz << "\t num=" << s.numMatches << "\t tic" << s.ticMatched <<  " s=" << s.mergedScore << endl;
+                cerr << "\t"; cerr << cpd->name << "\t" << cpd->precursorMz << "\tppmDiff=" << m.diff << "\t num=" << s.numMatches << "\t tic" << s.ticMatched <<  " s=" << s.spearmanRankCorrelation << endl;
                 if (s.mergedScore > bestScore.mergedScore ) {
                     bestScore = s;
                     bestHit = cpd;
+                    adduct =  m.adductLink;
                 }
             }
 
             if (bestHit) {
                 g->compound = bestHit;
+                g->adduct  = adduct;
+                if (adduct) g->tagString = adduct->name;
                 g->fragMatchScore = bestScore;
+
                 cerr << "\t BESTHIT"
                      << setprecision(6)
                      << g->meanMz << "\t"

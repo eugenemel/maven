@@ -28,7 +28,7 @@ EicWidget::EicWidget(QWidget *p) {
 	showTicLine(false);
 	showBicLine(false);
     showNotes(false);
-	showIsotopePlot(true);
+    showIsotopePlot(false);
 	showBarPlot(true);
 	showBoxPlot(false);
     automaticPeakGrouping(true);

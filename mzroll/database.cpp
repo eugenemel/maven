@@ -446,8 +446,8 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
         line = stream.readLine();
         if(line.startsWith("Name:",Qt::CaseInsensitive)){
 
-            if(cpd) {
-                cerr << "NIST LIBRARY:" << cpd << " " << cpd->name << " " << cpd->formula << endl;
+            if(cpd and !cpd->name.empty()) {
+                cerr << "NIST LIBRARY:" << cpd << " " << cpd->name << " " << cpd->formula << " " << cpd->id << endl;
                 if (cpd->precursorMz>0) { cpd->mass=cpd->precursorMz; }
                 else if (cpd->mass>0)   { cpd->precursorMz=cpd->mass; }
                 else if(!cpd->formula.empty()) { cpd->mass = cpd->precursorMz = mcalc.computeMass(cpd->formula,0); }
@@ -510,7 +510,7 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
 
     } while (!line.isNull());
 
-    if (cpd) compoundSet.push_back(cpd);
+    //if (cpd) compoundSet.push_back(cpd);
 
     //compoundSet.push_back(compound);
     qDebug() << "Database::loadNISTLibrary() in" << compoundSet.size()  << " compounds.";

@@ -629,7 +629,7 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
         child.groupId = parentgroup->groupId;
         child.compound = parentgroup->compound;
         child.parent = parentgroup;
-        child.setType(PeakGroup::Isotope);
+        child.setType(PeakGroup::IsotopeType);
         child.groupStatistics();
         if (clsf->hasModel()) { clsf->classify(&child); child.groupStatistics(); }
         parentgroup->addChild(child);

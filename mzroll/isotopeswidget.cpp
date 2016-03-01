@@ -45,7 +45,7 @@ void IsotopeWidget::setPeakGroup(PeakGroup* grp) {
 	if (!grp) return;
 
 	_group = grp;
-	if (grp && grp->type() != PeakGroup::Isotope ) pullIsotopes(grp); 
+    if (grp && grp->type() != PeakGroup::IsotopeType ) pullIsotopes(grp);
 }
 
 void IsotopeWidget::setPeak(Peak* peak) { 

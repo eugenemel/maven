@@ -36,7 +36,7 @@ PeakGroup::PeakGroup()  {
     maxMz=0;
 
     parent = NULL;
-    //adduct = NULL;
+    adduct = NULL;
     compound = NULL;
 
     isFocused=false;
@@ -88,6 +88,7 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
 
     parent = o.parent;
     compound = o.compound;
+    adduct = o.adduct;
 
     srmId=o.srmId;
     isFocused=o.isFocused;
