@@ -42,8 +42,7 @@ void Database::loadMethodsFolder(QString methodsFolder) {
 }
 
 int Database::loadCompoundsFile(QString filename) {
-    string dbfilename = filename.toStdString();
-    string dbname = mzUtils::cleanFilename(dbfilename);
+    string dbname = mzUtils::cleanFilename(filename.toStdString());
 
     vector<Compound*>compounds;
 
@@ -51,7 +50,7 @@ int Database::loadCompoundsFile(QString filename) {
          || filename.endsWith("sptxt",Qt::CaseInsensitive)) {
         compounds = loadNISTLibrary(filename);
     } else {
-        compounds = loadCompoundCSVFile(dbfilename);
+        compounds = loadCompoundCSVFile(filename);
     }
 
     deleteCompoundsSQL(dbname.c_str());
@@ -292,15 +291,15 @@ vector<Adduct*> Database::loadAdducts(string filename) {
 
 
 
-vector<Compound*> Database::loadCompoundCSVFile(string filename){
+vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
 
     vector<Compound*> compoundSet; //return
 
-    ifstream myfile(filename.c_str());
+    ifstream myfile(fileName.toLatin1());
     if (! myfile.is_open()) return compoundSet;
 
     string line;
-    string dbname = mzUtils::cleanFilename(filename);
+    string dbname = mzUtils::cleanFilename(fileName.toStdString());
     int loadCount=0; 
     int lineCount=0;
     map<string, int>header;
@@ -309,9 +308,8 @@ vector<Compound*> Database::loadCompoundCSVFile(string filename){
 
     //assume that files are tab delimited, unless matched ".csv", then comma delimited
     char sep='\t';
-    if(filename.find(".csv") > 0 || filename.find(".CSV") > 0 ) sep=',';
+    if(fileName.endsWith(".csv",Qt::CaseInsensitive)) sep = ',';
 
-    cerr << filename << " sep=" << sep << endl;
     while ( getline(myfile,line) ) {
         if (!line.empty() && line[0] == '#') continue;
         //trim spaces on the left
@@ -447,7 +445,7 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
         if(line.startsWith("Name:",Qt::CaseInsensitive)){
 
             if(cpd and !cpd->name.empty()) {
-                cerr << "NIST LIBRARY:" << cpd << " " << cpd->name << " " << cpd->formula << " " << cpd->id << endl;
+                //cerr << "NIST LIBRARY:" << cpd->db << " " << cpd->name << " " << cpd->formula << " " << cpd->id << endl;
                 if (cpd->precursorMz>0) { cpd->mass=cpd->precursorMz; }
                 else if (cpd->mass>0)   { cpd->precursorMz=cpd->mass; }
                 else if(!cpd->formula.empty()) { cpd->mass = cpd->precursorMz = mcalc.computeMass(cpd->formula,0); }

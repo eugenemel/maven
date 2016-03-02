@@ -316,7 +316,7 @@ ms_read_string_variable( cdfid, varid, arr_index1,arr_index2, max_size )
    long		tx_start[3];			/* Hyperslab corners	*/
    long		tx_count[3];			/* Hyperslab edges	*/
    char *	string;
-   register int	i;
+    int	i;
    unsigned int	len;
 
    /* Set up hyperslab indices and counts for multidimensional string
@@ -414,7 +414,7 @@ ms_write_string_variable( cdfid, varid, arr_index1, arr_index2, max_size,
 {
    long		tx_start[3];			/* Hyperslab corners	*/
    long		tx_count[3];			/* Hyperslab edges	*/
-   register int	i;
+    int	i;
    char *	ms_buffer;
    
    tx_start[0] = ( arr_index1 < 0L ? 0L : arr_index1 );

@@ -34,7 +34,7 @@ class Database {
         vector<Adduct*> loadAdducts(string filename);
         void loadMethodsFolder(QString methodsFolder);
         int  loadCompoundsFile(QString filename);
-        vector<Compound*> loadCompoundCSVFile(string filename);
+        vector<Compound*> loadCompoundCSVFile(QString fileName);
         vector<Compound*> loadNISTLibrary(QString fileName);
         void loadCompoundsSQL();
         void saveCompoundsSQL(vector<Compound*> &compoundSet);

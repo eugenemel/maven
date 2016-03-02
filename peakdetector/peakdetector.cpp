@@ -15,12 +15,10 @@
 //include "omp.h"
 
 #include "../mzroll/classifierNeuralNet.h"
-#include "../libmzorbi/MersenneTwister.h"
 #include "../mzroll/database.h"
 #include "./Fragment.h"
 #include "pugixml.hpp"
 #include <sys/time.h>
-
 
 #include <QtCore>
 #include <QCoreApplication>
@@ -37,7 +35,6 @@ using namespace std;
 int majorVersion = 1;
 int minorVersion = 1;
 int modVersion =   2;
-
 
 Database DB;
 QSqlDatabase projectDB;
@@ -107,7 +104,6 @@ float minFragmentMatchScore=2;
 float fragmentMatchPPMTolr=10;
 float productAmuToll = 0.01;
 
-
 void processOptions(int argc, char* argv[]);
 void loadSamples(vector<string>&filenames);
 void printSettings();
@@ -122,6 +118,7 @@ void writeConsensusMS2Spectra(string filename);
 void classConsensusMS2Spectra(string filename);
 void pullIsotopes(PeakGroup* parentgroup);
 void writeGroupInfoCSV(PeakGroup* group,  ofstream& groupReport);
+void loadSpectralLibraries(string methodsFolder);
 
 bool addPeakGroup(PeakGroup& grp);
 
@@ -133,7 +130,6 @@ vector<mzSlice*> getSrmSlices();
 
 void matchFragmentation();
 void writeMS2SimilarityMatrix(string filename);
-
 
 vector<EIC*> getEICs(float rtmin, float rtmax, PeakGroup& grp);
 
@@ -147,7 +143,7 @@ int main(int argc, char *argv[]) {
 	//read command line options
 	processOptions(argc,argv);
 
-        cerr << "peakdetector ver=" << majorVersion << "." << minorVersion << "." << modVersion << endl;
+    cerr << "peakdetector ver=" << majorVersion << "." << minorVersion << "." << modVersion << endl;
 
 	//load classification model
     cerr << "Loading classifiation model: " << methodsFolder+ "/"+clsfModelFilename << endl;
@@ -160,24 +156,12 @@ int main(int argc, char *argv[]) {
         exit(-1);
     }
 
+    loadSpectralLibraries(methodsFolder);
 
-	//load compound list
-	if (!ligandDbFilename.empty()) {
-        //processAllSlices=false;
-             if(ligandDbFilename.find("csv") !=std::string::npos )  DB.compoundsDB =  DB.loadCompoundCSVFile(ligandDbFilename);
-        else if(ligandDbFilename.find("txt") !=std::string::npos )  DB.compoundsDB =  DB.loadCompoundCSVFile(ligandDbFilename);
-        else if(ligandDbFilename.find("tab") !=std::string::npos )  DB.compoundsDB =  DB.loadCompoundCSVFile(ligandDbFilename);
-        else if(ligandDbFilename.find("msp") !=std::string::npos )  DB.compoundsDB =  DB.loadNISTLibrary(ligandDbFilename.c_str());
-        sort(DB.compoundsDB.begin(),DB.compoundsDB.end(), Compound::compMass);
-        cerr << "Loaded " << DB.compoundsDB.size() << " compounds." << endl;
-	}
-
-    //process compound list
     if (DB.compoundsDB.size() and searchAdductsFlag) {
         //processCompounds(compoundsDB, "compounds");
         DB.adductsDB = DB.loadAdducts(methodsFolder + "/" + adductDbFilename);
     }
-    qDebug() << "HI.." << endl;
 
     //load files
     double startLoadingTime = getTime();
@@ -185,15 +169,13 @@ int main(int argc, char *argv[]) {
     printf("Execution time (Sample loading) : %f seconds \n", getTime() - startLoadingTime);
 	if (samples.size() == 0 ) { cerr << "Exiting .. nothing to process " << endl;  exit(1); }
 
-	//get retenation time resoluution
+    //get retenation time resolution
 	avgScanTime = samples[0]->getAverageFullScanTime();
 
     //ionization
     if(samples.size() > 0 ) ionizationMode = samples[0]->getPolarity();
 
     printSettings();
-
-
 
     //align samples
     if (samples.size() > 1 && alignSamplesFlag) { alignSamples(); }
@@ -786,17 +768,27 @@ void writeCSVReport( string filename) {
     string SEP = csvFileFieldSeperator;
 
     QStringList Header;
-    Header << "label"<< "metaGroupId"<< "groupId"<< "goodPeakCount"
-                        <<"medMz" << "medRt"<<"maxQuality"
-                        <<"note"<<"compound" <<"compoundId" << "category"
-                        <<"expectedRtDiff"<<"ppmDiff"<<"parent"
-                        <<"ms2EventCount"
-                        <<"fragNumIonsMatched"
-                        <<"fragFracMatched"
-                        <<"ticMatched"
-                        <<"dotProduct"
-                        <<"mzFragError"
-                        <<"spearmanRankCorrelation";
+    Header << "label"<< "metaGroupId"
+                        << "groupId"
+                        << "goodPeakCount"
+                        << "medMz"
+                        << "medRt"
+                        << "maxQuality"
+                        << "note"
+                        << "compound"
+                        << "compoundId"
+                        << "category"
+                        << "database"
+                        << "expectedRtDiff"
+                        << "ppmDiff"
+                        << "parent"
+                        << "ms2EventCount"
+                        << "fragNumIonsMatched"
+                        << "fragFracMatched"
+                        << "ticMatched"
+                        << "dotProduct"
+                        << "mzFragError"
+                        << "spearmanRankCorrelation";
 
     for(unsigned int i=0; i< samples.size(); i++) { Header << samples[i]->sampleName.c_str(); }
 
@@ -863,7 +855,6 @@ int getChargeStateFromMS1(PeakGroup* grp) {
     }
 }
 
-
 void classConsensusMS2Spectra(string filename) {
         ofstream outstream;
         outstream.open(filename.c_str());
@@ -902,7 +893,6 @@ void classConsensusMS2Spectra(string filename) {
         }
         outstream.close();
 }
-
 
 void writeConsensusMS2Spectra(string filename) {
         cerr << "Writing consensus specta to " << filename <<  endl;
@@ -1070,13 +1060,12 @@ void pullIsotopes(PeakGroup* parentgroup) {
 }
 
 void writeGroupInfoCSV(PeakGroup* group,  ofstream& groupReport) {
+
+
     if(! groupReport.is_open()) return;
     string SEP = csvFileFieldSeperator;
     PeakGroup::QType qtype = quantitationType;
     vector<float> yvalues = group->getOrderedIntensityVector(samples,qtype);
-
-    //string tagString = group->srmId + group->tagString;
-    //tagString = mzUtils::substituteInQuotedString(tagString,"\",'","---");
 
     char label[2];
     sprintf(label,"%c",group->label);
@@ -1094,29 +1083,24 @@ void writeGroupInfoCSV(PeakGroup* group,  ofstream& groupReport) {
     string compoundName;
     string compoundCategory;
     string compoundID;
+    string database;
     float  expectedRtDiff=1000;
     float  ppmDist=1000;
 
     if ( group->compound != NULL) {
         Compound* c = group->compound;
-        compoundName = mzUtils::substituteInQuotedString(c->name,"\",'","_");
-        if (c->category.size()) compoundCategory = c->category[0];
-        compoundID =  c->id;
-        double mass =c->mass;
-
-        if (c->precursorMz > 0 ) {
-            ppmDist = mzUtils::ppmDist(c->precursorMz,group->meanMz);
-        } else if (!c->formula.empty()) {
-            float formula_mass =  mcalc.computeMass(c->formula,ionizationMode);
-            if(formula_mass) mass=formula_mass;
-            ppmDist = mzUtils::ppmDist(mass,(double) group->meanMz);
-        }
+        ppmDist = group->fragMatchScore.ppmError;
         expectedRtDiff = c->expectedRt-group->meanRt;
+        compoundName = c->name;
+        compoundID =  c->id;
+        database = c->db;
+        if (c->category.size()) compoundCategory = c->category[0];
     }
 
     groupReport << SEP << compoundName;
     groupReport << SEP << compoundID;
     groupReport << SEP << compoundCategory;
+    groupReport << SEP << database;
     groupReport << SEP << expectedRtDiff;
     groupReport << SEP << ppmDist;
 
@@ -1212,7 +1196,6 @@ void writeMS2SimilarityMatrix(string filename) {
     }
 }
 
-
 void matchFragmentation() {
         if(DB.compoundsDB.size() == 0) return;
 
@@ -1233,6 +1216,8 @@ void matchFragmentation() {
                 Compound* cpd = m.compoundLink;
                 FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productAmuToll);
                 s.mergedScore = s.spearmanRankCorrelation;
+                s.ppmError = m.diff;
+
                 if (s.numMatches == 0 ) continue;
                 cerr << "\t"; cerr << cpd->name << "\t" << cpd->precursorMz << "\tppmDiff=" << m.diff << "\t num=" << s.numMatches << "\t tic" << s.ticMatched <<  " s=" << s.spearmanRankCorrelation << endl;
                 if (s.mergedScore > bestScore.mergedScore ) {
@@ -1261,4 +1246,27 @@ void matchFragmentation() {
             }
             cerr << "-------" << endl;
        }
+}
+
+void loadSpectralLibraries(string methodsFolder) {
+    QDir dir(methodsFolder.c_str());
+    if (dir.exists()) {
+        dir.setFilter(QDir::Files );
+        QFileInfoList list = dir.entryInfoList();
+        for (int i = 0; i < list.size(); ++i) {
+            QFileInfo fileInfo = list.at(i);
+            QString fileName = fileInfo.absoluteFilePath();
+
+            vector<Compound*>compounds;
+            if ( fileName.endsWith("msp",Qt::CaseInsensitive) || fileName.endsWith("sptxt",Qt::CaseInsensitive)) {
+                compounds = DB.loadNISTLibrary(fileName);
+            } else {
+                compounds = DB.loadCompoundCSVFile(fileName);
+            }
+
+            DB.compoundsDB.insert( DB.compoundsDB.end(), compounds.begin(),compounds.end());
+        }
+    }
+
+    sort(DB.compoundsDB.begin(),DB.compoundsDB.end(), Compound::compMass);
 }

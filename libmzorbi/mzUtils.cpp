@@ -27,8 +27,8 @@ void split(const string& s, char c, vector<string>& v) {
 }
 
 char *mystrcasestr(const char *s1, const char *s2) {
-	register const char *s = s1;
-	register const char *p = s2;
+	 const char *s = s1;
+	 const char *p = s2;
 	do {
 		if (!*p) {
 			return (char *) s1;;
@@ -293,7 +293,7 @@ float torben_median(const vector<float> &m) {
   * Algorithm from N. Wirth’s book, implementation by N. Devillard.
   * This code in public domain.
   */
-#define ELEM_SWAP(a,b) { register float t=(a);(a)=(b);(b)=t; }
+#define ELEM_SWAP(a,b) {  float t=(a);(a)=(b);(b)=t; }
 /*---------------------------------------------------------------------------
     Function :   kth_smallest()
              :   array of elements, # of elements in the array, rank k
@@ -311,8 +311,8 @@ float torben_median(const vector<float> &m) {
   ---------------------------------------------------------------------------*/
 float kth_smallest(float a[], int n, int k)
 {
-     register int i,j,l,m ;
-     register float x ;
+      int i,j,l,m ;
+      float x ;
      l=0 ; m=n-1 ;
      while (l<m) {
          x=a[k] ;

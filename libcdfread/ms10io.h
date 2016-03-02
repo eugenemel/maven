@@ -214,7 +214,7 @@ typedef struct {
 ********************************************************************************
 *
 *  Client data structure: each time an AIA MS file is opened, a new "client"
-*  is registered for that file, associating the netCDF file ID with dimension,
+*  is ed for that file, associating the netCDF file ID with dimension,
 *  variable, data format, and other information.
 *
 *  The array, ms_clients, and counter (ms_client_count) keep track of
