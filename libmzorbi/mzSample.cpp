@@ -1376,3 +1376,34 @@ void mzSample::applyPolynomialTransform() {
 		scans[i]->rt = newrt;
 	}
 }
+
+double mzSample::getMS1PrecurursorMass(Scan* ms2scan,float ppm) {
+
+    if (ms2scan->precursorMz == 0 ) return 0;
+
+    int scanNum = ms2scan->scannum;
+    StatisticsVector<double>precursors;
+
+    for(int i=scanNum-20; i<scanNum+20; i++ ) {
+        Scan* scan = this->getScan(i);
+
+        if (!scan or scan->mslevel > 1 ) continue;
+        int pos = scan->findHighestIntensityPos(ms2scan->precursorMz,ppm);
+
+        if (pos > 0 ) { 
+            precursors.push_back( scan->mz[pos] );
+            //cout << "HIT: " << " scan=" << scan->scannum << "  ms2=" << setprecision(10) << ms2scan->precursorMz << " ms1=" << scan->mz[pos] << endl;
+        }
+    }
+
+    if ( precursors.size() == 0 ) cerr << "getMS1PrecurursorMass() CAN'T FIND PRECURSOR " << ms2scan->precursorMz << endl;
+
+    if ( precursors.size() > 0 ) {
+        return precursors.mean();
+    } else {
+        return ms2scan->precursorMz;
+    }
+}
+
+
+

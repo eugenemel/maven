@@ -1214,7 +1214,7 @@ void matchFragmentation() {
 
             for(MassCalculator::Match m: matchesX ) {
                 Compound* cpd = m.compoundLink;
-                FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productAmuToll);
+                FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productAmuToll,true);
                 s.mergedScore = s.spearmanRankCorrelation;
                 s.ppmError = m.diff;
 

@@ -337,13 +337,14 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
             continue;
         }
 
-        string id, name, formula;
+        string id, name, formula,smile;
         float rt=0;
         float mz=0;
         float charge=0;
         float collisionenergy=0;
         float precursormz=0;
         float productmz=0;
+        float logP;
         int N=fields.size();
         vector<string>categorylist;
 
@@ -355,6 +356,8 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
         if ( header.count("id")&& header["id"]<N) 	 id = fields[ header["id"] ];
         if ( header.count("name")&& header["name"]<N) 	 name = fields[ header["name"] ];
         if ( header.count("compound")&& header["compound"]<N) 	 name = fields[ header["compound"] ];
+        if ( header.count("smile")&& header["smile"]<N) 	 name = fields[ header["smile"] ];
+        if ( header.count("logp")&& header["logp"]<N) 	 logP = string2float(fields[ header["logp"] ]);
 
         if ( header.count("precursormz") && header["precursormz"]<N) precursormz=string2float(fields[ header["precursormz"]]);
         if ( header.count("productmz") && header["productmz"]<N)  productmz = string2float(fields[header["productmz"]]);
@@ -405,6 +408,8 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
             compound->precursorMz=precursormz;
             compound->productMz=productmz;
             compound->collisionEnergy=collisionenergy;
+            compound->smileString=smile;
+            compound->logP=logP;
             for(int i=0; i < categorylist.size(); i++) compound->category.push_back(categorylist[i]);
             compoundSet.push_back(compound);
             //addCompound(compound);

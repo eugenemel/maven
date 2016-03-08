@@ -535,15 +535,18 @@ double Fragment::totalIntensity() {
 
 double Fragment::dotProduct(const vector<int>& X, Fragment* other) {
     if (X.size() == 0) return 0;
-    double dotP=0;
-    double thisIntensity = this->totalIntensity();
-    double otherIntensity = other->totalIntensity();
+    double thisTIC = totalIntensity();
+    double otherTIC = other->totalIntensity();
+    if(thisTIC == 0 or otherTIC == 0) return 0;
 
+    double dotP=0;
     for(unsigned int i=0; i<X.size(); i++ )  {
         if (X[i] != -1)  {
-            dotP += (this->intensity_array[i])/thisIntensity * (other->intensity_array[X[i]])/otherIntensity;
+            dotP += pow(this->intensity_array[i]/thisTIC - other->intensity_array[X[i]]/otherTIC,2);
+            //cerr << i << " ints: " << intensity_array[i]/thisTIC << " " << other->intensity_array[X[i]]/otherTIC <<  " " << dotP << endl;
         }
     }
+    dotP = 1-sqrt(dotP);
     return dotP;
 }
 
@@ -551,8 +554,10 @@ double Fragment::ticMatched(const vector<int>& X) {
     if (X.size() == 0) return 0;
     double TIC = this->totalIntensity();
     double matchedTIC=0;
-    for(unsigned int i=0; i<this->nobs(); i++) TIC += this->intensity_array[i];
-    for(unsigned int i=0; i<X.size(); i++ ) if (X[i] != -1) matchedTIC += this->intensity_array[i];
+
+    for(unsigned int i=0; i<X.size(); i++ ) { 
+        if (X[i] != -1) matchedTIC += intensity_array[i];
+    }
     /*
        for(int i=0; i<other->nobs();i++ ) TIC += other->intensity_array[i]; 
        for(int i=0; i<X.size();     i++ ) if (X[i] != -1) matchedTIC += other->intensity_array[ X[i] ];

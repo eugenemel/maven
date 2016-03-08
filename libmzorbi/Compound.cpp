@@ -23,7 +23,7 @@ float Compound::ajustedMass(int charge) {
 }
 
 
-FragmentationMatchScore Compound::scoreCompoundHit(Fragment* f, float productAmuToll=0.01) {
+FragmentationMatchScore Compound::scoreCompoundHit(Fragment* f, float productAmuToll=0.01, bool searchProton=true) {
         FragmentationMatchScore s;
         Compound* cpd = this;
 
@@ -34,12 +34,14 @@ FragmentationMatchScore Compound::scoreCompoundHit(Fragment* f, float productAmu
         t.mzs = cpd->fragment_mzs;
         t.intensity_array = cpd->fragment_intensity;
 
-        int N = t.mzs.size();
-        for(int i=0; i<N;i++) {
-            t.mzs.push_back( t.mzs[i] + PROTON);
-            t.intensity_array.push_back( t.intensity_array[i] );
-            t.mzs.push_back( t.mzs[i] - PROTON );
-            t.intensity_array.push_back( t.intensity_array[i] );
+        if (searchProton)  { //special case, check for loss or gain of protons
+            int N = t.mzs.size();
+            for(int i=0; i<N;i++) {
+                t.mzs.push_back( t.mzs[i] + PROTON);
+                t.intensity_array.push_back( t.intensity_array[i] );
+                t.mzs.push_back( t.mzs[i] - PROTON );
+                t.intensity_array.push_back( t.intensity_array[i] );
+            }
         }
 
         t.sortByIntensity();

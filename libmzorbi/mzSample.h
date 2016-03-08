@@ -223,6 +223,7 @@ public:
     EIC* getEIC(float precursorMz, float collisionEnergy, float productMz, float amuQ1, float amuQ2 );
     EIC* getTIC(float,float,int);		//get Total Ion Chromatogram
     EIC* getBIC(float,float,int);		//get Base Peak Chromatogram
+    double getMS1PrecurursorMass(Scan* ms2scan,float ppm);
 
 
     deque <Scan*> scans;
@@ -634,7 +635,7 @@ class Compound {
 			void clearGroup()  { _group.clear(); }
 			void unlinkGroup() { _group.clear(); _groupUnlinked = true; }
             bool groupUnlinked() { return _groupUnlinked; }
-            FragmentationMatchScore scoreCompoundHit(Fragment* f, float productAmuToll);
+            FragmentationMatchScore scoreCompoundHit(Fragment* f, float productAmuToll, bool searchProton);
 
             vector<Reaction*>reactions;
             int    cid;
