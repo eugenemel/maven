@@ -13,7 +13,7 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
     this->sampleName = scan->sample->sampleName;
     this->scanNum = scan->scannum;
     this->precursorCharge = scan->precursorCharge;
-    this->sortedBy= SortType::Mz;
+    this->sortedBy= Fragment::SortType::Mz;
 
     int baseLineLevel=5; //lowest 5% of data are considered to be baseline
 
@@ -440,7 +440,7 @@ void Fragment::sortByIntensity() {
     intensity_array = b;
     obscount = c;
     annotations=d;
-    sortedBy = SortType::Intensity;
+    sortedBy = Fragment::SortType::Intensity;
 }	
 
 void Fragment::sortByMz() { 
@@ -462,7 +462,7 @@ void Fragment::sortByMz() {
     intensity_array = b;
     obscount = c;
     annotations=d;
-    sortedBy = SortType::Mz;
+    sortedBy = Fragment::SortType::Mz;
 }
 
 void Fragment::buildConsensusAvg() { 
