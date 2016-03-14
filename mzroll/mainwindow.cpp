@@ -50,7 +50,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 #endif
 
     readSettings();
-
     QString dataDir = ".";
 
     QList<QString> dirs;
@@ -105,7 +104,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     statusBar()->addPermanentWidget(btnBugs,0);
 
     setWindowIcon(QIcon(":/images/icon.png"));
-
 
     //dock widgets
     setDockOptions(QMainWindow::AllowNestedDocks | QMainWindow::VerticalTabs | QMainWindow::AnimatedDocks );

@@ -162,6 +162,7 @@ class mzSlice {
 	static bool compMz(const mzSlice* a, const mzSlice* b ) { return a->mz < b->mz; }
 	static bool compRt(const mzSlice* a, const mzSlice* b ) { return a->rt < b->rt; }
 	bool operator< (const mzSlice* b) { return mz < b->mz; }
+	bool operator< (const mzSlice& b) { return mz < b.mz; }
 };
 
 class mzLink { 

@@ -53,6 +53,9 @@ void SpectraWidget::initPlot() {
     _vnote->setFont(font);
     _vnote->setDefaultTextColor(Qt::red);
 
+    _title = new QGraphicsTextItem("",0);
+    scene()->addItem(_title);
+
 }
 
 void SpectraWidget::setCurrentScan(Scan* scan) {
@@ -75,10 +78,51 @@ void SpectraWidget::replot() {
 }
 
 
-void SpectraWidget::setTitle(QString title) {
-    if (mainwindow) {
-        mainwindow->spectraDockWidget->setWindowTitle("Spectra: " + title);
+void SpectraWidget::setTitle() {
+
+    if (width()<50) return;
+
+    QString title;
+    if (_currentScan->sample) {
+         mzSample* sample = _currentScan->sample;
+         QString sampleName = _currentScan->sample->sampleName.c_str();
+         QString polarity;
+         _currentScan->getPolarity() > 0 ? polarity = "Pos" : polarity = "Neg";
+
+         QColor sampleColor = QColor::fromRgbF( sample->color[0], sample->color[1], sample->color[2], 1 );
+
+         title += tr("Sample:<b>%1</b>  Scan:<b>%2</b> rt:<b>%3</b>   msLevel:<b>%4</b>  Ion:<b>%5</b>").arg(
+                             QString(sampleName),
+                             QString::number(_currentScan->scannum),
+                             QString::number(_currentScan->rt,'f',2),
+                             QString::number(_currentScan->mslevel),
+                             polarity
+                             );
     }
+
+    if (_currentScan->precursorMz) {
+        title += "<br>";
+        QString precursorMzLink= " PreMz: " + QString::number(_currentScan->precursorMz,'f',4);
+        title += precursorMzLink ;
+    }
+
+    if (_currentScan->collisionEnergy) {
+        QString precursorMzLink= " CE: " + QString::number(_currentScan->collisionEnergy,'f',1);
+        title += precursorMzLink ;
+    }
+
+    if (_currentScan->productMz>0) {
+        QString precursorMzLink= " ProMz: " + QString::number(_currentScan->productMz,'f',4);
+        title += precursorMzLink ;
+    }
+
+    QFont font = QApplication::font();
+    font.setPixelSize(8.0);
+    _title->setHtml(title);
+    int titleWith = _title->boundingRect().width();
+    _title->setPos(scene()->width()/2-titleWith/2, 3);
+    //_title->setScale(scene()->width()*0.5);
+    _title->update();
 }
 
 void SpectraWidget::setScan(Scan* scan) {
@@ -229,36 +273,12 @@ void SpectraWidget::drawGraph() {
     Scan* scan = _currentScan;
     if (scan == NULL ) return;
 
+    //draw title text
+    setTitle();
+
     QColor sampleColor = QColor::fromRgb(0,0,0,255);
     string sampleName =  ".";
     QString polarity;
-    QString title;
-
-    if (scan->sample ) {
-         mzSample* sample = scan->sample;
-         sampleName = sample->sampleName;
-         scan->getPolarity() > 0 ? polarity = "Positive" : polarity = "Negative";
-         sampleColor = QColor::fromRgbF( sample->color[0], sample->color[1], sample->color[2], 1 );
-         title = tr("Sample:%1   Scan:%2   rt:%3   msLevel:%4  Ionization Mode:%5 ").arg(
-                             QString(sampleName.c_str()),
-                             QString::number(scan->scannum),
-                             QString::number(scan->rt,'f',2),
-                             QString::number(scan->mslevel),
-                             polarity
-                             );
-    }
-
-    if (scan->precursorMz) {
-        QString precursorMzLink= "PrecursorMz: " + QString::number(scan->precursorMz,'f',3);
-        title += precursorMzLink ;
-    }
-
-    if (scan->productMz) {
-        QString precursorMzLink= " ProductMz: " + QString::number(scan->productMz,'f',3);
-        title += precursorMzLink ;
-    }
-
-    this->setTitle(title);
 
     QPen pen(Qt::black, 2);
     float fontSize = scene()->height()*0.05;
@@ -272,6 +292,7 @@ void SpectraWidget::drawGraph() {
     sline->setColor(sampleColor);
     sline->setPen(slineColor);
    _items.push_back(sline);
+
 
    if( _profileMode ) {
         QBrush slineFill(sampleColor);

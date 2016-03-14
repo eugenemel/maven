@@ -107,6 +107,12 @@ void mzSample::loadSample(const char* filename) {
     //set min and max values for rt
     calculateMzRtRange();
 
+    //recalculate precursor masses
+    cerr << "Recalculating Ms2 Precursor Masses" << endl;
+    for(Scan* ms2scan: scans) {
+        ms2scan->precursorMz=getMS1PrecurursorMass(ms2scan,20);
+    }
+
     if (mystrcasestr(filename,"blan") != NULL) {
         this->isBlank = true;
         cerr << "Found Blank: " << filename << endl;
@@ -1380,27 +1386,32 @@ void mzSample::applyPolynomialTransform() {
 double mzSample::getMS1PrecurursorMass(Scan* ms2scan,float ppm) {
 
     if (ms2scan->precursorMz == 0 ) return 0;
-
     int scanNum = ms2scan->scannum;
-    StatisticsVector<double>precursors;
 
-    for(int i=scanNum-20; i<scanNum+20; i++ ) {
+    double adjPreMass=0;
+    for(int i=scanNum; i>scanNum-50; i--) {
         Scan* scan = this->getScan(i);
 
-        if (!scan or scan->mslevel > 1 ) continue;
+        if (!scan or scan->mslevel > 1) continue;
+
+        //find highest intensity posiion is last ms1 scan
         int pos = scan->findHighestIntensityPos(ms2scan->precursorMz,ppm);
 
-        if (pos > 0 ) { 
-            precursors.push_back( scan->mz[pos] );
-            //cout << "HIT: " << " scan=" << scan->scannum << "  ms2=" << setprecision(10) << ms2scan->precursorMz << " ms1=" << scan->mz[pos] << endl;
-        }
+        //failed.. try harder
+        if (! pos ) pos = scan->findHighestIntensityPos(ms2scan->precursorMz,ppm*1.5);
+
+        //try harder
+        if (! pos ) pos = scan->findHighestIntensityPos(ms2scan->precursorMz,ppm*2);
+
+        if (pos > 0 ) adjPreMass= scan->mz[pos];
+         //out << "HIT: " << " scan=" << scan->scannum << "  ms2=" << setprecision(10) << ms2scan->precursorMz << " ms1=" << scan->mz[pos] << endl;
+        break;
     }
 
-    if ( precursors.size() == 0 ) cerr << "getMS1PrecurursorMass() CAN'T FIND PRECURSOR " << ms2scan->precursorMz << endl;
-
-    if ( precursors.size() > 0 ) {
-        return precursors.mean();
+    if ( adjPreMass > 0 ) {
+        return adjPreMass;
     } else {
+        cerr << "getMS1PrecurursorMass() CAN'T FIND PRECURSOR " << ms2scan->precursorMz << endl;
         return ms2scan->precursorMz;
     }
 }

@@ -11,8 +11,12 @@ unix {
 INSTALL_PREFIX=$$(DESTDIR)$$INSTALL_PREFIX
 DEFINES += INSTALL_LIBDIR=\\\"$$INSTALL_LIBDIR\\\"
 
-QMAKE_CXXFLAGS_RELEASE += -O3 -Wall -Wno-sign-conversion -std=c++11 -Wno-sign-compare
-QMAKE_CXXFLAGS_DEBUG   += -g  -Wall -Wno-sign-conversion -std=c++11 -Wno-sign-compare
+#QMAKE_CXXFLAGS_RELEASE += -O3 -Wall -Wno-sign-conversion -Wno-c+11-extensions -std=c++11 -Wno-sign-compare
+#QMAKE_CXXFLAGS_DEBUG   += -g  -Wall -Wno-sign-conversion -Wno-std=c++11 -Wno-sign-compare
+
+QMAKE_CXXFLAGS_RELEASE   += -O3  -Wall -Wno-sign-conversion -Wno-std=c++11 -Wno-sign-compare
+QMAKE_CXXFLAGS_DEBUG   += -g  -Wall -Wno-sign-conversion -Wno-c++11-extensions -Wno-sign-compare
+
 
 QT += core
 CONFIG += exceptions std++11
