@@ -51,7 +51,7 @@ class Reaction;
 class MassCalculator;
 class ChargedSpecies;
 class Fragment;
-class FragmentationMatchScore;
+struct FragmentationMatchScore;
 
 using namespace pugi;
 using namespace mzUtils;

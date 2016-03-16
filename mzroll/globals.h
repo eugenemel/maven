@@ -11,7 +11,7 @@
 //local
 #include "mzUtils.h"
 #include "mzSample.h"
-#include "mzMassSlicer.h"
+#include "parallelMassSlicer.h"
 #include "database.h"
 #include "classifier.h"
 #include "classifierNeuralNet.h"

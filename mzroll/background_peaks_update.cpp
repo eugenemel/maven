@@ -366,11 +366,11 @@ void BackgroundPeakUpdate::processMassSlices() {
 		if ( samples.size() > 0 ) avgScanTime = samples[0]->getAverageFullScanTime();
 
 		emit (updateProgressBar( "Computing Mass Slices", 2, 10 ));
-		MassSlices massSlices;
+        ParallelMassSlicer massSlices;
         massSlices.setSamples(samples);
 
         if(mustHaveMS2) {
-            massSlices.algorithmC(compoundPPMWindow,minGroupIntensity,rtStepSize);
+            massSlices.algorithmD(compoundPPMWindow,rtStepSize);
         } else {
             massSlices.algorithmB(ppmMerge,minGroupIntensity,rtStepSize);
         }

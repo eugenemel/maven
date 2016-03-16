@@ -1,5 +1,5 @@
 #include "mzSample.h"
-#include "mzMassSlicer.h"
+#include "parallelMassSlicer.h"
 #include <cmath>
 #include "PolyAligner.h"
 

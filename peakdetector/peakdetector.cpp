@@ -8,7 +8,6 @@
 #include<sstream>
 
 #include "mzSample.h"
-#include "mzMassSlicer.h"
 #include "parallelMassSlicer.h"
 #include "../mzroll/projectDB.h"
 #include "options.h"
