@@ -133,7 +133,9 @@ void PeakDetectionDialog::findPeaks() {
 		peakupdater->compoundRTWindow = compoundRTWindow->value();
         peakupdater->eicMaxGroups = eicMaxGroups->value();
 		peakupdater->avgScanTime = samples[0]->getAverageFullScanTime();
-		peakupdater->rtStepSize = rtStep->value();
+        peakupdater->rtStepSize = rtStep->value();
+        peakupdater->mustHaveMS2 = mustHaveMS2Flag->isChecked();
+        peakupdater->productAmuToll = productAmuTolr->value();
 
         if ( ! outputDirName->text().isEmpty()) {
             peakupdater->setOutputDir(outputDirName->text());

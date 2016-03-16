@@ -53,11 +53,13 @@ class Database {
         map<string,int>	  getDatabaseNames();
         map<string,int>   getChromotographyMethods();
 
-        Compound* findSpeciesById(string id);
+        Compound* findSpeciesById(string id,string db);
 		Compound* findSpeciesByPrecursor(float precursorMz, float productMz,int polarity,double amuQ1, double amuQ3);
         set<Compound*> findSpeciesByMass(float mz, float ppm);
         vector<Compound*> findSpeciesByName(string name, string dbname);
+
         vector<MassCalculator::Match> findMathchingCompounds(float mz, float ppm, float charge);
+        vector<MassCalculator::Match> findMathchingCompoundsSLOW(float mz, float ppm, float charge);
 
 		void loadRetentionTimes(QString method);
 		void saveRetentionTime(Compound* c, float rt, QString method);
@@ -68,7 +70,7 @@ class Database {
         vector<Adduct*> fragmentsDB;
 
         vector<Compound*> compoundsDB;
-		map<string,Compound*> compoundIdMap;
+        QMap<string,Compound*> compoundIdMap;
 
       private:
 		QSqlDatabase ligandDB;

@@ -126,7 +126,8 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
 	//qDebug << "Integrating area from " << rtmin << " to " << rtmax;
 	this->_integratedGroup.clear();
 	this->_integratedGroup.compound = _slice.compound;
-	this->_integratedGroup.srmId = _slice.srmId;
+    this->_integratedGroup.srmId = _slice.srmId;
+    _integratedGroup.adduct = NULL;
 
 	for(int i=0; i < eics.size(); i++ ) {
 		EIC* eic = eics[i];
@@ -151,24 +152,22 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
 			}
 		}
 		if (peak.pos > 0) {
-			//qDebug << "details" << peak.pos << " " << peak.minpos << " " << peak.maxpos;
 			eic->getPeakDetails(peak);
 			_integratedGroup.addPeak(peak);
-            qDebug() << eic->sampleName.c_str() << " " << peak.peakArea << " " << peak.peakAreaCorrected;
+            qDebug() << "integrateRegion: " << eic->sampleName.c_str() << " " << peak.peakArea << " " << peak.peakAreaCorrected;
 			this->showPeakArea(&peak);
 		}
 	}
 
     _integratedGroup.groupStatistics();
     setSelectedGroup(&_integratedGroup);
-    PeakGroup* newGroup = getMainWindow()->bookmarkPeakGroup();
 
+    PeakGroup* newGroup = getMainWindow()->bookmarkPeakGroup(&_integratedGroup);
     if (newGroup and newGroup->compound) {
            getMainWindow()->isotopeWidget->setPeakGroup(newGroup);
            setSelectedGroup(newGroup);
 
     }
-
 	this->copyToClipboard();
     scene()->update();
 }
@@ -261,11 +260,6 @@ void EicWidget::cleanup() {
 	peakgroups.clear();
 	if (_showTicLine == false && tics.size() > 0 ) { delete_all(tics); tics.clear(); }
 	clearPlot();
-}
-
-void EicWidget::addPeakGroup(PeakGroup& group) { 
- //qDebug <<" EicWidget::addPeakGroup(PeakGroup& group)";
-	peakgroups.push_back(group);
 }
 
 void EicWidget::computeEICs() {
@@ -1332,7 +1326,8 @@ void EicWidget::setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax
 }
 
 void EicWidget::setPeakGroup(PeakGroup* group) {
- //qDebug <<"EicWidget::setPeakGroup(PeakGroup* group) ";
+    qDebug() <<"EicWidget::setPeakGroup(PeakGroup* group) ";
+    group->summary();
 
     if (group == NULL ) return;
     _slice.mz = group->meanMz;
@@ -1341,9 +1336,6 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
 
     if (!group->srmId.empty()) {
         setSrmId(group->srmId);
-    } else if ( group->compound ) {
-        //TURNED OFF., behavior is no longer needed
-        //setCompound(group->compound);
     }
 
     if ( _autoZoom && group->parent != NULL ) {

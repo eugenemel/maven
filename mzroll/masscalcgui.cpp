@@ -63,25 +63,34 @@ void MassCalcWidget::showTable() {
     QTableWidget *p = mTable; 
     p->setUpdatesEnabled(false); 
     p->clear(); 
-    p->setColumnCount(3);
+    p->setColumnCount(5);
     p->setRowCount( matches.size() ) ;
-    p->setHorizontalHeaderLabels(  QStringList() << "Compound" << "Mass" << "ppmDiff");
+    p->setHorizontalHeaderLabels(  QStringList() << "Compound" << "ppmDiff" << "fragScore" << "Adduct" << "Mass" << "DB");
     p->setSortingEnabled(false);
     p->setUpdatesEnabled(false);
     
     for(unsigned int i=0;  i < matches.size(); i++ ) {
         //no duplicates in the list
         Compound* c = matches[i].compoundLink;
-        QString item1 = QString(matches[i].name.c_str() );
-        QString item2 = QString::number( matches[i].mass , 'f', 4);
-        QString item3 = QString::number( matches[i].diff , 'f', 4);
+        Adduct *  a = matches[i].adductLink;
+        QString matchName = QString(matches[i].name.c_str() );
+        QString preMz = QString::number( matches[i].mass , 'f', 4);
+        QString ppmDiff = QString::number( matches[i].diff , 'f', 4);
+        QString matchScore = QString::number( matches[i].fragScore.dotProduct , 'f', 2);
+        QString adductName = QString(a->name.c_str());
+        QString db = QString(c->db.c_str());
 
-        QTableWidgetItem* item = new QTableWidgetItem(item1,0);
+        QTableWidgetItem* item = new QTableWidgetItem(matchName,0);
 
         p->setItem(i,0, item );
-        p->setItem(i,1, new QTableWidgetItem(item2,0));
-        p->setItem(i,2, new QTableWidgetItem(item3,0)); 
-		if (c != NULL) item->setData(Qt::UserRole,QVariant::fromValue(c));
+        p->setItem(i,1, new QTableWidgetItem(ppmDiff,0));
+        p->setItem(i,2, new QTableWidgetItem(matchScore));
+        p->setItem(i,3, new QTableWidgetItem(adductName,0));
+        p->setItem(i,4, new QTableWidgetItem(preMz,0));
+        p->setItem(i,5, new QTableWidgetItem(db,0));
+
+
+        if (c != NULL) item->setData(Qt::UserRole,QVariant::fromValue(c));
     }
 
     p->setSortingEnabled(true); 
@@ -90,22 +99,14 @@ void MassCalcWidget::showTable() {
 
 }
 
-QSet<Compound*> MassCalcWidget::findMathchingCompounds(float mz, float ppm, float charge) {
+void MassCalcWidget::getMatches(PeakGroup* grp) {
+    matches = DB.findMathchingCompounds(_mz,_ppm,_charge);
+    if(grp->fragmentationPattern.nobs() == 0) return;
 
-	QSet<Compound*>uniqset;
-    MassCalculator mcalc;
-    Compound x("find", "", "",0);
-    x.mass = mz-2;
-    vector<Compound*>::iterator itr = lower_bound(DB.compoundsDB.begin(), DB.compoundsDB.end(), &x, Compound::compMass);
-
-	//cerr << "findMathchingCompounds() mz=" << mz << " ppm=" << ppm << " charge=" <<  charge;
-    for(;itr != DB.compoundsDB.end(); itr++ ) {
-        Compound* c = *itr; if (!c) continue;
-        double cmass = mcalc.computeMass(c->formula, charge);
-        if ( mzUtils::ppmDist((double) cmass, (double) mz) < ppm && !uniqset.contains(c) ) uniqset << c;
-        if (cmass > mz+2) break;
-	}
-	return uniqset;
+    for(MassCalculator::Match& m: matches ) {
+       Compound* cpd = m.compoundLink;
+       m.fragScore = cpd->scoreCompoundHit(&grp->fragmentationPattern,0.01,true);
+    }
 }
 
 void MassCalcWidget::getMatches() {

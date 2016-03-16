@@ -1,4 +1,4 @@
-#include <iostream>
+
 #include <fstream>
 #include <string>
 #include <vector>
@@ -101,8 +101,8 @@ int  eicMaxGroups=100;
 
 //MS2 matching
 float minFragmentMatchScore=2;
-float fragmentMatchPPMTolr=10;
 float productAmuToll = 0.01;
+string scoringScheme="ticMatch"; // ticMatch | spearmanRank
 
 void processOptions(int argc, char* argv[]);
 void loadSamples(vector<string>&filenames);
@@ -526,6 +526,7 @@ void processOptions(int argc, char* argv[]) {
                                 "q?minQuality <float>",
                                 "r?rtStepSize <float>",
                                 "s?nameSuffix <string>",
+                                "t?scoringScheme <string>",
                                 "v?ver",
                                 "w?minPeakWidth <int>",
                                 "x?minPrecursorCharge <int>",
@@ -558,6 +559,7 @@ void processOptions(int argc, char* argv[]) {
             case 'q' : minQuality=atof(optarg); break;
             case 'r' : rtStepSize=atof(optarg); break;
             case 's' : nameSuffix=string(optarg); break;
+            case 't' : scoringScheme=string(optarg); break;
             case 'w' : minNoNoiseObs=atoi(optarg); break;
             case 'x' : minPrecursorCharge=atoi(optarg); break;
             case 'y' : eic_smoothingWindow=atoi(optarg); break;
@@ -972,7 +974,6 @@ void pullIsotopes(PeakGroup* parentgroup) {
                         }
                     }
                 }
-
             }
             //if(isotopePeakIntensity==0) continue;
 
@@ -1205,6 +1206,8 @@ void matchFragmentation() {
 
             //set<Compound*> matches = findSpeciesByMass(g->meanMz,precursorPPM);
             vector<MassCalculator::Match>matchesX = DB.findMathchingCompounds(g->meanMz,precursorPPM,ionizationMode);
+            //vector<MassCalculator::Match>matchesS = DB.findMathchingCompoundsSLOW(g->meanMz,precursorPPM,ionizationMode);
+
             if(matchesX.size() == 0) continue;
 
             g->fragmentationPattern.printFragment(productAmuToll,10);
@@ -1215,7 +1218,13 @@ void matchFragmentation() {
             for(MassCalculator::Match m: matchesX ) {
                 Compound* cpd = m.compoundLink;
                 FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productAmuToll,true);
-                s.mergedScore = s.spearmanRankCorrelation;
+
+                if (scoringScheme == "spearmanRank") {
+                    s.mergedScore = s.spearmanRankCorrelation;
+                } else {
+                    s.mergedScore = s.ticMatched;
+
+                }
                 s.ppmError = m.diff;
 
                 if (s.numMatches == 0 ) continue;

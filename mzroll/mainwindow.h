@@ -148,6 +148,7 @@ public slots:
     void loadModel();
     void loadCompoundsFile();
     void loadCompoundsFile(QString filename);
+    void reloadMethodsFolder();
 
     bool addSample(mzSample* sample);
     void compoundDatabaseSearch();

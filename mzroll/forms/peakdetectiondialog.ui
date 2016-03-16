@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>577</width>
-    <height>803</height>
+    <width>704</width>
+    <height>887</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -26,63 +26,6 @@
       <string>Compound Database</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Compound Subset</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QComboBox" name="compoundDatabase"/>
-      </item>
-      <item row="1" column="0">
-       <widget class="QCheckBox" name="matchRt">
-        <property name="text">
-         <string>Match Retention Times</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QCheckBox" name="reportIsotopes">
-        <property name="text">
-         <string>Report Isotopic Peaks</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QDoubleSpinBox" name="compoundPPMWindow">
-        <property name="suffix">
-         <string> ppm</string>
-        </property>
-        <property name="maximum">
-         <double>1000000.000000000000000</double>
-        </property>
-        <property name="value">
-         <double>20.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_11">
-        <property name="text">
-         <string>EIC Extraction Window  +/- PPM </string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Compound Retention Time Matching Window</string>
-        </property>
-       </widget>
-      </item>
       <item row="3" column="2">
        <widget class="QDoubleSpinBox" name="compoundRTWindow">
         <property name="prefix">
@@ -121,7 +64,93 @@
          <number>999999999</number>
         </property>
         <property name="value">
-         <number>10</number>
+         <number>5</number>
+        </property>
+        <property name="displayIntegerBase">
+         <number>5</number>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Compound Retention Time Matching Window</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string>EIC Extraction Window  +/- PPM </string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QComboBox" name="compoundDatabase"/>
+      </item>
+      <item row="2" column="2">
+       <widget class="QDoubleSpinBox" name="compoundPPMWindow">
+        <property name="suffix">
+         <string> ppm</string>
+        </property>
+        <property name="maximum">
+         <double>1000000.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>20.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Compound Subset</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QCheckBox" name="reportIsotopes">
+        <property name="text">
+         <string>Report Isotopic Peaks</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="matchRt">
+        <property name="text">
+         <string>Match Retention Times</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="label_17">
+        <property name="text">
+         <string>Fragmentation Matching Tolr (amu)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="2">
+       <widget class="QDoubleSpinBox" name="productAmuTolr">
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>0.001000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>0.500000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.001000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.010000000000000</double>
         </property>
        </widget>
       </item>
@@ -149,10 +178,33 @@
       <bool>false</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="1">
+       <widget class="QDoubleSpinBox" name="ppmStep">
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="maximum">
+         <double>1000000000.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>1.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>20.000000000000000</double>
+        </property>
+       </widget>
+      </item>
       <item row="4" column="0">
        <widget class="QLabel" name="label">
         <property name="text">
          <string>Time Domain Resolution (scans)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Mass Domain Resolution (ppm)</string>
         </property>
        </widget>
       </item>
@@ -184,26 +236,10 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="ppmStep">
-        <property name="decimals">
-         <number>3</number>
-        </property>
-        <property name="maximum">
-         <double>1000000000.000000000000000</double>
-        </property>
-        <property name="singleStep">
-         <double>1.000000000000000</double>
-        </property>
-        <property name="value">
-         <double>20.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_7">
+      <item row="5" column="0">
+       <widget class="QCheckBox" name="mustHaveMS2Flag">
         <property name="text">
-         <string>Mass Domain Resolution (ppm)</string>
+         <string>Must Have MS2</string>
         </property>
        </widget>
       </item>

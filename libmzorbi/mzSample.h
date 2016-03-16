@@ -659,6 +659,7 @@ class Compound {
             float logP;
 
             string db;			//name of database for example KEGG, ECOCYC.. etc..
+            bool  isDecoy;
 
             vector<float>fragment_mzs;
             vector<float>fragment_intensity;

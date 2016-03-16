@@ -76,7 +76,6 @@ public slots:
     void setGallaryToEics();
 
     void selectGroupNearRt(float rt);
-    void addPeakGroup(PeakGroup& group);
     void eicToClipboard();
 
     void showSpline(bool f) { _showSpline=f; }

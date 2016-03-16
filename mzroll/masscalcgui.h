@@ -24,12 +24,12 @@ public:
 protected:
         
 
-public slots: 
+public slots:
+      void getMatches(PeakGroup* grp);
  	  void setMass(float mz);
 	  void setCharge(float charge);
 	  void setPPM(float ppm);
       void compute();
-	  QSet<Compound*> findMathchingCompounds(float mz, float ppm, float charge);
 
 private slots:
       void showCellInfo(int row, int col, int lrow, int lcol);

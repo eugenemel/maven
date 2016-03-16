@@ -4,6 +4,8 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     setAllowedAreas(Qt::AllDockWidgetAreas);
     setFloating(false);
     _mainwindow = mw;
+    currentProject = NULL;
+
     setObjectName(title);
     setWindowTitle(title);
     setAcceptDrops(true);
@@ -21,7 +23,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     connect(treeWidget, SIGNAL(itemSelectionChanged()),SLOT(showSelectedGroup()));
     setupPeakTable();
 
-       traindialog = new TrainDialog(this);
+    traindialog = new TrainDialog(this);
     connect(traindialog->saveButton,SIGNAL(clicked(bool)),SLOT(saveModel()));
     connect(traindialog->trainButton,SIGNAL(clicked(bool)),SLOT(Train()));
 
@@ -126,6 +128,11 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     //btnX->setIcon(QIcon(rsrcPath + "/hide.png"));
     connect(btnX, SIGNAL(clicked()),SLOT(hide()));
 
+    QLineEdit*  filterEditor = new QLineEdit(toolBar);
+    filterEditor->setMinimumWidth(15);
+    filterEditor->setPlaceholderText("Filter");
+    connect(filterEditor, SIGNAL(textEdited(QString)), this, SLOT(filterTree(QString)));
+
     QWidget* spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
     toolBar->addWidget(btnSwitchView);
@@ -151,6 +158,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
 
    // toolBar->addWidget(btnMoveTo);
     toolBar->addWidget(spacer);
+    toolBar->addWidget(filterEditor);
     toolBar->addWidget(btnX);
 
     ///LAYOUT
@@ -181,30 +189,17 @@ void TableDockWidget::setupPeakTable() {
     colNames << "m/z";
     colNames << "rt";
 
-    /*
-		colNames << "peakAreaFractional";
-		colNames << "noNoiseFraction";
-		colNames << "symmetry";
-		colNames << "width";
-		colNames << "sym/width";
-		colNames << "signalBaselineRatio";
-		colNames << "overlap";
-		colNames << "gaussFitR2";
-		colNames << "Quality";
-		colNames  << "Label";
-		colNames  << "FP/FN";
-		colNames  << "changeFoldRatio";
-		*/
-
     if (viewType == groupView) {
-        colNames << "#peaks";
-        colNames << "#good";
+        colNames << "#Peaks";
+        colNames << "#MS2s";
+        colNames << "MS2 Score";
         colNames << "Max Width";
         colNames << "Max Intensity";
         colNames << "Max S/N";
         colNames << "Max Quality";
         colNames << "Ratio Change";
         colNames << "P-value";
+
     } else if (viewType == peakView) {
         vector<mzSample*> vsamples = _mainwindow->getVisibleSamples();
         sort(vsamples.begin(), vsamples.end(), mzSample::compSampleOrder);
@@ -215,11 +210,9 @@ void TableDockWidget::setupPeakTable() {
 
     treeWidget->setColumnCount(colNames.size());
     treeWidget->setHeaderLabels(colNames);
-    treeWidget->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    treeWidget->header()->adjustSize();
+    //treeWidget->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    //treeWidget->header()->adjustSize();
     treeWidget->setSortingEnabled(true);
-
-
 
 }
 
@@ -245,11 +238,6 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
         group->updateQuality();
         if(viewType == groupView) item->setText(8,QString::number(group->maxQuality,'f',2));
         item->setText(0,groupTagString(group));
-    }
-
-    if ( viewType == groupView && group->changeFoldRatio >= 0 ) {
-        item->setText(9,QString::number(group->changeFoldRatio, 'f', 3));
-        item->setText(10,QString::number(group->changePValue,    'f', 6));
     }
 
     int good=0; int bad=0;
@@ -344,33 +332,15 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
 
     if (group->label == 'g' ) item->setIcon(0,QIcon(":/images/good.png"));
     if (group->label == 'b' ) item->setIcon(0,QIcon(":/images/bad.png"));
-    /*
-	item->setText(4,QString::number(p.peakAreaFractional, 'f', 2));
-	item->setText(5,QString::number(p.noNoiseFraction, 'f', 2));
-	item->setText(6,QString::number(p.symmetry));
-	item->setText(7,QString::number(p.width));
-	item->setText(8,QString::number(p.symmetry/(p.width+1)*log2(p.width+1),'f',2));
-	item->setText(9,QString::number(p.signalBaselineRatio, 'f', 3));
-	item->setText(10,QString::number(p.groupOverlapFrac, 'f', 2));
-	item->setText(11,QString::number(p.gaussFitR2*100, 'f', 2));
-        item->setText(12,QString::number(p.quality, 'f', 2));
-	item->setText(13,QString(group->label));
-	item->setText(14,QString::number(group->changeFoldRatio, 'f', 2));
-	*/
 
     if (viewType == groupView) {
         item->setText(3,QString::number(group->sampleCount));
-        item->setText(4,QString::number(group->goodPeakCount));
-        item->setText(5,QString::number(group->maxNoNoiseObs));
-        item->setText(6,QString::number(group->maxIntensity,'g',2));
-        item->setText(7,QString::number(group->maxSignalBaselineRatio,'f',0));
-        item->setText(8,QString::number(group->maxQuality,'f',2));
-
-        if ( group->changeFoldRatio != 0 ) {
-            item->setText(9,QString::number(group->changeFoldRatio, 'f', 2));
-            item->setText(10,QString::number(group->changePValue,    'e', 4));
-        }
-
+        item->setText(4,QString::number(group->ms2EventCount));
+        item->setText(5,QString::number(group->fragMatchScore.mergedScore));
+        item->setText(6,QString::number(group->maxNoNoiseObs));
+        item->setText(7,QString::number(group->maxIntensity,'g',2));
+        item->setText(8,QString::number(group->maxSignalBaselineRatio,'f',0));
+        item->setText(9,QString::number(group->maxQuality,'f',2));
     } else if ( viewType == peakView) {
         vector<mzSample*> vsamples = _mainwindow->getVisibleSamples();
         sort(vsamples.begin(), vsamples.end(), mzSample::compSampleOrder);
@@ -399,19 +369,20 @@ bool TableDockWidget::hasPeakGroup(PeakGroup* group) {
     return false;
 }
 
-PeakGroup* TableDockWidget::addPeakGroup(PeakGroup* group) {
-    if (group != NULL ) {
-        allgroups.push_back(*group);
-        if ( allgroups.size() > 0 ) {
-            PeakGroup& g = allgroups[ allgroups.size()-1 ];
-            g.groupId = allgroups.size();
-            return &g;
-        }
-    }
+void TableDockWidget::addPeakGroup(PeakGroup* group) {
+    addPeakGroup(group,false);
+}
 
-    return NULL;
-    //if ( _mainwindow->heatmap ) _mainwindow->heatmap->replot();
-    //	if ( _mainwindow->treemap ) _mainwindow->treemap->replot();
+PeakGroup* TableDockWidget::addPeakGroup(PeakGroup* group, bool updateTable) {
+    if (group == NULL) return NULL;
+    group->groupStatistics();
+    group->groupId = allgroups.size();
+    allgroups.push_back(*group);
+
+    PeakGroup& g = allgroups.back();
+    if (updateTable) addRow(&g,0);
+
+    return &g;
 }
 
 QList<PeakGroup*> TableDockWidget::getGroups() {
@@ -523,6 +494,7 @@ void TableDockWidget::exportGroupsToSpreadsheet() {
     }
 
     for(int i=0; i<allgroups.size(); i++ ) {
+        cerr << i << endl;
         PeakGroup& group = allgroups[i];
         csvreports->addGroup(&group);
     }
@@ -958,9 +930,11 @@ void TableDockWidget::findMatchingCompounds() {
     float ionizationMode = _mainwindow->getIonizationMode();
     for(int i=0; i < allgroups.size(); i++ ) {
         PeakGroup& g = allgroups[i];
-        QSet<Compound*>compounds = _mainwindow->massCalcWidget->findMathchingCompounds(g.meanMz, ppm, ionizationMode);
-        if (compounds.size() > 0 ) foreach( Compound*c, compounds) { g.tagString += " |" + c->name; break; }
-        cerr << g.meanMz << " " << compounds.size() << endl;
+        vector<MassCalculator::Match> matches = DB.findMathchingCompounds(g.meanMz,ppm,ionizationMode);
+        foreach(auto& m, matches) {
+            g.compound = m.compoundLink;
+            g.adduct   = m.adductLink;
+        }
     }
     updateTable();
 }
@@ -976,8 +950,6 @@ void TableDockWidget::writeGroupXML(QXmlStreamWriter& stream, PeakGroup* g) {
     stream.writeAttribute("groupRank",  QString::number(g->groupRank,'f',4) );
     stream.writeAttribute("label",  QString::number(g->label ));
     stream.writeAttribute("type",  QString::number((int)g->type()));
-    stream.writeAttribute("changeFoldRatio",  QString::number(g->changeFoldRatio,'f',4 ));
-    stream.writeAttribute("changePValue",  QString::number(g->changePValue,'e',6 ));
     if(g->srmId.length())	stream.writeAttribute("srmId",  QString(g->srmId.c_str()));
 
     //for sample contrasts  ratio and pvalue
@@ -1075,8 +1047,6 @@ PeakGroup* TableDockWidget::readGroupXML(QXmlStreamReader& xml,PeakGroup* parent
     g.groupRank = xml.attributes().value("grouRank").toString().toInt();
     g.label     =  xml.attributes().value("label").toString().toInt();
     g.setType( (PeakGroup::GroupType) xml.attributes().value("type").toString().toInt());
-    g.changeFoldRatio = xml.attributes().value("changeFoldRatio").toString().toDouble();
-    g.changePValue = xml.attributes().value("changePValue").toString().toDouble();
 
     string compoundId = xml.attributes().value("compoundId").toString().toStdString();
     string compoundDB = xml.attributes().value("compoundDB").toString().toStdString();
@@ -1086,7 +1056,7 @@ PeakGroup* TableDockWidget::readGroupXML(QXmlStreamReader& xml,PeakGroup* parent
     if (!srmId.empty()) g.setSrmId(srmId);
 
 	if (!compoundId.empty()){
-        Compound* c = DB.findSpeciesById(compoundId);
+        Compound* c = DB.findSpeciesById(compoundId,compoundDB);
 		if (c) g.compound = c;
 	} else if (!compoundName.empty() && !compoundDB.empty()) {
 		vector<Compound*>matches = DB.findSpeciesByName(compoundName,compoundDB);
@@ -1101,7 +1071,7 @@ PeakGroup* TableDockWidget::readGroupXML(QXmlStreamReader& xml,PeakGroup* parent
             //cerr << parent << "\t addChild() " << gp << endl;
         }
     } else {
-        gp = addPeakGroup(&g);
+        gp = addPeakGroup(&g,true);
         //cerr << "addParent() " << gp << endl;
     }
 
@@ -1171,7 +1141,7 @@ void TableDockWidget::savePeakTable() {
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save to Project File"),dir,
             "Maven Project File(*.mzrollDB)");
     if (fileName.isEmpty()) return;
-    if(!fileName.endsWith(".mzroll",Qt::CaseInsensitive)) fileName = fileName + ".mzroll";
+    if(!fileName.endsWith(".mzrollDB",Qt::CaseInsensitive)) fileName = fileName + ".mzrollDB";
 
     _mainwindow->getProjectWidget()->saveProjectSQLITE(fileName,this);
 
@@ -1351,7 +1321,6 @@ void TableDockWidget::unhideFocusedGroups() {
     }
 }
 
-
 void TableDockWidget::dragEnterEvent(QDragEnterEvent *event)
 {
     foreach (QUrl url, event->mimeData()->urls() ) {
@@ -1371,8 +1340,6 @@ void TableDockWidget::dropEvent(QDropEvent *event)
          std::cerr << "dropEvent:" << url.toString().toStdString() << endl;
     }
  }
-
-
 
 int TableDockWidget::loadSpreadsheet(QString fileName){
      qDebug() << "Loading SpreadSheet   : " << fileName;
@@ -1456,10 +1423,24 @@ int TableDockWidget::loadCSVFile(QString filename, QString sep="\t"){
     return lineCount;
 }
 
-
 void TableDockWidget::switchTableView() {
     viewType == groupView ? viewType=peakView: viewType=groupView;
     setupPeakTable();
     showAllGroups();
     updateTable();
 }
+
+void TableDockWidget::filterTree(QString needle) {
+        int itemCount = treeWidget->topLevelItemCount();
+        for(int i=0; i < itemCount; i++ ) {
+             QTreeWidgetItem *item = treeWidget->topLevelItem(i);
+                if ( item == NULL) continue;
+
+                if ( needle.isEmpty() || item->text(0).contains(needle,Qt::CaseInsensitive) ) {
+                        item->setHidden(false);
+                } else {
+                        item->setHidden(true);
+                }
+        }
+}
+

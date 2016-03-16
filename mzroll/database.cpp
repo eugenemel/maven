@@ -78,7 +78,7 @@ multimap<string,Compound*> Database::keywordSearch(string needle) {
     while (query.next()) {
         std::string id  = query.value(0).toString().toStdString();
         std::string keyword  = query.value(1).toString().toStdString();
-        Compound* cmpd = findSpeciesById(id);
+        Compound* cmpd = findSpeciesById(id,"");
         if (cmpd != NULL ) matches.insert(pair<string,Compound*>(keyword,cmpd));
     }
 	return matches;
@@ -86,7 +86,7 @@ multimap<string,Compound*> Database::keywordSearch(string needle) {
 
 void Database::addCompound(Compound* c) { 
     if(c == NULL) return;
-    compoundIdMap[c->id]=c;
+    compoundIdMap[c->id + c->db]=c;
     compoundsDB.push_back(c);
 }
 
@@ -95,7 +95,7 @@ void Database::loadCompoundsSQL() {
         compoundIdMap.clear();
 
         QSqlQuery query(ligandDB);
-        QString sql = "select * from compounds";
+        QString sql = "select * from compounds where name not like '%DECOY%'";
         query.prepare(sql);
         if(!query.exec()) qDebug() << query.lastError();
 
@@ -114,6 +114,9 @@ void Database::loadCompoundsSQL() {
             compound->collisionEnergy =  query.value("collisionEnergy").toDouble();
             compound->smileString=  query.value("smileString").toDouble();
 
+            //mark compound as decoy if names contains DECOY string
+            if(compound->name.find("DECOY") > 0) compound->isDecoy;
+
             for(QString f: query.value("category").toString().split(";") ) {
                 compound->category.push_back(f.toStdString());
             }
@@ -126,7 +129,7 @@ void Database::loadCompoundsSQL() {
                 compound->fragment_intensity.push_back(f.toDouble());
             }
 
-            compoundIdMap[compound->id]=compound;
+            compoundIdMap[compound->id + compound->db]=compound;
             compoundsDB.push_back(compound);
         }
         sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
@@ -154,20 +157,25 @@ set<Compound*> Database::findSpeciesByMass(float mz, float ppm) {
     return uniqset;
 }
 
-Compound* Database::findSpeciesById(string id) {
-    if ( compoundIdMap.count(id) ) return compoundIdMap[id];
+Compound* Database::findSpeciesById(string id,string db) {
+    //cerr << "searching for " << id << " " << compoundIdMap.size() << " " << db << endl;
+    if ( compoundIdMap.contains(id + db) ) return compoundIdMap[id + db];
+    if ( compoundIdMap.contains(id) ) return compoundIdMap[id];
+
     return NULL;
 
-    Compound* c = NULL;
+    /*Compound* c = NULL;
     for(int i=0; i < compoundsDB.size(); i++ ) {
         if (compoundsDB[i]->id == id ) { c = compoundsDB[i]; break; }
     }
     return c;
+    */
 }
 
 
 vector<Compound*> Database::findSpeciesByName(string name, string dbname) {
 		vector<Compound*> set;
+        qDebug() << "findSpeciesByName" << name.c_str();
 		for(unsigned int i=0; i < compoundsDB.size(); i++ ) {
 				if (compoundsDB[i]->name == name && compoundsDB[i]->db == dbname) {
 					set.push_back(compoundsDB[i]);
@@ -194,8 +202,31 @@ Compound* Database::findSpeciesByPrecursor(float precursorMz, float productMz, i
 		return x;
 }
 
-
 vector<MassCalculator::Match> Database::findMathchingCompounds(float mz, float ppm, float charge) {
+    vector<MassCalculator::Match>uniqset;
+
+    //compute plausable adducts
+    for(Adduct* a: adductsDB ) {
+            if (SIGN(a->charge) != SIGN(charge)) continue;
+            float pmz = a->computeParentMass(mz);
+            set<Compound*>hits = this->findSpeciesByMass(pmz,ppm);
+
+            for(Compound* c: hits) {
+            float adductMass=a->computeAdductMass(c->mass);
+            MassCalculator::Match match;
+            match.name = c->name + " : " + a->name;
+            match.adductLink = a;
+            match.compoundLink = c;
+            match.mass=adductMass;
+            match.diff = mzUtils::ppmDist((double) adductMass, (double) mz);
+            uniqset.push_back(match);
+            //cerr << "F:" << match.name << " " << match.diff << endl;
+        }
+     }
+    return uniqset;
+}
+
+vector<MassCalculator::Match> Database::findMathchingCompoundsSLOW(float mz, float ppm, float charge) {
     vector<MassCalculator::Match>uniqset;
     MassCalculator mcalc;
 
@@ -212,6 +243,7 @@ vector<MassCalculator::Match> Database::findMathchingCompounds(float mz, float p
                     match.mass=adductMass;
                     match.diff = mzUtils::ppmDist((double) adductMass, (double) mz);
                     uniqset.push_back(match);
+                    //cerr << "S:" << match.name << " " << match.diff << endl;
                 }
         }
      }

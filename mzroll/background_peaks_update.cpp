@@ -44,9 +44,11 @@ BackgroundPeakUpdate::BackgroundPeakUpdate(QWidget*) {
     minGroupIntensity=500;
 
     //compound detection setting
+    mustHaveMS2=false;
     compoundPPMWindow=10;
     compoundRTWindow=2;
     eicMaxGroups=INT_MAX;
+    productAmuToll=0.01;
 
     //triple quad matching options
     amuQ1=0.25;
@@ -178,6 +180,19 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             if (group.maxSignalBaselineRatio < minSignalBaseLineRatio) continue;
             if (group.maxIntensity < minGroupIntensity ) continue;
 
+
+            //build consensus ms2 specta
+            vector<Scan*>ms2events = group.getFragmenationEvents();
+            if(ms2events.size()) {
+                sort(ms2events.begin(),ms2events.end(),Scan::compIntensity);
+                Fragment f = Fragment(ms2events[0],0.01,1,1024);
+                for(Scan* s : ms2events) {  f.addFragment(new Fragment(s,0,0.01,1024)); }
+                f.buildConsensus(productAmuToll);
+                group.fragmentationPattern = f.consensus;
+                group.ms2EventCount = ms2events.size();
+            }
+
+            if (mustHaveMS2 and group.ms2EventCount == 0 ) continue;
             if (compound) group.compound = compound;
             if (!slice->srmId.empty()) group.srmId = slice->srmId;
 
@@ -227,6 +242,9 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         aligner.setPolymialDegree(mainwindow->alignmentDialog->polynomialDegree->value());
         aligner.doAlignment(groups);
     }
+
+    //match MS2 spectra
+    matchFragmentation();
 
     if (showProgressFlag && pullIsotopesFlag ) {
         emit(updateProgressBar("Calculation Isotopes" ,1, 100));
@@ -349,8 +367,13 @@ void BackgroundPeakUpdate::processMassSlices() {
 
 		emit (updateProgressBar( "Computing Mass Slices", 2, 10 ));
 		MassSlices massSlices;
-                massSlices.setSamples(samples);
-		massSlices.algorithmB(ppmMerge,minGroupIntensity,rtStepSize);
+        massSlices.setSamples(samples);
+
+        if(mustHaveMS2) {
+            massSlices.algorithmC(compoundPPMWindow,minGroupIntensity,rtStepSize);
+        } else {
+            massSlices.algorithmB(ppmMerge,minGroupIntensity,rtStepSize);
+        }
 
 		if (massSlices.slices.size() == 0) massSlices.algorithmA();
 		sort(massSlices.slices.begin(), massSlices.slices.end(), mzSlice::compIntensity );
@@ -390,8 +413,6 @@ void BackgroundPeakUpdate::findPeaksQQQ() {
 void BackgroundPeakUpdate::setRunFunction(QString functionName) { 
 	runFunction = functionName.toStdString();
 }
-
-
 
 
 vector<EIC*> BackgroundPeakUpdate::pullEICs(mzSlice* slice,
@@ -669,26 +690,59 @@ void BackgroundPeakUpdate::printSettings() {
     cerr << "#compoundRTWindow=" << compoundRTWindow << endl;
 }
 
-bool BackgroundPeakUpdate::covertToMzXML(QString filename, QString outfile) {
+void BackgroundPeakUpdate::matchFragmentation() {
+        if(DB.compoundsDB.size() == 0) return;
 
-        QFile test(outfile); if(test.exists()) return true;
+        for (unsigned int i=0; i< allgroups.size(); i++) {
+            PeakGroup* g = &allgroups[i];
+            if(g->ms2EventCount == 0) continue;
 
-		QString command = QString("ReAdW.exe --centroid --mzXML \"%1\" \"%2\"").
-				arg(filename).
-				arg(outfile);
+            vector<MassCalculator::Match>matchesX = DB.findMathchingCompounds(g->meanMz,compoundPPMWindow,ionizationMode);
 
-		qDebug() << command;
-		
-		QProcess *process = new QProcess();
-		//connect(process, SIGNAL(finished(int)), this, SLOT(doVideoCreated(int)));
-		process->start(command);
+            g->fragmentationPattern.printFragment(productAmuToll,10);
+            Adduct* adduct=0;
+            Compound* bestHit=0;
+            FragmentationMatchScore bestScore;
 
-		if (!process->waitForStarted()){
-				process->kill();
-				return false;
-		}
+            for(MassCalculator::Match m: matchesX ) {
+                Compound* cpd = m.compoundLink;
+                FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productAmuToll,true);
 
-	   while (!process->waitForFinished()) {};
-       QFile testOut(outfile); return testOut.exists();
+                if (scoringScheme == "spearmanRank") {
+                    s.mergedScore = s.spearmanRankCorrelation;
+                } else {
+                    s.mergedScore = s.ticMatched;
+
+                }
+                s.ppmError = m.diff;
+
+                if (s.numMatches == 0 ) continue;
+                //cerr << "\t"; cerr << cpd->name << "\t" << cpd->precursorMz << "\tppmDiff=" << m.diff << "\t num=" << s.numMatches << "\t tic" << s.ticMatched <<  " s=" << s.spearmanRankCorrelation << endl;
+
+                if (s.mergedScore > bestScore.mergedScore ) {
+                    bestScore = s;
+                    bestHit = cpd;
+                    adduct =  m.adductLink;
+                }
+            }
+
+            if (bestHit) {
+                g->compound = bestHit;
+                g->adduct  = adduct;
+                if (adduct) g->tagString = adduct->name;
+                g->fragMatchScore = bestScore;
+                /*
+                cerr << "\t BESTHIT"
+                     << setprecision(6)
+                     << g->meanMz << "\t"
+                     << g->meanRt << "\t"
+                     << g->maxIntensity << "\t"
+                     << bestHit->name << "\t"
+                     << bestScore.numMatches << "\t"
+                     << bestScore.fractionMatched << "\t"
+                     << bestScore.ticMatched << endl;
+                */
+
+            }
+       }
 }
-

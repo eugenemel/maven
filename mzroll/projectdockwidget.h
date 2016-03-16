@@ -25,6 +25,8 @@ public slots:
     void updateSampleList();
     void loadProject();
     void saveProject();
+    void closeProject();
+    void bookmarkPeakGroup(PeakGroup* group);
     void loadProjectSQLITE(QString filename);
     void saveProjectSQLITE(QString filename, TableDockWidget* peakTable = 0);
 

@@ -8,6 +8,7 @@
 #include <map>
 #include "mzSample.h" 
 #include "mzUtils.h"
+#include "Fragment.h"
 
 class Compound;
 class Isotope;
@@ -37,6 +38,7 @@ class MassCalculator {
         double diff=0;
         Compound* compoundLink=NULL;
         Adduct*   adductLink=NULL;
+        FragmentationMatchScore fragScore;
     } Match;
 
 

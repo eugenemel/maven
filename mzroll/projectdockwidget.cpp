@@ -16,15 +16,15 @@ ProjectDockWidget::ProjectDockWidget(QMainWindow *parent):
     font.setPointSize(10);
 
     lastUsedSampleColor = QColor(Qt::green);
+    lastOpennedProject = QString();
+    currentProject = 0;
 
-   // _splitter = new QSplitter(Qt::Vertical,this);
 
     _treeWidget=new QTreeWidget(this);
     _treeWidget->setColumnCount(4);
     _treeWidget->setObjectName("Samples");
     _treeWidget->setHeaderHidden(true);
     connect(_treeWidget,SIGNAL(itemSelectionChanged()), SLOT(showInfo()));
-   // _treeWidget->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::MaximumExpanding);
 
     QToolBar *toolBar = new QToolBar(this);
     toolBar->setFloatable(false);
@@ -61,6 +61,7 @@ ProjectDockWidget::ProjectDockWidget(QMainWindow *parent):
     fileLoader = new mzFileIO(this);
     connect(fileLoader,SIGNAL(finished()),this, SLOT(getSampleInfoSQLITE()));
     connect(fileLoader,SIGNAL(finished()),this, SLOT(updateSampleList()));
+
 }
 
 void ProjectDockWidget::changeSampleColor(QTreeWidgetItem* item, int col) {
@@ -385,6 +386,13 @@ void ProjectDockWidget::dropEvent(QDropEvent* e) {
 
 void ProjectDockWidget::saveProject() {
 
+    qDebug() << "saveProject() last=" << lastOpennedProject;
+
+    if (currentProject) {
+        saveProjectSQLITE(lastOpennedProject,_mainwindow->getBookmarkedPeaks());
+        return;
+    }
+
     QSettings* settings = _mainwindow->getSettings();
 
     QString dir = ".";
@@ -394,18 +402,11 @@ void ProjectDockWidget::saveProject() {
         if (test.exists()) dir = ldir;
     }
 
-    QString fileName = lastOpennedProject;
+     QString fileName = QFileDialog::getSaveFileName( this,"Save Project (.mzrollDB)", dir, "mzRoll Project(*.mzrollDB)");
+     if(!fileName.endsWith(".mzrollDB",Qt::CaseInsensitive)) fileName = fileName + ".mzrollDB";
 
-    if ( !fileName.isEmpty() && lastSavedProject == fileName ) {
-        saveProjectSQLITE(fileName);
-    } else {
-	    QString fileName = QFileDialog::getSaveFileName( this,
-                "Save Project (.mzrollDB)", dir, "mzRoll Project(*.mzrollDB)");
-
-        if(!fileName.endsWith(".mzrollDB",Qt::CaseInsensitive)) fileName = fileName + ".mzrollDB";
-
-        saveProjectSQLITE(fileName);
-    }
+     saveProjectSQLITE(fileName,_mainwindow->getBookmarkedPeaks());
+     lastOpennedProject = fileName;
 }
 
 void ProjectDockWidget::loadProject() {
@@ -419,6 +420,19 @@ void ProjectDockWidget::loadProject() {
 
 }
 
+void ProjectDockWidget::closeProject() {
+    if (currentProject) {
+        saveProjectSQLITE(lastOpennedProject,_mainwindow->getBookmarkedPeaks());
+        currentProject->close();
+    }
+    currentProject=0;
+}
+
+void ProjectDockWidget::bookmarkPeakGroup(PeakGroup* group) {
+    if (!currentProject) saveProject();
+    if (currentProject) currentProject->writeGroupSqlite(group,0);
+}
+
 void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
 
     QSettings* settings = _mainwindow->getSettings();
@@ -430,9 +444,6 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
     if (!selectedProject->open()) return;
 
     if (currentProject == 0) {
-        currentProject = selectedProject;
-    } else {
-        //currentProject->close();
         currentProject = selectedProject;
     }
 
@@ -517,24 +528,31 @@ void ProjectDockWidget::getSampleInfoSQLITE() {
 }
 
 void ProjectDockWidget::saveProjectSQLITE(QString filename, TableDockWidget* peakTable) {
-    if (filename.isEmpty() ) return;
+    if (filename.isEmpty()) return;
+    qDebug() << "saveProjectSQLITE()" << filename << endl;
 
     std::vector<mzSample*> sampleSet = _mainwindow->getSamples();
     if(sampleSet.size() == 0) return;
 
-    ProjectDB* project = new ProjectDB(filename);
-    if(! project->open() ) {
-          qDebug() << "Can't open " + filename;
+    ProjectDB* project=0;
+    if (filename == lastOpennedProject and currentProject->open() ) {
+        project = currentProject;
+    } else {
+        project = new ProjectDB(filename);
+        lastOpennedProject=filename;
+        currentProject=project;
     }
-    project->saveSamples(sampleSet);
 
-    if(!peakTable) return;
-    for(PeakGroup* group : peakTable->getGroups()) {
-        project->writeGroupSqlite(group);
+    if(project->open()) {
+        project->saveSamples(sampleSet);
+        if(peakTable) {
+            for(PeakGroup* group : peakTable->getGroups()) {
+                project->writeGroupSqlite(group,0);
+            }
+        }
+    } else {
+        qDebug() << "Can't write to " << lastOpennedProject;
     }
-    project->close();
-
-    //project->saveGroups(peakTable->getGroups());
 }
 
 

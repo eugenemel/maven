@@ -2,7 +2,7 @@
 
 void ProjectDB::saveGroups(vector<PeakGroup>& allgroups, QString setName) {
     for(unsigned int i=0; i < allgroups.size(); i++ ) {
-        writeGroupSqlite(&allgroups[i]);
+        writeGroupSqlite(&allgroups[i],0);
     }
 }
 
@@ -63,19 +63,20 @@ void ProjectDB::saveSamples(vector<mzSample *> &sampleSet) {
     query0.exec("end transaction");
 }
 
-void ProjectDB::writeGroupSqlite(PeakGroup* g) {
+void ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId=0) {
 	if (!g) return;
 
      QSqlQuery query0(projectDB);
      query0.exec("begin transaction");
      if(!query0.exec("create table IF NOT EXISTS peakgroups( \
                         groupId integer primary key AUTOINCREMENT, \
+                        parentGroupId integer, \
                         tagString varchar(255), \
-                        metaGroupId int, \
+                        metaGroupId integer, \
                         expectedRtDiff float, \
-                        groupRank i snt, \
+                        groupRank int, \
                         label varchar(10),\
-                        type int,\
+                        type integer,\
                         srmId varchar(255),\
                         compoundId varchar(255),\
                         compoundName varchar(255),\
@@ -84,27 +85,30 @@ void ProjectDB::writeGroupSqlite(PeakGroup* g) {
 
      //cerr << "inserting .. " << g->groupId << endl;
 	 QSqlQuery query1(projectDB);
-        query1.prepare("insert into peakgroups values(NULL,?,?,?,?,?,?,?,?,?,?)");
+        query1.prepare("insert into peakgroups values(NULL,?,?,?,?,?,?,?,?,?,?,?)");
         //query1.bindValue( 0, QString::number(g->groupId));
-        query1.bindValue( 0, QString(g->tagString.c_str()));
-        query1.bindValue( 1, QString::number(g->metaGroupId));
-        query1.bindValue( 2, QString::number(g->expectedRtDiff,'f',2));
-        query1.bindValue( 3, QString::number(g->groupRank));
-        query1.bindValue( 4, QString(g->label));
-        query1.bindValue( 5, QString::number(g->type()));
-        query1.bindValue( 6, QString(g->srmId.c_str()));
+        query1.addBindValue(QString::number(parentGroupId));
+        query1.addBindValue(QString(g->tagString.c_str()));
+        query1.addBindValue(QString::number(g->metaGroupId));
+        query1.addBindValue(QString::number(g->expectedRtDiff,'f',2));
+        query1.addBindValue(QString::number(g->groupRank));
+        query1.addBindValue(QString(g->label));
+        query1.addBindValue(QString::number(g->type()));
+        query1.addBindValue(QString(g->srmId.c_str()));
 
         if (g->compound != NULL) {
-        query1.bindValue( 7, QString(g->compound->id.c_str()) );
-        query1.bindValue( 8, QString(g->compound->name.c_str()) );
-        query1.bindValue( 9, QString(g->compound->db.c_str()) );
-} else{
-        query1.bindValue(8,  "" );
-        query1.bindValue(9,  "" );
-        query1.bindValue(10, "" );
-}
+            query1.addBindValue(QString(g->compound->id.c_str()) );
+            query1.addBindValue(QString(g->compound->name.c_str()) );
+            query1.addBindValue(QString(g->compound->db.c_str()) );
+        } else{
+            query1.addBindValue("" );
+            query1.addBindValue("" );
+            query1.addBindValue("" );
+        }
 
-     query1.exec();
+     if( ! query1.exec() ) {
+        qDebug() << query1.lastError();
+    }
      int lastInsertGroupId = query1.lastInsertId().toString().toInt();
 
      QSqlQuery query2(projectDB);
@@ -194,7 +198,7 @@ void ProjectDB::writeGroupSqlite(PeakGroup* g) {
         if ( g->childCount() ) {
            for(int i=0; i < g->children.size(); i++ ) {
                 PeakGroup* child = &(g->children[i]); 
-                writeGroupSqlite(child);
+                writeGroupSqlite(child,lastInsertGroupId);
             }
         }
 
@@ -204,14 +208,15 @@ void ProjectDB::writeGroupSqlite(PeakGroup* g) {
 
 void ProjectDB::loadPeakGroups(QString tableName) {
      tableName = "peakgroups";
-     vector<PeakGroup> groups;
 
      QSqlQuery query(projectDB);
+     query.exec("create index if not exists peak_group_ids on peaks(groupId)");
      query.exec("select * from peakgroups");
 
      while (query.next()) {
         PeakGroup g;
         g.groupId = query.value("groupId").toInt();
+        int parentGroupId = query.value("parentGroupId").toInt();
         g.tagString = query.value("tagString").toString().toStdString();
         g.metaGroupId = query.value("metaGroupId").toString().toInt();
         g.expectedRtDiff = query.value("expectedRtDiff").toString().toDouble();
@@ -229,7 +234,7 @@ void ProjectDB::loadPeakGroups(QString tableName) {
         if (!srmId.empty()) g.setSrmId(srmId);
 
         if (!compoundId.empty()){
-            Compound* c = DB.findSpeciesById(compoundId);
+            Compound* c = DB.findSpeciesById(compoundId,compoundDB);
             if (c) g.compound = c;
         } else if (!compoundName.empty() && !compoundDB.empty()) {
             vector<Compound*>matches = DB.findSpeciesByName(compoundName,compoundDB);
@@ -237,7 +242,17 @@ void ProjectDB::loadPeakGroups(QString tableName) {
         }
 
         loadGroupPeaks(&g);
-        allgroups.push_back(g);
+
+        if (parentGroupId==0) {
+            allgroups.push_back(g);
+        } else {
+            for(PeakGroup& x: allgroups) {
+                if(x.groupId == parentGroupId) {
+                    x.children.push_back(g);
+                    break;
+                }
+            }
+        }
     }
 }
 

@@ -77,6 +77,12 @@ public:
    //stop looking for groups if group count is greater than X
     int limitGroupCount;
 
+    //MS2 matching
+    bool mustHaveMS2;
+    float minFragmentMatchScore=2;
+    float productAmuToll = 0.01;
+    string scoringScheme="spearmanRank"; // ticMatch | spearmanRank
+
    //triple quad compound matching
    float amuQ1;
    float amuQ3;
@@ -127,7 +133,7 @@ private:
   vector<PeakGroup>allgroups;
   void cleanup();
   void printSettings();
-  bool covertToMzXML(QString filename, QString outfile);
+  void matchFragmentation();
 
   private:
   volatile bool _stopped;

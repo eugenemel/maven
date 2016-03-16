@@ -1411,7 +1411,7 @@ double mzSample::getMS1PrecurursorMass(Scan* ms2scan,float ppm) {
     if ( adjPreMass > 0 ) {
         return adjPreMass;
     } else {
-        cerr << "getMS1PrecurursorMass() CAN'T FIND PRECURSOR " << ms2scan->precursorMz << endl;
+        //cerr << "getMS1PrecurursorMass() CAN'T FIND PRECURSOR " << ms2scan->precursorMz << endl;
         return ms2scan->precursorMz;
     }
 }

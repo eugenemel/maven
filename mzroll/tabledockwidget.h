@@ -11,6 +11,7 @@ class MainWindow;
 class TrainDialog;
 class ClusterDialog;
 class NumericTreeWidgetItem;
+class ProjectDB;
 
 using namespace std;
 
@@ -27,12 +28,13 @@ public:
 
 	int  groupCount() { return allgroups.size(); }
 	bool hasPeakGroup(PeakGroup* group);
-	QList<PeakGroup*> getGroups();
+    PeakGroup* addPeakGroup(PeakGroup* group, bool updateTable);
+    QList<PeakGroup*> getGroups();
 
 public slots: 
 	  //void showInfo(PeakGroup* group);
-	  PeakGroup* addPeakGroup(PeakGroup* group);
-	  void setupPeakTable();
+      void addPeakGroup(PeakGroup* group);
+      void setupPeakTable();
 	  PeakGroup* getSelectedGroup();
       QList<PeakGroup*> getSelectedGroups();
           void showFocusedGroups();
@@ -85,6 +87,7 @@ public slots:
           int loadCSVFile(QString filename, QString sep);
           void switchTableView();
           void clearClusters();
+          void filterTree(QString needle);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event);
@@ -109,6 +112,7 @@ private:
           TrainDialog* traindialog;
           ClusterDialog*       clusterDialog;
           QDialog* 	 filtersDialog;
+          ProjectDB*  currentProject;
 
           enum tableViewType{ groupView=0, peakView=1 };
           tableViewType viewType;

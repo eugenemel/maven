@@ -9,6 +9,7 @@ Compound::Compound(string id, string name, string formula, int charge ) {
         this->mass =  mcalc->computeNeutralMass(formula);
 		this->expectedRt = -1;
         this->logP = 0;
+        this->isDecoy=false;
 
 		precursorMz=0;
 		productMz=0;

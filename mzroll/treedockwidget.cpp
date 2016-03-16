@@ -88,16 +88,16 @@ void TreeDockWidget::showInfo() {
                                 Scan*  scan =  v.value<Scan*>();
                                 if (scan->mslevel > 1)  mainwindow->fragmenationSpectraWidget->setScan(scan);
                                 else mainwindow->getSpectraWidget()->setScan(scan);
-
                                 mainwindow->getEicWidget()->setFocusLine(scan->rt);
-				
                         } else if (itemType == EICType ) {
                                 mainwindow->getEicWidget()->setSrmId(text.toStdString());
                         } else if (itemType == mzSliceType ) {
-                                        mzSlice slice =  v.value<mzSlice>();
-                                        mainwindow->getEicWidget()->setMzSlice(slice);
-                                        mainwindow->getEicWidget()->resetZoom();
-                                        qDebug() << "showInfo() mzSlice: " << slice.srmId.c_str();
+                                 mzSlice slice =  v.value<mzSlice>();
+                                 mainwindow->getEicWidget()->setMzSlice(slice);
+                                 mainwindow->getEicWidget()->resetZoom();
+                                 qDebug() << "showInfo() mzSlice: " << slice.srmId.c_str();
+                        } else if (itemType == mzLinkType ) {
+                                 if (text.toDouble()) { mainwindow->getEicWidget()->setMzSlice(text.toDouble());  }
                         } else {
                                 cerr << "UNKNOWN TYPE=" << v.type() << endl;
                         }

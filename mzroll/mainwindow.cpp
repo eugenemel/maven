@@ -72,7 +72,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     QString methodsFolder =      settings->value("methodsFolder").value<QString>();
     if (!QFile::exists(methodsFolder)) methodsFolder =  dataDir +  "/" + "methods";
     DB.connect( methodsFolder + "/ligand.db");
-    //DB.loadMethodsFolder(methodsFolder);
     DB.loadCompoundsSQL();
 
     //QString commonFragments =   methodsFolder + "/" + "FRAGMENTS.csv";
@@ -240,9 +239,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     createToolBars();
 
     ligandWidget->reloadCompounds();
-    if(settings->contains("lastDatabaseFile"))
-        ligandWidget->setDatabase("lastDatabaseFile");
-
+    ligandWidget->setDatabase("KNOWNS");
+    //if(settings->contains("lastDatabaseFile")) ligandWidget->setDatabase("lastDatabaseFile");
     setAcceptDrops(true);
 
     showNormal();	//return from full screen on startup
@@ -366,19 +364,13 @@ PeakGroup* MainWindow::bookmarkPeakGroup() {
 
 
 PeakGroup* MainWindow::bookmarkPeakGroup(PeakGroup* group) {
-
-    if ( bookmarkedPeaks == NULL ) return NULL;
-
+    qDebug() << "MainWindow::bookmarkPeakGroup(group)";
     if ( bookmarkedPeaks->isVisible() == false ) {
         bookmarkedPeaks->setVisible(true);
     }
 
-    PeakGroup* bookmarkedGroup=NULL;
-    if ( bookmarkedPeaks->hasPeakGroup(group) == false) {
-        bookmarkedGroup = bookmarkedPeaks->addPeakGroup(group);
-        bookmarkedPeaks->showAllGroups();
-    }
-    bookmarkedPeaks->updateTable();
+    projectDockWidget->bookmarkPeakGroup(group);
+    PeakGroup* bookmarkedGroup = bookmarkedPeaks->addPeakGroup(group,true);
     return bookmarkedGroup;
 }
 
@@ -541,7 +533,7 @@ void MainWindow::open(){
 
     if (projects.size() > 0 ) {
         foreach(QString filename, projects) {
-            if (filename.endsWith("mzroll"))   projectDockWidget->loadProjectXML(filename);
+            if (filename.endsWith("mzroll"))    projectDockWidget->loadProjectXML(filename);
             if (filename.endsWith("mzrollDB"))  projectDockWidget->loadProjectSQLITE(filename);
         }
         return;
@@ -595,6 +587,14 @@ void MainWindow::loadCompoundsFile() {
     if ( filelist.size() == 0 || filelist[0].isEmpty() ) return;
     loadCompoundsFile(filelist[0]);
 }
+
+void MainWindow::reloadMethodsFolder() {
+    QString methodsFolder =      settings->value("methodsFolder").value<QString>();
+    methodsFolder = QFileDialog::getExistingDirectory(this,methodsFolder);
+    DB.connect( methodsFolder + "/ligand.db");
+    DB.loadMethodsFolder(methodsFolder);
+}
+
 
 
 BackgroundPeakUpdate* MainWindow::newWorkerThread(QString funcName) {
@@ -774,6 +774,7 @@ void MainWindow::writeSettings() {
 
 void MainWindow::closeEvent(QCloseEvent *event) {
     settings->setValue("closeEvent", 1 );
+    projectDockWidget->saveProject();
     writeSettings();
     event->accept();
 
@@ -797,11 +798,14 @@ void MainWindow::createMenus() {
     connect(loadCompoundsFile, SIGNAL(triggered()), SLOT(loadCompoundsFile()));
     fileMenu->addAction(loadCompoundsFile);
 
+    QAction* reloadMethodFolder = new QAction(tr("Reload Compounds"), this);
+    connect(reloadMethodFolder, SIGNAL(triggered()), SLOT(reloadMethodsFolder()));
+    fileMenu->addAction(reloadMethodFolder);
+
     QAction* saveProjectFile = new QAction(tr("Save Project"), this);
     saveProjectFile->setShortcut(tr("Ctrl+S"));
     connect(saveProjectFile, SIGNAL(triggered()), projectDockWidget, SLOT(saveProject()));
     fileMenu->addAction(saveProjectFile);
-
 
     QAction* settingsAct = new QAction(tr("Options"), this);
     settingsAct->setToolTip(tr("Set program options"));
@@ -826,8 +830,6 @@ void MainWindow::createMenus() {
     QAction* aj = widgetsMenu->addAction("Fragmentation");
     aj->setCheckable(true);  aj->setChecked(false);
     connect(aj,SIGNAL(toggled(bool)),fragPanel,SLOT(setVisible(bool)));
-
-
 
     menuBar()->show();
 }
@@ -1092,6 +1094,10 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
         }
     }
 
+    if (massCalcWidget->isVisible()) {
+        massCalcWidget->getMatches(group);
+    }
+
     /*
     if ( scatterDockWidget->isVisible() ) {
         ((ScatterPlot*)scatterDockWidget)->showSimilar(group);
@@ -1237,10 +1243,10 @@ void MainWindow::showPeakInfo(Peak* _peak) {
         spectraWidget->setScan(_peak);
     }
 
-    if( massCalcWidget->isVisible() ) {
+    /*if( massCalcWidget->isVisible() ) {
         massCalcWidget->setMass(_peak->peakMz);
         massCalcWidget->setCharge(ionizationMode);
-    }
+    }*/
 
    if ( isotopeWidget->isVisible() ) {
         isotopeWidget->setIonizationMode(ionizationMode);
@@ -1593,8 +1599,8 @@ void MainWindow::getLinks(Peak* peak ) {
 
     //matching compounds
     for(int i=0; i < links.size(); i++ ) {
-        QSet<Compound*>compunds = massCalcWidget->findMathchingCompounds(links[i].mz2, ppm, ionizationMode);
-        if (compunds.size() > 0 ) foreach( Compound*c, compunds) { links[i].note += " |" + c->name; break; }
+        vector<MassCalculator::Match> matches =  DB.findMathchingCompounds(links[i].mz2, ppm, ionizationMode);
+        for(auto& m: matches) { links[i].note += " |" + m.name; break; }
     }
 
     vector<mzLink>subset;
