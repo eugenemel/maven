@@ -15,17 +15,37 @@ CSVReports::~CSVReports() {
 
 void CSVReports::openGroupReport(string outputfile) {
     if (samples.size()==0) return;
-    if(QString(outputfile.c_str()).endsWith(".csv",Qt::CaseInsensitive) ) setCommaDelimited();
 
-    QStringList colnames;
-    colnames << "label"<<"metaGroupId"<<"groupId"<<"goodPeakCount"<<"medMz"<<"medRt"<<"maxQuality"<<"note"<<"compound"<<"compoundId"<<"expectedRtDiff"<<"ppmDiff"<<"parent";
     groupReport.open(outputfile.c_str());
-    if (groupReport.is_open()) {
-        QString header = colnames.join(SEP.c_str());
-        groupReport << header.toStdString();
-        for(unsigned int i=0; i< samples.size(); i++) { groupReport << SEP << samples[i]->sampleName; }
-        groupReport << endl;
-    }
+    if(! groupReport.is_open()) return;
+
+    QStringList Header;
+    Header << "label"<< "metaGroupId"
+                        << "groupId"
+                        << "goodPeakCount"
+                        << "medMz"
+                        << "medRt"
+                        << "maxQuality"
+                        << "note"
+                        << "compound"
+                        << "compoundId"
+                        << "category"
+                        << "database"
+                        << "expectedRtDiff"
+                        << "ppmDiff"
+                        << "parent"
+                        << "ms2EventCount"
+                        << "fragNumIonsMatched"
+                        << "fragFracMatched"
+                        << "ticMatched"
+                        << "dotProduct"
+                        << "mzFragError"
+                        << "spearmanRankCorrelation";
+
+    for(unsigned int i=0; i< samples.size(); i++) { Header << samples[i]->sampleName.c_str(); }
+
+    foreach(QString h, Header)  groupReport << h.toStdString() << SEP;
+    groupReport << endl;
 }
 
 void CSVReports::openPeakReport(string outputfile) {
@@ -49,111 +69,53 @@ void CSVReports::openPeakReport(string outputfile) {
 
 //Feng note: CSVReports::addGroup modified to (1) output only C12 data without labeling or wen compound is unknown, (2) output all related isotopic forms with labeling, 
 //even when peak height is zero
-void CSVReports::addGroup(PeakGroup* group) { 
-    writePeakInfo( group );
+void CSVReports::writeGroupInfo(PeakGroup* group) {
+    if(! groupReport.is_open()) {
+        cerr << "writeGroupInfo: group Report is closed";
+        return;
+    }
 
     //get ionization mode
     int ionizationMode; 
     if( samples.size()>0 && samples[0]->getPolarity()>0 ) ionizationMode=+1;
     else ionizationMode = -1;
 
-    //if compound is unknown, output only the unlabeled form information
-    if( group->compound == NULL || group->childCount() == 0 ) writeGroupInfo(group); 
-    //output all relevant isotope info otherwise
-    else { 
-	writeGroupInfo( &group->children[0] ); //C12 info
-    	MassCalculator *masscalc;
-    	string formula = group->compound->formula;
-    	vector<Isotope> masslist = masscalc->computeIsotopes(formula, ionizationMode);
-    	for( int i=0; i<masslist.size(); i++ ) {
-	    Isotope& x = masslist[i];
-	    string isotopeName = x.name;
-	    if( ( isotopeName.find("C13-label")!=string::npos && samples[0]->_C13Labeled==true ) ||
-		( isotopeName.find("N15-label")!=string::npos && samples[0]->_N15Labeled==true ) ||
-		( isotopeName.find("S34-label")!=string::npos && samples[0]->_S34Labeled==true ) ||
-		( isotopeName.find("D-label")!=string::npos && samples[0]->_D2Labeled==true ) ) {
-	    		int counter=0;
-    	    		for (unsigned int k=0; k<group->children.size() && counter==0; k++) { //output non-zero-intensity peaks
-		    		PeakGroup* subgroup = &group->children[k];
-		    		if( subgroup->tagString == isotopeName ) { 
-        				subgroup->metaGroupId = group->metaGroupId;
-        				writeGroupInfo(subgroup);
-					counter=1;
-		    		}
-   	    		}
-	    		if( counter==0 ) { //output zero-intensity peaks
-                    groupReport << "No peak" << SEP << setprecision(7)
-                                << group->metaGroupId << SEP
-                                << "N/A" << SEP
-                                << "N/A" << SEP
-                                << "N/A" << SEP
-                                << "N/A" << SEP
-                                << "N/A" << SEP
-                                << isotopeName
-                                << SEP << group->compound->name
-                                << SEP << group->compound->id
-                                << SEP << "N/A"
-                                << SEP << "N/A";
-
-                    if ( group->parent != NULL )
-                            groupReport << SEP << group->parent->meanMz;
-                    else
-                            groupReport << SEP << group->meanMz;
-
-                    for( unsigned int j=0; j < samples.size(); j++) groupReport << SEP << 0;
-		    		groupReport << endl;
-	    		}
-		}
-    	}
-    }
-}
-
-/*
-void CSVReports::addGroup(PeakGroup* group) { 
-    writeGroupInfo(group);
-    writePeakInfo(group);
-}
-*/
-
-void CSVReports::closeFiles() { 
-    if(groupReport.is_open()) groupReport.close();
-    if(peakReport.is_open() ) peakReport.close();
-}
-
-void CSVReports::writeGroupInfo(PeakGroup* group) {
-    if(! groupReport.is_open()) return;
-    groupId++;
     vector<float> yvalues = group->getOrderedIntensityVector(samples,qtype);
-    //if ( group->metaGroupId == 0 ) { group->metaGroupId=groupId; }
 
-    string tagString = group->srmId + group->tagString;
-    tagString = mzUtils::substituteInQuotedString(tagString,"\",'","---");
     char label[2];
     sprintf(label,"%c",group->label);
 
     groupReport << label << SEP
-                << setprecision(7) << group->metaGroupId << SEP
-                << groupId << SEP
+                << setprecision(7)
+                << group->metaGroupId << SEP
+                << group->groupId << SEP
                 << group->goodPeakCount << SEP
                 << group->meanMz << SEP
                 << group->meanRt << SEP
                 << group->maxQuality << SEP
-                << tagString;
+                << group->tagString;
 
     string compoundName;
+    string compoundCategory;
     string compoundID;
-    float  expectedRtDiff=0;
-    float  ppmDist=0;
+    string database;
+    float  expectedRtDiff=1000;
+    float  ppmDist=1000;
 
-    if ( group->compound != NULL ) {
-        compoundName = mzUtils::substituteInQuotedString(group->compound->name,"\",'","---");
-        compoundID =  group->compound->id;
-        ppmDist = mzUtils::ppmDist((double) group->compound->mass,(double) group->meanMz);
-        expectedRtDiff = group->expectedRtDiff;
+    if ( group->compound != NULL) {
+        Compound* c = group->compound;
+        ppmDist = group->fragMatchScore.ppmError;
+        expectedRtDiff = c->expectedRt-group->meanRt;
+        compoundName = c->name;
+        compoundID =  c->id;
+        database = c->db;
+        if (c->category.size()) compoundCategory = c->category[0];
     }
 
-    groupReport << SEP << compoundName;
-    groupReport << SEP << compoundID;
+    groupReport << SEP << doubleQuoteString(compoundName);
+    groupReport << SEP << doubleQuoteString(compoundID);
+    groupReport << SEP << compoundCategory;
+    groupReport << SEP << database;
     groupReport << SEP << expectedRtDiff;
     groupReport << SEP << ppmDist;
 
@@ -163,15 +125,38 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
         groupReport << SEP << group->meanMz;
     }
 
+    groupReport << SEP << group->ms2EventCount;
+    groupReport << SEP << group->fragMatchScore.numMatches;
+    groupReport << SEP << group->fragMatchScore.fractionMatched;
+    groupReport << SEP << group->fragMatchScore.ticMatched;
+    groupReport << SEP << group->fragMatchScore.dotProduct;
+    groupReport << SEP << group->fragMatchScore.mzFragError;
+    groupReport << SEP << group->fragMatchScore.spearmanRankCorrelation;
+
     for( unsigned int j=0; j < samples.size(); j++) groupReport << SEP <<  yvalues[j];
     groupReport << endl;
 
     for (unsigned int k=0; k < group->children.size(); k++) {
-        group->children[k].metaGroupId = group->metaGroupId;
-        writeGroupInfo(&group->children[k]);
-        //writePeakInfo(&group->children[k]);
+        addGroup(&group->children[k]);
     }
+}
 
+string CSVReports::doubleQuoteString(std::string& in) {
+    if(in.find('\"') != std::string::npos or in.find(",") != std::string::npos) {
+        return "\"" + in + "\"";
+    } else{
+        return in;
+    }
+}
+
+void CSVReports::addGroup(PeakGroup* group) { 
+    writeGroupInfo(group);
+    writePeakInfo(group);
+}
+
+void CSVReports::closeFiles() { 
+    if(groupReport.is_open()) groupReport.close();
+    if(peakReport.is_open() ) peakReport.close();
 }
 
 void CSVReports::writePeakInfo(PeakGroup* group) {
@@ -180,7 +165,7 @@ void CSVReports::writePeakInfo(PeakGroup* group) {
     string compoundID = "";
 
     if (group->compound != NULL) {
-        compoundName = mzUtils::substituteInQuotedString(group->compound->name,"\",'","---");
+        compoundName = group->compound->name;
         compoundID   = group->compound->id;
     }
 
@@ -193,8 +178,8 @@ void CSVReports::writePeakInfo(PeakGroup* group) {
 
         peakReport << setprecision(8)
                 << groupId << SEP
-                << compoundName << SEP
-                << compoundID << SEP
+                << doubleQuoteString(compoundName) << SEP
+                << doubleQuoteString(compoundID) << SEP
                 << sampleName << SEP
                 << peak.peakMz <<  SEP
                 << peak.medianMz <<  SEP

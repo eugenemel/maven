@@ -482,7 +482,6 @@ class PeakGroup {
 		PeakGroup& operator=(const PeakGroup& o);
 		bool operator==(const PeakGroup* o);
 		void copyObj(const PeakGroup& o);
-		void copy(const PeakGroup* o);
 
 		~PeakGroup();
 
@@ -546,9 +545,9 @@ class PeakGroup {
         void  	setSrmId(string id)	  { srmId=id; }
         inline  string getSrmId() { return srmId; }
 
-		bool isPrimaryGroup();
-		inline bool hasCompoundLink()  { if(compound != NULL) return true ; return false; }
-		inline bool isEmpty()   { if(peaks.size() == 0) return true; return false; } 
+        bool isPrimaryGroup();
+        inline bool hasCompoundLink()  { if(compound != NULL) return true ; return false; }
+        inline bool isEmpty()   { if(peaks.size() == 0) return true; return false; }
 		inline unsigned int peakCount()  { return peaks.size(); 	  }
 		inline unsigned int childCount() { return children.size(); }
 		inline Compound* getCompound() { return compound; }
@@ -593,12 +592,12 @@ class PeakGroup {
         Fragment fragmentationPattern;
 
 		void deletePeaks();
-		bool deletePeak(unsigned int index);
+        bool deletePeak(unsigned int index);
 
 		void clear();
 		void deleteChildren();
-		bool deleteChild(unsigned int index);
-		bool deleteChild(PeakGroup* child);
+        bool deleteChild(unsigned int index);
+        bool deleteChild(PeakGroup* child);
         void copyChildren(const PeakGroup& other);
 
 		vector<float> getOrderedIntensityVector(vector<mzSample*>& samples, QType type);

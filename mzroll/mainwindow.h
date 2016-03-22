@@ -164,7 +164,7 @@ public slots:
     QString groupTextExport(PeakGroup* group);
     PeakGroup* bookmarkPeakGroup(PeakGroup* group);
     void setClipboardToGroup(PeakGroup* group);
-    PeakGroup* bookmarkPeakGroup();
+    void bookmarkSelectedPeakGroup();
     void reorderSamples(PeakGroup* group);
     void findCovariants(Peak* _peak);
     void reportBugs();
@@ -197,6 +197,7 @@ public slots:
 
 
     TableDockWidget* addPeaksTable(QString title);
+    void deletePeakTable(TableDockWidget* x);
     BackgroundPeakUpdate* newWorkerThread(QString funcName);
     QWidget* eicWidgetController();
 

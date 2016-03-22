@@ -9,7 +9,6 @@ Peak::Peak() {
 Peak::Peak(EIC* e, int p) { 
 		pos=p; 
 		eic = e;
-		sample = NULL;
 		baseMz=0;
 		fromBlankSample=false;
 		groupOverlap=0;
@@ -48,9 +47,9 @@ Peak::Peak(EIC* e, int p) {
 		chargeState=0;
 		isMonoIsotopic=false;
 		selectionScore=0;
-		ms2EventCount=0;
-
-		if (sample == NULL && eic != NULL ) sample = eic->sample;
+        ms2EventCount=0;
+        if (eic and eic->sample != NULL) sample = eic->sample;
+        //if (sample == NULL && eic != NULL ) sample = eic->sample;
 }
 
 

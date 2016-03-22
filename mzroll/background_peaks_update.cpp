@@ -272,7 +272,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         }
 
         if(keepFoundGroups) {
-            emit(newPeakGroup(&allgroups[j]));
+            emit(newPeakGroup(&allgroups[j],false));
             QCoreApplication::processEvents();
         }
 

@@ -103,7 +103,7 @@ public:
 
 signals:
 	void updateProgressBar(QString,int,int);
-	void newPeakGroup(PeakGroup* group);
+    void newPeakGroup(PeakGroup* group, bool add);
 
 protected:
   void run(void);

@@ -310,12 +310,19 @@ void MainWindow::setUrl(Compound* c) {
     setUrl(url,link);
 }
 
-TableDockWidget* MainWindow::addPeaksTable(QString title) { 
+void MainWindow::deletePeakTable(TableDockWidget *x) {
+        if(x == bookmarkedPeaks) return;
+        x->setVisible(false);
+        groupTables.removeOne(x);
+}
+
+TableDockWidget* MainWindow::addPeaksTable(QString title) {
     //TableDockWidget* panel	 = new TableDockWidget(this,"Bookmarked Groups",0);
     QPointer<TableDockWidget> panel	 = new TableDockWidget(this,"Bookmarked Groups",0);
     addDockWidget(Qt::BottomDockWidgetArea,panel,Qt::Horizontal);
     groupTables.push_back(panel);
 
+    /*
     if (sideBar) {
         QToolButton *btnTable = new QToolButton(sideBar);
         btnTable->setIcon(QIcon(rsrcPath + "/featuredetect.png"));
@@ -326,6 +333,7 @@ TableDockWidget* MainWindow::addPeaksTable(QString title) {
         connect(panel,SIGNAL(visibilityChanged(bool)),btnTable,SLOT(setChecked(bool)));
         sideBar->addWidget(btnTable);
     }
+   */
 
     return panel;
 }
@@ -354,11 +362,8 @@ vector<mzSample*> MainWindow::getVisibleSamples() {
 }
 
 
-PeakGroup* MainWindow::bookmarkPeakGroup() {
-    //qDebug() << "MainWindow::bookmarkPeakGroup()";
-    if ( eicWidget ) {
-       return bookmarkPeakGroup(eicWidget->getSelectedGroup() );
-    }
+void MainWindow::bookmarkSelectedPeakGroup() {
+   bookmarkPeakGroup(eicWidget->getSelectedGroup());
 }
 
 

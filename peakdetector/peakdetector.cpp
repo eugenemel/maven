@@ -1061,7 +1061,6 @@ void pullIsotopes(PeakGroup* parentgroup) {
 
 void writeGroupInfoCSV(PeakGroup* group,  ofstream& groupReport) {
 
-
     if(! groupReport.is_open()) return;
     string SEP = csvFileFieldSeperator;
     PeakGroup::QType qtype = quantitationType;

@@ -28,12 +28,11 @@ public:
 
 	int  groupCount() { return allgroups.size(); }
 	bool hasPeakGroup(PeakGroup* group);
-    PeakGroup* addPeakGroup(PeakGroup* group, bool updateTable);
     QList<PeakGroup*> getGroups();
 
 public slots: 
 	  //void showInfo(PeakGroup* group);
-      void addPeakGroup(PeakGroup* group);
+      PeakGroup* addPeakGroup(PeakGroup* group, bool updateTable);
       void setupPeakTable();
 	  PeakGroup* getSelectedGroup();
       QList<PeakGroup*> getSelectedGroups();
@@ -55,7 +54,6 @@ public slots:
       void exportGroupsToSpreadsheet();
 	  void showSelectedGroup();
 	  void setGroupLabel(char label);
-      void showPeakGroup(int row);
 	  void showLastGroup();
 	  void showNextGroup();
 	  void Train();

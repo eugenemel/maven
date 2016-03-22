@@ -29,8 +29,9 @@ class CSVReports {
 
 	private:
 		void writeGroupInfo(PeakGroup* group);
-		void writePeakInfo(PeakGroup* group);
-						
+        void writePeakInfo(PeakGroup* group);
+        string doubleQuoteString(std::string& in);
+
 		int groupId;	//sequential group numbering
         string SEP;
 

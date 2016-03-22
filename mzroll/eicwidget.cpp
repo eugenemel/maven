@@ -162,13 +162,16 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
     _integratedGroup.groupStatistics();
     setSelectedGroup(&_integratedGroup);
 
-    PeakGroup* newGroup = getMainWindow()->bookmarkPeakGroup(&_integratedGroup);
+    getMainWindow()->getBookmarkedPeaks()->addPeakGroup(&_integratedGroup,true);
+    /*
     if (newGroup and newGroup->compound) {
            getMainWindow()->isotopeWidget->setPeakGroup(newGroup);
            setSelectedGroup(newGroup);
 
     }
-	this->copyToClipboard();
+    this->copyToClipboard();
+   */
+
     scene()->update();
 }
 
@@ -1327,7 +1330,6 @@ void EicWidget::setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax
 
 void EicWidget::setPeakGroup(PeakGroup* group) {
     qDebug() <<"EicWidget::setPeakGroup(PeakGroup* group) ";
-    group->summary();
 
     if (group == NULL ) return;
     _slice.mz = group->meanMz;
