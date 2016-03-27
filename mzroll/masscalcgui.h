@@ -25,7 +25,7 @@ protected:
         
 
 public slots:
-      void getMatches(PeakGroup* grp);
+      void setPeakGroup(PeakGroup* grp);
  	  void setMass(float mz);
 	  void setCharge(float charge);
 	  void setPPM(float ppm);

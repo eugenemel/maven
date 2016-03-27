@@ -225,6 +225,7 @@ public:
     EIC* getTIC(float,float,int);		//get Total Ion Chromatogram
     EIC* getBIC(float,float,int);		//get Base Peak Chromatogram
     double getMS1PrecurursorMass(Scan* ms2scan,float ppm);
+    vector<Scan*> getFragmenationEvents(mzSlice* slice);
 
 
     deque <Scan*> scans;
@@ -559,7 +560,8 @@ class PeakGroup {
 
         vector<Scan*> getRepresentativeFullScans();
         vector<Scan*> getFragmenationEvents();
-        Scan* getAverageFragmenationScan(float resolution);
+        void computeFragPattern(float productPpmTolr);
+        Scan* getAverageFragmenationScan(float productPpmTolr);
 
 		inline void setParent(PeakGroup* p) {parent=p;}
 		inline void setLabel(char label) { this->label=label;}
@@ -635,7 +637,7 @@ class Compound {
 			void clearGroup()  { _group.clear(); }
 			void unlinkGroup() { _group.clear(); _groupUnlinked = true; }
             bool groupUnlinked() { return _groupUnlinked; }
-            FragmentationMatchScore scoreCompoundHit(Fragment* f, float productAmuToll, bool searchProton);
+            FragmentationMatchScore scoreCompoundHit(Fragment* f, float productPpmTolr, bool searchProton);
 
             vector<Reaction*>reactions;
             int    cid;

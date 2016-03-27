@@ -1,4 +1,7 @@
 #include "projectDB.h"
+ ProjectDB::ProjectDB(QString dbfilename) {
+                openDatabaseConnection(dbfilename);
+            }
 
 void ProjectDB::saveGroups(vector<PeakGroup>& allgroups, QString setName) {
     for(unsigned int i=0; i < allgroups.size(); i++ ) {
@@ -7,14 +10,14 @@ void ProjectDB::saveGroups(vector<PeakGroup>& allgroups, QString setName) {
 }
 
 void ProjectDB::deleteAll() {
-    QSqlQuery query(projectDB);
+    QSqlQuery query(sqlDB);
     query.exec("delete from peakgroups");
     query.exec("delete from samples");
     query.exec("delete from peaks");
 }
 
 void ProjectDB::saveSamples(vector<mzSample *> &sampleSet) {
-    QSqlQuery query0(projectDB);
+    QSqlQuery query0(sqlDB);
 
     query0.exec("begin transaction");
     if(!query0.exec("create table IF NOT EXISTS samples(\
@@ -25,9 +28,10 @@ void ProjectDB::saveSamples(vector<mzSample *> &sampleSet) {
                     sampleOrder int,\
                     isSelected  int,\
                     color_red float,\
-                    color_blue float,\
                     color_green float,\
+                    color_blue float,\
                     color_alpha float,\
+                    norml_const float, \
                     transform_a0 float,\
                     transform_a1 float,\
                     transform_a2 float,\
@@ -35,8 +39,8 @@ void ProjectDB::saveSamples(vector<mzSample *> &sampleSet) {
                     transform_a5 float \
                     )"))  qDebug() << "Ho... " << query0.lastError();
 
-        QSqlQuery query1(projectDB);
-        query1.prepare("insert into samples values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        QSqlQuery query1(sqlDB);
+        query1.prepare("replace into samples values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
         for(mzSample* s : sampleSet) {
             query1.bindValue( 0, s->getSampleOrder() );
@@ -51,12 +55,13 @@ void ProjectDB::saveSamples(vector<mzSample *> &sampleSet) {
             query1.bindValue( 7, s->color[1] );
             query1.bindValue( 8, s->color[2] );
             query1.bindValue( 9, s->color[3] );
+            query1.bindValue( 10, s->getNormalizationConstant());
 
-            query1.bindValue( 10,  0);
             query1.bindValue( 11,  0);
             query1.bindValue( 12,  0);
             query1.bindValue( 13,  0);
             query1.bindValue( 14,  0);
+            query1.bindValue( 15,  0);
 
             if(!query1.exec())  qDebug() << query1.lastError();
         }
@@ -66,7 +71,7 @@ void ProjectDB::saveSamples(vector<mzSample *> &sampleSet) {
 void ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId=0) {
 	if (!g) return;
 
-     QSqlQuery query0(projectDB);
+     QSqlQuery query0(sqlDB);
      query0.exec("begin transaction");
      if(!query0.exec("create table IF NOT EXISTS peakgroups( \
                         groupId integer primary key AUTOINCREMENT, \
@@ -84,7 +89,7 @@ void ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId=0) {
                         )"))  qDebug() << query0.lastError();
 
      //cerr << "inserting .. " << g->groupId << endl;
-	 QSqlQuery query1(projectDB);
+	 QSqlQuery query1(sqlDB);
         query1.prepare("insert into peakgroups values(NULL,?,?,?,?,?,?,?,?,?,?,?)");
         //query1.bindValue( 0, QString::number(g->groupId));
         query1.addBindValue(QString::number(parentGroupId));
@@ -111,7 +116,7 @@ void ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId=0) {
     }
      int lastInsertGroupId = query1.lastInsertId().toString().toInt();
 
-     QSqlQuery query2(projectDB);
+     QSqlQuery query2(sqlDB);
      if(!query2.exec("create table IF NOT EXISTS peaks( \
                     peakId integer primary key AUTOINCREMENT, \
                     groupId int,\
@@ -151,7 +156,7 @@ void ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId=0) {
                     fromBlankSample int,\
                     label int)"))  qDebug() << query2.lastError();
 			
-	 		QSqlQuery query3(projectDB); 
+	 		QSqlQuery query3(sqlDB); 
             query3.prepare("insert into peaks values(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 		
 			for(int j=0; j < g->peaks.size(); j++ ) { 
@@ -209,7 +214,7 @@ void ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId=0) {
 void ProjectDB::loadPeakGroups(QString tableName) {
      tableName = "peakgroups";
 
-     QSqlQuery query(projectDB);
+     QSqlQuery query(sqlDB);
      query.exec("create index if not exists peak_group_ids on peaks(groupId)");
      query.exec("select * from peakgroups");
 
@@ -258,7 +263,7 @@ void ProjectDB::loadPeakGroups(QString tableName) {
 
 void ProjectDB::loadGroupPeaks(PeakGroup* parent) {
 
-     QSqlQuery query(projectDB);
+     QSqlQuery query(sqlDB);
      query.prepare("select P.*, S.name as sampleName from peaks P, samples S where P.sampleId = S.sampleId and P.groupId = ?");
      query.bindValue(0,parent->groupId);
      //qDebug() << "loadin peaks for group " << parent->groupId;
@@ -310,4 +315,29 @@ void ProjectDB::loadGroupPeaks(PeakGroup* parent) {
             //cerr << "\t\t\t" << p.getSample() << " " << p.rt << endl;
             parent->addPeak(p);
         }
+}
+bool ProjectDB::openDatabaseConnection(QString dbname) {
+    if (sqlDB.isOpen() and  sqlDB.databaseName() == dbname) {
+        qDebug() << "Already oppenned.. ";
+        return true;
+    }
+
+    if (!sqlDB.isOpen()) {
+        qDebug() << "openning.. " << dbname;
+        sqlDB = QSqlDatabase::addDatabase("QSQLITE", dbname);
+        sqlDB.setDatabaseName(dbname);
+        sqlDB.open();
+    }
+
+    return sqlDB.isOpen();
+}
+
+bool ProjectDB::closeDatabaseConnection() {
+
+    if (sqlDB.isOpen()) {
+        sqlDB.close();
+        QSqlDatabase::removeDatabase(sqlDB.databaseName());
+    }
+
+    return !sqlDB.isOpen();
 }

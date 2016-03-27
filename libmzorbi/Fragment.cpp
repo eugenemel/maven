@@ -75,7 +75,8 @@ void Fragment::printMzList() {
     for(unsigned int i=0; i<mzs.size(); i++ ) { cerr << setprecision(3) << mzs[i] << " "; }
 }
 
-int Fragment::findClosestHighestIntensityPos(float _mz, float tolr) {
+int Fragment::findClosestHighestIntensityPos(float _mz, float ppmTolr) {
+    float tolr = _mz/1e6*ppmTolr;
     float mzmin = _mz - tolr;
     float mzmax = _mz + tolr+0.001;
 
@@ -102,7 +103,7 @@ int Fragment::findClosestHighestIntensityPos(float _mz, float tolr) {
 }
 
 
-void Fragment::printFragment(float productAmuToll,unsigned int limitTopX=10) {
+void Fragment::printFragment(float productPpmToll,unsigned int limitTopX=10) {
     cerr << setprecision(10) << " preMz=" << precursorMz << " ce=" << this->collisionEnergy <<  " scan=" << this->scanNum << endl;
     cerr << " mzs: \t";
     for(unsigned int i=0; i<mzs.size() && i < limitTopX; i++ ) {
@@ -118,7 +119,7 @@ void Fragment::printFragment(float productAmuToll,unsigned int limitTopX=10) {
     cerr << endl;
 
     for(unsigned int i=0; i<brothers.size(); i++) {
-        double matchScore = this->compareToFragment(brothers[i],productAmuToll);
+        double matchScore = this->compareToFragment(brothers[i],productPpmToll);
         cerr << setprecision(3) << " similarity=" << matchScore;
 
         cerr << " brother mzs=\t";
@@ -179,7 +180,7 @@ void Fragment::printConsensusMGF(ostream& outstream, double minConsensusFraction
     outstream << "END IONS" << endl;
 }
 
-void Fragment::printConsensusNIST(ostream& outstream, double minConsensusFraction, float productAmuToll, Compound* compound=0) {
+void Fragment::printConsensusNIST(ostream& outstream, double minConsensusFraction, float productPpmToll, Compound* compound=0) {
 
     string COMPOUNDNAME = "Unknown";
     if (compound)  COMPOUNDNAME = compound->id;
@@ -227,10 +228,7 @@ void Fragment::printConsensusNIST(ostream& outstream, double minConsensusFractio
         float fracObserved = ((float) obscount[i])/consensusSize;
         if (fracObserved > minConsensusFraction )  {
 
-            //mz  ints  annotation
-            if (productAmuToll < 0.1 ) outstream << setprecision(7) << mzs[i] << "\t";
-            else outstream << setprecision(6) << mzs[i] << "\t";
-
+            outstream << setprecision(7) << mzs[i] << "\t";
             outstream << (int) intensity_array[i] << "\t";
 
             string ionName = "?";
@@ -285,7 +283,7 @@ void Fragment::printInclusionList(bool printHeader, ostream& outstream, string C
 
 }
 
-FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productAmuToll) {
+FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTolr) {
     FragmentationMatchScore s;
     if (mzs.size() < 2 or other->mzs.size() < 2) return s;
 
@@ -294,37 +292,40 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productAmuTo
     Fragment* b =  other;
 
     s.ppmError = abs((a->precursorMz-b->precursorMz)/a->precursorMz*1e6);
-    vector<int>ranks = compareRanks(a,b,productAmuToll);
+    vector<int>ranks = compareRanks(a,b,productPpmTolr);
     for(int rank: ranks) { if(rank != -1) s.numMatches++; }
     s.fractionMatched = s.numMatches / a->nobs();
+    s.hypergeomScore  = SHP(s.numMatches,a->nobs(),b->nobs(),100000);
     s.spearmanRankCorrelation = spearmanRankCorrelation(ranks);
     s.ticMatched = ticMatched(ranks);
     s.mzFragError =  mzErr(ranks,b);
     s.dotProduct = dotProduct(ranks,b);
+    s.weightedDotProduct = mzWeightedDotProduct(ranks,b);
 
     return s;
 }
 
 
-double Fragment::compareToFragment(Fragment* other, float productAmuToll) { 
+double Fragment::compareToFragment(Fragment* other, float productPpmTolr) {
     if (mzs.size() < 2 or other->mzs.size() < 2) return 0; 	
     //which one is smaller;
     Fragment* a = this;
     Fragment* b =  other;
     //if (b->mzs.size() < a->mzs.size() ) { a=other; b=this; }
-    vector<int>ranks = compareRanks(a,b,productAmuToll);
+    vector<int>ranks = compareRanks(a,b,productPpmTolr);
     //return spearmanRankCorrelation(ranks);
     //return fractionMatched(ranks);
     return ticMatched(ranks);
 }
 
-vector<int> Fragment::compareRanks( Fragment* a, Fragment* b, float productAmuToll) {
+vector<int> Fragment::compareRanks(Fragment* a, Fragment* b, float productPpmTolr) {
     bool verbose=false;
     if (verbose) { cerr << "\t\t "; a->printMzList(); cerr << "\nvs \n"; b->printMzList();  }
     vector<int> ranks (a->mzs.size(),-1);	//missing value == -1
     for(unsigned int i=0; i<a->mzs.size(); i++ ) {
         for( unsigned int j=0; j < b->mzs.size(); j++ ) {
-            if (abs(a->mzs[i]-b->mzs[j])<productAmuToll) { ranks[i] = j; break; }   //this needs optimization.. 
+            //if (abs(a->mzs[i]-b->mzs[j])<productAmuToll) { ranks[i] = j; break; }   //this needs optimization..
+            if (mzUtils::ppmDist(a->mzs[i],b->mzs[j])<productPpmTolr) { ranks[i] = j; break; }   //this needs optimization..
         }
     }
     if (verbose) { cerr << " compareranks: ";
@@ -333,19 +334,19 @@ vector<int> Fragment::compareRanks( Fragment* a, Fragment* b, float productAmuTo
 }
 
 
-vector<int> Fragment::locatePositions( Fragment* a, Fragment* b, float productAmuToll) {
+vector<int> Fragment::locatePositions( Fragment* a, Fragment* b, float productPpmTolr) {
     bool verbose=false;
     if (verbose) { cerr << "\t\t "; a->printMzList(); cerr << "\nvs \n"; b->printMzList();  }
     vector<int> ranks (a->mzs.size(),-1);	//missing value == -1
     for(unsigned int i=0; i<a->mzs.size(); i++ ) {
-        int pos = b->findClosestHighestIntensityPos(a->mzs[i],productAmuToll);
+        int pos = b->findClosestHighestIntensityPos(a->mzs[i],productPpmTolr);
         ranks[i] = pos;
     }
     if (verbose) { cerr << " compareranks: "; for(unsigned int i=0; i < ranks.size(); i++ ) cerr << ranks[i] << " "; }
     return ranks;
 }
 
-void Fragment::buildConsensus(float productAmuToll) {
+void Fragment::buildConsensus(float productPpmTolr) {
     if(this->consensus != NULL) {  delete(this->consensus); this->consensus=NULL; }
 
     Fragment* Cons = new Fragment(this);  //make a copy
@@ -355,7 +356,7 @@ void Fragment::buildConsensus(float productAmuToll) {
     for(unsigned int i=0; i<brothers.size(); i++) {
         Fragment* brother = brothers[i];
 
-        vector<int>ranks=locatePositions(brother,Cons,productAmuToll);	//location 
+        vector<int>ranks=locatePositions(brother,Cons,productPpmTolr);	//location
 
         for(unsigned int j=0; j<ranks.size(); j++ ) {
             int   posA = ranks[j];	
@@ -371,7 +372,6 @@ void Fragment::buildConsensus(float productAmuToll) {
             }
         }
         Cons->sortByMz();
-        //cerr << "cons" << i  << " "; Cons->printFragment(productAmuToll);
     }
 
     //average values 
@@ -383,9 +383,6 @@ void Fragment::buildConsensus(float productAmuToll) {
     for(unsigned int i=0; i<Cons->intensity_array.size(); i++) { Cons->intensity_array[i] = Cons->intensity_array[i]/maxValue*10000; }
     this->consensus = Cons; 
 
-    //cerr << "buildConsensus()" << endl; 
-    //Cons->printFragment(productAmuToll);
-    //cerr << endl << endl << endl;
 }
 
 
@@ -550,6 +547,24 @@ double Fragment::dotProduct(const vector<int>& X, Fragment* other) {
     return dotP;
 }
 
+
+double Fragment::mzWeightedDotProduct(const vector<int>& X, Fragment* other) {
+    if (X.size() == 0) return 0;
+    double thisTIC = totalIntensity();
+    double otherTIC = other->totalIntensity();
+
+    if(thisTIC == 0 or otherTIC == 0) return 0;
+
+    double dotP=0;
+    for(unsigned int i=0; i<X.size(); i++ )  
+        if (X[i] != -1)  dotP += this->intensity_array[i] * other->intensity_array[X[i]];
+
+    //return dotP/sqrt(thisTIC*thisTIC*otherTIC*otherTIC);   //DIP
+    return sqrt(dotP)/sqrt(thisTIC*otherTIC);               //SIM
+}
+
+
+
 double Fragment::ticMatched(const vector<int>& X) {
     if (X.size() == 0) return 0;
     double TIC = this->totalIntensity();
@@ -565,14 +580,30 @@ double Fragment::ticMatched(const vector<int>& X) {
     if (TIC>0) return matchedTIC/TIC; else return 0;
 }
 
-bool Fragment::hasMz(double mzValue, double amuTolr) {
-    for(unsigned int i=0; i < nobs(); i++)  if (abs(mzs[i]-mzValue) < amuTolr) return true;
+double Fragment::logNchooseK(int N,int k) {
+    double x = k / (double) N;
+    return N*x*log(1/x)+(1-x)*log(1/(1-x));
+}
+
+double Fragment::SHP(int k, int m, int n, int N=100000) {   //k=matched, m=len1, n=len2
+    if (k==0) return 0;
+    if (k>=m) k=m-1; 
+    if (k>=n) k=n-1; 
+    double A=logNchooseK(m,k);
+    double B=logNchooseK(N-m,n-k);
+    double C=logNchooseK(N,n);
+    return -(A+B-C);
+}
+
+
+bool Fragment::hasMz(float mzValue, float ppmTolr) {
+    for(unsigned int i=0; i < nobs(); i++)  if (mzUtils::ppmDist(mzs[i],mzValue) < ppmTolr) return true;
     return false;
 }
 
-bool Fragment::hasNLS(double NLS, double amuTolr) {
-    double mzValue = precursorMz-NLS;
-    for(unsigned int i=0; i < nobs(); i++)  if (abs(mzs[i]-mzValue) < amuTolr) return true;
+bool Fragment::hasNLS(float NLS, float ppmTolr) {
+    float mzValue = precursorMz-NLS;
+    for(unsigned int i=0; i < nobs(); i++)  if (mzUtils::ppmDist(mzs[i],mzValue) < ppmTolr) return true;
     return false;
 }
 

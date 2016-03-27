@@ -14,8 +14,9 @@ extern Database DB;
 class ProjectDB {
 
 	public: 
-            QSqlDatabase projectDB;
-            QString projectFilename;
+            ProjectDB(QString dbfilename);
+
+            QSqlDatabase sqlDB;
 
             vector<PeakGroup> allgroups;
             vector<mzSample*> samples;
@@ -28,35 +29,13 @@ class ProjectDB {
             void loadGroupPeaks(PeakGroup* group);
             void deleteAll();
 
-            ProjectDB(QString dbfilename) {
-                projectFilename = dbfilename;
-                open();
-            }
 
-            void setSamples(vector<mzSample*>set) {
-                samples = set;
-            }
+            void setSamples(vector<mzSample*>set) { samples = set; }
+            bool isOpen() { sqlDB.isOpen(); }
+            QString databaseName() { return sqlDB.databaseName(); }
 
-            bool open() {
-                projectDB = QSqlDatabase::addDatabase("QSQLITE", "projectDB");
-                projectDB.setDatabaseName(projectFilename);
-                projectDB.open();
-
-               if (!projectDB.isOpen()) {
-                    qDebug()  << "Failed to open project" + projectFilename;
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-
-            bool close() {
-                if (projectFilename.isEmpty()) {
-                    //projectDB.close();
-                    projectFilename = QString();
-                }
-                return true;
-            }
+            bool openDatabaseConnection(QString dbname);
+            bool closeDatabaseConnection();
 
 
 };

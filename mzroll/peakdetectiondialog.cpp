@@ -71,13 +71,10 @@ void PeakDetectionDialog::show() {
         }
     }
 
-    map<string,int>::iterator itr;
-    map<string,int>dbnames = DB.getDatabaseNames();
-
+    QStringList dbnames = DB.getDatabaseNames();
     compoundDatabase->clear();
-    for(itr=dbnames.begin(); itr != dbnames.end(); itr++ )  {
-        string db = (*itr).first;
-        if (!db.empty()) compoundDatabase->addItem(QString(db.c_str()));
+    for(QString db: dbnames ) {
+        compoundDatabase->addItem(db);
     }
 
 
@@ -129,13 +126,17 @@ void PeakDetectionDialog::findPeaks() {
 		peakupdater->minGroupIntensity = minGroupIntensity->value();
         peakupdater->pullIsotopesFlag = reportIsotopes->isChecked();
         peakupdater->ppmMerge =  ppmStep->value();
-        peakupdater->compoundPPMWindow = compoundPPMWindow->value();  //convert to half window units.
+        peakupdater->compoundPPMWindow = compoundPPMWindow->value();
 		peakupdater->compoundRTWindow = compoundRTWindow->value();
         peakupdater->eicMaxGroups = eicMaxGroups->value();
 		peakupdater->avgScanTime = samples[0]->getAverageFullScanTime();
         peakupdater->rtStepSize = rtStep->value();
-        peakupdater->mustHaveMS2 = mustHaveMS2Flag->isChecked();
-        peakupdater->productAmuToll = productAmuTolr->value();
+        peakupdater->mustHaveMS2 = compoundMustHaveMS2->isChecked() || featureMustHaveMs2->isChecked();
+        peakupdater->productPpmTolr = productPpmTolr->value();
+        peakupdater->scoringScheme  = fragScoringAlgorithm->currentText();
+        peakupdater->minFragmentMatchScore = fragMinScore->value();
+        peakupdater->minNumFragments = fragMinPeaks->value();
+
 
         if ( ! outputDirName->text().isEmpty()) {
             peakupdater->setOutputDir(outputDirName->text());
@@ -163,7 +164,8 @@ void PeakDetectionDialog::findPeaks() {
 			runBackgroupJob("findPeaksQQQ");
 		} else if ( _featureDetectionType == FullSpectrum ) {
 			runBackgroupJob("processMassSlices");
-		}  else {
+        }  else {
+            peakupdater->compoundDatabase = compoundDatabase->currentText();
  			peakupdater->setCompounds( DB.getCopoundsSubset(compoundDatabase->currentText().toStdString()) );
 			runBackgroupJob("computePeaks");
 		}

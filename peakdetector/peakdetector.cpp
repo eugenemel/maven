@@ -100,7 +100,7 @@ int  eicMaxGroups=100;
 
 //MS2 matching
 float minFragmentMatchScore=2;
-float productAmuToll = 0.01;
+float productPpmTolr = 20;
 string scoringScheme="ticMatch"; // ticMatch | spearmanRank
 
 void processOptions(int argc, char* argv[]);
@@ -420,7 +420,7 @@ void processSlices(vector<mzSlice*>&slices, string setName) {
                 sort(ms2events.begin(),ms2events.end(),Scan::compIntensity);
                 Fragment f = Fragment(ms2events[0],0.01,1,1024);
                 for(Scan* s : ms2events) {  f.addFragment(new Fragment(s,0,0.01,1024)); }
-                f.buildConsensus(productAmuToll);
+                f.buildConsensus(productPpmTolr);
                 group.fragmentationPattern = f.consensus;
                 group.ms2EventCount = ms2events.size();
             }
@@ -517,7 +517,7 @@ void processOptions(int argc, char* argv[]) {
                                 "g?grouping_maxRtWindow <float>",
                                 "h?help",
                                 "i?minGroupIntensity <float>",
-                                "k?productAmuToll <float>",
+                                "k?productPpmTolr <float>",
                                 "m?methodsFolder <string>",
                                 "n?eicMaxGroups <int>",
                                 "o?outputdir <string>",
@@ -550,7 +550,7 @@ void processOptions(int argc, char* argv[]) {
             case 'g' : grouping_maxRtWindow=atof(optarg); break;
             case 'h' : opts.usage(cerr, "files ..."); exit(0); break;
             case 'i' : minGroupIntensity=atof(optarg); break;
-            case 'k' : productAmuToll=atof(optarg); break;
+            case 'k' : productPpmTolr=atof(optarg); break;
             case 'm' : methodsFolder = optarg; break;
             case 'n' : eicMaxGroups=atoi(optarg); break;
             case 'o' : outputdir = optarg + string(DIR_SEPARATOR_STR); break;
@@ -746,7 +746,7 @@ void writeReport(string setName) {
     if (saveSqlLiteProject)  {
         ProjectDB project = ProjectDB(projectDBfilenane.c_str());
 
-        if ( project.open() ) {
+       if ( project.isOpen() ) {
             project.deleteAll();
             project.saveSamples(samples);
             project.saveGroups(allgroups,setName.c_str());
@@ -885,12 +885,10 @@ void classConsensusMS2Spectra(string filename) {
                 string compoundClass = pair.first;
                 Fragment& f = pair.second;
                 if(f.brothers.size() < 10) continue;
-                f.buildConsensus(productAmuToll);
+                f.buildConsensus(productPpmTolr);
 
                 cerr << "Writing " << compoundClass << endl;
-                f.printConsensusNIST(outstream,0.75,productAmuToll,f.group->compound);
-                //f->printMzList();
-                //f->printConsensusNIST(outstream,0.01,productAmuToll);
+                f.printConsensusNIST(outstream,0.75,productPpmTolr,f.group->compound);
         }
         outstream.close();
 }
@@ -906,7 +904,7 @@ void writeConsensusMS2Spectra(string filename) {
             //Scan* x = allgroups[i].getAverageFragmenationScan(100);
             PeakGroup* group = &allgroups[i];
             if (group->fragmentationPattern.nobs() > 0 ) {
-                group->fragmentationPattern.printConsensusNIST(outstream,0.01,productAmuToll,group->compound);
+                group->fragmentationPattern.printConsensusNIST(outstream,0.01,productPpmTolr,group->compound);
             }
         }
         outstream.close();
@@ -1174,7 +1172,7 @@ void writeMS2SimilarityMatrix(string filename) {
         Fragment& f1 = allFragments[i];
         for (int j=i; j< allFragments.size(); j++) {
             Fragment& f2 = allFragments[j];
-            FragmentationMatchScore score = f1.scoreMatch( &f2, productAmuToll);
+            FragmentationMatchScore score = f1.scoreMatch( &f2, productPpmTolr);
 
             //print matrix
             if(score.numMatches > 2 ) {
@@ -1208,14 +1206,14 @@ void matchFragmentation() {
 
             if(matchesX.size() == 0) continue;
 
-            g->fragmentationPattern.printFragment(productAmuToll,10);
+            g->fragmentationPattern.printFragment(productPpmTolr,10);
             Adduct* adduct=0;
             Compound* bestHit=0;
             FragmentationMatchScore bestScore;
 
             for(MassCalculator::Match m: matchesX ) {
                 Compound* cpd = m.compoundLink;
-                FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productAmuToll,true);
+                FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productPpmTolr,true);
 
                 if (scoringScheme == "spearmanRank") {
                     s.mergedScore = s.spearmanRankCorrelation;

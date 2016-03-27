@@ -385,8 +385,7 @@ void ProjectDockWidget::dropEvent(QDropEvent* e) {
 }
 
 void ProjectDockWidget::saveProject() {
-
-    qDebug() << "saveProject() last=" << lastOpennedProject;
+      qDebug() << " ProjectDockWidget::saveProject()";
 
     if (currentProject) {
         saveProjectSQLITE(lastOpennedProject,_mainwindow->getBookmarkedPeaks());
@@ -394,7 +393,6 @@ void ProjectDockWidget::saveProject() {
     }
 
     QSettings* settings = _mainwindow->getSettings();
-
     QString dir = ".";
     if ( settings->contains("lastDir") ) {
         QString ldir = settings->value("lastDir").value<QString>();
@@ -403,10 +401,12 @@ void ProjectDockWidget::saveProject() {
     }
 
      QString fileName = QFileDialog::getSaveFileName( this,"Save Project (.mzrollDB)", dir, "mzRoll Project(*.mzrollDB)");
-     if(!fileName.endsWith(".mzrollDB",Qt::CaseInsensitive)) fileName = fileName + ".mzrollDB";
 
-     saveProjectSQLITE(fileName,_mainwindow->getBookmarkedPeaks());
-     lastOpennedProject = fileName;
+     if(!fileName.isEmpty()) {
+        if(!fileName.endsWith(".mzrollDB",Qt::CaseInsensitive)) fileName = fileName + ".mzrollDB";
+        saveProjectSQLITE(fileName,_mainwindow->getBookmarkedPeaks());
+        lastOpennedProject = fileName;
+     }
 }
 
 void ProjectDockWidget::loadProject() {
@@ -423,9 +423,9 @@ void ProjectDockWidget::loadProject() {
 void ProjectDockWidget::closeProject() {
     if (currentProject) {
         saveProjectSQLITE(lastOpennedProject,_mainwindow->getBookmarkedPeaks());
-        currentProject->close();
+        currentProject->closeDatabaseConnection();
+        currentProject=0;
     }
-    currentProject=0;
 }
 
 void ProjectDockWidget::bookmarkPeakGroup(PeakGroup* group) {
@@ -440,12 +440,9 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
     QString projectPath = fileinfo.path();
     QString projectName = fileinfo.fileName();
 
-    ProjectDB* selectedProject = new ProjectDB(fileName);
-    if (!selectedProject->open()) return;
+    if(currentProject) {  currentProject->closeDatabaseConnection(); currentProject=0; }
 
-    if (currentProject == 0) {
-        currentProject = selectedProject;
-    }
+    ProjectDB* selectedProject = new ProjectDB(fileName);
 
     QStringList pathlist;
     pathlist << projectPath
@@ -453,7 +450,7 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
              << ".."
              << settings->value("lastDir").value<QString>();
 
-    QSqlQuery query(currentProject->projectDB);
+    QSqlQuery query(selectedProject->sqlDB);
     query.exec("select * from samples");
 
     QStringList filelist;
@@ -486,13 +483,14 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
     }
 
     this->lastOpennedProject = fileName;
+    currentProject = selectedProject;
     fileLoader->setMainWindow(_mainwindow);
     fileLoader->loadSamples(filelist);
 }
 
 void ProjectDockWidget::getSampleInfoSQLITE() {
 
-    QSqlQuery query(currentProject->projectDB);
+    QSqlQuery query(currentProject->sqlDB);
     query.exec("select * from samples");
     qDebug() << "getSampleInfoSQLITE()" << query.numRowsAffected();
 
@@ -500,25 +498,29 @@ void ProjectDockWidget::getSampleInfoSQLITE() {
              QString fname   = query.value("filename").toString();
              QString sname   = query.value("name").toString();
              QString setname  = query.value("setName").toString();
-             QString sampleOrder  = query.value("sampleOrder").toString();
-             QString isSelected   = query.value("isSelected").toString();
-             QString color_red    = query.value("color_red").toString();
-             QString color_blue   = query.value("color_blue").toString();
-             QString color_green = query.value("color_green").toString();
-             QString color_alpha  = query.value("color_alpha").toString();
 
-            foreach(mzSample* sample, _mainwindow->getSamples()) {
-                if(sample->sampleName != sname.toStdString()) continue;
+             int sampleOrder  = query.value("sampleOrder").toInt();
+             int isSelected   = query.value("isSelected").toInt();
+             float color_red    = query.value("color_red").toDouble();
+             float color_blue   = query.value("color_blue").toDouble();
+             float color_green = query.value("color_green").toDouble();
+             float color_alpha  = query.value("color_alpha").toDouble();
+             float norml_const   = query.value("norml_const").toDouble(); if(norml_const == 0) norml_const=1.0;
 
-                if (!sname.isEmpty() )  		sample->sampleName = sname.toStdString();
-                if (!setname.isEmpty() )  		sample->setSetName(setname.toStdString());
-                if (!sampleOrder.isEmpty())     sample->setSampleOrder(sampleOrder.toInt());
-                if (!isSelected.isEmpty()) 		sample->isSelected = isSelected.toInt();
+            foreach(mzSample* s, _mainwindow->getSamples()) {
+                if(s->sampleName != sname.toStdString()) continue;
 
-                sample->color[0]   = color_red.toDouble();
-                sample->color[1]   = color_green.toDouble();
-                sample->color[2]   = color_blue.toDouble();
-                sample->color[3]   = color_alpha.toDouble();
+                if (!sname.isEmpty() )  		s->sampleName = sname.toStdString();
+                if (!setname.isEmpty() )  		s->setSetName(setname.toStdString());
+
+                s->setSampleOrder(sampleOrder);
+                s->isSelected = isSelected;
+                s->color[0]   = color_red;
+                s->color[1]   = color_green;
+                s->color[2]   = color_blue;
+                s->color[3]   = color_alpha;
+                s->setNormalizationConstant(norml_const);
+
              }
          }
 
@@ -535,24 +537,26 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename, TableDockWidget* pea
     if(sampleSet.size() == 0) return;
 
     ProjectDB* project=0;
-    if (filename == lastOpennedProject and currentProject->open() ) {
+    if (currentProject and currentProject->databaseName() == filename and currentProject->isOpen())  {
+        qDebug() << "existing project..";
         project = currentProject;
     } else {
+        qDebug() << "new project..";
         project = new ProjectDB(filename);
-        lastOpennedProject=filename;
-        currentProject=project;
+        project->openDatabaseConnection(filename);
     }
 
-    if(project->open()) {
+    lastOpennedProject=filename;
+    currentProject=project;
+
+    //if(project->isOpen()) {
         project->saveSamples(sampleSet);
         if(peakTable) {
-            for(PeakGroup* group : peakTable->getGroups()) {
-                project->writeGroupSqlite(group,0);
-            }
+            for(PeakGroup* group : peakTable->getGroups())  project->writeGroupSqlite(group,0);
         }
-    } else {
-        qDebug() << "Can't write to " << lastOpennedProject;
-    }
+    //} else {
+    //   qDebug() << "Can't write to " << lastOpennedProject;
+    //}
 }
 
 

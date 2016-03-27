@@ -303,16 +303,34 @@ void TableDockWidget::heatmapBackground(QTreeWidgetItem* item) {
     }
 }
 
+QString TableDockWidget::groupTagString(PeakGroup* group){
+    if (!group) return QString();
 
+    QStringList parts;
+
+    if (group->compound != NULL) {
+        parts << group->compound->name.c_str();
+        if (group->adduct) parts << group->adduct->name.c_str();
+        if (!group->tagString.empty()) parts << group->tagString.c_str();
+        parts << group->compound->db.c_str();
+    } else {
+        parts << QString::number(group->meanMz,'f',3) + "@" + QString::number(group->meanRt,'f',2);
+    }
+
+    if(!group->srmId.empty()) parts << QString(group->srmId.c_str());
+    return parts.join("|");
+}
+/*
 QString TableDockWidget::groupTagString(PeakGroup* group){ 
     if (!group) return QString();
-	QString tag(group->tagString.c_str());
+    QString tag(group->tagString.c_str());
     if (group->compound) tag = QString(group->compound->name.c_str());
     if (! group->tagString.empty()) tag += " | " + QString(group->tagString.c_str());
     if (! group->srmId.empty()) tag +=  " | " + QString(group->srmId.c_str());
     if ( tag.isEmpty() ) tag = QString::number(group->groupId);
     return tag;
 }
+*/
 
 void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) { 
 
@@ -1198,7 +1216,7 @@ void TableDockWidget::runScript() {
 void TableDockWidget::loadPeakTableSQLITE(QString fileName) {
 
     ProjectDB* selectedProject = new ProjectDB(fileName);
-    if (!selectedProject->open()) return;
+    if (!selectedProject->isOpen()) return;
 
     allgroups.clear(); //remove existing groups
 
@@ -1206,9 +1224,9 @@ void TableDockWidget::loadPeakTableSQLITE(QString fileName) {
     selectedProject->loadPeakGroups("peakgroups");
 
     allgroups = selectedProject->allgroups;
-    //for(PeakGroup g: selectedProject->allgroups) allgroups.append(g);
     for(int i=0; i < allgroups.size(); i++ ) allgroups[i].groupStatistics();
-    selectedProject->close();
+
+    //selectedProject->closeDatabaseConnection();
     showAllGroups();
 }
 

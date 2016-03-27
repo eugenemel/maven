@@ -80,8 +80,10 @@ public:
     //MS2 matching
     bool mustHaveMS2;
     float minFragmentMatchScore=2;
-    float productAmuToll = 0.01;
-    string scoringScheme="spearmanRank"; // ticMatch | spearmanRank
+    float minNumFragments=0;
+    float productPpmTolr = 20;
+    QString scoringScheme="dotProduct"; // ticMatch | spearmanRank | dotProduct
+    QString compoundDatabase;
 
    //triple quad compound matching
    float amuQ1;

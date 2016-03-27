@@ -38,7 +38,7 @@ void Database::loadMethodsFolder(QString methodsFolder) {
         }
     }
 
-    loadCompoundsSQL();
+    reloadAll();
 }
 
 int Database::loadCompoundsFile(QString filename) {
@@ -62,6 +62,7 @@ int Database::loadCompoundsFile(QString filename) {
 
 
 void Database::closeAll() {
+    compoundIdMap.clear();
     mzUtils::delete_all(adductsDB);     adductsDB.clear();
     mzUtils::delete_all(compoundsDB);   compoundsDB.clear();
     mzUtils::delete_all(fragmentsDB);   fragmentsDB.clear();
@@ -279,10 +280,14 @@ vector<Compound*> Database::getCopoundsSubset(string dbname) {
 	return subset;
 }
 
-map<string,int> Database::getDatabaseNames() { 
-	map<string,int>dbnames;
-	for (unsigned int i=0; i < compoundsDB.size(); i++ ) dbnames[ compoundsDB[i]->db ]++;
-	return dbnames;
+QStringList Database::getDatabaseNames() {
+    QSqlQuery query(ligandDB);
+    query.prepare("SELECT distinct dbName from compounds");
+    if (!query.exec())  qDebug() << query.lastError();
+
+    QStringList dbnames;
+    while (query.next())  dbnames << query.value(0).toString();
+    return dbnames;
 }
 
 vector<Adduct*> Database::loadAdducts(string filename) {
@@ -553,14 +558,24 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
     return compoundSet;
 }
 
+void Database::deleteAllCompoundsSQL() {
+    QSqlQuery query(ligandDB);
+    query.prepare("delete from compounds");
+    if (!query.exec())  qDebug() << query.lastError();
+    ligandDB.commit();
+    qDebug() << "deleteAllCompounds";
+}
+
 
 void Database::deleteCompoundsSQL(QString dbName) {
     QSqlQuery query(ligandDB);
     query.prepare("delete from compounds where dbName = ?");
     query.bindValue( 0, dbName );
-    query.exec();
+    if (!query.exec())  qDebug() << query.lastError();
+    ligandDB.commit();
     qDebug() << "deleteCompoundsSQL" << dbName <<  " " << query.numRowsAffected();
 }
+
 
 void Database::saveCompoundsSQL(vector<Compound*> &compoundSet) {
 

@@ -48,7 +48,7 @@ BackgroundPeakUpdate::BackgroundPeakUpdate(QWidget*) {
     compoundPPMWindow=10;
     compoundRTWindow=2;
     eicMaxGroups=INT_MAX;
-    productAmuToll=0.01;
+    productPpmTolr=20.0;
 
     //triple quad matching options
     amuQ1=0.25;
@@ -124,8 +124,6 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
     baseline_smoothingWindow = settings->value("baseline_smoothing").toInt();
     baseline_dropTopX =  settings->value("baseline_quantile").toInt();
 
-
-
     for (unsigned int s=0; s < slices.size();  s++ ) {
         mzSlice* slice = slices[s];
         double mzmin = slice->mzmin;
@@ -187,7 +185,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
                 sort(ms2events.begin(),ms2events.end(),Scan::compIntensity);
                 Fragment f = Fragment(ms2events[0],0.01,1,1024);
                 for(Scan* s : ms2events) {  f.addFragment(new Fragment(s,0,0.01,1024)); }
-                f.buildConsensus(productAmuToll);
+                f.buildConsensus(productPpmTolr);
                 group.fragmentationPattern = f.consensus;
                 group.ms2EventCount = ms2events.size();
             }
@@ -245,6 +243,13 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
     //match MS2 spectra
     matchFragmentation();
+
+    //run clustering
+    double maxRtDiff = 0.2;
+    double minSampleCorrelation= 0.8;
+    double minPeakShapeCorrelation=0.9;
+    PeakGroup::clusterGroups(allgroups,samples,maxRtDiff,minSampleCorrelation,minPeakShapeCorrelation,compoundPPMWindow);
+
 
     if (showProgressFlag && pullIsotopesFlag ) {
         emit(updateProgressBar("Calculation Isotopes" ,1, 100));
@@ -322,20 +327,19 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
 
         mzSlice* slice = new mzSlice();
         slice->compound = c;
+
         if (!c->srmId.empty()) slice->srmId=c->srmId;
 
         if (!c->formula.empty()) {
-            double mass = mcalc.computeMass(c->formula,ionizationMode);
-            slice->mzmin = mass - compoundPPMWindow * mass/1e6;
-            slice->mzmax = mass + compoundPPMWindow * mass/1e6;
+            slice->mz = mcalc.computeMass(c->formula,ionizationMode);
         } else if (c->mass > 0 ) {
-            double mass = c->mass;
-            slice->mzmin = mass - compoundPPMWindow * mass/1e6;
-            slice->mzmax = mass + compoundPPMWindow * mass/1e6;
+            slice->mz = c->mass;
         } else {
             continue;
         }
 
+        slice->mzmin = slice->mz - compoundPPMWindow * slice->mz/1e6;
+        slice->mzmax = slice->mz + compoundPPMWindow * slice->mz/1e6;
 
         if (matchRtFlag && c->expectedRt > 0 ) {
             slice->rtmin = c->expectedRt-compoundRTWindow;
@@ -344,6 +348,18 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
             slice->rtmin = 0;
             slice->rtmax = 1e9;
         }
+
+        //check if slice has ms2events
+        if (mustHaveMS2) {
+            bool hasMS2=false;
+            for(mzSample* sample: samples) {
+                if(sample->getFragmenationEvents(slice).size() > 0 ) {
+                    hasMS2=true; break;
+                }
+            }
+            if(hasMS2 == false) continue;
+        }
+
         slices.push_back(slice);
     }
 
@@ -699,27 +715,37 @@ void BackgroundPeakUpdate::matchFragmentation() {
 
             vector<MassCalculator::Match>matchesX = DB.findMathchingCompounds(g->meanMz,compoundPPMWindow,ionizationMode);
 
-            g->fragmentationPattern.printFragment(productAmuToll,10);
+            //g->fragmentationPattern.printFragment(productPpmTolr,10);
             Adduct* adduct=0;
             Compound* bestHit=0;
             FragmentationMatchScore bestScore;
 
             for(MassCalculator::Match m: matchesX ) {
                 Compound* cpd = m.compoundLink;
-                FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productAmuToll,true);
+                if(!compoundDatabase.isEmpty() and  cpd->db != compoundDatabase.toStdString()) continue;
 
-                if (scoringScheme == "spearmanRank") {
+                FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productPpmTolr,true);
+
+                if (scoringScheme == "HyperGeomScore" ) {
+                    s.mergedScore = s.hypergeomScore;
+                } else if (scoringScheme == "DotProduct") {
+                    s.mergedScore = s.dotProduct;
+                } else if (scoringScheme == "SpearmanRank") {
                     s.mergedScore = s.spearmanRankCorrelation;
-                } else {
+                } else if (scoringScheme == "TICMatched") {
                     s.mergedScore = s.ticMatched;
-
+                } else if (scoringScheme == "WeightedDotProduct" ){
+                    s.mergedScore = s.weightedDotProduct;
+                } else{
+                    s.mergedScore = s.hypergeomScore;
                 }
+                qDebug() << "scoring=" << scoringScheme << " " << s.mergedScore;
                 s.ppmError = m.diff;
 
-                if (s.numMatches == 0 ) continue;
+                if (s.numMatches < minNumFragments ) continue;
                 //cerr << "\t"; cerr << cpd->name << "\t" << cpd->precursorMz << "\tppmDiff=" << m.diff << "\t num=" << s.numMatches << "\t tic" << s.ticMatched <<  " s=" << s.spearmanRankCorrelation << endl;
 
-                if (s.mergedScore > bestScore.mergedScore ) {
+                if (s.mergedScore > minFragmentMatchScore and s.mergedScore > bestScore.mergedScore ) {
                     bestScore = s;
                     bestHit = cpd;
                     adduct =  m.adductLink;

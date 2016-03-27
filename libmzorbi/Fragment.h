@@ -22,6 +22,8 @@ struct FragmentationMatchScore {
     double mzFragError;
     double mergedScore;
     double dotProduct;
+    double weightedDotProduct;
+    double hypergeomScore;
 
     FragmentationMatchScore() {
         fractionMatched=0;
@@ -32,6 +34,8 @@ struct FragmentationMatchScore {
         mzFragError=1000;
         mergedScore=0;
         dotProduct=0;
+        weightedDotProduct=0;
+        hypergeomScore=0;
     }
 
     FragmentationMatchScore& operator=(const FragmentationMatchScore& b) {
@@ -43,6 +47,8 @@ struct FragmentationMatchScore {
         mzFragError=b.mzFragError;
         mergedScore=b.mergedScore;
         dotProduct=b.dotProduct;
+        weightedDotProduct=b.weightedDotProduct;
+        hypergeomScore=b.hypergeomScore;
         return *this;
     }
 
@@ -90,19 +96,19 @@ class Fragment {
         void appendBrothers(Fragment* other);
         void printMzList();
         int  findClosestHighestIntensityPos(float _mz, float tolr);
-        void printFragment(float productAmuToll,unsigned int limitTopX);
+        void printFragment(float productPpmToll,unsigned int limitTopX);
         void printInclusionList(bool printHeader, ostream& outstream, string COMPOUNDNAME);
         void printConsensusMS2(ostream& outstream, double minConsensusFraction);
         void printConsensusMGF(ostream& outstream, double minConsensusFraction);
-        void printConsensusNIST(ostream& outstream, double minConsensusFraction, float productAmuToll, Compound* compound);
-        FragmentationMatchScore scoreMatch(Fragment* other, float productAmuToll);
+        void printConsensusNIST(ostream& outstream, double minConsensusFraction, float productPpmToll, Compound* compound);
+        FragmentationMatchScore scoreMatch(Fragment* other, float productPpmToll);
 
-        double compareToFragment(Fragment* other, float productAmuToll);
-        static vector<int> compareRanks( Fragment* a, Fragment* b, float productAmuToll);
-        static vector<int> locatePositions( Fragment* a, Fragment* b, float productAmuToll);
+        double compareToFragment(Fragment* other, float productPPMToll);
+        static vector<int> compareRanks(Fragment* a, Fragment* b, float productPpmTolr);
+        static vector<int> locatePositions( Fragment* a, Fragment* b, float productPpmToll);
 
 
-        void buildConsensus(float productAmuToll);
+        void buildConsensus(float productPpmTolr);
         vector<unsigned int> intensityOrderDesc();
         vector<int> mzOrderInc();
 
@@ -119,9 +125,13 @@ class Fragment {
         double totalIntensity();
         double dotProduct(const vector<int>& X, Fragment* other);
         double ticMatched(const vector<int>& X);
-        bool hasMz(double mzValue, double amuTolr);
-        bool hasNLS(double NLS, double amuTolr);
+        double mzWeightedDotProduct(const vector<int>& X, Fragment* other);
+        bool hasMz(float mzValue, float ppmTolr);
+        bool hasNLS(float NLS, float ppmTolr);
         void addNeutralLosses();
+
+        double logNchooseK(int N,int k);
+        double SHP(int matched, int len1, int len2, int N);
 
         static bool compPrecursorMz(const Fragment* a, const Fragment* b) { return a->precursorMz<b->precursorMz; }
         bool operator<(const Fragment* b) const{ return this->precursorMz < b->precursorMz; }

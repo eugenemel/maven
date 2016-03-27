@@ -17,7 +17,7 @@ MassCalcWidget::MassCalcWidget(MainWindow* mw) {
 }
 
 void MassCalcWidget::setMass(float mz) { 
-	if ( mz == _mz ) return;
+    if ( abs(mz-_mz)<0.0005) return;
 
     lineEdit->setText(QString::number(mz,'f',5)); 
     _mz = mz; 
@@ -63,7 +63,7 @@ void MassCalcWidget::showTable() {
     QTableWidget *p = mTable; 
     p->setUpdatesEnabled(false); 
     p->clear(); 
-    p->setColumnCount(5);
+    p->setColumnCount(6);
     p->setRowCount( matches.size() ) ;
     p->setHorizontalHeaderLabels(  QStringList() << "Compound" << "ppmDiff" << "fragScore" << "Adduct" << "Mass" << "DB");
     p->setSortingEnabled(false);
@@ -76,7 +76,7 @@ void MassCalcWidget::showTable() {
         QString matchName = QString(matches[i].name.c_str() );
         QString preMz = QString::number( matches[i].mass , 'f', 4);
         QString ppmDiff = QString::number( matches[i].diff , 'f', 4);
-        QString matchScore = QString::number( matches[i].fragScore.dotProduct , 'f', 2);
+        QString matchScore = QString::number( matches[i].fragScore.weightedDotProduct , 'f', 3);
         QString adductName = QString(a->name.c_str());
         QString db = QString(c->db.c_str());
 
@@ -99,14 +99,22 @@ void MassCalcWidget::showTable() {
 
 }
 
-void MassCalcWidget::getMatches(PeakGroup* grp) {
+void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
+    if(!grp) return;
+
+    _mz = grp->meanMz;
     matches = DB.findMathchingCompounds(_mz,_ppm,_charge);
+    cerr << "MassCalcWidget::setPeakGroup(PeakGroup* grp)" << endl;
+
+    if(grp->ms2EventCount == 0) grp->computeFragPattern(_ppm);
     if(grp->fragmentationPattern.nobs() == 0) return;
+    float productPpmTolr=20;
 
     for(MassCalculator::Match& m: matches ) {
        Compound* cpd = m.compoundLink;
-       m.fragScore = cpd->scoreCompoundHit(&grp->fragmentationPattern,0.01,true);
+       m.fragScore = cpd->scoreCompoundHit(&grp->fragmentationPattern,productPpmTolr,true);
     }
+    showTable();
 }
 
 void MassCalcWidget::getMatches() {

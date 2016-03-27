@@ -1,68 +1,34 @@
 #!/bin/sh
 DATE=`date +%Y%m%d`
-
-#clean up
-rm -rf Maven.app  Maven.dmg
+SRC=/Users/eugenemelamud/src/mzroll
+BUILD=/Users/eugenemelamud/src/mzroll
+QTBIN=/Users/eugenemelamud/Qt/5.5/clang_64/bin/
 
 #get the latest source
-cd ..
-bzr pull lp:mzroll
+cd $BUILD
+
+#clean up
+rm -rf $BUILD/bin/Maven.app $BUILD/bin/Maven.dmg
 
 #update Makefile
-#qmake -spec mac-g++ -r
-qmake
-#make clean
-make -j2 
+$QTBIN/qmake -r
+#make
+make clean
+make -j4
 
 #copy support files
-cd bin
-cp *.csv *.db *.model Maven.app/Contents/Resources
+cd $BUILD/bin
+cp $SRC/bin/*.csv   Maven.app/Contents/Resources
+cp $SRC/bin/*.model Maven.app/Contents/Resources
 
 mkdir Maven.app/Contents/Resources/methods
 mkdir Maven.app/Contents/Resources/pathways
 mkdir Maven.app/Contents/Resources/scripts
-cp methods/* Maven.app/Contents/Resources/methods
-cp pathways/* Maven.app/Contents/Resources/pathways
-cp scripts/* Maven.app/Contents/Resources/scripts
+cp $SRC/bin/methods/* Maven.app/Contents/Resources/methods
+cp $SRC/bin/pathways/* Maven.app/Contents/Resources/pathways
+cp $SRC/bin/scripts/* Maven.app/Contents/Resources/scripts
 
 #fix Qt dynamic library dependancy
-macdeployqt Maven.app
-
-#fix third party dependancies
-FRAMEWORKS=Maven.app/Contents/Frameworks
-NEWPATH=\@executable_path/../Frameworks
-
-chmod +w $FRAMEWORKS/*.dylib
-
-cp /usr/local/lib/libnetcdf.7.dylib $FRAMEWORKS/
-install_name_tool -id $NEWPATH/libnetcdf.7.dylib  $FRAMEWORKS/libnetcdf.7.dylib 
-install_name_tool -change /usr/local/lib/libsz.2.0.0.dylib   $NEWPATH/libsz.2.0.0.dylib  $FRAMEWORKS/libnetcdf.7.dylib 
-install_name_tool -change /usr/local/lib/libhdf5.7.dylib     $NEWPATH/libhdf5.7.dylib    $FRAMEWORKS/libnetcdf.7.dylib 
-install_name_tool -change /usr/local/lib/libhdf5_hl.7.dylib  $NEWPATH/libhdf5_hl.7.dylib $FRAMEWORKS/libnetcdf.7.dylib 
-
-cp /usr/local/lib/libsz.2.0.0.dylib $FRAMEWORKS/
-install_name_tool -id $NEWPATH/libsz.2.0.0.dylib  $FRAMEWORKS/libsz.2.0.0.dylib 
-
-cp /usr/local/lib/libhdf5.7.dylib $FRAMEWORKS/
-install_name_tool -id $NEWPATH/libhdf5.7.dylib  $FRAMEWORKS/libhdf5.7.dylib 
-install_name_tool -change /usr/local/lib/libsz.2.0.0.dylib   $NEWPATH/libsz.2.0.0.dylib  $FRAMEWORKS/libhdf5.7.dylib
-
-cp /usr/local/lib/libhdf5_hl.7.dylib $FRAMEWORKS/
-install_name_tool -id $NEWPATH/libhdf5_hl.7.dylib  $FRAMEWORKS/libhdf5_hl.7.dylib 
-install_name_tool -change /usr/local/lib/libsz.2.0.0.dylib   $NEWPATH/libsz.2.0.0.dylib  $FRAMEWORKS/libhdf5_hl.7.dylib
-install_name_tool -change /usr/local/Cellar/hdf5/1.8.8/lib/libhdf5.7.dylib   $NEWPATH/libhdf5.7.dylib  	 $FRAMEWORKS/libhdf5_hl.7.dylib
-
-#list dependancies
-otool -L $FRAMEWORKS/libsz.2.0.0.dylib
-otool -L $FRAMEWORKS/libnetcdf.7.dylib
-otool -L $FRAMEWORKS/libhdf5_hl.7.dylib
-otool -L $FRAMEWORKS/libhdf5.7.dylib
-
-
-echo "Creating dmg";
-rm Maven.dmg
-macdeployqt Maven.app -dmg
-
-echo "Copying to Desktop..";
-cp Maven.dmg  ~/Desktop/Maven_$DATE.dmg
-
+$QTBIN/macdeployqt Maven.app -dmg
+$QTBIN/macdeployqt peakdetector.app -dmg
+mv Maven.dmg ~/Desktop/Maven_$DATE.dmg

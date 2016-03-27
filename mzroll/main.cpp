@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
     splash.setMask(pixmap.mask());
     splash.show();
     app.processEvents();
+    app.setApplicationName("Maven2");
 
     MainWindow* mainWindow = new MainWindow();
     //qInstallMessageHandler(customMessageHandler);

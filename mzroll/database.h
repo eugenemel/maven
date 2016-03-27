@@ -24,7 +24,7 @@ class Database {
             connect(filename);
             reloadAll();
         }
-        ~Database() { closeAll(); }
+        //~Database() { closeAll(); }
 
 		QSqlDatabase& getLigandDB() { return ligandDB; }
         void reloadAll();  //loads all tables
@@ -39,6 +39,7 @@ class Database {
         void loadCompoundsSQL();
         void saveCompoundsSQL(vector<Compound*> &compoundSet);
         void deleteCompoundsSQL( QString dbName);
+        void deleteAllCompoundsSQL();
 
 		multimap<string,Compound*> keywordSearch(string needle);
 		vector<string>   getCompoundReactions(string compound_id);
@@ -50,7 +51,7 @@ class Database {
         vector<Compound*> getKnowns();
 
 
-        map<string,int>	  getDatabaseNames();
+        QStringList getDatabaseNames();
         map<string,int>   getChromotographyMethods();
 
         Compound* findSpeciesById(string id,string db);

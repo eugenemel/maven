@@ -24,7 +24,7 @@ float Compound::ajustedMass(int charge) {
 }
 
 
-FragmentationMatchScore Compound::scoreCompoundHit(Fragment* f, float productAmuToll=0.01, bool searchProton=true) {
+FragmentationMatchScore Compound::scoreCompoundHit(Fragment* f, float productPpmTolr=20, bool searchProton=true) {
         FragmentationMatchScore s;
         Compound* cpd = this;
 
@@ -46,11 +46,7 @@ FragmentationMatchScore Compound::scoreCompoundHit(Fragment* f, float productAmu
         }
 
         t.sortByIntensity();
-        s = t.scoreMatch(f,productAmuToll);
+        s = t.scoreMatch(f,productPpmTolr);
 
-        //if(s.numMatches>0)  {
-        //   vector<int>ranks = Fragment::compareRanks(&t,f,productAmuToll);
-        //    for(int i=0; i< ranks.size(); i++ ) if(ranks[i]>0) cerr << t.mzs[i] << " "; cerr << endl;
-        //}
         return s;
 }

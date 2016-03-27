@@ -77,20 +77,12 @@ QString LigandWidget::getDatabaseName() {
 
 void LigandWidget::reloadCompounds() {
 	databaseSelect->disconnect(SIGNAL(currentIndexChanged(QString)));
-	databaseSelect->clear();
-	QSet<QString>set;
-	for(int i=0; i< DB.compoundsDB.size(); i++) {
-            if (! set.contains( DB.compoundsDB[i]->db.c_str() ) )
-                set.insert( DB.compoundsDB[i]->db.c_str() );
-	}
+    databaseSelect->clear();
 
-        QIcon icon(rsrcPath + "/dbsearch.png");
-        QSetIterator<QString> i(set);
-        int pos=0;
-	while (i.hasNext()) { 
-                //databaseSelect->insertItem(pos++, i.next());
-                databaseSelect->addItem(icon,i.next());
-	}
+    QStringList dbnames = DB.getDatabaseNames();
+    for(QString db: dbnames ) {
+        databaseSelect->addItem(db);
+    }
 	connect(databaseSelect, SIGNAL(currentIndexChanged(QString)), this, SLOT(setDatabase(QString)));
 }
 

@@ -40,18 +40,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
  qRegisterMetaType<QTextCursor>("QTextCursor");
 
-#ifdef Q_WS_MAC
-    QDir dir(QApplication::applicationDirPath());
-    dir.cdUp();
-    dir.cd("plugins");
-    QApplication::setLibraryPaths(QStringList(dir.absolutePath()));
-    QStringList list = QApplication::libraryPaths();
-    qDebug() << "Library Path=" <<  list;
-#endif
-
     readSettings();
     QString dataDir = ".";
-
     QList<QString> dirs;
     dirs    << dataDir
             << QApplication::applicationDirPath()
@@ -66,12 +56,20 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     setWindowTitle(programName + " " + QString::number(MAVEN_VERSION));
 
     //CONNECT TO DATABASE
-    QString storageLocation =   QStandardPaths::displayName(QStandardPaths::AppDataLocation);
-
     //locations of common files and directories
     QString methodsFolder =      settings->value("methodsFolder").value<QString>();
-    if (!QFile::exists(methodsFolder)) methodsFolder =  dataDir +  "/" + "methods";
-    DB.connect( methodsFolder + "/ligand.db");
+    QString writeLocation = QStandardPaths::standardLocations(QStandardPaths::DataLocation).first();
+
+    if(!QFile::exists(methodsFolder)) methodsFolder =  dataDir +  "/" + "methods";
+    if(!QFile::exists(writeLocation))  { QDir dir; dir.mkdir(writeLocation); }
+
+    qDebug() << "APP=" <<  QApplication::applicationName();
+    qDebug() << "VER=" <<  QApplication::applicationVersion();
+    qDebug() << "Data=" <<  writeLocation;
+    qDebug() << "Data Folder=" << dataDir;
+    qDebug() << "Method Folder=" << methodsFolder;
+
+    DB.connect(writeLocation + "/ligand.db");
     DB.loadCompoundsSQL();
 
     //QString commonFragments =   methodsFolder + "/" + "FRAGMENTS.csv";
@@ -84,8 +82,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     QString clsfModelFilename = dataDir +  "/"  +       settings->value("clsfModelFilename").value<QString>();
     if(QFile::exists(clsfModelFilename)) clsf->loadModel(clsfModelFilename.toStdString());
 
-    qDebug() << "Data Folder=" << dataDir;
-    qDebug() << "Method Folder=" << methodsFolder;
 
     //progress Bar on the bottom of the page
     statusText  = new QLabel(this);
@@ -400,22 +396,10 @@ void MainWindow::setCompoundFocus(Compound*c) {
     float mz = c->mass;
     if (!c->formula.empty() && charge) mz = c->ajustedMass(charge);
 
-    if ( isotopeWidget && isotopeWidget->isVisible() ) isotopeWidget->setCompound(c);
-    if ( massCalcWidget && massCalcWidget->isVisible() ) { massCalcWidget->setMass(mz); }
-
-    if (eicWidget->isVisible() && samples.size() > 0 ) {
-        eicWidget->setCompound(c);
-    }
-
-    if(c->fragment_mzs.size()) {
-        fragmenationSpectraWidget->overlayCompound(c);
-    }
-    /*
-        if( peaksPanel->isVisible() && c->hasGroup() ) {
-            peaksPanel->setInfo(c->getPeakGroup());
-         }
-		*/
-
+    if (isotopeWidget && isotopeWidget->isVisible() ) isotopeWidget->setCompound(c);
+    if (massCalcWidget && massCalcWidget->isVisible() )  massCalcWidget->setMass(mz);
+    if (eicWidget->isVisible() && samples.size() > 0 )  eicWidget->setCompound(c);
+    if (fragmenationSpectraWidget->isVisible())  fragmenationSpectraWidget->overlayCompound(c);
     if (c) setUrl(c);
 }
 
@@ -596,11 +580,14 @@ void MainWindow::loadCompoundsFile() {
 void MainWindow::reloadMethodsFolder() {
     QString methodsFolder =      settings->value("methodsFolder").value<QString>();
     methodsFolder = QFileDialog::getExistingDirectory(this,methodsFolder);
-    DB.connect( methodsFolder + "/ligand.db");
-    DB.loadMethodsFolder(methodsFolder);
+
+    if (not methodsFolder.isEmpty()) {
+        DB.connect( methodsFolder + "/ligand.db");
+        DB.deleteAllCompoundsSQL();
+        DB.loadMethodsFolder(methodsFolder);
+        ligandWidget->reloadCompounds();
+    }
 }
-
-
 
 BackgroundPeakUpdate* MainWindow::newWorkerThread(QString funcName) {
     BackgroundPeakUpdate* workerThread = new BackgroundPeakUpdate(this);
@@ -1093,15 +1080,13 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
     }
 
     if(fragmenationSpectraWidget->isVisible()) {
-        fragmenationSpectraWidget->setScan(group->getAverageFragmenationScan(0.01));
-        if ( group->compound != NULL and group->compound->fragment_mzs.size()) {
-           fragmenationSpectraWidget->overlayCompound(group->compound);
-        }
+        Scan* avgScan = group->getAverageFragmenationScan(20);
+        fragmenationSpectraWidget->setScan(avgScan);
+        fragmenationSpectraWidget->overlayCompound(group->compound);
+        delete(avgScan);
     }
 
-    if (massCalcWidget->isVisible()) {
-        massCalcWidget->getMatches(group);
-    }
+    if (massCalcWidget->isVisible()) { massCalcWidget->setPeakGroup(group); }
 
     /*
     if ( scatterDockWidget->isVisible() ) {
@@ -1109,9 +1094,7 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
     }
     */
 
-    if (group->peaks.size() > 0) {
-        showPeakInfo(&(group->peaks[0]));
-    }
+    if (group->peaks.size() > 0) showPeakInfo(&(group->peaks[0]));
 }
 
 
@@ -1248,10 +1231,10 @@ void MainWindow::showPeakInfo(Peak* _peak) {
         spectraWidget->setScan(_peak);
     }
 
-    /*if( massCalcWidget->isVisible() ) {
+    if( massCalcWidget->isVisible() ) {
         massCalcWidget->setMass(_peak->peakMz);
         massCalcWidget->setCharge(ionizationMode);
-    }*/
+    }
 
    if ( isotopeWidget->isVisible() ) {
         isotopeWidget->setIonizationMode(ionizationMode);
@@ -1259,7 +1242,12 @@ void MainWindow::showPeakInfo(Peak* _peak) {
         isotopeWidget->setPeak(_peak);
     }
 
-    if ( fragPanel->isVisible() ) {
+   if (fragmenationSpectraWidget->isVisible()) {
+        vector<Scan*>ms2s = _peak->getFragmenationEvents(getUserPPM());
+        if (ms2s.size()) fragmenationSpectraWidget->setScan(ms2s[0]);
+    }
+
+    if( fragPanel->isVisible() ) {
         showFragmentationScans(_peak->peakMz);
     }
 }
@@ -1385,8 +1373,9 @@ void MainWindow::showFragmentationScans(float pmz) {
     fragPanel->clearTree();
     for ( unsigned int i=0; i < samples.size(); i++ ) {
         for (unsigned int j=0; j < samples[i]->scans.size(); j++ ) {
-            if ( samples[i]->scans[j]->mslevel > 1 && ppmDist(samples[i]->scans[j]->precursorMz,pmz) < ppm ) {
-                fragPanel->addScanItem(samples[i]->scans[j]);
+            Scan* s = samples[i]->scans[j];
+            if ( s->mslevel > 1 && ppmDist(s->precursorMz,pmz) < ppm ) {
+                fragPanel->addScanItem(s);
             }
         }
     }
@@ -1553,7 +1542,7 @@ QWidget* MainWindow::eicWidgetController() {
     connect(btnPDF, SIGNAL(clicked()), SLOT(exportPDF()));
     connect(btnPNG, SIGNAL(clicked()), SLOT(exportSVG()));
     connect(btnAutoZoom,SIGNAL(toggled(bool)), eicWidget,SLOT(autoZoom(bool)));
-    connect(btnBookmark,SIGNAL(clicked()),  this,  SLOT(bookmarkPeakGroup()));
+    connect(btnBookmark,SIGNAL(clicked()),  this,  SLOT(bookmarkSelectedPeakGroup()));
     connect(btnCopyCSV,SIGNAL(clicked()),  eicWidget, SLOT(copyToClipboard()));
     connect(btnMarkGood,SIGNAL(clicked()), eicWidget, SLOT(markGroupGood()));
     connect(btnMarkBad,SIGNAL(clicked()),  eicWidget, SLOT(markGroupBad()));

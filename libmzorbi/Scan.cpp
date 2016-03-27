@@ -204,6 +204,10 @@ void Scan::summary() {
          << " totalIntensty=" << this->totalIntensity()
          << endl;
 
+    for(int i=0; i<mz.size(); i++) {
+        cerr << "\t" << mz[i] << "\t" << intensity[i] << endl;
+    }
+
 }
 
 //generate multi charges series..endingin in change Zx,Mx

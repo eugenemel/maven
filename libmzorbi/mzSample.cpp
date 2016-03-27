@@ -1416,5 +1416,19 @@ double mzSample::getMS1PrecurursorMass(Scan* ms2scan,float ppm) {
     }
 }
 
+vector<Scan*> mzSample::getFragmenationEvents(mzSlice* slice) {
+    vector<Scan*>matchedscans;
+    for( unsigned int j=0; j < scans.size(); j++ ) {
+            Scan* scan = scans[j];
+            if (!scan or scan->mslevel <= 1 or scan->rt < slice->rtmin) continue; //skip ms1 events
+            if (scan->rt > slice->rtmax) break;
+            if (scan->precursorMz >= slice->mzmin and scan->precursorMz <= slice->mzmax) {
+                matchedscans.push_back(scan);
+            }
+     }
+    return matchedscans;
+}
+
+
 
 

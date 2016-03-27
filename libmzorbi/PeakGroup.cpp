@@ -573,7 +573,32 @@ vector<Scan*> PeakGroup::getFragmenationEvents() {
     return matchedscans;
 }
 
+void PeakGroup::computeFragPattern(float productPpmTolr)  {
+    //build consensus ms2 specta
+    vector<Scan*>ms2events = getFragmenationEvents();
+    if (ms2events.size() == 0 ) return;
+    sort(ms2events.begin(),ms2events.end(),Scan::compIntensity);
 
+    Fragment f(ms2events[0],0.01,1,1024);
+    for(Scan* s : ms2events) {  f.addFragment(new Fragment(s,0,0.01,1024)); }
+    f.buildConsensus(productPpmTolr);
+    f.consensus->sortByMz();
+    fragmentationPattern = f.consensus;
+}
+
+Scan* PeakGroup::getAverageFragmenationScan(float productPpmTolr)  {
+    //build consensus ms2 specta
+    computeFragPattern(productPpmTolr);
+    Scan* avgScan = new Scan(NULL,0,0,0,0,0);
+
+    for(unsigned int i=0; i<fragmentationPattern.mzs.size();i++) {
+        avgScan->mz.push_back(fragmentationPattern.mzs[i]);
+        avgScan->intensity.push_back(fragmentationPattern.intensity_array[i]);
+    }
+    return avgScan;
+}
+
+/*
 Scan* PeakGroup::getAverageFragmenationScan(float resolution) {
 
     int scanCount=0;
@@ -640,6 +665,7 @@ Scan* PeakGroup::getAverageFragmenationScan(float resolution) {
     //cout << "getAverageScan() from:" << from << " to:" << to << " scanCount:" << scanCount << "scans. mzs=" << avgScan->nobs() << endl;
     return avgScan;
 }
+*/
 
 
 
