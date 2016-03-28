@@ -63,11 +63,10 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     if(!QFile::exists(methodsFolder)) methodsFolder =  dataDir +  "/" + "methods";
     if(!QFile::exists(writeLocation))  { QDir dir; dir.mkdir(writeLocation); }
 
-    qDebug() << "APP=" <<  QApplication::applicationName();
-    qDebug() << "VER=" <<  QApplication::applicationVersion();
-    qDebug() << "Data=" <<  writeLocation;
-    qDebug() << "Data Folder=" << dataDir;
-    qDebug() << "Method Folder=" << methodsFolder;
+    qDebug() << "APP=" <<  QApplication::applicationName() << "VER=" <<  QApplication::applicationVersion();
+    qDebug() << "WRITE FOLDER=" <<  writeLocation;
+    qDebug() << "DATA  FOLDER=" << dataDir;
+    qDebug() << "METHODS FOLDER=" << methodsFolder;
 
     DB.connect(writeLocation + "/ligand.db");
     DB.loadCompoundsSQL();

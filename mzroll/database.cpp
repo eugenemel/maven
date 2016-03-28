@@ -113,7 +113,7 @@ void Database::loadCompoundsSQL() {
             compound->precursorMz =  query.value("precursorMz").toDouble();
             compound->productMz =  query.value("productMz").toDouble();
             compound->collisionEnergy =  query.value("collisionEnergy").toDouble();
-            compound->smileString=  query.value("smileString").toDouble();
+            compound->smileString=  query.value("smileString").toString().toStdString();
 
             //mark compound as decoy if names contains DECOY string
             if(compound->name.find("DECOY") > 0) compound->isDecoy=true;

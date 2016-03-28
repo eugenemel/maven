@@ -231,6 +231,7 @@ void LigandWidget::showTable() {
         parent->setText(1,QString::number(compound->mass));
         if(compound->expectedRt > 0) parent->setText(2,QString::number(compound->expectedRt));
         if (compound->formula.length())parent->setText(3,compound->formula.c_str());
+        if (compound->smileString.length()) parent->setText(3,compound->smileString.c_str());
 
         parent->setData(0, Qt::UserRole, QVariant::fromValue(compound));
         parent->setFlags(Qt::ItemIsSelectable|Qt::ItemIsDragEnabled|Qt::ItemIsEnabled);
@@ -239,6 +240,7 @@ void LigandWidget::showTable() {
         if (compound->precursorMz) addItem(parent,"Precursor Mz", compound->precursorMz);
         if (compound->productMz) addItem(parent,"Product Mz", compound->productMz);
         if (compound->collisionEnergy) addItem(parent,"Collision Energy", compound->collisionEnergy);
+        if (!compound->smileString.empty()) addItem(parent,"Smile", compound->smileString);
         if (compound->hasGroup() ) parent->setIcon(0,QIcon(":/images/link.png"));
 
         if(compound->category.size() > 0) {
