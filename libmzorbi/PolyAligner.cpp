@@ -141,7 +141,7 @@ AlignmentStats* PolyAligner::align(int degree) {
 		}
 	}
 
-	delete result;
+    delete[] result;
 	delete[] w;
 	delete[] x;
 	delete[] ref;

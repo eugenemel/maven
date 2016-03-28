@@ -122,7 +122,7 @@ int mzFileIO::loadPepXML(QString fileName) {
 
                 } else if (xml.name() == "search_hit") {
 		    hitCount++;
-                    int hit_rank = xml.attributes().value("hit_rank").toString().toInt();
+                    //int hit_rank = xml.attributes().value("hit_rank").toString().toInt();
                     QString peptide = xml.attributes().value("peptide").toString();
                     QString protein = xml.attributes().value("protein").toString();
 		    QString formula = "";
@@ -141,8 +141,8 @@ int mzFileIO::loadPepXML(QString fileName) {
 		    DB.addCompound(cpd);
 
                 } else if (xml.name() == "mod_aminoacid_mass" ) {
-                    int pos =          xml.attributes().value("position").toString().toInt();
-		    double massshift = xml.attributes().value("mass").toString().toDouble();
+                    //int pos =          xml.attributes().value("position").toString().toInt();
+                    //double massshift = xml.attributes().value("mass").toString().toDouble();
                 } else if (xml.name() == "search_score" ) {
                     QString name = xml.attributes().value("name").toString();
                     QString value = xml.attributes().value("value").toString();

@@ -31,7 +31,7 @@ class ProjectDB {
 
 
             void setSamples(vector<mzSample*>set) { samples = set; }
-            bool isOpen() { sqlDB.isOpen(); }
+            bool isOpen() { return sqlDB.isOpen(); }
             QString databaseName() { return sqlDB.databaseName(); }
 
             bool openDatabaseConnection(QString dbname);

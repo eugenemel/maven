@@ -406,7 +406,6 @@ void GalleryWidget::mousePressEvent(QMouseEvent *event) {
 
 void GalleryWidget::resizeEvent ( QResizeEvent * event ) {
       qDebug() << "GalleryWidget::resize() ";
-      QSize newsize = event->size();
 	  replot();
 }
 

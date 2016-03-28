@@ -115,7 +115,7 @@ void SpectraMatching::showScan() {
     foreach(QTreeWidgetItem* item, resultTable->selectedItems() ) {
 
         QVariant v =   item->data(0,Qt::UserRole);
-        unsigned int hitId=  v.value<int>();
+        int hitId=  v.value<int>();
 
         if (hitId >= 0 && hitId < matches.size()) {
             mainwindow->getSpectraWidget()->overlaySpectralHit(matches[hitId]);
@@ -313,7 +313,6 @@ double SpectraMatching::matchPattern(Scan* scan) {
        double score=0;
        for(int k=0; k < N; k++ ) {
            patternItensityObserved[k] = patternItensityObserved[k]/maxObservedIntensity*100;
-           double deltaIntensity =  abs(patternIntensityGiven[k]-patternItensityObserved[k]);
            double ratio =  abs((patternIntensityGiven[k]+1)/(patternItensityObserved[k]+1));
 
            //bound checking if specified
@@ -368,8 +367,6 @@ void SpectraMatching::exportMatches() {
 
     if (matches.size() == 0 ) { return; }
     QString dir = ".";
-    QSettings* settings = mainwindow->getSettings();
-
     QString groupsTAB = "Tab Delimited File (*.tab)";
 
     QString sFilterSel;
@@ -384,7 +381,6 @@ void SpectraMatching::exportMatches() {
 
     for(int i=0; i <matches.size(); i++ ) {
 	    SpectralHit& hit = matches[i];
-	    NumericTreeWidgetItem *item = new NumericTreeWidgetItem(resultTable,0);
 
 	    QString mzString, intsString;
 	    for(int i=0; i < hit.mzList.size(); i++ ) {

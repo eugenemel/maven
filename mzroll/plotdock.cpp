@@ -373,8 +373,7 @@ void PlotDockWidget::mousePressEvent(QMouseEvent *event) {
 }
 */
 
-void PlotDockWidget::resizeEvent ( QResizeEvent * event ) {
-      QSize newsize = event->size();
+void PlotDockWidget::resizeEvent ( QResizeEvent *) {
 	  replot();
 }
 
@@ -412,7 +411,7 @@ void PlotAxes::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
 	painter->setPen(pen);
 
     float fontsize = 8;
-	QFont font("Helvetica",8);
+    QFont font("Helvetica",fontsize);
 	painter->setFont(font);
 
     if (nticks == 0 ) nticks = 2;
@@ -491,6 +490,6 @@ void PlotDockWidget::exportPDF(){
 void PlotDockWidget::contextMenuEvent(QContextMenuEvent * event) {
     QDockWidget::contextMenuEvent(event);
 	//show menu
-    QAction *selectedAction = contextMenu->exec(event->globalPos());
+    contextMenu->exec(event->globalPos());
 }
 

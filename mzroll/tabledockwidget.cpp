@@ -263,7 +263,7 @@ void TableDockWidget::heatmapBackground(QTreeWidgetItem* item) {
     if(viewType != peakView) return;
 
     int firstColumn=3;
-    StatisticsVector<float>values; float sum=0;
+    StatisticsVector<float>values;
     for(unsigned int i=firstColumn; i< item->columnCount(); i++) {
           values.push_back(item->text(i).toFloat());
     }
@@ -705,7 +705,6 @@ void TableDockWidget::Train() {
 void TableDockWidget::keyPressEvent(QKeyEvent *e ) {
     //cerr << "TableDockWidget::keyPressEvent()" << e->key() << endl;
 
-    QTreeWidgetItem *item = treeWidget->currentItem();
     if (e->key() == Qt::Key_Delete ) {
         deleteGroup();
     } else if ( e->key() == Qt::Key_T ) {
@@ -724,8 +723,6 @@ void TableDockWidget::updateStatus() {
     int totalCount=0;
     int goodCount=0;
     int badCount=0;
-    int ignoredCount=0;
-    int predictedGood=0;
     for(int i=0; i < allgroups.size(); i++ ) {
         char groupLabel = allgroups[i].label;
         if (groupLabel == 'g' ) {
@@ -896,7 +893,6 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
     QAction* z6 = menu.addAction("Show Hidden Groups");
     connect(z6, SIGNAL(triggered()), SLOT(unhideFocusedGroups()));
 
-    QAction *selectedAction = menu.exec(event->globalPos());
 
 
     QMenu analysis("Cluster Analysis");
@@ -908,6 +904,8 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
     connect(zz2, SIGNAL(triggered()), treeWidget,SLOT(expandAll()));
 
     menu.addMenu(&analysis);
+
+    menu.exec(event->globalPos());
 }
 
 
@@ -1350,7 +1348,7 @@ void TableDockWidget::dropEvent(QDropEvent *event)
     }
  }
 
-int TableDockWidget::loadSpreadsheet(QString fileName){
+void TableDockWidget::loadSpreadsheet(QString fileName){
      qDebug() << "Loading SpreadSheet   : " << fileName;
 
      if( fileName.endsWith(".txt",Qt::CaseInsensitive)) {

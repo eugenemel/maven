@@ -112,7 +112,7 @@ QTreeWidgetItem* TreeDockWidget::addPeak(Peak* peak, QTreeWidgetItem* parent) {
     } else {
 	    item = new QTreeWidgetItem(parent,PeakType);
     }
-
+    return item;
 }
 
 void TreeDockWidget::keyPressEvent(QKeyEvent *e ) {
@@ -340,7 +340,7 @@ void TreeDockWidget::contextMenuEvent ( QContextMenuEvent * event )
     QAction* z0 = menu.addAction("Copy to Clipboard");
     connect(z0, SIGNAL(triggered()), this ,SLOT(copyToClipbard()));
 
-    QAction *selectedAction = menu.exec(event->globalPos());
+    menu.exec(event->globalPos());
 }
 
 

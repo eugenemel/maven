@@ -26,10 +26,10 @@ QRectF Axes::boundingRect() const
 void Axes::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 { 
 	QPen pen(Qt::black, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
-	painter->setPen(pen);
+    painter->setPen(pen);
 
-    float fontsize = 8;
-	QFont font("Helvetica",8);
+    double fontsize=8;
+    QFont font("Helvetica",fontsize);
 	painter->setFont(font);
 
     if (nticks == 0 ) nticks = 2;

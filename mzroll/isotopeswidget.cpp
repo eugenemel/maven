@@ -110,9 +110,9 @@ void IsotopeWidget::computeIsotopes(string f) {
         float parentPeakIntensity = getIsotopeIntensity(parentMass);
         QSettings* settings = _mw->getSettings();
 
-        double maxIsotopeScanDiff  = settings->value("maxIsotopeScanDiff").toDouble();
-        double minIsotopicCorrelation  = settings->value("minIsotopicCorrelation").toDouble();
-        double maxNaturalAbundanceErr  = settings->value("maxNaturalAbundanceErr").toDouble();
+        //double maxIsotopeScanDiff  = settings->value("maxIsotopeScanDiff").toDouble();
+        //double minIsotopicCorrelation  = settings->value("minIsotopicCorrelation").toDouble();
+        //double maxNaturalAbundanceErr  = settings->value("maxNaturalAbundanceErr").toDouble();
         bool C13Labeled   =  settings->value("C13Labeled").toBool();
         bool N15Labeled   =  settings->value("N15Labeled").toBool();
         bool S34Labeled   =  settings->value("S34Labeled").toBool();
@@ -125,6 +125,7 @@ void IsotopeWidget::computeIsotopes(string f) {
                 Isotope& x = isotopes[i];
 
                 float expectedAbundance    =  x.abundance;
+                double maxNaturalAbundanceErr  = settings->value("maxNaturalAbundanceErr").toDouble();
 
                 mzLink link;
                 if (  (x.C13 > 0 && C13Labeled==false)
@@ -388,7 +389,6 @@ QString IsotopeWidget::groupTextEport(PeakGroup* group) {
 
 		info << QString(group->tagString.c_str());
 		for( unsigned int j=0; j < vsamples.size(); j++) {
-			mzSample* s  = vsamples[j];
 			info << QString::number(yvalues[j], 'f', 2 );
 		}
 		return info.join("\t");

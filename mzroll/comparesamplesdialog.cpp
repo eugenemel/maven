@@ -232,8 +232,6 @@ void CompareSamplesDialog::compareSets() {
 		emit(setProgressBar("CompareSamples", i+1, allgroups.size()));
     }
 
-    float alpha = minPValue->value(); //alpha value
-
 	//calculate Pvalues
 	std::sort(rand_scores.begin(), rand_scores.end()); //sort random scores, 
 	for(int i=0; i < allgroups.size(); i++ ) {

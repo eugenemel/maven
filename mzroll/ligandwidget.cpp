@@ -101,7 +101,6 @@ QTreeWidgetItem* LigandWidget::addItem(QTreeWidgetItem* parentItem, string key ,
 }
 
 void LigandWidget::setDatabase(QString dbname) {
-   int currentIndex = databaseSelect->currentIndex();
    int index = databaseSelect->findText(dbname,Qt::MatchExactly);
    if (index != -1 ) databaseSelect->setCurrentIndex(index);
 

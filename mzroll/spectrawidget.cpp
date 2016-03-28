@@ -86,12 +86,11 @@ void SpectraWidget::setTitle() {
 
     QString title;
     if (_currentScan->sample) {
-         mzSample* sample = _currentScan->sample;
          QString sampleName = _currentScan->sample->sampleName.c_str();
          QString polarity;
          _currentScan->getPolarity() > 0 ? polarity = "Pos" : polarity = "Neg";
 
-         QColor sampleColor = QColor::fromRgbF( sample->color[0], sample->color[1], sample->color[2], 1 );
+         //QColor sampleColor = QColor::fromRgbF( sample->color[0], sample->color[1], sample->color[2], 1 );
 
          title += tr("Sample:<b>%1</b>  Scan:<b>%2</b> rt:<b>%3</b>   msLevel:<b>%4</b>  Ion:<b>%5</b>").arg(
                              QString(sampleName),
@@ -478,7 +477,7 @@ void SpectraWidget::incrementScan(int increment, int msLevel=0 ) {
 
 	Scan* newScan=sample->getScan(_currentScan->scannum+increment);
     if (msLevel != 0 && newScan && newScan->mslevel != msLevel ) {
-        for(unsigned int i=newScan->scannum; i >= 0 && i< sample->scans.size(); i+=increment ) {
+        for(unsigned int i=newScan->scannum; i< sample->scans.size(); i+=increment ) {
             newScan =sample->getScan(i);
             if ( newScan && newScan->mslevel==msLevel) break;
         }
@@ -496,7 +495,6 @@ void SpectraWidget::incrementScan(int increment, int msLevel=0 ) {
 
 
 void SpectraWidget::resizeEvent (QResizeEvent * event) {
-    QSize newsize = event->size();
     replot();
 }
 
@@ -574,9 +572,6 @@ void SpectraWidget::setMzFocus(float mz) {
     int bestMatch=-1; 
     float bestMatchDiff=FLT_MAX;
 
-	float ppm= mainwindow->getUserPPM();
-	float mzmin = mz - mz/1e6*ppm;
-	float mzmax = mz + mz/1e6*ppm;
     mzSlice eicSlice = mainwindow->getEicWidget()->getMzSlice();
 
     /*
@@ -675,7 +670,6 @@ void SpectraWidget::drawArrow(float mz1, float intensity1, float mz2, float inte
 
     int x3 = toX(_focusCoord.x());
     int y3 = toY(_focusCoord.y());
-    float mz3 = _focusCoord.x();
 
     if ( ppmDist(mz1,mz2) < 0.1 ) return;
 
@@ -809,13 +803,13 @@ void SpectraWidget::contextMenuEvent(QContextMenuEvent * event) {
 
     QAction* a4 = menu.addAction("Profile Mode");
     connect(a4, SIGNAL(triggered()), SLOT(setProfileMode()));
-    (a4, SIGNAL(triggered()), SLOT(spectraToClipboard()));
+    //connect(a4, SIGNAL(triggered()), SLOT(spectraToClipboard()));
     
     QAction* a5 = menu.addAction("Centroided Mode");
     connect(a5, SIGNAL(triggered()), SLOT(setCentroidedMode()));
         
     
-    QAction *selectedAction = menu.exec(event->globalPos());
+   menu.exec(event->globalPos());
 }
 
 void SpectraWidget::spectraToClipboard() {

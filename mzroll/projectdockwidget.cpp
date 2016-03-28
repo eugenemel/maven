@@ -315,7 +315,6 @@ void ProjectDockWidget::setInfo(vector<mzSample*>&samples) {
 void ProjectDockWidget::showSample(QTreeWidgetItem* item, int col) {
     if (item == NULL) return;
     bool checked = (item->checkState(0) != Qt::Unchecked );
-    QTreeWidgetItem* parent = item->parent();
 
     if (item->type() == SampleType ) {
         QVariant v = item->data(0,Qt::UserRole);
@@ -595,13 +594,14 @@ void ProjectDockWidget::loadProjectXML(QString fileName) {
 
 
             if (xml.name() == "sample") {
+                currentSampleCount++;
                 QString fname   = xml.attributes().value("filename").toString();
                 QString sname   = xml.attributes().value("name").toString();
                 QString setname   = xml.attributes().value("setName").toString();
                 QString sampleOrder   = xml.attributes().value("sampleOrder").toString();
                 QString isSelected   = xml.attributes().value("isSelected").toString();
                 _mainwindow->setStatusText(tr("Loading sample: %1").arg(sname));
-                _mainwindow->setProgressBar(tr("Loading Sample Number %1").arg(++currentSampleCount),currentSampleCount,currentSampleCount+1);
+                _mainwindow->setProgressBar(tr("Loading Sample Number %1").arg(currentSampleCount),currentSampleCount,currentSampleCount+1);
 
                 bool checkLoaded=false;
                 foreach(mzSample* loadedFile, _mainwindow->getSamples()) {
@@ -725,13 +725,11 @@ void ProjectDockWidget::contextMenuEvent ( QContextMenuEvent * event )
     QAction* z0 = menu.addAction("Unload Selected Sample");
     connect(z0, SIGNAL(triggered()), this ,SLOT(unloadSample()));
 
-    QAction *selectedAction = menu.exec(event->globalPos());
+    menu.exec(event->globalPos());
 }
 
 void ProjectDockWidget::keyPressEvent(QKeyEvent *e ) {
     //cerr << "TableDockWidget::keyPressEvent()" << e->key() << endl;
-
-    QTreeWidgetItem *item = _treeWidget->currentItem();
     if (e->key() == Qt::Key_Delete ) {
         unloadSample();
     }

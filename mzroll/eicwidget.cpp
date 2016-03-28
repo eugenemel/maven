@@ -752,8 +752,6 @@ void EicWidget::showPeakArea(Peak* peak) {
     if (peak == NULL ) return;
     if( peak->hasEIC()==false) return;
 
-    float rtWidth = peak->rtmax-peak->rtmin;
-
     //make sure that this is not a dead pointer to lost eic
     bool matched=false;
     EIC* eic= peak->getEIC();
@@ -991,8 +989,7 @@ void EicWidget::addBarPlot(PeakGroup* group ) {
 	_barplot->setMainWindow(getMainWindow());
 	_barplot->setPeakGroup(group);
 
-        int bwidth = _barplot->boundingRect().width();
-        int bheight = _barplot->boundingRect().height();
+    int bwidth = _barplot->boundingRect().width();
 	int xpos = scene()->width()*0.95-bwidth;
 	int ypos = scene()->height()*0.10;
 	_barplot->setPos(xpos,ypos);
@@ -1055,7 +1052,6 @@ void EicWidget::addBoxPlot(PeakGroup* group) {
 	_boxplot->setPeakGroup(group);
 
 	int bwidth =  _boxplot->boundingRect().width();
-        int bheight = _boxplot->boundingRect().height();
 
 	int xpos = scene()->width()*0.95-bwidth;
 	int ypos = scene()->height()*0.10;
@@ -1078,8 +1074,6 @@ void EicWidget::addFitLine(PeakGroup* group) {
 		if(p.hasEIC()==false) return;
 
 		float rtWidth = p.rtmax-p.rtmin;
-		float rtStep = rtWidth/steps;
-		float s = 1.00;
 
 		EIC* eic= p.getEIC();
 		vector<mzPoint>observed = eic->getIntensityVector(p);
@@ -1530,7 +1524,8 @@ void EicWidget::contextMenuEvent(QContextMenuEvent * event) {
     connect(o8, SIGNAL(toggled(bool)), SLOT(showMS2Events(bool)));
     connect(o8, SIGNAL(toggled(bool)), SLOT(replot()));
 
-    QAction *selectedAction = menu.exec(event->globalPos());
+    //QPoint pos = QWidget::mapFromParent(QCursor::pos());
+    menu.exec(event->pos());
     scene()->update();
 
 }
@@ -1570,7 +1565,6 @@ void EicWidget::eicToClipboard() {
 
 void EicWidget::selectGroupNearRt(float rt) {
  //qDebug <<"EicWidget::selectGroupNearRt(float rt) ";
-	float minDiff = FLT_MAX;
 	if ( peakgroups.size() == 0 ) return;
 
     PeakGroup* selGroup = NULL;
@@ -1717,8 +1711,6 @@ void EicWidget::addMS2Events(float mzmin, float mzmax) {
     vector <mzSample*> samples = mw->getVisibleSamples();
 
     if (samples.size() <= 0 ) return;
-    float ppm = mw->getUserPPM();
-
     mw->fragPanel->clearTree();
     int count=0;
     for ( unsigned int i=0; i < samples.size(); i++ ) {

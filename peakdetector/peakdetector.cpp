@@ -333,9 +333,7 @@ void processSlices(vector<mzSlice*>&slices, string setName) {
     //process KNOWNS
 
     startTime = time(NULL);
-    int converged=0;
     int eicCounter=0;
-    int foundGroups=0;
 
     double EICPullTime = 0.0;
     double peakGroupingTime = 0.0;
@@ -765,7 +763,6 @@ void writeCSVReport( string filename) {
     groupReport.open(filename.c_str());
     if(! groupReport.is_open()) return;
 
-    int metaGroupId=0;
     string SEP = csvFileFieldSeperator;
 
     QStringList Header;
@@ -833,7 +830,6 @@ bool isMonoisotope(PeakGroup* grp) {
     if(! highestIntensityPeak) return false;
 
     int scanum = highestIntensityPeak->scan;
-    float peakMz =highestIntensityPeak->peakMz;
     Scan* s = highestIntensityPeak->getSample()->getScan(scanum);
     return isC12Parent(s,highestIntensityPeak->peakMz);
 }
@@ -866,7 +862,7 @@ void classConsensusMS2Spectra(string filename) {
         for (int i=0; i < allgroups.size(); i++ ) {
             PeakGroup* group = &allgroups[i];
             if (group->compound == NULL) continue; //skip unassinged compounds
-            if (group->fragmentationPattern.nobs() == 0); //skip compounds without fragmentation
+            if (group->fragmentationPattern.nobs() == 0) continue; //skip compounds without fragmentation
 
             vector<string>nameParts; split(group->compound->category[0], ';',nameParts);
             if (nameParts.size() ==0) continue; //skip unassinged compound classes

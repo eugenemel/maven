@@ -24,7 +24,7 @@ class IsotopeBar : public QObject, public QGraphicsRectItem
             setAcceptHoverEvents(true);
 	}
 
-        QRectF boundingRect() {
+        QRectF boundingRect() const {
               return QGraphicsRectItem::boundingRect();
         }
 
@@ -66,8 +66,7 @@ public:
 	
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-    void contextMenuEvent(QContextMenuEvent * event);
-
+    void contextMenuEvent(QGraphicsSceneContextMenuEvent* event);
 
 private:
     float _width;

@@ -85,7 +85,7 @@ void ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId=0) {
                         srmId varchar(255),\
                         compoundId varchar(255),\
                         compoundName varchar(255),\
-						compoundDB varchar(255)\ 
+                        compoundDB varchar(255)\
                         )"))  qDebug() << query0.lastError();
 
      //cerr << "inserting .. " << g->groupId << endl;
@@ -129,7 +129,7 @@ void ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId=0) {
 					rtmax float, \
 					mzmin float, \
 					mzmax float, \
-					scan int,	\ 
+                    scan int,	\
 					minscan int, \
 					maxscan int,\
 					peakArea float,\

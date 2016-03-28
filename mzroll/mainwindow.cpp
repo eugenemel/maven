@@ -255,8 +255,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
                 "Woops.. did the program crash last time? Would you like to report a bug?");
     } 
 
-    versionCheck();
-
     settings->setValue("closeEvent", 0 );
 }
 
@@ -409,7 +407,6 @@ void MainWindow::hideDockWidgets() {
     for (int i = 0; i < dockWidgets.size(); i++) {
         dockWidgets[i]->hide();
     }
-    QWidget* menu = QMainWindow::menuWidget();
 }
 
 void MainWindow::showDockWidgets() {
@@ -1626,7 +1623,6 @@ void MainWindow::markGroup(PeakGroup* group, char label) {
     //getPlotWidget()->scene()->update();
 }
 
-int MainWindow::versionCheck() {}
 
 MatrixXf MainWindow::getIsotopicMatrix(PeakGroup* group) {
 

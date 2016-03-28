@@ -116,7 +116,7 @@ void Database::loadCompoundsSQL() {
             compound->smileString=  query.value("smileString").toDouble();
 
             //mark compound as decoy if names contains DECOY string
-            if(compound->name.find("DECOY") > 0) compound->isDecoy;
+            if(compound->name.find("DECOY") > 0) compound->isDecoy=true;
 
             for(QString f: query.value("category").toString().split(";") ) {
                 compound->category.push_back(f.toStdString());
@@ -294,7 +294,7 @@ vector<Adduct*> Database::loadAdducts(string filename) {
     vector<Adduct*> adducts;
     ifstream myfile(filename.c_str());
 
-    if (! myfile.is_open()) adducts;
+    if (! myfile.is_open()) return adducts;
 
     string line;
     while ( getline(myfile,line) ) {

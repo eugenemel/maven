@@ -189,7 +189,6 @@ void HeatMap::mousePressEvent(QMouseEvent *event) {
 }
 
 void HeatMap::resizeEvent ( QResizeEvent * event ) {
-      QSize newsize = event->size();
 	  update();
 }
 

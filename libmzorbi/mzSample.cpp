@@ -70,7 +70,7 @@ void mzSample::addScan(Scan*s ) {
 }
 
 string mzSample::cleanSampleName(string sampleName) {
-        unsigned int pos =sampleName.find_last_of("/");
+        size_t pos =sampleName.find_last_of("/");
         if (pos != std::string::npos) {
                 sampleName=sampleName.substr(pos+1, sampleName.length());
         }

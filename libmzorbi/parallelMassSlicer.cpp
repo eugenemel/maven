@@ -50,7 +50,7 @@ void ParallelMassSlicer::algorithmB(float userPPM, float minIntensity, int rtSte
 	for(unsigned int i=0; i < samples.size(); i++) {
 		//if (slices.size() > _maxSlices) break;
 		//
-		Scan* lastScan = NULL;
+        //Scan* lastScan = NULL;
 		cerr << "#algorithmB:" << samples[i]->sampleName << endl;
 
 		for(unsigned int j=0; j < samples[i]->scans.size(); j++ ) {

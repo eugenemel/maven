@@ -40,7 +40,7 @@ protected:
     void mousePressEvent( QGraphicsSceneMouseEvent * event);
 	void mouseDoubleClickEvent (QGraphicsSceneMouseEvent* event);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-	void contextMenuEvent ( QGraphicsSceneMouseEvent * event );
+    void contextMenuEvent ( QGraphicsSceneContextMenuEvent* event );
 	void keyPressEvent(QKeyEvent *event);
     
 private:

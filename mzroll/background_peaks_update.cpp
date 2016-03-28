@@ -126,11 +126,6 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
     for (unsigned int s=0; s < slices.size();  s++ ) {
         mzSlice* slice = slices[s];
-        double mzmin = slice->mzmin;
-        double mzmax = slice->mzmax;
-        double rtmin = slice->rtmin;
-        double rtmax = slice->rtmax;;
-
         Compound* compound = slice->compound;
 
         if ( compound != NULL && compound->hasGroup() )

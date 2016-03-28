@@ -129,7 +129,6 @@ public:
 
     PeakGroup::QType getUserQuantType();
 
-    int versionCheck();
     bool isSampleFileType(QString filename);
     bool isProjectFileType(QString filename);
 

@@ -125,7 +125,7 @@ void IsotopePlot::showBars() {
 }
 
 
-void IsotopePlot::contextMenuEvent(QContextMenuEvent * event) {
+void IsotopePlot::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     QMenu menu;
 
     SettingsForm* settingsForm = _mw->settingsForm;
@@ -134,7 +134,8 @@ void IsotopePlot::contextMenuEvent(QContextMenuEvent * event) {
     connect(d, SIGNAL(triggered()), settingsForm, SLOT(showIsotopeDetectionTab()));
     connect(d, SIGNAL(triggered()), settingsForm, SLOT(show()));
 
-    menu.exec(event->globalPos());
+    QPoint pos = QCursor::pos();
+    menu.exec(pos);
 
 }
 

@@ -279,6 +279,7 @@ vector<MassCalculator::Match> MassCalculator::enumerateMasses(double inputMass, 
         }
     }
     std::sort(matches.begin(), matches.end(), compDiff );
+    return matches;
 }
 
 std::string MassCalculator::prettyName(int c, int h, int n, int o, int p, int s) { 

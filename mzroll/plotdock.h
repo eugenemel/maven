@@ -138,7 +138,7 @@ class PlotDockWidget: public QDockWidget {
                                 void contextMenuEvent(QContextMenuEvent * event);
 
 				void drawAxes();
-				void resizeEvent ( QResizeEvent *event );
+                void resizeEvent (QResizeEvent *);
                                 // void mousePressEvent(QMouseEvent *event);
 				void keyPressEvent(QKeyEvent *event);
 

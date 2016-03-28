@@ -81,7 +81,7 @@ public slots:
           void clusterGroups();
 	  void findMatchingCompounds();
 	  void filterPeakTable();
-          int loadSpreadsheet(QString fileName);
+          void loadSpreadsheet(QString fileName);
           int loadCSVFile(QString filename, QString sep);
           void switchTableView();
           void clearClusters();
