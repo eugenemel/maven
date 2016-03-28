@@ -212,11 +212,20 @@ void SpectraWidget::clearOverlay() {
     _showOverlay=false;
 }
 
+void SpectraWidget::overlayPeakGroup(PeakGroup* group) {
+    if(!group) return;
+    Scan* avgScan = group->getAverageFragmenationScan(20);
+    setScan(avgScan);
+    if (group->compound)  overlayCompound(group->compound);
+    delete(avgScan);
+}
+
 void SpectraWidget::overlayCompound(Compound* c) {
    if(!_currentScan) return;
    if(!c or c->fragment_mzs.size() == 0 ) { clearOverlay(); return; }
 
    SpectralHit hit;
+   hit.compoundId = c->name.c_str();
    hit.scan = _currentScan;
    hit.precursorMz = c->precursorMz;
    hit.productPPM=20;
@@ -243,6 +252,14 @@ void SpectraWidget::drawSpectalHitLines(SpectralHit& hit) {
     graypen.setStyle(Qt::DashDotLine);
 
     float SCALE=0.45;
+
+    //create label
+    QGraphicsTextItem* text = new QGraphicsTextItem(hit.compoundId);
+    text->setFont(_title->font());
+    text->setPos(_title->pos().x(),toY(_maxY*0.95,SCALE));
+    scene()->addItem(text);
+    _items.push_back(text);
+
 
     for(int i=0; i < hit.mzList.size(); i++) {
         float hitMz=hit.mzList[i];
@@ -401,7 +418,6 @@ void SpectraWidget::drawGraph() {
 
     if(_showOverlay and _spectralHit.mzList.size()>0) {
         drawSpectalHitLines(_spectralHit);
-        //overlaySpectra(_spectralHit.mzList, _spectralHit.intensityList);
     }
 
     addAxes();

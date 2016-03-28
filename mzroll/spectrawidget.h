@@ -32,6 +32,7 @@ public slots:
                     void spectraToClipboardTop();
                     void overlaySpectralHit(SpectralHit& hit);
                     void overlayCompound(Compound* c);
+                    void overlayPeakGroup(PeakGroup* group);
                     void resetZoom();
                     void zoomIn();
                     void zoomOut();

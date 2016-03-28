@@ -9,12 +9,13 @@ cd $BUILD
 
 #clean up
 rm -rf $BUILD/bin/Maven.app $BUILD/bin/Maven.dmg
+rm -rf $BUILD/bin/peakdetector.app
 
 #update Makefile
 $QTBIN/qmake -r
 #make
 make clean
-make -j4
+make -j10
 
 #copy support files
 cd $BUILD/bin

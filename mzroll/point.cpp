@@ -30,6 +30,7 @@ EicPoint::EicPoint(float x, float y, Peak* peak, MainWindow* mw)
          connect(this, SIGNAL(peakGroupFocus(PeakGroup*)), mw->getEicWidget(), SLOT(setSelectedGroup(PeakGroup*)));
          connect(this, SIGNAL(peakGroupFocus(PeakGroup*)), mw->getEicWidget()->scene(), SLOT(update()));
          connect(this, SIGNAL(peakGroupSelected(PeakGroup*)), mw->massCalcWidget, SLOT(setPeakGroup(PeakGroup*)));
+         connect(this, SIGNAL(peakGroupSelected(PeakGroup*)), mw->fragmenationSpectraWidget, SLOT(overlayPeakGroup(PeakGroup*)));
     }
 
 }

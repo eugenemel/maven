@@ -39,8 +39,10 @@ void CSVReports::openGroupReport(string outputfile) {
                         << "fragFracMatched"
                         << "ticMatched"
                         << "dotProduct"
-                        << "mzFragError"
-                        << "spearmanRankCorrelation";
+                        << "weigtedDotProduct"
+                        << "hyperGeomScore"
+                        << "spearmanRankCorrelation"
+                        << "mzFragError";
 
     for(unsigned int i=0; i< samples.size(); i++) { Header << samples[i]->sampleName.c_str(); }
 
@@ -130,8 +132,10 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
     groupReport << SEP << group->fragMatchScore.fractionMatched;
     groupReport << SEP << group->fragMatchScore.ticMatched;
     groupReport << SEP << group->fragMatchScore.dotProduct;
-    groupReport << SEP << group->fragMatchScore.mzFragError;
+    groupReport << SEP << group->fragMatchScore.weightedDotProduct;
+    groupReport << SEP << group->fragMatchScore.hypergeomScore;
     groupReport << SEP << group->fragMatchScore.spearmanRankCorrelation;
+    groupReport << SEP << group->fragMatchScore.mzFragError;
 
     for( unsigned int j=0; j < samples.size(); j++) groupReport << SEP <<  yvalues[j];
     groupReport << endl;

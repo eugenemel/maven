@@ -393,11 +393,16 @@ void MainWindow::setCompoundFocus(Compound*c) {
 
     float mz = c->mass;
     if (!c->formula.empty() && charge) mz = c->ajustedMass(charge);
-
+    if (eicWidget->isVisible() && samples.size() > 0 )  eicWidget->setCompound(c);
     if (isotopeWidget && isotopeWidget->isVisible() ) isotopeWidget->setCompound(c);
     if (massCalcWidget && massCalcWidget->isVisible() )  massCalcWidget->setMass(mz);
-    if (eicWidget->isVisible() && samples.size() > 0 )  eicWidget->setCompound(c);
-    if (fragmenationSpectraWidget->isVisible())  fragmenationSpectraWidget->overlayCompound(c);
+
+    //show fragmentation
+    if (fragmenationSpectraWidget->isVisible())  {
+        PeakGroup* group = eicWidget->getSelectedGroup();
+        fragmenationSpectraWidget->overlayPeakGroup(group);
+    }
+
     if (c) setUrl(c);
 }
 
@@ -1077,10 +1082,7 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
     }
 
     if(fragmenationSpectraWidget->isVisible()) {
-        Scan* avgScan = group->getAverageFragmenationScan(20);
-        fragmenationSpectraWidget->setScan(avgScan);
-        fragmenationSpectraWidget->overlayCompound(group->compound);
-        delete(avgScan);
+        fragmenationSpectraWidget->overlayPeakGroup(group);
     }
 
     if (massCalcWidget->isVisible()) { massCalcWidget->setPeakGroup(group); }

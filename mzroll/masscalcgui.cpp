@@ -139,7 +139,7 @@ void MassCalcWidget::keggLink(QString formula){
 
 void MassCalcWidget::showCellInfo(int row, int col, int lrow, int lcol) {
 
-    int mNum = row-1; //header row
+    int mNum = row; //header row
     if (matches.size() == 0 or mNum<0 or mNum>matches.size()) return;
 
     MassCalculator::Match m = matches[mNum];
