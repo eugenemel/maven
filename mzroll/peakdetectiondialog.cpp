@@ -136,6 +136,7 @@ void PeakDetectionDialog::findPeaks() {
         peakupdater->scoringScheme  = fragScoringAlgorithm->currentText();
         peakupdater->minFragmentMatchScore = fragMinScore->value();
         peakupdater->minNumFragments = fragMinPeaks->value();
+        peakupdater->searchAdductsFlag = reportAdducts->isChecked();
 
 
         if ( ! outputDirName->text().isEmpty()) {

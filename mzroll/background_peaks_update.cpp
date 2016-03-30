@@ -10,6 +10,7 @@ BackgroundPeakUpdate::BackgroundPeakUpdate(QWidget*) {
     alignSamplesFlag=false;
     processMassSlicesFlag=false;
     pullIsotopesFlag=false;
+    searchAdductsFlag=false;
     matchRtFlag=false;
     checkConvergance=false;
 
@@ -185,7 +186,14 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
                 group.ms2EventCount = ms2events.size();
             }
 
-            if (mustHaveMS2 and group.ms2EventCount == 0 ) continue;
+            matchFragmentation(&group);
+
+            if(mustHaveMS2) {
+                if(group.ms2EventCount == 0) continue;
+                if(group.fragMatchScore.mergedScore < this->minFragmentMatchScore) continue;
+
+            }
+
             if (compound) group.compound = compound;
             if (!slice->srmId.empty()) group.srmId = slice->srmId;
 
@@ -200,7 +208,6 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             groupsToAppend.push_back(&group);
         }
-
 
         std::sort(groupsToAppend.begin(), groupsToAppend.end(),PeakGroup::compRankPtr);
 
@@ -235,9 +242,6 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         aligner.setPolymialDegree(mainwindow->alignmentDialog->polynomialDegree->value());
         aligner.doAlignment(groups);
     }
-
-    //match MS2 spectra
-    matchFragmentation();
 
     //run clustering
     double maxRtDiff = 0.2;
@@ -313,54 +317,69 @@ void BackgroundPeakUpdate::cleanup() {
 void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setName) { 
     if (set.size() == 0 ) return;
 
-    limitGroupCount=INT_MAX; //must not be active when processing compounds
-
     vector<mzSlice*>slices;
-    for (unsigned int i=0; i < set.size();  i++ ) {
-        Compound* c = set[i];
+    MassCalculator massCalc;
+    emit (updateProgressBar( "Computing Mass Slices", 1, 10 ));
+
+
+    vector<Adduct*> adductList;
+    if (ionizationMode > 0) adductList.push_back(MassCalculator::PlusHAdduct);
+    else if (ionizationMode < 0) adductList.push_back(MassCalculator::MinusHAdduct);
+    else adductList.push_back(MassCalculator::ZeroMassAdduct);
+
+    //search all adducts
+    if (searchAdductsFlag) adductList = DB.adductsDB;
+
+    for (Compound* c: set) {
         if ( c == NULL ) continue;
 
-        mzSlice* slice = new mzSlice();
-        slice->compound = c;
+        float M0 =  c->mass;
+        if (!c->formula.empty())  M0 = massCalc.computeNeutralMass(c->formula);
+        if (M0 <= 0) continue;
 
-        if (!c->srmId.empty()) slice->srmId=c->srmId;
+        for(Adduct* a: adductList) {
+            if (SIGN(a->charge) != SIGN(ionizationMode)) continue;
 
-        if (!c->formula.empty()) {
-            slice->mz = mcalc.computeMass(c->formula,ionizationMode);
-        } else if (c->mass > 0 ) {
-            slice->mz = c->mass;
-        } else {
-            continue;
-        }
+             mzSlice* slice = new mzSlice();
+             slice->mz = a->computeAdductMass(M0);
+             slice->compound = c;
+             slice->adduct   = a;
+             slice->mzmin = slice->mz - compoundPPMWindow * slice->mz/1e6;
+             slice->mzmax = slice->mz + compoundPPMWindow * slice->mz/1e6;
+             slice->rtmin = 0;
+             slice->rtmax = 1e9;
+             if (!c->srmId.empty()) slice->srmId=c->srmId;
 
-        slice->mzmin = slice->mz - compoundPPMWindow * slice->mz/1e6;
-        slice->mzmax = slice->mz + compoundPPMWindow * slice->mz/1e6;
+            if (matchRtFlag && c->expectedRt > 0 ) {
+                slice->rtmin = c->expectedRt-compoundRTWindow;
+                slice->rtmax = c->expectedRt+compoundRTWindow;
+            } else {
+                slice->rtmin = 0;
+                slice->rtmax = 1e9;
+            }
 
-        if (matchRtFlag && c->expectedRt > 0 ) {
-            slice->rtmin = c->expectedRt-compoundRTWindow;
-            slice->rtmax = c->expectedRt+compoundRTWindow;
-        } else {
-            slice->rtmin = 0;
-            slice->rtmax = 1e9;
-        }
-
-        //check if slice has ms2events
-        if (mustHaveMS2) {
-            bool hasMS2=false;
-            for(mzSample* sample: samples) {
-                if(sample->getFragmenationEvents(slice).size() > 0 ) {
-                    hasMS2=true; break;
+            if(mustHaveMS2) {
+                if (not sliceHasMS2Event(slice)) {
+                    delete(slice);
+                    continue;
                 }
             }
-            if(hasMS2 == false) continue;
-        }
 
-        slices.push_back(slice);
+            slices.push_back(slice);
+        }
     }
 
     //printSettings();
     processSlices(slices,setName);
     delete_all(slices);
+}
+
+bool BackgroundPeakUpdate::sliceHasMS2Event(mzSlice* slice) {
+    //check if slice has ms2events
+    for(mzSample* sample: samples) {
+        if(sample->getFragmenationEvents(slice).size() > 0 ) return true;
+    }
+   return false;
 }
 
 void BackgroundPeakUpdate::setSamples(vector<mzSample*>&set){ 
@@ -701,58 +720,55 @@ void BackgroundPeakUpdate::printSettings() {
     cerr << "#compoundRTWindow=" << compoundRTWindow << endl;
 }
 
-void BackgroundPeakUpdate::matchFragmentation() {
-        if(DB.compoundsDB.size() == 0) return;
+void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g) {
+    if(DB.compoundsDB.size() == 0) return;
+    if(g->ms2EventCount == 0) return;
 
-        for (unsigned int i=0; i< allgroups.size(); i++) {
-            PeakGroup* g = &allgroups[i];
-            if(g->ms2EventCount == 0) continue;
+    vector<MassCalculator::Match>matchesX = DB.findMathchingCompounds(g->meanMz,compoundPPMWindow,ionizationMode);
 
-            vector<MassCalculator::Match>matchesX = DB.findMathchingCompounds(g->meanMz,compoundPPMWindow,ionizationMode);
+    //g->fragmentationPattern.printFragment(productPpmTolr,10);
+    MassCalculator::Match bestMatch;
 
-            //g->fragmentationPattern.printFragment(productPpmTolr,10);
-            Adduct* adduct=0;
-            Compound* bestHit=0;
-            FragmentationMatchScore bestScore;
+    for(MassCalculator::Match match: matchesX ) {
+        Compound* cpd = match.compoundLink;
+        if(!compoundDatabase.isEmpty() and  cpd->db != compoundDatabase.toStdString()) continue;
 
-            for(MassCalculator::Match m: matchesX ) {
-                Compound* cpd = m.compoundLink;
-                if(!compoundDatabase.isEmpty() and  cpd->db != compoundDatabase.toStdString()) continue;
+        FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productPpmTolr,true);
+        if (s.numMatches < minNumFragments ) continue;
 
-                FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productPpmTolr,true);
+        if (scoringScheme == "HyperGeomScore" ) {
+            s.mergedScore = s.hypergeomScore;
+        } else if (scoringScheme == "DotProduct") {
+            s.mergedScore = s.dotProduct;
+        } else if (scoringScheme == "SpearmanRank") {
+            s.mergedScore = s.spearmanRankCorrelation;
+        } else if (scoringScheme == "TICMatched") {
+            s.mergedScore = s.ticMatched;
+        } else if (scoringScheme == "WeightedDotProduct" ){
+            s.mergedScore = s.weightedDotProduct;
+        } else{
+            s.mergedScore = s.hypergeomScore;
+        }
+        // qDebug() << "scoring=" << scoringScheme << " " << s.mergedScore;
+        s.ppmError = match.diff;
 
-                if (scoringScheme == "HyperGeomScore" ) {
-                    s.mergedScore = s.hypergeomScore;
-                } else if (scoringScheme == "DotProduct") {
-                    s.mergedScore = s.dotProduct;
-                } else if (scoringScheme == "SpearmanRank") {
-                    s.mergedScore = s.spearmanRankCorrelation;
-                } else if (scoringScheme == "TICMatched") {
-                    s.mergedScore = s.ticMatched;
-                } else if (scoringScheme == "WeightedDotProduct" ){
-                    s.mergedScore = s.weightedDotProduct;
-                } else{
-                    s.mergedScore = s.hypergeomScore;
-                }
-                qDebug() << "scoring=" << scoringScheme << " " << s.mergedScore;
-                s.ppmError = m.diff;
+        //cerr << "\t"; cerr << cpd->name << "\t" << cpd->precursorMz << "\tppmDiff=" << m.diff << "\t num=" << s.numMatches << "\t tic" << s.ticMatched <<  " s=" << s.spearmanRankCorrelation << endl;
 
-                if (s.numMatches < minNumFragments ) continue;
-                //cerr << "\t"; cerr << cpd->name << "\t" << cpd->precursorMz << "\tppmDiff=" << m.diff << "\t num=" << s.numMatches << "\t tic" << s.ticMatched <<  " s=" << s.spearmanRankCorrelation << endl;
+        match.fragScore = s;
+        if (match.fragScore.mergedScore > bestMatch.fragScore.mergedScore ) {
+            bestMatch = match;
+            bestMatch.adductLink = match.adductLink;
+            bestMatch.compoundLink = match.compoundLink;
+        }
+    }
 
-                if (s.mergedScore > minFragmentMatchScore and s.mergedScore > bestScore.mergedScore ) {
-                    bestScore = s;
-                    bestHit = cpd;
-                    adduct =  m.adductLink;
-                }
-            }
+    if (bestMatch.fragScore.mergedScore > 0) {
+        g->compound = bestMatch.compoundLink;
+        g->adduct  =  bestMatch.adductLink;
+        g->fragMatchScore = bestMatch.fragScore;
 
-            if (bestHit) {
-                g->compound = bestHit;
-                g->adduct  = adduct;
-                if (adduct) g->tagString = adduct->name;
-                g->fragMatchScore = bestScore;
-                /*
+        if (g->adduct) g->tagString = g->adduct->name;
+        /*
                 cerr << "\t BESTHIT"
                      << setprecision(6)
                      << g->meanMz << "\t"
@@ -764,6 +780,5 @@ void BackgroundPeakUpdate::matchFragmentation() {
                      << bestScore.ticMatched << endl;
                 */
 
-            }
-       }
+    }
 }

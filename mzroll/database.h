@@ -18,7 +18,9 @@
 class Database {
 
     public:
-        Database(){ _connected = false; };
+        Database() {
+            //empty constructor
+        }
 
         Database(QString filename) {
             connect(filename);
@@ -65,18 +67,17 @@ class Database {
 		void loadRetentionTimes(QString method);
 		void saveRetentionTime(Compound* c, float rt, QString method);
 
-		void saveValidation(Peak* p);
+        void saveValidation(Peak* p);
 
         vector<Adduct*> adductsDB;
         vector<Adduct*> fragmentsDB;
-
         vector<Compound*> compoundsDB;
-        QMap<string,Compound*> compoundIdMap;
+
 
       private:
 		QSqlDatabase ligandDB;
-        bool _connected;
-    
+        QMap<string,Compound*> compoundIdMap;
+
 };
 
 

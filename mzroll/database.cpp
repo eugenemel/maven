@@ -123,11 +123,15 @@ void Database::loadCompoundsSQL() {
             }
 
             for(QString f: query.value("fragment_mzs").toString().split(";") ) {
-                compound->fragment_mzs.push_back(f.toDouble());
+                if(f.toDouble()) {
+                    compound->fragment_mzs.push_back(f.toDouble());
+                }
             }
 
             for(QString f: query.value("fragment_intensity").toString().split(";") ) {
-                compound->fragment_intensity.push_back(f.toDouble());
+                if(f.toDouble()) {
+                    compound->fragment_intensity.push_back(f.toDouble());
+                }
             }
 
             compoundIdMap[compound->id + compound->db]=compound;
@@ -312,13 +316,7 @@ vector<Adduct*> Database::loadAdducts(string filename) {
         float mass=string2float(fields[3]);
 
         if ( name.empty() || nmol < 0 ) continue;
-        Adduct* a = new Adduct();
-        a->nmol = nmol;
-        a->name = name;
-        a->mass = mass;
-        a->charge = charge;
-        a->isParent = false;
-        if (abs(abs(a->mass)-HMASS)< 0.01) a->isParent=true;
+        Adduct* a = new Adduct(name,mass,charge,nmol);
         adducts.push_back(a);
     }
     cerr << "loadAdducts() " << filename << " count=" << adducts.size() << endl;
@@ -393,7 +391,7 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
         if ( header.count("id")&& header["id"]<N) 	 id = fields[ header["id"] ];
         if ( header.count("name")&& header["name"]<N) 	 name = fields[ header["name"] ];
         if ( header.count("compound")&& header["compound"]<N) 	 name = fields[ header["compound"] ];
-        if ( header.count("smile")&& header["smile"]<N) 	 name = fields[ header["smile"] ];
+        if ( header.count("smile")&& header["smile"]<N) 	 smile = fields[ header["smile"] ];
         if ( header.count("logp")&& header["logp"]<N) 	 logP = string2float(fields[ header["logp"] ]);
 
         if ( header.count("precursormz") && header["precursormz"]<N) precursormz=string2float(fields[ header["precursormz"]]);

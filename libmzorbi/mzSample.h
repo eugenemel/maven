@@ -14,6 +14,7 @@
 #include  <float.h>
 #include <iomanip>
 #include "assert.h"
+
 #include "pugixml.hpp"
 #include "base64.h"
 #include "statistics.h"
@@ -140,13 +141,13 @@ class Scan {
 
 class mzSlice { 
     public:
-        mzSlice(float a, float b, float c, float d) { mzmin= a; mzmax=b; rtmin=c; rtmax=d; mz=a+(b-a)/2; rt=c+(d-c)/2; compound=NULL; ionCount=0; }
-        mzSlice(float a, float b, float c ) {  mz=mzmin=mzmax=a; rt=rtmin=rtmax=b; ionCount=c;  compound=NULL; ionCount=0;}
-	mzSlice(string filterLine) { mzmin=mzmax=rtmin=rtmax=mz=rt=ionCount=0; compound=NULL; srmId=filterLine; }
-        mzSlice() { mzmin=mzmax=rtmin=rtmax=mz=rt=ionCount=0; compound=NULL; }
-	mzSlice(const mzSlice& b) { mzmin=b.mzmin; mzmax=b.mzmax; rtmin=b.rtmin; rtmax=b.rtmax; ionCount=b.ionCount; mz=b.mz; rt=b.rt; compound=b.compound; srmId=b.srmId; }
-	mzSlice& operator= (const mzSlice& b) { mzmin=b.mzmin; mzmax=b.mzmax; rtmin=b.rtmin; rtmax=b.rtmax; ionCount=b.ionCount;
-				compound=b.compound; srmId=b.srmId; mz=b.mz; rt=b.rt; return *this; }
+
+    mzSlice(float mzmin, float mzmax, float rtmin, float rtmax) { this->mzmin=mzmin; this->mzmax=mzmax; this->rtmin=rtmin; this->rtmax=rtmax; this->mz=mzmin+(mzmax-mzmin)/2; this->rt=rtmin+(rtmax-rtmin)/2; compound=NULL; adduct=NULL, ionCount=0; }
+    mzSlice(float mz, float rt, float ions) {  this->mz=this->mzmin=this->mzmax=mz; this->rt=this->rtmin=this->rtmax=rt; this->ionCount=ions;  compound=NULL; adduct=NULL, ionCount=0; }
+    mzSlice(string filterLine) { mzmin=mzmax=rtmin=rtmax=mz=rt=ionCount=0; compound=NULL; adduct=NULL,srmId=filterLine; }
+    mzSlice() { mzmin=mzmax=rtmin=rtmax=mz=rt=ionCount=0; compound=NULL; adduct=NULL; }
+    mzSlice(const mzSlice& b) { mzmin=b.mzmin; mzmax=b.mzmax; rtmin=b.rtmin; rtmax=b.rtmax; ionCount=b.ionCount; mz=b.mz; rt=b.rt; compound=b.compound; adduct=b.adduct; srmId=b.srmId; }
+    mzSlice& operator= (const mzSlice& b) { mzmin=b.mzmin; mzmax=b.mzmax; rtmin=b.rtmin; rtmax=b.rtmax; ionCount=b.ionCount; compound=b.compound; adduct=b.adduct; srmId=b.srmId; mz=b.mz; rt=b.rt; return *this; }
 
         float mzmin;
         float mzmax;
@@ -156,6 +157,8 @@ class mzSlice {
         float rt;
         float ionCount;
         Compound* compound;
+        Adduct*   adduct;
+
 	string srmId;
 
 	static bool compIntensity(const mzSlice* a, const mzSlice* b ) { return b->ionCount < a->ionCount; }
@@ -714,12 +717,16 @@ public:
 class Adduct { 
 
 	public:
-		Adduct(){ isParent=false; mass=0; charge=1; nmol=1; }
-		string name;
+        Adduct(){ mass=0; charge=1; nmol=1; }
+
+        Adduct(string name, float mass, int charge, int nmol){
+            this->name=name; this->mass=mass; this->charge=charge; this->nmol=nmol;
+        }
+
+        string name;
 		int	  nmol;
 		float mass;
 		float charge;
-		bool isParent;
 		
         //given adduct mass compute parent ion mass
 		inline float computeParentMass(float mz)  { return  (mz*abs(charge)-mass)/nmol; }

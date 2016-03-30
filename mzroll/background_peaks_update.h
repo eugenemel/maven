@@ -40,6 +40,7 @@ public:
   bool keepFoundGroups;
   bool processMassSlicesFlag;
   bool pullIsotopesFlag;
+  bool searchAdductsFlag;
   bool showProgressFlag;
   bool matchRtFlag;
   bool checkConvergance;
@@ -135,7 +136,8 @@ private:
   vector<PeakGroup>allgroups;
   void cleanup();
   void printSettings();
-  void matchFragmentation();
+  void matchFragmentation(PeakGroup* g);
+  bool sliceHasMS2Event(mzSlice* slice);
 
   private:
   volatile bool _stopped;

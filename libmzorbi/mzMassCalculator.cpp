@@ -28,6 +28,9 @@ aaLookup["W"] = 186.07931;
 */
 
 MassCalculator::IonizationType MassCalculator::ionizationType = MassCalculator::ESI;
+Adduct* MassCalculator::PlusHAdduct  = new Adduct("[M-H]+",  PROTON , 1, 1);
+Adduct* MassCalculator::MinusHAdduct = new Adduct("[M-H]-", -PROTON, -1, 1);
+Adduct* MassCalculator::ZeroMassAdduct = new Adduct("[M]",0 ,1, 1);
 
 /*---------- function to get molar weight of an element or group --------*/
 double MassCalculator::getElementMass(string elmnt){

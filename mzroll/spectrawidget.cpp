@@ -1,6 +1,5 @@
 #include "spectrawidget.h"
 
-
 SpectraWidget::SpectraWidget(MainWindow* mw) { 
     this->mainwindow = mw;
    _currentScan = NULL;
@@ -216,20 +215,61 @@ void SpectraWidget::overlayPeakGroup(PeakGroup* group) {
     if(!group) return;
     Scan* avgScan = group->getAverageFragmenationScan(20);
     setScan(avgScan);
-    if (group->compound)  overlayCompound(group->compound);
+    if (group->compound)  {
+        if(group->compound->fragment_mzs.size()) overlayCompound(group->compound);
+        else if (!group->compound->smileString.empty()) overlayTheoreticalSpectra(group->compound);
+        else  overlayCompound(group->compound);
+    }
     delete(avgScan);
 }
 
+void SpectraWidget::overlayTheoreticalSpectra(Compound* c) {
+   if(!c or c->smileString.empty()) return;
+
+   SpectralHit hit;
+   hit.compoundId = "THEORY: "; hit.compoundId += c->name.c_str();
+   hit.scan = _currentScan;
+   hit.precursorMz = c->precursorMz;
+   hit.productPPM=100;
+
+    BondBreaker bb;
+    bb.breakCarbonBonds(true);
+    bb.breakDoubleBonds(true);
+    bb.setMinMW(70);
+    bb.setSmile(c->smileString);
+    map<string,double> fragments = bb.getFragments();
+
+    for(auto& pair: fragments) {
+        qDebug() << "Ah:" << pair.second;
+        hit.mzList.push_back(pair.second);
+        hit.intensityList.push_back(1000);
+
+        hit.mzList.push_back(pair.second-PROTON);
+        hit.intensityList.push_back(800);
+
+        hit.mzList.push_back(pair.second+PROTON);
+        hit.intensityList.push_back(800);
+    }
+
+    _showOverlay = true;
+    overlaySpectralHit(hit);
+}
+
 void SpectraWidget::overlayCompound(Compound* c) {
-   if(!_currentScan) return;
-   if(!c or c->fragment_mzs.size() == 0 ) { clearOverlay(); return; }
+   clearOverlay();
+   if(!_currentScan or !c) return;
+
+   if(c->fragment_mzs.size() == 0 ) {
+       overlayTheoreticalSpectra(c);
+       return;
+   }
 
    SpectralHit hit;
    hit.compoundId = c->name.c_str();
    hit.scan = _currentScan;
    hit.precursorMz = c->precursorMz;
    hit.productPPM=20;
-   cerr << "overlayCompound() " << c->name << endl;
+   cerr << "overlayCompound() " << c->name << " #fragments=" << c->fragment_mzs.size() << endl;
 
    for(int i=0; i < c->fragment_mzs.size(); i++) 	   hit.mzList << c->fragment_mzs[i];
    for(int i=0; i < c->fragment_intensity.size(); i++) hit.intensityList << c->fragment_intensity[i];
@@ -247,7 +287,8 @@ void SpectraWidget::drawSpectalHitLines(SpectralHit& hit) {
     float ppmWindow =    hit.productPPM;
     double maxIntensity= hit.getMaxIntensity();
 
-    QPen redpen(Qt::red,2);
+    QPen redpen(Qt::red,1);
+    QPen bluepen(Qt::blue,2);
     QPen graypen(Qt::gray,1);
     graypen.setStyle(Qt::DashDotLine);
 
@@ -271,7 +312,7 @@ void SpectraWidget::drawSpectalHitLines(SpectralHit& hit) {
         int y = toY(hitIntensity/maxIntensity*_maxY,SCALE);
 
         QGraphicsLineItem* line = new QGraphicsLineItem(x,y,x,toY(0),0);
-        line->setPen(redpen);
+        pos > 0 ?  line->setPen(bluepen) : line->setPen(redpen);
         scene()->addItem(line);
         _items.push_back(line);
 

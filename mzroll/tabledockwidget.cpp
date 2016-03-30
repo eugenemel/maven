@@ -561,7 +561,7 @@ QList<PeakGroup*> TableDockWidget::getSelectedGroups() {
     QList<PeakGroup*> selectedGroups;
     foreach(QTreeWidgetItem* item, treeWidget->selectedItems() ) {
         if (item) {
-            QVariant v = item->data(0,Qt::UserRole);
+            QVariant v = item->data(0,PeakGroupType);
             PeakGroup*  group =  v.value<PeakGroup*>();
             if ( group != NULL ) { selectedGroups.append(group); }
         }
@@ -572,8 +572,12 @@ QList<PeakGroup*> TableDockWidget::getSelectedGroups() {
 PeakGroup* TableDockWidget::getSelectedGroup() { 
     QTreeWidgetItem *item = treeWidget->currentItem();
     if (!item) return NULL;
-    QVariant v = item->data(0,Qt::UserRole);
+    qDebug() << "B" << endl;
+
+    QVariant v = item->data(0,PeakGroupType);
     PeakGroup*  group =  v.value<PeakGroup*>();
+
+    qDebug() << "C" << group;
     if ( group != NULL ) { return group; }
     return NULL;
 }
@@ -581,7 +585,7 @@ PeakGroup* TableDockWidget::getSelectedGroup() {
 void TableDockWidget::setGroupLabel(char label) {
     foreach(QTreeWidgetItem* item, treeWidget->selectedItems() ) {
         if (item) {
-            QVariant v = item->data(0,Qt::UserRole);
+            QVariant v = item->data(0,PeakGroupType);
             PeakGroup*  group =  v.value<PeakGroup*>();
             if ( group != NULL ) {
                  group->setLabel(label);
@@ -602,6 +606,7 @@ void TableDockWidget::deleteGroup() {
 
     PeakGroup* parentGroup = group->parent;
 
+    qDebug() << "deleteGroup()" << group << " " << parentGroup << endl;
     if ( parentGroup == NULL ) { //top level item
         for(int i=0; i < allgroups.size(); i++) {
             if ( &allgroups[i] == group ) {
@@ -703,7 +708,6 @@ void TableDockWidget::Train() {
 }
 
 void TableDockWidget::keyPressEvent(QKeyEvent *e ) {
-    //cerr << "TableDockWidget::keyPressEvent()" << e->key() << endl;
 
     if (e->key() == Qt::Key_Delete ) {
         deleteGroup();
@@ -1297,14 +1301,14 @@ void TableDockWidget::showFocusedGroups() {
     int N=treeWidget->topLevelItemCount();
     for(int i=0; i < N; i++ ) {
         QTreeWidgetItem* item = treeWidget->topLevelItem(i);
-        QVariant v = item->data(0,Qt::UserRole);
+        QVariant v = item->data(0,PeakGroupType);
         PeakGroup*  group =  v.value<PeakGroup*>();
         if (group && group->isFocused) item->setHidden(false); else item->setHidden(true);
        
         if ( item->text(0).startsWith("Cluster") ) {
             bool showParentFlag=false;
             for(int j=0; j<item->childCount();j++) {
-                QVariant v = (item->child(j))->data(0,Qt::UserRole);
+                QVariant v = (item->child(j))->data(0,PeakGroupType);
                 PeakGroup*  group =  v.value<PeakGroup*>();
                 if (group && group->isFocused) { item->setHidden(false); showParentFlag=true; } else item->setHidden(true);
             }

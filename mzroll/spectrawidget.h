@@ -5,6 +5,7 @@
 #include "stable.h"
 #include "mzSample.h"
 #include "mainwindow.h"
+#include "BondBreaker.h"
 
 class SpectraWidget : public QGraphicsView
 {
@@ -33,6 +34,8 @@ public slots:
                     void overlaySpectralHit(SpectralHit& hit);
                     void overlayCompound(Compound* c);
                     void overlayPeakGroup(PeakGroup* group);
+                    void overlayTheoreticalSpectra(Compound* c);
+
                     void resetZoom();
                     void zoomIn();
                     void zoomOut();

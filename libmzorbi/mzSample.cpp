@@ -1430,5 +1430,3 @@ vector<Scan*> mzSample::getFragmenationEvents(mzSlice* slice) {
 }
 
 
-
-

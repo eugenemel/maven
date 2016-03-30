@@ -25,13 +25,29 @@ using namespace std;
 // FAB   M+X M+N
 // ACPI  M+H  M+X
 
+
+
 class MassCalculator { 
 
     public:
         enum IonizationType { ESI=0, EI=1};
         static IonizationType ionizationType;
+        static Adduct* PlusHAdduct;
+        static Adduct* MinusHAdduct;
+        static Adduct* ZeroMassAdduct;
 
-    typedef struct {
+    struct Match {
+
+        Match& operator= (const Match& b) {
+            name = b.name;
+            formula = b.formula;
+            mass = b.mass;
+            diff = b.diff;
+            compoundLink = b.compoundLink;
+            adductLink =   b.adductLink;
+            fragScore = b.fragScore;
+        }
+
         std::string name;
         std::string formula;
         double mass=0;
@@ -39,7 +55,7 @@ class MassCalculator {
         Compound* compoundLink=NULL;
         Adduct*   adductLink=NULL;
         FragmentationMatchScore fragScore;
-    } Match;
+    };
 
 
     MassCalculator(){}
