@@ -77,6 +77,10 @@ void PeakDetectionDialog::show() {
         compoundDatabase->addItem(db);
     }
 
+    fragScoringAlgorithm->clear();
+    for(string scoringAlgorithm: FragmentationMatchScore::getScoringAlgorithmNames()) {
+        fragScoringAlgorithm->addItem(scoringAlgorithm.c_str());
+    }
 
     QString selectedDB = mainwindow->ligandWidget->getDatabaseName();
     compoundDatabase->setCurrentIndex(compoundDatabase->findText(selectedDB));

@@ -30,9 +30,10 @@ public slots:
 	  void setCharge(float charge);
 	  void setPPM(float ppm);
       void compute();
+      void updateDatabaseList();
 
 private slots:
-      void showCellInfo(int row, int col, int lrow, int lcol);
+      void showInfo();
 	  void getMatches();
       void showTable();
    

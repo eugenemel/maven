@@ -19,7 +19,6 @@ void ParallelMassSlicer::algorithmA() {
     cerr << "#algorithmA" << slices.size() << endl;
 }
 
-	
 void ParallelMassSlicer::algorithmB(float userPPM, float minIntensity, int rtStep) { 
 	delete_all(slices);
 	slices.clear();
@@ -124,14 +123,13 @@ void ParallelMassSlicer::algorithmB(float userPPM, float minIntensity, int rtSte
 	sort(slices.begin(),slices.end(), mzSlice::compIntensity);
 }
 
-	void ParallelMassSlicer::addSlice(mzSlice* s) { 
+void ParallelMassSlicer::addSlice(mzSlice* s) {
 		slices.push_back(s);
 		int mzRange = s->mz*10;
 		cache.insert( pair<int,mzSlice*>(mzRange, s));
 	}
 
-
-    void ParallelMassSlicer::algorithmC(float ppm, float minIntensity, float rtWindow) {
+void ParallelMassSlicer::algorithmC(float ppm, float minIntensity, float rtWindow) {
         delete_all(slices);
         slices.clear();
         cache.clear();
@@ -164,9 +162,7 @@ void ParallelMassSlicer::algorithmB(float userPPM, float minIntensity, int rtSte
         cerr << "#algorithmC" << slices.size() << endl;
     }
 
-
-
-    void ParallelMassSlicer::algorithmD(float ppm, float rtWindow) {
+void ParallelMassSlicer::algorithmD(float ppm, float rtWindow) {
         delete_all(slices);
         slices.clear();
         cache.clear();

@@ -23,7 +23,7 @@
    <item row="3" column="1" alignment="Qt::AlignLeft">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -548,33 +548,7 @@
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QComboBox" name="fragScoringAlgorithm">
-            <item>
-             <property name="text">
-              <string>HyperGeomScore</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>WeightedDotProduct</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>SpearmanRank</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>TICMatched</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>DotProduct</string>
-             </property>
-            </item>
-           </widget>
+           <widget class="QComboBox" name="fragScoringAlgorithm"/>
           </item>
           <item row="1" column="1">
            <widget class="QDoubleSpinBox" name="productPpmTolr">

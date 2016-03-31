@@ -75,7 +75,7 @@ QString LigandWidget::getDatabaseName() {
 	return databaseSelect->currentText();
 }
 
-void LigandWidget::reloadCompounds() {
+void LigandWidget::updateDatabaseList() {
 	databaseSelect->disconnect(SIGNAL(currentIndexChanged(QString)));
     databaseSelect->clear();
 

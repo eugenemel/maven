@@ -233,7 +233,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     createMenus();
     createToolBars();
 
-    ligandWidget->reloadCompounds();
+    ligandWidget->updateDatabaseList();
+    massCalcWidget->updateDatabaseList();
     ligandWidget->setDatabase("KNOWNS");
     //if(settings->contains("lastDatabaseFile")) ligandWidget->setDatabase("lastDatabaseFile");
     setAcceptDrops(true);
@@ -558,7 +559,9 @@ void MainWindow::loadCompoundsFile(QString filename){
     DB.loadCompoundsSQL();
 
     if (compoundCount > 0 && ligandWidget) {
-        ligandWidget->reloadCompounds();
+        ligandWidget->updateDatabaseList();
+        massCalcWidget->updateDatabaseList();
+
         if( ligandWidget->isVisible() )
             ligandWidget->setDatabase(QString(dbname.c_str()));
     }
@@ -586,7 +589,8 @@ void MainWindow::reloadMethodsFolder() {
         DB.connect( methodsFolder + "/ligand.db");
         DB.deleteAllCompoundsSQL();
         DB.loadMethodsFolder(methodsFolder);
-        ligandWidget->reloadCompounds();
+        ligandWidget->updateDatabaseList();
+        massCalcWidget->updateDatabaseList();
     }
 }
 

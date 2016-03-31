@@ -25,6 +25,27 @@ struct FragmentationMatchScore {
     double weightedDotProduct;
     double hypergeomScore;
 
+    static vector<string> getScoringAlgorithmNames() {
+        vector<string> names;
+        names.push_back("HyperGeomScore");
+        names.push_back("DotProduct");
+        names.push_back("WeightedDotProduct");
+        names.push_back("SpearmanRank");
+        names.push_back("TICMatched");
+        return names;
+    }
+
+
+    double getScoreByName(string scoringAlgorithm) {
+        if (scoringAlgorithm == "HyperGeomScore" )         return hypergeomScore;
+        else if (scoringAlgorithm == "DotProduct")         return dotProduct;
+        else if (scoringAlgorithm == "SpearmanRank")       return spearmanRankCorrelation;
+        else if (scoringAlgorithm == "TICMatched")         return ticMatched;
+        else if (scoringAlgorithm == "WeightedDotProduct") return weightedDotProduct;
+        else return hypergeomScore;
+
+    }
+
     FragmentationMatchScore() {
         fractionMatched=0;
         spearmanRankCorrelation=0;

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>632</width>
-    <height>305</height>
+    <width>634</width>
+    <height>307</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -34,40 +34,12 @@
        <widget class="QLineEdit" name="lineEdit"/>
       </item>
       <item>
-       <widget class="QLabel" name="label_3">
-        <property name="layoutDirection">
-         <enum>Qt::RightToLeft</enum>
-        </property>
-        <property name="text">
-         <string>ppm</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDoubleSpinBox" name="maxppmdiff">
-        <property name="maximum">
-         <double>10000.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_2">
-        <property name="layoutDirection">
-         <enum>Qt::RightToLeft</enum>
-        </property>
-        <property name="text">
-         <string>Ionization Mode</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDoubleSpinBox" name="ionization">
-        <property name="decimals">
-         <number>0</number>
-        </property>
-        <property name="minimum">
-         <double>-99.000000000000000</double>
-        </property>
+       <widget class="QComboBox" name="databaseSelect">
+        <item>
+         <property name="text">
+          <string>All</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
@@ -80,53 +52,97 @@
      </layout>
     </item>
     <item>
-     <widget class="QTableWidget" name="mTable">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="editTriggers">
-       <set>QAbstractItemView::NoEditTriggers</set>
-      </property>
-      <property name="alternatingRowColors">
-       <bool>false</bool>
-      </property>
-      <property name="sortingEnabled">
-       <bool>true</bool>
-      </property>
-      <attribute name="horizontalHeaderStretchLastSection">
-       <bool>false</bool>
-      </attribute>
-      <attribute name="verticalHeaderStretchLastSection">
-       <bool>false</bool>
-      </attribute>
+     <widget class="QTreeWidget" name="treeWidget">
       <column>
        <property name="text">
-        <string>Compound</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Mass</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>ppmDiff</string>
+        <string notr="true">1</string>
        </property>
       </column>
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_4"/>
+     <widget class="QFrame" name="frame">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="4">
+        <widget class="QDoubleSpinBox" name="fragmentPPM">
+         <property name="minimum">
+          <double>0.250000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>10000.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.250000000000000</double>
+         </property>
+         <property name="value">
+          <double>20.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="9">
+        <widget class="QComboBox" name="scoringSchema"/>
+       </item>
+       <item row="0" column="1">
+        <widget class="QDoubleSpinBox" name="maxppmdiff">
+         <property name="minimum">
+          <double>0.250000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>10000.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.250000000000000</double>
+         </property>
+         <property name="value">
+          <double>5.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="layoutDirection">
+          <enum>Qt::RightToLeft</enum>
+         </property>
+         <property name="text">
+          <string>Precursor PPM</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="8">
+        <widget class="QDoubleSpinBox" name="ionization">
+         <property name="decimals">
+          <number>0</number>
+         </property>
+         <property name="minimum">
+          <double>-99.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="6">
+        <widget class="QLabel" name="label_2">
+         <property name="layoutDirection">
+          <enum>Qt::RightToLeft</enum>
+         </property>
+         <property name="text">
+          <string>Ion</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Fragment PPM</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </item>
    </layout>
   </widget>

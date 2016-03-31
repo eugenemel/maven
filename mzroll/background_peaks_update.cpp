@@ -728,6 +728,7 @@ void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g) {
 
     //g->fragmentationPattern.printFragment(productPpmTolr,10);
     MassCalculator::Match bestMatch;
+    string scoringAlgorithm = scoringScheme.toStdString();
 
     for(MassCalculator::Match match: matchesX ) {
         Compound* cpd = match.compoundLink;
@@ -735,22 +736,9 @@ void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g) {
 
         FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productPpmTolr,true);
         if (s.numMatches < minNumFragments ) continue;
-
-        if (scoringScheme == "HyperGeomScore" ) {
-            s.mergedScore = s.hypergeomScore;
-        } else if (scoringScheme == "DotProduct") {
-            s.mergedScore = s.dotProduct;
-        } else if (scoringScheme == "SpearmanRank") {
-            s.mergedScore = s.spearmanRankCorrelation;
-        } else if (scoringScheme == "TICMatched") {
-            s.mergedScore = s.ticMatched;
-        } else if (scoringScheme == "WeightedDotProduct" ){
-            s.mergedScore = s.weightedDotProduct;
-        } else{
-            s.mergedScore = s.hypergeomScore;
-        }
-        // qDebug() << "scoring=" << scoringScheme << " " << s.mergedScore;
+        s.mergedScore = s.getScoreByName(scoringAlgorithm);
         s.ppmError = match.diff;
+        // qDebug() << "scoring=" << scoringScheme << " " << s.mergedScore;
 
         //cerr << "\t"; cerr << cpd->name << "\t" << cpd->precursorMz << "\tppmDiff=" << m.diff << "\t num=" << s.numMatches << "\t tic" << s.ticMatched <<  " s=" << s.spearmanRankCorrelation << endl;
 

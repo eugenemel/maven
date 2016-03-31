@@ -13,7 +13,17 @@ MassCalcWidget::MassCalcWidget(MainWindow* mw) {
   connect(lineEdit,SIGNAL(returnPressed()),SLOT(compute()));
   connect(ionization,SIGNAL(valueChanged(double)),SLOT(compute()));
   connect(maxppmdiff,SIGNAL(valueChanged(double)),SLOT(compute()));
-  connect(mTable, SIGNAL(currentCellChanged(int,int,int,int)), SLOT(showCellInfo(int,int,int,int)));
+  connect(treeWidget,SIGNAL(itemSelectionChanged()), SLOT(showInfo()));
+  connect(databaseSelect, SIGNAL(currentIndexChanged(QString)), this, SLOT(showTable()));
+  connect(scoringSchema, SIGNAL(currentIndexChanged(QString)), this, SLOT(showTable()));
+
+
+   scoringSchema->clear();
+   for(string scoringAlgorithm: FragmentationMatchScore::getScoringAlgorithmNames()) {
+        scoringSchema->addItem(scoringAlgorithm.c_str());
+   }
+
+
 }
 
 void MassCalcWidget::setMass(float mz) { 
@@ -31,6 +41,16 @@ void MassCalcWidget::setCharge(float charge) {
     ionization->setValue(charge);
     _charge=charge;
 }
+
+void MassCalcWidget::updateDatabaseList() {
+    databaseSelect->clear();
+    QStringList dbnames = DB.getDatabaseNames();
+    databaseSelect->addItem("All");
+    for(QString db: dbnames ) {
+        databaseSelect->addItem(db);
+    }
+}
+
 void MassCalcWidget::setPPM(float diff) { maxppmdiff->setValue(diff); _ppm=diff; }
 
 void MassCalcWidget::compute() {
@@ -60,15 +80,16 @@ void MassCalcWidget::compute() {
 
 void MassCalcWidget::showTable() {
         
-    QTableWidget *p = mTable; 
+    QTreeWidget *p = treeWidget;
     p->setUpdatesEnabled(false); 
     p->clear(); 
     p->setColumnCount(6);
-    p->setRowCount( matches.size() ) ;
-    p->setHorizontalHeaderLabels(  QStringList() << "Compound" << "ppmDiff" << "fragScore" << "Adduct" << "Mass" << "DB");
+    p->setHeaderLabels( QStringList() << "Compound" << "ppmDiff" << "fragScore" << "Adduct" << "Mass" << "DB");
     p->setSortingEnabled(false);
     p->setUpdatesEnabled(false);
-    
+
+    string scoringAlgorithm = scoringSchema->currentText().toStdString();
+
     for(unsigned int i=0;  i < matches.size(); i++ ) {
         //no duplicates in the list
         Compound* c = matches[i].compoundLink;
@@ -76,24 +97,25 @@ void MassCalcWidget::showTable() {
         QString matchName = QString(matches[i].name.c_str() );
         QString preMz = QString::number( matches[i].mass , 'f', 4);
         QString ppmDiff = QString::number( matches[i].diff , 'f', 4);
-        QString matchScore = QString::number( matches[i].fragScore.weightedDotProduct , 'f', 3);
+        QString matchScore = QString::number( matches[i].fragScore.getScoreByName(scoringAlgorithm) , 'f', 3);
         QString adductName = QString(a->name.c_str());
         QString db = QString(c->db.c_str());
 
-        QTableWidgetItem* item = new QTableWidgetItem(matchName,0);
+        //filter hits by database
+        if (databaseSelect->currentText() != "All" and databaseSelect->currentText() != db) continue;
 
-        p->setItem(i,0, item );
-        p->setItem(i,1, new QTableWidgetItem(ppmDiff,0));
-        p->setItem(i,2, new QTableWidgetItem(matchScore));
-        p->setItem(i,3, new QTableWidgetItem(adductName,0));
-        p->setItem(i,4, new QTableWidgetItem(preMz,0));
-        p->setItem(i,5, new QTableWidgetItem(db,0));
-
-
-        if (c != NULL) item->setData(Qt::UserRole,QVariant::fromValue(c));
+        QTreeWidgetItem* item = new QTreeWidgetItem(treeWidget,Qt::UserRole);
+        item->setData(0,Qt::UserRole,QVariant(i));
+        item->setText(0,matchName);
+        item->setText(1,ppmDiff);
+        item->setText(2,matchScore);
+        item->setText(3,adductName);
+        item->setText(4,preMz);
+        item->setText(5,db);
     }
 
-    p->setSortingEnabled(true); 
+    p->header()->setStretchLastSection(true);
+    p->setSortingEnabled(true);
     p->setUpdatesEnabled(true);
     p->update();
 
@@ -106,13 +128,12 @@ void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
     matches = DB.findMathchingCompounds(_mz,_ppm,_charge);
     cerr << "MassCalcWidget::setPeakGroup(PeakGroup* grp)" << endl;
 
-    if(grp->ms2EventCount == 0) grp->computeFragPattern(_ppm);
+    if(grp->ms2EventCount == 0) grp->computeFragPattern(fragmentPPM->value());
     if(grp->fragmentationPattern.nobs() == 0) return;
-    float productPpmTolr=20;
 
     for(MassCalculator::Match& m: matches ) {
        Compound* cpd = m.compoundLink;
-       m.fragScore = cpd->scoreCompoundHit(&grp->fragmentationPattern,productPpmTolr,true);
+       m.fragScore = cpd->scoreCompoundHit(&grp->fragmentationPattern,fragmentPPM->value(),true);
     }
     showTable();
 }
@@ -137,10 +158,14 @@ void MassCalcWidget::keggLink(QString formula){
     _mw->setUrl(requestStr);
 }
 
-void MassCalcWidget::showCellInfo(int row, int col, int lrow, int lcol) {
+void MassCalcWidget::showInfo() {
+    if (matches.size() == 0) return;
 
-    int mNum = row; //header row
-    if (matches.size() == 0 or mNum<0 or mNum>matches.size()) return;
+    QTreeWidgetItem* item = treeWidget->selectedItems().last();
+    if(!item) return;
+
+    QVariant v = item->data(0,Qt::UserRole);
+    int mNum = v.toInt();
 
     MassCalculator::Match m = matches[mNum];
     if(m.mass)  _mw->getEicWidget()->setMzSlice(m.mass);

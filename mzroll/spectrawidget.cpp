@@ -230,7 +230,7 @@ void SpectraWidget::overlayTheoreticalSpectra(Compound* c) {
    hit.compoundId = "THEORY: "; hit.compoundId += c->name.c_str();
    hit.scan = _currentScan;
    hit.precursorMz = c->precursorMz;
-   hit.productPPM=100;
+   hit.productPPM=  mainwindow->massCalcWidget->fragmentPPM->value();
 
     BondBreaker bb;
     bb.breakCarbonBonds(true);
@@ -240,7 +240,7 @@ void SpectraWidget::overlayTheoreticalSpectra(Compound* c) {
     map<string,double> fragments = bb.getFragments();
 
     for(auto& pair: fragments) {
-        qDebug() << "Ah:" << pair.second;
+        //qDebug() << "Ah:" << pair.second;
         hit.mzList.push_back(pair.second);
         hit.intensityList.push_back(1000);
 
@@ -268,7 +268,7 @@ void SpectraWidget::overlayCompound(Compound* c) {
    hit.compoundId = c->name.c_str();
    hit.scan = _currentScan;
    hit.precursorMz = c->precursorMz;
-   hit.productPPM=20;
+   hit.productPPM=  mainwindow->massCalcWidget->fragmentPPM->value();
    cerr << "overlayCompound() " << c->name << " #fragments=" << c->fragment_mzs.size() << endl;
 
    for(int i=0; i < c->fragment_mzs.size(); i++) 	   hit.mzList << c->fragment_mzs[i];
@@ -318,7 +318,7 @@ void SpectraWidget::drawSpectalHitLines(SpectralHit& hit) {
 
         //matched?
         if (pos > 0 && pos < _currentScan->nobs()) {
-            //cerr << "matched:" << hitMz << " " <<  _currentScan->mz[pos] << " "  << hitIntensity << " " << _currentScan->intensity[pos] << endl;
+            cerr << "matched:" << hitMz << " " <<  _currentScan->mz[pos] << " "  << hitIntensity << " " << _currentScan->intensity[pos] << endl;
             int x = toX(_currentScan->mz[pos]);
             int y = toY(_maxY,SCALE);
             QGraphicsLineItem* line = new QGraphicsLineItem(x,y,x,toY(0),0);
@@ -326,7 +326,7 @@ void SpectraWidget::drawSpectalHitLines(SpectralHit& hit) {
             scene()->addItem(line);
             _items.push_back(line);
         } else {
-            //cerr << "!matched:" << hitMz << endl;
+            cerr << "!matched:" << hitMz << endl;
 
         }
     }

@@ -46,6 +46,7 @@ class MassCalculator {
             compoundLink = b.compoundLink;
             adductLink =   b.adductLink;
             fragScore = b.fragScore;
+            return *this;
         }
 
         std::string name;

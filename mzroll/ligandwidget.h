@@ -46,7 +46,7 @@ class LigandWidget: public QDockWidget {
 public:
     LigandWidget(MainWindow* parent);
 
-    void reloadCompounds();
+    void updateDatabaseList();
     QString getDatabaseName();
     void clear() { treeWidget->clear(); }
     void showNext();
