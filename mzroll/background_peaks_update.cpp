@@ -56,6 +56,10 @@ BackgroundPeakUpdate::BackgroundPeakUpdate(QWidget*) {
     amuQ3=0.3;
 
 
+    //fragmentaiton matching
+    searchProton=false;
+
+
 }
 
 BackgroundPeakUpdate::~BackgroundPeakUpdate() {
@@ -734,7 +738,7 @@ void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g) {
         Compound* cpd = match.compoundLink;
         if(!compoundDatabase.isEmpty() and  cpd->db != compoundDatabase.toStdString()) continue;
 
-        FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productPpmTolr,true);
+        FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productPpmTolr,searchProton);
         if (s.numMatches < minNumFragments ) continue;
         s.mergedScore = s.getScoreByName(scoringAlgorithm);
         s.ppmError = match.diff;

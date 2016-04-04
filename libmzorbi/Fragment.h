@@ -90,7 +90,7 @@ class Fragment {
         float collisionEnergy;
         int precursorCharge;
         bool isDecoy;
-        int  sortedBy;
+        SortType sortedBy;
 
         PeakGroup* group;
 

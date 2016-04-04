@@ -79,8 +79,9 @@ public:
     int limitGroupCount;
 
     //MS2 matching
-    bool mustHaveMS2;
-    float minFragmentMatchScore=2;
+    bool mustHaveMS2=false;
+    bool searchProton=false;    //consider +/-PROTON when matching fragmentation
+    float minFragmentMatchScore=0;
     float minNumFragments=0;
     float productPpmTolr = 20;
     QString scoringScheme="dotProduct"; // ticMatch | spearmanRank | dotProduct

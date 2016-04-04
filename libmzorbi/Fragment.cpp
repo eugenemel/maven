@@ -33,6 +33,8 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
     this->group = NULL;
     this->consensus =NULL;
     this->rt = scan->rt;
+
+    this->sortByMz();
 }
 
 
@@ -293,6 +295,7 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
 
     s.ppmError = abs((a->precursorMz-b->precursorMz)/a->precursorMz*1e6);
     vector<int>ranks = compareRanks(a,b,productPpmTolr);
+    //vector<int>ranks = locatePositions(a,b,productPpmTolr);
     for(int rank: ranks) { if(rank != -1) s.numMatches++; }
     s.fractionMatched = s.numMatches / a->nobs();
     s.hypergeomScore  = SHP(s.numMatches,a->nobs(),b->nobs(),100000);
@@ -328,7 +331,8 @@ vector<int> Fragment::compareRanks(Fragment* a, Fragment* b, float productPpmTol
             if (mzUtils::ppmDist(a->mzs[i],b->mzs[j])<productPpmTolr) { ranks[i] = j; break; }   //this needs optimization..
         }
     }
-    if (verbose) { cerr << " compareranks: ";
+    if (verbose) {
+        cerr << " compareranks: ";
         for(unsigned int i=0; i < ranks.size(); i++ ) cerr << ranks[i] << " "; }
         return ranks;
 }
@@ -337,6 +341,7 @@ vector<int> Fragment::compareRanks(Fragment* a, Fragment* b, float productPpmTol
 vector<int> Fragment::locatePositions( Fragment* a, Fragment* b, float productPpmTolr) {
     bool verbose=false;
     if (verbose) { cerr << "\t\t "; a->printMzList(); cerr << "\nvs \n"; b->printMzList();  }
+    b->sortByMz();
     vector<int> ranks (a->mzs.size(),-1);	//missing value == -1
     for(unsigned int i=0; i<a->mzs.size(); i++ ) {
         int pos = b->findClosestHighestIntensityPos(a->mzs[i],productPpmTolr);
@@ -421,6 +426,8 @@ vector<int> Fragment::mzOrderInc() {
 
 
 void Fragment::sortByIntensity() { 
+    if(sortedBy == Fragment::SortType::Intensity) return; //sppedup already sorted
+
     vector<unsigned int>order = intensityOrderDesc();
     vector<float> a(mzs.size());
     vector<float> b(intensity_array.size());
@@ -440,7 +447,10 @@ void Fragment::sortByIntensity() {
     sortedBy = Fragment::SortType::Intensity;
 }	
 
-void Fragment::sortByMz() { 
+void Fragment::sortByMz() {
+
+    if(sortedBy == Fragment::SortType::Mz) return; //sppedup already sorted
+
     vector<int>order = mzOrderInc();
     vector<float> a(mzs.size());
     vector<float> b(intensity_array.size());
@@ -530,34 +540,38 @@ double Fragment::totalIntensity() {
     return TIC;
 }
 
+
+
 double Fragment::dotProduct(const vector<int>& X, Fragment* other) {
     if (X.size() == 0) return 0;
     double thisTIC = totalIntensity();
     double otherTIC = other->totalIntensity();
+
     if(thisTIC == 0 or otherTIC == 0) return 0;
 
     double dotP=0;
-    for(unsigned int i=0; i<X.size(); i++ )  {
-        if (X[i] != -1)  {
-            dotP += pow(this->intensity_array[i]/thisTIC - other->intensity_array[X[i]]/otherTIC,2);
-            //cerr << i << " ints: " << intensity_array[i]/thisTIC << " " << other->intensity_array[X[i]]/otherTIC <<  " " << dotP << endl;
-        }
-    }
-    dotP = 1-sqrt(dotP);
-    return dotP;
-}
+    for(unsigned int i=0; i<X.size(); i++ )
+        if (X[i] != -1)  dotP += this->intensity_array[i] * other->intensity_array[X[i]];
 
+    //return dotP/sqrt(thisTIC*thisTIC*otherTIC*otherTIC);   //DIP
+    return sqrt(dotP)/sqrt(thisTIC*otherTIC);               //SIM
+}
 
 double Fragment::mzWeightedDotProduct(const vector<int>& X, Fragment* other) {
     if (X.size() == 0) return 0;
-    double thisTIC = totalIntensity();
-    double otherTIC = other->totalIntensity();
+    double thisTIC = 0;
+    double otherTIC = 0;
+
+    for(unsigned int i=0; i<this->nobs();  i++) thisTIC +=  mzs[i] * intensity_array[i];
+    for(unsigned int j=0; j<other->nobs(); j++) otherTIC += other->mzs[j] * other->intensity_array[j];
 
     if(thisTIC == 0 or otherTIC == 0) return 0;
 
     double dotP=0;
-    for(unsigned int i=0; i<X.size(); i++ )  
-        if (X[i] != -1)  dotP += this->intensity_array[i] * other->intensity_array[X[i]];
+    for(unsigned int i=0; i<X.size(); i++ ) {
+        int j = X[i];
+        if (j != -1)  dotP += mzs[i]*intensity_array[i] * other->mzs[j]*other->intensity_array[j];
+    }
 
     //return dotP/sqrt(thisTIC*thisTIC*otherTIC*otherTIC);   //DIP
     return sqrt(dotP)/sqrt(thisTIC*otherTIC);               //SIM

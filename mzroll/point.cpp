@@ -140,6 +140,7 @@ void EicPoint::mousePressEvent (QGraphicsSceneMouseEvent* event) {
     if(_scan) {
         _mw->fragmenationSpectraDockWidget->setVisible(true);
         _mw->fragmenationSpectraWidget->setScan(_scan);
+        _mw->massCalcWidget->setFragmentationScan(_scan);
        // if(_scan->mslevel >= 2)  _mw->spectralHitsDockWidget->limitPrecursorMz(_scan->precursorMz);
     }
 

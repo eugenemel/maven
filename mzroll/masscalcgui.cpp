@@ -104,7 +104,7 @@ void MassCalcWidget::showTable() {
         //filter hits by database
         if (databaseSelect->currentText() != "All" and databaseSelect->currentText() != db) continue;
 
-        QTreeWidgetItem* item = new QTreeWidgetItem(treeWidget,Qt::UserRole);
+        NumericTreeWidgetItem* item = new NumericTreeWidgetItem(treeWidget,Qt::UserRole);
         item->setData(0,Qt::UserRole,QVariant(i));
         item->setText(0,matchName);
         item->setText(1,ppmDiff);
@@ -133,10 +133,28 @@ void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
 
     for(MassCalculator::Match& m: matches ) {
        Compound* cpd = m.compoundLink;
-       m.fragScore = cpd->scoreCompoundHit(&grp->fragmentationPattern,fragmentPPM->value(),true);
+       m.fragScore = cpd->scoreCompoundHit(&grp->fragmentationPattern,fragmentPPM->value(),false);
     }
     showTable();
 }
+
+void MassCalcWidget::setFragmentationScan(Scan* scan) {
+    if(!scan) return;
+
+    float minSigNoiseRatio=0.0;
+    Fragment f(scan,0,0,1024);
+
+    _mz = scan->precursorMz;
+    matches = DB.findMathchingCompounds(_mz,_ppm,_charge);
+    cerr << "MassCalcWidget::setPeakGroup(PeakGroup* grp)" << endl;
+
+    for(MassCalculator::Match& m: matches ) {
+       Compound* cpd = m.compoundLink;
+       m.fragScore = cpd->scoreCompoundHit(&f,fragmentPPM->value(),false);
+    }
+    showTable();
+}
+
 
 void MassCalcWidget::getMatches() {
     matches = DB.findMathchingCompounds(_mz,_ppm,_charge);
