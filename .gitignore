@@ -8,6 +8,7 @@ peakdetector/tmp
 pugixml/src/tmp
 build/
 bin/
+test/
 *.moc
 .vim*
 *.sw*

@@ -233,7 +233,7 @@ void ProjectDB::loadPeakGroups(QString tableName) {
         string compoundDB = query.value("compoundDB").toString().toStdString();
         string compoundName = query.value("compoundName").toString().toStdString();
 
-        if(!compoundName.empty()) g.tagString=compoundName;
+        //if(!compoundName.empty()) g.tagString=compoundName;
 
         string srmId = query.value("srmId").toString().toStdString();
         if (!srmId.empty()) g.setSrmId(srmId);
@@ -253,12 +253,15 @@ void ProjectDB::loadPeakGroups(QString tableName) {
         } else {
             for(PeakGroup& x: allgroups) {
                 if(x.groupId == parentGroupId) {
+                    //cerr << x.groupId << " " << parentGroupId << " " << g.tagString << endl;
                     x.children.push_back(g);
                     break;
                 }
             }
         }
     }
+
+   cerr << "ProjectDB read in " << allgroups.size() << endl;
 }
 
 void ProjectDB::loadGroupPeaks(PeakGroup* parent) {

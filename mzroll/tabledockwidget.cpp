@@ -332,7 +332,11 @@ QString TableDockWidget::groupTagString(PeakGroup* group){
 }
 */
 
-void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) { 
+void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
+
+    group->groupStatistics();
+
+    //cerr << "addRow" << group << " "  << group->meanMz << " " << group->meanRt << " " << group->children.size() << " " << group->tagString << endl;
 
     if (group == NULL) return;
     if (group->peakCount() == 0 ) return;
@@ -370,6 +374,7 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     updateItem(item);
 
     if ( group->childCount() > 0 ) {
+        //cerr << "Add children!" << endl;
         for( int i=0; i < group->childCount(); i++ ) addRow(&(group->children[i]), item);
     }
 }
