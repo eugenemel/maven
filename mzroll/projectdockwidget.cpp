@@ -548,14 +548,15 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename, TableDockWidget* pea
     lastOpennedProject=filename;
     currentProject=project;
 
-    //if(project->isOpen()) {
+    if(project->isOpen()) {
+        project->deleteAll();;
         project->saveSamples(sampleSet);
         if(peakTable) {
             for(PeakGroup* group : peakTable->getGroups())  project->writeGroupSqlite(group,0);
         }
-    //} else {
-    //   qDebug() << "Can't write to " << lastOpennedProject;
-    //}
+    } else {
+       qDebug() << "Can't write to closed project" << filename;
+    }
 }
 
 

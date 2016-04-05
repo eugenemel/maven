@@ -1211,10 +1211,10 @@ void matchFragmentation() {
                 Compound* cpd = m.compoundLink;
                 FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productPpmTolr,true);
 
-                if (scoringScheme == "spearmanRank") {
-                    s.mergedScore = s.spearmanRankCorrelation;
+                if (scoringScheme == "dotProduct") {
+                    s.mergedScore = s.weightedDotProduct;
                 } else {
-                    s.mergedScore = s.ticMatched;
+                    s.mergedScore = s.hypergeomScore;
 
                 }
                 s.ppmError = m.diff;

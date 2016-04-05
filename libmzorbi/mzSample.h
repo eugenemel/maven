@@ -628,7 +628,7 @@ class Compound {
 
 		private:
 			PeakGroup _group;			//link to peak group
-                        bool      _groupUnlinked;
+            bool      _groupUnlinked;
 
 		public:
 			Compound(string id, string name, string formula, int charge );
@@ -642,12 +642,12 @@ class Compound {
             bool groupUnlinked() { return _groupUnlinked; }
             FragmentationMatchScore scoreCompoundHit(Fragment* f, float productPpmTolr, bool searchProton);
 
-            vector<Reaction*>reactions;
             int    cid;
             string id;
             string name;
             string formula;
             string smileString;
+            int    ionizationMode;
 
             string srmId;
             float expectedRt;
@@ -664,17 +664,16 @@ class Compound {
 
             string db;			//name of database for example KEGG, ECOCYC.. etc..
             bool  isDecoy;
+            bool  virtualFragmentation;
 
             vector<float>fragment_mzs;
             vector<float>fragment_intensity;
             vector<string> category;
 
             float ajustedMass(int charge);
-            void addReaction(Reaction* r) { reactions.push_back(r); }
             static bool compMass(const Compound* a, const Compound* b )      { return(a->mass < b->mass);       }
             static bool compName(const Compound* a, const Compound* b )    { return(a->name < b->name);       }
             static bool compFormula(const Compound* a, const Compound* b ) { return(a->formula < b->formula); }
-            static bool compReactionCount(const Compound* a, const Compound* b ) { return(a->reactions.size() < b->reactions.size()); }
 
 	
 };

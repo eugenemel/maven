@@ -8,6 +8,7 @@ SpectraMatching::SpectraMatching(MainWindow *w): QDialog(w) {
     connect(exportButton, SIGNAL(clicked(bool)), SLOT(exportMatches()));
     resultTable->setSortingEnabled(true);
     bound_checking_pattern=false;
+    setModal(true);
 }
 
 void SpectraMatching::findMatches() { 

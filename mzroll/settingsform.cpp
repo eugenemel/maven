@@ -43,6 +43,8 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(scan_filter_min_intensity, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
     connect(ionizationType,SIGNAL(currentIndexChanged(int)),SLOT(getFormValues()));
 
+    setModal(true);
+
 }
 
 void SettingsForm::recomputeIsotopes() { 

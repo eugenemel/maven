@@ -519,8 +519,17 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
              QString formula = line.mid(9,line.length()).simplified();
              formula.replace("\"","",Qt::CaseInsensitive);
              if(!formula.isEmpty()) cpd->formula = formula.toStdString();
+         } else if (line.startsWith("molecule formula:",Qt::CaseInsensitive)) {
+             QString formula = line.mid(17,line.length()).simplified();
+             formula.replace("\"","",Qt::CaseInsensitive);
+             if(!formula.isEmpty()) cpd->formula = formula.toStdString();
          } else if (line.startsWith("CATEGORY:",Qt::CaseInsensitive)) {
              cpd->category.push_back(line.mid(10,line.length()).simplified().toStdString());
+         } else if (line.startsWith("Tag:",Qt::CaseInsensitive)) {
+            if(line.contains("virtual",Qt::CaseInsensitive)) cpd->virtualFragmentation=true;
+         } else if (line.startsWith("ion mode:",Qt::CaseInsensitive)) {
+            if(line.contains("neg",Qt::CaseInsensitive)) cpd->ionizationMode=-1;
+            if(line.contains("pos",Qt::CaseInsensitive)) cpd->ionizationMode=+1;
          } else if (line.startsWith("Comment:",Qt::CaseInsensitive)) {
              QString comment = line.mid(8,line.length()).simplified();
              if (comment.contains(formulaMatch)){

@@ -2,5 +2,5 @@
 
 AlignmentDialog::AlignmentDialog(QWidget *parent) : QDialog(parent) { 
 		setupUi(this); 
-		setModal(false);
+        setModal(true);
 }

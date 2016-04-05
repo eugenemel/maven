@@ -11,9 +11,12 @@ Compound::Compound(string id, string name, string formula, int charge ) {
         this->logP = 0;
         this->isDecoy=false;
 
+        cid=0;
+        ionizationMode=0;
 		precursorMz=0;
 		productMz=0;
-		collisionEnergy=0;
+        collisionEnergy=0;
+        virtualFragmentation=false;
 
 }
 

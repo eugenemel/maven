@@ -261,7 +261,7 @@ void ProjectDB::loadPeakGroups(QString tableName) {
         }
     }
 
-   cerr << "ProjectDB read in " << allgroups.size() << endl;
+   cerr << "ProjectDB Read in " << allgroups.size() << endl;
 }
 
 void ProjectDB::loadGroupPeaks(PeakGroup* parent) {

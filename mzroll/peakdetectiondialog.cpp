@@ -14,6 +14,8 @@ PeakDetectionDialog::PeakDetectionDialog(QWidget *parent) :
     connect(loadModelButton, SIGNAL(clicked(bool)), SLOT(loadModel()));
     connect(setOutputDirButton, SIGNAL(clicked(bool)), SLOT(setOutputDir()));
 
+    setModal(true);
+
     _featureDetectionType= CompoundDB;
 
 }
@@ -62,7 +64,13 @@ void PeakDetectionDialog::setOutputDir() {
 	outputDirName->setText(dirName);
 }
 
-void PeakDetectionDialog::show() { 
+void PeakDetectionDialog::show() {
+
+
+    //Qt::WindowFlags flags = windowFlags();
+    //setWindowFlags(flags | Qt::WindowStaysOnTopHint
+
+
     if ( mainwindow != NULL ) {
         QSettings* settings = mainwindow->getSettings();
         if ( settings ) {
