@@ -1227,37 +1227,28 @@ void EicWidget::setSrmId(string srmId) {
    	replot();
 }
 
-void EicWidget::setCompound(Compound* c ) {
-    //qDebug << "EicWidget::setCompound()";
-    //benchmark
-//	timespec tS;
-    //timespec tE;
-    //clock_gettime(CLOCK_REALTIME, &tS);
-
-//	for(int i =0; i < 100000; i++ ) { findPlotBounds(); }
-    
+void EicWidget::setCompound(Compound* c, Adduct* adduct) {
     if ( c == NULL ) return;
     if ( getMainWindow()->sampleCount() == 0) return;
 
     vector <mzSample*> samples = getMainWindow()->getVisibleSamples();
     if (samples.size() == 0 ) return;
 
-    int ionizationMode = samples[0]->getPolarity();
-    if (getMainWindow()->getIonizationMode()) ionizationMode=getMainWindow()->getIonizationMode(); //user specified ionization mode
-
     float ppm = getMainWindow()->getUserPPM();
-    float mz = 0;
+    float mz = c->mass;
 
-    if (!c->formula.empty()) {
-        mz = c->ajustedMass(ionizationMode);
-    } else {
-        mz=c->mass;
+    if(not adduct) {
+       adduct = MassCalculator::ZeroMassAdduct;
+       int ionizationMode = samples[0]->getPolarity();
+       if (getMainWindow()->getIonizationMode()) {
+           ionizationMode=getMainWindow()->getIonizationMode(); //user specified ionization mode
+       }
+
+        if(ionizationMode>0) adduct = MassCalculator::PlusHAdduct;
+        else if(ionizationMode<0) adduct = MassCalculator::MinusHAdduct;
     }
 
-    //else {
-    //    MassCalculator mcalc;
-    //    mz =mcalc.adjustMass(c->mass,ionizationMode);
-    //}
+    if (adduct)  mz = adduct->computeAdductMass(c->mass);
 
     float minmz = mz - mz/1e6*ppm;
     float maxmz = mz + mz/1e6*ppm;
@@ -1296,17 +1287,17 @@ void EicWidget::setCompound(Compound* c ) {
 
 void EicWidget::setMzSlice(const mzSlice& slice) {
     //qDebug << "EicWidget::setmzSlice()";
-    if ( slice.mzmin != _slice.mzmin || slice.mzmax != _slice.mzmax  
-         || slice.srmId != _slice.srmId
-         || slice.compound != _slice.compound ) {
+    if ( slice.mzmin != _slice.mzmin || slice.mzmax != _slice.mzmax  || slice.srmId != _slice.srmId || slice.compound != _slice.compound ) {
         _slice = slice;
+
         if ( slice.compound ) {
+            //SRM DATA
             if (slice.compound->precursorMz !=0 && slice.compound->productMz != 0 ) {
-                _slice.mzmin = slice.compound->precursorMz;
-                _slice.mzmax = slice.compound->productMz;
-                _slice.mz    = slice.compound->precursorMz;
-                _slice.compound=slice.compound;
-                _slice.srmId  = slice.srmId;
+                _slice.mzmin =   slice.compound->precursorMz;
+                _slice.mzmax =   slice.compound->productMz;
+                _slice.mz    =   slice.compound->precursorMz;
+                _slice.compound= slice.compound;
+                _slice.srmId  =  slice.srmId;
             }
         }
         recompute();

@@ -31,37 +31,22 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   databaseSelect->setDuplicatesEnabled(false);
   //databaseSelect->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::MinimumExpanding);
 
-
   galleryButton = new QToolButton(toolBar);
   galleryButton->setIcon(QIcon(rsrcPath + "/gallery.png"));
   galleryButton->setToolTip(tr("Show Compounds in Gallery Widget"));
   connect(galleryButton,SIGNAL(clicked()),SLOT(showGallery()));
 
-  loadButton = new QToolButton(toolBar);
-  loadButton->setIcon(QIcon(rsrcPath + "/fileopen.png"));
-  loadButton->setToolTip("Load Custom Compound List");
-
-  connect(loadButton,SIGNAL(clicked()), mw, SLOT(loadCompoundsFile()));
   connect(this, SIGNAL(compoundFocused(Compound*)), mw, SLOT(setCompoundFocus(Compound*)));
   connect(this, SIGNAL(urlChanged(QString)), mw, SLOT(setUrl(QString)));
-
-  saveButton = new QToolButton(toolBar);
-  saveButton->setIcon(QIcon(rsrcPath + "/filesave.png"));
-  saveButton->setToolTip("Save Compound List");
-  connect(saveButton,SIGNAL(clicked()), SLOT(saveCompoundList()));
 
   QLineEdit*  filterEditor = new QLineEdit(toolBar);
   filterEditor->setMinimumWidth(10);
   filterEditor->setPlaceholderText("Compound Name Filter");
   connect(filterEditor, SIGNAL(textEdited(QString)), this, SLOT(showMatches(QString)));
 
-  saveButton->setEnabled(false);
-
   //toolBar->addWidget(new QLabel("Compounds: "));
   toolBar->addWidget(filterEditor);
   toolBar->addWidget(databaseSelect);
-  toolBar->addWidget(loadButton);
-  toolBar->addWidget(saveButton);
   toolBar->addWidget(galleryButton);
 
 
@@ -118,14 +103,6 @@ void LigandWidget::databaseChanged(int index) {
 void LigandWidget::setDatabaseAltered(QString name, bool altered) {
     alteredDatabases[name]=altered;
     QString dbname = databaseSelect->currentText();
-
-    if (dbname == name && altered == true) {
-        saveButton->setEnabled(true);
-    }
-
-    if (dbname == name && altered == false) {
-        saveButton->setEnabled(false);
-    }
 }
 
 void LigandWidget::setCompoundFocus(Compound* c) {

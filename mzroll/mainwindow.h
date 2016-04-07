@@ -27,6 +27,7 @@
 #include "mzfileio.h"
 #include "spectralhit.h"
 #include "rconsolewidget.h"
+#include "librarydialog.h"
 
 class SettingsForm;
 class EicWidget;
@@ -58,6 +59,8 @@ class SpectraMatching;
 class LogWidget;
 class RconsoleWidget;
 class SpectralHit;
+class LibraryMangerDialog;
+
 
 extern Database DB; 
 
@@ -108,6 +111,7 @@ public:
     PeakDetectionDialog *peakDetectionDialog;
     AlignmentDialog*	  alignmentDialog;
     RconsoleWidget*       rconsoleDockWidget;
+    LibraryMangerDialog*       libraryDialog;
 
     QProgressBar  *progressBar;
 
@@ -145,9 +149,8 @@ public slots:
     void setMzValue();
     void setMzValue(float mz);
     void loadModel();
-    void loadCompoundsFile();
-    void loadCompoundsFile(QString filename);
-    void reloadMethodsFolder();
+
+
 
     bool addSample(mzSample* sample);
     void compoundDatabaseSearch();

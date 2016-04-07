@@ -67,5 +67,6 @@
         <file>images/colorfill.png</file>
         <file>images/averageSpectra.png</file>
         <file>images/integrateArea.png</file>
+        <file>images/librarymanager.png</file>
     </qresource>
 </RCC>

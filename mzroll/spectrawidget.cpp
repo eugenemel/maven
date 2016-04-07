@@ -318,7 +318,7 @@ void SpectraWidget::drawSpectalHitLines(SpectralHit& hit) {
 
         //matched?
         if (pos > 0 && pos < _currentScan->nobs()) {
-            cerr << "matched:" << hitMz << " " <<  _currentScan->mz[pos] << " "  << hitIntensity << " " << _currentScan->intensity[pos] << endl;
+            //cerr << "matched:" << hitMz << " " <<  _currentScan->mz[pos] << " "  << hitIntensity << " " << _currentScan->intensity[pos] << endl;
             int x = toX(_currentScan->mz[pos]);
             int y = toY(_maxY,SCALE);
             QGraphicsLineItem* line = new QGraphicsLineItem(x,y,x,toY(0),0);
@@ -326,7 +326,7 @@ void SpectraWidget::drawSpectalHitLines(SpectralHit& hit) {
             scene()->addItem(line);
             _items.push_back(line);
         } else {
-            cerr << "!matched:" << hitMz << endl;
+            //cerr << "!matched:" << hitMz << endl;
 
         }
     }

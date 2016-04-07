@@ -141,7 +141,6 @@ void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
 void MassCalcWidget::setFragmentationScan(Scan* scan) {
     if(!scan) return;
 
-    float minSigNoiseRatio=0.0;
     Fragment f(scan,0,0,1024);
 
     _mz = scan->precursorMz;
@@ -186,9 +185,8 @@ void MassCalcWidget::showInfo() {
     int mNum = v.toInt();
 
     MassCalculator::Match m = matches[mNum];
-    if(m.mass)  _mw->getEicWidget()->setMzSlice(m.mass);
-
     if (m.compoundLink) {
+        _mw->getEicWidget()->setCompound(m.compoundLink,m.adductLink);
         _mw->fragmenationSpectraWidget->overlayCompound(m.compoundLink);
     }
 }

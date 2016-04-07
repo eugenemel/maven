@@ -45,7 +45,7 @@ public slots:
     void setRtWindow(float rtmin, float rtmax );
     void setSrmId(string srmId);
     void setPeakGroup(PeakGroup* group);
-    void setCompound(Compound* c );
+    void setCompound(Compound* c, Adduct* a);
     void setSelectedGroup(PeakGroup* group);
     void addEICLines(bool showSpline);
     void addCubicSpline();

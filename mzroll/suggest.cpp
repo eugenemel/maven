@@ -49,7 +49,7 @@ void SuggestPopup::addToHistory(QString key) {
 }
 
 void SuggestPopup::setDatabase(QString db) {
-	_currentDatabase =db;
+    _currentDatabase =db;
 }
 
 void SuggestPopup::addToHistory() {
@@ -115,7 +115,10 @@ void SuggestPopup::doSearchCompounds(QString needle) {
     string currentDb = _currentDatabase.toStdString();
 
     for(unsigned int i=0;  i < DB.compoundsDB.size(); i++ ) {
+
         Compound* c = DB.compoundsDB[i];
+        if (!c or c->db != currentDb ) continue;
+
         QString name(c->name.c_str() );
         QString formula(c->formula.c_str() );
         QString id(c->id.c_str() );
@@ -126,7 +129,6 @@ void SuggestPopup::doSearchCompounds(QString needle) {
         int index = regexp.indexIn(name);
         if ( index < 0) index = regexp.indexIn(id);
         if ( index < 0) continue;
-        if ( c->db != currentDb ) continue;
 
        // qDebug() << "Compound: " << name << " " << currentDb.c_str() ;
 

@@ -567,10 +567,10 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
 
 void Database::deleteAllCompoundsSQL() {
     QSqlQuery query(ligandDB);
-    query.prepare("delete from compounds");
+    query.prepare("drop table compounds");
     if (!query.exec())  qDebug() << query.lastError();
     ligandDB.commit();
-    qDebug() << "deleteAllCompounds";
+    qDebug() << "deleteAllCompounds: done";
 }
 
 
@@ -603,13 +603,15 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet) {
                     productMz   float,\
                     collisionEnergy float,\
                     logP float,\
+                    virtualFragmentation int,\
+                    ionizationMode int,\
                     category varchar(255),\
                     fragment_mzs text, \
                     fragment_intensity text \
                     )"))  qDebug() << "Ho... " << query0.lastError();
 
         QSqlQuery query1(ligandDB);
-        query1.prepare("insert into compounds values(NULL,?,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?)");
+        query1.prepare("insert into compounds values(NULL, ?,?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?)");
 
         for(Compound* c : compoundSet) {
             QStringList cat;
@@ -635,9 +637,12 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet) {
 
             query1.bindValue( 11, c->collisionEnergy);
             query1.bindValue( 12, c->logP);
-            query1.bindValue( 13, cat.join(";"));
-            query1.bindValue( 14, fragMz.join(";"));
-            query1.bindValue( 15, fragIntensity.join(";"));
+            query1.bindValue( 13, c->virtualFragmentation);
+            query1.bindValue( 14, c->ionizationMode);
+            query1.bindValue( 15, cat.join(";"));
+
+            query1.bindValue( 16, fragMz.join(";"));
+            query1.bindValue( 17, fragIntensity.join(";"));
 
             if(!query1.exec())  qDebug() << query1.lastError();
         }

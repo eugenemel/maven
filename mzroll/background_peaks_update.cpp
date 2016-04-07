@@ -325,7 +325,6 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
     MassCalculator massCalc;
     emit (updateProgressBar( "Computing Mass Slices", 1, 10 ));
 
-
     vector<Adduct*> adductList;
     if (ionizationMode > 0) adductList.push_back(MassCalculator::PlusHAdduct);
     else if (ionizationMode < 0) adductList.push_back(MassCalculator::MinusHAdduct);

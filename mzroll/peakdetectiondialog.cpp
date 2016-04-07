@@ -6,9 +6,7 @@ PeakDetectionDialog::PeakDetectionDialog(QWidget *parent) :
     settings = NULL;
     mainwindow = NULL;
 
-    setModal(false);
     peakupdater = NULL;
-
     connect(computeButton, SIGNAL(clicked(bool)), SLOT(findPeaks()));
     connect(cancelButton, SIGNAL(clicked(bool)), SLOT(cancel()));
     connect(loadModelButton, SIGNAL(clicked(bool)), SLOT(loadModel()));
@@ -65,11 +63,6 @@ void PeakDetectionDialog::setOutputDir() {
 }
 
 void PeakDetectionDialog::show() {
-
-
-    //Qt::WindowFlags flags = windowFlags();
-    //setWindowFlags(flags | Qt::WindowStaysOnTopHint
-
 
     if ( mainwindow != NULL ) {
         QSettings* settings = mainwindow->getSettings();

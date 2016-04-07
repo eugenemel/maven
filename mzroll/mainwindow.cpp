@@ -136,7 +136,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     galleryDockWidget->setVisible(false);
     projectDockWidget->setVisible(false);
     rconsoleDockWidget->setVisible(false);
- fragmenationSpectraDockWidget->setVisible(false);    //treemap->setVisible(false);
+    fragmenationSpectraDockWidget->setVisible(false);    //treemap->setVisible(false);
     //peaksPanel->setVisible(false);
     //treeMapDockWidget =  createDockWidget("TreeMap",treemap);
 
@@ -153,6 +153,11 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     alignmentDialog	 =  new AlignmentDialog(this);
     connect(alignmentDialog->alignButton,SIGNAL(clicked()),SLOT(Align()));
     connect(alignmentDialog->UndoAlignment,SIGNAL(clicked()),SLOT(UndoAlignment()));
+
+    //Compound Library  Manager
+    libraryDialog = new LibraryMangerDialog(this);
+    libraryDialog->setMainWindow(this);
+
 
     //rconsole dialog
     //rconsoleDialog	 =  new RConsoleDialog(this);
@@ -393,7 +398,7 @@ void MainWindow::setCompoundFocus(Compound*c) {
 
     float mz = c->mass;
     if (!c->formula.empty() && charge) mz = c->ajustedMass(charge);
-    if (eicWidget->isVisible() && samples.size() > 0 )  eicWidget->setCompound(c);
+    if (eicWidget->isVisible() && samples.size() > 0 )  eicWidget->setCompound(c,NULL);
     if (isotopeWidget && isotopeWidget->isVisible() ) isotopeWidget->setCompound(c);
     if (massCalcWidget && massCalcWidget->isVisible() )  massCalcWidget->setMass(mz);
 
@@ -550,50 +555,6 @@ void MainWindow::loadModel(){
     QStringList filelist = QFileDialog::getOpenFileNames( this, "Select Model To Load", ".", "All Files(*.model)");
     if ( filelist.size() > 0 )  clsf->loadModel(filelist[0].toStdString());
 }
-
-void MainWindow::loadCompoundsFile(QString filename){
-    string dbfilename = filename.toStdString();
-    string dbname = mzUtils::cleanFilename(dbfilename);
-
-    int compoundCount = DB.loadCompoundsFile(filename);
-    DB.loadCompoundsSQL();
-
-    if (compoundCount > 0 && ligandWidget) {
-        ligandWidget->updateDatabaseList();
-        massCalcWidget->updateDatabaseList();
-
-        if( ligandWidget->isVisible() )
-            ligandWidget->setDatabase(QString(dbname.c_str()));
-    }
-
-
-    settings->setValue("lastDatabaseFile",filename);
-    setStatusText(tr("loadCompounds: done after loading %1 compounds").arg(QString::number(compoundCount)));
-}
-
-void MainWindow::loadCompoundsFile() {
-    QStringList filelist = QFileDialog::getOpenFileNames(this,
-            "Select Compounds File To Load",
-             ".",
-            "All Known Formats(*.csv *.tab *.msp *.sptxt *.pepXML);;Tab Delimited(*.tab);;CSV File(*.csv);;NIST Library(*.msp);;SpectraST(*.sptxt) pepXML(*.pepXML)");
-
-    if ( filelist.size() == 0 || filelist[0].isEmpty() ) return;
-    loadCompoundsFile(filelist[0]);
-}
-
-void MainWindow::reloadMethodsFolder() {
-    QString methodsFolder =      settings->value("methodsFolder").value<QString>();
-    methodsFolder = QFileDialog::getExistingDirectory(this,methodsFolder);
-
-    if (not methodsFolder.isEmpty()) {
-        DB.connect( methodsFolder + "/ligand.db");
-        DB.deleteAllCompoundsSQL();
-        DB.loadMethodsFolder(methodsFolder);
-        ligandWidget->updateDatabaseList();
-        massCalcWidget->updateDatabaseList();
-    }
-}
-
 BackgroundPeakUpdate* MainWindow::newWorkerThread(QString funcName) {
     BackgroundPeakUpdate* workerThread = new BackgroundPeakUpdate(this);
     workerThread->setMainWindow(this);
@@ -792,12 +753,8 @@ void MainWindow::createMenus() {
     fileMenu->addAction(loadModel);
 
     QAction* loadCompoundsFile = new QAction(tr("Load Compound List"), this);
-    connect(loadCompoundsFile, SIGNAL(triggered()), SLOT(loadCompoundsFile()));
+    connect(loadCompoundsFile, SIGNAL(triggered()), libraryDialog, SLOT(loadCompoundsFile()));
     fileMenu->addAction(loadCompoundsFile);
-
-    QAction* reloadMethodFolder = new QAction(tr("Reload Compounds"), this);
-    connect(reloadMethodFolder, SIGNAL(triggered()), SLOT(reloadMethodsFolder()));
-    fileMenu->addAction(reloadMethodFolder);
 
     QAction* saveProjectFile = new QAction(tr("Save Project"), this);
     saveProjectFile->setShortcut(tr("Ctrl+S"));
@@ -857,6 +814,12 @@ void MainWindow::createToolBars() {
     btnOpen->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnOpen->setToolTip(tr("Read in Mass Spec. Files"));
 
+    QToolButton *btnLibrary = new QToolButton(toolBar);
+    btnLibrary->setText("Library");
+    btnLibrary->setIcon(QIcon(rsrcPath + "/librarymanager.png"));
+    btnLibrary->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnLibrary->setToolTip(tr("Library Manager"));
+
     QToolButton *btnAlign = new QToolButton(toolBar);
     btnAlign->setText("Align");
     btnAlign->setIcon(QIcon(rsrcPath + "/textcenter.png"));
@@ -889,6 +852,7 @@ void MainWindow::createToolBars() {
 
 
     connect(btnOpen, SIGNAL(clicked()), SLOT(open()));
+    connect(btnLibrary, SIGNAL(clicked()), libraryDialog, SLOT(show()));
     connect(btnAlign,SIGNAL(clicked()), alignmentDialog, SLOT(show()));
     connect(btnDbSearch,SIGNAL(clicked()), SLOT(compoundDatabaseSearch()));
     connect(btnFeatureDetect,SIGNAL(clicked()), SLOT(showMassSlices()));
@@ -897,6 +861,7 @@ void MainWindow::createToolBars() {
 
 
     toolBar->addWidget(btnOpen);
+    toolBar->addWidget(btnLibrary);
     toolBar->addWidget(btnAlign);
     toolBar->addWidget(btnDbSearch);
     toolBar->addWidget(btnFeatureDetect);
