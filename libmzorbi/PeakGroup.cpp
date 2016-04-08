@@ -38,6 +38,7 @@ PeakGroup::PeakGroup()  {
     parent = NULL;
     adduct = NULL;
     compound = NULL;
+    deletedFlag=false;
 
     isFocused=false;
     label=0;				//classification label
@@ -97,6 +98,8 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     goodPeakCount=o.goodPeakCount;
     _type = o._type;
     tagString = o.tagString;
+    deletedFlag = o.deletedFlag;
+
 
     fragMatchScore = o.fragMatchScore;
     fragmentationPattern = o.fragmentationPattern;

@@ -4,7 +4,6 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     setAllowedAreas(Qt::AllDockWidgetAreas);
     setFloating(false);
     _mainwindow = mw;
-    currentProject = NULL;
 
     setObjectName(title);
     setWindowTitle(title);
@@ -20,7 +19,11 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
     treeWidget->setAcceptDrops(false);    
     treeWidget->setObjectName("PeakGroupTable");
-    connect(treeWidget, SIGNAL(itemSelectionChanged()),SLOT(showSelectedGroup()));
+
+    connect(treeWidget, SIGNAL(itemPressed(QTreeWidgetItem*,int)),SLOT(showSelectedGroup()));
+    connect(treeWidget, SIGNAL(itemClicked(QTreeWidgetItem*,int)),SLOT(showSelectedGroup()));
+    connect(treeWidget, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),SLOT(showSelectedGroup()));
+
     setupPeakTable();
 
     traindialog = new TrainDialog(this);
@@ -102,7 +105,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     QToolButton *btnHeatmapelete = new QToolButton(toolBar);
     btnHeatmapelete->setIcon(QIcon(rsrcPath + "/delete.png"));
     btnHeatmapelete->setToolTip("Delete Group");
-    connect(btnHeatmapelete, SIGNAL(clicked()), this, SLOT(deleteGroup()));
+    connect(btnHeatmapelete, SIGNAL(clicked()), this, SLOT(deleteSelected()));
 
     QToolButton *btnPDF = new QToolButton(toolBar);
     btnPDF->setIcon(QIcon(rsrcPath + "/PDF.png"));
@@ -333,19 +336,25 @@ QString TableDockWidget::groupTagString(PeakGroup* group){
 */
 
 void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
+    if(!group) return;
 
     group->groupStatistics();
-
-    //cerr << "addRow" << group << " "  << group->meanMz << " " << group->meanRt << " " << group->children.size() << " " << group->tagString << endl;
+    cerr << "addRow" << group->groupId << " "  << group->meanMz << " " << group->meanRt << " " << group->children.size() << " " << group->tagString << endl;
 
     if (group == NULL) return;
     if (group->peakCount() == 0 ) return;
     if (group->meanMz <= 0 ) return;
 
-    NumericTreeWidgetItem *item = new NumericTreeWidgetItem(root,PeakGroupType);
-    item->setFlags(Qt::ItemIsSelectable |  Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
-    item->setData(0,PeakGroupType,QVariant::fromValue(group));
+    NumericTreeWidgetItem *item=NULL;
+    if(!root) {
+       item = new NumericTreeWidgetItem(treeWidget,PeakGroupType);
+    } else {
+       item = new NumericTreeWidgetItem(root,PeakGroupType);
+    }
 
+    item->setFlags(Qt::ItemIsSelectable |  Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
+
+    item->setData(0,PeakGroupType,QVariant::fromValue(group));
     item->setText(0,groupTagString(group));
     item->setText(1,QString::number(group->meanMz, 'f', 4));
     item->setText(2,QString::number(group->meanRt, 'f', 2));
@@ -370,7 +379,7 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
         }
         heatmapBackground(item);
     }
-    if (!root) treeWidget->addTopLevelItem(item);
+
     updateItem(item);
 
     if ( group->childCount() > 0 ) {
@@ -392,12 +401,20 @@ bool TableDockWidget::hasPeakGroup(PeakGroup* group) {
 
 PeakGroup* TableDockWidget::addPeakGroup(PeakGroup* group, bool updateTable) {
     if (group == NULL) return NULL;
+
+    if(this->windowTitle() == "Bookmarks") {
+        group->groupId=_mainwindow->projectDockWidget->bookmarkPeakGroup(group);
+        cerr << "bookmark:" <<  group->groupId  << " " << group->peaks.size() << " " << group->children.size() << endl;
+    }
+
     allgroups.push_back(*group);
-    PeakGroup* g = &allgroups.back();
-    cerr << "add2:" << g << " " << g->peaks.size() << " " << g->children.size() << endl;
-    g->groupId = allgroups.size();
-    if(updateTable) showAllGroups();
-    //if (updateTable) addRow(g,NULL);
+    PeakGroup* g = &allgroups[allgroups.size()-1];
+
+    if (updateTable) {
+        //addRow(&allgroups[allgroups.size()-1], NULL);
+        showAllGroups();
+        //updateStatus();
+    }
     return g;
 }
 
@@ -529,15 +546,16 @@ void TableDockWidget::exportGroupsToSpreadsheet() {
 
 void TableDockWidget::showSelectedGroup() {
     //sortBy(treeWidget->header()->sortIndicatorSection());
+
     QTreeWidgetItem *item = treeWidget->currentItem();
     if (!item) return;
     if (item->type() != PeakGroupType) return;
 
     QVariant v = item->data(0,PeakGroupType);
     PeakGroup*  group =  v.value<PeakGroup*>();
-    cerr << "showSelectedGroup:" << group << " " << group->peaks.size() << " " << group->children.size() << endl;
 
     if ( group != NULL ) {
+        cerr << "showSelectedGroup: group" << group->groupId << " " << group->peaks.size() << " " << group->children.size() << endl;
         _mainwindow->setPeakGroup(group);
         _mainwindow->rconsoleDockWidget->updateStatus();
     }
@@ -577,12 +595,10 @@ QList<PeakGroup*> TableDockWidget::getSelectedGroups() {
 PeakGroup* TableDockWidget::getSelectedGroup() { 
     QTreeWidgetItem *item = treeWidget->currentItem();
     if (!item) return NULL;
-    qDebug() << "B" << endl;
 
     QVariant v = item->data(0,PeakGroupType);
     PeakGroup*  group =  v.value<PeakGroup*>();
 
-    qDebug() << "C" << group;
     if ( group != NULL ) { return group; }
     return NULL;
 }
@@ -601,36 +617,48 @@ void TableDockWidget::setGroupLabel(char label) {
     updateStatus();
 }
 
-void TableDockWidget::deleteGroup() {
+void TableDockWidget::deleteSelected() {
 
-    QTreeWidgetItem *item = treeWidget->currentItem();
-    if ( item == NULL ) return;
+    QList<PeakGroup*> selectedGroups = getSelectedGroups();
+    QTreeWidgetItemIterator it(treeWidget);
+    QTreeWidgetItem* nextItem=0;
 
-    PeakGroup* group = getSelectedGroup();
-    if ( group == NULL ) return;
+    int deleteCount=0;
+    while (*it) {
+        QTreeWidgetItem* item = (*it);
+        QVariant v = item->data(0,PeakGroupType);
+        PeakGroup*  group =  v.value<PeakGroup*>();
+        group->deletedFlag = false;
 
-    PeakGroup* parentGroup = group->parent;
-
-    qDebug() << "deleteGroup()" << group << " " << parentGroup << endl;
-    if ( parentGroup == NULL ) { //top level item
-        for(int i=0; i < allgroups.size(); i++) {
-            if ( &allgroups[i] == group ) {
+        if (selectedGroups.contains(group)) {
+           group->deletedFlag = true;
+           deleteCount++;
+           nextItem = treeWidget->itemBelow(item); //get next item
+            if (item->parent()) {
+                 item->parent()->removeChild(item);
+                 //delete(item);
+                 treeWidget->update();
+            } else {
                 treeWidget->takeTopLevelItem(treeWidget->indexOfTopLevelItem(item));
-                treeWidget->update();
-                delete(item);
-                allgroups.erase(allgroups.begin()+i);
-                break;
             }
         }
-    } else if ( parentGroup && parentGroup->childCount() ) {	//this a child item
-        if ( parentGroup->deleteChild(group) ) {
-            QTreeWidgetItem* parentItem = item->parent();
-            if ( parentItem ) { parentItem->removeChild(item); delete(item); }
-            treeWidget->update();
+        ++it;
+    }
+    qDebug() << "Delete="  << deleteCount << endl;
+    if (deleteCount) {
+        for(int i=0; i < allgroups.size(); i++) {
+            if(allgroups[i].deletedFlag)  {
+                qDebug() << "Delete=" << allgroups[i].groupId;
+                allgroups.erase(allgroups.begin()+i); i--;
+            }
         }
     }
-    _mainwindow->getEicWidget()->replotForced();
-    return;
+    if (nextItem)  {
+        treeWidget->setCurrentItem(nextItem);
+        //_mainwindow->getEicWidget()->replotForced();
+    }
+
+    updateStatus();
 }
 
 void TableDockWidget::setClipboard() { 
@@ -714,8 +742,12 @@ void TableDockWidget::Train() {
 
 void TableDockWidget::keyPressEvent(QKeyEvent *e ) {
 
-    if (e->key() == Qt::Key_Delete ) {
-        deleteGroup();
+     qDebug() << "KEY=" << e->key();
+
+    if (e->key() == Qt::Key_Enter ) {
+        showSelectedGroup();
+    } else if (e->key() == Qt::Key_Delete ) {
+        deleteSelected();
     } else if ( e->key() == Qt::Key_T ) {
         Train();
     } else if ( e->key() == Qt::Key_G ) {

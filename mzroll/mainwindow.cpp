@@ -40,34 +40,32 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
  qRegisterMetaType<QTextCursor>("QTextCursor");
 
-    readSettings();
-    QString dataDir = ".";
-    QList<QString> dirs;
-    dirs    << dataDir
-            << QApplication::applicationDirPath()
-            << QApplication::applicationDirPath() + "/../Resources/";
+  setWindowTitle(programName + " " + QString::number(MAVEN_VERSION));
+  qDebug() << "APP=" <<  QApplication::applicationName() << "VER=" <<  QApplication::applicationVersion();
 
-    //find location of DATA
-    foreach (QString d, dirs) {    qDebug() << "Checking dir: " + d;
-        QFile test(d+"/ADDUCTS.csv");
-        if (test.exists()) { dataDir=d; settings->setValue("dataDir", dataDir); break;}
+  readSettings();
+
+  QList<QString> dirs;
+  QString methodsFolder =      settings->value("methodsFolder").value<QString>();
+  dirs    << methodsFolder
+            << "."
+            << "./methods"
+            << QApplication::applicationDirPath()  + "/methods"
+            << QApplication::applicationDirPath() + "/../Resources/methods";
+
+    QString defaultModelFile =   settings->value("clsfModelFilename").value<QString>();
+    foreach (QString d, dirs) {
+        qDebug() << "Checking dir: " + d;
+        QFile test(d+ "/" + defaultModelFile);
+        if (test.exists()) { methodsFolder=d; settings->setValue("methodsFolder", methodsFolder); break;}
     }
 
-    setWindowTitle(programName + " " + QString::number(MAVEN_VERSION));
-
-    //CONNECT TO DATABASE
-    //locations of common files and directories
-    QString methodsFolder =      settings->value("methodsFolder").value<QString>();
-    QString writeLocation = QStandardPaths::standardLocations(QStandardPaths::DataLocation).first();
-
-    if(!QFile::exists(methodsFolder)) methodsFolder =  dataDir +  "/" + "methods";
-    if(!QFile::exists(writeLocation))  { QDir dir; dir.mkdir(writeLocation); }
-
-    qDebug() << "APP=" <<  QApplication::applicationName() << "VER=" <<  QApplication::applicationVersion();
-    qDebug() << "WRITE FOLDER=" <<  writeLocation;
-    qDebug() << "DATA  FOLDER=" << dataDir;
     qDebug() << "METHODS FOLDER=" << methodsFolder;
 
+    //CONNECT TO COMPOUND DATABASE
+    QString writeLocation = QStandardPaths::standardLocations(QStandardPaths::DataLocation).first();
+    if(!QFile::exists(writeLocation))  { QDir dir; dir.mkdir(writeLocation); }
+    qDebug() << "WRITE FOLDER=" <<  writeLocation;
     DB.connect(writeLocation + "/ligand.db");
     DB.loadCompoundsSQL();
 
@@ -78,8 +76,13 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     if(QFile::exists(commonAdducts))   DB.adductsDB = DB.loadAdducts(commonAdducts.toStdString());
 
     clsf = new ClassifierNeuralNet();    //clsf = new ClassifierNaiveBayes();
-    QString clsfModelFilename = dataDir +  "/"  +       settings->value("clsfModelFilename").value<QString>();
-    if(QFile::exists(clsfModelFilename)) clsf->loadModel(clsfModelFilename.toStdString());
+    QString clsfModelFilename = methodsFolder +  "/"  +   defaultModelFile;
+    if(QFile::exists(clsfModelFilename)) {
+        clsf->loadModel(clsfModelFilename.toStdString());
+    } else {
+        qDebug() << "ERROR: Can't find default.model"  << methodsFolder;
+    }
+
 
 
     //progress Bar on the bottom of the page
@@ -115,7 +118,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     ligandWidget = new LigandWidget(this);
     heatmap	 = 	  new HeatMap(this);
     galleryWidget = new GalleryWidget(this);
-    bookmarkedPeaks = new TableDockWidget(this,"Bookmarked Groups",0);
+    bookmarkedPeaks = new TableDockWidget(this,"Bookmarks",0);
     spectraDockWidget =  createDockWidget("Spectra",spectraWidget);
     heatMapDockWidget =  createDockWidget("HeatMap",heatmap);
     galleryDockWidget =  createDockWidget("Gallery",galleryWidget);
@@ -316,8 +319,7 @@ void MainWindow::deletePeakTable(TableDockWidget *x) {
 }
 
 TableDockWidget* MainWindow::addPeaksTable(QString title) {
-    //TableDockWidget* panel	 = new TableDockWidget(this,"Bookmarked Groups",0);
-    QPointer<TableDockWidget> panel	 = new TableDockWidget(this,"Bookmarked Groups",0);
+    QPointer<TableDockWidget> panel	 = new TableDockWidget(this,title,0);
     addDockWidget(Qt::BottomDockWidgetArea,panel,Qt::Horizontal);
     groupTables.push_back(panel);
 
@@ -367,15 +369,12 @@ void MainWindow::bookmarkSelectedPeakGroup() {
 
 
 
-PeakGroup* MainWindow::bookmarkPeakGroup(PeakGroup* group) {
+void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
     qDebug() << "MainWindow::bookmarkPeakGroup(group)";
     if ( bookmarkedPeaks->isVisible() == false ) {
         bookmarkedPeaks->setVisible(true);
     }
-
-    projectDockWidget->bookmarkPeakGroup(group);
-    PeakGroup* bookmarkedGroup = bookmarkedPeaks->addPeakGroup(group,true);
-    return bookmarkedGroup;
+    bookmarkedPeaks->addPeakGroup(group,true);
 }
 
 void MainWindow::setFormulaFocus(QString formula) {

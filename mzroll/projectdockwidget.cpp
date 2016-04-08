@@ -427,9 +427,13 @@ void ProjectDockWidget::closeProject() {
     }
 }
 
-void ProjectDockWidget::bookmarkPeakGroup(PeakGroup* group) {
+int ProjectDockWidget::bookmarkPeakGroup(PeakGroup* group) {
     if (!currentProject) saveProject();
-    if (currentProject) currentProject->writeGroupSqlite(group,0);
+
+    if (currentProject)
+        return currentProject->writeGroupSqlite(group,0,"peakgroups");
+    else
+        return -1;
 }
 
 void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
@@ -552,7 +556,7 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename, TableDockWidget* pea
         project->deleteAll();;
         project->saveSamples(sampleSet);
         if(peakTable) {
-            for(PeakGroup* group : peakTable->getGroups())  project->writeGroupSqlite(group,0);
+            for(PeakGroup* group : peakTable->getGroups())  project->writeGroupSqlite(group,0,"peakgroups");
         }
     } else {
        qDebug() << "Can't write to closed project" << filename;

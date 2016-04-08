@@ -5,7 +5,7 @@
 
 void ProjectDB::saveGroups(vector<PeakGroup>& allgroups, QString setName) {
     for(unsigned int i=0; i < allgroups.size(); i++ ) {
-        writeGroupSqlite(&allgroups[i],0);
+        writeGroupSqlite(&allgroups[i],0,"peakgroups");
     }
 }
 
@@ -68,38 +68,70 @@ void ProjectDB::saveSamples(vector<mzSample *> &sampleSet) {
     query0.exec("end transaction");
 }
 
-void ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId=0) {
-	if (!g) return;
+void ProjectDB::deletePeakGroup(PeakGroup* g, QString tableName) {
+     if (!g) return;
+
+     vector<int>selectedGroups;
+     selectedGroups.push_back(g->groupId);
+     for(const PeakGroup& child: g->children)  selectedGroups.push_back(child.groupId);
+
+     if(selectedGroups.size() == 0) return;
 
      QSqlQuery query0(sqlDB);
      query0.exec("begin transaction");
-     if(!query0.exec("create table IF NOT EXISTS peakgroups( \
-                        groupId integer primary key AUTOINCREMENT, \
-                        parentGroupId integer, \
-                        tagString varchar(255), \
-                        metaGroupId integer, \
-                        expectedRtDiff float, \
-                        groupRank int, \
+     QSqlQuery query1(sqlDB);
+     query1.prepare("delete from ?     where groupId = ?");
+
+     QSqlQuery query2(sqlDB);
+     query2.prepare("delete from peaks where groupId = ?");
+
+     for(int id: selectedGroups) {
+            query1.addBindValue(tableName);
+            query1.addBindValue(id);
+            query2.addBindValue(id);
+
+            if( query1.exec() ) qDebug() << query1.lastError();
+            if( query2.exec() ) qDebug() << query2.lastError();
+    }
+    query0.exec("commit");
+}
+
+int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId=0, QString tableName="peakgroups") {
+
+     if (!g) return -1;
+     QSqlQuery query0(sqlDB);
+     query0.exec("begin transaction");
+     QString TABLESQL= QString("create table IF NOT EXISTS %1 (\
+                        groupId integer primary key AUTOINCREMENT,\
+                        parentGroupId integer,\
+                        tagString varchar(255),\
+                        metaGroupId integer,\
+                        expectedRtDiff float,\
+                        groupRank int,\
                         label varchar(10),\
                         type integer,\
                         srmId varchar(255),\
                         compoundId varchar(255),\
                         compoundName varchar(255),\
                         compoundDB varchar(255)\
-                        )"))  qDebug() << query0.lastError();
+                        )").arg(tableName);
+
+     if(!query0.exec(TABLESQL)) qDebug() << query0.lastError();
+
+     QString INSERTSQL = QString("insert into %1 values(NULL,?,?,?,?,?,?,?,?,?,?,?)").arg(tableName);
 
      //cerr << "inserting .. " << g->groupId << endl;
 	 QSqlQuery query1(sqlDB);
-        query1.prepare("insert into peakgroups values(NULL,?,?,?,?,?,?,?,?,?,?,?)");
-        //query1.bindValue( 0, QString::number(g->groupId));
-        query1.addBindValue(QString::number(parentGroupId));
-        query1.addBindValue(QString(g->tagString.c_str()));
-        query1.addBindValue(QString::number(g->metaGroupId));
-        query1.addBindValue(QString::number(g->expectedRtDiff,'f',2));
-        query1.addBindValue(QString::number(g->groupRank));
-        query1.addBindValue(QString(g->label));
-        query1.addBindValue(QString::number(g->type()));
-        query1.addBindValue(QString(g->srmId.c_str()));
+            query1.prepare(INSERTSQL);
+            //query1.bindValue( 0, QString::number(g->groupId));
+            query1.addBindValue(QString::number(parentGroupId));
+            query1.addBindValue(QString(g->tagString.c_str()));
+            query1.addBindValue(QString::number(g->metaGroupId));
+            query1.addBindValue(QString::number(g->expectedRtDiff,'f',2));
+            query1.addBindValue(QString::number(g->groupRank));
+            query1.addBindValue(QString(g->label));
+            query1.addBindValue(QString::number(g->type()));
+            query1.addBindValue(QString(g->srmId.c_str()));
 
         if (g->compound != NULL) {
             query1.addBindValue(QString(g->compound->id.c_str()) );
@@ -208,15 +240,15 @@ void ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId=0) {
         }
 
     query0.exec("end transaction");
+    qDebug() << "writeGroupSQL: groupId" << lastInsertGroupId << " table=" << tableName;
+    return lastInsertGroupId;
 }
 
-
 void ProjectDB::loadPeakGroups(QString tableName) {
-     tableName = "peakgroups";
 
      QSqlQuery query(sqlDB);
      query.exec("create index if not exists peak_group_ids on peaks(groupId)");
-     query.exec("select * from peakgroups");
+     query.exec("select * from " + tableName );
 
      while (query.next()) {
         PeakGroup g;

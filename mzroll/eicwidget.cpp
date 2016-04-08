@@ -884,6 +884,10 @@ void EicWidget::setTitle() {
         tagString = QString(_slice.srmId.c_str());
     }
 
+    if(_slice.adduct) {
+        tagString += QString(_slice.adduct->name.c_str());
+    }
+
     QString titleText =  tr("<b>%1</b> m/z: %2-%3").arg(
                 tagString,
                 QString::number(_slice.mzmin, 'f', 4),
@@ -1267,7 +1271,9 @@ void EicWidget::setCompound(Compound* c, Adduct* adduct) {
 
     mzSlice slice(minmz,maxmz,rtmin,rtmax);
     slice.compound = c;
+    slice.adduct   = adduct;
     if(!c->srmId.empty()) slice.srmId=c->srmId;
+
     setMzSlice(slice);
 
    //clock_gettime(CLOCK_REALTIME, &tE);
@@ -1292,7 +1298,7 @@ void EicWidget::setMzSlice(const mzSlice& slice) {
 
         if ( slice.compound ) {
             //SRM DATA
-            if (slice.compound->precursorMz !=0 && slice.compound->productMz != 0 ) {
+            if (slice.compound->precursorMz !=0 && slice.compound->productMz>0) {
                 _slice.mzmin =   slice.compound->precursorMz;
                 _slice.mzmax =   slice.compound->productMz;
                 _slice.mz    =   slice.compound->precursorMz;

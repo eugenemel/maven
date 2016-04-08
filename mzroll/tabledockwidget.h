@@ -63,7 +63,7 @@ public slots:
 	  void updateTable();
 	  void updateItem(QTreeWidgetItem* item);
 	  void updateStatus();
-          void runScript();
+       void runScript();
 
 	  void markGroupBad();
 	  void markGroupGood();
@@ -74,8 +74,8 @@ public slots:
           void showTreeMap();
 	  void showScatterPlot();
 	  void setClipboard();
-	  void deleteGroup();
-	  void sortBy(int);
+      void deleteSelected();
+      void sortBy(int);
 	  void align();
 	  void deleteAll();
           void clusterGroups();
@@ -110,7 +110,6 @@ private:
           TrainDialog* traindialog;
           ClusterDialog*       clusterDialog;
           QDialog* 	 filtersDialog;
-          ProjectDB*  currentProject;
 
           enum tableViewType{ groupView=0, peakView=1 };
           tableViewType viewType;

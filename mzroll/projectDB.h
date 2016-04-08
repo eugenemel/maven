@@ -24,10 +24,11 @@ class ProjectDB {
             void saveSamples(vector<mzSample *> &sampleSet);
             void saveGroups(vector<PeakGroup>   &allgroups, QString setName);
             void writeSearchResultsToDB();
-            void writeGroupSqlite(PeakGroup* group, int parentGroupId);
+            int writeGroupSqlite(PeakGroup* group, int parentGroupId, QString tableName);
             void loadPeakGroups(QString tableName);
             void loadGroupPeaks(PeakGroup* group);
             void deleteAll();
+            void deletePeakGroup(PeakGroup* g, QString tableName);
 
 
             void setSamples(vector<mzSample*>set) { samples = set; }
