@@ -555,6 +555,7 @@ void SpectraWidget::resizeEvent (QResizeEvent * event) {
     replot();
 }
 
+/*
 void SpectraWidget::enterEvent (QEvent *) {
     grabKeyboard();
 }
@@ -562,6 +563,7 @@ void SpectraWidget::enterEvent (QEvent *) {
 void SpectraWidget::leaveEvent (QEvent*) {
     releaseKeyboard();
 }
+*/
 
 void SpectraWidget::addAxes() { 
 

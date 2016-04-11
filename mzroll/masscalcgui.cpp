@@ -114,6 +114,7 @@ void MassCalcWidget::showTable() {
         item->setText(5,db);
     }
 
+    p->sortByColumn(2,Qt::DescendingOrder);
     p->header()->setStretchLastSection(true);
     p->setSortingEnabled(true);
     p->setUpdatesEnabled(true);

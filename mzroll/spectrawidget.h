@@ -105,8 +105,8 @@ public slots:
                     void annotateScan();
 
 		protected:
-                    void leaveEvent ( QEvent * event );
-                    void enterEvent(QEvent * event);
+                    //void leaveEvent ( QEvent * event );
+                    //void enterEvent(QEvent * event);
                     void keyPressEvent(QKeyEvent *event);
                     void resizeEvent ( QResizeEvent * event );
                     void mouseReleaseEvent(QMouseEvent * mouseEvent);

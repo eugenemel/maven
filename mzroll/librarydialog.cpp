@@ -68,7 +68,7 @@ void LibraryMangerDialog::loadCompoundsFile() {
     QStringList filelist = QFileDialog::getOpenFileNames(this,
             "Select Compounds File To Load",
              methodsFolder,
-            "All Known Formats(*.csv *.tab *.msp *.sptxt *.pepXML);;Tab Delimited(*.tab);;CSV File(*.csv);;NIST Library(*.msp);;SpectraST(*.sptxt) pepXML(*.pepXML)");
+            "All Known Formats(*.csv *.tab *.txt *.msp *.sptxt *.pepXML);;Tab Delimited(*.tab);;CSV File(*.csv);;NIST Library(*.msp);;SpectraST(*.sptxt) pepXML(*.pepXML)");
 
     if ( filelist.size() == 0 || filelist[0].isEmpty() ) return;
     loadCompoundsFile(filelist[0]);

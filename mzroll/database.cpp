@@ -330,43 +330,52 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
 
     vector<Compound*> compoundSet; //return
 
-    ifstream myfile(fileName.toLatin1());
-    if (! myfile.is_open()) return compoundSet;
+    QFile data(fileName);
+    if (!data.open(QFile::ReadOnly) ) {
+        qDebug() << "Can't open " << fileName; exit(-1);
+        return compoundSet;
+    }
 
-    string line;
     string dbname = mzUtils::cleanFilename(fileName.toStdString());
-    int loadCount=0; 
-    int lineCount=0;
-    map<string, int>header;
-    vector<string> headers;
+    QMap<QString, int>header;
+    QVector<QString> headers;
     MassCalculator mcalc;
 
     //assume that files are tab delimited, unless matched ".csv", then comma delimited
     char sep='\t';
     if(fileName.endsWith(".csv",Qt::CaseInsensitive)) sep = ',';
+    QTextStream stream(&data);
 
-    while ( getline(myfile,line) ) {
-        if (!line.empty() && line[0] == '#') continue;
-        //trim spaces on the left
-        line.erase(line.find_last_not_of(" \n\r\t")+1);
+    QString line;
+    int loadCount=0;
+    int lineCount=0;
+
+    do {
+        line = stream.readLine().trimmed();
+        if (line.isEmpty() || line[0] == '#') continue;
+
         lineCount++;
-        vector<string>fields;
-        mzUtils::split(line, sep, fields);
+        //vector<string>fields;
+        //mzUtils::split(line.toStdString(), sep, fields);
+
+        QStringList fieldsA = line.split(sep);
+        QVector<QString> fields = fieldsA.toVector();
 
         for(unsigned int i=0; i < fields.size(); i++ ) {
             int n = fields[i].length();
             if (n>2 && fields[i][0] == '"' && fields[i][n-1] == '"') {
-                fields[i]= fields[i].substr(1,n-2);
+                fields[i]= fields[i].replace("\"","");
             }
             if (n>2 && fields[i][0] == '\'' && fields[i][n-1] == '\'') {
-                fields[i]= fields[i].substr(1,n-2);
+                fields[i]= fields[i].replace("\"","");
             }
+            fields[i] = fields[i].trimmed();
         }
 
         if (lineCount==1) {
             headers = fields;
             for(unsigned int i=0; i < fields.size(); i++ ) {
-                fields[i]=makeLowerCase(fields[i]);
+                fields[i]=fields[i].toLower();
                 header[ fields[i] ] = i;
             }
             continue;
@@ -382,46 +391,46 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
         float logP;
         int N=fields.size();
         vector<string>categorylist;
+        //qDebug() << N << line;
 
-        if ( header.count("mz") && header["mz"]<N)  mz = string2float(fields[ header["mz"]]);
-        if ( header.count("rt") && header["rt"]<N)  rt = string2float(fields[ header["rt"]]);
-        if ( header.count("expectedrt") && header["expectedrt"]<N) rt = string2float(fields[ header["expectedrt"]]);
-        if ( header.count("charge")&& header["charge"]<N) charge = string2float(fields[ header["charge"]]);
-        if ( header.count("formula")&& header["formala"]<N) formula = fields[ header["formula"] ];
-        if ( header.count("id")&& header["id"]<N) 	 id = fields[ header["id"] ];
-        if ( header.count("name")&& header["name"]<N) 	 name = fields[ header["name"] ];
-        if ( header.count("compound")&& header["compound"]<N) 	 name = fields[ header["compound"] ];
-        if ( header.count("smile")&& header["smile"]<N) 	 smile = fields[ header["smile"] ];
-        if ( header.count("logp")&& header["logp"]<N) 	 logP = string2float(fields[ header["logp"] ]);
+        if ( header.count("mz") && header["mz"]<N)  mz = fields[ header["mz"]].toDouble();
+        if ( header.count("rt") && header["rt"]<N)  rt = fields[ header["rt"]].toDouble();
+        if ( header.count("expectedrt") && header["expectedrt"]<N) rt = fields[ header["expectedrt"]].toDouble();
+        if ( header.count("charge")&& header["charge"]<N) charge = fields[ header["charge"]].toDouble();
+        if ( header.count("formula")&& header["formala"]<N) formula = fields[ header["formula"] ].toStdString();
+        if ( header.count("id")&& header["id"]<N) 	 id = fields[ header["id"] ].toStdString();
+        if ( header.count("name")&& header["name"]<N) 	 name = fields[ header["name"] ].toStdString();
+        if ( header.count("compound")&& header["compound"]<N) 	 name = fields[ header["compound"] ].toStdString();
+        if ( header.count("metabolite")&& header["metabolite"]<N) 	 name = fields[ header["compound"] ].toStdString();
+        if ( header.count("smile")&& header["smile"]<N) 	 smile = fields[ header["smile"] ].toStdString();
+        if ( header.count("logp")&& header["logp"]<N) 	 logP = fields[ header["logp"] ].toDouble();
 
-        if ( header.count("precursormz") && header["precursormz"]<N) precursormz=string2float(fields[ header["precursormz"]]);
-        if ( header.count("productmz") && header["productmz"]<N)  productmz = string2float(fields[header["productmz"]]);
-        if ( header.count("collisionenergy") && header["collisionenergy"]<N) collisionenergy=string2float(fields[ header["collisionenergy"]]);
+        if ( header.count("precursormz") && header["precursormz"]<N) precursormz=fields[ header["precursormz"]].toDouble();
+        if ( header.count("productmz") && header["productmz"]<N)  productmz = fields[header["productmz"]].toDouble();
+        if ( header.count("collisionenergy") && header["collisionenergy"]<N) collisionenergy=fields[ header["collisionenergy"]].toDouble();
 
-        if ( header.count("Q1") && header["Q1"]<N) precursormz=string2float(fields[ header["Q1"]]);
-        if ( header.count("Q3") && header["Q3"]<N)  productmz = string2float(fields[header["Q3"]]);
-        if ( header.count("CE") && header["CE"]<N) collisionenergy=string2float(fields[ header["CE"]]);
+        if ( header.count("Q1") && header["Q1"]<N) precursormz=fields[ header["Q1"]].toDouble();
+        if ( header.count("Q3") && header["Q3"]<N)  productmz = fields[header["Q3"]].toDouble();
+        if ( header.count("CE") && header["CE"]<N) collisionenergy=fields[ header["CE"]].toDouble();
 
         //cerr << lineCount << " " << endl;
         //for(int i=0; i<headers.size(); i++) cerr << headers[i] << ", ";
         //cerr << "   -> category=" << header.count("category") << endl;
         if ( header.count("category") && header["category"]<N) {
-            string catstring=fields[header["category"]];
-            if (!catstring.empty()) {
-                mzUtils::split(catstring,';', categorylist);
-                if(categorylist.size() == 0) categorylist.push_back(catstring);
-                //cerr << catstring << " ListSize=" << categorylist.size() << endl;
+            QString catstring=fields[header["category"]];
+            if (!catstring.isEmpty()) {
+                for(QString x: catstring.split(";"))  categorylist.push_back(x.toStdString());
             }
          }
 
         if ( header.count("polarity") && header["polarity"] <N)  {
-            string x = fields[ header["polarity"]];
+            QString x = fields[ header["polarity"]];
             if ( x == "+" ) {
                 charge = 1;
             } else if ( x == "-" ) {
                 charge = -1;
             } else  {
-                charge = string2float(x);
+                charge = x.toInt();
             }
 
         }
@@ -450,8 +459,9 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
             //addCompound(compound);
             loadCount++;
         }
-    }
-    myfile.close();
+    } while (!line.isNull());
+
+    qDebug() << "Read in" << lineCount << " lines." <<  " compounds=" << loadCount << endl;
 
     sort(compoundSet.begin(),compoundSet.end(), Compound::compMass);
     return compoundSet;
@@ -576,6 +586,10 @@ void Database::deleteAllCompoundsSQL() {
 
 void Database::deleteCompoundsSQL(QString dbName) {
     QSqlQuery query(ligandDB);
+
+    //create index based on database name.
+     query.exec("create index if not exists compound_db_idx on compounds(dbName)");
+
     query.prepare("delete from compounds where dbName = ?");
     query.bindValue( 0, dbName );
     if (!query.exec())  qDebug() << query.lastError();
@@ -609,6 +623,8 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet) {
                     fragment_mzs text, \
                     fragment_intensity text \
                     )"))  qDebug() << "Ho... " << query0.lastError();
+
+        query0.exec("create index if not exists compound_db_idx on compounds(dbName)");
 
         QSqlQuery query1(ligandDB);
         query1.prepare("insert into compounds values(NULL, ?,?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?)");
