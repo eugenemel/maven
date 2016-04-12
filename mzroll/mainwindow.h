@@ -78,6 +78,7 @@ public:
     QDoubleSpinBox 	  *ppmWindowBox;
     QLineEdit         *searchText;
     QComboBox		  *quantType;
+    QComboBox         *adductType;
     QLabel			  *statusText;
 
     SpectraWidget     *spectraWidget;
@@ -160,7 +161,6 @@ public slots:
     void Align();
     void UndoAlignment();
     void spectaFocused(Peak* _peak);
-    bool checkCompoundExistance(Compound* c);
     void setCompoundFocus(Compound* c);
     void showFragmentationScans(float pmz);
     QString groupTextExport(PeakGroup* group);
@@ -188,8 +188,11 @@ public slots:
     void addToHistory(const mzSlice& slice);
     void historyNext();
     void historyLast();
-    void getLinks(Peak* peak);
+    void getCovariants(Peak* peak);
     void markGroup(PeakGroup* group,char label);
+
+    void changeUserAdduct();
+    Adduct* getUserAdduct();
 
     void setIonizationMode( int x );
     int  getIonizationMode() { return _ionizationMode; }

@@ -13,7 +13,6 @@ class Note : public QObject, public QGraphicsItem {
 
 public:
 	
-        Note(UserNote* note, QGraphicsItem *parent = 0);
 	Note(const QString &text, QGraphicsItem *parent = 0, QGraphicsScene *scene = 0);
 
 	void setEditable(bool f) { editable=f; }
@@ -30,7 +29,6 @@ public:
         enum Style { NumberOnly=0, ShortText=1, FullText=2, showNoteIcon=3 };
         void setStyle(Style s) { _style = s; }
         void setTimeoutTime(int time) { _timeOutTime=time; }
-        void setRemoteNoteLink(UserNote* note, QString url);
 
 
 	int noteid;

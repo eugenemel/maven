@@ -23,6 +23,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
  qRegisterMetaType<Compound*>("Compound*");
  qRegisterMetaTypeStreamOperators<Compound*>("Compound*");
 
+ qRegisterMetaType<Adduct*>("Adduct*");
+ //qRegisterMetaTypeStreamOperators<Adduct*>("Adduct*");
+
  qRegisterMetaType<Scan*>("Scan*");
  qRegisterMetaTypeStreamOperators<Scan*>("Scan*");
 
@@ -34,9 +37,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
  qRegisterMetaType<mzSlice>("mzSlice");
  qRegisterMetaTypeStreamOperators<mzSlice>("mzSlice");
-
- qRegisterMetaType<UserNote*>("UserNote*");
- //qRegisterMetaTypeStreamOperators<UserNote*>("UserNote*");
 
  qRegisterMetaType<QTextCursor>("QTextCursor");
 
@@ -220,10 +220,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     fragPanel->hide();
 
 
-    setIonizationMode(0);
-    if ( settings->contains("ionizationMode")) {
-    	setIonizationMode(settings->value("ionizationMode").toInt());
-    }
 
     setUserPPM(5);
     if ( settings->contains("ppmWindowBox")) {
@@ -245,6 +241,12 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     massCalcWidget->updateDatabaseList();
     ligandWidget->setDatabase("KNOWNS");
     //if(settings->contains("lastDatabaseFile")) ligandWidget->setDatabase("lastDatabaseFile");
+
+    setIonizationMode(0);
+    if ( settings->contains("ionizationMode")) {
+        setIonizationMode(settings->value("ionizationMode").toInt());
+    }
+
     setAcceptDrops(true);
 
     showNormal();	//return from full screen on startup
@@ -345,12 +347,16 @@ void MainWindow::setUserPPM( double x) {
 }
 
 void MainWindow::setIonizationMode( int x ) {
+    qDebug() << "setIonizationMode: " << x;
     _ionizationMode=x;
      massCalcWidget->setCharge(_ionizationMode);
      isotopeWidget->setCharge(_ionizationMode);
 
-
+     if(x>0) adductType->setCurrentText("[M+H]+");
+     else if(x<0) adductType->setCurrentText("[M-H]-");
+     else adductType->setCurrentText("[M]");
 }
+
 vector<mzSample*> MainWindow::getVisibleSamples() { 
 
     vector<mzSample*>vsamples;
@@ -378,26 +384,29 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
 }
 
 void MainWindow::setFormulaFocus(QString formula) {
-    int charge = 0;
-    if (getIonizationMode()) charge=getIonizationMode(); //user specified ionization mode
-
+    Adduct* adduct = getUserAdduct();
     MassCalculator mcalc;
-    double parentMass = mcalc.computeMass(formula.toStdString(),charge);
-    if ( eicWidget->isVisible() ) eicWidget->setMzSlice(parentMass);
+    double parentMass = mcalc.computeNeutralMass(formula.toStdString());
+    double pmz = adduct->computeAdductMass(parentMass);
+    if ( eicWidget->isVisible() ) eicWidget->setMzSlice(pmz);
     isotopeWidget->setFormula(formula);
 }
 
 void MainWindow::setCompoundFocus(Compound*c) {
     if (c == NULL ) return;
 
+    /*
     int charge = 0;
     if (samples.size() > 0  && samples[0]->getPolarity() > 0) charge = 1;
     if (getIonizationMode()) charge=getIonizationMode(); //user specified ionization mode
-    qDebug() << "setCompoundFocus:" << c->name.c_str() << " " << charge << " " << c->expectedRt;
+    */
 
-    float mz = c->mass;
-    if (!c->formula.empty() && charge) mz = c->ajustedMass(charge);
-    if (eicWidget->isVisible() && samples.size() > 0 )  eicWidget->setCompound(c,NULL);
+    Adduct* adduct = getUserAdduct();
+    cerr << "setCompoundFocus:" << c->name.c_str() << " " << adduct->name << " " << c->expectedRt << endl;
+    searchText->setText(c->name.c_str());
+
+    float mz = adduct->computeAdductMass(c->mass);
+    if (eicWidget->isVisible() && samples.size() > 0 )  eicWidget->setCompound(c,adduct);
     if (isotopeWidget && isotopeWidget->isVisible() ) isotopeWidget->setCompound(c);
     if (massCalcWidget && massCalcWidget->isVisible() )  massCalcWidget->setMass(mz);
 
@@ -430,16 +439,8 @@ void MainWindow::showDockWidgets() {
 }
 
 void MainWindow::doSearch(QString needle) { 
-    QRegExp words("[a-z][A-Z]",Qt::CaseInsensitive,QRegExp::RegExp);
     QRegExp formula("C[1-9].*(H[1-9]+|O[1-9]+|N[1-9]+)",Qt::CaseInsensitive,QRegExp::RegExp);
-
-    if ( needle.contains(words) || needle.isEmpty()) {
-        ligandWidget->setFilterString(needle);
-    }
-
-    if (needle.contains(formula) ) {
-        setFormulaFocus(needle);
-    }
+    if (needle.contains(formula) ){ setFormulaFocus(needle);}
 }
 
 void MainWindow::setMzValue() { 
@@ -894,17 +895,14 @@ void MainWindow::createToolBars() {
 
     QShortcut* ctrlK = new QShortcut(QKeySequence(tr("Ctrl+K", "Do Search")), this);
     QShortcut* ctrlF = new QShortcut(QKeySequence(tr("Ctrl+F", "Do Search")), this);
-
     connect(ctrlK,SIGNAL(activated()),searchText,SLOT(selectAll())); 
     connect(ctrlK,SIGNAL(activated()),searchText,SLOT(setFocus())); 
-
     connect(ctrlF,SIGNAL(activated()),searchText,SLOT(selectAll()));
     connect(ctrlF,SIGNAL(activated()),searchText,SLOT(setFocus()));
 
 
     suggestPopup = new SuggestPopup(searchText);
-    connect(suggestPopup,SIGNAL(compoundSelected(Compound*)),this, SLOT(setCompoundFocus(Compound*)));
-    connect(suggestPopup,SIGNAL(compoundSelected(Compound*)),ligandWidget,SLOT(setCompoundFocus(Compound*)));
+    connect(suggestPopup,SIGNAL(compoundSelected(Compound*)),this,SLOT(setCompoundFocus(Compound*)));
     connect(ligandWidget,SIGNAL(databaseChanged(QString)),suggestPopup,SLOT(setDatabase(QString)));
     layout->addSpacing(10);
 
@@ -917,6 +915,12 @@ void MainWindow::createToolBars() {
     quantType->setToolTip("Peak Quntitation Type");
     connect(quantType,SIGNAL(activated(int)),eicWidget,SLOT(replot()));
 
+    adductType = new QComboBox(hBox);
+    for(Adduct* a: DB.adductsDB) {
+        adductType->addItem(a->name.c_str(),QVariant::fromValue(a));
+    }
+    connect(adductType,SIGNAL(currentIndexChanged(QString)),SLOT(changeUserAdduct()));
+
     settings->beginGroup("searchHistory");
     QStringList keys = settings->childKeys();
     foreach(QString key, keys) suggestPopup->addToHistory(key, settings->value(key).toInt());
@@ -925,6 +929,7 @@ void MainWindow::createToolBars() {
     layout->addWidget(quantType, 0);
     layout->addWidget(new QLabel("[m/z]", hBox), 0);
     layout->addWidget(searchText, 0);
+    layout->addWidget(adductType, 0);
     layout->addWidget(new QLabel("+/-",0,0));
     layout->addWidget(ppmWindowBox, 0);
 
@@ -1227,9 +1232,6 @@ void MainWindow::spectaFocused(Peak* _peak) {
     Scan* scan = sample->getScan(_peak->scan); 
     if (scan == NULL) return;
 
-    int ionizationMode = scan->getPolarity();
-    if (getIonizationMode()) ionizationMode=getIonizationMode(); //user specified ionization mode
-
     if (spectraDockWidget->isVisible() && scan) {
         spectraWidget->setScan(_peak);
     }
@@ -1354,27 +1356,6 @@ void MainWindow::reorderSamples(PeakGroup* group ) {
     if ( eicWidget ) eicWidget->update();
 }
 
-bool MainWindow::checkCompoundExistance(Compound* c) { 
-    int charge = -1;
-    if ( samples.size() > 0  && samples[0]->getPolarity() > 0) charge = 1;
-    if (getIonizationMode()) charge=getIonizationMode(); //user specified ionization mode
-
-    float mz = c->ajustedMass(charge);
-    float mzmin = mz - mz/1e6*3;
-    float mzmax = mz + mz/1e6*3;
-
-    for ( unsigned int i=0; i < samples.size(); i++ ) {
-        int consectveMatches=0;
-        for (unsigned int j=0; j < samples[i]->scans.size(); j++ ) {
-            vector<int> matches = samples[i]->scans[j]->findMatchingMzs(mzmin,mzmax);
-            if (matches.size() > 0 ) { consectveMatches++; } else consectveMatches=0;
-            if (consectveMatches > 3 ) return true;
-        }
-    }
-    return false;
-}
-
-
 
 QWidget* MainWindow::eicWidgetController() {
 
@@ -1426,13 +1407,6 @@ QWidget* MainWindow::eicWidgetController() {
     btnGallary->setIcon(QIcon(rsrcPath + "/gallery.png"));
     btnGallary->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnGallary->setToolTip(tr("Show In Gallary"));
-
-    QToolButton *btnShowTic= new QToolButton(toolBar);
-    btnShowTic->setCheckable(true);
-    btnShowTic->setChecked(false);
-    btnShowTic->setIcon(QIcon(rsrcPath + "/tic.png"));
-    btnShowTic->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnShowTic->setToolTip(tr("Show TICs"));
 
     QToolButton *btnMarkGood = new QToolButton(toolBar);
     btnMarkGood->setIcon(QIcon(rsrcPath + "/markgood.png"));
@@ -1497,7 +1471,6 @@ QWidget* MainWindow::eicWidgetController() {
     toolBar->addSeparator();
 
     toolBar->addWidget(btnAutoZoom);
-    toolBar->addWidget(btnShowTic);
 
 //    toolBar->addWidget(smoothingWindowBox);
 
@@ -1516,10 +1489,6 @@ QWidget* MainWindow::eicWidgetController() {
     connect(btnIntegrateArea,SIGNAL(clicked()),  eicWidget, SLOT(startAreaIntegration()));
     connect(btnAverageSpectra,SIGNAL(clicked()),  eicWidget, SLOT(startSpectralAveraging()));
 
-
-    connect(btnShowTic,SIGNAL(toggled(bool)), eicWidget, SLOT(showTicLine(bool)));
-    connect(btnShowTic,SIGNAL(toggled(bool)), eicWidget, SLOT(replot()));
-
     QWidget *window = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setMargin(0);
@@ -1532,8 +1501,9 @@ QWidget* MainWindow::eicWidgetController() {
     return window;
 }
 
-void MainWindow::getLinks(Peak* peak ) {
-    if (!peak) return;
+void MainWindow::getCovariants(Peak* peak ) {
+    if(!peak) return;
+    if(!covariantsPanel->isVisible() or ! galleryDockWidget->isVisible()) return;
 
     Scan* scan = peak->getScan();
     if (!scan) return;
@@ -1730,4 +1700,34 @@ bool MainWindow::isProjectFileType(QString filename) {
     if (filename.endsWith("mzrollDB",Qt::CaseInsensitive))  return 1;
     if (filename.endsWith("mzroll",Qt::CaseInsensitive))  return 1;
     return 0;
+}
+
+void MainWindow::changeUserAdduct() {
+    QVariant v = adductType->currentData();
+    Adduct*  adduct =  v.value<Adduct*>();
+    if(adduct) {
+        _ionizationMode = SIGN(adduct->charge);
+        cerr << "changeUserAdduct::" << adduct->name << endl;
+        massCalcWidget->ionization->setValue(_ionizationMode);
+
+        mzSlice& currentSlice = eicWidget->getMzSlice();
+        if(currentSlice.compound) {
+            setCompoundFocus(currentSlice.compound);
+        }
+    }
+}
+
+Adduct* MainWindow::getUserAdduct() {
+    QVariant v = adductType->currentData();
+    Adduct*  adduct =  v.value<Adduct*>();
+    if(adduct) {
+        cerr << "getUserAdduct::" << adduct->name << endl;
+        return adduct;
+    } else if (_ionizationMode > 0 ) {
+        return MassCalculator::PlusHAdduct;
+    } else if (_ionizationMode < 0 ) {
+        return MassCalculator::MinusHAdduct;
+    } else {
+        return MassCalculator::ZeroMassAdduct;
+    }
 }

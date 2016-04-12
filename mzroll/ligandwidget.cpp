@@ -92,6 +92,8 @@ void LigandWidget::setDatabase(QString dbname) {
     _mw->getSettings()->setValue("lastCompoundDatabase", getDatabaseName());
     emit databaseChanged(getDatabaseName());
     showTable();
+
+    if(!filterString.isEmpty()) showMatches(filterString);
 }
 
 void LigandWidget::databaseChanged(int index) {
@@ -111,23 +113,19 @@ void LigandWidget::setCompoundFocus(Compound* c) {
 	int index = databaseSelect->findText(dbname,Qt::MatchExactly);
         if (index != -1 ) databaseSelect->setCurrentIndex(index);
 
-	QString filterString(c->name.c_str());
-	setWindowTitle("Compounds: " + filterString);
-	showTable(); 
+    QString filterString(c->name.c_str());
+    showTable();
 }
 
 
 void LigandWidget::setFilterString(QString s) { 
 	if(s != filterString) { 
-		filterString=s; 
-		setWindowTitle("Compounds: " + filterString);
         showMatches(s);
 	} 
-    //if (s.length() >= 4 ) { showMatches(s); }
 }
 
 void LigandWidget::showMatches(QString needle) { 
-
+    filterString=needle;
 
     QRegExp regexp(needle,Qt::CaseInsensitive,QRegExp::RegExp);
     if(! regexp.isValid())return;

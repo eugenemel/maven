@@ -146,7 +146,7 @@ void EicPoint::mousePressEvent (QGraphicsSceneMouseEvent* event) {
     }
 
     if (_peak && _mw->covariantsPanel->isVisible()) {
-        _mw->getLinks(_peak);
+        _mw->getCovariants(_peak);
     }
 
     //scene()->update();

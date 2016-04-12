@@ -9,28 +9,6 @@ Note::Note(const QString &text, QGraphicsItem *parent, QGraphicsScene *scene): Q
 }
 
 
-Note::Note(UserNote* usernote, QGraphicsItem *parent): QGraphicsItem(parent)
-{
-    setupGraphicOptions();
-
-    if (usernote) {
-
-        QString text = tr("<b>%2</b><br>%3<br> rt:%4").arg(
-                usernote->title,
-                usernote->description,
-                QString::number(usernote->rt,'f',2));
-
-        _label->setFlag(QGraphicsItem::ItemIsSelectable);
-        _label->setFlag(QGraphicsItem::ItemIsFocusable);
-        _label->setAcceptedMouseButtons(Qt::LeftButton);
-
-        setHtml(text);
-        setData(0,QVariant(usernote->noteid));
-        //connect(_label,SIGNAL(linkActivated(QString)),SLOT(linkClicked()));
-    }
-}
-
-
 void Note::setupGraphicOptions() {
     setFlag(QGraphicsItem::ItemIsSelectable);
     setFlag(QGraphicsItem::ItemIsFocusable);
@@ -148,18 +126,6 @@ void Note::mouseMoveEvent (QGraphicsSceneMouseEvent* event) {
 	QGraphicsItem::mouseMoveEvent(event);
 }
 
-//format remote note URL
-void Note::setRemoteNoteLink(UserNote* note, QString link) {
-    if (note && !link.isEmpty() ) {
-        QUrl url(link);
-        QUrlQuery query;
-        query.addQueryItem("noteid", QString::number(note->noteid));
-        query.addQueryItem("action","editnote");
-        url.setQuery(query);
-        _link = url.toString();
-    }
-}
-
 void Note::mousePressEvent(QGraphicsSceneMouseEvent *event) {
     if(!_link.isEmpty()) QDesktopServices::openUrl(_link);
 };
@@ -169,7 +135,6 @@ void Note::mouseReleaseEvent(QGraphicsSceneMouseEvent *event){
 };
 
 void Note::mouseDoubleClickEvent(QGraphicsSceneMouseEvent*) {
-
     if (editable ) {
         bool ok;
         QString text = QInputDialog::getText(0, tr("Edit Note"), tr("Note:"), QLineEdit::Normal, toPlainText(), &ok);

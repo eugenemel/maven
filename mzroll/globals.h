@@ -22,38 +22,15 @@
 const QString rsrcPath = ":/images";
 const QString programName = "MAVEN";
 
-
 static const double Pi = 3.14159265358979323846264338327950288419717;
-
-struct UserNote {
-    int  noteid;
-    float mz;
-    float mzmin;
-    float mzmax;
-    float rt;
-    float intensity;
-    QString compound_name;
-    QString compound_id;
-    QString srm_id;
-    QString title;
-    QString description;
-    QString method;
-    QString author;
-    QString creationTime;
-    QString guid;
-    QString link;
-    bool remoteNote;
-    QString remoteUrl;
-};
-
 
 Q_DECLARE_METATYPE(mzSample*)
 Q_DECLARE_METATYPE(Peak*)
 Q_DECLARE_METATYPE(Compound*)
+Q_DECLARE_METATYPE(Adduct*)
 Q_DECLARE_METATYPE(Scan*)
 Q_DECLARE_METATYPE(PeakGroup*)
 Q_DECLARE_METATYPE(mzSlice*)
-Q_DECLARE_METATYPE(UserNote*)
 Q_DECLARE_METATYPE(mzSlice)
 
 enum itemType {
@@ -64,7 +41,8 @@ enum itemType {
 		EICType,
 		PeakType,
 		mzSliceType, 
-		mzLinkType
+        mzLinkType,
+        AdductType
 };
 
 extern Database DB; 

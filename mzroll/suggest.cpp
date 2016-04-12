@@ -177,10 +177,10 @@ void SuggestPopup::doSearchHistory(QString needle)  {
 void SuggestPopup::doSearch(QString needle) 
 {
 
-                //minum length of needle in order to start matching
-                if (needle.isEmpty() || needle.length() < 3 ) return;
-		needle = needle.simplified();
-		needle.replace(' ',".*");
+        //minum length of needle in order to start matching
+        if (needle.isEmpty() || needle.length() < 3 ) return;
+        needle = needle.simplified();
+        needle.replace(' ',".*");
 
 		QRegExp regexp(needle,Qt::CaseInsensitive,QRegExp::RegExp);
 		if (!needle.isEmpty() && !regexp.isValid()) return;
@@ -219,12 +219,10 @@ void SuggestPopup::doSearch(QString needle)
                         //qDebug() << "Compound: " << name << " score: " << score;
                         item = new NumericTreeWidgetItem(popup,CompoundType);
                         item->setData(0,Qt::UserRole,QVariant::fromValue(compound_matches[name]));
-                        item->setIcon(0,QIcon(rsrcPath + "/molecule.png"));
                     }  else if (searchHistory.contains(name) ) {
                         if (historyMatches++ < 10 ) continue;
                         //qDebug() << "History: " << name << " score: " << score;
                         item = new NumericTreeWidgetItem(popup,0);
-                        item->setIcon(0,QIcon(rsrcPath + "/featuredetect.png"));
                     } else {
                         //qDebug() << "Hmm: " << name << " score: " << score;
                         break;
