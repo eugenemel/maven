@@ -87,7 +87,7 @@ public:
     LigandWidget     *ligandWidget;
     IsotopeWidget    *isotopeWidget;
     TreeDockWidget 	*covariantsPanel;
-    TreeDockWidget	 *fragPanel;
+    TreeDockWidget	 *fragmentationEventsWidget;
     TreeDockWidget	 *srmDockWidget;
     //TreeDockWidget   *peaksPanel;
     QDockWidget         *spectraDockWidget;
@@ -121,7 +121,7 @@ public:
     SpectraWidget*  getSpectraWidget() { return spectraWidget; }
     ProjectDockWidget* getProjectWidget() { return projectDockWidget; }
     RconsoleWidget*    getRconsoleWidget() { return rconsoleDockWidget; }
-    TableDockWidget*    getBookmarkedPeaks() { return bookmarkedPeaks; }
+    TableDockWidget*    getBookmarkTable() { return bookmarkedPeaks; }
 
     Classifier* getClassifier() { return clsf; }
 

@@ -118,7 +118,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId=0, QString table
 
      if(!query0.exec(TABLESQL)) qDebug() << query0.lastError();
 
-     QString INSERTSQL = QString("insert into %1 values(NULL,?,?,?,?,?,?,?,?,?,?,?)").arg(tableName);
+     QString INSERTSQL = QString("insert into %1 (groupId,parentGroupId,tagString,metaGroupId,expectedRtDiff,groupRank,label,type,srmId,compoundId,compoundName,compoundDB) values(NULL,?,?,?,?,?,?,?,?,?,?,?)").arg(tableName);
 
      //cerr << "inserting .. " << g->groupId << endl;
 	 QSqlQuery query1(sqlDB);

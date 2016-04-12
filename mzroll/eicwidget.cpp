@@ -162,15 +162,18 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
     _integratedGroup.groupStatistics();
     setSelectedGroup(&_integratedGroup);
 
-    getMainWindow()->getBookmarkedPeaks()->addPeakGroup(&_integratedGroup,true);
-    /*
-    if (newGroup and newGroup->compound) {
-           getMainWindow()->isotopeWidget->setPeakGroup(newGroup);
-           setSelectedGroup(newGroup);
+    getMainWindow()->getBookmarkTable()->addPeakGroup(&_integratedGroup,true);
+    PeakGroup* lastBookmark = getMainWindow()->getBookmarkTable()->getLastBookmarkedGroup();
+
+    if (lastBookmark and lastBookmark->compound) {
+           getMainWindow()->isotopeWidget->setPeakGroup(lastBookmark);
+           setSelectedGroup(lastBookmark);
 
     }
-    this->copyToClipboard();
-   */
+
+    if (lastBookmark) {
+        getMainWindow()->setClipboardToGroup(lastBookmark);
+    }
 
     scene()->update();
 }
@@ -1683,7 +1686,7 @@ void EicWidget::addMS2Events(float mzmin, float mzmax) {
     vector <mzSample*> samples = mw->getVisibleSamples();
 
     if (samples.size() <= 0 ) return;
-    mw->fragPanel->clearTree();
+    mw->fragmentationEventsWidget->clearTree();
     int count=0;
     for ( unsigned int i=0; i < samples.size(); i++ ) {
         mzSample* sample = samples[i];
@@ -1693,7 +1696,7 @@ void EicWidget::addMS2Events(float mzmin, float mzmax) {
 
             if (scan->mslevel > 1 && scan->precursorMz >= mzmin && scan->precursorMz <= mzmax) {
 
-                mw->fragPanel->addScanItem(scan);
+                mw->fragmentationEventsWidget->addScanItem(scan);
                 if (scan->rt < _slice.rtmin || scan->rt > _slice.rtmax) continue;
 
         		QColor color = QColor::fromRgbF( sample->color[0], sample->color[1], sample->color[2], 1 );

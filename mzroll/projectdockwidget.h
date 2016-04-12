@@ -14,9 +14,8 @@ class ProjectDockWidget : public QDockWidget
     Q_OBJECT
 public:
     explicit ProjectDockWidget(QMainWindow *parent = 0);
-
-
-signals:
+    QColor getSampleColor(mzSample* sample);
+    QIcon getSampleIcon(mzSample* sample);
 
 public slots:
     void showInfo();

@@ -7,7 +7,7 @@ RconsoleWidget::RconsoleWidget(QWidget *parent): QDockWidget(parent)
 
     _mainwindow = (MainWindow*) parent;
     _settings = _mainwindow->getSettings();
-    _linkedTable = _mainwindow->getBookmarkedPeaks();
+    _linkedTable = _mainwindow->getBookmarkTable();
 
     setupEditor();
 

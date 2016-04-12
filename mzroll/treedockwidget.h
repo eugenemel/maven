@@ -33,7 +33,8 @@ public slots:
 	  void setInfo(vector<Compound*>&compounds);
 
 	  void setInfo(vector<mzLink>&links);
-	  void setInfo(vector<mzSlice*>&slices);
+      void setInfo(vector<mzSlice*>&slices);
+      void setupScanListHeader();
 
 	  void addScanItem(Scan* scan);
 	  void clearTree();

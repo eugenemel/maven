@@ -219,6 +219,17 @@ void ProjectDockWidget::changeColors() {
       _mainwindow->getEicWidget()->replot();
 }
 
+QIcon ProjectDockWidget::getSampleIcon(mzSample* sample) {
+    QColor color = getSampleColor(sample);
+    QPixmap pixmap = QPixmap(20,20); pixmap.fill(color);
+    return QIcon(pixmap);
+}
+
+QColor ProjectDockWidget::getSampleColor(mzSample* sample) {
+    if(!sample) return Qt::black;
+    return QColor::fromRgbF( sample->color[0], sample->color[1], sample->color[2], sample->color[3] );
+}
+
 void ProjectDockWidget::setSampleColor(QTreeWidgetItem* item, QColor color) {
     if (item == NULL) return;
     if (!color.isValid()) return;
@@ -387,7 +398,7 @@ void ProjectDockWidget::saveProject() {
       qDebug() << " ProjectDockWidget::saveProject()";
 
     if (currentProject) {
-        saveProjectSQLITE(lastOpennedProject,_mainwindow->getBookmarkedPeaks());
+        saveProjectSQLITE(lastOpennedProject,_mainwindow->getBookmarkTable());
         return;
     }
 
@@ -403,7 +414,7 @@ void ProjectDockWidget::saveProject() {
 
      if(!fileName.isEmpty()) {
         if(!fileName.endsWith(".mzrollDB",Qt::CaseInsensitive)) fileName = fileName + ".mzrollDB";
-        saveProjectSQLITE(fileName,_mainwindow->getBookmarkedPeaks());
+        saveProjectSQLITE(fileName,_mainwindow->getBookmarkTable());
         lastOpennedProject = fileName;
      }
 }
@@ -421,7 +432,7 @@ void ProjectDockWidget::loadProject() {
 
 void ProjectDockWidget::closeProject() {
     if (currentProject) {
-        saveProjectSQLITE(lastOpennedProject,_mainwindow->getBookmarkedPeaks());
+        saveProjectSQLITE(lastOpennedProject,_mainwindow->getBookmarkTable());
         currentProject->closeDatabaseConnection();
         currentProject=0;
     }

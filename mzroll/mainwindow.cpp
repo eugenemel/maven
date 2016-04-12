@@ -113,7 +113,10 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     isotopeWidget =  new IsotopeWidget(this);
     massCalcWidget =  new MassCalcWidget(this);
     covariantsPanel= new TreeDockWidget(this,"Covariants",3);
-    fragPanel	= new TreeDockWidget(this,"Fragmentation", 5);
+
+    fragmentationEventsWidget	= new TreeDockWidget(this,"MS2 List", 7);
+    fragmentationEventsWidget->setupScanListHeader();
+
     srmDockWidget 	= new TreeDockWidget(this,"SRM List", 1);
     ligandWidget = new LigandWidget(this);
     heatmap	 = 	  new HeatMap(this);
@@ -131,7 +134,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     covariantsPanel->setVisible(false);
     isotopeWidget->setVisible(false);
     massCalcWidget->setVisible(false);
-    fragPanel->setVisible(false);
+    fragmentationEventsWidget->setVisible(false);
     bookmarkedPeaks->setVisible(false);
     spectraDockWidget->setVisible(false);
     scatterDockWidget->setVisible(false);
@@ -182,7 +185,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
     addDockWidget(Qt::BottomDockWidgetArea,spectraDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,covariantsPanel,Qt::Horizontal);
-    addDockWidget(Qt::BottomDockWidgetArea,fragPanel,Qt::Horizontal);
+    addDockWidget(Qt::BottomDockWidgetArea,fragmentationEventsWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,scatterDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,bookmarkedPeaks,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,galleryDockWidget,Qt::Horizontal);
@@ -198,7 +201,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     tabifyDockWidget(spectraDockWidget,massCalcWidget);
     tabifyDockWidget(spectraDockWidget,isotopeWidget);
     tabifyDockWidget(spectraDockWidget,massCalcWidget);
-    tabifyDockWidget(spectraDockWidget,fragPanel);
+    tabifyDockWidget(spectraDockWidget,fragmentationEventsWidget);
     tabifyDockWidget(spectraDockWidget,covariantsPanel);
     tabifyDockWidget(spectraDockWidget,galleryDockWidget);
     tabifyDockWidget(spectraDockWidget,rconsoleDockWidget);
@@ -217,7 +220,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
     projectDockWidget->show();
     scatterDockWidget->hide();
-    fragPanel->hide();
+    fragmentationEventsWidget->hide();
 
 
 
@@ -296,21 +299,32 @@ void MainWindow::setUrl(QString url,QString link) {
 
 void MainWindow::setUrl(Compound* c) { 
     if(c==NULL) return;
-    QString biocycURL="http://biocyc.org/ECOLI/NEW-IMAGE?type=NIL&object";
+    QString hmdbURL="http://www.hmdb.ca/metabolites/";
     QString keggURL= "http://www.genome.jp/dbget-bin/www_bget?";
+    QString pubChemCidUrl= "https://pubchem.ncbi.nlm.nih.gov/compound/";
     QString pubChemURL= "http://www.ncbi.nlm.nih.gov/sites/entrez?db=pccompound&term=";
+    QString lipidMapsURL= "http://www.lipidmaps.org/data/LMSDRecord.php?LMID=";
+
+   QString id = c->id.c_str();
+   QString hmdbId("HMDB");
+   QString lipidmapsId("LM");
+   QRegExp keggId("^C\\d+$");
+   QRegExp pubmedId("^\\d+$");
 
     QString url;
-    if ( c->db == "MetaCyc" ) {
-    	url = biocycURL+tr("=%1").arg(c->id.c_str());
-    } else if ( c->db == "KEGG" ) {
-    	url = keggURL+tr("%1").arg(c->id.c_str());
-    //} else if ( c->id.c_str() != "") {
-      //  url = keggURL+tr("%1").arg(c->id.c_str());
+    if ( id.contains(hmdbId,Qt::CaseInsensitive) ) {
+        url = hmdbURL + id;
+    } else if ( id.startsWith(lipidmapsId,Qt::CaseInsensitive) ) {
+       url = lipidMapsURL + id;
+    } else if ( id.contains(keggId) ) {
+        url = keggURL+tr("%1").arg(id);
+    } else if ( id.contains(pubmedId) ) {
+        url = pubChemCidUrl + id;
     } else {
         url = pubChemURL+tr("%1").arg(c->name.c_str());
     }
-    QString link(c->name.c_str());
+
+    QString link(c->id.c_str());
     setUrl(url,link);
 }
 
@@ -450,7 +464,7 @@ void MainWindow::setMzValue() {
     if (isDouble) {
         if(eicWidget->isVisible() ) eicWidget->setMzSlice(mz);
         if(massCalcWidget->isVisible() ) massCalcWidget->setMass(mz);
-        if(fragPanel->isVisible()   ) showFragmentationScans(mz);
+        if(fragmentationEventsWidget->isVisible()   ) showFragmentationScans(mz);
     }
     suggestPopup->addToHistory(QString::number(mz,'f',5));
 }
@@ -459,7 +473,7 @@ void MainWindow::setMzValue(float mz) {
     searchText->setText(QString::number(mz,'f',8));
     if (eicWidget->isVisible() ) eicWidget->setMzSlice(mz);
     if (massCalcWidget->isVisible() ) massCalcWidget->setMass(mz);
-    if (fragPanel->isVisible()   ) showFragmentationScans(mz);
+    if (fragmentationEventsWidget->isVisible()   ) showFragmentationScans(mz);
 }
 
 void MainWindow::print(){
@@ -781,9 +795,9 @@ void MainWindow::createMenus() {
     connect(hideWidgets, SIGNAL(triggered()), SLOT(hideDockWidgets()));
     widgetsMenu->addAction(hideWidgets);
 
-    QAction* aj = widgetsMenu->addAction("Fragmentation");
+    QAction* aj = widgetsMenu->addAction("Fragmentation Events List");
     aj->setCheckable(true);  aj->setChecked(false);
-    connect(aj,SIGNAL(toggled(bool)),fragPanel,SLOT(setVisible(bool)));
+    connect(aj,SIGNAL(toggled(bool)),fragmentationEventsWidget,SLOT(setVisible(bool)));
 
     menuBar()->show();
 }
@@ -1218,7 +1232,7 @@ void MainWindow::showPeakInfo(Peak* _peak) {
         if (ms2s.size()) fragmenationSpectraWidget->setScan(ms2s[0]);
     }
 
-    if( fragPanel->isVisible() ) {
+    if( fragmentationEventsWidget->isVisible() ) {
         showFragmentationScans(_peak->peakMz);
     }
 }
@@ -1334,16 +1348,16 @@ void MainWindow::setClipboardToGroup(PeakGroup* group) {
 
 void MainWindow::showFragmentationScans(float pmz) { 
 
-    if (!fragPanel || fragPanel->isVisible() == false ) return;
+    if (!fragmentationEventsWidget || fragmentationEventsWidget->isVisible() == false ) return;
     float ppm = getUserPPM();
 
     if (samples.size() <= 0 ) return;
-    fragPanel->clearTree();
+    fragmentationEventsWidget->clearTree();
     for ( unsigned int i=0; i < samples.size(); i++ ) {
         for (unsigned int j=0; j < samples[i]->scans.size(); j++ ) {
             Scan* s = samples[i]->scans[j];
             if ( s->mslevel > 1 && ppmDist(s->precursorMz,pmz) < ppm ) {
-                fragPanel->addScanItem(s);
+                fragmentationEventsWidget->addScanItem(s);
             }
         }
     }

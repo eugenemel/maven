@@ -85,9 +85,8 @@ void GalleryWidget::fileGallery(const QString &fromDir) {
 
 void GalleryWidget::addEicPlots(std::vector<Compound*>&compounds) {
 
-	MassCalculator  mcalc;
-	float compoundPPMWindow=mainwindow->getUserPPM();
-	int   ionizationMode=mainwindow->getIonizationMode();
+    float compoundPPMWindow=mainwindow->getUserPPM();
+    Adduct* adduct = mainwindow->getUserAdduct();
 
 	std::vector<mzSample*>samples = mainwindow->getVisibleSamples();
 	if (samples.size() == 0 ) return;
@@ -102,12 +101,10 @@ void GalleryWidget::addEicPlots(std::vector<Compound*>&compounds) {
 		slice.rtmax = 1e9;
 		if (!c->srmId.empty()) slice.srmId=c->srmId;
 
-		if (!c->formula.empty()) {
-			double mass = mcalc.computeMass(c->formula,ionizationMode);
-            double ppmW = mass/1e6*compoundPPMWindow;
-            slice.mzmin = mass-ppmW;
-            slice.mzmax = mass+ppmW;
-		}
+        double mass = adduct->computeParentMass(c->mass);
+        double ppmW = mass/1e6*compoundPPMWindow;
+        slice.mzmin = mass-ppmW;
+        slice.mzmax = mass+ppmW;
 
     /*	if (c->expectedRt > 0 ) {
 			slice.rtmin = c->expectedRt-2.0;
@@ -115,8 +112,8 @@ void GalleryWidget::addEicPlots(std::vector<Compound*>&compounds) {
 		}
     */
 		TinyPlot* plot = addEicPlot(slice);
-		if(plot) plot->setTitle(QString(c->name.c_str()));
-		if(plot) plot->setData(0, QVariant::fromValue(c));
+        if(plot) plot->setTitle(QString(c->name.c_str()));
+        if(plot) plot->setData(0, QVariant::fromValue(c));
 	}
 	if (plotitems.size() > 0) replot();
 }

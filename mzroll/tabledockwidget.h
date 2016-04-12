@@ -34,11 +34,13 @@ public slots:
 	  //void showInfo(PeakGroup* group);
       PeakGroup* addPeakGroup(PeakGroup* group, bool updateTable);
       void setupPeakTable();
-	  PeakGroup* getSelectedGroup();
+      PeakGroup* getSelectedGroup();
+      PeakGroup* getLastBookmarkedGroup();
       QList<PeakGroup*> getSelectedGroups();
           void showFocusedGroups();
           void clearFocusedGroups();
           void unhideFocusedGroups();
+
 
       //input from xml
         void loadPeakTable();

@@ -86,7 +86,10 @@ void TreeDockWidget::showInfo() {
                                 if (group) mainwindow->setPeakGroup(group);
                         } else if ( itemType == ScanType ) {
                                 Scan*  scan =  v.value<Scan*>();
-                                if (scan->mslevel > 1)  mainwindow->fragmenationSpectraWidget->setScan(scan);
+                                if (scan->mslevel > 1)  {
+                                    mainwindow->fragmenationSpectraWidget->setScan(scan);
+                                    mainwindow->massCalcWidget->setFragmentationScan(scan);
+                                }
                                 else mainwindow->getSpectraWidget()->setScan(scan);
                                 mainwindow->getEicWidget()->setFocusLine(scan->rt);
                         } else if (itemType == EICType ) {
@@ -238,15 +241,33 @@ void TreeDockWidget::filterTree(QString needle) {
         }
 }
 
+void TreeDockWidget::setupScanListHeader() {
+    QStringList colNames;
+    colNames << "pre m/z" << "rt" << "TIC" << "#peaks" << "scannum" << "sample";
+    treeWidget->setColumnCount(colNames.size());
+    treeWidget->setHeaderLabels(colNames);
+    treeWidget->setSortingEnabled(true);
+    treeWidget->setHeaderHidden(false);
+
+}
+
 void TreeDockWidget::addScanItem(Scan* scan) {
         if (scan == NULL) return;
+
+        MainWindow* mainwindow = (MainWindow*)parentWidget();
+        QIcon icon = mainwindow->projectDockWidget->getSampleIcon(scan->sample);
+
         QTreeWidgetItem *item = new QTreeWidgetItem(treeWidget,ScanType);
-        item->setData(0,Qt::UserRole,QVariant::fromValue(scan));	
+        item->setData(0,Qt::UserRole,QVariant::fromValue(scan));
+        item->setIcon(0,icon);
+
         item->setText(0,QString::number(scan->precursorMz,'f',4));	
         item->setText(1,QString::number(scan->rt));
-        item->setText(2,QString::number(scan->scannum));
-        item->setText(3,QString(scan->sample->sampleName.c_str()));
-        item->setText(4,QString(scan->filterLine.c_str()));
+        item->setText(2,QString::number(scan->totalIntensity(),'g',3));
+        item->setText(3,QString::number(scan->nobs()));
+        item->setText(4,QString::number(scan->scannum));
+        item->setText(5,QString(scan->sample->sampleName.c_str()));
+        item->setText(6,QString(scan->filterLine.c_str()));
 }
 
 

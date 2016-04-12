@@ -690,6 +690,14 @@ void TableDockWidget::showLastGroup() {
     }
 }
 
+PeakGroup* TableDockWidget::getLastBookmarkedGroup() {
+    if (allgroups.size() > 0) {
+        return &(allgroups.back());
+    } else {
+        return 0;
+    }
+}
+
 void TableDockWidget::showNextGroup() {
 
     QTreeWidgetItem *item= treeWidget->currentItem();
