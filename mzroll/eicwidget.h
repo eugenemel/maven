@@ -68,9 +68,6 @@ public slots:
     void replotForced();
     void print(QPaintDevice* printer);
     void showPeakArea(Peak*);
-    void addNote();
-    void addNote(Peak* p);
-    void addNote(float x, float y, QString text);
     void updateNote(Note*);
     void saveRetentionTime();
     void setGallaryToEics();

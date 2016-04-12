@@ -241,7 +241,6 @@ void EicWidget::setScan(Scan* scan) {
 void EicWidget::mouseMoveEvent(QMouseEvent* event){
 // //qDebug <<" EicWidget::mouseMoveEvent(QMouseEvent* event)";
     QGraphicsView::mouseMoveEvent(event);
-    //QPoint posi = event->globalPos();
     //QToolTip::showText(posi, "(" + QString::number(rt,'f',4) + " " + QString::number(intensity,'f',2) + ")" , this);
     if (_mouseStartPos !=_mouseEndPos ) {
 
@@ -260,7 +259,7 @@ void EicWidget::cleanup() {
 	//remove groups
 	delete_all(eics);
 	eics.clear();
-	peakgroups.clear();
+    peakgroups.clear();
 	if (_showTicLine == false && tics.size() > 0 ) { delete_all(tics); tics.clear(); }
 	clearPlot();
 }
@@ -1173,7 +1172,6 @@ void EicWidget::addPeakPositions(PeakGroup* group) {
 				p->setBrush(brush);
 				p->setPen(pen);
 				p->setPeakGroup(group);
-				//connect(p,SIGNAL(addNote(Peak*)),this,SLOT(addNote(Peak*)));
 				scene()->addItem(p);
 		} 
 }
@@ -1320,7 +1318,7 @@ void EicWidget::setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax
 }
 
 void EicWidget::setPeakGroup(PeakGroup* group) {
-    qDebug() <<"EicWidget::setPeakGroup(PeakGroup* group) ";
+    qDebug() <<"EicWidget::setPeakGroup(PeakGroup* group) " << group;
 
     if (group == NULL ) return;
     _slice.mz = group->meanMz;
@@ -1402,27 +1400,6 @@ void EicWidget::print(QPaintDevice* printer) {
 	render(&painter);
 }
 
-void EicWidget::addNote() {
- //qDebug <<"EicWidget::addNote() ";
-	QPointF pos = _lastClickPos;
-	float rt = invX(pos.x());
-	float intensity = invY(pos.y());
-	QString text;
-	addNote(rt,intensity,text);
-}
-
-void EicWidget::addNote(Peak* peak) {
- //qDebug <<"EicWidget::addNote(Peak* peak) ";
-	QString text;
-	addNote(peak->rt,peak->peakIntensity,text);
-}
-
-void EicWidget::addNote(float rt, float intensity, QString text) { 
- //qDebug <<"EicWidget::addNote(float rt, float intensity, QString text) "; 
-
-}
-
-
 void EicWidget::updateNote(Note* note) { 
  //qDebug <<"EicWidget::updateNote(Note* note) "; 
 	if (note == NULL) return;
@@ -1430,20 +1407,18 @@ void EicWidget::updateNote(Note* note) {
 }
 
 void EicWidget::contextMenuEvent(QContextMenuEvent * event) {
- //qDebug <<"EicWidget::contextMenuEvent(QContextMenuEvent * event) ";
 
-    event->ignore();
+    QTransform transform();
+    QGraphicsItem *mod = this->itemAt(event->pos());
+    qDebug() << "EicWidget::contextMenuEvent(QContextMenuEvent * event) " << mod;
+    if(mod) return;
+
     QMenu menu;
-    QMenu options("Options");
-
     SettingsForm* settingsForm = getMainWindow()->settingsForm;
 
     QAction* d = menu.addAction("Peak Grouping Options");
     connect(d, SIGNAL(triggered()), settingsForm, SLOT(showPeakDetectionTab()));
     connect(d, SIGNAL(triggered()), settingsForm, SLOT(show()));
-
-    QAction* a = menu.addAction("Add a Note");
-    connect(a, SIGNAL(triggered()), SLOT(addNote()));
 
     QAction* b = menu.addAction("Recalculate EICs");
     connect(b, SIGNAL(triggered()), SLOT(replotForced()));
@@ -1451,78 +1426,78 @@ void EicWidget::contextMenuEvent(QContextMenuEvent * event) {
     QAction* c = menu.addAction("Copy EIC(s) to Clipboard");
     connect(c, SIGNAL(triggered()), SLOT(eicToClipboard()));
 
-    menu.addMenu(&options);
+    menu.addSeparator();
 
-    QAction* o4 = options.addAction("Show Peaks");
+
+    QAction* o4 = menu.addAction("Show Peaks");
     o4->setCheckable(true);
     o4->setChecked(_showPeaks);
     connect(o4, SIGNAL(toggled(bool)), SLOT(showPeaks(bool)));
     connect(o4, SIGNAL(toggled(bool)), SLOT(replot()));
 
-    QAction* o1 = options.addAction("Show Spline");
+    QAction* o1 = menu.addAction("Show Spline");
     o1->setCheckable(true);
     o1->setChecked(_showSpline);
     connect(o1, SIGNAL(toggled(bool)), SLOT(showSpline(bool)));
     connect(o1, SIGNAL(toggled(bool)), SLOT(replot()));
 
-    QAction* o2 = options.addAction("Show Baseline");
+    QAction* o2 = menu.addAction("Show Baseline");
     o2->setCheckable(true);
     o2->setChecked(_showBaseline);
     connect(o2, SIGNAL(toggled(bool)), SLOT(showBaseLine(bool)));
     connect(o2, SIGNAL(toggled(bool)), SLOT(replot()));
 
-    QAction* o3 = options.addAction("Show TIC");
+    QAction* o3 = menu.addAction("Show TIC");
     o3->setCheckable(true);
     o3->setChecked(_showTicLine);
     connect(o3, SIGNAL(toggled(bool)), SLOT(showTicLine(bool)));
     connect(o3, SIGNAL(toggled(bool)), SLOT(replot()));
 
-    QAction* o31 = options.addAction("Show BIC");
+    QAction* o31 = menu.addAction("Show BIC");
     o31->setCheckable(true);
     o31->setChecked(_showBicLine);
     connect(o31, SIGNAL(toggled(bool)), SLOT(showBicLine(bool)));
     connect(o31, SIGNAL(toggled(bool)), SLOT(replot()));
 
-    QAction* o33 = options.addAction("Show Merged EIC");
+    QAction* o33 = menu.addAction("Show Merged EIC");
     o33->setCheckable(true);
     o33->setChecked(_showMergedEIC);
     connect(o33, SIGNAL(toggled(bool)), SLOT(showMergedEIC(bool)));
     connect(o33, SIGNAL(toggled(bool)), SLOT(replot()));
 
-
-    QAction* o34 = options.addAction("Show EICs as Lines");
+    QAction* o34 = menu.addAction("Show EICs as Lines");
     o34->setCheckable(true);
     o34->setChecked(_showEICLines);
     connect(o34, SIGNAL(toggled(bool)), SLOT(showEICLines(bool)));
     connect(o34, SIGNAL(toggled(bool)), SLOT(replot()));
 
 
-    QAction* o5 = options.addAction("Show Bar Plot");
+    QAction* o5 = menu.addAction("Show Bar Plot");
     o5->setCheckable(true);
     o5->setChecked(_showBarPlot);
     connect(o5, SIGNAL(toggled(bool)), SLOT(showBarPlot(bool)));
     connect(o5, SIGNAL(toggled(bool)), SLOT(replot()));
 
-    QAction* o6 = options.addAction("Show Isotope Plot");
+    QAction* o6 = menu.addAction("Show Isotope Plot");
     o6->setCheckable(true);
     o6->setChecked(_showIsotopePlot);
     connect(o6, SIGNAL(toggled(bool)), SLOT(showIsotopePlot(bool)));
     connect(o6, SIGNAL(toggled(bool)), SLOT(replot()));
 
-    QAction* o7 = options.addAction("Show Box Plot");
+    QAction* o7 = menu.addAction("Show Box Plot");
     o7->setCheckable(true);
     o7->setChecked(_showBoxPlot);
     connect(o7, SIGNAL(toggled(bool)), SLOT(showBoxPlot(bool)));
     connect(o7, SIGNAL(toggled(bool)), SLOT(replot()));
 
-    QAction* o8 = options.addAction("Show MS2 Events");
+    QAction* o8 = menu.addAction("Show MS2 Events");
     o8->setCheckable(true);
     o8->setChecked(_showMS2Events);
     connect(o8, SIGNAL(toggled(bool)), SLOT(showMS2Events(bool)));
     connect(o8, SIGNAL(toggled(bool)), SLOT(replot()));
 
-    //QPoint pos = QWidget::mapFromParent(QCursor::pos());
-    menu.exec(event->pos());
+    QPoint pos = this->mapToGlobal(event->pos());
+    menu.exec(pos);
     scene()->update();
 
 }

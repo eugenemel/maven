@@ -123,8 +123,9 @@ void EicPoint::mousePressEvent (QGraphicsSceneMouseEvent* event) {
     //if (_group) _group->groupOveralMatrix();
 
     if (event->button() == Qt::RightButton)  {
-        QGraphicsSceneContextMenuEvent sevent;
-        contextMenuEvent(&sevent);
+        QGraphicsSceneContextMenuEvent e; e.setPos(event->pos());
+        this->contextMenuEvent(&e);
+        event->ignore();
         return;
     }
 
@@ -220,7 +221,7 @@ void EicPoint::linkCompound() {
 
 void EicPoint::reorderSamples() { if (_mw && _group ) _mw->reorderSamples(_group ); }
 
-void EicPoint::contextMenuEvent ( QGraphicsSceneContextMenuEvent* event ) {
+void EicPoint::contextMenuEvent (QGraphicsSceneContextMenuEvent* event) {
     QMenu menu;
 
     QAction* c1 = menu.addAction("Copy Details to Clipboard");
@@ -252,10 +253,10 @@ void EicPoint::contextMenuEvent ( QGraphicsSceneContextMenuEvent* event ) {
         connect(d, SIGNAL(triggered()), SLOT(reorderSamples()));
     }
 
-     menu.exec(event->screenPos());
-
-
-    //event->ignore();
+     QPointF p = event->pos();
+     QPoint pos = scene()->views().first()->mapToGlobal(p.toPoint());
+     menu.exec(pos);
+     event->ignore();
 }
 
 void EicPoint::keyPressEvent( QKeyEvent *e ) {
