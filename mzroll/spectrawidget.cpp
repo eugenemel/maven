@@ -721,14 +721,19 @@ int SpectraWidget::findNearestMz(QPointF pos) {
 }
 
 void SpectraWidget::drawArrow(float mz1, float intensity1, float mz2, float intensity2) {
+
+    float SCALE=1.0;
+    float OFFSET=0;
+    if (_showOverlay) { SCALE=0.45; OFFSET=-scene()->height()/2.0; }
+
     int x1=  toX(mz1);
-    int y1=  toY(intensity1);
+    int y1=  toY(intensity1,SCALE,OFFSET);
 
     int x2 = toX(mz2);
-    int y2 = toY(intensity2);
+    int y2 = toY(intensity2,SCALE,OFFSET);
 
     int x3 = toX(_focusCoord.x());
-    int y3 = toY(_focusCoord.y());
+    int y3 = toY(_focusCoord.y(),SCALE,OFFSET);
 
     if ( ppmDist(mz1,mz2) < 0.1 ) return;
 

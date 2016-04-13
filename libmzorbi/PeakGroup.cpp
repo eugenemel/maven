@@ -3,7 +3,7 @@
 PeakGroup::PeakGroup()  { 
     groupId=0;
     metaGroupId=0;
-    groupRank=INT_MAX;
+    groupRank=1000;
 
     maxIntensity=0;
     meanRt=0;
@@ -98,6 +98,7 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     goodPeakCount=o.goodPeakCount;
     _type = o._type;
     tagString = o.tagString;
+    searchTableName = o.searchTableName;
     deletedFlag = o.deletedFlag;
 
 

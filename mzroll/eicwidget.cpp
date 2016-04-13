@@ -126,6 +126,7 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
 	//qDebug << "Integrating area from " << rtmin << " to " << rtmax;
 	this->_integratedGroup.clear();
 	this->_integratedGroup.compound = _slice.compound;
+    this->_integratedGroup.adduct = _slice.adduct;
     this->_integratedGroup.srmId = _slice.srmId;
     _integratedGroup.adduct = NULL;
 
@@ -162,7 +163,7 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
     _integratedGroup.groupStatistics();
     setSelectedGroup(&_integratedGroup);
 
-    getMainWindow()->getBookmarkTable()->addPeakGroup(&_integratedGroup,true);
+    getMainWindow()->bookmarkPeakGroup(&_integratedGroup);
     PeakGroup* lastBookmark = getMainWindow()->getBookmarkTable()->getLastBookmarkedGroup();
 
     if (lastBookmark and lastBookmark->compound) {

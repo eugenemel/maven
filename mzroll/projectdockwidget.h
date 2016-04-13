@@ -25,9 +25,10 @@ public slots:
     void loadProject();
     void saveProject();
     void closeProject();
+    void loadAllPeakTables();
     int bookmarkPeakGroup(PeakGroup* group);
     void loadProjectSQLITE(QString filename);
-    void saveProjectSQLITE(QString filename, TableDockWidget* peakTable = 0);
+    void saveProjectSQLITE(QString filename);
 
     void loadProjectXML(QString filename);
     void saveProjectXML(QString filename, TableDockWidget* peakTable = 0);
@@ -47,6 +48,7 @@ private slots:
     void setSampleColor(QTreeWidgetItem* item, QColor color);
     void dropEvent (QDropEvent*event);
     void unloadSample();
+    void unloadAllSamples();
     void filterTreeItems(QString filterString);
     void getSampleInfoSQLITE();
 

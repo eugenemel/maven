@@ -45,7 +45,6 @@ public slots:
       //input from xml
         void loadPeakTable();
         void loadPeakTableXML(QString infile);
-        void loadPeakTableSQLITE(QString filename);
 
       //output to xml
        void savePeakTable();

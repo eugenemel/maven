@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
  qRegisterMetaType<QTextCursor>("QTextCursor");
 
-  setWindowTitle(programName + " " + QString::number(MAVEN_VERSION));
+  setWindowTitle(PROGRAMNAME + " " + QString::number(MAVEN_VERSION));
   qDebug() << "APP=" <<  QApplication::applicationName() << "VER=" <<  QApplication::applicationVersion();
 
   readSettings();
@@ -121,7 +121,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     ligandWidget = new LigandWidget(this);
     heatmap	 = 	  new HeatMap(this);
     galleryWidget = new GalleryWidget(this);
-    bookmarkedPeaks = new TableDockWidget(this,"Bookmarks",0);
+    bookmarkedPeaks = addPeaksTable("Bookmarks");
     spectraDockWidget =  createDockWidget("Spectra",spectraWidget);
     heatMapDockWidget =  createDockWidget("HeatMap",heatmap);
     galleryDockWidget =  createDockWidget("Gallery",galleryWidget);
@@ -328,6 +328,20 @@ void MainWindow::setUrl(Compound* c) {
     setUrl(url,link);
 }
 
+TableDockWidget* MainWindow::findPeakTable(QString title) {
+    for(TableDockWidget* x: groupTables) {
+        if(x->windowTitle() == title) return x;
+    }
+    return NULL;
+}
+
+void MainWindow::deleteAllPeakTables() {
+    for(TableDockWidget* t: groupTables) {
+        t->deleteAll();
+        deletePeakTable(t);
+    }
+}
+
 void MainWindow::deletePeakTable(TableDockWidget *x) {
         if(x == bookmarkedPeaks) return;
         x->setVisible(false);
@@ -522,7 +536,6 @@ void MainWindow::open(){
     QFileInfo fileInfo (absoluteFilePath);
     QDir tmp = fileInfo.absoluteDir();
     if ( tmp.exists()) settings->setValue("lastDir",tmp.absolutePath());
-    setWindowTitle(programName + "_" + QString::number(MAVEN_VERSION) + " " + fileInfo.fileName());
 
     QStringList samples;
     QStringList peaks;
@@ -547,14 +560,6 @@ void MainWindow::open(){
             if (filename.endsWith("mzrollDB"))  projectDockWidget->loadProjectSQLITE(filename);
         }
         return;
-    }
-
-    if (peaks.size() > 0 ) {
-        foreach(QString filename, peaks ) {
-            QFileInfo fileInfo(filename);
-            TableDockWidget* tableX = addPeaksTable("Group Set " + fileInfo.fileName());
-            tableX->loadPeakTableSQLITE(filename);
-        }
     }
 
     if ( samples.size() > 0 ) {

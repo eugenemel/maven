@@ -398,7 +398,7 @@ void ProjectDockWidget::saveProject() {
       qDebug() << " ProjectDockWidget::saveProject()";
 
     if (currentProject) {
-        saveProjectSQLITE(lastOpennedProject,_mainwindow->getBookmarkTable());
+        saveProjectSQLITE(lastOpennedProject);
         return;
     }
 
@@ -414,13 +414,19 @@ void ProjectDockWidget::saveProject() {
 
      if(!fileName.isEmpty()) {
         if(!fileName.endsWith(".mzrollDB",Qt::CaseInsensitive)) fileName = fileName + ".mzrollDB";
-        saveProjectSQLITE(fileName,_mainwindow->getBookmarkTable());
+        saveProjectSQLITE(fileName);
         lastOpennedProject = fileName;
      }
 }
 
 void ProjectDockWidget::loadProject() {
 
+    closeProject();
+
+    //project is still open leave
+    if (currentProject) return;
+
+    //open project
     QSettings* settings = _mainwindow->getSettings();
     QString dir = ".";
     if ( settings->contains("lastDir") ) dir = settings->value("lastDir").value<QString>();
@@ -428,13 +434,22 @@ void ProjectDockWidget::loadProject() {
     QString fileName = QFileDialog::getOpenFileName( this, "Select Project To Open", dir, "All Files(*.mzrollDB)");
     if (fileName.isEmpty()) return;
 
+    loadProjectSQLITE(fileName);
+
 }
 
 void ProjectDockWidget::closeProject() {
-    if (currentProject) {
-        saveProjectSQLITE(lastOpennedProject,_mainwindow->getBookmarkTable());
+    if(!currentProject) return;
+
+    QMessageBox::StandardButton reply = QMessageBox::question(this, "Save And Close Project ?", "Do you want to save and close this project?", QMessageBox::Yes | QMessageBox::Cancel);
+    if (reply == QMessageBox::Yes) {
+        saveProjectSQLITE(lastOpennedProject);
         currentProject->closeDatabaseConnection();
+        delete(currentProject);
         currentProject=0;
+
+        _mainwindow->deleteAllPeakTables();
+        unloadAllSamples();
     }
 }
 
@@ -442,19 +457,21 @@ int ProjectDockWidget::bookmarkPeakGroup(PeakGroup* group) {
     if (!currentProject) saveProject();
 
     if (currentProject)
-        return currentProject->writeGroupSqlite(group,0,"peakgroups");
+        return currentProject->writeGroupSqlite(group,0,"Bookmarks");
     else
         return -1;
 }
 
 void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
 
+    if(currentProject)  closeProject();
+    if(currentProject) return;
+
     QSettings* settings = _mainwindow->getSettings();
     QFileInfo fileinfo(fileName);
     QString projectPath = fileinfo.path();
     QString projectName = fileinfo.fileName();
-
-    if(currentProject) {  currentProject->closeDatabaseConnection(); currentProject=0; }
+    _mainwindow->setWindowTitle(PROGRAMNAME + "_" + QString::number(MAVEN_VERSION) + " " + projectName);
 
     ProjectDB* selectedProject = new ProjectDB(fileName);
 
@@ -538,12 +555,44 @@ void ProjectDockWidget::getSampleInfoSQLITE() {
              }
          }
 
-    // update other widgets
-    TableDockWidget* peakTable = _mainwindow->addPeaksTable(this->lastOpennedProject);
-    peakTable->loadPeakTableSQLITE(this->lastOpennedProject);
+    loadAllPeakTables();
 }
 
-void ProjectDockWidget::saveProjectSQLITE(QString filename, TableDockWidget* peakTable) {
+void ProjectDockWidget::loadAllPeakTables() {
+
+    if(!currentProject) return;
+
+    currentProject->setSamples(_mainwindow->getSamples());
+
+    //create tables for search results
+    QStringList tableNames = currentProject->getSearchTableNames();
+    for(QString searchTableName : tableNames) {
+        TableDockWidget* table = _mainwindow->findPeakTable(searchTableName);
+        if(!table) _mainwindow->addPeaksTable(searchTableName);
+    }
+
+    //clear previous results
+    currentProject->clearLoadedPeakGroups();;
+
+    //load all peakgroups
+    currentProject->loadPeakGroups("peakgroups");
+    for(int i=0; i < currentProject->allgroups.size(); i++ ) {
+        PeakGroup* g = &(currentProject->allgroups[i]);
+        currentProject->allgroups[i].groupStatistics();
+
+        //put them in right place
+        if(g->searchTableName.empty()) g->searchTableName="Bookmarks";
+        TableDockWidget* table = _mainwindow->findPeakTable(g->searchTableName.c_str());
+        if(table) table->addPeakGroup(g,false);
+    }
+
+    //updated display widgets
+    for(TableDockWidget* t: _mainwindow->getAllPeakTables()) {
+        t->showAllGroups();
+    }
+}
+
+void ProjectDockWidget::saveProjectSQLITE(QString filename) {
     if (filename.isEmpty()) return;
     qDebug() << "saveProjectSQLITE()" << filename << endl;
 
@@ -566,9 +615,15 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename, TableDockWidget* pea
     if(project->isOpen()) {
         project->deleteAll();;
         project->saveSamples(sampleSet);
-        if(peakTable) {
-            for(PeakGroup* group : peakTable->getGroups())  project->writeGroupSqlite(group,0,"peakgroups");
+
+        int groupCount=0;
+        for(TableDockWidget* peakTable : _mainwindow->getAllPeakTables() ) {
+            for(PeakGroup* group : peakTable->getGroups()) {
+                groupCount++;
+                project->writeGroupSqlite(group,0,peakTable->windowTitle());
+            }
         }
+        _mainwindow->setStatusText(tr("Saved %1 groups to %2").arg(QString::number(groupCount),filename));
     } else {
        qDebug() << "Can't write to closed project" << filename;
     }
@@ -676,7 +731,7 @@ void ProjectDockWidget::loadProjectXML(QString fileName) {
     int sampleCount = _mainwindow->sampleCount();
     updateSampleList();
     if(_mainwindow->srmDockWidget->isVisible()) _mainwindow->showSRMList();
-    if(_mainwindow->bookmarkedPeaks) _mainwindow->bookmarkedPeaks->loadPeakTableSQLITE(fileName);
+    if(_mainwindow->bookmarkedPeaks) _mainwindow->bookmarkedPeaks->loadPeakTableXML(fileName);
     if(_mainwindow->spectraWidget && sampleCount) _mainwindow->spectraWidget->setScan(samples[0]->getScan(0));
 
     lastOpennedProject = fileName;
@@ -753,6 +808,24 @@ void ProjectDockWidget::keyPressEvent(QKeyEvent *e ) {
     QDockWidget::keyPressEvent(e);
 }
 
+void ProjectDockWidget::unloadAllSamples() {
+
+        //delete samples
+        QMessageBox::StandardButton reply = QMessageBox::question(this, "Unload Samples", "Do you want unload all samples?", QMessageBox::Yes | QMessageBox::Cancel);
+        if (reply != QMessageBox::Yes) return;
+
+        _treeWidget->clear();
+
+        for(mzSample* sample: _mainwindow->samples) {
+            sample->isSelected=false;
+            delete_all(sample->scans);
+        }
+
+        _mainwindow->samples.clear();
+        _mainwindow->getEicWidget()->replotForced();
+}
+
+
 void ProjectDockWidget::unloadSample() {
     QTreeWidgetItem *item = _treeWidget->currentItem();
     if (item) {
@@ -782,7 +855,5 @@ void ProjectDockWidget::unloadSample() {
         //delete(item);
     }
 
-    if ( _mainwindow->getEicWidget() ) {
-        _mainwindow->getEicWidget()->replotForced();
-    }
+    _mainwindow->getEicWidget()->replotForced();
 }

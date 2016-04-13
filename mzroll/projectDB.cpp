@@ -5,15 +5,15 @@
 
 void ProjectDB::saveGroups(vector<PeakGroup>& allgroups, QString setName) {
     for(unsigned int i=0; i < allgroups.size(); i++ ) {
-        writeGroupSqlite(&allgroups[i],0,"peakgroups");
+        writeGroupSqlite(&allgroups[i],0,setName);
     }
 }
 
 void ProjectDB::deleteAll() {
     QSqlQuery query(sqlDB);
-    query.exec("delete from peakgroups");
-    query.exec("delete from samples");
-    query.exec("delete from peaks");
+    query.exec("drop table peakgroups");
+    query.exec("drop table samples");
+    query.exec("drop table peaks");
 }
 
 void ProjectDB::saveSamples(vector<mzSample *> &sampleSet) {
@@ -22,9 +22,9 @@ void ProjectDB::saveSamples(vector<mzSample *> &sampleSet) {
     query0.exec("begin transaction");
     if(!query0.exec("create table IF NOT EXISTS samples(\
                     sampleId integer primary key AUTOINCREMENT,\
-                    name varchar(255),\
-                    filename varchar(255),\
-                    setName varchar(255),\
+                    name varchar(254),\
+                    filename varchar(254),\
+                    setName varchar(254),\
                     sampleOrder int,\
                     isSelected  int,\
                     color_red float,\
@@ -68,6 +68,17 @@ void ProjectDB::saveSamples(vector<mzSample *> &sampleSet) {
     query0.exec("end transaction");
 }
 
+QStringList ProjectDB::getSearchTableNames() {
+    QSqlQuery query(sqlDB);
+    query.prepare("SELECT distinct searchTableName from peakgroups");
+    if (!query.exec())  qDebug() << query.lastError();
+
+    QStringList dbnames;
+    while (query.next())  dbnames << query.value(0).toString();
+    return dbnames;
+}
+
+
 void ProjectDB::deletePeakGroup(PeakGroup* g, QString tableName) {
      if (!g) return;
 
@@ -96,29 +107,37 @@ void ProjectDB::deletePeakGroup(PeakGroup* g, QString tableName) {
     query0.exec("commit");
 }
 
-int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId=0, QString tableName="peakgroups") {
+int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableName) {
 
      if (!g) return -1;
      QSqlQuery query0(sqlDB);
      query0.exec("begin transaction");
-     QString TABLESQL= QString("create table IF NOT EXISTS %1 (\
+
+     QString TABLESQL= QString("create table IF NOT EXISTS peakgroups (\
                         groupId integer primary key AUTOINCREMENT,\
                         parentGroupId integer,\
-                        tagString varchar(255),\
+                        tagString varchar(254),\
                         metaGroupId integer,\
                         expectedRtDiff float,\
                         groupRank int,\
                         label varchar(10),\
                         type integer,\
-                        srmId varchar(255),\
-                        compoundId varchar(255),\
-                        compoundName varchar(255),\
-                        compoundDB varchar(255)\
-                        )").arg(tableName);
+                        srmId varchar(254),\
+                        ms2EventCount int,\
+                        ms2Score double,\
+                        adductName varchar(32),\
+                        compoundId varchar(254),\
+                        compoundName varchar(254),\
+                        compoundDB varchar(254),\
+                        searchTableName varchar(254)\
+                        )");
 
      if(!query0.exec(TABLESQL)) qDebug() << query0.lastError();
 
-     QString INSERTSQL = QString("insert into %1 (groupId,parentGroupId,tagString,metaGroupId,expectedRtDiff,groupRank,label,type,srmId,compoundId,compoundName,compoundDB) values(NULL,?,?,?,?,?,?,?,?,?,?,?)").arg(tableName);
+     QString INSERTSQL = QString("insert into peakgroups\
+                                 (groupId,parentGroupId,tagString,metaGroupId,expectedRtDiff,groupRank,label,type,srmId,ms2EventCount,ms2Score,adductName,compoundId,compoundName,compoundDB,searchTableName)\
+                                 values(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+
 
      //cerr << "inserting .. " << g->groupId << endl;
 	 QSqlQuery query1(sqlDB);
@@ -132,16 +151,26 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId=0, QString table
             query1.addBindValue(QString(g->label));
             query1.addBindValue(QString::number(g->type()));
             query1.addBindValue(QString(g->srmId.c_str()));
+            query1.addBindValue(QString::number(g->ms2EventCount));
+            query1.addBindValue(QString::number(g->fragMatchScore.mergedScore,'f',6));
+
+        if (g->adduct) {
+            query1.addBindValue(QString(g->adduct->name.c_str()) );
+        } else {
+            query1.addBindValue(QString());
+        }
 
         if (g->compound != NULL) {
             query1.addBindValue(QString(g->compound->id.c_str()) );
             query1.addBindValue(QString(g->compound->name.c_str()) );
             query1.addBindValue(QString(g->compound->db.c_str()) );
         } else{
-            query1.addBindValue("" );
-            query1.addBindValue("" );
-            query1.addBindValue("" );
+            query1.addBindValue(QString());
+            query1.addBindValue(QString());
+            query1.addBindValue(QString());
         }
+
+        query1.addBindValue(tableName);
 
      if( ! query1.exec() ) {
         qDebug() << query1.lastError();
@@ -235,12 +264,12 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId=0, QString table
         if ( g->childCount() ) {
            for(int i=0; i < g->children.size(); i++ ) {
                 PeakGroup* child = &(g->children[i]); 
-                writeGroupSqlite(child,lastInsertGroupId);
+                writeGroupSqlite(child,lastInsertGroupId,tableName);
             }
         }
 
     query0.exec("end transaction");
-    qDebug() << "writeGroupSQL: groupId" << lastInsertGroupId << " table=" << tableName;
+    //qDebug() << "writeGroupSQL: groupId" << lastInsertGroupId << " table=" << tableName;
     return lastInsertGroupId;
 }
 
@@ -259,16 +288,24 @@ void ProjectDB::loadPeakGroups(QString tableName) {
         g.expectedRtDiff = query.value("expectedRtDiff").toString().toDouble();
         g.groupRank = query.value("groupRank").toString().toInt();
         g.label     =  query.value("label").toString().toInt();
+        g.ms2EventCount = query.value("ms2EventCount").toString().toInt();
+        g.fragMatchScore.mergedScore = query.value("ms2Score").toString().toDouble();
         g.setType( (PeakGroup::GroupType) query.value("type").toString().toInt());
+        g.searchTableName = query.value("searchTableName").toString().toStdString();
 
         string compoundId = query.value("compoundId").toString().toStdString();
         string compoundDB = query.value("compoundDB").toString().toStdString();
         string compoundName = query.value("compoundName").toString().toStdString();
+        string adductName = query.value("adductName").toString().toStdString();
 
         //if(!compoundName.empty()) g.tagString=compoundName;
 
         string srmId = query.value("srmId").toString().toStdString();
         if (!srmId.empty()) g.setSrmId(srmId);
+
+        if (!adductName.empty()) {
+              //find adduct
+        }
 
         if (!compoundId.empty()){
             Compound* c = DB.findSpeciesById(compoundId,compoundDB);
@@ -285,7 +322,6 @@ void ProjectDB::loadPeakGroups(QString tableName) {
         } else {
             for(PeakGroup& x: allgroups) {
                 if(x.groupId == parentGroupId) {
-                    //cerr << x.groupId << " " << parentGroupId << " " << g.tagString << endl;
                     x.children.push_back(g);
                     break;
                 }
@@ -351,6 +387,7 @@ void ProjectDB::loadGroupPeaks(PeakGroup* parent) {
             parent->addPeak(p);
         }
 }
+
 bool ProjectDB::openDatabaseConnection(QString dbname) {
     if (sqlDB.isOpen() and  sqlDB.databaseName() == dbname) {
         qDebug() << "Already oppenned.. ";

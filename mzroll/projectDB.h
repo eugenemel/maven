@@ -21,6 +21,7 @@ class ProjectDB {
             vector<PeakGroup> allgroups;
             vector<mzSample*> samples;
 
+            void clearLoadedPeakGroups() { allgroups.clear(); }
             void saveSamples(vector<mzSample *> &sampleSet);
             void saveGroups(vector<PeakGroup>   &allgroups, QString setName);
             void writeSearchResultsToDB();
@@ -29,6 +30,7 @@ class ProjectDB {
             void loadGroupPeaks(PeakGroup* group);
             void deleteAll();
             void deletePeakGroup(PeakGroup* g, QString tableName);
+            QStringList getSearchTableNames();
 
 
             void setSamples(vector<mzSample*>set) { samples = set; }

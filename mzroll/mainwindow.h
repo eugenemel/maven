@@ -202,7 +202,11 @@ public slots:
 
 
     TableDockWidget* addPeaksTable(QString title);
+    TableDockWidget* findPeakTable(QString title);
+    QList< QPointer<TableDockWidget> > getAllPeakTables() { return groupTables; }
+
     void deletePeakTable(TableDockWidget* x);
+    void deleteAllPeakTables();
     BackgroundPeakUpdate* newWorkerThread(QString funcName);
     QWidget* eicWidgetController();
 

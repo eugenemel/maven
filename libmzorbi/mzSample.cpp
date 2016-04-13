@@ -1394,21 +1394,21 @@ double mzSample::getMS1PrecurursorMass(Scan* ms2scan,float ppm) {
 
         if (!scan or scan->mslevel > 1) continue;
 
-        //find highest intensity posiion is last ms1 scan
-        int pos = scan->findHighestIntensityPos(ms2scan->precursorMz,ppm);
+        for( float mult=1; mult <= 5; mult++) {
+            //find highest intensity posiion is last ms1 scan
+            int pos = scan->findHighestIntensityPos(ms2scan->precursorMz,ppm*mult);
+            if (pos >0) {
+                adjPreMass= scan->mz[pos];
+                break;
+            }
+        }
 
-        //failed.. try harder
-        if (! pos ) pos = scan->findHighestIntensityPos(ms2scan->precursorMz,ppm*1.5);
-
-        //try harder
-        if (! pos ) pos = scan->findHighestIntensityPos(ms2scan->precursorMz,ppm*2);
-
-        if (pos > 0 ) adjPreMass= scan->mz[pos];
-         //out << "HIT: " << " scan=" << scan->scannum << "  ms2=" << setprecision(10) << ms2scan->precursorMz << " ms1=" << scan->mz[pos] << endl;
+       //out << "HIT: " << " scan=" << scan->scannum << "  ms2=" << setprecision(10) << ms2scan->precursorMz << " ms1=" << scan->mz[pos] << endl;
         break;
     }
 
     if ( adjPreMass > 0 ) {
+        //cerr << "adjPreMass : ms2p=" << ms2scan->precursorMz << " adjP" << adjPreMass << "  err="  << mzUtils::ppmDist((double) ms2scan->precursorMz,adjPreMass) << endl;
         return adjPreMass;
     } else {
         //cerr << "getMS1PrecurursorMass() CAN'T FIND PRECURSOR " << ms2scan->precursorMz << endl;

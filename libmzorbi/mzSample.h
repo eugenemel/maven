@@ -498,6 +498,7 @@ class PeakGroup {
 
         string srmId;
         string tagString;
+        string searchTableName;
         char label;			//classification label
         string getName();               //compound name + tagString + srmid
 

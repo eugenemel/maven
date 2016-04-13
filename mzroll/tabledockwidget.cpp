@@ -82,6 +82,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     btnTrain->setToolTip("Train Neural Net");
     connect(btnTrain,SIGNAL(clicked()),traindialog,SLOT(show()));
 
+    /*
     QToolButton *btnXML = new QToolButton(toolBar);
     btnXML->setIcon(QIcon(rsrcPath + "/exportxml.png"));
     btnXML->setToolTip("Save Peaks");
@@ -91,6 +92,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     btnLoad->setIcon(QIcon(rsrcPath + "/fileopen.png"));
     btnLoad->setToolTip("Load Peaks");
     connect(btnLoad, SIGNAL(clicked()), SLOT(loadPeakTable()));
+    */
 
     QToolButton *btnGood = new QToolButton(toolBar);
     btnGood->setIcon(QIcon(rsrcPath + "/markgood.png"));
@@ -156,8 +158,10 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     toolBar->addWidget(btnRunScript);
 
     toolBar->addSeparator();
+    /*
     toolBar->addWidget(btnXML);
     toolBar->addWidget(btnLoad);
+    */
 
    // toolBar->addWidget(btnMoveTo);
     toolBar->addWidget(spacer);
@@ -401,20 +405,10 @@ bool TableDockWidget::hasPeakGroup(PeakGroup* group) {
 
 PeakGroup* TableDockWidget::addPeakGroup(PeakGroup* group, bool updateTable) {
     if (group == NULL) return NULL;
-
-    if(this->windowTitle() == "Bookmarks") {
-        group->groupId=_mainwindow->projectDockWidget->bookmarkPeakGroup(group);
-        cerr << "bookmark:" <<  group->groupId  << " " << group->peaks.size() << " " << group->children.size() << endl;
-    }
-
     allgroups.push_back(*group);
     PeakGroup* g = &allgroups[allgroups.size()-1];
 
-    if (updateTable) {
-        //addRow(&allgroups[allgroups.size()-1], NULL);
-        showAllGroups();
-        //updateStatus();
-    }
+    if (updateTable)  showAllGroups();
     return g;
 }
 
@@ -1199,7 +1193,7 @@ void TableDockWidget::savePeakTable() {
     if (fileName.isEmpty()) return;
     if(!fileName.endsWith(".mzrollDB",Qt::CaseInsensitive)) fileName = fileName + ".mzrollDB";
 
-    _mainwindow->getProjectWidget()->saveProjectSQLITE(fileName,this);
+    _mainwindow->getProjectWidget()->saveProjectSQLITE(fileName);
 
     //savePeakTable(fileName);
 }
@@ -1234,7 +1228,7 @@ void TableDockWidget::loadPeakTable() {
     if (fileName.isEmpty()) return;
 
     if (selFilter == filters[0]) {
-        loadPeakTableSQLITE(fileName);
+        _mainwindow->projectDockWidget->loadProjectSQLITE(fileName);
     } else if (selFilter == filters[1]) {
         loadPeakTableXML(fileName);
     } else if (selFilter == filters[2]) {
@@ -1260,22 +1254,6 @@ void TableDockWidget::runScript() {
 
 }
 
-void TableDockWidget::loadPeakTableSQLITE(QString fileName) {
-
-    ProjectDB* selectedProject = new ProjectDB(fileName);
-    if (!selectedProject->isOpen()) return;
-
-    allgroups.clear(); //remove existing groups
-
-    selectedProject->setSamples(_mainwindow->getSamples());
-    selectedProject->loadPeakGroups("peakgroups");
-
-    allgroups = selectedProject->allgroups;
-    for(int i=0; i < allgroups.size(); i++ ) allgroups[i].groupStatistics();
-
-    //selectedProject->closeDatabaseConnection();
-    showAllGroups();
-}
 
 void TableDockWidget::loadPeakTableXML(QString fileName) {
 
