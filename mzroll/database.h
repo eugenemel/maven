@@ -64,6 +64,8 @@ class Database {
         vector<MassCalculator::Match> findMathchingCompounds(float mz, float ppm, float charge);
         vector<MassCalculator::Match> findMathchingCompoundsSLOW(float mz, float ppm, float charge);
 
+        Adduct* findAdductByName(string id);
+
 		void loadRetentionTimes(QString method);
 		void saveRetentionTime(Compound* c, float rt, QString method);
 

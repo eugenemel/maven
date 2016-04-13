@@ -162,6 +162,16 @@ set<Compound*> Database::findSpeciesByMass(float mz, float ppm) {
     return uniqset;
 }
 
+Adduct* Database::findAdductByName(string id) {
+
+    if(id == "[M+H]+")  return MassCalculator::PlusHAdduct;
+    else if(id == "[M-H]-")  return MassCalculator::MinusHAdduct;
+    else if(id == "[M]") return MassCalculator::ZeroMassAdduct;
+
+    for(Adduct* a: this->adductsDB)  if (a->name == id) return a;
+    return 0;
+}
+
 Compound* Database::findSpeciesById(string id,string db) {
     //cerr << "searching for " << id << " " << compoundIdMap.size() << " " << db << endl;
     if ( compoundIdMap.contains(id + db) ) return compoundIdMap[id + db];

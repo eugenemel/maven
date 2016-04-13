@@ -304,7 +304,7 @@ void ProjectDB::loadPeakGroups(QString tableName) {
         if (!srmId.empty()) g.setSrmId(srmId);
 
         if (!adductName.empty()) {
-              //find adduct
+              g.adduct = DB.findAdductByName(adductName);
         }
 
         if (!compoundId.empty()){
