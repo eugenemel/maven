@@ -784,7 +784,8 @@ void writeCSVReport( string filename) {
                         << "fragNumIonsMatched"
                         << "fragFracMatched"
                         << "ticMatched"
-                        << "dotProduct"
+                        << "weightedDotProduct"
+                        << "hypergeomScore"
                         << "mzFragError"
                         << "spearmanRankCorrelation";
 
@@ -1107,7 +1108,8 @@ void writeGroupInfoCSV(PeakGroup* group,  ofstream& groupReport) {
     groupReport << SEP << group->fragMatchScore.numMatches;
     groupReport << SEP << group->fragMatchScore.fractionMatched;
     groupReport << SEP << group->fragMatchScore.ticMatched;
-    groupReport << SEP << group->fragMatchScore.dotProduct;
+    groupReport << SEP << group->fragMatchScore.weightedDotProduct;
+    groupReport << SEP << group->fragMatchScore.hypergeomScore;
     groupReport << SEP << group->fragMatchScore.mzFragError;
     groupReport << SEP << group->fragMatchScore.spearmanRankCorrelation;
 
@@ -1211,7 +1213,7 @@ void matchFragmentation() {
                 Compound* cpd = m.compoundLink;
                 FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productPpmTolr,true);
 
-                if (scoringScheme == "dotProduct") {
+                if (scoringScheme == "weightedDotProduct") {
                     s.mergedScore = s.weightedDotProduct;
                 } else {
                     s.mergedScore = s.hypergeomScore;
