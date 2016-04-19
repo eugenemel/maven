@@ -11,7 +11,6 @@
 #include "parallelMassSlicer.h"
 #include "../mzroll/projectDB.h"
 #include "options.h"
-//include "omp.h"
 
 #include "../mzroll/classifierNeuralNet.h"
 #include "../mzroll/database.h"
@@ -24,6 +23,7 @@
 
 using namespace std;
 #ifdef OMP_PARALLEL
+	#include "omp.h"
 	#define getTime() omp_get_wtime()
 #else 
 	#define getTime() get_wall_time()
@@ -345,7 +345,7 @@ void processSlices(vector<mzSlice*>&slices, string setName) {
 
 //Creating openmp threads and static scheduling with chunk of size 128
 #ifdef OMP_PARALLEL
-#pragma omp parallel for ordered num_threads(8) private(converged, eicCounter, foundGroups) schedule(static,128)
+#pragma omp parallel for ordered num_threads(8) private(eicCounter) schedule(static,128)
 #endif
 		for (int i=0; i < slices.size();  i++ ) {
                 if (i % 1000==0)
@@ -608,11 +608,11 @@ void printSettings() {
 
 void loadSamples(vector<string>&filenames) {
 		cerr << "Loading samples" << endl;
+        	int sampleOrder=0;
 
 #ifdef OMP_PARALLEL
 		#pragma omp parallel for ordered num_threads(4) schedule(static)  
 #endif
-        int sampleOrder=0;
 		for (unsigned int i=0; i < filenames.size(); i++ ) {
 //          cout << "Thread # " << omp_get_thread_num() << endl;
 			cerr << "Loading " << filenames[i] << endl;
