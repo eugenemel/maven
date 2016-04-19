@@ -35,8 +35,6 @@ EicPoint::EicPoint(float x, float y, Peak* peak, MainWindow* mw)
 
 }
 
-EicPoint::~EicPoint() {}
-
 QRectF EicPoint::boundingRect() const
 {
     return(QRectF(_x-_cSize/2,_y-_cSize/2,_cSize,_cSize));

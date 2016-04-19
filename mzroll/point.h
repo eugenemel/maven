@@ -19,7 +19,6 @@ public:
     enum POINTSHAPE { CIRCLE, SQUARE, TRIANGLE_UP, TRIANGLE_DOWN };
     EicPoint(QObject *parent = 0);
     EicPoint(float x, float y, Peak* peak, MainWindow* mw);
-        ~EicPoint();
     void setColor(QColor &c)  { _color = c; _pen.setColor(c); _brush.setColor(c); }
     void setPen(QPen &p)  { _pen = p;  }
     void setBrush(QBrush &b)  { _brush = b; }
