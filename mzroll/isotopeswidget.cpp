@@ -42,8 +42,7 @@ IsotopeWidget::~IsotopeWidget(){
 }
 
 void IsotopeWidget::setPeakGroup(PeakGroup* grp) { 
-	if (!grp) return;
-
+    if (!grp) return;
 	_group = grp;
     if (grp && grp->type() != PeakGroup::IsotopeType ) pullIsotopes(grp);
 }
@@ -107,17 +106,17 @@ void IsotopeWidget::computeIsotopes(string f) {
 	if (f.empty()) return;
         if(links.size() > 0 ) links.clear();
 	double parentMass = mcalc.computeMass(f,_charge);
-        float parentPeakIntensity = getIsotopeIntensity(parentMass);
-        QSettings* settings = _mw->getSettings();
+    float parentPeakIntensity = getIsotopeIntensity(parentMass);
+    QSettings* settings = _mw->getSettings();
 
-        //double maxIsotopeScanDiff  = settings->value("maxIsotopeScanDiff").toDouble();
-        //double minIsotopicCorrelation  = settings->value("minIsotopicCorrelation").toDouble();
-        //double maxNaturalAbundanceErr  = settings->value("maxNaturalAbundanceErr").toDouble();
-        bool C13Labeled   =  settings->value("C13Labeled").toBool();
-        bool N15Labeled   =  settings->value("N15Labeled").toBool();
-        bool S34Labeled   =  settings->value("S34Labeled").toBool();
-        bool D2Labeled   =   settings->value("D2Labeled").toBool();
+    double maxNaturalAbundanceErr  = settings->value("maxNaturalAbundanceErr").toDouble();
+    bool C13Labeled   =  settings->value("C13Labeled").toBool();
+    bool N15Labeled   =  settings->value("N15Labeled").toBool();
+    bool S34Labeled   =  settings->value("S34Labeled").toBool();
+    bool D2Labeled   =   settings->value("D2Labeled").toBool();
 
+    //NO ISOTOPES SELECTED..
+    if (C13Labeled == false and N15Labeled == false and S34Labeled == false and D2Labeled == false) return;
 
 
 	vector<Isotope> isotopes = mcalc.computeIsotopes(f,_charge);
@@ -125,7 +124,6 @@ void IsotopeWidget::computeIsotopes(string f) {
                 Isotope& x = isotopes[i];
 
                 float expectedAbundance    =  x.abundance;
-                double maxNaturalAbundanceErr  = settings->value("maxNaturalAbundanceErr").toDouble();
 
                 mzLink link;
                 if (  (x.C13 > 0 && C13Labeled==false)
