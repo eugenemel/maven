@@ -117,6 +117,8 @@ void IsotopeWidget::computeIsotopes(string f) {
 
     //NO ISOTOPES SELECTED..
     if (C13Labeled == false and N15Labeled == false and S34Labeled == false and D2Labeled == false) return;
+    qDebug() << "Isotope Calculation: " << C13Labeled << N15Labeled << S34Labeled << D2Labeled;
+
 
 
 	vector<Isotope> isotopes = mcalc.computeIsotopes(f,_charge);
@@ -186,7 +188,15 @@ void IsotopeWidget::pullIsotopes(PeakGroup* group) {
 		QClipboard *clipboard = QApplication::clipboard();
 		clipboard->clear(QClipboard::Clipboard);
 
-		setClipboard(group);
+        setClipboard(group);
+
+        //check if isotope search is on
+        QSettings* settings = _mw->getSettings();
+        bool C13Labeled   =  settings->value("C13Labeled").toBool();
+        bool N15Labeled   =  settings->value("N15Labeled").toBool();
+        bool S34Labeled   =  settings->value("S34Labeled").toBool();
+        bool D2Labeled   =   settings->value("D2Labeled").toBool();
+        if (C13Labeled == false and N15Labeled == false and S34Labeled == false and D2Labeled == false) return;
 
 		if (group->compound == NULL) {
 			_mw->setStatusText(tr("Unknown compound. Clipboard set to %1").arg(group->tagString.c_str()));

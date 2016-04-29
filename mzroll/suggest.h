@@ -43,7 +43,7 @@ private:
 	 QMap<QString,int> searchHistory;
 
 
-	void doSearchCompounds(QString needle);
+    void doSearchCompounds(QString needle, int maxHitCount, QString dbLimit);
 	void doSearchHistory(QString needle);
 
 	QHash<QString,float> scores;

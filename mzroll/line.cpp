@@ -3,6 +3,8 @@
 EicLine::EicLine(QGraphicsItem* parent, QGraphicsScene *scene):QGraphicsItem(parent)
 {
     setHighlighted(false);
+    setAcceptHoverEvents(false);
+
     _endsFixed=false;
     _fillPath=false;
     _closePath=true;

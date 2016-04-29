@@ -177,7 +177,8 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             if (group.maxNoNoiseObs < minNoNoiseObs) continue;
             if (group.maxSignalBaselineRatio < minSignalBaseLineRatio) continue;
             if (group.maxIntensity < minGroupIntensity ) continue;
-
+            //if (group.isMonoisotopic(compoundPPMWindow) == false) continue;
+            //if (getChargeStateFromMS1(&group) < minPrecursorCharge) continue;
 
             //build consensus ms2 specta
             vector<Scan*>ms2events = group.getFragmenationEvents();

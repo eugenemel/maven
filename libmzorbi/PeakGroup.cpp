@@ -510,12 +510,19 @@ PeakGroup& PeakGroup::operator=(const PeakGroup& o)  {
     return *this;
 }
 
+bool PeakGroup::operator==(const PeakGroup& o)  {
+    if ( this->meanMz == o.meanMz
+         && this->meanRt == o.meanRt
+         && this->minMz  == o.minMz
+         && this->maxMz  == o.maxMz
+         && this->minRt  == o.minRt
+         && this->maxRt  == o.maxRt
+    ) return true;
+    return false;
+}
 
 bool PeakGroup::operator==(const PeakGroup* o)  {
-    if ( this == o ) {
-        cerr << o << " " << this << endl;
-        return true;
-    }
+    if ( this == o )  return true;
     return false;
 }
 
@@ -729,5 +736,43 @@ void PeakGroup::clusterGroups(vector<PeakGroup> &allgroups, vector<mzSample*>sam
             grp2.metaGroupId = grp1.metaGroupId;
         }
     }
+}
+
+Peak* PeakGroup::getHighestIntensityPeak() {
+    Peak* highestIntensityPeak=0;
+    for(int i=0; i < peaks.size(); i++ ) {
+        if (!highestIntensityPeak or peaks[i].peakIntensity > highestIntensityPeak->peakIntensity) {
+           highestIntensityPeak = &peaks[i];
+        }
+    }
+    return highestIntensityPeak;
+}
+
+
+int PeakGroup::getChargeStateFromMS1(float ppm) {
+    Peak* highestIntensityPeak=this->getHighestIntensityPeak();
+    int scanum = highestIntensityPeak->scan;
+    float peakMz =highestIntensityPeak->peakMz;
+    Scan* s = highestIntensityPeak->getSample()->getScan(scanum);
+
+    int peakPos=0;
+    if (s) peakPos = s->findHighestIntensityPos(highestIntensityPeak->peakMz,ppm);
+
+    if (s and peakPos > 0 and peakPos < s->nobs() ) {
+        float ppm = (0.005/peakMz)*1e6;
+        vector<int> parentPeaks = s->assignCharges(ppm);
+        return parentPeaks[peakPos];
+    } else {
+        return 0;
+    }
+}
+
+bool PeakGroup::isMonoisotopic( float ppm) {
+    Peak* highestIntensityPeak=this->getHighestIntensityPeak();
+    if(! highestIntensityPeak) return false;
+
+    int scanum = highestIntensityPeak->scan;
+    Scan* s = highestIntensityPeak->getSample()->getScan(scanum);
+    return s->isMonoisotopicPrecursor(highestIntensityPeak->peakMz,ppm);
 }
 

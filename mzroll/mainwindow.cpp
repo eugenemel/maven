@@ -906,7 +906,7 @@ void MainWindow::createToolBars() {
     connect(ppmWindowBox, SIGNAL(valueChanged(double)), eicWidget, SLOT(setPPM(double)));
 
     searchText = new QLineEdit(hBox);
-    searchText->setMinimumWidth(200);
+    searchText->setMinimumWidth(400);
     searchText->setToolTip("<b>Text Search</b> <br> Compound Names: <b>ATP</b>,<br> Patterns: <b>[45]-phosphate</b> <br>Formulas: <b> C6H10* </b>");
     searchText->setObjectName(QString::fromUtf8("searchText"));
     searchText->setShortcutEnabled(true);
@@ -1367,13 +1367,6 @@ void MainWindow::showFragmentationScans(float pmz) {
             }
         }
     }
-}
-
-void MainWindow::reorderSamples(PeakGroup* group ) {
-    if ( group ) group->reorderSamples();
-    std::sort(samples.begin(), samples.end(), mzSample::compSampleOrder);
-    if ( projectDockWidget) projectDockWidget->updateSampleList();
-    if ( eicWidget ) eicWidget->update();
 }
 
 
