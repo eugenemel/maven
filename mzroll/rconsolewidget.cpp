@@ -54,8 +54,7 @@ void RconsoleWidget::openFile()
     if ( _settings->contains("scriptsFolder") )
         dir = _settings->value("scriptsFolder").value<QString>();
 
-    QString scriptName = QFileDialog::getOpenFileName(this, "Run Script",
-                                                      dir, "R Script (*.R)");
+    QString scriptName = QFileDialog::getOpenFileName(this, "Run Script", dir, "R Script (*.R)");
     loadScript(scriptName);
 }
 
@@ -143,7 +142,13 @@ void RconsoleWidget::runAnalysis() {
     // exec R
     QString Rexe = _settings->value("Rprogram").toString();
     if(!QFile::exists(Rexe)) {
-        errorLog->appendPlainText("Can't find " + Rexe);
+        if(QFile::exists("/Library/Frameworks/R.framework/Resources/Rscript")) {
+            Rexe = "/Library/Frameworks/R.framework/Resources/Rscript";
+        }
+    }
+
+    if(!QFile::exists(Rexe)) {
+        errorLog->appendPlainText("Can't find R.exe" + Rexe);
         return;
     }
 
@@ -173,8 +178,9 @@ void RconsoleWidget::runAnalysis() {
     //start process
     QStringList arguments;
     QString os = QString(xstr(PLATFORM));
+    qDebug() << "Running on " << os <<  Rexe;
     //windows operationg system arguments
-    if (os == "Windows") {
+    if(Rexe.contains("rscript",Qt::CaseInsensitive)) {
          arguments  << "--slave" << "--no-save" << processScriptFile  << groupsTableFile;
     } else  {
         arguments  << "--slave" << "--no-save" << "-f" << processScriptFile << "--args" << groupsTableFile;

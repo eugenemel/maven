@@ -24,6 +24,7 @@ public slots:
     void updateSampleList();
     void loadProject();
     void saveProject();
+    void saveProjectAs();
     void closeProject();
     void loadAllPeakTables();
     int bookmarkPeakGroup(PeakGroup* group);
@@ -64,7 +65,6 @@ private:
 
     ProjectDB* currentProject;
     mzFileIO*  fileLoader;
-
 
 };
 

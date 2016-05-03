@@ -762,7 +762,7 @@ void MainWindow::createMenus() {
     QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
     QMenu* widgetsMenu =  menuBar()->addMenu(tr("&Widgets"));
 
-    QAction* openAct = new QAction(QIcon(":/images/open.png"), tr("&Load Samples|Projects|Peaks"), this);
+    QAction* openAct = new QAction("Load Samples|Projects|Peaks", this);
     openAct->setShortcut(tr("Ctrl+O"));
     openAct->setToolTip(tr("Open an existing file"));
     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
@@ -781,14 +781,15 @@ void MainWindow::createMenus() {
     connect(saveProjectFile, SIGNAL(triggered()), projectDockWidget, SLOT(saveProject()));
     fileMenu->addAction(saveProjectFile);
 
+    QAction* saveProjectFileAs = new QAction(tr("Save Project As"), this);
+    saveProjectFileAs->setShortcut(tr("Ctrl+Shift+S"));
+    connect(saveProjectFileAs, SIGNAL(triggered()), projectDockWidget, SLOT(saveProjectAs()));
+    fileMenu->addAction(saveProjectFileAs);
+
     QAction* settingsAct = new QAction(tr("Options"), this);
     settingsAct->setToolTip(tr("Set program options"));
     connect(settingsAct, SIGNAL(triggered()), settingsForm, SLOT(show()));
     fileMenu->addAction(settingsAct);
-
-    QAction* reportBug = new QAction(tr("Report Bugs!"), this);
-    connect(reportBug, SIGNAL(triggered()), SLOT(reportBugs()));
-    fileMenu->addAction(reportBug);
 
     QAction* exitAct = new QAction(tr("E&xit"), this);
     exitAct->setShortcut(tr("Ctrl+Q"));

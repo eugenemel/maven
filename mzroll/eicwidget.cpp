@@ -1389,7 +1389,6 @@ void EicWidget::print(QPaintDevice* printer) {
 
 void EicWidget::contextMenuEvent(QContextMenuEvent * event) {
 
-    QTransform transform();
     QGraphicsItem *mod = this->itemAt(event->pos());
     qDebug() << "EicWidget::contextMenuEvent(QContextMenuEvent * event) " << mod;
     if(mod) return;
