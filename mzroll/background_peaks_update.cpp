@@ -301,17 +301,17 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
     //cleanup();
 }
 
-bool BackgroundPeakUpdate::addPeakGroup(PeakGroup& grp1) { 
+bool BackgroundPeakUpdate::addPeakGroup(PeakGroup& grp) {
 
     for(int i=0; i<allgroups.size(); i++) {
-        PeakGroup& grp2 = allgroups[i];
-        float rtoverlap = mzUtils::checkOverlap(grp1.minRt, grp1.maxRt, grp2.minRt, grp2.maxRt );
-        if ( rtoverlap > 0.9 && ppmDist(grp2.meanMz, grp1.meanMz) < ppmMerge  ) {
+        PeakGroup& grpB = allgroups[i];
+        float rtoverlap = mzUtils::checkOverlap(grp.minRt, grp.maxRt, grpB.minRt, grpB.maxRt );
+        if ( rtoverlap > 0.9 && ppmDist(grpB.meanMz, grp.meanMz) < ppmMerge  ) {
             return false;
         }
     }
 
-    allgroups.push_back(grp1);
+    allgroups.push_back(grp);
     return true;
 }
 

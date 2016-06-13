@@ -27,9 +27,9 @@
 
 
 #define ALL 0
-#define INPUT 1
-#define HIDDEN 2
-#define OUTPUT 3
+#define NN_INPUT 1
+#define NN_HIDDEN 2
+#define NN_OUTPUT 3
 
 // Sigmoid function. Basically a differentiable threshold function.
 
