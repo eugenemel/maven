@@ -26,8 +26,8 @@
 
 #ifndef _NEURON_H
 #define _NEURON_H
-#define INPUT 1
-#define NONINPUT 0
+#define NN_INPUT 1
+#define NN_NONINPUT 0
 
 struct neuron {
 	float *weights;

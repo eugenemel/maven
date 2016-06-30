@@ -19,8 +19,6 @@ EicWidget::EicWidget(QWidget *p) {
 	_selectionLine = NULL;
 	_statusText=NULL;
 
-	selectedGroup = NULL;
-
 	autoZoom(true);
 	showPeaks(true);
 	showSpline(false);
@@ -36,8 +34,8 @@ EicWidget::EicWidget(QWidget *p) {
     showEICLines(false);
     showMS2Events(true);
 
-    scene()->setItemIndexMethod(QGraphicsScene::NoIndex);
-    //scene()->setItemIndexMethod(QGraphicsScene::BspTreeIndex);
+    //scene()->setItemIndexMethod(QGraphicsScene::NoIndex);
+    scene()->setItemIndexMethod(QGraphicsScene::BspTreeIndex);
 	setDragMode(QGraphicsView::RubberBandDrag);
 	setCacheMode(CacheBackground);
 	setMinimumSize(QSize(1,1));
@@ -102,11 +100,11 @@ void EicWidget::mouseReleaseEvent(QMouseEvent *event) {
              qDebug() << "zoomIn";
             _slice.rtmin = rtmin;
             _slice.rtmax = rtmax;
-            if ( selectedGroup ) {
-                if (selectedGroup->meanRt > rtmin && selectedGroup->meanRt < rtmax ) {
-                    float d = std::max(abs(selectedGroup->meanRt - rtmin), abs(selectedGroup->meanRt - rtmax));
-                    _slice.rtmin = selectedGroup->meanRt - d;
-                    _slice.rtmax = selectedGroup->meanRt + d;
+            if ( _selectedGroup.peakCount() ) {
+                if (_selectedGroup.meanRt > rtmin && _selectedGroup.meanRt < rtmax ) {
+                    float d = std::max(abs(_selectedGroup.meanRt - rtmin), abs(_selectedGroup.meanRt - rtmax));
+                    _slice.rtmin = _selectedGroup.meanRt - d;
+                    _slice.rtmax = _selectedGroup.meanRt + d;
                 }
             }
         } else if ( deltaX < 0 ) {	 //zoomout
@@ -117,7 +115,7 @@ void EicWidget::mouseReleaseEvent(QMouseEvent *event) {
             if ( _slice.rtmin < bounds.rtmin) _slice.rtmin=bounds.rtmin;
             if ( _slice.rtmax > bounds.rtmax) _slice.rtmax=bounds.rtmax;
         }
-        replot(selectedGroup);
+        replot(getSelectedGroup());
     }
 }
 
@@ -218,7 +216,6 @@ void EicWidget::setFocusLine(float rt) {
 	_focusLine->setLine(toX(rt), 0, toX(rt), height() );
 }
 
-
 void EicWidget::drawSelectionLine(float rtmin, float rtmax) { 
  //qDebug <<" EicWidget::drawSelectionLine(float rtmin, float rtmax)";
     if (_selectionLine == NULL ) _selectionLine = new QGraphicsLineItem(0);
@@ -231,8 +228,6 @@ void EicWidget::drawSelectionLine(float rtmin, float rtmax) {
     _selectionLine->update();
 }
 
-
-
 void EicWidget::setScan(Scan* scan) {
  //qDebug <<" EicWidget::setScan(Scan* scan)";
 	if ( scan == NULL ) return;
@@ -243,18 +238,16 @@ void EicWidget::setScan(Scan* scan) {
 }
 
 void EicWidget::mouseMoveEvent(QMouseEvent* event){
-// //qDebug <<" EicWidget::mouseMoveEvent(QMouseEvent* event)";
     QGraphicsView::mouseMoveEvent(event);
-    //QToolTip::showText(posi, "(" + QString::number(rt,'f',4) + " " + QString::number(intensity,'f',2) + ")" , this);
-    if (_mouseStartPos !=_mouseEndPos ) {
+   // QToolTip::showText(posi, "(" + QString::number(rt,'f',4) + " " + QString::number(intensity,'f',2) + ")" , this);
 
+    if (_mouseStartPos !=_mouseEndPos ) {
         if ( event->modifiers() == Qt::ShiftModifier ) {
     	    QPointF pos = event->pos();
     	    float rt = invX(pos.x());
             float rtA = invX(_mouseStartPos.x());
             drawSelectionLine(min(rt,rtA), max(rt,rtA));
         }
-
     }
 }
 
@@ -271,19 +264,18 @@ void EicWidget::cleanup() {
 void EicWidget::computeEICs() {
  	qDebug() << " EicWidget::computeEICs()";
     QTime timerX; timerX.start();
-	vector <mzSample*> samples = getMainWindow()->getVisibleSamples();
-    	if (samples.size() == 0) return;
+    vector <mzSample*> samples = getMainWindow()->getVisibleSamples();
+    if (samples.size() == 0) return;
 
-    	QSettings *settings 		= getMainWindow()->getSettings();
-        float eic_smoothingWindow = settings->value("eic_smoothingWindow").toDouble();
-        int   eic_smoothingAlgorithm = settings->value("eic_smoothingAlgorithm").toInt();
-        float amuQ1 = settings->value("amuQ1").toDouble();
-        float amuQ3 = settings->value("amuQ3").toDouble();
-        int baseline_smoothing = settings->value("baseline_smoothing").toInt();
-        int baseline_quantile =  settings->value("baseline_quantile").toInt();
+    QSettings *settings 		= getMainWindow()->getSettings();
+    float eic_smoothingWindow = settings->value("eic_smoothingWindow").toDouble();
+    int   eic_smoothingAlgorithm = settings->value("eic_smoothingAlgorithm").toInt();
+    float amuQ1 = settings->value("amuQ1").toDouble();
+    float amuQ3 = settings->value("amuQ3").toDouble();
+    int baseline_smoothing = settings->value("baseline_smoothing").toInt();
+    int baseline_quantile =  settings->value("baseline_quantile").toInt();
 
-
-        //qDebug << "eic_smoothingAlgorithm=" << eic_smoothingAlgorithm;
+   //qDebug << "eic_smoothingAlgorithm=" << eic_smoothingAlgorithm;
 
 	mzSlice slice = _slice;
 	mzSlice bounds  = visibleSamplesBounds();
@@ -291,7 +283,7 @@ void EicWidget::computeEICs() {
 	slice.rtmax=bounds.rtmax;
 
     //get eics
-        eics = BackgroundPeakUpdate::pullEICs(&slice,
+     eics = BackgroundPeakUpdate::pullEICs(&slice,
                                               samples,
                                               EicLoader::PeakDetection,
                                               eic_smoothingWindow,
@@ -335,7 +327,6 @@ mzSlice EicWidget::visibleEICBounds() {
         return bounds;
     //} Feng note: move this bracket to above "return bounds" fixes a maximum retention time bug.
 }
-
 
 mzSlice EicWidget::visibleSamplesBounds() {
  //qDebug <<"EicWidget::visibleSamplesBounds() ";
@@ -493,8 +484,6 @@ void EicWidget::addEICLines(bool showSpline) {
     }
 }
 
-
-
 void EicWidget::addCubicSpline() {
     qDebug() <<" EicWidget::addCubicSpline()";
     QTime timerZ; timerZ.start();
@@ -581,7 +570,6 @@ void EicWidget::addCubicSpline() {
     }
     qDebug() << "\t\taddCubicSpline() done. msec=" << timerZ.elapsed();
 }
-
 
 void EicWidget::addTicLine() {
  //qDebug <<" EicWidget::addTicLine()";
@@ -748,7 +736,6 @@ void EicWidget::addBaseline(PeakGroup* group) {
     }
 }
 
-
 void EicWidget::showPeakArea(Peak* peak) {
  //qDebug <<" EicWidget::showPeakArea(Peak* peak)";
 
@@ -812,6 +799,8 @@ void EicWidget::clearPlot() {
 }
 
 void EicWidget::replot(PeakGroup* group ) {
+
+    if (group == NULL)  _selectedGroup = PeakGroup();
     qDebug() <<" EicWidget::replot(PeakGroup* group ) group=" << group;
 
     QTime timerX; timerX.start();
@@ -877,11 +866,9 @@ void EicWidget::setTitle() {
     if ( pxSize > 20 ) pxSize = 20;
     font.setPixelSize(pxSize);
 
-    QString tagString;
+    QString tagString = _selectedGroup.getName().c_str();
 
-    if (selectedGroup != NULL ) {
-        tagString = QString(selectedGroup->getName().c_str());
-    } else if (_slice.compound != NULL ) {
+    if (_slice.compound != NULL ) {
         tagString = QString(_slice.compound->name.c_str());
     } else if (!_slice.srmId.empty()) {
         tagString = QString(_slice.srmId.c_str());
@@ -919,8 +906,6 @@ void EicWidget::recompute(){
  //qDebug <<" EicWidget::recompute()";
     cleanup(); //more clean up
     computeEICs();	//retrive eics
-    selectedGroup = NULL;
-
 }
 
 void EicWidget::wheelEvent(QWheelEvent *event) {
@@ -1135,8 +1120,6 @@ void EicWidget::addFitLine(PeakGroup* group) {
     return;
 }
 
-
-
 void EicWidget::showAllPeaks() { 
  //qDebug <<"EicWidget::showAllPeaks() "; 
 	for(int i=0; i < peakgroups.size(); i++ ) {
@@ -1150,7 +1133,7 @@ void EicWidget::addPeakPositions(PeakGroup* group) {
 		if ( _showPeaks == false ) return;
 
 		bool setZValue=false;
-		if (selectedGroup && group == selectedGroup ) {
+        if (_selectedGroup.peakCount() && group->tagString == _selectedGroup.tagString ) {
 				sort(group->peaks.begin(), group->peaks.end(), Peak::compIntensity); 
 				setZValue=true;
 		}
@@ -1180,7 +1163,6 @@ void EicWidget::addPeakPositions(PeakGroup* group) {
 		} 
 }
 
-
 void EicWidget::resetZoom() { 
  //qDebug <<"EicWidget::resetZoom() "; 
     mzSlice bounds(0,0,0,0);
@@ -1205,12 +1187,9 @@ void EicWidget::zoom(float factor) {
     if (_zoomFactor > 20 )  _zoomFactor = 20;
 
     if ( getSelectedGroup() ) {
-        setPeakGroup(getSelectedGroup());
         replot(getSelectedGroup());
     }
 }
-
-
 
 MainWindow* EicWidget::getMainWindow() {  
 // //qDebug <<"EicWidget::getMainWindow() ";  
@@ -1324,10 +1303,11 @@ void EicWidget::setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax
 void EicWidget::setPeakGroup(PeakGroup* group) {
     qDebug() <<"EicWidget::setPeakGroup(PeakGroup* group) " << group;
 
-    if (group == NULL ) return;
+    if (group == NULL) return;
     _slice.mz = group->meanMz;
     _slice.compound = group->compound;
     _slice.srmId = group->srmId;
+    _slice.adduct = group->adduct;
 
     if (!group->srmId.empty()) {
         setSrmId(group->srmId);
@@ -1360,8 +1340,6 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
     addPeakPositions(group);
 }
 
-
-
 void EicWidget::setPPM(double ppm) { 
  //qDebug <<"EicWidget::setPPM(double ppm) "; 
         mzSlice x = _slice;
@@ -1376,7 +1354,8 @@ void EicWidget::setMzSlice(float mz){
 	mzSlice x (_slice.mzmin,_slice.mzmax,_slice.rtmin,_slice.rtmax);
 	x.mz = mz;
 	x.mzmin = mz - mz/1e6*getMainWindow()->getUserPPM();
-	x.mzmax = mz + mz/1e6*getMainWindow()->getUserPPM();
+    x.mzmax = mz + mz/1e6*getMainWindow()->getUserPPM();
+    x.compound = NULL;
 	setMzSlice(x);
 }
 
@@ -1389,8 +1368,12 @@ void EicWidget::groupPeaks() {
 
     peakgroups = EIC::groupPeaks(eics,eic_smoothingWindow,grouping_maxRtWindow);
 
-	//keep only top X groups ( ranked by intensity )
-	EIC::removeLowRankGroups(peakgroups,50);
+    //keep only top X groups ( ranked by intensity )
+    qDebug() << "Start groupCount=" << peakgroups.size();
+
+    EIC::removeLowRankGroups(peakgroups,50);
+
+    qDebug() << "Stop groupCount=" << peakgroups.size();
 }
 
 void EicWidget::print(QPaintDevice* printer) {
@@ -1404,15 +1387,8 @@ void EicWidget::print(QPaintDevice* printer) {
 	render(&painter);
 }
 
-void EicWidget::updateNote(Note* note) { 
- //qDebug <<"EicWidget::updateNote(Note* note) "; 
-	if (note == NULL) return;
-	//getMainWindow()->notesDockWidgeth->updateNote(Note* note);
-}
-
 void EicWidget::contextMenuEvent(QContextMenuEvent * event) {
 
-    QTransform transform();
     QGraphicsItem *mod = this->itemAt(event->pos());
     qDebug() << "EicWidget::contextMenuEvent(QContextMenuEvent * event) " << mod;
     if(mod) return;
@@ -1500,6 +1476,12 @@ void EicWidget::contextMenuEvent(QContextMenuEvent * event) {
     connect(o8, SIGNAL(toggled(bool)), SLOT(showMS2Events(bool)));
     connect(o8, SIGNAL(toggled(bool)), SLOT(replot()));
 
+    QAction* o9 = menu.addAction("Group Peaks");
+    o9->setCheckable(true);
+    o9->setChecked(_groupPeaks);
+    connect(o9, SIGNAL(toggled(bool)), SLOT(automaticPeakGrouping(bool)));
+    connect(o9, SIGNAL(toggled(bool)), SLOT(replot()));
+
     QPoint pos = this->mapToGlobal(event->pos());
     menu.exec(pos);
     scene()->update();
@@ -1565,29 +1547,31 @@ void EicWidget::setSelectedGroup(PeakGroup* group ) {
 	if (_frozen || group == NULL) return;
 	if (_showBarPlot)     addBarPlot(group);
 	if (_showIsotopePlot) addIsotopicPlot(group);
-	if (_showBoxPlot)     addBoxPlot(group);
+    if (_showBoxPlot)     addBoxPlot(group);
+
     addBaseline(group);
     //drawSelectionLine(group->minRt, group->maxRt);
 	//addFitLine(group);
-	selectedGroup = group;
+    _selectedGroup = *group;
 }
 
 void EicWidget::setGallaryToEics() {
 
     if(getMainWindow()->galleryDockWidget->isVisible()) {
-        getMainWindow()->galleryWidget->addIdividualEicPlots(eics,selectedGroup);
+        getMainWindow()->galleryWidget->addIdividualEicPlots(eics,getSelectedGroup());
     }
 }
 
 void EicWidget::saveRetentionTime() {
- //qDebug <<"EicWidget::saveRetentionTime() ";
-	if (!selectedGroup || selectedGroup->compound == NULL ) return;
-
+    qDebug() <<"EicWidget::saveRetentionTime() NOT IMPLEMENTED";
+    return;
+    /*
+    if (_selectedGroup.compound == NULL ) return;
 	QPointF pos = _lastClickPos;
 	float rt = invX(pos.x());
-	selectedGroup->compound->expectedRt = rt;
-
-	DB.saveRetentionTime(selectedGroup->compound, rt, "user_method");
+    _selectedGroup.compound->expectedRt = rt;
+    DB.saveRetentionTime(_selectedGroup.compound, rt, "user_method");
+    */
 }
 
 void EicWidget::keyPressEvent( QKeyEvent *e ) {

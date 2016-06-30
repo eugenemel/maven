@@ -312,11 +312,14 @@ void LigandWidget::showGallery() {
 
 	vector<Compound*>matches;
     QTreeWidgetItemIterator itr(treeWidget);
+    int count=0;
     while (*itr) {
         QTreeWidgetItem* item =(*itr);
         QVariant v = item->data(0,Qt::UserRole);
         Compound*  compound =  v.value<Compound*>();
         matches.push_back(compound);
+        if (count++ > 200) break;
+        ++itr;
     }
 
     //qDebug() << "  showGallery()" << matches.size();

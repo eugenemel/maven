@@ -167,7 +167,6 @@ public slots:
     void bookmarkPeakGroup(PeakGroup* group);
     void setClipboardToGroup(PeakGroup* group);
     void bookmarkSelectedPeakGroup();
-    void reorderSamples(PeakGroup* group);
     void findCovariants(Peak* _peak);
     void reportBugs();
     void updateEicSmoothingWindow(int value);

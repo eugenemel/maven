@@ -155,19 +155,19 @@ void SettingsForm::getFormValues() {
     settings->setValue("scan_filter_min_quantile", scan_filter_min_quantile->value());
 
 
-
     //change ionization mode
+    /*
     int mode=0;
     if (ionizationMode->currentText().contains("+1") )     mode=1;
     else if ( ionizationMode->currentText().contains("-1") ) mode=-1;
     if(mainwindow) mainwindow->setIonizationMode(mode);
     settings->setValue("ionizationMode",mode);
+    */
 
     //change ionization type
 
     if (ionizationType->currentText() == "EI")  MassCalculator::ionizationType = MassCalculator::EI;
     else MassCalculator::ionizationType = MassCalculator::ESI;
-
 
     mzSample::setFilter_centroidScans( centroid_scan_flag->checkState() == Qt::Checked );
     mzSample::setFilter_minIntensity( scan_filter_min_intensity->value() );

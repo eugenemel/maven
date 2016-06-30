@@ -35,44 +35,31 @@ Adduct* MassCalculator::ZeroMassAdduct = new Adduct("[M]",0 ,1, 1);
 /*---------- function to get molar weight of an element or group --------*/
 double MassCalculator::getElementMass(string elmnt){
 
-	/* default behavior is to ignore string */
-	double val_atome(0);
-	
-	/* Check for atoms */
-	if (elmnt == "H"){
-		val_atome = 1.0078250321;
-    } else if ( elmnt == "D") {
-        val_atome =  2.01410178;
-	} else if (elmnt == "C") {
-		val_atome = 12.00000000;
-	} else if (elmnt == "N") {
-		val_atome = 14.0030740052;
-	} else if (elmnt == "O") {
-		val_atome = 15.9949146221;
-	} else if (elmnt == "S") {
-		val_atome = 31.97207069;
-	} else if (elmnt == "P") {
-		val_atome = 30.97376151;
-	} else if (elmnt == "F") {
-		val_atome = 18.9984032;
-	} else if (elmnt == "Na"){
-		val_atome = 22.98976967;
-	} else if (elmnt == "Mg"){
-		val_atome = 24.98583702;
-	} else if (elmnt == "Cl"){
-		val_atome = 34.96885271;
-	} else if (elmnt == "K") {
-		val_atome = 38.96399867;
-	} else if (elmnt == "Ca") {
-		val_atome = 39.9625912;
-	} else if (elmnt == "Se") {
-		val_atome = 79.916521;
-    } else if (elmnt == "As") {
-		val_atome = 74.921596;
-    } else if (elmnt == "Si") {
-		val_atome = 27.9769265325;
-	}
-	return(val_atome);
+    /* default behavior is to ignore string */
+    double val_atome(0);
+    
+/* Check for atoms */
+    if (elmnt == "H")        val_atome = 1.0078250321;
+    else if (elmnt == "D")   val_atome = 2.01410178;
+    else if (elmnt == "C")   val_atome = 12.00000000;
+    else if (elmnt == "N")   val_atome = 14.0030740052;
+    else if (elmnt == "O")   val_atome = 15.9949146221;
+    else if (elmnt == "S")   val_atome = 31.97207069;
+    else if (elmnt == "P")   val_atome = 30.97376151;
+    else if (elmnt == "F")   val_atome = 18.9984032;
+    else if (elmnt == "Na")  val_atome = 22.98976967;
+    else if (elmnt == "Mg")  val_atome = 24.98583702;
+    else if (elmnt == "Ca")  val_atome = 39.962591;
+    else if (elmnt == "Cl")  val_atome = 34.96885271;
+    else if (elmnt == "Br")  val_atome = 78.918336;
+    else if (elmnt == "I")   val_atome = 126.904477;
+    else if (elmnt == "K")   val_atome = 38.96399867;
+    else if (elmnt == "Ca")  val_atome = 39.9625912;
+    else if (elmnt == "Se")  val_atome = 79.916521;
+    else if (elmnt == "As")  val_atome = 74.921596;
+    else if (elmnt == "Si")  val_atome = 27.9769265325;
+    else if (elmnt == "Fe")  val_atome = 55.934939;
+    return(val_atome);
 }
 /*-----------------------------------------------------------------------*/
 

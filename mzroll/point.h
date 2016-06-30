@@ -59,9 +59,9 @@ private:
 private slots:
 	void bookmark();
 	void linkCompound();
-	void reorderSamples();
 	void setClipboardToGroup();
-        void setClipboardToIsotopes();
+    void setClipboardToIsotopes();
+
 signals:
     void peakSelected(Peak*);
     void peakGroupSelected(PeakGroup*);

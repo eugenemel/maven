@@ -29,7 +29,7 @@ public:
 
     vector<EIC*> getEICs() { return eics; }
     vector<PeakGroup>& getPeakGroups() { return peakgroups; }
-    PeakGroup* getSelectedGroup() 	  {  return selectedGroup; }
+    PeakGroup* getSelectedGroup() 	  {  return &_selectedGroup; }
     mzSlice&   getMzSlice() 		  {	 return _slice; }
     QString eicToTextBuffer();
 
@@ -68,7 +68,6 @@ public slots:
     void replotForced();
     void print(QPaintDevice* printer);
     void showPeakArea(Peak*);
-    void updateNote(Note*);
     void saveRetentionTime();
     void setGallaryToEics();
 
@@ -180,7 +179,7 @@ private:
 
 
     vector<PeakGroup> peakgroups;	    //peaks grouped across samples
-	PeakGroup* selectedGroup;			//currently selected peak group
+    PeakGroup  _selectedGroup;			//currently selected peak group
 	PeakGroup  _integratedGroup;		//manually integrated peak group
     
     //gui related

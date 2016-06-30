@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>465</width>
-    <height>586</height>
+    <width>679</width>
+    <height>532</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,10 +15,17 @@
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="6" column="0" colspan="9">
+    <item row="7" column="0">
+     <widget class="QLabel" name="statusLabel">
+      <property name="text">
+       <string>Status:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0" colspan="8">
      <widget class="QTextEdit" name="editor"/>
     </item>
-    <item row="9" column="0" colspan="9">
+    <item row="9" column="0" colspan="8">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
        <number>0</number>
@@ -45,40 +52,6 @@
       </widget>
      </widget>
     </item>
-    <item row="0" column="2">
-     <spacer name="horizontalSpacer">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="0" column="5">
-     <widget class="QLabel" name="statusLabel">
-      <property name="text">
-       <string>Status:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="6">
-     <widget class="QPushButton" name="btnRun">
-      <property name="text">
-       <string>Run</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <widget class="QPushButton" name="btnOpen">
-      <property name="text">
-       <string>Load Script</string>
-      </property>
-     </widget>
-    </item>
     <item row="0" column="1">
      <widget class="QPushButton" name="btnSave">
       <property name="enabled">
@@ -89,10 +62,24 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="0" colspan="7">
+    <item row="4" column="0" colspan="6">
      <widget class="QLabel" name="fileLabel">
       <property name="text">
        <string>File:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="7">
+     <widget class="QPushButton" name="btnRun">
+      <property name="text">
+       <string>Run</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QPushButton" name="btnOpen">
+      <property name="text">
+       <string>Load Script</string>
       </property>
      </widget>
     </item>

@@ -394,13 +394,7 @@ void ProjectDockWidget::dropEvent(QDropEvent* e) {
     if (item && item->type() == SampleType ) changeSampleOrder();
 }
 
-void ProjectDockWidget::saveProject() {
-      qDebug() << " ProjectDockWidget::saveProject()";
-
-    if (currentProject) {
-        saveProjectSQLITE(lastOpennedProject);
-        return;
-    }
+void ProjectDockWidget::saveProjectAs() {
 
     QSettings* settings = _mainwindow->getSettings();
     QString dir = ".";
@@ -409,14 +403,22 @@ void ProjectDockWidget::saveProject() {
         QDir test(ldir);
         if (test.exists()) dir = ldir;
     }
-
-     QString fileName = QFileDialog::getSaveFileName( this,"Save Project (.mzrollDB)", dir, "mzRoll Project(*.mzrollDB)");
+     QString fileName = QFileDialog::getSaveFileName( this,"Save Project As (.mzrollDB)", dir, "mzRoll Project(*.mzrollDB)");
 
      if(!fileName.isEmpty()) {
         if(!fileName.endsWith(".mzrollDB",Qt::CaseInsensitive)) fileName = fileName + ".mzrollDB";
         saveProjectSQLITE(fileName);
         lastOpennedProject = fileName;
      }
+}
+
+void ProjectDockWidget::saveProject() {
+    if (currentProject) {
+        saveProjectSQLITE(lastOpennedProject);
+        return;
+    } else {
+        saveProjectAs();
+    }
 }
 
 void ProjectDockWidget::loadProject() {

@@ -42,16 +42,7 @@ QRectF EicPoint::boundingRect() const
 
 void EicPoint::hoverEnterEvent (QGraphicsSceneHoverEvent*) {
    // qDebug() << "EicPoint:: hoverEnterEvent()";
-	this->setFocus(Qt::MouseFocusReason);
-
-	//update colors of all peaks belonging to this group
-	if(_group) { 
-		foreach (QGraphicsItem *item, scene()->items()) {
-			if (qgraphicsitem_cast<EicPoint *>(item)) {
-				if (((EicPoint*) item)->getPeakGroup() == _group) item->update();
-			}
-		}
-	}
+    //this->setFocus(Qt::MouseFocusReason);
 
 	string sampleName;
     if (_peak && _peak->getSample() ) {
@@ -63,26 +54,7 @@ void EicPoint::hoverEnterEvent (QGraphicsSceneHoverEvent*) {
                             "<br> <b>rt: </b>" +   QString::number(_peak->rt, 'f', 2 ) +
                             "<br> <b>scan#: </b>" +   QString::number(_peak->scan ) + 
                             "<br> <b>m/z: </b>" + QString::number(_peak->peakMz, 'f', 6 )
-							);
-
-		update();
-		/*
-		   "<br> <b>quality:  </b>"  + QString::number(_peak->quality, 'f', 2) +
-		   "<br> <b>sigma:  </b>"  + QString::number(_peak->gaussFitSigma, 'f', 2) +
-		   "<br> <b>fitR2:  </b>"  + QString::number(_peak->gaussFitR2*100, 'f', 2)
-		   "<br> <b>Group Overlap Frac: </b>" + QString::number(_peak->groupOverlapFrac)
-		   "<br> <b>peakAreaFractional: </b>" + QString::number(_peak->peakAreaFractional) +
-		   "<br> <b>noNoiseFraction: </b>" + QString::number(_peak->noNoiseFraction) +
-		   "<br> <b>symmetry: </b>" + QString::number(_peak->symmetry) +
-		   "<br> <b>sigma: </b>" + QString::number(_peak->gaussFitSigma) +
-		   "<br> <b>r2: </b>" + QString::number(_peak->gaussFitR2) +
-		   "<br> <b>angle: </b>" + QString::number(_peak->angle) +
-		   "<br> <b>rank: </b>" + QString::number(_peak->peakRank) +
-		   "<br> <b>S/N: </b>" + QString::number(_peak->signalBaselineRatio, 'f', 4) +
-		   "<br> <b>Width: </b>" + QString::number(_peak->width) +
-		   "<br> <b>No NoiseObs: </b>" + QString::number(_peak->noNoiseObs) +
-		   "<br> <b>Group Overlap Frac: </b>" + QString::number(_peak->groupOverlapFrac) +
-		 */
+                            );
 	} else if (_scan) { 
 		setToolTip( "<b>  Sample: </b>"   + QString( _scan->sample->sampleName.c_str() ) +
 					"<br> <b>FilterLine: </b>" + 		  QString(_scan->filterLine.c_str() ) + 
@@ -91,9 +63,7 @@ void EicPoint::hoverEnterEvent (QGraphicsSceneHoverEvent*) {
 		);
 	}
 
-
-
-    if(_group) {
+    if(_group and not _group->isEmpty()) {
         _group->isFocused = true;
         emit(peakGroupFocus(_group));
     }
@@ -102,15 +72,7 @@ void EicPoint::hoverEnterEvent (QGraphicsSceneHoverEvent*) {
 void EicPoint::hoverLeaveEvent ( QGraphicsSceneHoverEvent*) {
     clearFocus();
 
-    if (_group) {
-        _group->isFocused = false;
-
-        foreach (QGraphicsItem *item, scene()->items()) {
-            if (qgraphicsitem_cast<EicPoint *>(item)) {
-                if (((EicPoint*) item)->getPeakGroup() == _group) item->update();
-            }
-        }
-    }
+    if (_group)  _group->isFocused = false;
     update(); 
 }
 
@@ -161,7 +123,7 @@ void EicPoint::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
 
     PeakGroup* selGroup = _mw->getEicWidget()->getSelectedGroup();
 
-    if (_group != NULL && selGroup == _group ) {
+    if (_group != NULL && selGroup->minMz == _group->minMz && selGroup->minRt == _group->minRt ) {
         brush.setStyle(Qt::SolidPattern);
         pen.setColor(_color.darker());
         pen.setWidth(_pen.width()+1);
@@ -217,8 +179,6 @@ void EicPoint::linkCompound() {
 	}
 }
 
-void EicPoint::reorderSamples() { if (_mw && _group ) _mw->reorderSamples(_group ); }
-
 void EicPoint::contextMenuEvent (QGraphicsSceneContextMenuEvent* event) {
     QMenu menu;
 
@@ -245,11 +205,6 @@ void EicPoint::contextMenuEvent (QGraphicsSceneContextMenuEvent* event) {
     QAction* c3 = menu.addAction("Mark Bad");
     c3->setIcon(QIcon(rsrcPath + "/markbad.png"));
     connect(c3, SIGNAL(triggered()), _mw->getEicWidget(), SLOT(markGroupBad()));
-
-    if ( _group && _group->peaks.size() > 1  ) {
-        QAction* d = menu.addAction("Sort Samples by Peak Intensity");
-        connect(d, SIGNAL(triggered()), SLOT(reorderSamples()));
-    }
 
      QPointF p = event->pos();
      QPoint pos = scene()->views().first()->mapToGlobal(p.toPoint());

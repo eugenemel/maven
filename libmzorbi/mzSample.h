@@ -35,8 +35,8 @@
 #endif
 
 #if defined(WIN32) || defined(WIN64)
-#define strncasecmp strnicmp
-#define isnan(x) ((x) = (x))
+//define strncasecmp strnicmp
+//define isnan(x) ((x) = (x))
 #endif /* Def WIN32 or Def WIN64 */
 
 class mzSample;
@@ -82,6 +82,7 @@ class Scan {
     vector<int> findMatchingMzs(float mzmin, float mzmax);
     int findHighestIntensityPos(float mz, float ppm);		//higest intensity pos
     int findClosestHighestIntensityPos(float mz, float ppm);	//highest intensity pos nearest to the cente mz
+    bool isMonoisotopicPrecursor(float monoIsotopeMz, float ppm);
 
     bool hasMz(float mz, float ppm);
     bool isCentroided() { return centroided; }
@@ -485,7 +486,8 @@ class PeakGroup {
 		PeakGroup(const PeakGroup& o);
 		PeakGroup& operator=(const PeakGroup& o);
 		bool operator==(const PeakGroup* o);
-		void copyObj(const PeakGroup& o);
+        bool operator==(const PeakGroup& o);
+        void copyObj(const PeakGroup& o);
 
 		~PeakGroup();
 
@@ -566,6 +568,11 @@ class PeakGroup {
         vector<Scan*> getFragmenationEvents();
         void computeFragPattern(float productPpmTolr);
         Scan* getAverageFragmenationScan(float productPpmTolr);
+
+        Peak* getHighestIntensityPeak();
+        int getChargeStateFromMS1(float ppm);
+        bool isMonoisotopic(float ppm);
+
 
 		inline void setParent(PeakGroup* p) {parent=p;}
 		inline void setLabel(char label) { this->label=label;}
