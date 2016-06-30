@@ -647,11 +647,14 @@ bool addPeakGroup(PeakGroup& grp1) {
 
 	//cerr << "\t\t accepting " << grp1.meanMz << "@" << grp1.meanRt;
 #ifdef OMP_PARALLEL
-                    #pragma omp critical
+#pragma omp critical
+{
 #endif
+
 	allgroups.push_back(grp1); 
+
 #ifdef OMP_PARALLEL
-                    #pragma omp end critical
+}
 #endif
 	return true;
 }
@@ -1222,7 +1225,7 @@ void matchFragmentation() {
                 s.ppmError = m.diff;
 
                 if (s.numMatches == 0 ) continue;
-                cerr << "\t"; cerr << cpd->name << "\t" << cpd->precursorMz << "\tppmDiff=" << m.diff << "\t num=" << s.numMatches << "\t tic" << s.ticMatched <<  " s=" << s.spearmanRankCorrelation << endl;
+                //cerr << "\t"; cerr << cpd->name << "\t" << cpd->precursorMz << "\tppmDiff=" << m.diff << "\t num=" << s.numMatches << "\t tic" << s.ticMatched <<  " s=" << s.spearmanRankCorrelation << endl;
                 if (s.mergedScore > bestScore.mergedScore ) {
                     bestScore = s;
                     bestHit = cpd;
@@ -1247,7 +1250,7 @@ void matchFragmentation() {
                      << bestScore.ticMatched << endl;
 
             }
-            cerr << "-------" << endl;
+            //cerr << "-------" << endl;
        }
 }
 
