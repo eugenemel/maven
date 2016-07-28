@@ -36,7 +36,7 @@ void LibraryMangerDialog::deleteLibrary() {
         qDebug() << "Delete Library" << libraryName;
         DB.deleteCompoundsSQL(libraryName);
     }
-    DB.loadCompoundsSQL();
+    DB.loadCompoundsSQL("ALL");
     updateLibraryStats();
 }
 
@@ -45,7 +45,7 @@ void LibraryMangerDialog::loadCompoundsFile(QString filename){
     string dbname = mzUtils::cleanFilename(dbfilename);
 
     int compoundCount = DB.loadCompoundsFile(filename);
-    DB.loadCompoundsSQL();
+    DB.loadCompoundsSQL("ALL");
 
     if (compoundCount > 0 && mainwindow->ligandWidget) {
         mainwindow->ligandWidget->updateDatabaseList();

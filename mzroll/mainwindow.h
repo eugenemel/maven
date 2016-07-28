@@ -15,6 +15,7 @@
 #include "tabledockwidget.h"
 #include "peakdetectiondialog.h"
 #include "alignmentdialog.h"
+#include "calibratedialog.h"
 //#include "rconsoledialog.h"
 #include "background_peaks_update.h"
 #include "heatmap.h"
@@ -35,6 +36,7 @@ class PlotDockWidget;
 class BackgroundPeakUpdate;
 class PeakDetectionDialog;
 class AlignmentDialog;
+class CalibrateDialog;
 //class RConsoleDialog;
 class SpectraWidget;
 class LigandWidget;
@@ -111,6 +113,7 @@ public:
     SettingsForm   *settingsForm;
     PeakDetectionDialog *peakDetectionDialog;
     AlignmentDialog*	  alignmentDialog;
+    CalibrateDialog*	  calibrateDialog;
     RconsoleWidget*       rconsoleDockWidget;
     LibraryMangerDialog*       libraryDialog;
 
@@ -159,6 +162,7 @@ public slots:
     void setUrl(Compound*);
     void setFormulaFocus(QString formula);
     void Align();
+    void Calibrate();
     void UndoAlignment();
     void spectaFocused(Peak* _peak);
     void setCompoundFocus(Compound* c);

@@ -19,7 +19,7 @@ void Database::reloadAll() {
     const std::string EmptyString;
     compoundIdMap.clear();
     compoundsDB.clear();
-    loadCompoundsSQL();
+    loadCompoundsSQL("ALL");
 
     cerr << "compoundsDB=" << compoundsDB.size() << " " << compoundIdMap.size() << endl;
     cerr << "adductsDB=" << adductsDB.size() << endl;
@@ -91,12 +91,15 @@ void Database::addCompound(Compound* c) {
     compoundsDB.push_back(c);
 }
 
-void Database::loadCompoundsSQL() {
+void Database::loadCompoundsSQL(QString databaseName) {
         compoundsDB.clear();
         compoundIdMap.clear();
 
         QSqlQuery query(ligandDB);
         QString sql = "select * from compounds where name not like '%DECOY%'";
+
+        if (databaseName != "ALL")  sql += " and dbName='" + databaseName + "'";
+
         query.prepare(sql);
         if(!query.exec()) qDebug() << query.lastError();
 

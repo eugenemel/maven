@@ -67,7 +67,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     if(!QFile::exists(writeLocation))  { QDir dir; dir.mkdir(writeLocation); }
     qDebug() << "WRITE FOLDER=" <<  writeLocation;
     DB.connect(writeLocation + "/ligand.db");
-    DB.loadCompoundsSQL();
+
+    DB.loadCompoundsSQL("KNOWNS");
 
     //QString commonFragments =   methodsFolder + "/" + "FRAGMENTS.csv";
     //if(QFile::exists(commonFragments)) DB.fragmentsDB = DB.loadAdducts(commonFragments.toStdString());
@@ -159,6 +160,10 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     alignmentDialog	 =  new AlignmentDialog(this);
     connect(alignmentDialog->alignButton,SIGNAL(clicked()),SLOT(Align()));
     connect(alignmentDialog->UndoAlignment,SIGNAL(clicked()),SLOT(UndoAlignment()));
+
+    //calibration dialog
+    calibrateDialog	 =  new CalibrateDialog(this);
+    connect(calibrateDialog->calibrateButton,SIGNAL(clicked()),SLOT(Calibrate()));
 
     //Compound Library  Manager
     libraryDialog = new LibraryMangerDialog(this);
@@ -847,6 +852,12 @@ void MainWindow::createToolBars() {
     btnAlign->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnAlign->setToolTip(tr("Align Samples"));
 
+    QToolButton *btnCalibrate = new QToolButton(toolBar);
+    btnCalibrate->setText("Calibrate");
+    btnCalibrate->setIcon(QIcon(rsrcPath + "/positive_ion.png"));
+    btnCalibrate->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnCalibrate->setToolTip(tr("Calibrate"));
+
     QToolButton *btnDbSearch = new QToolButton(toolBar);
     btnDbSearch->setText("Databases");
     btnDbSearch->setIcon(QIcon(rsrcPath + "/dbsearch.png"));
@@ -875,6 +886,7 @@ void MainWindow::createToolBars() {
     connect(btnOpen, SIGNAL(clicked()), SLOT(open()));
     connect(btnLibrary, SIGNAL(clicked()), libraryDialog, SLOT(show()));
     connect(btnAlign,SIGNAL(clicked()), alignmentDialog, SLOT(show()));
+    connect(btnCalibrate,SIGNAL(clicked()), calibrateDialog, SLOT(show()));
     connect(btnDbSearch,SIGNAL(clicked()), SLOT(compoundDatabaseSearch()));
     connect(btnFeatureDetect,SIGNAL(clicked()), SLOT(showMassSlices()));
     connect(btnSettings,SIGNAL(clicked()),settingsForm,SLOT(show()));
@@ -884,6 +896,7 @@ void MainWindow::createToolBars() {
     toolBar->addWidget(btnOpen);
     toolBar->addWidget(btnLibrary);
     toolBar->addWidget(btnAlign);
+    toolBar->addWidget(btnCalibrate);
     toolBar->addWidget(btnDbSearch);
     toolBar->addWidget(btnFeatureDetect);
     toolBar->addWidget(btnSpectraMatching);
@@ -1089,6 +1102,24 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
     if (group->peaks.size() > 0) showPeakInfo(&(group->peaks[0]));
 }
 
+void MainWindow::Calibrate() { 
+
+    QString dbName = calibrateDialog->compoundDatabase->currentText();
+    BackgroundPeakUpdate* workerThread = newWorkerThread("computePeaks");
+    workerThread->eic_ppmWindow = calibrateDialog->ppmSearch->value();
+    workerThread->eic_smoothingAlgorithm = 10;
+    workerThread->compoundDatabase = dbName;
+    workerThread->setCompounds( DB.getCopoundsSubset(dbName.toStdString()));
+    workerThread->matchRtFlag = true;
+    workerThread->minGoodPeakCount = 1;
+    workerThread->minGroupIntensity =  calibrateDialog->minGroupIntensity->value();
+    workerThread->minSignalBaseLineRatio = calibrateDialog->minSN->value();
+    //workerThread->minNoNoiseObs =  10;
+    workerThread->alignSamplesFlag=false;
+    workerThread->keepFoundGroups=false;
+    workerThread->eicMaxGroups=3;
+    workerThread->start();
+}
 
 void MainWindow::Align() { 
     if (sampleCount() < 2 ) return;
