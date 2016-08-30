@@ -595,6 +595,7 @@ void PeakGroup::computeFragPattern(float productPpmTolr)  {
     f.buildConsensus(productPpmTolr);
     f.consensus->sortByMz();
     fragmentationPattern = f.consensus;
+    ms2EventCount = ms2events.size();
 }
 
 Scan* PeakGroup::getAverageFragmenationScan(float productPpmTolr)  {

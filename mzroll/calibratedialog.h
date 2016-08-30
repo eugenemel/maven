@@ -19,6 +19,20 @@ class CalibrateDialog : public QDialog, public Ui_CalibrateDialog {
 
                 public slots:
                     void show();
+                    void runCalibration();
+                    void undoCalibration();
+                    void doCorrection();
+                    void addPeakGroup(PeakGroup* grp,bool);
+
+        private:
+                    MainWindow* mw;
+                    BackgroundPeakUpdate* workerThread;
+                    vector<PeakGroup>allgroups;
+                    bool evaluateFit(vector<double>obs, vector<double>exp, vector<double> coef);
+                    void applyFit(mzSample* sample, vector<double> coef);
+                    void reverseFit(mzSample* sample);
+                    vector<double> leastSqrFit(vector<double> &x, vector<double> &y);
+
 };
 
 #endif

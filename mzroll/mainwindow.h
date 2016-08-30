@@ -162,7 +162,6 @@ public slots:
     void setUrl(Compound*);
     void setFormulaFocus(QString formula);
     void Align();
-    void Calibrate();
     void UndoAlignment();
     void spectaFocused(Peak* _peak);
     void setCompoundFocus(Compound* c);

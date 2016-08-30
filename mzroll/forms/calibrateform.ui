@@ -6,21 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>355</width>
-    <height>319</height>
+    <width>359</width>
+    <height>353</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Calibrate Options</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="3" column="1">
-    <widget class="QPushButton" name="calibrateButton">
-     <property name="text">
-      <string>Calibrate</string>
-     </property>
-    </widget>
-   </item>
    <item row="1" column="1">
     <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
@@ -39,6 +32,15 @@
       </item>
       <item row="1" column="1">
        <widget class="QDoubleSpinBox" name="minGroupIntensity">
+        <property name="showGroupSeparator" stdset="0">
+         <bool>true</bool>
+        </property>
+        <property name="suffix">
+         <string> ions</string>
+        </property>
+        <property name="decimals">
+         <number>0</number>
+        </property>
         <property name="minimum">
          <double>0.000000000000000</double>
         </property>
@@ -49,7 +51,7 @@
          <double>1000.000000000000000</double>
         </property>
         <property name="value">
-         <double>100000.000000000000000</double>
+         <double>10000.000000000000000</double>
         </property>
        </widget>
       </item>
@@ -69,7 +71,7 @@
          <number>1</number>
         </property>
         <property name="value">
-         <number>5</number>
+         <number>2</number>
         </property>
        </widget>
       </item>
@@ -89,7 +91,7 @@
          <number>999999999</number>
         </property>
         <property name="value">
-         <number>5</number>
+         <number>3</number>
         </property>
        </widget>
       </item>
@@ -139,6 +141,20 @@
        </widget>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QPushButton" name="calibrateButton">
+     <property name="text">
+      <string>Calibrate</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QPushButton" name="undoCalibrationButton">
+     <property name="text">
+      <string>Undo Calibration</string>
+     </property>
     </widget>
    </item>
   </layout>

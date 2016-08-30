@@ -68,7 +68,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     qDebug() << "WRITE FOLDER=" <<  writeLocation;
     DB.connect(writeLocation + "/ligand.db");
 
-    DB.loadCompoundsSQL("KNOWNS");
+    //DB.loadCompoundsSQL("KNOWNS");
+    DB.loadCompoundsSQL("ALL");
 
     //QString commonFragments =   methodsFolder + "/" + "FRAGMENTS.csv";
     //if(QFile::exists(commonFragments)) DB.fragmentsDB = DB.loadAdducts(commonFragments.toStdString());
@@ -163,7 +164,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
     //calibration dialog
     calibrateDialog	 =  new CalibrateDialog(this);
-    connect(calibrateDialog->calibrateButton,SIGNAL(clicked()),SLOT(Calibrate()));
 
     //Compound Library  Manager
     libraryDialog = new LibraryMangerDialog(this);
@@ -1102,24 +1102,6 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
     if (group->peaks.size() > 0) showPeakInfo(&(group->peaks[0]));
 }
 
-void MainWindow::Calibrate() { 
-
-    QString dbName = calibrateDialog->compoundDatabase->currentText();
-    BackgroundPeakUpdate* workerThread = newWorkerThread("computePeaks");
-    workerThread->eic_ppmWindow = calibrateDialog->ppmSearch->value();
-    workerThread->eic_smoothingAlgorithm = 10;
-    workerThread->compoundDatabase = dbName;
-    workerThread->setCompounds( DB.getCopoundsSubset(dbName.toStdString()));
-    workerThread->matchRtFlag = true;
-    workerThread->minGoodPeakCount = 1;
-    workerThread->minGroupIntensity =  calibrateDialog->minGroupIntensity->value();
-    workerThread->minSignalBaseLineRatio = calibrateDialog->minSN->value();
-    //workerThread->minNoNoiseObs =  10;
-    workerThread->alignSamplesFlag=false;
-    workerThread->keepFoundGroups=false;
-    workerThread->eicMaxGroups=3;
-    workerThread->start();
-}
 
 void MainWindow::Align() { 
     if (sampleCount() < 2 ) return;

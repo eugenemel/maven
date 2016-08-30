@@ -361,7 +361,7 @@ void Fragment::buildConsensus(float productPpmTolr) {
     for(unsigned int i=0; i<brothers.size(); i++) {
         Fragment* brother = brothers[i];
 
-        vector<int>ranks=locatePositions(brother,Cons,productPpmTolr);	//location
+        vector<int>ranks=compareRanks(brother,Cons,productPpmTolr);	//location
 
         for(unsigned int j=0; j<ranks.size(); j++ ) {
             int   posA = ranks[j];	
@@ -460,7 +460,7 @@ void Fragment::sortByMz() {
     for(unsigned int i=0; i<order.size(); i++) {
         b[i] = intensity_array[order[i]];
         a[i] = mzs[order[i]];
-        c[i] = obscount[order[i]];
+        if(order[i] < obscount.size()) c[i] = obscount[order[i]];
         if (annotations.count(order[i])>0) d[i] = annotations[order[i]];
 
     };

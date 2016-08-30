@@ -2,8 +2,8 @@
 DATE=`date +%Y%m%d`
 SRC=/Users/eugenemelamud/src/mzroll
 BUILD=/Users/eugenemelamud/src/mzroll
-#QTBIN=/Users/eugenemelamud/Qt5.7.0/5.7/clang_64/bin
-QTBIN=~/Qt/5.6/clang_64/bin/
+QTBIN=/Users/eugenemelamud/Qt5.7.0/5.7/clang_64/bin
+#QTBIN=~/Qt/5.6/clang_64/bin/
 #QTBIN=~/Qt/5.6/clang_64/bin/macdeployqt
 
 #get the latest source
@@ -16,7 +16,7 @@ rm -rf $BUILD/bin/peakdetector.app
 #update Makefile
 $QTBIN/qmake -r
 #make
-#make clean
+make clean
 make -j10
 
 #copy support files
