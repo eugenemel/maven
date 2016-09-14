@@ -1,7 +1,6 @@
 OUTPUT_DIR = $$(OUTPUT_DIR)
 isEmpty(OUTPUT_DIR):OUTPUT_DIR=$$PWD/build
 
-
 INSTALL_LIBDIR = $$(INSTALL_LIBDIR)
 unix {
   !mac {

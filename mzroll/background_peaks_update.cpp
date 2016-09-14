@@ -177,20 +177,13 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             if (group.maxNoNoiseObs < minNoNoiseObs) continue;
             if (group.maxSignalBaselineRatio < minSignalBaseLineRatio) continue;
             if (group.maxIntensity < minGroupIntensity ) continue;
+
             //if (group.isMonoisotopic(compoundPPMWindow) == false) continue;
             //if (getChargeStateFromMS1(&group) < minPrecursorCharge) continue;
 
             //build consensus ms2 specta
             vector<Scan*>ms2events = group.getFragmenationEvents();
-            if(ms2events.size()) {
-                sort(ms2events.begin(),ms2events.end(),Scan::compIntensity);
-                Fragment f = Fragment(ms2events[0],0.01,1,1024);
-                for(Scan* s : ms2events) {  f.addFragment(new Fragment(s,0,0.01,1024)); }
-                f.buildConsensus(productPpmTolr);
-                group.fragmentationPattern = f.consensus;
-                group.ms2EventCount = ms2events.size();
-            }
-
+            group.computeFragPattern(productPpmTolr);
             matchFragmentation(&group);
 
             if(mustHaveMS2) {
@@ -282,6 +275,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
         if(keepFoundGroups) {
             emit(newPeakGroup(&allgroups[j],false));
+            qDebug() << "Emmiting..." << allgroups[j].meanMz;
             QCoreApplication::processEvents();
         }
 

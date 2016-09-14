@@ -1,4 +1,3 @@
-
 #include <fstream>
 #include <string>
 #include <vector>
@@ -130,7 +129,6 @@ vector<mzSlice*> getSrmSlices();
 void matchFragmentation();
 void writeMS2SimilarityMatrix(string filename);
 
-vector<EIC*> getEICs(float rtmin, float rtmax, PeakGroup& grp);
 
 double get_wall_time();
 double get_cpu_time(); 
@@ -483,25 +481,6 @@ void processSlices(vector<mzSlice*>&slices, string setName) {
     printf("Execution time (Write report) : %f seconds \n",getTime() - startWriteReportTime);
 }
 
-vector<EIC*> getEICs(float rtmin, float rtmax, PeakGroup& grp) { 
-		vector<EIC*>eics;
-		for(int i=0; i < grp.peaks.size(); i++ ) {
-				float mzmin  = grp.meanMz-0.2;
-				float mzmax  = grp.meanMz+0.2;
-				//cerr <<setprecision(5) << "getEICs: mz:" << mzmin << "-" << mzmax << " rt:" << rtmin << "-" << rtmax << endl;
-
-		  		for ( unsigned int j=0; j < samples.size(); j++ ) {
-					if ( !grp.srmId.empty() ) {
-						EIC* eic = samples[j]->getEIC(grp.srmId);
-						eics.push_back(eic);
-					} else {
-						EIC* eic = samples[j]->getEIC(mzmin,mzmax,rtmin,rtmax,1);
-						eics.push_back(eic);
-					}
-				}
-		}
-		return(eics);
-}
 
 void processOptions(int argc, char* argv[]) {
 

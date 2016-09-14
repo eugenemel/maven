@@ -231,7 +231,6 @@ public:
     double getMS1PrecurursorMass(Scan* ms2scan,float ppm);
     vector<Scan*> getFragmenationEvents(mzSlice* slice);
 
-
     deque <Scan*> scans;
     string sampleName;
     string fileName;
@@ -255,9 +254,13 @@ public:
     map<string,vector<int> >srmScans;		//srm to scan mapping
     map<string,string> instrumentInfo;		//tags associated with this sample
 
+
     //saving and restoring retention times
     vector<float>originalRetentionTimes;       			//saved retention times prior to alignment
-	vector<double>polynomialAlignmentTransformation;		//parameters for polynomial transform
+    vector<double>polynomialAlignmentTransformation;		//parameters for polynomial transform
+
+    //Instrument PPM Calibration
+    vector<double> ppmCorrectionCoef;
 
     void saveOriginalRetentionTimes();
     void restoreOriginalRetentionTimes();       
@@ -455,7 +458,8 @@ class Peak {
 		inline EIC*	 getEIC() { return eic;    }
 		inline bool hasEIC() { return eic != NULL; }
 		Scan* getScan() { if(sample) return sample->getScan(scan); else return NULL; }	
-		vector<Scan*> getFragmenationEvents(float ppmWindow);
+        vector<Scan*> getFragmenationEvents(float ppmWindow);
+        Fragment getConsensusFragmentation(float ppmWindow, float productPpmTolr);
 
 		int getChargeState();
 

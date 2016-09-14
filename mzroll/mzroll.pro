@@ -41,7 +41,9 @@ FORMS = forms/settingsform.ui  \
         forms/rconsolewidget.ui \
         forms/clusterdialog.ui \
         forms/spectramatching.ui \
-    forms/librarydialog.ui
+        forms/calibrateform.ui \
+        forms/librarydialog.ui \
+
 
 HEADERS +=  stable.h \
                     globals.h \
@@ -85,7 +87,8 @@ HEADERS +=  stable.h \
                     spectralhit.h \
                     clusterdialog.h \
                     projectDB.h \
-                    librarydialog.h
+                    librarydialog.h \
+                    calibratedialog.h 
 
 
 SOURCES += mainwindow.cpp  \
@@ -128,7 +131,8 @@ csvreports.cpp \
  spectramatching.cpp \
  mzfileio.cpp \
  projectDB.cpp \
- librarydialog.cpp
+ librarydialog.cpp \
+ calibratedialog.cpp 
 
 
 sources.files =  $$HEADERS \

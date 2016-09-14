@@ -67,7 +67,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     if(!QFile::exists(writeLocation))  { QDir dir; dir.mkdir(writeLocation); }
     qDebug() << "WRITE FOLDER=" <<  writeLocation;
     DB.connect(writeLocation + "/ligand.db");
-    DB.loadCompoundsSQL();
+
+    //DB.loadCompoundsSQL("KNOWNS");
+    DB.loadCompoundsSQL("ALL");
 
     //QString commonFragments =   methodsFolder + "/" + "FRAGMENTS.csv";
     //if(QFile::exists(commonFragments)) DB.fragmentsDB = DB.loadAdducts(commonFragments.toStdString());
@@ -159,6 +161,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     alignmentDialog	 =  new AlignmentDialog(this);
     connect(alignmentDialog->alignButton,SIGNAL(clicked()),SLOT(Align()));
     connect(alignmentDialog->UndoAlignment,SIGNAL(clicked()),SLOT(UndoAlignment()));
+
+    //calibration dialog
+    calibrateDialog	 =  new CalibrateDialog(this);
 
     //Compound Library  Manager
     libraryDialog = new LibraryMangerDialog(this);
@@ -847,6 +852,12 @@ void MainWindow::createToolBars() {
     btnAlign->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnAlign->setToolTip(tr("Align Samples"));
 
+    QToolButton *btnCalibrate = new QToolButton(toolBar);
+    btnCalibrate->setText("Calibrate");
+    btnCalibrate->setIcon(QIcon(rsrcPath + "/positive_ion.png"));
+    btnCalibrate->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnCalibrate->setToolTip(tr("Calibrate"));
+
     QToolButton *btnDbSearch = new QToolButton(toolBar);
     btnDbSearch->setText("Databases");
     btnDbSearch->setIcon(QIcon(rsrcPath + "/dbsearch.png"));
@@ -875,6 +886,7 @@ void MainWindow::createToolBars() {
     connect(btnOpen, SIGNAL(clicked()), SLOT(open()));
     connect(btnLibrary, SIGNAL(clicked()), libraryDialog, SLOT(show()));
     connect(btnAlign,SIGNAL(clicked()), alignmentDialog, SLOT(show()));
+    connect(btnCalibrate,SIGNAL(clicked()), calibrateDialog, SLOT(show()));
     connect(btnDbSearch,SIGNAL(clicked()), SLOT(compoundDatabaseSearch()));
     connect(btnFeatureDetect,SIGNAL(clicked()), SLOT(showMassSlices()));
     connect(btnSettings,SIGNAL(clicked()),settingsForm,SLOT(show()));
@@ -884,6 +896,7 @@ void MainWindow::createToolBars() {
     toolBar->addWidget(btnOpen);
     toolBar->addWidget(btnLibrary);
     toolBar->addWidget(btnAlign);
+    toolBar->addWidget(btnCalibrate);
     toolBar->addWidget(btnDbSearch);
     toolBar->addWidget(btnFeatureDetect);
     toolBar->addWidget(btnSpectraMatching);

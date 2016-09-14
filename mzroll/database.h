@@ -38,7 +38,7 @@ class Database {
         int  loadCompoundsFile(QString filename);
         vector<Compound*> loadCompoundCSVFile(QString fileName);
         vector<Compound*> loadNISTLibrary(QString fileName);
-        void loadCompoundsSQL();
+        void loadCompoundsSQL(QString databaseName);
         void saveCompoundsSQL(vector<Compound*> &compoundSet);
         void deleteCompoundsSQL( QString dbName);
         void deleteAllCompoundsSQL();

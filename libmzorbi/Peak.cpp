@@ -143,6 +143,19 @@ vector<Scan*> Peak::getFragmenationEvents(float ppmWindow) {
 }
 
 
+Fragment Peak::getConsensusFragmentation(float ppmWindow,float productPpmTolr=20) {
+            vector<Scan*> ms2events =  this->getFragmenationEvents(ppmWindow);
+            if (ms2events.size()==0) return Fragment();
+            Fragment* f = new Fragment(ms2events[0],0.0001,0,1024);
+            for(Scan* s: ms2events) f->addFragment(new Fragment(s,0.0001,0,1024));
+
+            f->buildConsensus(productPpmTolr);
+            Fragment fcons(f->consensus);
+            delete(f);
+            return fcons;
+}
+
+
 
 vector<mzLink> Peak::findCovariants() {
 
