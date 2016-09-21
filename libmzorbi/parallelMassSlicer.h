@@ -24,7 +24,7 @@ class ParallelMassSlicer {
 		mzSlice* sliceExists(float mz,float rt);
 		void algorithmA();
         void algorithmB(float ppm, float minIntensity, int step);
-        void algorithmC(float ppm, float minIntensity, float rtStep);
+        void algorithmC(float ppm, float minIntensity, float rtStep, int topN, int minCharge);
         void algorithmD(float ppm,float rtStep);
         void setMaxSlices( int x) { _maxSlices=x; }
 		void setSamples(vector<mzSample*> samples)  { this->samples = samples; }

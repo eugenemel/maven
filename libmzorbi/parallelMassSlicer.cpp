@@ -129,7 +129,7 @@ void ParallelMassSlicer::addSlice(mzSlice* s) {
 		cache.insert( pair<int,mzSlice*>(mzRange, s));
 	}
 
-void ParallelMassSlicer::algorithmC(float ppm, float minIntensity, float rtWindow) {
+void ParallelMassSlicer::algorithmC(float ppm, float minIntensity, float rtWindow, int topN=20, int minCharge=1) {
         delete_all(slices);
         slices.clear();
         cache.clear();
@@ -138,16 +138,24 @@ void ParallelMassSlicer::algorithmC(float ppm, float minIntensity, float rtWindo
             mzSample* s = samples[i];
             for(unsigned int j=0; j < s->scans.size(); j++) {
                 Scan* scan = samples[i]->scans[j];
+
                 if (scan->mslevel != 1 ) continue;
+                vector<int>chargeState = scan->assignCharges(ppm);
+
                 vector<int> positions = scan->intensityOrderDesc();
-                for(unsigned int k=0; k< positions.size() && k<10; k++ ) {
+                for(unsigned int k=0; k< positions.size() && k<topN; k++ ) {
                     int pos = positions[k];
-                    if (scan->intensity[pos] < minIntensity) continue;
+                    if(scan->intensity[pos] < minIntensity) continue;
+                    if(scan->isMonoisotopicPrecursor(scan->mz[pos],ppm) == false) continue;
+                    //if (chargeState[pos] < minCharge )  continue;
+
                     float rt = scan->rt;
                     float mz = scan->mz[ pos ];
                     float mzmax = mz + mz/1e6*ppm;
                     float mzmin = mz - mz/1e6*ppm;
-                    if(! sliceExists(mz,rt) ) {
+
+                    mzSlice* slice = sliceExists(mz,rt);
+                    if(!slice ) {
                         mzSlice* s = new mzSlice(mzmin,mzmax, rt-2*rtWindow, rt+2*rtWindow);
                         s->ionCount = scan->intensity[pos];
                         s->rt=scan->rt;
@@ -155,14 +163,19 @@ void ParallelMassSlicer::algorithmC(float ppm, float minIntensity, float rtWindo
                         slices.push_back(s);
                         int mzRange = mz*10;
                         cache.insert( pair<int,mzSlice*>(mzRange, s));
+                    } else if ( slice->ionCount < scan->intensity[pos]) {
+                            slice->ionCount = scan->intensity[pos];
+                            slice->rt = scan->rt;
+                            slice->mz = mz;
                     }
+
                 }
             }
         }
         cerr << "#algorithmC" << slices.size() << endl;
     }
 
-void ParallelMassSlicer::algorithmD(float ppm, float rtWindow) {
+void ParallelMassSlicer::algorithmD(float ppm, float rtWindow) {        //features that have ms2 events
         delete_all(slices);
         slices.clear();
         cache.clear();
@@ -176,6 +189,7 @@ void ParallelMassSlicer::algorithmD(float ppm, float rtWindow) {
                 float mz = scan->precursorMz;
                 float mzmax = mz + mz/1e6*ppm;
                 float mzmin = mz - mz/1e6*ppm;
+
                 if(! sliceExists(mz,rt) ) {
                     mzSlice* s = new mzSlice(mzmin,mzmax, rt-2*rtWindow, rt+2*rtWindow);
                     s->ionCount = scan->totalIntensity();
@@ -188,7 +202,7 @@ void ParallelMassSlicer::algorithmD(float ppm, float rtWindow) {
             }
         }
         cerr << "#algorithmD" << slices.size() << endl;
-    }
+}
 
 mzSlice*  ParallelMassSlicer::sliceExists(float mz, float rt) {
 	pair< multimap<int, mzSlice*>::iterator,  multimap<int, mzSlice*>::iterator > ppp;
