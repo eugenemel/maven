@@ -19,6 +19,7 @@
 
 #include <QtCore>
 #include <QCoreApplication>
+#include <QPixmap>
 
 using namespace std;
 #ifdef OMP_PARALLEL
@@ -117,6 +118,8 @@ void classConsensusMS2Spectra(string filename);
 void pullIsotopes(PeakGroup* parentgroup);
 void writeGroupInfoCSV(PeakGroup* group,  ofstream& groupReport);
 void loadSpectralLibraries(string methodsFolder);
+void makeImages(ParallelMassSlicer* massSlices, vector<mzSample*> sampleSubset, float rtAccur,float mzAccur);
+void extractSampleFeatures(vector<string>filenames);
 
 bool addPeakGroup(PeakGroup& grp);
 
@@ -160,6 +163,8 @@ int main(int argc, char *argv[]) {
         DB.adductsDB = DB.loadAdducts(methodsFolder + "/" + adductDbFilename);
     }
 
+    extractSampleFeatures(filenames); exit(-1);
+
     //load files
     double startLoadingTime = getTime();
     loadSamples(filenames);
@@ -191,13 +196,92 @@ int main(int argc, char *argv[]) {
 	return(0);
 }
 
+mzSlice getGlobalBounds(vector<mzSample*>sampleSubset) {
+
+    mzSlice bounds;
+    if (sampleSubset.size() == 0) return bounds;
+
+    float minMz = 100;
+    float maxMz = 3000;
+    float minRt = 0;
+    float maxRt = sampleSubset[0]->maxRt;
+
+    for(mzSample* s: sampleSubset) {
+        minMz = min(minMz, s->minMz);
+        maxMz = max(maxMz, s->maxMz);
+        minRt = min(minRt, s->minRt);
+        maxRt = max(maxRt, s->maxRt);
+    }
+
+    maxRt = ceil(maxRt)+1.0;
+    maxMz = ceil(maxMz)+1.0;
+
+    bounds.mzmin = minMz;
+    bounds.mzmax = maxMz;
+    bounds.rtmin = minRt;
+    bounds.rtmax = maxRt;
+
+    return bounds;
+}
+
+
+
+void makeImages(ParallelMassSlicer* massSlices, vector<mzSample*> sampleSubset, float rtAccur=0.1,float mzAccur=0.1) {
+
+    mzSlice GB = getGlobalBounds(sampleSubset);
+
+    float rt_range = (GB.rtmax-GB.rtmin);
+    float mz_range = (GB.mzmax-GB.mzmin);
+
+    int imageWidth  = (int) max( rt_range/rtAccur, (float) 1.0);
+    int imageHeight = (int) max( mz_range/mzAccur, (float) 1.0);
+
+
+    for(mzSample* sample: sampleSubset) {
+
+        float maxIntensity = exp(log(sample->maxIntensity)*0.7);
+        cerr << "IMAGE W:" << imageWidth << " H:" << imageHeight << " " << rt_range << " " << mz_range << " " << maxIntensity << endl;
+
+        QImage img(imageWidth,imageHeight,QImage::Format_RGB32);
+        img.setText("title", sample->getSampleName().c_str());
+        img.setText("author","Eugene M");
+        img.setText("comment",QString::number((double) GB.mzmin)+"-"+ QString::number((double) GB.mzmax));
+
+        //draw scan data
+        for(Scan* s: sample->scans) {
+            if (s->mslevel != 1) continue;
+            float xcoord = (s->rt-GB.rtmin)/rt_range * imageWidth;
+            for(int i=0; i < s->nobs();i++) {
+                float ycoord = (s->mz[i]-GB.mzmin)/mz_range * imageHeight;
+                float c = (s->intensity[i])/maxIntensity * 254; if (c>254) c=254;
+                img.setPixel(xcoord,ycoord,qRgba(0,0,c,0));
+            }
+        }
+
+        //draw location of features
+       for(mzSlice* s: massSlices->slices ) {
+           float xcoord = (s->rt-GB.rtmin)/rt_range * imageWidth;
+           float ycoord = (s->mz-GB.mzmin)/mz_range * imageHeight;
+           img.setPixel(xcoord,ycoord,qRgba(255,255,255,0));
+        }
+
+       //draw mz_ticks
+        for(float y=GB.mzmin; y<GB.mzmax; y+=100.0) {
+            float ycoord = (y-GB.mzmin)/mz_range * imageHeight;
+            for(int x=0;x<10;x++)  img.setPixel(x,ycoord,qRgba(255,255,255,0));
+        }
+
+        img.save(QString(sample->getSampleName().c_str()) + ".png");
+    }
+}
+
 void alignSamples() { 
 	cerr << "Aligning samples" << endl;
     bool _tmpMustHaveMS2=mustHaveMS2; mustHaveMS2=false;
 
     ParallelMassSlicer massSlices;
     massSlices.setSamples(samples);
-    massSlices.algorithmB(10.0,1e6,5); //ppm, minIntensity, rtWindow in Scans
+    massSlices.algorithmC(10.0,1e4,2,20,1); //ppm, minIntensity, rtWindow in Scans
     sort(massSlices.slices.begin(), massSlices.slices.end(), mzSlice::compIntensity);
     processSlices(massSlices.slices,"alignment");
 
@@ -216,7 +300,6 @@ void alignSamples() {
                         << endl;
        */
     }
-
     Aligner aligner;
     aligner.doAlignment(agroups);
     allgroups.clear();
@@ -285,8 +368,9 @@ void processMassSlices(int limit) {
         double functionAlgorithmBTime = getTime();
 
         if (mustHaveMS2) {
-            massSlices.algorithmD(precursorPPM,rtStepSize);
-            printf("Execution time (AlgorithmD) : %f seconds \n",((float)getTime() - (float)functionAlgorithmBTime) );
+            //massSlices.algorithmD(precursorPPM,rtStepSize);
+            massSlices.algorithmC(precursorPPM,minGroupIntensity,rtStepSize,20,minPrecursorCharge);
+            //printf("Execution time (AlgorithmD) : %f seconds \n",((float)getTime() - (float)functionAlgorithmBTime) );
         } else {
             massSlices.algorithmB(precursorPPM,minGroupIntensity,rtStepSize);
             printf("Execution time (AlgorithmB) : %f seconds \n",((float)getTime() - (float)functionAlgorithmBTime) );
@@ -583,6 +667,32 @@ void printSettings() {
 
     for (unsigned int i=0;i <filenames.size(); i++) cerr << "#Sample" << i << " :" << filenames[i] << endl;
 	cerr << endl;
+}
+
+void extractSampleFeatures(vector<string>filenames) {
+
+        for (unsigned int i=0; i < filenames.size(); i++ ) {
+//          cout << "Thread # " << omp_get_thread_num() << endl;
+            cerr << "Loading " << filenames[i] << endl;
+            mzSample* sample = new mzSample();
+            sample->loadSample(filenames[i].c_str());
+            if(not sample) { delete sample;  continue; }
+
+            //add sample to sampleset
+            vector<mzSample*>sampleSubset;
+            sampleSubset.push_back(sample);
+
+            ParallelMassSlicer massSlices;
+            massSlices.setSamples(sampleSubset);
+            massSlices.algorithmC(precursorPPM,minGroupIntensity,rtStepSize,20,minPrecursorCharge); //ppm, minIntensity, rtWindow in Scans
+            makeImages(&massSlices,sampleSubset,0.2,0.1);
+
+            //sort(massSlices.slices.begin(), massSlices.slices.end(), mzSlice::compIntensity);
+            //processSlices(massSlices.slices,"alignment");
+            //cerr << "Aligning: " << allgroups.size() << endl;
+            //vector<PeakGroup*>agroups(allgroups.size());
+            //sort(allgroups.begin(),allgroups.end(),PeakGroup::compRt);
+        }
 }
 
 void loadSamples(vector<string>&filenames) {

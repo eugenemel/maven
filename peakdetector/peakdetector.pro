@@ -6,8 +6,8 @@ DESTDIR = ../bin
 CONFIG -= network gui opengl
 CONFIG += sql qt std++14
 
-QT += sql
-QT -= network gui opengl std++14
+QT += sql gui
+QT -= network opengl std++14
 
 INCLUDEPATH += ../pugixml/src/ ../sqlite ../libmzorbi ../pugixml/src ../libneural ../zlib/ ../libharu/include
 
