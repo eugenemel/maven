@@ -203,7 +203,7 @@ public:
     void parseMzXML(const char*);			// load data from mzXML file
     void parseMzML(const char*);			// load data from mzML file
     int  parseCDF (char *filename, int is_verbose);     // load netcdf files
-    void parseMzXMLScan(const xml_node& scan, int scannum);		// parse individual scan
+    Scan* parseMzXMLScan(const xml_node& scan, int scannum);		// parse individual scan
     void writeMzCSV(const char*);
     string cleanSampleName(string fileName);
 
@@ -232,6 +232,7 @@ public:
     vector<Scan*> getFragmenationEvents(mzSlice* slice);
 
     deque <Scan*> scans;
+    unsigned int sampleId;
     string sampleName;
     string fileName;
     bool isSelected;
