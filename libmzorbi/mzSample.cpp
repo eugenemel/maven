@@ -83,7 +83,6 @@ string mzSample::cleanSampleName(string sampleName) {
 
 }
 
-
 void mzSample::loadSample(const char* filename) {
 
     string filenameString = string(filename);
@@ -670,6 +669,49 @@ Scan* mzSample::parseMzXMLScan(const xml_node& mzxml_scan_node, int scannum) {
         }
     }
     return _scan;
+}
+
+void mzSample::openStream(const char* filename) {
+    string filenameString = string(filename);
+    this->sampleName = cleanSampleName(filename);
+    this->fileName = filenameString;
+
+    _iostream.open(filename);
+}
+
+
+Scan* mzSample::randomAccessMzXMLScan(int seek_pos_start, int seek_pos_end) {
+
+    int length = seek_pos_end-seek_pos_start;
+
+    if(length <= 1) {
+        cerr << "Empty mzXML buffer" << endl;
+        return NULL;
+    }
+
+    //read scan text
+    char *buffer = new char[length+1];
+    _iostream.seekg(seek_pos_start,_iostream.beg); _iostream.read(buffer,length);
+    buffer[length]='\0';
+
+    //parse scan text
+    Scan* scan=NULL;
+    try {
+        xml_document doc;
+        const unsigned int parse_options = parse_minimal;
+        bool loadok = doc.load(buffer, parse_options);
+        if (loadok )  {
+            xml_node scanXMLData = doc.child("scan");
+            scan = parseMzXMLScan(scanXMLData,0);
+        } else {
+            cerr << "Faild to parse buffer len=" << length << "\t" << buffer[0] << " " << buffer[length-1] << " ok="<< loadok << endl;
+        }
+    } catch (char* err) {
+        cerr << "error: randomAccessMzXMLScan:" << err << endl;
+    }
+
+    delete[] buffer;
+    return scan;
 }
 
 void mzSample::summary() { 
