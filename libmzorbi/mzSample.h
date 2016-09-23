@@ -197,6 +197,7 @@ class mzSample {
 public:
     mzSample();                         			// constructor
     ~mzSample();
+    void openStream(const char* filename);	   	// constructor : load from file
     void loadSample(const char* filename);	   	// constructor : load from file
     void parseMzData(const char*);			// load data from mzData file
     void parseMzCSV(const char*);			// load data from mzCSV file
@@ -204,6 +205,7 @@ public:
     void parseMzML(const char*);			// load data from mzML file
     int  parseCDF (char *filename, int is_verbose);     // load netcdf files
     Scan* parseMzXMLScan(const xml_node& scan, int scannum);		// parse individual scan
+    Scan* randomAccessMzXMLScan(int seek_pos_start, int seek_pos_end);
     void writeMzCSV(const char*);
     string cleanSampleName(string fileName);
 
@@ -306,7 +308,8 @@ public:
         static bool filter_centroidScans;
         static int filter_intensityQuantile;
 		static int filter_mslevel;
-		static int filter_polarity;
+        static int filter_polarity;
+        ifstream   _iostream;
 
 };
 
