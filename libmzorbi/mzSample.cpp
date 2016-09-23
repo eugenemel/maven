@@ -506,13 +506,15 @@ void mzSample::parseMzXML(const char* filename) {
                 for (xml_node scan = spectrumstore.child("scan"); scan; scan = scan.next_sibling("scan")) {
                     scannum++;
                     if (strncasecmp(scan.name(),"scan",4) == 0) {
-                        parseMzXMLScan(scan,scannum);
+                        Scan* newScan = parseMzXMLScan(scan,scannum);
+                        if(newScan) addScan(newScan);
                     }
 
                     for ( xml_node child = scan.first_child(); child; child = child.next_sibling()) {
                         scannum++;
                         if (strncasecmp(child.name(),"scan",4) == 0) {
-                            parseMzXMLScan(child,scannum);
+                            Scan* newScan = parseMzXMLScan(child,scannum);
+                            if(newScan) addScan(newScan);
                         }
                     }
                 }
@@ -521,7 +523,7 @@ void mzSample::parseMzXML(const char* filename) {
             }
 }
 
-void mzSample::parseMzXMLScan(const xml_node& mzxml_scan_node, int scannum) {
+Scan* mzSample::parseMzXMLScan(const xml_node& mzxml_scan_node, int scannum) {
 
     float rt = 0;
     float precursorMz = 0;
@@ -608,12 +610,12 @@ void mzSample::parseMzXMLScan(const xml_node& mzxml_scan_node, int scannum) {
     */
 
     }
-    addScan(_scan);
+    //addScan(_scan);
 
     xml_node peaks =  mzxml_scan_node.child("peaks");
     if ( ! peaks.empty() ) {
         string b64String(peaks.child_value());
-        if ( b64String.empty()) return;  //no m/z intensity values
+        if ( b64String.empty()) return _scan;  //no m/z intensity values
 		bool decompress = false;
 
         //decompress
@@ -667,6 +669,7 @@ void mzSample::parseMzXMLScan(const xml_node& mzxml_scan_node, int scannum) {
             _scan->filterLine = scanType + ":" + float2string(_scan->precursorMz,4) + " [" + float2string(_scan->productMz,4) + "]";
         }
     }
+    return _scan;
 }
 
 void mzSample::summary() { 
