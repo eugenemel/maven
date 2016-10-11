@@ -700,18 +700,19 @@ public:
     string name;
     double mass;
     double abundance;
+    int charge;
     int N15;
     int C13;
     int S34;
     int H2;
 
     Isotope(string name, float mass, int c=0, int n=0, int s=0, int h=0) {
-        this->mass=mass; this->name=name;
+        this->mass=mass; this->name=name; charge=0;
         C13=c; N15=n; S34=s; H2=h;
     }
 
     Isotope() {
-        mass=0; abundance=0; N15=0; C13=0; S34=0; H2=0;
+        mass=0; abundance=0; N15=0; C13=0; S34=0; H2=0; charge=0;
     }
 
     Isotope(const Isotope& b) {
@@ -719,11 +720,13 @@ public:
         mass=b.mass;
         abundance=b.abundance;
         N15=b.N15; S34=b.S34; C13=b.C13; H2=b.H2;
+        charge = b.charge;
     }
 
     Isotope& operator=(const Isotope& b) {
         name=b.name; mass=b.mass; abundance=b.abundance;
         N15=b.N15; S34=b.S34; C13=b.C13; H2=b.H2;
+        charge =b.charge;
         return *this;
     }
 
