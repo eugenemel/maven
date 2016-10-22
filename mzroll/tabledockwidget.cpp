@@ -197,6 +197,8 @@ void TableDockWidget::setupPeakTable() {
     colNames << "rt";
 
     if (viewType == groupView) {
+        colNames << "Charge";
+        colNames << "Istope#";
         colNames << "#Peaks";
         colNames << "#MS2s";
         colNames << "MS2 Score";
@@ -367,13 +369,15 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     if (group->label == 'b' ) item->setIcon(0,QIcon(":/images/bad.png"));
 
     if (viewType == groupView) {
-        item->setText(3,QString::number(group->sampleCount));
-        item->setText(4,QString::number(group->ms2EventCount));
-        item->setText(5,QString::number(group->fragMatchScore.mergedScore));
-        item->setText(6,QString::number(group->maxNoNoiseObs));
-        item->setText(7,QString::number(group->maxIntensity,'g',2));
-        item->setText(8,QString::number(group->maxSignalBaselineRatio,'f',0));
-        item->setText(9,QString::number(group->maxQuality,'f',2));
+        item->setText(3,QString::number(group->chargeState));
+        item->setText(4,QString::number(group->isotopicIndex));
+        item->setText(5,QString::number(group->sampleCount));
+        item->setText(6,QString::number(group->ms2EventCount));
+        item->setText(7,QString::number(group->fragMatchScore.mergedScore));
+        item->setText(8,QString::number(group->maxNoNoiseObs));
+        item->setText(9,QString::number(group->maxIntensity,'g',2));
+        item->setText(10,QString::number(group->maxSignalBaselineRatio,'f',0));
+        item->setText(11,QString::number(group->maxQuality,'f',2));
     } else if ( viewType == peakView) {
         vector<mzSample*> vsamples = _mainwindow->getVisibleSamples();
         sort(vsamples.begin(), vsamples.end(), mzSample::compSampleOrder);

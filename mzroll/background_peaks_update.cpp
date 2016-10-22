@@ -51,6 +51,8 @@ BackgroundPeakUpdate::BackgroundPeakUpdate(QWidget*) {
     eicMaxGroups=INT_MAX;
     productPpmTolr=20.0;
 
+    excludeIsotopicPeaks=false;
+
     //triple quad matching options
     amuQ1=0.25;
     amuQ3=0.3;
@@ -170,6 +172,20 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             groupCount++;
             peakCount += group.peakCount();
 
+            Peak* peak = group.getHighestIntensityPeak();
+            if(!peak)  continue;
+
+            vector<Isotope> isotopes = peak->getScan()->getIsotopicPattern(peak->peakMz,compoundPPMWindow,6,10);
+
+            if(isotopes.size() > 0) {
+                group.chargeState = isotopes.front().charge;
+                for(Isotope& isotope: isotopes) {
+                    if (mzUtils::ppmDist((float) isotope.mass, (float) group.meanMz) < compoundPPMWindow) {
+                        group.isotopicIndex=isotope.C13;
+                    }
+                }
+            }
+
             if (clsf->hasModel()) { clsf->classify(&group); group.groupStatistics(); }
             if (clsf->hasModel()&& group.goodPeakCount < minGoodPeakCount) continue;
             // if (group.blankMean*minBlankRatio > group.sampleMean ) continue;
@@ -177,13 +193,13 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             if (group.maxNoNoiseObs < minNoNoiseObs) continue;
             if (group.maxSignalBaselineRatio < minSignalBaseLineRatio) continue;
             if (group.maxIntensity < minGroupIntensity ) continue;
+            if ((excludeIsotopicPeaks or compound) and not group.isMonoisotopic(compoundPPMWindow)) continue;
 
-            //if (group.isMonoisotopic(compoundPPMWindow) == false) continue;
             //if (getChargeStateFromMS1(&group) < minPrecursorCharge) continue;
-
-            //build consensus ms2 specta
+                        //build consensus ms2 specta
             vector<Scan*>ms2events = group.getFragmenationEvents();
             group.computeFragPattern(productPpmTolr);
+
             matchFragmentation(&group);
 
             if(mustHaveMS2) {
@@ -722,7 +738,15 @@ void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g) {
     if(DB.compoundsDB.size() == 0) return;
     if(g->ms2EventCount == 0) return;
 
-    vector<MassCalculator::Match>matchesX = DB.findMathchingCompounds(g->meanMz,compoundPPMWindow,ionizationMode);
+    double searchMz = g->meanMz;
+
+    /*Peak* peak = g->getHighestIntensityPeak();
+    if (!peak or !peak->getScan()) return;
+    vector<Isotope> isotopes = peak->getScan()->getIsotopicPattern(searchMz,compoundPPMWindow,6,10);
+    if(isotopes.size() > 0) searchMz = isotopes.front().mass;
+    */
+
+    vector<MassCalculator::Match>matchesX = DB.findMathchingCompounds(searchMz,compoundPPMWindow,ionizationMode);
 
     //g->fragmentationPattern.printFragment(productPpmTolr,10);
     MassCalculator::Match bestMatch;

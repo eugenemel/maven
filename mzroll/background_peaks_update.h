@@ -78,6 +78,8 @@ public:
    //stop looking for groups if group count is greater than X
     int limitGroupCount;
 
+    bool excludeIsotopicPeaks;
+
     //MS2 matching
     bool mustHaveMS2=false;
     bool searchProton=false;    //consider +/-PROTON when matching fragmentation

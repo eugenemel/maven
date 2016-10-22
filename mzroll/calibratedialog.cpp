@@ -25,7 +25,7 @@ void CalibrateDialog::show() {
         }
     }*/
 
-    QStringList dbnames = DB.getDatabaseNames();
+    QStringList dbnames = DB.getLoadedDatabaseNames();
     compoundDatabase->clear();
     for(QString db: dbnames ) {
         compoundDatabase->addItem(db);

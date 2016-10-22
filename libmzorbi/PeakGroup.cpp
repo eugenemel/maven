@@ -46,6 +46,9 @@ PeakGroup::PeakGroup()  {
     goodPeakCount=0;
     _type = None;
 
+    chargeState=0;
+    isotopicIndex=0;
+
     changePValue=0;
     changeFoldRatio=0;
     //children.reserve(0);
@@ -108,6 +111,11 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     changeFoldRatio = o.changeFoldRatio;
     changePValue    = o.changePValue;
     peaks = o.peaks;
+
+
+    chargeState=o.chargeState;
+    isotopicIndex=o.isotopicIndex;
+
     copyChildren(o);
 }
 

@@ -44,7 +44,7 @@ void MassCalcWidget::setCharge(float charge) {
 
 void MassCalcWidget::updateDatabaseList() {
     databaseSelect->clear();
-    QStringList dbnames = DB.getDatabaseNames();
+    QStringList dbnames = DB.getLoadedDatabaseNames();
     databaseSelect->addItem("All");
     for(QString db: dbnames ) {
         databaseSelect->addItem(db);

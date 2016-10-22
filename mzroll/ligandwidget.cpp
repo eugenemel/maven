@@ -91,6 +91,7 @@ void LigandWidget::setDatabase(QString dbname) {
 
     _mw->getSettings()->setValue("lastCompoundDatabase", getDatabaseName());
     emit databaseChanged(getDatabaseName());
+    DB.loadCompoundsSQL(dbname);
     showTable();
 
     if(!filterString.isEmpty()) showMatches(filterString);

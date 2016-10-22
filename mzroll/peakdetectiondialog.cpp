@@ -142,6 +142,7 @@ void PeakDetectionDialog::findPeaks() {
         peakupdater->minFragmentMatchScore = fragMinScore->value();
         peakupdater->minNumFragments = fragMinPeaks->value();
         peakupdater->searchAdductsFlag = reportAdducts->isChecked();
+        peakupdater->excludeIsotopicPeaks = excludeIsotopicPeaks->isChecked();
 
 
         if ( ! outputDirName->text().isEmpty()) {

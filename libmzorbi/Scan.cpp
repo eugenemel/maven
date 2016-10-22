@@ -528,3 +528,71 @@ bool Scan::isMonoisotopicPrecursor(float monoIsotopeMz, float ppm) {
     return true;
 }
 
+
+vector<Isotope> Scan::getIsotopicPattern(float centerMz, float ppm, int maxZ=6, int maxIsotopes=10) {
+
+    //determine most likely charge state
+    int bestZ=0;
+    int maxSeriesIntenisty=0;
+    vector<Isotope> isotopes;
+
+    const double NMASS= 13.0033548378-12.0;
+
+    int pos=this->findHighestIntensityPos(centerMz,ppm);
+    if (pos<=0) return isotopes;
+    float focusMz = this->mz[pos];
+    float focusIntensity = this->intensity[pos];
+    float lastIntensity  = focusIntensity;
+
+    for(int z=1; z<maxZ; z++) {
+        float delta = NMASS/z;
+        double zSeriesIntensity=0;
+        vector<int>pattern;
+        int isoCount=0;
+
+        for(int j=0; j<maxIsotopes; j++) { //forward
+            float mz=focusMz+(j*delta);
+            int matchedPos =  this->findHighestIntensityPos(mz,ppm);
+            if (matchedPos>0) {
+                float matchedInt =  this->intensity[matchedPos];
+                if (matchedInt/focusIntensity<0.1) break;
+
+                lastIntensity = this->intensity[matchedPos];
+                zSeriesIntensity += log(this->intensity[matchedPos]);
+                pattern.push_back(matchedPos);
+                isoCount++;
+            } else break;
+        }
+
+        for(int j=1; j<maxIsotopes; j++) {  //back
+            float mz=focusMz-(j*delta);
+            int matchedPos = this->findHighestIntensityPos(mz,ppm);
+            if (matchedPos>0) {
+                float matchedInt =  this->intensity[matchedPos];
+                if (matchedInt/focusIntensity>0.5) break;
+                if (matchedInt/focusIntensity<0.1) break;
+
+                lastIntensity = this->intensity[matchedPos];
+                zSeriesIntensity += log(this->intensity[matchedPos]);
+                pattern.push_back(matchedPos);
+                isoCount++;
+            } else break;
+        }
+
+        if (zSeriesIntensity>maxSeriesIntenisty and isoCount>1) {
+            bestZ=z;
+            sort(pattern.begin(),pattern.end());
+            isotopes.clear();;
+
+            for(int i=0; i<pattern.size();i++) {
+                int pos = pattern[i];
+                Isotope iso("I",this->mz[pos],i,0,0,0);
+                iso.charge=bestZ;
+                iso.abundance=this->intensity[pos];
+                isotopes.push_back(iso);;
+            }
+        }
+    }
+    return isotopes;
+}
+

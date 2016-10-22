@@ -54,6 +54,7 @@ class Database {
 
 
         QStringList getDatabaseNames();
+        QStringList getLoadedDatabaseNames() { return loadedDatabase.keys(); }
         map<string,int>   getChromotographyMethods();
 
         Compound* findSpeciesById(string id,string db);
@@ -79,6 +80,7 @@ class Database {
       private:
 		QSqlDatabase ligandDB;
         QMap<string,Compound*> compoundIdMap;
+        QMap<QString,int> loadedDatabase;
 
 };
 

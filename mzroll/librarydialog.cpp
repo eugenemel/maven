@@ -3,6 +3,7 @@
 LibraryMangerDialog::LibraryMangerDialog(QWidget *parent) : QDialog(parent) {
         setupUi(this);
         setModal(true);
+        connect(loadButton,SIGNAL(clicked(bool)),SLOT(loadLibrary()));
         connect(deleteButton,SIGNAL(clicked(bool)),SLOT(deleteLibrary()));
         connect(importButton,SIGNAL(clicked()),SLOT(loadCompoundsFile()));
         connect(reloadAllButton,SIGNAL(clicked()),SLOT(reloadMethodsFolder()));
@@ -17,16 +18,25 @@ void LibraryMangerDialog::show() {
 
 void LibraryMangerDialog::updateLibraryStats() {
 
-    map<string,int> dbnames;
-    for(Compound* c: DB.compoundsDB)  dbnames[c->db]++;
+    QMap<QString,int> dbcounts;
+    for(Compound* c: DB.compoundsDB)  dbcounts[c->db.c_str()]++;
 
     treeWidget->clear();
-    for(auto& pair: dbnames ) {
+    for(QString dbname: DB.getDatabaseNames()) {
         QTreeWidgetItem* item = new QTreeWidgetItem(treeWidget);
-        item->setText(0,pair.first.c_str());
-        item->setText(1,QString::number(pair.second));
+        item->setText(0,dbname);
+        item->setText(1,QString::number(dbcounts[dbname]));
         treeWidget->addTopLevelItem(item);
     }
+}
+
+void LibraryMangerDialog::loadLibrary() {
+    foreach(QTreeWidgetItem* item, treeWidget->selectedItems() ) {
+        QString libraryName = item->text(0);
+        qDebug() << "Load Library" << libraryName;
+        DB.loadCompoundsSQL(libraryName);
+    }
+    updateLibraryStats();
 }
 
 void LibraryMangerDialog::deleteLibrary() {
@@ -36,7 +46,6 @@ void LibraryMangerDialog::deleteLibrary() {
         qDebug() << "Delete Library" << libraryName;
         DB.deleteCompoundsSQL(libraryName);
     }
-    DB.loadCompoundsSQL("ALL");
     updateLibraryStats();
 }
 
@@ -45,7 +54,7 @@ void LibraryMangerDialog::loadCompoundsFile(QString filename){
     string dbname = mzUtils::cleanFilename(dbfilename);
 
     int compoundCount = DB.loadCompoundsFile(filename);
-    DB.loadCompoundsSQL("ALL");
+    DB.loadCompoundsSQL(dbname.c_str());
 
     if (compoundCount > 0 && mainwindow->ligandWidget) {
         mainwindow->ligandWidget->updateDatabaseList();

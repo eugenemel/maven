@@ -24,6 +24,7 @@ public slots:
 
 private slots:
     void deleteLibrary();
+    void loadLibrary();
 
 private:
     void updateLibraryStats();

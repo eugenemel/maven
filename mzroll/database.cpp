@@ -92,8 +92,11 @@ void Database::addCompound(Compound* c) {
 }
 
 void Database::loadCompoundsSQL(QString databaseName) {
-        compoundsDB.clear();
-        compoundIdMap.clear();
+
+        if (loadedDatabase.count(databaseName)) {
+            qDebug()  << databaseName << "already loaded";
+            return;
+        }
 
         QSqlQuery query(ligandDB);
         QString sql = "select * from compounds where name not like '%DECOY%'";
@@ -140,8 +143,10 @@ void Database::loadCompoundsSQL(QString databaseName) {
             compoundIdMap[compound->id + compound->db]=compound;
             compoundsDB.push_back(compound);
         }
+
         sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
         qDebug() << "loadCompoundSQL : " << compoundsDB.size();
+        loadedDatabase[databaseName] = 1;
 }
 
 set<Compound*> Database::findSpeciesByMass(float mz, float ppm) { 

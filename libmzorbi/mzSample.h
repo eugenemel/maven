@@ -52,6 +52,7 @@ class Reaction;
 class MassCalculator;
 class ChargedSpecies;
 class Fragment;
+class Isotope;
 struct FragmentationMatchScore;
 
 using namespace pugi;
@@ -133,7 +134,9 @@ class Scan {
     static bool compIntensity(Scan* a, Scan* b ) { return a->totalIntensity() > b->totalIntensity(); }
     bool operator< (const Scan& b) { return rt < b.rt; }  //default comparision operation
 
-    private:
+    vector<Isotope> getIsotopicPattern(float centerMz, float ppm, int maxZ, int maxIsotopes);
+
+private:
         int polarity;
 
 
@@ -555,6 +558,11 @@ class PeakGroup {
         //for sample contrasts  ratio and pvalue
         float changeFoldRatio;
         float changePValue;
+
+
+        //LOSS
+        int     chargeState;
+        int     isotopicIndex;
 
         bool  	hasSrmId()  { return srmId.empty(); }
         void  	setSrmId(string id)	  { srmId=id; }
