@@ -181,6 +181,9 @@ Adduct* Database::findAdductByName(string id) {
 }
 
 Compound* Database::findSpeciesById(string id,string db) {
+
+    if (!loadedDatabase.count(db.c_str()))  loadCompoundsSQL(db.c_str());
+
     //cerr << "searching for " << id << " " << compoundIdMap.size() << " " << db << endl;
     if ( compoundIdMap.contains(id + db) ) return compoundIdMap[id + db];
     if ( compoundIdMap.contains(id) ) return compoundIdMap[id];
@@ -197,7 +200,9 @@ Compound* Database::findSpeciesById(string id,string db) {
 
 
 vector<Compound*> Database::findSpeciesByName(string name, string dbname) {
-		vector<Compound*> set;
+        if (!loadedDatabase.count(dbname.c_str()))  loadCompoundsSQL(dbname.c_str());
+
+        vector<Compound*> set;
         qDebug() << "findSpeciesByName" << name.c_str();
 		for(unsigned int i=0; i < compoundsDB.size(); i++ ) {
 				if (compoundsDB[i]->name == name && compoundsDB[i]->db == dbname) {
