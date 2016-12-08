@@ -411,7 +411,7 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
         float collisionenergy=0;
         float precursormz=0;
         float productmz=0;
-        float logP;
+        float logP=0;
         int N=fields.size();
         vector<string>categorylist;
         //qDebug() << N << line;
