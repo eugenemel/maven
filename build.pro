@@ -7,3 +7,4 @@ SUBDIRS += \
 		libmzorbi\
         	mzroll \
 		peakdetector\
+                mzLibraryBrowser
