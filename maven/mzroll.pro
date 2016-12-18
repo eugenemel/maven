@@ -25,7 +25,7 @@ QT += network
 #DEFINES += QT_CORE_LIB QT_DLL QT_NETWORK_LIB QT_SQL_LIB QT_THREAD_LIB
 #INCLUDEPATH +=  /usr/include/qt4/QtXml/ /usr/include/qt/QtSql
 
-INCLUDEPATH += ../libmzorbi ../mzorbi ../pugixml/src ../libneural
+INCLUDEPATH += ../libmaven ../maven ../pugixml/src ../libneural
 LIBS += -L. -L../lib -L../build/lib -lmzorbi -lpugixml -lneural -lz
 message($$LIBS)
 
