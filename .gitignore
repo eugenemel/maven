@@ -1,14 +1,7 @@
 Makefile
-libcdfread/tmp
-libmzorbi/tmp
-libneural/tmp
-mzroll/tmp
+maven/tmp
 mzWatcher/tmp
-peakdetector/tmp
-pugixml/src/tmp
-build/
 bin/
-test/
 *.moc
 .vim*
 *.sw*
