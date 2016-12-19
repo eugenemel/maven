@@ -1,4 +1,4 @@
-include(../mzroll.pri)
+include(../libmaven.pri)
 #TEMPLATE = app
 CONFIG += qt thread sql svg console std++14
 QMAKE_STRIP=echo
@@ -26,7 +26,7 @@ QT += network
 #INCLUDEPATH +=  /usr/include/qt4/QtXml/ /usr/include/qt/QtSql
 
 INCLUDEPATH += ../libmaven ../maven ../pugixml/src ../libneural
-LIBS += -L. -L../lib -L../build/lib -lmzorbi -lpugixml -lneural -lz
+LIBS += -L. -L../lib -L../build/lib -lmaven -lpugixml -lneural -lz
 message($$LIBS)
 
 INSTALLS += sources target
