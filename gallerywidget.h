@@ -25,7 +25,9 @@ class GalleryWidget : public QGraphicsView
 			void addEicPlots(std::vector<mzSlice*>&slices);
 			void addEicPlots(std::vector<mzLink>&links);
             void addIdividualEicPlots(std::vector<EIC*>& eics,PeakGroup* grp);
-			void fileGallery(const QString& dir);
+            void fileGallery(const QString& dir);
+            void exportPDF();
+
 		private:
 				MainWindow* mainwindow;
 				QList<QGraphicsItem*> plotitems;
@@ -34,7 +36,8 @@ class GalleryWidget : public QGraphicsView
 				int _boxW;
 				int _boxH;
 				TinyPlot* addEicPlot(std::vector<EIC*>& eics);
-				TinyPlot* addEicPlot(mzSlice& slice);
+                TinyPlot* addEicPlot(mzSlice& slice);
+                bool recursionCheck;
 
 
 		protected:
@@ -42,8 +45,8 @@ class GalleryWidget : public QGraphicsView
 				void resizeEvent ( QResizeEvent *event );
 				void wheelEvent(QWheelEvent *event);
                 void mousePressEvent(QMouseEvent *event);
-				void keyPressEvent(QKeyEvent *event);
-				bool recursionCheck;
+                void keyPressEvent(QKeyEvent *event);
+                void contextMenuEvent(QContextMenuEvent * event);
 
 };
 

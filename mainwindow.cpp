@@ -422,7 +422,12 @@ void MainWindow::setFormulaFocus(QString formula) {
     MassCalculator mcalc;
     double parentMass = mcalc.computeNeutralMass(formula.toStdString());
     double pmz = adduct->computeAdductMass(parentMass);
-    if ( eicWidget->isVisible() ) eicWidget->setMzSlice(pmz);
+
+    if ( eicWidget->isVisible() ) {
+        Compound *unk = new Compound(formula.toStdString(),formula.toStdString(),formula.toStdString(),0);
+        eicWidget->setCompound(unk,adduct);
+//        eicWidget->setMzSlice(pmz);
+    }
     isotopeWidget->setFormula(formula);
 }
 
@@ -440,6 +445,7 @@ void MainWindow::setCompoundFocus(Compound*c) {
     searchText->setText(c->name.c_str());
 
     float mz = adduct->computeAdductMass(c->mass);
+    cerr << "setCompoundFocus:" << c->name.c_str() << " " << adduct->name << " " << c->expectedRt << " mass=" << c->mass << " mz=" << mz << endl;
     if (eicWidget->isVisible() && samples.size() > 0 )  eicWidget->setCompound(c,adduct);
     if (isotopeWidget && isotopeWidget->isVisible() ) isotopeWidget->setCompound(c);
     if (massCalcWidget && massCalcWidget->isVisible() )  massCalcWidget->setMass(mz);

@@ -309,7 +309,7 @@ void GalleryWidget::replot() {
 }
 
 void GalleryWidget::wheelEvent(QWheelEvent *event) {
-	    qDebug() << "GalleryWidget::wheelEvent() ";
+        //qDebug() << "GalleryWidget::wheelEvent() ";
 		if ( event->delta() > 0 ) {
             if(_boxH*0.8>50) {
                  _boxH *= 0.8; replot();
@@ -412,7 +412,10 @@ void GalleryWidget::keyPressEvent(QKeyEvent *event)
 				case Qt::Key_Right:
 						break;
 				case Qt::Key_Left:
-						break;
+                        break;
+                case Qt::Key_P:
+                        exportPDF();
+                        break;
 				default:
 					QGraphicsView::keyPressEvent(event);
 		}
@@ -420,3 +423,39 @@ void GalleryWidget::keyPressEvent(QKeyEvent *event)
 }
 
 
+void GalleryWidget::exportPDF(){
+
+    const QString fileName = QFileDialog::getSaveFileName(
+            this, "Export File Name", QString(),
+            "PDF Documents (*.pdf)");
+
+    if ( !fileName.isEmpty() )
+    {
+        QPrinter printer;
+        printer.setOutputFormat(QPrinter::PdfFormat);
+        printer.setOrientation(QPrinter::Landscape);
+        printer.setOutputFileName(fileName);
+
+        QPainter painter;
+        if (! painter.begin(&printer)) { // failed to open file
+            qWarning("failed to open file, is it writable?");
+            return;
+        }
+
+        this->render(&painter);
+        painter.end();
+    }
+}
+
+
+
+void GalleryWidget::contextMenuEvent(QContextMenuEvent * event) {
+
+    QMenu menu;
+    QAction* o = menu.addAction("Export to PDF");
+    connect(o, SIGNAL(triggered()), SLOT(exportPDF()));
+
+    QPoint pos = this->mapToGlobal(event->pos());
+    menu.exec(pos);
+    scene()->update();
+}

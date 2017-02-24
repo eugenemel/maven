@@ -274,6 +274,16 @@ void SpectraWidget::overlayCompound(Compound* c) {
    for(int i=0; i < c->fragment_mzs.size(); i++) 	   hit.mzList << c->fragment_mzs[i];
    for(int i=0; i < c->fragment_intensity.size(); i++) hit.intensityList << c->fragment_intensity[i];
 
+   //remove previous annotations
+   links.clear();;
+
+   //add new annotations
+   for(auto ion: c->fragment_iontype) {
+         float mz= c->fragment_mzs[ion.first];
+         string note = ion.second;
+         links.push_back(mzLink(mz,mz,note));
+   }
+
    //for(int i=0; i < c->fragment_mzs.size(); i++) { cerr << "overlay:" << c->fragment_mzs[i] << endl; }
 
    _showOverlay = true;

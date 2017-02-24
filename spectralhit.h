@@ -4,6 +4,7 @@
 #include "mzSample.h"
 #include <QString>
 #include <QVector>
+#include <QMap>
 
 class SpectralHit {
 
@@ -12,7 +13,7 @@ class SpectralHit {
 		Scan* scan;
 		QString sampleName;
 		QVector<double>mzList;
-		QVector<double>intensityList;
+        QVector<double>intensityList;
 		float productPPM;
 		int matchCount;
 		float precursorMz;

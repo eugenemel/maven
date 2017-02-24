@@ -112,10 +112,18 @@ void Database::loadCompoundsSQL(QString databaseName) {
             string formula = query.value("formula").toString().toStdString();
             int charge = query.value("charge").toInt();
 
-			Compound* compound = new Compound(id,name,formula,charge);
+
+            //the neutral mass is computated automatically  inside the constructor
+            Compound* compound = new Compound(id,name,formula,charge);
+
             compound->cid  =  query.value("cid").toInt();
             compound->db   =  query.value("dbName").toString().toStdString();
             compound->expectedRt =  query.value("expectedRt").toDouble();
+
+            if (!compound->formula.empty()) {
+                compound->mass =  query.value("mass").toDouble();
+            }
+
             compound->precursorMz =  query.value("precursorMz").toDouble();
             compound->productMz =  query.value("productMz").toDouble();
             compound->collisionEnergy =  query.value("collisionEnergy").toDouble();
@@ -481,6 +489,7 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
             compoundSet.push_back(compound);
             //addCompound(compound);
             loadCount++;
+            //cerr << "Loading: " << id << " " << formula << "mz=" << compound->mass << " rt=" << compound->expectedRt << " charge=" << charge << endl;
         }
     } while (!line.isNull());
 
@@ -519,9 +528,7 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
 
             if(cpd and !cpd->name.empty()) {
                 //cerr << "NIST LIBRARY:" << cpd->db << " " << cpd->name << " " << cpd->formula << " " << cpd->id << endl;
-                if (cpd->precursorMz>0) { cpd->mass=cpd->precursorMz; }
-                else if (cpd->mass>0)   { cpd->precursorMz=cpd->mass; }
-                else if(!cpd->formula.empty()) { cpd->mass = cpd->precursorMz = mcalc.computeMass(cpd->formula,0); }
+                if(!cpd->formula.empty())  cpd->mass = mcalc.computeMass(cpd->formula,0);
                 compoundSet.push_back(cpd);
             }
 
@@ -548,6 +555,8 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
             if(!smileString.isEmpty()) cpd->smileString=smileString.toStdString();
          } else if (line.startsWith("PRECURSORMZ:",Qt::CaseInsensitive)) {
             cpd->precursorMz = line.mid(13,line.length()).simplified().toDouble();
+         } else if (line.startsWith("ADDUCT:",Qt::CaseInsensitive)) {
+            cpd->adductString = line.mid(8,line.length()).simplified().toStdString();
          } else if (line.startsWith("FORMULA:",Qt::CaseInsensitive)) {
              QString formula = line.mid(9,line.length()).simplified();
              formula.replace("\"","",Qt::CaseInsensitive);
@@ -584,6 +593,8 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
                  if (ok && ook && mz >= 0 && ints >= 0) {
                      cpd->fragment_intensity.push_back(ints);
                      cpd->fragment_mzs.push_back(mz);
+                     int frag_indx = cpd->fragment_mzs.size()-1;
+                     cpd->fragment_iontype[frag_indx] = mzintpair.at(2).toStdString();
                  }
              }
          }
