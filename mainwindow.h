@@ -163,6 +163,7 @@ public slots:
     void setFormulaFocus(QString formula);
     void Align();
     void UndoAlignment();
+    void doGuidedAligment(QString filename);
     void spectaFocused(Peak* _peak);
     void setCompoundFocus(Compound* c);
     void showFragmentationScans(float pmz);

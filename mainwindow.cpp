@@ -540,6 +540,7 @@ void MainWindow::open(){
                   tr("NetCDF Format(*.cdf *.nc);;")+
                   tr("Maven Project File (*.mzroll *.mzrollDB);;")+
                   tr("Maven Peaks File (*.mzPeaks);;")+
+                  tr("Alignment File (*.rt);;")+
                   tr("All Files(*.*)"));
 
     if (filelist.size() == 0 ) return;
@@ -552,6 +553,8 @@ void MainWindow::open(){
     QStringList samples;
     QStringList peaks;
     QStringList projects;
+    QStringList alignmentfiles;
+
     foreach(QString filename, filelist ) {
         QFileInfo fileInfo(filename);
         if (!fileInfo.exists()) continue;
@@ -562,6 +565,8 @@ void MainWindow::open(){
             projects << filename;
         } else if (filename.endsWith("mzpeaks",Qt::CaseInsensitive)) {
             peaks << filename;
+        } else if (filename.endsWith(".rt",Qt::CaseInsensitive)) {
+            alignmentfiles << filename;
         }
     }
 
@@ -579,6 +584,10 @@ void MainWindow::open(){
         fileLoader->setMainWindow(this);
         fileLoader->loadSamples(samples);
         fileLoader->start();
+    }
+
+    if (alignmentfiles.size()>0) {
+        doGuidedAligment(alignmentfiles.first());
     }
 }
 
@@ -1135,6 +1144,23 @@ void MainWindow::Align() {
     workerThread->start();
 }
 
+void MainWindow::doGuidedAligment(QString alignmentFile) {
+    if (samples.size() > 1) return;
+
+    for(int i=0; i < samples.size(); i++ ) {
+        if (samples[i]) samples[i]->saveOriginalRetentionTimes();
+    }
+
+    if (alignmentFile.length()) {
+        cerr << "Aligning samples" << "\t" << alignmentFile.toStdString() << endl;
+        Aligner aligner;
+        aligner.setSamples(samples);
+        aligner.loadAlignmentFile(alignmentFile.toStdString().c_str());
+        aligner.doSegmentedAligment();
+    }
+
+    getEicWidget()->replotForced();
+}
 
 void MainWindow::UndoAlignment() {
     for(int i=0; i < samples.size(); i++ ) {
