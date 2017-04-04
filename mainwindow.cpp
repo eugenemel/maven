@@ -1145,7 +1145,7 @@ void MainWindow::Align() {
 }
 
 void MainWindow::doGuidedAligment(QString alignmentFile) {
-    if (samples.size() > 1) return;
+    if (samples.size() <= 1) return;
 
     for(int i=0; i < samples.size(); i++ ) {
         if (samples[i]) samples[i]->saveOriginalRetentionTimes();
