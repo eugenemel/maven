@@ -5,7 +5,14 @@ QMAKE_STRIP=echo
 #PRECOMPILED_HEADER  = stable.h
 
 #add version information during compilation
-VERSION = $$system(date +%Y%m%d)
+win32 {
+    SYS_DATE=$$system(date /T)
+    SYS_DATE2=$$last(SYS_DATE)
+    DATE_PARTS=$$split(SYS_DATE2, /)
+    VERSION=$$member(DATE_PARTS, 2)$$member(DATE_PARTS, 0)$$member(DATE_PARTS, 1)
+} else {
+    VERSION = $$system(date +%Y%m%d)
+}
 DEFINES += "MAVEN_VERSION=$$VERSION"
 DEFINES += "PLATFORM=\"$$QMAKE_HOST.os\""
 

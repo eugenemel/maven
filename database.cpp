@@ -594,7 +594,9 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
                      cpd->fragment_intensity.push_back(ints);
                      cpd->fragment_mzs.push_back(mz);
                      int frag_indx = cpd->fragment_mzs.size()-1;
-                     cpd->fragment_iontype[frag_indx] = mzintpair.at(2).toStdString();
+					 if(mzintpair.size() >= 3) {
+						 cpd->fragment_iontype[frag_indx] = mzintpair.at(2).toStdString();
+					}
                  }
              }
          }
