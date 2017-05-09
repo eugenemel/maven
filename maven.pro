@@ -25,8 +25,8 @@ QT += network
 #DEFINES += QT_CORE_LIB QT_DLL QT_NETWORK_LIB QT_SQL_LIB QT_THREAD_LIB
 #INCLUDEPATH +=  /usr/include/qt4/QtXml/ /usr/include/qt/QtSql
 
-INCLUDEPATH += ../libmaven ../maven ../pugixml/src ../libneural
-LIBS += -L. -L../lib -L../build/lib -lmaven -lpugixml -lneural -lz
+INCLUDEPATH += ../libmaven ../maven ../pugixml/src ../libneural ../MSToolkit/include
+LIBS += -L. -L../lib -L../build/lib -lmaven -lpugixml -lneural -lz -lmstoolkitlite
 message($$LIBS)
 
 INSTALLS += sources target
