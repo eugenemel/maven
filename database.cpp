@@ -550,7 +550,9 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
             if(!id.isEmpty()) cpd->id = id.toStdString();
          } else if (line.startsWith("LOGP:",Qt::CaseInsensitive)) {
             cpd->logP = line.mid(5,line.length()).simplified().toDouble();
-         } else if (line.startsWith("SMILE:",Qt::CaseInsensitive)) {
+        } else if (line.startsWith("RT:",Qt::CaseInsensitive)) {
+           cpd->expectedRt= line.mid(3,line.length()).simplified().toDouble();
+        } else if (line.startsWith("SMILE:",Qt::CaseInsensitive)) {
             QString smileString = line.mid(7,line.length()).simplified();
             if(!smileString.isEmpty()) cpd->smileString=smileString.toStdString();
          } else if (line.startsWith("PRECURSORMZ:",Qt::CaseInsensitive)) {
@@ -572,7 +574,7 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
          } else if (line.startsWith("ion mode:",Qt::CaseInsensitive)) {
             if(line.contains("neg",Qt::CaseInsensitive)) cpd->ionizationMode=-1;
             if(line.contains("pos",Qt::CaseInsensitive)) cpd->ionizationMode=+1;
-         } else if (line.startsWith("Comment:",Qt::CaseInsensitive)) {
+
              QString comment = line.mid(8,line.length()).simplified();
              if (comment.contains(formulaMatch)){
                  cpd->formula=formulaMatch.capturedTexts().at(1).toStdString();

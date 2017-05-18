@@ -41,6 +41,7 @@ public slots:
                     void zoomOut();
                     void setProfileMode() { _profileMode=true;  }
                     void setCentroidedMode() { _profileMode=false; }
+                    void setLog10Transform(bool flag) { _log10Transform=flag; }
                     void setCurrentScan(Scan* scan);
                     void constructAverageScan(float rtmin, float rtmax);
                     void findSimilarScans();
@@ -59,6 +60,7 @@ public slots:
                     bool  _resetZoomFlag;
                     bool  _profileMode;
                     bool  _showOverlay;
+                    bool  _log10Transform;
 
                     float _minX;
                     float _maxX;

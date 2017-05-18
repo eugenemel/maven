@@ -4,6 +4,7 @@ SpectraWidget::SpectraWidget(MainWindow* mw) {
     this->mainwindow = mw;
    _currentScan = NULL;
    _avgScan = NULL;
+   _log10Transform=false;
 
     initPlot();
 
@@ -71,6 +72,9 @@ void SpectraWidget::setCurrentScan(Scan* scan) {
         //}
         links.clear();
         _currentScan->deepcopy(scan);
+        if(_log10Transform) {
+            _currentScan->log10Transform();
+        }
     }
 }
 
@@ -826,6 +830,8 @@ void SpectraWidget::resetZoom() {
     replot();
 }
 
+
+
 void SpectraWidget::zoomIn() {
     float D = (_maxX-_minX)/2;
     if (D < 0.5 ) return;
@@ -865,6 +871,12 @@ void SpectraWidget::contextMenuEvent(QContextMenuEvent * event) {
 
     QAction* a1 = menu.addAction("Go To Scan");
     connect(a1, SIGNAL(triggered()), SLOT(gotoScan()));
+
+    QAction* a6 = menu.addAction("Log10 Transform");
+    a6->setCheckable(true);
+    a6->setChecked(_log10Transform);
+    connect(a6, SIGNAL(toggled(bool)), SLOT(setLog10Transform(bool)));
+    connect(a6, SIGNAL(toggled(bool)),  SLOT(resetZoom()));
 
     QAction* a3b = menu.addAction("Find Similar Scans");
     connect(a3b, SIGNAL(triggered()), SLOT(findSimilarScans()));
