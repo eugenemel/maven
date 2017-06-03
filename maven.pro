@@ -33,7 +33,7 @@ QT += network
 #INCLUDEPATH +=  /usr/include/qt4/QtXml/ /usr/include/qt/QtSql
 
 INCLUDEPATH += ../libmaven ../maven ../pugixml/src ../libneural ../MSToolkit/include
-LIBS += -L. -L../lib -L../build/lib -L../MSToolkit -lz -lmaven -lpugixml -lneural -lmstoolkitlite
+LIBS += -L. -L../lib -L../build/lib -L../MSToolkit -lmaven -lpugixml -lneural -lz -lmstoolkitlite
 message($$LIBS)
 
 INSTALLS += sources target
