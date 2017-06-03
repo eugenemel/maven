@@ -289,7 +289,8 @@ QDockWidget* MainWindow::createDockWidget(QString title, QWidget* w) {
 }
 
 void MainWindow::reportBugs() {
-    QUrl link("http://genomics-pubs.princeton.edu/mzroll/index.php?show=bugs");
+    //QUrl link("http://genomics-pubs.princeton.edu/mzroll/index.php?show=bugs");
+    QUrl link("https://github.com/eugenemel/maven/issues");
     QDesktopServices::openUrl(link);
 
 }
@@ -420,13 +421,13 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
 void MainWindow::setFormulaFocus(QString formula) {
     Adduct* adduct = getUserAdduct();
     MassCalculator mcalc;
-    double parentMass = mcalc.computeNeutralMass(formula.toStdString());
-    double pmz = adduct->computeAdductMass(parentMass);
+    //double parentMass = mcalc.computeNeutralMass(formula.toStdString());
+    //double pmz = adduct->computeAdductMass(parentMass);
 
     if ( eicWidget->isVisible() ) {
         Compound *unk = new Compound(formula.toStdString(),formula.toStdString(),formula.toStdString(),0);
         eicWidget->setCompound(unk,adduct);
-//        eicWidget->setMzSlice(pmz);
+        //eicWidget->setMzSlice(pmz);
     }
     isotopeWidget->setFormula(formula);
 }
