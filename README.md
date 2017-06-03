@@ -1,5 +1,7 @@
+
 # Maven GUI: Metabolomics Analysis and Visualization Engine 
 
+![Alt text](https://travis-ci.org/eugenemel/maven_core.svg?branch=master)
 
 #Compilation
 ```
