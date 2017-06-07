@@ -33,7 +33,7 @@ QT += network
 #INCLUDEPATH +=  /usr/include/qt4/QtXml/ /usr/include/qt/QtSql
 
 INCLUDEPATH += ../libmaven ../maven ../pugixml/src ../libneural ../MSToolkit/include
-LIBS += -L. -L../lib -L../build/lib -L../MSToolkit -lmaven -lpugixml -lneural -lz -lmstoolkitlite
+LIBS += -L. -L../lib -L../build/lib -L../MSToolkit -lmaven -lpugixml -lneural -lmstoolkitlite -lz
 message($$LIBS)
 
 INSTALLS += sources target
@@ -83,7 +83,7 @@ HEADERS +=  stable.h \
                     heatmap.h  \
                     note.h  \
                     suggest.h \
-                    alignmentdialog.h \ 
+                    alignmentdialog.h \
                     scatterplot.h \
                     gallerywidget.h \
                     rconsolewidget.h \
@@ -95,7 +95,7 @@ HEADERS +=  stable.h \
                     clusterdialog.h \
                     projectDB.h \
                     librarydialog.h \
-                    calibratedialog.h 
+                    calibratedialog.h
 
 
 SOURCES += mainwindow.cpp  \
@@ -139,7 +139,7 @@ csvreports.cpp \
  mzfileio.cpp \
  projectDB.cpp \
  librarydialog.cpp \
- calibratedialog.cpp 
+ calibratedialog.cpp
 
 
 sources.files =  $$HEADERS \
