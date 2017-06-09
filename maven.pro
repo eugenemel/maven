@@ -6,12 +6,9 @@ QMAKE_STRIP=echo
 
 #add version information during compilation
 win32 {
-    SYS_DATE=$$system(date /T)
-    SYS_DATE2=$$last(SYS_DATE)
-    DATE_PARTS=$$split(SYS_DATE2, /)
-    VERSION=$$member(DATE_PARTS, 2)$$member(DATE_PARTS, 0)$$member(DATE_PARTS, 1)
+    VERSION = $$system("..\get_version.bat")
 } else {
-    VERSION = $$system(date +%Y%m%d)
+    VERSION = $$system("../get_version.sh")
 }
 DEFINES += "MAVEN_VERSION=$$VERSION"
 DEFINES += "PLATFORM=\"$$QMAKE_HOST.os\""
