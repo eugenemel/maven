@@ -28,15 +28,12 @@ DESTDIR = ../bin
 QT += sql xml printsupport opengl
 QT += network
 
-
 #DEFINES += QT_CORE_LIB QT_DLL QT_NETWORK_LIB QT_SQL_LIB QT_THREAD_LIB
 #INCLUDEPATH +=  /usr/include/qt4/QtXml/ /usr/include/qt/QtSql
 
 INCLUDEPATH += ../libmaven ../maven ../pugixml/src ../libneural ../MSToolkit/include
 LIBS += -L. -L../lib -L../build/lib -L../MSToolkit -lmaven -lpugixml -lneural -lmstoolkitlite -lz
 message($$LIBS)
-
-INSTALLS += sources target
 
 FORMS = forms/settingsform.ui  \
 		forms/masscalcwidget.ui \
@@ -149,8 +146,12 @@ sources.files =  $$HEADERS \
   *.html \
   *.pro \
   images
- sources.path =  ./src
- target.path =  ../bin
+sources.path =  ./src
+target.path =  $${INSTALL_PREFIX}/bin
+desktop.path = $${INSTALL_PREFIX}/share/applications
+desktop.files = maven.desktop
+
+INSTALLS += target desktop
 
 build_all {
   !build_pass {
