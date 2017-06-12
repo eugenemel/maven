@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
-Name=mzRoll
+Name=Maven
 Comment=Metabolomics Data and Pathway Browser
-Exec=mzroll
-Icon=mzroll
+Exec=maven
+Icon=images/icon
 Categories=Education;Science;Biology;

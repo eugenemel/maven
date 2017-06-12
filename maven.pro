@@ -146,7 +146,7 @@ sources.files =  $$HEADERS \
 sources.path =  ./src
 target.path =  $${INSTALL_PREFIX}/bin
 desktop.path = $${INSTALL_PREFIX}/share/applications
-desktop.files = maven.desktop
+desktop.files = mzroll.desktop
 
 INSTALLS += target desktop
 
