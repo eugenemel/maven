@@ -6,12 +6,9 @@ QMAKE_STRIP=echo
 
 #add version information during compilation
 win32 {
-    SYS_DATE=$$system(date /T)
-    SYS_DATE2=$$last(SYS_DATE)
-    DATE_PARTS=$$split(SYS_DATE2, /)
-    VERSION=$$member(DATE_PARTS, 2)$$member(DATE_PARTS, 0)$$member(DATE_PARTS, 1)
+    VERSION = $$system("..\get_version.bat")
 } else {
-    VERSION = $$system(date +%Y%m%d)
+    VERSION = $$system("../get_version.sh")
 }
 DEFINES += "MAVEN_VERSION=$$VERSION"
 DEFINES += "PLATFORM=\"$$QMAKE_HOST.os\""
@@ -28,15 +25,12 @@ DESTDIR = ../bin
 QT += sql xml printsupport opengl
 QT += network
 
-
 #DEFINES += QT_CORE_LIB QT_DLL QT_NETWORK_LIB QT_SQL_LIB QT_THREAD_LIB
 #INCLUDEPATH +=  /usr/include/qt4/QtXml/ /usr/include/qt/QtSql
 
 INCLUDEPATH += ../libmaven ../maven ../pugixml/src ../libneural ../MSToolkit/include
-LIBS += -L. -L../lib -L../build/lib -L../MSToolkit -lmaven -lpugixml -lneural -lz -lmstoolkitlite
+LIBS += -L. -L../lib -L../build/lib -L../MSToolkit -lmaven -lpugixml -lneural -lmstoolkitlite -lz
 message($$LIBS)
-
-INSTALLS += sources target
 
 FORMS = forms/settingsform.ui  \
 		forms/masscalcwidget.ui \
@@ -83,7 +77,7 @@ HEADERS +=  stable.h \
                     heatmap.h  \
                     note.h  \
                     suggest.h \
-                    alignmentdialog.h \ 
+                    alignmentdialog.h \
                     scatterplot.h \
                     gallerywidget.h \
                     rconsolewidget.h \
@@ -95,7 +89,7 @@ HEADERS +=  stable.h \
                     clusterdialog.h \
                     projectDB.h \
                     librarydialog.h \
-                    calibratedialog.h 
+                    calibratedialog.h
 
 
 SOURCES += mainwindow.cpp  \
@@ -139,7 +133,7 @@ csvreports.cpp \
  mzfileio.cpp \
  projectDB.cpp \
  librarydialog.cpp \
- calibratedialog.cpp 
+ calibratedialog.cpp
 
 
 sources.files =  $$HEADERS \
@@ -149,8 +143,12 @@ sources.files =  $$HEADERS \
   *.html \
   *.pro \
   images
- sources.path =  ./src
- target.path =  ../bin
+sources.path =  ./src
+target.path =  $${INSTALL_PREFIX}/bin
+desktop.path = $${INSTALL_PREFIX}/share/applications
+desktop.files = mzroll.desktop
+
+INSTALLS += target desktop
 
 build_all {
   !build_pass {
