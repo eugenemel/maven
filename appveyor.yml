@@ -1,0 +1,40 @@
+version: 1.0.{build}
+environment:
+  matrix:
+  - COMPILER: msys2
+    PLATFORM: x64
+    MSYS2_ARCH: x86_64
+    MSYS2_DIR: msys64
+    MSYSTEM: MINGW64
+    BIT: 64
+  PATH: 'C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%'
+
+build_script:
+  # Get submodules
+  - git submodule update --init --recursive
+
+  # Not sure why, but seem to have to set path here
+  - SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
+
+  # Install 64-bit QT
+  - bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-qt-creator"
+
+  # Install zlib
+  - bash -lc "pacman -S --needed --noconfirm zlib-devel"
+
+  # Install sqlite3
+  - bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3"
+
+  # Build MAVEN
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake -r"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"
+
+after_build:
+    - SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
+    - src\maven\get_version.bat > version.txt
+    - SET /p VERSION=<version.txt
+    - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/maven/bin/maven_dev_$VERSION.exe
+
+artifacts:
+    - path: 'dist/maven_*.zip'
+      name: Maven

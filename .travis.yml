@@ -1,0 +1,42 @@
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      sudo: required
+      #group: deprecated-2017Q2
+      group: edge
+    - os: osx
+      osx_image: xcode8.3
+
+addons:
+  apt:
+    sources:
+      - sourceline: 'ppa:beineri/opt-qt58-trusty'
+    packages:
+      - qt58-meta-minimal
+      - mesa-common-dev
+      - libgl1-mesa-dev
+      - libsqlite3-dev
+      - libmysqlclient-dev
+      - libssl1.0.0
+      - libssl-dev
+
+before_install:
+  - ./ci/travis/before_install_${TRAVIS_OS_NAME}.sh
+  #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./ci/travis/brew_install_osx.sh; fi
+  #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install qt5     ; fi
+
+script:
+  # Add installed Qt path to $PATH
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then source /opt/qt*/bin/qt*-env.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source qt-5.env; fi
+  # Build and install
+  - qmake -r
+  - make -j2
+  - make INSTALL_ROOT=appdir install
+  # Set VERSION env var
+  - export VERSION=$(src/maven/get_version.sh)
+  # Package deployment artifacts
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./make_dist_linux.sh "src/maven/appdir/bin/maven_dev_${VERSION}"; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./make_dist_osx.sh "src/maven/appdir/bin/Maven.app"; fi
+  - ls -la dist/
