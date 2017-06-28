@@ -3,8 +3,6 @@ matrix:
     - os: linux
       dist: trusty
       sudo: required
-      #group: deprecated-2017Q2
-      group: edge
     - os: osx
       osx_image: xcode8.3
 
@@ -23,8 +21,6 @@ addons:
 
 before_install:
   - ./ci/travis/before_install_${TRAVIS_OS_NAME}.sh
-  #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./ci/travis/brew_install_osx.sh; fi
-  #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install qt5     ; fi
 
 script:
   # Add installed Qt path to $PATH
