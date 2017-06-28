@@ -14,7 +14,83 @@ void ProjectDB::deleteAll() {
     query.exec("drop table peakgroups");
     query.exec("drop table samples");
     query.exec("drop table peaks");
+    query.exec("drop table scans");
 }
+
+string ProjectDB::getScanSigniture(Scan* scan, int limitSize=200) {
+    stringstream SIG;
+    map<int,bool>seen;
+
+    int mz_count=0;
+    for(int pos: scan->intensityOrderDesc() ) {
+        float mzround = (int) scan->mz[pos];
+        int peakIntensity = (int) scan->intensity[pos];
+
+        if(! seen.count(mzround)) {
+            SIG << "[" << setprecision(9) << scan->mz[pos] << "," << peakIntensity << "]";
+            seen[mzround]=true;
+        }
+
+        if (mz_count++ >= limitSize) break;
+    }
+
+    return SIG.str();
+}
+
+
+void ProjectDB::saveScans(vector<mzSample *> &sampleSet) {
+    QSqlQuery query0(sqlDB);
+
+	query0.exec("begin transaction");
+	if(!query0.exec("CREATE TABLE IF NOT EXISTS scans(\
+				id INTEGER PRIMARY KEY   AUTOINCREMENT,\
+				sampleId     int       NOT NULL,\
+				scan    int       NOT NULL,\
+				fileSeekStart  int       NOT NULL,\
+				fileSeekEnd    int       NOT NULL,\
+				mslevel        int       NOT NULL,\
+				rt             real       NOT NULL,\
+				precursorMz       real       NOT NULL,\
+				precursorCharge   int       NOT NULL,\
+				precursorIc real  NOT NULL,\
+				minmz   real  NOT NULL,\
+				maxmz   real  NOT NULL,\
+				data VARCHAR(100000))" ))  qDebug() << "Ho... " << query0.lastError();
+
+        QSqlQuery query1(sqlDB);
+        query1.prepare("insert into scans values(NULL,?,?,?,?,?,?,?,?,?,?,?,?)");
+
+		int ms2count=0;
+        for(mzSample* s : sampleSet) {
+				cerr << "Saving scans for sample: " << s->sampleName  << " #scans=" << s->scans.size() << endl;
+				for (int i=0; i < s->scans.size(); i++ ) {
+					if (i % 1000 == 0) cerr << "...";
+
+					Scan* scan = s->scans[i];
+					if (scan->mslevel == 1) continue;
+					string scanData = getScanSigniture(scan,2000);
+					ms2count++;
+
+					query1.addBindValue( s->getSampleOrder());
+					query1.addBindValue( scan->scannum);
+					query1.addBindValue( -1);
+					query1.addBindValue( -1);
+					query1.addBindValue( scan->mslevel);
+					query1.addBindValue( scan->rt);
+					query1.addBindValue( scan->precursorMz);
+					query1.addBindValue( scan->precursorCharge);
+					query1.addBindValue( scan->totalIntensity());
+					query1.addBindValue( scan->minMz());
+					query1.addBindValue( scan->maxMz());
+					query1.addBindValue( scanData.c_str());
+
+					if(!query1.exec())  qDebug() << query1.lastError();
+				}
+				cerr << "#ms2=" << ms2count << endl;
+        }
+    query0.exec("end transaction");
+}
+
 
 void ProjectDB::saveSamples(vector<mzSample *> &sampleSet) {
     QSqlQuery query0(sqlDB);
