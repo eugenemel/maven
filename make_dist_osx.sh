@@ -45,7 +45,7 @@ appfn="${apppath##*/}"
 distpath="dist"
 basefn="${appfn%.app}"
 # Get version
-VERSION=$("src/maven/get_version.sh")
+VERSION=$("git describe --tags --dirty")
 dmgfn="${basefn}_${VERSION}.dmg"
 
 rm -rf "${distpath}"

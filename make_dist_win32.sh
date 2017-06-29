@@ -13,7 +13,7 @@ REV=`tput smso`
 function HELP {
     echo -e \\n"${REV}Basic usage:${NORM} ${BOLD}$SCRIPT file.exe${NORM}"\\n
     echo -e "${REV}-h${NORM}  --Displays this help message. No further functions are performed."\\n
-    echo -e "Example: ${BOLD}$SCRIPT \"bin/maven_dev_20170405.exe\"${NORM}"\\n
+    echo -e "Example: ${BOLD}$SCRIPT \"appdir/bin/maven_800.exe\"${NORM}"\\n
     exit 1
 }
 

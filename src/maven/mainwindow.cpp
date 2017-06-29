@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
  qRegisterMetaType<QTextCursor>("QTextCursor");
 
-  setWindowTitle(PROGRAMNAME + " " + QString::number(MAVEN_VERSION));
+  setWindowTitle(PROGRAMNAME + " " + QString(MAVEN_VERSION));
   qDebug() << "APP=" <<  QApplication::applicationName() << "VER=" <<  QApplication::applicationVersion();
 
   readSettings();
@@ -272,7 +272,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
         setUrl("http://genomics-pubs.princeton.edu/mzroll/index.php?show=bugs",
                 "Woops.. did the program crash last time? Would you like to report a bug?");
-    } 
+    }
 
     settings->setValue("closeEvent", 0 );
 }
@@ -296,15 +296,15 @@ void MainWindow::reportBugs() {
 }
 
 
-void MainWindow::setUrl(QString url,QString link) { 
+void MainWindow::setUrl(QString url,QString link) {
 
     if(url.isEmpty()) return;
     if(link.isEmpty()) link="Link";
     setStatusText(tr("<a href=\"%1\">%2</a>").arg(url, link));
-} 
+}
 
 
-void MainWindow::setUrl(Compound* c) { 
+void MainWindow::setUrl(Compound* c) {
     if(c==NULL) return;
     QString hmdbURL="http://www.hmdb.ca/metabolites/";
     QString keggURL= "http://www.genome.jp/dbget-bin/www_bget?";
@@ -377,7 +377,7 @@ TableDockWidget* MainWindow::addPeaksTable(QString title) {
 }
 
 
-void MainWindow::setUserPPM( double x) { 
+void MainWindow::setUserPPM( double x) {
     _ppmWindow=x;
 }
 
@@ -392,7 +392,7 @@ void MainWindow::setIonizationMode( int x ) {
      else adductType->setCurrentText("[M]");
 }
 
-vector<mzSample*> MainWindow::getVisibleSamples() { 
+vector<mzSample*> MainWindow::getVisibleSamples() {
 
     vector<mzSample*>vsamples;
     for(int i=0; i < samples.size(); i++ ) {
@@ -479,12 +479,12 @@ void MainWindow::showDockWidgets() {
     if(menu) menu->show();
 }
 
-void MainWindow::doSearch(QString needle) { 
+void MainWindow::doSearch(QString needle) {
     QRegExp formula("C[1-9].*(H[1-9]+|O[1-9]+|N[1-9]+)",Qt::CaseInsensitive,QRegExp::RegExp);
     if (needle.contains(formula) ){ setFormulaFocus(needle);}
 }
 
-void MainWindow::setMzValue() { 
+void MainWindow::setMzValue() {
     bool isDouble =false;
     QString value = searchText->text();
     float mz = value.toDouble(&isDouble);
@@ -496,7 +496,7 @@ void MainWindow::setMzValue() {
     suggestPopup->addToHistory(QString::number(mz,'f',5));
 }
 
-void MainWindow::setMzValue(float mz) { 
+void MainWindow::setMzValue(float mz) {
     searchText->setText(QString::number(mz,'f',8));
     if (eicWidget->isVisible() ) eicWidget->setMzSlice(mz);
     if (massCalcWidget->isVisible() ) massCalcWidget->setMass(mz);
@@ -533,7 +533,7 @@ void MainWindow::open(){
 
     QStringList filelist = QFileDialog::getOpenFileNames(
             this, "Select projects, peaks, samples to open:",
-            dir,  
+            dir,
                   tr("All Known Formats(*.mzroll *.mzrollDB *.mzPeaks *.mzXML *.mzxml *.mzdata *.mzData *.mzData.xml *.cdf *.nc *.mzML);;")+
                   tr("mzXML Format(*.mzXML *.mzxml);;")+
                   tr("mzData Format(*.mzdata *.mzData *.mzData.xml);;")+
@@ -607,7 +607,7 @@ BackgroundPeakUpdate* MainWindow::newWorkerThread(QString funcName) {
 }
 
 /*
-void MainWindow::terminateTheads() { 
+void MainWindow::terminateTheads() {
 
 	for(int i=0; i < threads.size(); i++ ) {
 		if (threads[i] != NULL ) {
@@ -940,13 +940,13 @@ void MainWindow::createToolBars() {
     searchText->setToolTip("<b>Text Search</b> <br> Compound Names: <b>ATP</b>,<br> Patterns: <b>[45]-phosphate</b> <br>Formulas: <b> C6H10* </b>");
     searchText->setObjectName(QString::fromUtf8("searchText"));
     searchText->setShortcutEnabled(true);
-    connect(searchText,SIGNAL(textEdited(QString)),this,SLOT(doSearch(QString))); 
+    connect(searchText,SIGNAL(textEdited(QString)),this,SLOT(doSearch(QString)));
     connect(searchText,SIGNAL(returnPressed()), SLOT(setMzValue()));
 
     QShortcut* ctrlK = new QShortcut(QKeySequence(tr("Ctrl+K", "Do Search")), this);
     QShortcut* ctrlF = new QShortcut(QKeySequence(tr("Ctrl+F", "Do Search")), this);
-    connect(ctrlK,SIGNAL(activated()),searchText,SLOT(selectAll())); 
-    connect(ctrlK,SIGNAL(activated()),searchText,SLOT(setFocus())); 
+    connect(ctrlK,SIGNAL(activated()),searchText,SLOT(selectAll()));
+    connect(ctrlK,SIGNAL(activated()),searchText,SLOT(setFocus()));
     connect(ctrlF,SIGNAL(activated()),searchText,SLOT(selectAll()));
     connect(ctrlF,SIGNAL(activated()),searchText,SLOT(setFocus()));
 
@@ -1045,7 +1045,7 @@ void MainWindow::historyNext() {
     eicWidget->setMzSlice(history.next());
 }
 
-void MainWindow::addToHistory(const mzSlice& slice) { 
+void MainWindow::addToHistory(const mzSlice& slice) {
     history.addToHistory(slice);
 }
 
@@ -1064,7 +1064,7 @@ bool MainWindow::addSample(mzSample* sample) {
     }
 }
 
-void MainWindow::showMassSlices() { 
+void MainWindow::showMassSlices() {
     peakDetectionDialog->setFeatureDetection( PeakDetectionDialog::FullSpectrum );
     peakDetectionDialog->show();
 }
@@ -1074,7 +1074,7 @@ void MainWindow::compoundDatabaseSearch() {
     peakDetectionDialog->show();
 }
 
-void MainWindow::showSRMList() { 
+void MainWindow::showSRMList() {
     vector<mzSlice*>slices = getSrmSlices();
     if (slices.size() ==  0 ) return;
     srmDockWidget->setInfo(slices);
@@ -1119,7 +1119,7 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
 }
 
 
-void MainWindow::Align() { 
+void MainWindow::Align() {
     if (sampleCount() < 2 ) return;
 
     BackgroundPeakUpdate* workerThread = newWorkerThread("processMassSlices");
@@ -1296,7 +1296,7 @@ void MainWindow::spectaFocused(Peak* _peak) {
     mzSample* sample = _peak->getSample();
     if (sample == NULL) return;
 
-    Scan* scan = sample->getScan(_peak->scan); 
+    Scan* scan = sample->getScan(_peak->scan);
     if (scan == NULL) return;
 
     if (spectraDockWidget->isVisible() && scan) {
@@ -1307,7 +1307,7 @@ void MainWindow::spectaFocused(Peak* _peak) {
 
 }
 
-void MainWindow::setupSampleColors() { 
+void MainWindow::setupSampleColors() {
     if (samples.size()==0) return;
 
     float N = samples.size();
@@ -1386,7 +1386,7 @@ QString MainWindow::groupTextExport(PeakGroup* group ) {
     return groupInfo.join("\n");
 }
 
-void MainWindow::findCovariants(Peak* _peak) { 
+void MainWindow::findCovariants(Peak* _peak) {
     if ( covariantsPanel->isVisible() ) {
         vector<mzLink> links = _peak->findCovariants();
         covariantsPanel->setInfo(links);
@@ -1399,7 +1399,7 @@ void MainWindow::setClipboardToGroup(PeakGroup* group) {
     clipboard->setText( groupTextExport(group) );
 }
 
-void MainWindow::showFragmentationScans(float pmz) { 
+void MainWindow::showFragmentationScans(float pmz) {
 
     if (!fragmentationEventsWidget || fragmentationEventsWidget->isVisible() == false ) return;
     float ppm = getUserPPM();

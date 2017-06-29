@@ -31,8 +31,8 @@ script:
   - make -j2
   - make INSTALL_ROOT=appdir install
   # Set VERSION env var
-  - export VERSION=$(src/maven/get_version.sh)
+  - export VERSION=$(git describe --tags --dirty)
   # Package deployment artifacts
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./make_dist_linux.sh "src/maven/appdir/bin/maven_dev_${VERSION}"; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./make_dist_osx.sh "src/maven/appdir/bin/Maven.app"; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./make_dist_linux.sh "src/maven/appdir/bin/maven_"*; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./make_dist_osx.sh "src/maven/appdir/bin/Maven_"*".app"; fi
   - ls -la dist/

@@ -28,12 +28,13 @@ build_script:
   # Build MAVEN
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake -r"
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make INSTALL_ROOT=appdir install"
 
 after_build:
     - SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
-    - src\maven\get_version.bat > version.txt
-    - SET /p VERSION=<version.txt
-    - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/maven/bin/maven_dev_$VERSION.exe
+    #- src\maven\get_version.bat > version.txt
+    #- SET /p VERSION=<version.txt
+    - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/maven/appdir/bin/maven_*.exe
 
 artifacts:
     - path: 'dist/maven_*.zip'

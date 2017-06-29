@@ -282,15 +282,15 @@ void ProjectDockWidget::setInfo(vector<mzSample*>&samples) {
     for(int i=0; i < samples.size(); i++ ) {
         mzSample* sample = samples[i];
         if (!sample) continue;
-        
+
         QTreeWidgetItem* parent = getParentFolder(QString(sample->fileName.c_str()));
         //QTreeWidgetItem* parent=NULL;
         QTreeWidgetItem *item=NULL;
 
-        if (parent) { 
-            item = new QTreeWidgetItem(parent,SampleType); 
+        if (parent) {
+            item = new QTreeWidgetItem(parent,SampleType);
         } else {
-            item = new QTreeWidgetItem(_treeWidget,SampleType); 
+            item = new QTreeWidgetItem(_treeWidget,SampleType);
         }
 
         QColor color = QColor::fromRgbF( sample->color[0], sample->color[1], sample->color[2], sample->color[3] );
@@ -352,7 +352,7 @@ QTreeWidgetItem* ProjectDockWidget::getParentFolder(QString fileName) {
         QStringList pathlist = path.split("/");
         if (pathlist.size() > 2 ) {
             QString parentFolder = pathlist[ pathlist.size()-2 ];
-            if(parentMap.contains(parentFolder)) { 
+            if(parentMap.contains(parentFolder)) {
                 parent = parentMap[parentFolder];
             } else {
                 parent = new QTreeWidgetItem(_treeWidget);
@@ -473,7 +473,7 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
     QFileInfo fileinfo(fileName);
     QString projectPath = fileinfo.path();
     QString projectName = fileinfo.fileName();
-    _mainwindow->setWindowTitle(PROGRAMNAME + "_" + QString::number(MAVEN_VERSION) + " " + projectName);
+    _mainwindow->setWindowTitle(PROGRAMNAME + "_" + QString(MAVEN_VERSION) + " " + projectName);
 
     ProjectDB* selectedProject = new ProjectDB(fileName);
 
