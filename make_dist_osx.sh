@@ -44,9 +44,7 @@ basepath="${apppath%.app}"
 appfn="${apppath##*/}"
 distpath="dist"
 basefn="${appfn%.app}"
-# Get version
-VERSION=$("git describe --tags --dirty")
-dmgfn="${basefn}_${VERSION}.dmg"
+dmgfn="${basefn}.dmg"
 
 rm -rf "${distpath}"
 mkdir -p "${distpath}"
@@ -70,4 +68,3 @@ macdeployqt "${apppath}"
 
 echo "Making DMG"
 hdiutil create "${distpath}/${dmgfn}" -srcfolder "${apppath}" -ov
-
