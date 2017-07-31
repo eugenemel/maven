@@ -39,3 +39,16 @@ after_build:
 artifacts:
     - path: 'dist/maven_*.zip'
       name: Maven
+
+deploy:
+  #release: myproduct-v$(appveyor_build_version)
+  description: ''
+  provider: GitHub
+  auth_token:
+    secure: +Ny819lvqNkz89JsKLoYYtMhppbI9iPOIBnvg/ooBkcsnKiFjeNoAvxUOjni4A5+ # your encrypted token from GitHub
+  artifact: /maven_.*\.zip/            # upload Maven zip archive to release assets
+  draft: false
+  prerelease: false
+  on:
+    #branch: master                 # release from master branch only
+    appveyor_repo_tag: true        # deploy on tag push only
