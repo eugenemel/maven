@@ -13,7 +13,7 @@ REV=`tput smso`
 function HELP {
     echo -e \\n"${REV}Basic usage:${NORM} ${BOLD}$SCRIPT file.exe${NORM}"\\n
     echo -e "${REV}-h${NORM}  --Displays this help message. No further functions are performed."\\n
-    echo -e "Example: ${BOLD}$SCRIPT \"appdir/bin/maven_800\"${NORM}"\\n
+    echo -e "Example: ${BOLD}$SCRIPT \"appdir/bin/Maven_Linux\"${NORM}"\\n
     exit 1
 }
 
@@ -43,6 +43,7 @@ binpath=$1
 bindir=${binpath%/*}
 binfn="${binpath##*/}"
 distpath="dist"
+appimagefn="${binfn%.exe}_Linux.AppImage"
 
 # TODO Resources must be copied to appdir prior to packaging
 # See: RedTimer example at https://github.com/probonopd/linuxdeployqt/wiki
@@ -71,6 +72,6 @@ ls -la "${binpath}"
 echo "Copying AppImage to ${distpath}"
 mkdir -p "${distpath}"
 ls -la
-cp -v "Maven-"*".AppImage" "${distpath}/"
+cp -v "Maven-"*".AppImage" "${distpath}/${appimagefn}"
 ls -la "${distpath}"
 

@@ -10,7 +10,7 @@ include(gitversion.pri)
 DEFINES += MAVEN_VERSION=\\\"$$VERSION\\\"
 DEFINES += "PLATFORM=\"$$QMAKE_HOST.os\""
 
-TARGET = Maven_$$VERSION_$$QMAKE_HOST.os
+TARGET = Maven_$$GIT_VERSION
 
 RC_FILE = mzroll.rc
 RESOURCES +=  mzroll.qrc
