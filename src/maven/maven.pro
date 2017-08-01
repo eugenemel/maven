@@ -5,12 +5,12 @@ QMAKE_STRIP=echo
 #PRECOMPILED_HEADER  = stable.h
 
 #add version information during compilation
-VERSION = $$system("git describe --tags --dirty")
+#VERSION = $$system("git describe --tags --dirty")
+include(gitversion.pri)
 DEFINES += MAVEN_VERSION=\\\"$$VERSION\\\"
 DEFINES += "PLATFORM=\"$$QMAKE_HOST.os\""
 
-TARGET = maven_$$VERSION
-macx:TARGET=Maven_$$VERSION
+TARGET = Maven_$$VERSION_$$QMAKE_HOST.os
 
 RC_FILE = mzroll.rc
 RESOURCES +=  mzroll.qrc
