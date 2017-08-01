@@ -11,12 +11,12 @@ desktop.path = $${INSTALL_PREFIX}/share/applications
 desktop.files = maven.desktop
 
 #add version information during compilation
-#VERSION = $$system("git describe --tags --dirty")
+#VERSION = $$system("git describe --tags --always")
 include(gitversion.pri)
 DEFINES += MAVEN_VERSION=\\\"$$VERSION\\\"
 DEFINES += "PLATFORM=\"$$QMAKE_HOST.os\""
 
-TARGET = Maven_$$GIT_VERSION
+TARGET = Maven
 
 RC_FILE = mzroll.rc
 RESOURCES +=  mzroll.qrc

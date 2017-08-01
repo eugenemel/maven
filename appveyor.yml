@@ -25,6 +25,9 @@ build_script:
   # Install sqlite3
   - bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3"
 
+  # Get version
+  - bash -lc "export GIT_VERSION=$(git describe --tags --always)"
+
   # Build MAVEN
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake -r"
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"
@@ -37,7 +40,7 @@ after_build:
     - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/maven/appdir/bin/Maven*.exe
 
 artifacts:
-    - path: 'dist/maven_*.zip'
+    - path: 'dist/Maven*.zip'
       name: Maven
 
 deploy:

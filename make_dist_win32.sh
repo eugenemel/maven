@@ -42,7 +42,7 @@ shift $((OPTIND-1))  #This tells getopts to move on to the next argument.
 exepath=$1
 exefn="${exepath##*/}"
 distpath="dist/${exefn%.exe}-Windows"
-zipfn="${exefn%.exe}-Windows.zip"
+zipfn="${exefn%.exe}_${GIT_VERSION}-Windows.zip"
 
 rm -rf "${distpath}"
 mkdir -p "${distpath}"
