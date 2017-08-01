@@ -25,11 +25,8 @@ build_script:
   # Install sqlite3
   - bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3"
 
-  # Get version
-  - bash -lc "export GIT_VERSION=$(git describe --tags --always)"
-
   # Build MAVEN
-  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake -r"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; GIT_VERSION=$(git describe --tags --always) qmake -r"
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make INSTALL_ROOT=appdir install"
 
@@ -49,7 +46,7 @@ deploy:
   provider: GitHub
   auth_token:
     secure: +Ny819lvqNkz89JsKLoYYtMhppbI9iPOIBnvg/ooBkcsnKiFjeNoAvxUOjni4A5+ # your encrypted token from GitHub
-  artifact: /Maven_.*\.zip/            # upload Maven zip archive to release assets
+  artifact: /Maven.*\.zip/            # upload Maven zip archive to release assets
   draft: false
   prerelease: false
   on:
