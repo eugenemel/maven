@@ -39,6 +39,8 @@ done
 
 shift $((OPTIND-1))  #This tells getopts to move on to the next argument.
 
+GIT_VERSION=$(get_version.sh)
+
 binpath=$1
 bindir=${binpath%/*}
 binfn="${binpath##*/}"

@@ -11,15 +11,11 @@ win32 {
     NULL_DEVICE = /dev/null
 }
 
-# Need to call git with manually specified paths to repository
-#BASE_GIT_COMMAND = git --git-dir $$PWD/.git --work-tree $$PWD
-BASE_GIT_COMMAND = git
-
 # Get version from environment variable (available to downstream scripts too)
 GIT_VERSION = $$(GIT_VERSION)
 isEmpty(GIT_VERSION) {
     # Trying to get version from git tag / revision
-    GIT_VERSION = $$system($$BASE_GIT_COMMAND describe --always --tags 2> $$NULL_DEVICE)
+    GIT_VERSION = $$system(get_version.sh 2> $$NULL_DEVICE)
 }
 
 # Turns describe output like 0.1.5-42-g652c397 into "0.1.5.42.652c397"
@@ -44,4 +40,4 @@ DEFINES += GIT_VERSION=\\\"$$GIT_VERSION\\\"
 #macx {
 #    INFO_PLIST_PATH = $$shell_quote($${OUT_PWD}/$${INSTALL_ROOT}/$${target.path}/$${TARGET}.app/Contents/Info.plist)
 #    QMAKE_POST_LINK += /usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString $${VERSION}\" $${INFO_PLIST_PATH}
-}#
+#}
