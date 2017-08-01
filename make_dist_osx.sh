@@ -44,7 +44,7 @@ basepath="${apppath%.app}"
 appfn="${apppath##*/}"
 distpath="dist"
 basefn="${appfn%.app}"
-dmgfn="${basefn}_Mac.dmg"
+dmgfn="${basefn}-Mac.dmg"
 
 rm -rf "${distpath}"
 mkdir -p "${distpath}"

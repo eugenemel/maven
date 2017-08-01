@@ -34,7 +34,7 @@ after_build:
     - SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
     #- src\maven\get_version.bat > version.txt
     #- SET /p VERSION=<version.txt
-    - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/maven/appdir/bin/Maven_*.exe
+    - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/maven/appdir/bin/Maven*.exe
 
 artifacts:
     - path: 'dist/maven_*.zip'

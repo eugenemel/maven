@@ -1,8 +1,14 @@
 include(../maven_core/libmaven.pri)
 TEMPLATE = app
+DESTDIR = bin
 CONFIG += qt thread sql svg console std++14
 QMAKE_STRIP=echo
 #PRECOMPILED_HEADER  = stable.h
+
+
+target.path =  $${INSTALL_PREFIX}/bin
+desktop.path = $${INSTALL_PREFIX}/share/applications
+desktop.files = maven.desktop
 
 #add version information during compilation
 #VERSION = $$system("git describe --tags --dirty")
@@ -16,7 +22,8 @@ RC_FILE = mzroll.rc
 RESOURCES +=  mzroll.qrc
 ICON = images/icon.icns
 
-DESTDIR = bin
+INSTALLS += target
+linux:INSTALLS += desktop
 
 QT += sql xml printsupport opengl network
 
@@ -136,12 +143,6 @@ sources.files =  $$HEADERS \
   *.pro \
   images
 sources.path =  .
-target.path =  $${INSTALL_PREFIX}/bin
-desktop.path = $${INSTALL_PREFIX}/share/applications
-desktop.files = maven.desktop
-
-INSTALLS += target
-linux:INSTALLS += desktop
 
 build_all {
   !build_pass {

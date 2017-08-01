@@ -43,7 +43,7 @@ binpath=$1
 bindir=${binpath%/*}
 binfn="${binpath##*/}"
 distpath="dist"
-appimagefn="${binfn%.exe}_Linux.AppImage"
+appimagefn="${binfn%.exe}-Linux.AppImage"
 
 # TODO Resources must be copied to appdir prior to packaging
 # See: RedTimer example at https://github.com/probonopd/linuxdeployqt/wiki
