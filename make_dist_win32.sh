@@ -39,7 +39,7 @@ done
 
 shift $((OPTIND-1))  #This tells getopts to move on to the next argument.
 
-GIT_VERSION=$(get_version.sh)
+GIT_VERSION=$(src/maven/get_version.sh)
 
 exepath=$1
 exefn="${exepath##*/}"
