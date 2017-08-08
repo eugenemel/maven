@@ -40,6 +40,5 @@ deploy:
       - dist/Maven*.dmg
   skip_cleanup: true
   on:
-    repo: lparsons/maven
-    all_branches: true
+    branch: master
     tags: true
