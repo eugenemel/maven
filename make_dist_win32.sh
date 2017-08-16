@@ -13,7 +13,7 @@ REV=`tput smso`
 function HELP {
     echo -e \\n"${REV}Basic usage:${NORM} ${BOLD}$SCRIPT file.exe${NORM}"\\n
     echo -e "${REV}-h${NORM}  --Displays this help message. No further functions are performed."\\n
-    echo -e "Example: ${BOLD}$SCRIPT \"bin/maven_dev_20170405.exe\"${NORM}"\\n
+    echo -e "Example: ${BOLD}$SCRIPT \"appdir/bin/Maven.exe\"${NORM}"\\n
     exit 1
 }
 
@@ -39,10 +39,12 @@ done
 
 shift $((OPTIND-1))  #This tells getopts to move on to the next argument.
 
+GIT_VERSION=$(src/maven/get_version.sh)
+
 exepath=$1
 exefn="${exepath##*/}"
-distpath="dist/${exefn%.exe}"
-zipfn="${exefn%.exe}.zip"
+distpath="dist/${exefn%.exe}-Windows"
+zipfn="${exefn%.exe}_${GIT_VERSION}-Windows.zip"
 
 rm -rf "${distpath}"
 mkdir -p "${distpath}"

@@ -13,7 +13,7 @@ REV=`tput smso`
 function HELP {
     echo -e \\n"${REV}Basic usage:${NORM} ${BOLD}$SCRIPT file.exe${NORM}"\\n
     echo -e "${REV}-h${NORM}  --Displays this help message. No further functions are performed."\\n
-    echo -e "Example: ${BOLD}$SCRIPT \"bin/maven_dev_20170405\"${NORM}"\\n
+    echo -e "Example: ${BOLD}$SCRIPT \"appdir/bin/Maven_Linux\"${NORM}"\\n
     exit 1
 }
 
@@ -39,10 +39,13 @@ done
 
 shift $((OPTIND-1))  #This tells getopts to move on to the next argument.
 
+GIT_VERSION=$(src/maven/get_version.sh)
+
 binpath=$1
 bindir=${binpath%/*}
 binfn="${binpath##*/}"
 distpath="dist"
+appimagefn="${binfn%.exe}_${GIT_VERSION}-Linux.AppImage"
 
 # TODO Resources must be copied to appdir prior to packaging
 # See: RedTimer example at https://github.com/probonopd/linuxdeployqt/wiki
@@ -62,15 +65,15 @@ chmod a+x linuxdeployqt*.AppImage
 unset QTDIR; unset QT_PLUGIN_PATH; unset LD_LIBRARY_PATH
 
 echo "Running linuxdeployqt"
-./linuxdeployqt*.AppImage "${binpath}" -bundle-non-qt-libs -verbose=2
-./linuxdeployqt*.AppImage "${binpath}" -appimage -verbose=2
-find "${bindir}" -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq
+./linuxdeployqt*.AppImage "${binpath}" -bundle-non-qt-libs -verbose=1
+./linuxdeployqt*.AppImage "${binpath}" -appimage -verbose=1
+# find "${bindir}" -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq
 #- curl --upload-file ./APPNAME*.AppImage https://transfer.sh/APPNAME-git.$(git rev-parse --short HEAD)-x86_64.AppImage
 ls -la "${binpath}"
 
 echo "Copying AppImage to ${distpath}"
 mkdir -p "${distpath}"
 ls -la
-cp -v "Maven-${VERSION}-x86_64.AppImage" "${distpath}/"
+cp -v "Maven-"*".AppImage" "${distpath}/${appimagefn}"
 ls -la "${distpath}"
 

@@ -1,32 +1,31 @@
 include(../maven_core/libmaven.pri)
 TEMPLATE = app
+DESTDIR = bin
 CONFIG += qt thread sql svg console std++14
 QMAKE_STRIP=echo
 #PRECOMPILED_HEADER  = stable.h
 
+
+target.path =  $${INSTALL_PREFIX}/bin
+desktop.path = $${INSTALL_PREFIX}/share/applications
+desktop.files = maven.desktop
+
 #add version information during compilation
-win32 {
-    VERSION = $$system(".\get_version.bat")
-} else {
-    VERSION = $$system("./get_version.sh")
-}
-DEFINES += "MAVEN_VERSION=$$VERSION"
+#VERSION = $$system("git describe --tags --always")
+include(gitversion.pri)
+DEFINES += MAVEN_VERSION=\\\"$$VERSION\\\"
 DEFINES += "PLATFORM=\"$$QMAKE_HOST.os\""
 
-TARGET = maven_dev_$$VERSION
-macx:TARGET=Maven
+TARGET = Maven
 
 RC_FILE = mzroll.rc
 RESOURCES +=  mzroll.qrc
 ICON = images/icon.icns
 
-DESTDIR = bin
+INSTALLS += target
+linux:INSTALLS += desktop
 
-QT += sql xml printsupport opengl
-QT += network
-
-#DEFINES += QT_CORE_LIB QT_DLL QT_NETWORK_LIB QT_SQL_LIB QT_THREAD_LIB
-#INCLUDEPATH +=  /usr/include/qt4/QtXml/ /usr/include/qt/QtSql
+QT += sql xml printsupport opengl network
 
 INCLUDEPATH += ../maven_core/libmaven src ../maven_core/pugixml/src ../maven_core/libneural ../maven_core/MSToolkit/include
 LIBS += -L. -L../maven_core/lib -L../maven_core/build/lib -L../maven_core/MSToolkit -lmaven -lpugixml -lneural -lmstoolkitlite -lz
@@ -143,12 +142,7 @@ sources.files =  $$HEADERS \
   *.html \
   *.pro \
   images
-sources.path =  ./src
-target.path =  $${INSTALL_PREFIX}/bin
-desktop.path = $${INSTALL_PREFIX}/share/applications
-desktop.files = maven.desktop
-
-INSTALLS += target desktop
+sources.path =  .
 
 build_all {
   !build_pass {

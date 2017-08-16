@@ -39,14 +39,14 @@ done
 
 shift $((OPTIND-1))  #This tells getopts to move on to the next argument.
 
+GIT_VERSION=$(src/maven/get_version.sh)
+
 apppath=$1
 basepath="${apppath%.app}"
 appfn="${apppath##*/}"
 distpath="dist"
 basefn="${appfn%.app}"
-# Get version
-VERSION=$("src/maven/get_version.sh")
-dmgfn="${basefn}_${VERSION}.dmg"
+dmgfn="${basefn}_${GIT_VERSION}-Mac.dmg"
 
 rm -rf "${distpath}"
 mkdir -p "${distpath}"
@@ -70,4 +70,3 @@ macdeployqt "${apppath}"
 
 echo "Making DMG"
 hdiutil create "${distpath}/${dmgfn}" -srcfolder "${apppath}" -ov
-

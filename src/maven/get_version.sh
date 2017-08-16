@@ -1,2 +1,3 @@
 #!/bin/sh
-date +%Y%m%d
+export GIT_VERSION=$(git describe --tags --always)
+echo $GIT_VERSION

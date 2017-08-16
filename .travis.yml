@@ -1,42 +1,44 @@
 matrix:
   include:
-    - os: linux
-      dist: trusty
-      sudo: required
-      #group: deprecated-2017Q2
-      group: edge
-    - os: osx
-      osx_image: xcode8.3
-
+  - os: linux
+    dist: trusty
+    sudo: required
+  - os: osx
+    osx_image: xcode8.3
 addons:
   apt:
     sources:
-      - sourceline: 'ppa:beineri/opt-qt58-trusty'
+    - sourceline: ppa:beineri/opt-qt58-trusty
     packages:
-      - qt58-meta-minimal
-      - mesa-common-dev
-      - libgl1-mesa-dev
-      - libsqlite3-dev
-      - libmysqlclient-dev
-      - libssl1.0.0
-      - libssl-dev
-
+    - qt58-meta-minimal
+    - mesa-common-dev
+    - libgl1-mesa-dev
+    - libsqlite3-dev
+    - libmysqlclient-dev
+    - libssl1.0.0
+    - libssl-dev
 before_install:
-  - ./ci/travis/before_install_${TRAVIS_OS_NAME}.sh
-  #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./ci/travis/brew_install_osx.sh; fi
-  #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install qt5     ; fi
-
+- "./ci/travis/before_install_${TRAVIS_OS_NAME}.sh"
 script:
-  # Add installed Qt path to $PATH
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then source /opt/qt*/bin/qt*-env.sh; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source qt-5.env; fi
-  # Build and install
-  - qmake -r
-  - make -j2
-  - make INSTALL_ROOT=appdir install
-  # Set VERSION env var
-  - export VERSION=$(src/maven/get_version.sh)
-  # Package deployment artifacts
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./make_dist_linux.sh "src/maven/appdir/bin/maven_dev_${VERSION}"; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./make_dist_osx.sh "src/maven/appdir/bin/Maven.app"; fi
-  - ls -la dist/
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then source /opt/qt*/bin/qt*-env.sh; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source qt-5.env; fi
+- qmake -r
+- make -j2
+- make INSTALL_ROOT=appdir install
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./make_dist_linux.sh "src/maven/appdir/bin/Maven";
+  fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./make_dist_osx.sh "src/maven/appdir/bin/Maven.app";
+  fi
+- ls -la dist/
+deploy:
+  provider: releases
+  api_key:
+    secure: b8s6YfcCm75PIovcrHzNbTWzHMCd12yY+eGnnHg5XwHdoi0MMLRZiUiEnoVFNPlpNSu6aO0nnr23/bL9+fKqajW//z/+055S5ukrvZarPJyAywYOOd8DUL81d7Hi+kLTA9FPu43SeqJN/tYD8YvebGUipwZj5q5oU4IQ5XkKQJvp04ObvfTIsH1rb3bdFxcucYbPIU6A8zhLHeXGEUvKtPjJXGP41MyFGHSQtfrjBLyZbDkXvLXIILFR3hKuC1UjX30rYJbI5jnLYov3v2yFe2XTxQC3W6Q950hsf6AzqW7/oMHVA6/cVSzj0bjKBiUZ4nk6YKE/Sn1LWhRDKj2MNGdLDYaWiaFK64KQOXh5TsM3o6Tt7/fqW7rYbl7tT0Yg1Xx0ZbgvYliT5BgbzHHoDJULYQOl4kRtOG6+yt2ek5GdJ9a3WfKQIwaa3/8uYFkbZ/PvOHiv8bolGTHdVlkO7e7E0B01miCMp+IjldVlJZIWS69B/Pmn+Z1dt80g+uW7xMX6X7CrYdSzVkYdDYKc1EuiretA74KPn3EnzdOF6/3I4p6/oAB3hWbELE2VnS+hRxvIDJMF9nb+uBGWaCP2evkvbG4+fI0TBE5ni9LymdxNyd8sTZsD8YWijhP82fRSKIcaqki6SbsP//KRnxLtOryUNoqAhALc6sFLpD5f4BU=
+  file_glob: true
+  file:
+      - dist/Maven*.AppImage
+      - dist/Maven*.dmg
+  skip_cleanup: true
+  on:
+    branch: master
+    tags: true

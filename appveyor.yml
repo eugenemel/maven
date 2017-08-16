@@ -28,13 +28,27 @@ build_script:
   # Build MAVEN
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake -r"
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make INSTALL_ROOT=appdir install"
 
 after_build:
     - SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
-    - src\maven\get_version.bat > version.txt
-    - SET /p VERSION=<version.txt
-    - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/maven/bin/maven_dev_$VERSION.exe
+    #- src\maven\get_version.bat > version.txt
+    #- SET /p VERSION=<version.txt
+    - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/maven/appdir/bin/Maven.exe
 
 artifacts:
-    - path: 'dist/maven_*.zip'
+    - path: 'dist/Maven*.zip'
       name: Maven
+
+deploy:
+  #release: myproduct-v$(appveyor_build_version)
+  description: ''
+  provider: GitHub
+  auth_token:
+    secure: +Ny819lvqNkz89JsKLoYYtMhppbI9iPOIBnvg/ooBkcsnKiFjeNoAvxUOjni4A5+ # your encrypted token from GitHub
+  artifact: /Maven.*\.zip/            # upload Maven zip archive to release assets
+  draft: false
+  prerelease: false
+  on:
+    branch: master                 # release from master branch only
+    appveyor_repo_tag: true        # deploy on tag push only
