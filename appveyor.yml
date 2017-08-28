@@ -34,7 +34,7 @@ after_build:
     - SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
     #- src\maven\get_version.bat > version.txt
     #- SET /p VERSION=<version.txt
-    - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/maven/appdir/bin/Maven.exe
+    - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/maven/appdir/bin/Maven.exe"
 
 artifacts:
     - path: 'dist/Maven*.zip'
@@ -45,7 +45,7 @@ deploy:
   description: ''
   provider: GitHub
   auth_token:
-    secure: +Ny819lvqNkz89JsKLoYYtMhppbI9iPOIBnvg/ooBkcsnKiFjeNoAvxUOjni4A5+ # your encrypted token from GitHub
+    secure: 6ciJmy/m+e9HFVAfaziq3B91sguloOnXVGq0eYrFM1pXVqeI2k5vS2N1Yg+rzbjD # your encrypted token from GitHub
   artifact: /Maven.*\.zip/            # upload Maven zip archive to release assets
   draft: false
   prerelease: false
