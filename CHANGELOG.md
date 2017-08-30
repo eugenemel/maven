@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased][]
 ### Added
+-   Detect dual 13C/2H labeled isotopes @lparsons
 
 ### Changed
 
