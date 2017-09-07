@@ -3,5 +3,5 @@ Type=Application
 Name=Maven
 Comment=Metabolomics Data and Pathway Browser
 Exec=Maven
-Icon=images/icon
-Categories=Education;Science;Biology;
+Icon=icon
+Categories=Science;
