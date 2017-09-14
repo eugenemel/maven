@@ -19,21 +19,31 @@ Tagged versions are automatically released on GitHub releases.
 
 ## Releases
 
-1.  Update `CHANGELOG.md` from `Unreleased` to `<version>`, update diff links.
+1.  Create branch `prepare_release_<version>`.
 
-2.  Merge all PRs, ensure pipelines pass. Be sure to update local repo with
-    merge commit (e.g. `git checkout master; git fetch upstream master; git
-        merge upstream master`)
+2.  Update `CHANGELOG.md` from `Unreleased` to `<version>`, update diff links.
 
-3.  Tag with new version:
+3.  Submit Pull Request for the `prepare_release_<version>` branch.
+
+4.  Once other members agree to release, merge the PR and ensure Travis and
+    Appveyor pass.
+
+5.  Update local repo with the merge commit:
+    ```
+    git checkout master
+    git fetch upstream master
+    git merge upstream master
+    ```
+
+6.  Tag with new version:
     ```
     git tag -a <version>
     git push --tags
     ```
 
-4.  Check GitHub releases, add helpful release notes, etc.
+7.  Check GitHub releases, add helpful release notes, etc.
 
-5.  Prepare for new development (can be pushed directly to master):
+8.  Prepare for new development (can be pushed directly to master):
 
     1.  Update `CHNAGELOG.md` to add `Unreleased` section, add diff link:
         ```

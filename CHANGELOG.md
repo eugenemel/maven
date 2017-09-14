@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## [Unreleased][]
+## [8.0.1][]
 ### Added
 -   Detect dual 13C/2H labeled isotopes @lparsons
 
@@ -43,6 +43,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [20161028][] - 2016-10-28
 -   TODO - Document changes
 
-[Unreleased]: https://github.com/eugenemel/maven/compare/8.0.0...HEAD
+[8.0.1]: https://github.com/eugenemel/maven/compare/8.0.0...8.0.1
 [8.0.0]: https://github.com/eugenemel/maven/compare/20161028...8.0.0
 [20161028]: https://github.com/eugenemel/maven/compare/92cf1d16dfc7d9f6bf4394890a06c3ecbed2ba1a...20161028
