@@ -55,7 +55,7 @@ Tagged versions are automatically released on GitHub releases.
     ```
     git clone --recursive  git@github.com:eugenemel/maven.git maven
     cd maven
-    qmake -r
+    qmake -r build.pro
     make -j4
     ```
 
