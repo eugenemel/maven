@@ -39,6 +39,7 @@ public slots:
                     void resetZoom();
                     void zoomIn();
                     void zoomOut();
+                    void zoomRegion(float centerMz, float window);
                     void setProfileMode() { _profileMode=true;  }
                     void setCentroidedMode() { _profileMode=false; }
                     void setLog10Transform(bool flag) { _log10Transform=flag; }

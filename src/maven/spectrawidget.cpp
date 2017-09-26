@@ -95,13 +95,12 @@ void SpectraWidget::setTitle() {
 
          //QColor sampleColor = QColor::fromRgbF( sample->color[0], sample->color[1], sample->color[2], 1 );
 
-         title += tr("Sample:<b>%1</b>  Scan:<b>%2</b> rt:<b>%3</b>   msLevel:<b>%4</b>  Ion:<b>%5</b>").arg(
+         title += tr("Sample:<b>%1</b> Scan:<b>%2</b> rt:<b>%3</b> msLevel:<b>%4</b> Ion:<b>%5</b>").arg(
                              QString(sampleName),
                              QString::number(_currentScan->scannum),
                              QString::number(_currentScan->rt,'f',2),
                              QString::number(_currentScan->mslevel),
-                             polarity
-                             );
+                             polarity);
     }
 
     if (_currentScan->precursorMz) {
@@ -120,7 +119,14 @@ void SpectraWidget::setTitle() {
         title += precursorMzLink ;
     }
 
-    QFont font = QApplication::font();
+	if (_currentScan->precursorMz > 0 and _currentScan->sample) {
+		double amu = 0.5;
+		double ppm = 10.0;
+		double purity = _currentScan->sample->getPrecursorPurity(_currentScan,amu,ppm);
+		title += " <b>Purity: " + QString::number(purity*100.0,'f',1) + "% </b>";
+	}
+
+	QFont font = QApplication::font();
     font.setPixelSize(8.0);
     _title->setHtml(title);
     int titleWith = _title->boundingRect().width();
@@ -847,6 +853,16 @@ void SpectraWidget::zoomIn() {
     findBounds(false,true);
     replot();
 
+}
+
+void SpectraWidget::zoomRegion(float centerMz, float window) { 
+	if (centerMz <= 0) return;
+    _focusCoord = QPointF(centerMz,1e3);
+	float _centerX = _focusCoord.x();
+	_minX =  _centerX - window;
+	_maxX =  _centerX + window;
+    findBounds(false,true);
+    replot();
 }
 
 void SpectraWidget::zoomOut() {

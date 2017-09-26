@@ -102,7 +102,15 @@ void EicPoint::mousePressEvent (QGraphicsSceneMouseEvent* event) {
         _mw->fragmenationSpectraDockWidget->setVisible(true);
         _mw->fragmenationSpectraWidget->setScan(_scan);
         _mw->massCalcWidget->setFragmentationScan(_scan);
-       // if(_scan->mslevel >= 2)  _mw->spectralHitsDockWidget->limitPrecursorMz(_scan->precursorMz);
+
+		//show last full scan
+        if(_scan->mslevel >= 2 && _scan->sample) {
+			Scan* lastfullscan = _scan->sample->getLastFullScan(_scan);
+			if(lastfullscan) {
+				_mw->spectraWidget->setScan(lastfullscan);
+				_mw->spectraWidget->zoomRegion(_scan->precursorMz,0.5);
+			}
+		}
     }
 
     if (_peak && _mw->covariantsPanel->isVisible()) {
