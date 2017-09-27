@@ -56,7 +56,10 @@
     </widget>
    </item>
    <item row="1" column="0" colspan="3">
-    <widget class="QTreeWidget" name="treeWidget">
+	   <widget class="QTreeWidget" name="treeWidget">
+     <property name="selectionMode">
+	     <enum>QAbstractItemView::MultiSelection</enum>
+     </property>
      <property name="expandsOnDoubleClick">
       <bool>true</bool>
      </property>
