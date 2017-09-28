@@ -120,9 +120,8 @@ void SpectraWidget::setTitle() {
     }
 
 	if (_currentScan->precursorMz > 0 and _currentScan->sample) {
-		double amu = _currentScan->isolationWindow;  
 		double ppm = 10.0;
-		double purity = _currentScan->sample->getPrecursorPurity(_currentScan,amu,ppm);
+		double purity = _currentScan->getPrecursorPurity(ppm);
 		title += " <b>Purity: " + QString::number(purity*100.0,'f',1) + "% </b>";
 	}
 

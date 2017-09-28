@@ -53,14 +53,16 @@ void ProjectDB::saveScans(vector<mzSample *> &sampleSet) {
 				precursorMz       real       NOT NULL,\
 				precursorCharge   int       NOT NULL,\
 				precursorIc real  NOT NULL,\
+				precursorPurity real, \
 				minmz   real  NOT NULL,\
 				maxmz   real  NOT NULL,\
 				data VARCHAR(100000))" ))  qDebug() << "Ho... " << query0.lastError();
 
         QSqlQuery query1(sqlDB);
-        query1.prepare("insert into scans values(NULL,?,?,?,?,?,?,?,?,?,?,?,?)");
+        query1.prepare("insert into scans values(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
 		int ms2count=0;
+		float ppm = 20;
         for(mzSample* s : sampleSet) {
 				cerr << "Saving scans for sample: " << s->sampleName  << " #scans=" << s->scans.size() << endl;
 				for (int i=0; i < s->scans.size(); i++ ) {
@@ -68,6 +70,7 @@ void ProjectDB::saveScans(vector<mzSample *> &sampleSet) {
 
 					Scan* scan = s->scans[i];
 					if (scan->mslevel == 1) continue;
+
 					string scanData = getScanSigniture(scan,2000);
 					ms2count++;
 
@@ -80,6 +83,7 @@ void ProjectDB::saveScans(vector<mzSample *> &sampleSet) {
 					query1.addBindValue( scan->precursorMz);
 					query1.addBindValue( scan->precursorCharge);
 					query1.addBindValue( scan->totalIntensity());
+					query1.addBindValue( scan->getPrecursorPurity(ppm));
 					query1.addBindValue( scan->minMz());
 					query1.addBindValue( scan->maxMz());
 					query1.addBindValue( scanData.c_str());

@@ -105,7 +105,8 @@ void EicPoint::mousePressEvent (QGraphicsSceneMouseEvent* event) {
 
 		//show last full scan
         if(_scan->mslevel >= 2 && _scan->sample) {
-			Scan* lastfullscan = _scan->sample->getLastFullScan(_scan);
+			int scanHistory=50;
+			Scan* lastfullscan = _scan->getLastFullScan(scanHistory);
 			if(lastfullscan) {
 				_mw->spectraWidget->setScan(lastfullscan);
 				_mw->spectraWidget->zoomRegion(_scan->precursorMz,0.5);
