@@ -8,7 +8,7 @@ PlotScene::PlotScene(QObject * parent): QGraphicsScene(parent) {
     ylabel = new QGraphicsTextItem();
     ylabel->hide();
     ylabel->setFont(QFont("Helvetica",10));
-    //FIXME ylabel->rotate(-90);
+    ylabel->setRotation(-90);
 
     xlabel = new QGraphicsTextItem();
     xlabel->hide();
@@ -52,7 +52,7 @@ void PlotScene::showYLabel(QString text) {
 		addItem(ylabel); 
 		ylabel->setHtml(text); 
 		ylabel->setVisible(true);  
-		ylabel->setPos(-20, plotRect.height()/2 );
+        ylabel->setPos(-20, plotRect.height()/2 );
 	}
 }
 

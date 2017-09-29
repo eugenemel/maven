@@ -18,7 +18,7 @@ ScatterPlot::ScatterPlot(QWidget* w):PlotDockWidget(w,0) {
 	setWindowTitle("Scatter Plot");
 
     showSimilarFlag = false;
-    plotType = scatter;
+    plotType = mzrt;
 
     setupToolBar();
 	setTable(NULL);
@@ -46,6 +46,12 @@ void ScatterPlot::setupToolBar() {
     btnFlower->setToolTip("Flower Plot");
     connect(btnFlower,SIGNAL(clicked()),this,SLOT(setPlotTypeFlower()));
 
+    QToolButton *btnMzRt = new QToolButton(toolBar);
+    btnMzRt->setIcon(QIcon(rsrcPath + "/spreadsheet.png"));
+    btnMzRt->setToolTip("Mz/Rt Plot");
+    connect(btnMzRt,SIGNAL(clicked()),this,SLOT(setPlotTypeMzRt()));
+
+
     QToolButton *btnCovariants = new QToolButton(toolBar);
 	btnCovariants->setIcon(QIcon(rsrcPath + "/covariants.png"));
 	btnCovariants->setToolTip("Highlight Covariants on Click");
@@ -61,6 +67,7 @@ void ScatterPlot::setupToolBar() {
     toolBar->addWidget(btnF);
     toolBar->addWidget(btnScatter);
     toolBar->addWidget(btnFlower);
+    toolBar->addWidget(btnMzRt);
     toolBar->addWidget(btnCovariants);
 
     setTitleBarWidget(toolBar);
@@ -288,7 +295,87 @@ void ScatterPlot::drawFlower(vector<PeakGroup*>groups) {
          }
 }
 
+void ScatterPlot::drawMzRt(QList<PeakGroup*>groups) {
 
+        sort(groups.begin(), groups.end());
+
+        StatisticsVector<float>mzs;
+        StatisticsVector<float>rts;
+        StatisticsVector<float>signal;
+
+        for(int i=0;i<groups.size();i++) {
+            PeakGroup* g = groups[i];
+            float y = g->maxIntensity; y <=0 ? y=-log10(0.001) : y=-log10(y);
+            mzs.push_back(g->meanMz);
+            rts.push_back(g->meanRt);
+            signal.push_back(y);
+        }
+
+        if (mzs.size() == 0 || rts.size() == 0 ) return;
+
+        //get data minimum and mazimum values
+        float minX = rts.minimum();
+        float maxX = rts.maximum();
+        scene()->setXDim(minX*0.8,maxX*1.1);
+
+        float minY = mzs.minimum();
+        float maxY = mzs.maximum();
+        scene()->setYDim(minY*0.8,maxY*1.1);
+
+        //reset zoom if no zoom history is present
+        if (zoomHistory.isEmpty()) { scene()->resetZoom(); }
+
+        // plot is in log scale
+        scene()->setLogTransformed(false,false);
+
+        //draw x and y axes
+        drawAxes();
+        scene()->showVLine(true);
+        scene()->showHLine(true);
+        scene()->showXLabel("rt");
+        scene()->showYLabel("m/z");
+
+        QPen pen(Qt::black);
+        QBrush brush(QColor::fromRgbF(0.9,0,0,0.3));
+
+        //get a visible limits of the plot
+        QPointF xlimits = scene()->getZoomXDim();
+        QPointF ylimits = scene()->getZoomYDim();
+
+    //qDebug() << " drawScatter: " << xlimits << " " << ylimits << endl;
+
+        for (int i=0; i<groups.size(); i++ ) {
+                float x = rts[i];
+                float y = mzs[i];
+                if (x < xlimits.x() || x > xlimits.y() ) continue;
+                if (y < ylimits.x() || y > ylimits.y() ) continue;
+
+                PeakGroup* group=NULL;
+                if (i < groups.size()) group=groups[i];
+
+                double r=1.0;
+                if (group) r = group->changePValue;
+                if (r<=0) r=0.001;
+                if (r> 1) r=1;
+                float alpha = 1-pow(r,0.2); //pvalue^0.2
+
+                brush = QBrush(QColor::fromRgbF(0,0,alpha,alpha));
+                QPointF pos = scene()->plotToMap(x,y);
+
+                //radius
+                float R=1.0-(((float)i)/groups.size());
+                R = (R+0.25)*10;
+
+                QGraphicsItem* item = scene()->addEllipse(pos.x()-R/2,pos.y()-R/2,R,R,pen,brush);
+                item->setFlag(QGraphicsItem::ItemIsSelectable);
+                item->setToolTip( tr("%1,%2").arg(x).arg(y) );
+
+                if(group) {
+                    item->setData(0, QVariant::fromValue(group));
+                    item->setToolTip( tr("m/z:%1 rt:%2 pvalue:%3").arg(group->meanMz).arg(group->meanRt).arg(group->changePValue));
+                }
+         }
+}
 
 void ScatterPlot::draw() { 
     qDebug() << "ScatterPlot::draw()";
@@ -316,7 +403,9 @@ void ScatterPlot::draw() {
 	if (!_table) return;
 
 	QList<PeakGroup*>allgroups = _table->getGroups();
-	if (allgroups.size() == 0) return;
+    if (allgroups.size() == 0) return;
+    if(plotType == mzrt) { drawMzRt(allgroups); }
+
 
     float _maxPvalue  = 0.01;
     float _minIntensity   = 1; 
@@ -346,6 +435,7 @@ void ScatterPlot::draw() {
 
     vector<mzSample*>set1 = compareSamplesDialog->getSampleSet1();
     vector<mzSample*>set2 = compareSamplesDialog->getSampleSet2();
+
 
 
     if (set1.size() == 0) return;

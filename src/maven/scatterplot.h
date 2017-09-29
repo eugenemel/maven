@@ -10,7 +10,7 @@ class MainWindow;
 class ScatterPlot: public PlotDockWidget  {
     Q_OBJECT
 
-        enum  plotTypeEnum { scatter=0, flower=1 };
+        enum  plotTypeEnum { scatter=0, flower=1, mzrt=2 };
 
 		public:
 				ScatterPlot(QWidget* w);
@@ -23,6 +23,7 @@ class ScatterPlot: public PlotDockWidget  {
 				void showSelectedGroups(QPointF a, QPointF b);
                 void setPlotTypeScatter() { plotType=scatter;  draw(); }
                 void setPlotTypeFlower() { plotType=flower;    draw(); }
+                void setPlotTypeMzRt() { plotType=mzrt;    draw(); }
                 void showSimilarOnClick(bool t) { showSimilarFlag=t; }
 
 
@@ -31,6 +32,7 @@ class ScatterPlot: public PlotDockWidget  {
 				void draw();
 				void drawScatter(StatisticsVector<float>vecB,StatisticsVector<float>vecY, vector<PeakGroup*>groups);
                 void drawFlower(vector<PeakGroup*>groups);
+                void drawMzRt(QList<PeakGroup*>groups);
                 void setupToolBar();
 
 		private:
