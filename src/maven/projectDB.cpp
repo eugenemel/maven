@@ -190,6 +190,8 @@ void ProjectDB::deletePeakGroup(PeakGroup* g, QString tableName) {
 int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableName) {
 
      if (!g) return -1;
+     if (g->deletedFlag) return -1; // skip deleted groups
+
      QSqlQuery query0(sqlDB);
      query0.exec("begin transaction");
 

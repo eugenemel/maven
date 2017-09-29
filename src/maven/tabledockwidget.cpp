@@ -345,11 +345,12 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     if(!group) return;
 
     group->groupStatistics();
-    cerr << "addRow" << group->groupId << " "  << group->meanMz << " " << group->meanRt << " " << group->children.size() << " " << group->tagString << endl;
+    //cerr << "addRow" << group->groupId << " "  << group->meanMz << " " << group->meanRt << " " << group->children.size() << " " << group->tagString << endl;
 
     if (group == NULL) return;
     if (group->peakCount() == 0 ) return;
     if (group->meanMz <= 0 ) return;
+    if (group->label == 'x') return; //deleted group
 
     NumericTreeWidgetItem *item=NULL;
     if(!root) {
@@ -616,41 +617,41 @@ void TableDockWidget::setGroupLabel(char label) {
 }
 
 void TableDockWidget::deleteSelected() {
-
+    //mark groups about to be deleted as x
+    //setGroupLabel('x');
+    qDebug() << "deleteSelected()";
     QList<PeakGroup*> selectedGroups = getSelectedGroups();
-    QTreeWidgetItemIterator it(treeWidget);
     QTreeWidgetItem* nextItem=0;
 
     int deleteCount=0;
-    while (*it) {
-        QTreeWidgetItem* item = (*it);
-        QVariant v = item->data(0,PeakGroupType);
-        PeakGroup*  group =  v.value<PeakGroup*>();
-        group->deletedFlag = false;
-
-        if (selectedGroups.contains(group)) {
-           group->deletedFlag = true;
-           deleteCount++;
-           nextItem = treeWidget->itemBelow(item); //get next item
+    foreach(QTreeWidgetItem* item, treeWidget->selectedItems() ) {
+        if (item) {
+            QVariant v = item->data(0,PeakGroupType);
+            PeakGroup*  group =  v.value<PeakGroup*>();
+            if ( group != NULL ) {
+                group->deletedFlag = true;
+                group->setLabel('x');
+                deleteCount++;
+            }
+            nextItem = treeWidget->itemBelow(item); //get next item
             if (item->parent()) {
                  item->parent()->removeChild(item);
-                 //delete(item);
-                 treeWidget->update();
             } else {
                 treeWidget->takeTopLevelItem(treeWidget->indexOfTopLevelItem(item));
             }
         }
-        ++it;
     }
-    qDebug() << "Delete="  << deleteCount << endl;
+
     if (deleteCount) {
         for(int i=0; i < allgroups.size(); i++) {
             if(allgroups[i].deletedFlag)  {
                 qDebug() << "Delete=" << allgroups[i].groupId;
-                allgroups.erase(allgroups.begin()+i); i--;
+                allgroups.erase(allgroups.begin()+i);
+                i--;
             }
         }
     }
+
     if (nextItem)  {
         treeWidget->setCurrentItem(nextItem);
         //_mainwindow->getEicWidget()->replotForced();
