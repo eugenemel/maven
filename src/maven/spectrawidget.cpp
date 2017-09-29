@@ -854,9 +854,15 @@ void SpectraWidget::zoomIn() {
 
 }
 
-void SpectraWidget::zoomRegion(float centerMz, float window) { 
-	if (centerMz <= 0) return;
-    _focusCoord = QPointF(centerMz,1e3);
+void SpectraWidget::zoomRegion(float centerMz, float window) {
+    if (centerMz <= 0) return;
+
+     int pos = _currentScan->findHighestIntensityPos(centerMz,10.00);
+     if (pos > 0 && pos <= _currentScan->nobs()) {
+         _focusCoord.setX(_currentScan->mz[pos]);
+         _focusCoord.setY(_currentScan->intensity[pos]);
+     }
+
 	float _centerX = _focusCoord.x();
 	_minX =  _centerX - window;
 	_maxX =  _centerX + window;

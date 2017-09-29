@@ -89,6 +89,12 @@ void TreeDockWidget::showInfo() {
                                 if (scan->mslevel > 1)  {
                                     mainwindow->fragmenationSpectraWidget->setScan(scan);
                                     mainwindow->massCalcWidget->setFragmentationScan(scan);
+
+                                    Scan* lastms1 = scan->getLastFullScan(50);
+                                    if(lastms1) {
+                                        mainwindow->getSpectraWidget()->setScan(lastms1);
+                                        mainwindow->getSpectraWidget()->zoomRegion(scan->precursorMz,2);
+                                    }
                                 }
                                 else mainwindow->getSpectraWidget()->setScan(scan);
                                 mainwindow->getEicWidget()->setFocusLine(scan->rt);
@@ -243,7 +249,7 @@ void TreeDockWidget::filterTree(QString needle) {
 
 void TreeDockWidget::setupScanListHeader() {
     QStringList colNames;
-    colNames << "pre m/z" << "rt" << "TIC" << "#peaks" << "scannum" << "sample";
+    colNames << "pre m/z" << "rt" << "purity" << "z" << "TIC" << "#peaks" << "scannum" << "sample";
     treeWidget->setColumnCount(colNames.size());
     treeWidget->setHeaderLabels(colNames);
     treeWidget->setSortingEnabled(true);
@@ -263,11 +269,13 @@ void TreeDockWidget::addScanItem(Scan* scan) {
 
         item->setText(0,QString::number(scan->precursorMz,'f',4));	
         item->setText(1,QString::number(scan->rt));
-        item->setText(2,QString::number(scan->totalIntensity(),'g',3));
-        item->setText(3,QString::number(scan->nobs()));
-        item->setText(4,QString::number(scan->scannum));
-        item->setText(5,QString(scan->sample->sampleName.c_str()));
-        item->setText(6,QString(scan->filterLine.c_str()));
+        item->setText(2,QString::number(scan->getPrecursorPurity(20.00),'g',3));
+        item->setText(3,QString::number(scan->precursorCharge));
+        item->setText(4,QString::number(scan->totalIntensity(),'g',3));
+        item->setText(5,QString::number(scan->nobs()));
+        item->setText(6,QString::number(scan->scannum));
+        item->setText(7,QString(scan->sample->sampleName.c_str()));
+        item->setText(8,QString(scan->filterLine.c_str()));
 }
 
 
