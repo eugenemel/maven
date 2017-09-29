@@ -124,12 +124,13 @@ void CalibrateDialog::doCorrection() {
 void CalibrateDialog::doCorrection() {
 
     MassCalculator massCalc;
-    Adduct* adduct = MassCalculator::MinusHAdduct;
-    if (workerThread->ionizationMode > 0) adduct = MassCalculator::PlusHAdduct;
+	
+    //Adduct* adduct = MassCalculator::MinusHAdduct;
+    //if (workerThread->ionizationMode > 0) adduct = MassCalculator::PlusHAdduct;
 
     int minNumFragments=5;
     float productPpmTolr=100;
-    double precursorPPM = ppmSearch->value();
+    //double precursorPPM = ppmSearch->value();
 
     for(mzSample* s: mw->getSamples() ) {
 

@@ -1073,10 +1073,10 @@ void EicWidget::addFitLine(PeakGroup* group) {
 
 		//find max point and total intensity
 		float sum=0; 
-		float maxpoint=0; float max=observed[0].y;
+		float max=observed[0].y;
 		for(int i=0; i < observed.size(); i++ ) { 
 			sum += observed[i].y; 
-			if (observed[i].y > max) { max=observed[i].y; maxpoint=i; }
+			if (observed[i].y > max) { max=observed[i].y; }
 		}
 		if (sum == 0) return;
 		/*

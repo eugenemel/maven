@@ -136,7 +136,7 @@ void PlotScene::mouseReleaseEvent ( QGraphicsSceneMouseEvent * mouseEvent ) {
 			setSelectionArea(path);
 			qDebug() << "selectArea " << rect << " " << selectedItems().size();
 			emit(selectArea(down,up));
-		}   else if ( abs(width) > 10 & abs(height) > 0 )  {
+		}   else if ( (abs(width) > 10) & (abs(height) > 0) )  {
 		    cerr <<  "mouseReleaseEvent() zoomArea : " << endl;
 			emit(zoomArea(down,up));
         }
@@ -425,11 +425,12 @@ void PlotAxes::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
     int y0 = origin.y();
     int y1 = plotRect.topLeft().y();
 
-    float min = 0;
+    /* not used right now
+	float min = 0;
     float max = 0;
-
     if (type == 0 ) { min = myscene->getZoomXDim().x(); max = myscene->getZoomXDim().y(); }
     if (type == 1 ) { min = myscene->getZoomYDim().x(); max = myscene->getZoomYDim().y(); }
+	*/
 
 
     float ticks = nticks;

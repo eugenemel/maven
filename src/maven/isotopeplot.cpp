@@ -75,8 +75,8 @@ void IsotopePlot::showBars() {
     int visibleSamplesCount = _samples.size();
     sort(_samples.begin(), _samples.end(), mzSample::compSampleOrder);
 
-    PeakGroup::QType qtype = PeakGroup::AreaTop;
-    if ( _mw ) qtype = _mw->getUserQuantType();
+    //PeakGroup::QType qtype = PeakGroup::AreaTop;
+    //if ( _mw ) qtype = _mw->getUserQuantType();
 
     MatrixXf MM = _mw->getIsotopicMatrix(_group);
 

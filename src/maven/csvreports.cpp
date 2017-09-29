@@ -78,9 +78,11 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
     }
 
     //get ionization mode
+	/* this is not used for now
     int ionizationMode; 
     if( samples.size()>0 && samples[0]->getPolarity()>0 ) ionizationMode=+1;
     else ionizationMode = -1;
+	*/
 
     vector<float> yvalues = group->getOrderedIntensityVector(samples,qtype);
 

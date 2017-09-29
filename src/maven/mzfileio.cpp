@@ -105,9 +105,9 @@ int mzFileIO::loadPepXML(QString fileName) {
 */
  
     int hitCount=0;
-    int charge; 
-    float precursorMz;
-    int  scannum;
+    int charge=0;
+    float precursorMz=0;
+    //int  scannum=0;
 
     Compound* cpd = NULL;
     while (!xml.atEnd()) {
@@ -115,7 +115,7 @@ int mzFileIO::loadPepXML(QString fileName) {
         if (xml.isStartElement()) {
                 taglist << xml.name();
                 if (xml.name() == "spectrum_query") {
-                    scannum = xml.attributes().value("start_scan").toString().toInt();
+                    //scannum = xml.attributes().value("start_scan").toString().toInt();
                     charge = xml.attributes().value("charge").toString().toInt();
                     precursorMz = xml.attributes().value("precursor_neutral_mass").toString().toInt();
 		    precursorMz = (precursorMz-charge)/charge;	
