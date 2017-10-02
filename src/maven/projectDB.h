@@ -40,9 +40,16 @@ class ProjectDB {
             bool openDatabaseConnection(QString dbname);
             bool closeDatabaseConnection();
 
-			string getScanSigniture(Scan* scan, int limitSize);
-			void saveScans(vector<mzSample *> &sampleSet);
+	    string getScanSigniture(Scan* scan, int limitSize);
+	    void saveScans(vector<mzSample *> &sampleSet);
 
+	    mzSample* getSampleById( int sampleId);
+	    void doAlignment();
+
+	    QString  projectPath();
+	    QString  projectName();
+
+	    void loadSamples();
 };
 
 #endif

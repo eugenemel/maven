@@ -414,6 +414,56 @@ void ProjectDB::loadPeakGroups(QString tableName) {
    cerr << "ProjectDB Read in " << allgroups.size() << endl;
 }
 
+mzSample* ProjectDB::getSampleById(int sampleId) { 
+	for (mzSample* s: samples) {
+		if (s->sampleId == sampleId)  return s;
+	}
+	return 0;
+}
+
+void ProjectDB::doAlignment() {
+
+     QSqlQuery query(sqlDB);
+     query.prepare("select * select S.name, S.sampleId, R.* from rt_update_key R, samples S where S.sampleId = R.sampleId");
+     int err = query.exec();
+
+     if(err) { 
+        qDebug() << query.lastError();
+	return;
+     }
+
+     AligmentSegment* lastSegment=0;
+     Aligner aligner;
+     aligner.setSamples(samples);
+
+     int segCount=0;
+     while (query.next()) {
+            	string sampleName = query.value("name").toString().toStdString();
+            	int sampleId =   query.value("id").toString().toInt();
+		mzSample* sample = this->getSampleById(sampleId);
+		if (!sample) continue;
+		segCount++;
+
+     		AligmentSegment* seg = new AligmentSegment();
+		seg->sampleName   = sampleName;
+		seg->seg_start = 0; 
+		seg->seg_end   = query.value("rt").toString().toDouble();
+		seg->new_start = 0;
+		seg->new_end   = query.value("rt_update").toString().toDouble();
+
+		if (lastSegment and lastSegment->sampleName == seg->sampleName) { 
+			seg->seg_start = lastSegment->seg_end;
+			seg->new_start = lastSegment->new_end;
+		}
+
+		aligner.addSegment(sample->sampleName,seg);
+		lastSegment = seg;
+       }
+     cerr << "ProjectDB::doAlignment() loaded " << segCount << " segments\t"; 
+     aligner.doSegmentedAligment();
+}
+
+
 void ProjectDB::loadGroupPeaks(PeakGroup* parent) {
 
      QSqlQuery query(sqlDB);
@@ -470,6 +520,17 @@ void ProjectDB::loadGroupPeaks(PeakGroup* parent) {
         }
 }
 
+QString  ProjectDB::projectPath() {
+ 	QFileInfo fileinfo(sqlDB.databaseName());
+    	return fileinfo.path();
+}
+
+QString  ProjectDB::projectName() {
+ 	QFileInfo fileinfo(sqlDB.databaseName());
+    	return fileinfo.fileName();
+}
+
+    
 bool ProjectDB::openDatabaseConnection(QString dbname) {
     if (sqlDB.isOpen() and  sqlDB.databaseName() == dbname) {
         qDebug() << "Already oppenned.. ";
@@ -484,6 +545,47 @@ bool ProjectDB::openDatabaseConnection(QString dbname) {
     }
 
     return sqlDB.isOpen();
+}
+
+void ProjectDB::loadSamples() {
+
+    	if (!sqlDB.isOpen()) { 
+		qDebug() << "error loadSamples().. datatabase is not open";
+		return;
+	}
+
+	QString projectPath = this->projectPath();
+	QSqlQuery query(sqlDB);
+	query.exec("select * from samples");
+
+	QStringList filelist;
+	while (query.next()) {
+		QString fname   = query.value("filename").toString();
+		QString sname   = query.value("name").toString();
+
+		//skip files that have been loaded already
+		bool checkLoaded=false;
+		foreach(mzSample* loadedFile, samples) {
+			if (loadedFile->sampleName == sname.toStdString()) checkLoaded=true;
+			if (QString(loadedFile->fileName.c_str()) == fname) checkLoaded=true;
+		}
+
+		if(checkLoaded == true) continue;  // skip files that have been loaded already
+
+		//find location of the file
+		QStringList pathlist; pathlist << projectPath << "." << "..";
+		QFileInfo sampleFile(fname);
+		if (!sampleFile.exists()) {
+			foreach(QString path, pathlist) {
+				fname= path + QDir::separator() + sampleFile.fileName();
+				if (sampleFile.exists())  break;
+			}
+		}
+
+		if (!fname.isEmpty() ) {
+			filelist << fname;
+		}
+	}
 }
 
 bool ProjectDB::closeDatabaseConnection() {
