@@ -7,12 +7,12 @@ PlotScene::PlotScene(QObject * parent): QGraphicsScene(parent) {
 
     ylabel = new QGraphicsTextItem();
     ylabel->hide();
-    ylabel->setFont(QFont("Helvetica",10));
+    ylabel->setFont(QFont("Helvetica",12));
     ylabel->setRotation(-90);
 
     xlabel = new QGraphicsTextItem();
     xlabel->hide();
-    xlabel->setFont(QFont("Helvetica",10));
+    xlabel->setFont(QFont("Helvetica",12));
 
 	xValueLabel   = new Note("", hline, this);  xValueLabel->setExpanded(true); xValueLabel->hide();
 	yValueLabel   = new Note("", vline, this);  yValueLabel->setExpanded(true); yValueLabel->hide();
@@ -410,7 +410,7 @@ void PlotAxes::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
 	QPen pen(Qt::black, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
 	painter->setPen(pen);
 
-    float fontsize = 8;
+    float fontsize = 12;
     QFont font("Helvetica",fontsize);
 	painter->setFont(font);
 

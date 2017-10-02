@@ -378,7 +378,7 @@ void SpectraWidget::drawGraph() {
     QPen pen(Qt::black, 2);
     float fontSize = scene()->height()*0.05;
     if ( fontSize < 1) fontSize=1;
-    if ( fontSize > 10) fontSize=10;
+    if ( fontSize > 16) fontSize=16;
     QFont font("Helvetica", fontSize);
     float _focusedMz = _focusCoord.x();
 

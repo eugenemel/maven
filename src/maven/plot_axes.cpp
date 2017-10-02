@@ -25,12 +25,14 @@ QRectF Axes::boundingRect() const
 
 void Axes::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 { 
-	QPen pen(Qt::black, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+    QPen pen(Qt::darkGray, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
     painter->setPen(pen);
 
-    double fontsize=8;
+    double fontsize=12;
     QFont font("Helvetica",fontsize);
-	painter->setFont(font);
+    font.setBold(true);
+    painter->setFont(font);
+
 
     if (nticks == 0 ) nticks = 2;
     int x0 = margin;
@@ -56,7 +58,7 @@ void Axes::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
     if ( type == 0) { 	//X axes
         painter->drawLine(x0,Y0,x1,Y0);
         for (int i=0; i <= ticks; i++ ) painter->drawLine(x0+ix*i,Y0-5,x0+ix*i,Y0+5);
-        for (int i=0; i <= ticks; i++ ) painter->drawText(x0+ix*i,Y0+10,QString::number(min+b*i,'f',2));
+        for (int i=0; i <= ticks; i++ ) painter->drawText(x0+ix*i,Y0+12,QString::number(min+b*i,'f',2));
     } else if ( type == 1 ) { //Y axes
         painter->drawLine(X0,y0,X0,y1);
 		for (int i=0; i <= ticks; i++ ) {
