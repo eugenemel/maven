@@ -531,6 +531,7 @@ void ProjectDockWidget::getSampleInfoSQLITE() {
              QString fname   = query.value("filename").toString();
              QString sname   = query.value("name").toString();
              QString setname  = query.value("setName").toString();
+             int sampleId  =   query.value("sampleID").toInt();
 
              int sampleOrder  = query.value("sampleOrder").toInt();
              int isSelected   = query.value("isSelected").toInt();
@@ -546,6 +547,7 @@ void ProjectDockWidget::getSampleInfoSQLITE() {
                 if (!sname.isEmpty() )  		s->sampleName = sname.toStdString();
                 if (!setname.isEmpty() )  		s->setSetName(setname.toStdString());
 
+                s->sampleId = sampleId;
                 s->setSampleOrder(sampleOrder);
                 s->isSelected = isSelected;
                 s->color[0]   = color_red;
@@ -556,7 +558,8 @@ void ProjectDockWidget::getSampleInfoSQLITE() {
 
              }
          }
-
+    currentProject->setSamples(_mainwindow->getSamples());
+    currentProject->doAlignment();
     loadAllPeakTables();
 }
 
@@ -616,7 +619,9 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
 
     if(project->isOpen()) {
         project->deleteAll();;
+        project->setSamples(sampleSet);
         project->saveSamples(sampleSet);
+        project->saveAlignment();
 
         int groupCount=0;
         for(TableDockWidget* peakTable : _mainwindow->getAllPeakTables() ) {

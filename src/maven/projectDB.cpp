@@ -15,6 +15,7 @@ void ProjectDB::deleteAll() {
     query.exec("drop table samples");
     query.exec("drop table peaks");
     query.exec("drop table scans");
+    query.exec("drop table rt_update_key");
 }
 
 void ProjectDB::deleteGroups() {
@@ -23,6 +24,15 @@ void ProjectDB::deleteGroups() {
     query.exec("drop table peaks");
 }
 
+void ProjectDB::assignSampleIds() {
+    int maxSampleId = -1;
+    for(mzSample* s: samples) if (s->getSampleId()>maxSampleId) maxSampleId=s->getSampleId();
+    if (maxSampleId == -1) maxSampleId=0;
+    for(mzSample* s: samples) {
+        if (s->getSampleId() == -1)  s->setSampleId(maxSampleId++);
+        cerr << "asssignSampleIds" << s->sampleName << " \t" << s->sampleId << endl;
+   }
+}
 
 string ProjectDB::getScanSigniture(Scan* scan, int limitSize=200) {
     stringstream SIG;
@@ -81,7 +91,7 @@ void ProjectDB::saveScans(vector<mzSample *> &sampleSet) {
 					string scanData = getScanSigniture(scan,2000);
 					ms2count++;
 
-					query1.addBindValue( s->getSampleOrder());
+                    query1.addBindValue( s->getSampleId());
 					query1.addBindValue( scan->scannum);
 					query1.addBindValue( -1);
 					query1.addBindValue( -1);
@@ -105,6 +115,8 @@ void ProjectDB::saveScans(vector<mzSample *> &sampleSet) {
 
 void ProjectDB::saveSamples(vector<mzSample *> &sampleSet) {
     QSqlQuery query0(sqlDB);
+
+    this->assignSampleIds();
 
     query0.exec("begin transaction");
     if(!query0.exec("create table IF NOT EXISTS samples(\
@@ -130,7 +142,7 @@ void ProjectDB::saveSamples(vector<mzSample *> &sampleSet) {
         query1.prepare("replace into samples values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
         for(mzSample* s : sampleSet) {
-            query1.bindValue( 0, s->getSampleOrder() );
+            query1.bindValue( 0, s->getSampleId() );
             query1.bindValue( 1, QString(s->getSampleName().c_str()) );
             query1.bindValue( 2, QString(s->fileName.c_str()));
             query1.bindValue( 3, QString(s->getSetName().c_str()));
@@ -312,7 +324,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 			for(int j=0; j < g->peaks.size(); j++ ) { 
 					Peak& p = g->peaks[j];
                     query3.addBindValue(QString::number(lastInsertGroupId));
-                    query3.addBindValue(p.getSample()->getSampleOrder());
+                    query3.addBindValue(p.getSample()->getSampleId());
                     query3.addBindValue(QString::number(p.pos));
 					query3.addBindValue(QString::number(p.minpos));
 					query3.addBindValue(QString::number(p.maxpos));
@@ -428,6 +440,41 @@ mzSample* ProjectDB::getSampleById(int sampleId) {
 	return 0;
 }
 
+void ProjectDB::saveAlignment() {
+            qDebug() << "ProjectDB::saveAlignment()";
+
+            QSqlQuery query0(sqlDB);
+            query0.exec("begin transaction");
+            //create table if not exists
+            if(!query0.exec("CREATE TABLE IF NOT EXISTS rt_update_key(sampleId int NOT NULL, rt real NOT NULL, rt_update real NOT NULL)"))
+                    qDebug() << "Ho... " << query0.lastError();
+
+            //delete current alignment
+            query0.exec("delete from rt_update_key");
+
+            //save new alignment
+           QSqlQuery query1(sqlDB);
+           query1.prepare("insert into rt_update_key values(?,?,?)");
+
+           for(mzSample* s : samples) {
+                        cerr << "Saving alignment for sample: " << s->sampleName  << " #scans=" << s->scans.size() << endl;
+                        for (int i=0; i < s->scans.size(); i++ ) {
+                            if (i % 200 == 0 || i == s->scans.size()-1) {
+                                Scan* scan = s->scans[i];
+                                float rt_update = scan->rt;
+                                float rt = scan->rt;
+                                if(s->originalRetentionTimes.size() > i) rt = s->originalRetentionTimes[i];
+                                query1.addBindValue( s->getSampleId() );
+                                query1.addBindValue( rt);
+                                query1.addBindValue( rt_update );
+                                if(!query1.exec())  qDebug() << query1.lastError();
+                    }
+           }
+        }
+        query0.exec("end transaction");
+}
+
+
 void ProjectDB::doAlignment() {
 	if (!sqlDB.isOpen() ) { qDebug() << "doAlignment: database is not openned"; return; }
 
@@ -440,18 +487,18 @@ void ProjectDB::doAlignment() {
 
      int segCount=0;
      while (query.next()) {
-            	string sampleName = query.value("name").toString().toStdString();
-            	int sampleId =   query.value("sampleId").toString().toInt();
-		mzSample* sample = this->getSampleById(sampleId);
-		if (!sample) continue;
+        string sampleName = query.value("name").toString().toStdString();
+        int sampleId =   query.value("sampleId").toString().toInt();
+        mzSample* sample = this->getSampleById(sampleId);
+        if (!sample) continue;
 		segCount++;
 
-     		AligmentSegment* seg = new AligmentSegment();
-		seg->sampleName   = sampleName;
-		seg->seg_start = 0; 
-		seg->seg_end   = query.value("rt").toString().toDouble();
-		seg->new_start = 0;
-		seg->new_end   = query.value("rt_update").toString().toDouble();
+        AligmentSegment* seg = new AligmentSegment();
+        seg->sampleName   = sampleName;
+        seg->seg_start = 0;
+        seg->seg_end   = query.value("rt").toString().toDouble();
+        seg->new_start = 0;
+        seg->new_end   = query.value("rt_update").toString().toDouble();
 
 		if (lastSegment and lastSegment->sampleName == seg->sampleName) { 
 			seg->seg_start = lastSegment->seg_end;
@@ -585,9 +632,9 @@ void ProjectDB::loadSamples() {
 
             	mzSample* s = new mzSample();
             	s->loadSample(fname.toLatin1());
-        	s->fileName = fname.toStdString();
-		s->sampleId = sampleId;
-	   	s->setSampleOrder(sampleOrder);
+                s->fileName = fname.toStdString();
+                s->sampleId = sampleId;
+                s->setSampleOrder(sampleOrder);
                 s->isSelected = isSelected;
                 s->color[0]   = color_red;
                 s->color[1]   = color_green;

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>495</width>
-    <height>429</height>
+    <width>486</width>
+    <height>525</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -161,6 +161,13 @@
         </property>
         <property name="value">
          <number>5</number>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QCheckBox" name="mustHaveMS2Events">
+        <property name="text">
+         <string>Use Peaks With MS2 Events</string>
         </property>
        </widget>
       </item>

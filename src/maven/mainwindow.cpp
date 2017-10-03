@@ -776,7 +776,6 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     projectDockWidget->saveProject();
     writeSettings();
     event->accept();
-
 }
 
 void MainWindow::createMenus() {
@@ -1136,6 +1135,7 @@ void MainWindow::Align() {
     workerThread->limitGroupCount =  alignmentDialog->limitGroupCount->value();
     workerThread->minGroupIntensity =  alignmentDialog->minGroupIntensity->value();
     workerThread->eic_smoothingWindow = alignmentDialog->groupingWindow->value();
+    workerThread->mustHaveMS2 = alignmentDialog->mustHaveMS2Events->isChecked();
 
     workerThread->minSignalBaseLineRatio = alignmentDialog->minSN->value();
     workerThread->minNoNoiseObs = alignmentDialog->minPeakWidth->value();

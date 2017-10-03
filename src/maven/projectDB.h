@@ -31,6 +31,8 @@ class ProjectDB {
             void deleteAll();
             void deleteGroups();
             void deletePeakGroup(PeakGroup* g, QString tableName);
+            void assignSampleIds();
+            void saveAlignment();
             QStringList getSearchTableNames();
 
 
