@@ -106,6 +106,7 @@ void Database::loadCompoundsSQL(QString databaseName) {
         query.prepare(sql);
         if(!query.exec()) qDebug() << query.lastError();
 
+        int loadcount=0;
         while (query.next()) {
             string id =   query.value("compoundId").toString().toStdString();
             string name = query.value("name").toString().toStdString();
@@ -150,11 +151,12 @@ void Database::loadCompoundsSQL(QString databaseName) {
 
             compoundIdMap[compound->id + compound->db]=compound;
             compoundsDB.push_back(compound);
+            loadcount++;
         }
 
         sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
         qDebug() << "loadCompoundSQL : " << compoundsDB.size();
-        loadedDatabase[databaseName] = 1;
+        if(loadcount > 0 and databaseName != "ALL") loadedDatabase[databaseName] = 1;
 }
 
 set<Compound*> Database::findSpeciesByMass(float mz, float ppm) { 

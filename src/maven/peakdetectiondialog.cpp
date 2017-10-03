@@ -72,7 +72,8 @@ void PeakDetectionDialog::show() {
         }
     }
 
-    QStringList dbnames = DB.getDatabaseNames();
+    QStringList dbnames = DB.getLoadedDatabaseNames();
+    dbnames.push_front("ALL");
     compoundDatabase->clear();
     for(QString db: dbnames ) {
         compoundDatabase->addItem(db);
@@ -173,7 +174,11 @@ void PeakDetectionDialog::findPeaks() {
 			runBackgroupJob("processMassSlices");
         }  else {
             peakupdater->compoundDatabase = compoundDatabase->currentText();
- 			peakupdater->setCompounds( DB.getCopoundsSubset(compoundDatabase->currentText().toStdString()) );
+            if(peakupdater->compoundDatabase == "ALL") {
+                peakupdater->setCompounds( DB.compoundsDB );
+            } else {
+                peakupdater->setCompounds( DB.getCopoundsSubset(compoundDatabase->currentText().toStdString()) );
+            }
 			runBackgroupJob("computePeaks");
 		}
 }
