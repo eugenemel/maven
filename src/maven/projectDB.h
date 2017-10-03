@@ -29,6 +29,7 @@ class ProjectDB {
             void loadPeakGroups(QString tableName);
             void loadGroupPeaks(PeakGroup* group);
             void deleteAll();
+            void deleteGroups();
             void deletePeakGroup(PeakGroup* g, QString tableName);
             QStringList getSearchTableNames();
 
@@ -50,6 +51,7 @@ class ProjectDB {
 	    QString  projectName();
 
 	    void loadSamples();
+	    vector<mzSample*> getSamples() { return samples; }
 };
 
 #endif

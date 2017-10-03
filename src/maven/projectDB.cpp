@@ -17,6 +17,13 @@ void ProjectDB::deleteAll() {
     query.exec("drop table scans");
 }
 
+void ProjectDB::deleteGroups() {
+    QSqlQuery query(sqlDB);
+    query.exec("drop table peakgroups");
+    query.exec("drop table peaks");
+}
+
+
 string ProjectDB::getScanSigniture(Scan* scan, int limitSize=200) {
     stringstream SIG;
     map<int,bool>seen;
@@ -422,24 +429,19 @@ mzSample* ProjectDB::getSampleById(int sampleId) {
 }
 
 void ProjectDB::doAlignment() {
+	if (!sqlDB.isOpen() ) { qDebug() << "doAlignment: database is not openned"; return; }
 
-     QSqlQuery query(sqlDB);
-     query.prepare("select * select S.name, S.sampleId, R.* from rt_update_key R, samples S where S.sampleId = R.sampleId");
-     int err = query.exec();
+	QSqlQuery query(sqlDB);
+	query.exec("select S.name, S.sampleId, R.* from rt_update_key R, samples S where S.sampleId = R.sampleId");
 
-     if(err) { 
-        qDebug() << query.lastError();
-	return;
-     }
-
-     AligmentSegment* lastSegment=0;
-     Aligner aligner;
-     aligner.setSamples(samples);
+	AligmentSegment* lastSegment=0;
+	Aligner aligner;
+	aligner.setSamples(samples);
 
      int segCount=0;
      while (query.next()) {
             	string sampleName = query.value("name").toString().toStdString();
-            	int sampleId =   query.value("id").toString().toInt();
+            	int sampleId =   query.value("sampleId").toString().toInt();
 		mzSample* sample = this->getSampleById(sampleId);
 		if (!sample) continue;
 		segCount++;
@@ -562,6 +564,16 @@ void ProjectDB::loadSamples() {
 	while (query.next()) {
 		QString fname   = query.value("filename").toString();
 		QString sname   = query.value("name").toString();
+		QString setname  = query.value("setName").toString();
+		int sampleId    = query.value("sampleId").toString().toInt();
+
+		int sampleOrder  = query.value("sampleOrder").toInt();
+		int isSelected   = query.value("isSelected").toInt();
+		float color_red    = query.value("color_red").toDouble();
+		float color_blue   = query.value("color_blue").toDouble();
+		float color_green = query.value("color_green").toDouble();
+		float color_alpha  = query.value("color_alpha").toDouble();
+		float norml_const   = query.value("norml_const").toDouble(); if(norml_const == 0) norml_const=1.0;
 
 		//skip files that have been loaded already
 		bool checkLoaded=false;
@@ -569,23 +581,21 @@ void ProjectDB::loadSamples() {
 			if (loadedFile->sampleName == sname.toStdString()) checkLoaded=true;
 			if (QString(loadedFile->fileName.c_str()) == fname) checkLoaded=true;
 		}
+	     	if(checkLoaded == true) continue;  // skip files that have been loaded already
 
-		if(checkLoaded == true) continue;  // skip files that have been loaded already
-
-		//find location of the file
-		QStringList pathlist; pathlist << projectPath << "." << "..";
-		QFileInfo sampleFile(fname);
-		if (!sampleFile.exists()) {
-			foreach(QString path, pathlist) {
-				fname= path + QDir::separator() + sampleFile.fileName();
-				if (sampleFile.exists())  break;
-			}
-		}
-
-		if (!fname.isEmpty() ) {
-			filelist << fname;
-		}
-	}
+            	mzSample* s = new mzSample();
+            	s->loadSample(fname.toLatin1());
+        	s->fileName = fname.toStdString();
+		s->sampleId = sampleId;
+	   	s->setSampleOrder(sampleOrder);
+                s->isSelected = isSelected;
+                s->color[0]   = color_red;
+                s->color[1]   = color_green;
+                s->color[2]   = color_blue;
+                s->color[3]   = color_alpha;
+                s->setNormalizationConstant(norml_const);
+		if(s->scans.size() > 0) this->samples.push_back(s);
+    }
 }
 
 bool ProjectDB::closeDatabaseConnection() {
