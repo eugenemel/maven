@@ -444,8 +444,8 @@ void MainWindow::setCompoundFocus(Compound*c) {
     Adduct* adduct = getUserAdduct();
     searchText->setText(c->name.c_str());
 
-    float mz = adduct->computeAdductMass(c->mass);
-    cerr << "setCompoundFocus:" << c->name.c_str() << " " << adduct->name << " " << c->expectedRt << " mass=" << c->mass << " mz=" << mz << endl;
+    float mz = adduct->computeAdductMass(c->getExactMass());
+    cerr << "setCompoundFocus:" << c->name.c_str() << " " << adduct->name << " " << c->expectedRt << " mass=" << c->getExactMass() << " mz=" << mz << endl;
     if (eicWidget->isVisible() && samples.size() > 0 )  eicWidget->setCompound(c,adduct);
     if (isotopeWidget && isotopeWidget->isVisible() ) isotopeWidget->setCompound(c);
     if (massCalcWidget && massCalcWidget->isVisible() )  massCalcWidget->setMass(mz);

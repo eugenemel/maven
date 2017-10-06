@@ -122,7 +122,7 @@ void Database::loadCompoundsSQL(QString databaseName) {
             compound->expectedRt =  query.value("expectedRt").toDouble();
 
             if (!compound->formula.empty()) {
-                compound->mass =  query.value("mass").toDouble();
+                compound->setExactMass( query.value("mass").toDouble());
             }
 
             compound->precursorMz =  query.value("precursorMz").toDouble();
@@ -163,16 +163,16 @@ set<Compound*> Database::findSpeciesByMass(float mz, float ppm) {
 	set<Compound*>uniqset;
 
     Compound x("find", "", "",0);
-    x.mass = mz-(mz/1e6*ppm);;
+    x.setExactMass(mz-(mz/1e6*ppm));
     vector<Compound*>::iterator itr = lower_bound(
             compoundsDB.begin(),compoundsDB.end(), 
             &x, Compound::compMass );
 
     for(;itr != compoundsDB.end(); itr++ ) {
         Compound* c = *itr;
-        if (c->mass > mz+1) break;
+        if (c->getExactMass() > mz+1) break;
 
-        if ( mzUtils::ppmDist(c->mass,mz) < ppm ) {
+        if ( mzUtils::ppmDist(c->getExactMass(),mz) < ppm ) {
 			if (uniqset.count(c)) continue;
             uniqset.insert(c);
         }
@@ -250,7 +250,7 @@ vector<MassCalculator::Match> Database::findMathchingCompounds(float mz, float p
             set<Compound*>hits = this->findSpeciesByMass(pmz,ppm);
 
             for(Compound* c: hits) {
-            float adductMass=a->computeAdductMass(c->mass);
+            float adductMass=a->computeAdductMass(c->getExactMass());
             MassCalculator::Match match;
             match.name = c->name + " : " + a->name;
             match.adductLink = a;
@@ -479,7 +479,7 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
 
             compound->expectedRt = rt;
             if (mz == 0) mz = mcalc.computeMass(formula,charge);
-            compound->mass = mz;
+            compound->setExactMass(mz);
             compound->db = dbname;
             compound->expectedRt=rt;
             compound->precursorMz=precursormz;
@@ -530,7 +530,7 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
 
             if(cpd and !cpd->name.empty()) {
                 //cerr << "NIST LIBRARY:" << cpd->db << " " << cpd->name << " " << cpd->formula << " " << cpd->id << endl;
-                if(!cpd->formula.empty())  cpd->mass = mcalc.computeMass(cpd->formula,0);
+                if(!cpd->formula.empty())  cpd->setExactMass( mcalc.computeMass(cpd->formula,0));
                 compoundSet.push_back(cpd);
             }
 
@@ -544,7 +544,7 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
         if(cpd == NULL) continue;
 
         if (line.startsWith("MW:",Qt::CaseInsensitive)) {
-            cpd->mass = line.mid(3,line.length()).simplified().toDouble();
+            cpd->setExactMass( line.mid(3,line.length()).simplified().toDouble());
          } else if (line.startsWith("CE:",Qt::CaseInsensitive)) {
             cpd->collisionEnergy = line.mid(3,line.length()).simplified().toDouble();
          } else if (line.startsWith("ID:",Qt::CaseInsensitive)) {
@@ -559,6 +559,9 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
             if(!smileString.isEmpty()) cpd->smileString=smileString.toStdString();
          } else if (line.startsWith("PRECURSORMZ:",Qt::CaseInsensitive)) {
             cpd->precursorMz = line.mid(13,line.length()).simplified().toDouble();
+         } else if (line.startsWith("EXACTMASS:",Qt::CaseInsensitive)) {
+            float exactMass = line.mid(10,line.length()).simplified().toDouble();
+            cpd->setExactMass(exactMass);
          } else if (line.startsWith("ADDUCT:",Qt::CaseInsensitive)) {
             cpd->adductString = line.mid(8,line.length()).simplified().toStdString();
          } else if (line.startsWith("FORMULA:",Qt::CaseInsensitive)) {
@@ -685,7 +688,7 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet) {
             query1.bindValue( 4, QString(c->smileString.c_str()));
             query1.bindValue( 5, QString(c->srmId.c_str()));
 
-            query1.bindValue( 6, c->mass );
+            query1.bindValue( 6, c->getExactMass() );
             query1.bindValue( 7, c->charge);
             query1.bindValue( 8, c->expectedRt);
             query1.bindValue( 9, c->precursorMz);

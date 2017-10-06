@@ -101,7 +101,7 @@ void GalleryWidget::addEicPlots(std::vector<Compound*>&compounds) {
 		slice.rtmax = 1e9;
 		if (!c->srmId.empty()) slice.srmId=c->srmId;
 
-        double mass = adduct->computeParentMass(c->mass);
+        double mass = adduct->computeParentMass(c->getExactMass());
         double ppmW = mass/1e6*compoundPPMWindow;
         slice.mzmin = mass-ppmW;
         slice.mzmax = mass+ppmW;

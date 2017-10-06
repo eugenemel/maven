@@ -231,7 +231,7 @@ void SuggestPopup::doSearch(QString needle)
                  item->setData(0,Qt::UserRole,QVariant::fromValue(c));
                  dbName=c->db.c_str();
                  fragmentsCount=c->fragment_mzs.size();
-                 mw = QString::number(c->mass,'f',3);
+                 mw = QString::number(c->getExactMass(),'f',3);
              }
 
              if (item) {

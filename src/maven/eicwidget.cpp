@@ -1220,7 +1220,7 @@ void EicWidget::setCompound(Compound* c, Adduct* adduct) {
     if (samples.size() == 0 ) return;
 
     float ppm = getMainWindow()->getUserPPM();
-    float mz = c->mass;
+    float mz = c->getExactMass();
 
     if(not adduct) {
        adduct = MassCalculator::ZeroMassAdduct;
@@ -1233,7 +1233,7 @@ void EicWidget::setCompound(Compound* c, Adduct* adduct) {
         else if(ionizationMode<0) adduct = MassCalculator::MinusHAdduct;
     }
 
-    if (adduct)  mz = adduct->computeAdductMass(c->mass);
+    if (adduct)  mz = adduct->computeAdductMass(c->getExactMass());
 
     float minmz = mz - mz/1e6*ppm;
     float maxmz = mz + mz/1e6*ppm;

@@ -173,7 +173,7 @@ void LigandWidget::updateCurrentItemData() {
     Compound*  c =  v.value<Compound*>();
     if(!c) return;
 
-    QString mass = QString::number(c->mass);
+    QString mass = QString::number(c->getExactMass());
     QString rt = QString::number(c->expectedRt);
     item->setText(1,mass);
     item->setText(2,rt);
@@ -204,7 +204,7 @@ void LigandWidget::showTable() {
 
         QString name(compound->name.c_str() );
         parent->setText(0,name.toUpper());  //Feng note: sort names after capitalization
-        parent->setText(1,QString::number(compound->mass));
+        parent->setText(1,QString::number(compound->getExactMass()));
         if(compound->expectedRt > 0) parent->setText(2,QString::number(compound->expectedRt));
         if (compound->formula.length())parent->setText(3,compound->formula.c_str());
         if (compound->smileString.length()) parent->setText(3,compound->smileString.c_str());

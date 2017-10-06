@@ -133,7 +133,7 @@ int mzFileIO::loadPepXML(QString fileName) {
 				    formula.toStdString(),
 				    charge);
 
-		    cpd->mass=precursorMz;
+            cpd->setExactMass(precursorMz); // Potential problem, should use peptide aa sequence for calculation
 		    cpd->precursorMz=precursorMz;
 		    cpd->db=dbname;
 		    //cpd->fragment_mzs = mzs;

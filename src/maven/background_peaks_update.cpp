@@ -347,7 +347,7 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
     for (Compound* c: set) {
         if ( c == NULL ) continue;
 
-        float M0 =  c->mass;
+        float M0 =  c->getExactMass();
         if (!c->formula.empty())  M0 = massCalc.computeNeutralMass(c->formula);
         if (M0 <= 0) continue;
 
