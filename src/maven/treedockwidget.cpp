@@ -263,7 +263,7 @@ void TreeDockWidget::addScanItem(Scan* scan) {
         MainWindow* mainwindow = (MainWindow*)parentWidget();
         QIcon icon = mainwindow->projectDockWidget->getSampleIcon(scan->sample);
 
-        QTreeWidgetItem *item = new QTreeWidgetItem(treeWidget,ScanType);
+        NumericTreeWidgetItem *item = new NumericTreeWidgetItem(treeWidget,ScanType);
         item->setData(0,Qt::UserRole,QVariant::fromValue(scan));
         item->setIcon(0,icon);
 
