@@ -45,7 +45,7 @@ deploy:
   description: ''
   provider: GitHub
   auth_token:
-    secure: 6eEEQOjuW0F1Zc4q948wpOkmKuzcozCjfXlRon8p46e8fP9Ga+BYg/BjBESGGFy9 # your encrypted token from GitHub
+    secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn # your encrypted token from GitHub
   artifact: /Maven.*\.zip/            # upload Maven zip archive to release assets
   draft: false
   prerelease: false
