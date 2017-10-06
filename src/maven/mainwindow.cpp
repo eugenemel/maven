@@ -442,7 +442,6 @@ void MainWindow::setCompoundFocus(Compound*c) {
     */
 
     Adduct* adduct = getUserAdduct();
-    cerr << "setCompoundFocus:" << c->name.c_str() << " " << adduct->name << " " << c->expectedRt << endl;
     searchText->setText(c->name.c_str());
 
     float mz = adduct->computeAdductMass(c->mass);

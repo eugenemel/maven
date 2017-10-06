@@ -553,7 +553,8 @@ void TableDockWidget::showSelectedGroup() {
     QVariant v = item->data(0,PeakGroupType);
     PeakGroup*  group =  v.value<PeakGroup*>();
 
-    if ( group != NULL ) {
+    if ( group != NULL  and lastSelectedGroup != group) {
+        lastSelectedGroup = group;
         cerr << "showSelectedGroup: group" << group->groupId << " " << group->peaks.size() << " " << group->children.size() << endl;
         _mainwindow->setPeakGroup(group);
         _mainwindow->rconsoleDockWidget->updateStatus();
