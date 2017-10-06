@@ -4,6 +4,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [8.0.3][]
+### Added
+-   Implimentation of multivariate hypergeometic scoring for ms2 spectra @eugenemel
+-   Maven can now read compressed mzML and mzXML samples with 32bit and 64bit encoding
+-   Saving and loading of segmented alignments from mzrollDB @eugenemel
+-   Loading and simulation search of multiple fragmentation libraries @eugenemel
+-   Adjusted plot widgets to use bigger fonts @eugenemel
+-   Implemented new scatter plot, m/z by rt of detected peakgroups
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed 
+-   Fixed bug in hypergeometic scoring that caused NaN in output
+-   Fixed bug that caused crashes on deletion of bookmarks
+-   Fixed repeated widget update calls for peakgroup display from bookmarks 
+-   Fixed / suppressed many compiler warning
+
+## [8.0.2][]
+### Added
+-   Maven calcuates and displays purity of ms2 specta
+-   Extract precursor isolation window from mzXML records
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
 
 ## [8.0.1][]
 ### Added
