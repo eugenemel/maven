@@ -126,16 +126,16 @@ void ProjectDB::saveSamples(vector<mzSample *> &sampleSet) {
                     setName varchar(254),\
                     sampleOrder int,\
                     isSelected  int,\
-                    color_red float,\
-                    color_green float,\
-                    color_blue float,\
-                    color_alpha float,\
-                    norml_const float, \
-                    transform_a0 float,\
-                    transform_a1 float,\
-                    transform_a2 float,\
-                    transform_a4 float,\
-                    transform_a5 float \
+                    color_red real,\
+                    color_green real,\
+                    color_blue real,\
+                    color_alpha real,\
+                    norml_const real, \
+                    transform_a0 real,\
+                    transform_a1 real,\
+                    transform_a2 real,\
+                    transform_a4 real,\
+                    transform_a5 real \
                     )"))  qDebug() << "Ho... " << query0.lastError();
 
         QSqlQuery query1(sqlDB);
@@ -219,13 +219,13 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                         parentGroupId integer,\
                         tagString varchar(254),\
                         metaGroupId integer,\
-                        expectedRtDiff float,\
+                        expectedRtDiff real,\
                         groupRank int,\
                         label varchar(10),\
                         type integer,\
                         srmId varchar(254),\
                         ms2EventCount int,\
-                        ms2Score double,\
+                        ms2Score real,\
                         adductName varchar(32),\
                         compoundId varchar(254),\
                         compoundName varchar(254),\
@@ -244,16 +244,16 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 	 QSqlQuery query1(sqlDB);
             query1.prepare(INSERTSQL);
             //query1.bindValue( 0, QString::number(g->groupId));
-            query1.addBindValue(QString::number(parentGroupId));
+            query1.addBindValue(parentGroupId);
             query1.addBindValue(QString(g->tagString.c_str()));
-            query1.addBindValue(QString::number(g->metaGroupId));
-            query1.addBindValue(QString::number(g->expectedRtDiff,'f',2));
-            query1.addBindValue(QString::number(g->groupRank));
+            query1.addBindValue(g->metaGroupId);
+            query1.addBindValue(g->expectedRtDiff);
+            query1.addBindValue(g->groupRank);
             query1.addBindValue(QString(g->label));
-            query1.addBindValue(QString::number(g->type()));
+            query1.addBindValue(g->type());
             query1.addBindValue(QString(g->srmId.c_str()));
-            query1.addBindValue(QString::number(g->ms2EventCount));
-            query1.addBindValue(QString::number(g->fragMatchScore.mergedScore,'f',6));
+            query1.addBindValue(g->ms2EventCount);
+            query1.addBindValue(g->fragMatchScore.mergedScore);
 
         if (g->adduct) {
             query1.addBindValue(QString(g->adduct->name.c_str()) );
@@ -286,35 +286,35 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                     pos int, \
 					minpos int, \
 					maxpos int, \
-					rt float, \
-					rtmin float, \
-					rtmax float, \
-					mzmin float, \
-					mzmax float, \
+                    rt real, \
+                    rtmin real, \
+                    rtmax real, \
+                    mzmin real, \
+                    mzmax real, \
                     scan int,	\
 					minscan int, \
 					maxscan int,\
-					peakArea float,\
-					peakAreaCorrected float,\
-					peakAreaTop float,\
-					peakAreaFractional float,\
-					peakRank float,\
-					peakIntensity float,\
-					peakBaseLineLevel float,\
-					peakMz float,\
-					medianMz float,\
-					baseMz float,\
-					quality float,\
+                    peakArea real,\
+                    peakAreaCorrected real,\
+                    peakAreaTop real,\
+                    peakAreaFractional real,\
+                    peakRank real,\
+                    peakIntensity real,\
+                    peakBaseLineLevel real,\
+                    peakMz real,\
+                    medianMz real,\
+                    baseMz real,\
+                    quality real,\
 					width int,\
-					gaussFitSigma float,\
-					gaussFitR2 float,\
+                    gaussFitSigma real,\
+                    gaussFitR2 real,\
 					noNoiseObs int,\
-					noNoiseFraction float,\
-					symmetry float,\
-					signalBaselineRatio float,\
-					groupOverlap float,\
-					groupOverlapFrac float,\
-					localMaxFlag float,\
+                    noNoiseFraction real,\
+                    symmetry real,\
+                    signalBaselineRatio real,\
+                    groupOverlap real,\
+                    groupOverlapFrac real,\
+                    localMaxFlag real,\
                     fromBlankSample int,\
                     label int)"))  qDebug() << query2.lastError();
 			
@@ -325,39 +325,39 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 					Peak& p = g->peaks[j];
                     query3.addBindValue(QString::number(lastInsertGroupId));
                     query3.addBindValue(p.getSample()->getSampleId());
-                    query3.addBindValue(QString::number(p.pos));
-					query3.addBindValue(QString::number(p.minpos));
-					query3.addBindValue(QString::number(p.maxpos));
-					query3.addBindValue(QString::number(p.rt));
-					query3.addBindValue(QString::number(p.rtmin));
-					query3.addBindValue(QString::number(p.rtmax));
-					query3.addBindValue(QString::number(p.mzmin));
-					query3.addBindValue(QString::number(p.mzmax));
-					query3.addBindValue(QString::number((int) p.scan));
-					query3.addBindValue(QString::number((int) p.minscan));
-					query3.addBindValue(QString::number((int) p.maxscan));
-					query3.addBindValue(QString::number(p.peakArea));
-					query3.addBindValue(QString::number(p.peakAreaCorrected));
-					query3.addBindValue(QString::number(p.peakAreaTop));
-					query3.addBindValue(QString::number(p.peakAreaFractional));
-					query3.addBindValue(QString::number(p.peakRank));
-					query3.addBindValue(QString::number(p.peakIntensity));;
-					query3.addBindValue(QString::number(p.peakBaseLineLevel));
-					query3.addBindValue(QString::number(p.peakMz));
-					query3.addBindValue(QString::number(p.medianMz));
-					query3.addBindValue(QString::number(p.baseMz));
-					query3.addBindValue(QString::number(p.quality));
-					query3.addBindValue(QString::number((int) p.width));
-					query3.addBindValue(QString::number(p.gaussFitSigma));
-					query3.addBindValue(QString::number(p.gaussFitR2));
-					query3.addBindValue(QString::number((int) p.noNoiseObs));
-					query3.addBindValue(QString::number(p.noNoiseFraction));
-					query3.addBindValue(QString::number(p.symmetry));
-					query3.addBindValue(QString::number(p.signalBaselineRatio));
-					query3.addBindValue(QString::number(p.groupOverlap));
-					query3.addBindValue(QString::number(p.groupOverlapFrac));
-					query3.addBindValue(QString::number(p.localMaxFlag));
-					query3.addBindValue(QString::number(p.fromBlankSample));
+                    query3.addBindValue(p.pos);
+                    query3.addBindValue(p.minpos);
+                    query3.addBindValue(p.maxpos);
+                    query3.addBindValue(p.rt);
+                    query3.addBindValue(p.rtmin);
+                    query3.addBindValue(p.rtmax);
+                    query3.addBindValue(p.mzmin);
+                    query3.addBindValue(p.mzmax);
+                    query3.addBindValue((int) p.scan);
+                    query3.addBindValue((int) p.minscan);
+                    query3.addBindValue((int) p.maxscan);
+                    query3.addBindValue(p.peakArea);
+                    query3.addBindValue(p.peakAreaCorrected);
+                    query3.addBindValue(p.peakAreaTop);
+                    query3.addBindValue(p.peakAreaFractional);
+                    query3.addBindValue(p.peakRank);
+                    query3.addBindValue(p.peakIntensity);;
+                    query3.addBindValue(p.peakBaseLineLevel);
+                    query3.addBindValue(p.peakMz);
+                    query3.addBindValue(p.medianMz);
+                    query3.addBindValue(p.baseMz);
+                    query3.addBindValue(p.quality);
+                    query3.addBindValue((int) p.width);
+                    query3.addBindValue(p.gaussFitSigma);
+                    query3.addBindValue(p.gaussFitR2);
+                    query3.addBindValue((int) p.noNoiseObs);
+                    query3.addBindValue(p.noNoiseFraction);
+                    query3.addBindValue(p.symmetry);
+                    query3.addBindValue(p.signalBaselineRatio);
+                    query3.addBindValue(p.groupOverlap);
+                    query3.addBindValue(p.groupOverlapFrac);
+                    query3.addBindValue(p.localMaxFlag);
+                    query3.addBindValue(p.fromBlankSample);
 					query3.addBindValue(QString::number(p.label));
     				if(!query3.exec())  qDebug() << query3.lastError();
 		}
