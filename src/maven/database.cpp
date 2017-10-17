@@ -1,6 +1,8 @@
 #include "database.h"
 
 bool Database::connect(QString filename) {
+    qDebug() << "Connecting to " << filename << endl;
+
     ligandDB = QSqlDatabase::addDatabase("QSQLITE", "ligandDB");
     ligandDB.setDatabaseName(filename);
     ligandDB.open();
@@ -105,6 +107,7 @@ void Database::loadCompoundsSQL(QString databaseName) {
 
         query.prepare(sql);
         if(!query.exec()) qDebug() << query.lastError();
+        MassCalculator mcalc;
 
         int loadcount=0;
         while (query.next()) {
@@ -112,6 +115,8 @@ void Database::loadCompoundsSQL(QString databaseName) {
             string name = query.value("name").toString().toStdString();
             string formula = query.value("formula").toString().toStdString();
             int charge = query.value("charge").toInt();
+            float exactMass = query.value("mass").toDouble();
+            float precursorMz =  query.value("precursorMz").toDouble();
 
 
             //the neutral mass is computated automatically  inside the constructor
@@ -121,8 +126,10 @@ void Database::loadCompoundsSQL(QString databaseName) {
             compound->db   =  query.value("dbName").toString().toStdString();
             compound->expectedRt =  query.value("expectedRt").toDouble();
 
-            if (!compound->formula.empty()) {
-                compound->setExactMass( query.value("mass").toDouble());
+            if (formula.empty()) {
+                if(exactMass >0 ) compound->setExactMass(exactMass);
+            } else {
+                 compound->setExactMass(mcalc.computeNeutralMass(formula));
             }
 
             compound->precursorMz =  query.value("precursorMz").toDouble();
