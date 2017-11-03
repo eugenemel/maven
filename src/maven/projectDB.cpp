@@ -488,6 +488,8 @@ void ProjectDB::doAlignment() {
      int segCount=0;
      while (query.next()) {
         string sampleName = query.value("name").toString().toStdString();
+		mzUtils::replace(sampleName,".mzXML",""); //bug fix.. alignment.rt files do not strore extensions.
+
         int sampleId =   query.value("sampleId").toString().toInt();
         mzSample* sample = this->getSampleById(sampleId);
         if (!sample) continue;
