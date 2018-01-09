@@ -26,7 +26,7 @@ build_script:
   - bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3"
 
   # Build MAVEN
-  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake -r build.pro"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro"
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make INSTALL_ROOT=appdir install"
 
