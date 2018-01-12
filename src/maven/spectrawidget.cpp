@@ -122,8 +122,9 @@ void SpectraWidget::setTitle() {
 	if (_currentScan->precursorMz > 0 and _currentScan->sample) {
 		double ppm = 10.0;
 		double purity = _currentScan->getPrecursorPurity(ppm);
-		title += " <b>Purity: " + QString::number(purity*100.0,'f',1) + "% </b>";
-	}
+        title += " <b>Purity: </b> " + QString::number(purity*100.0,'f',1) + "%";
+        title += " <b>IsolWin: </b>" + QString::number(_currentScan->isolationWindow,'f',1);
+    }
 
 	QFont font = QApplication::font();
     font.setPixelSize(8.0);

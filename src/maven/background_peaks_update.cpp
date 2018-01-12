@@ -198,7 +198,9 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             //if (getChargeStateFromMS1(&group) < minPrecursorCharge) continue;
                         //build consensus ms2 specta
             vector<Scan*>ms2events = group.getFragmenationEvents();
+
             group.computeFragPattern(productPpmTolr);
+            // BROKEN group.findHighestPurityMS2Pattern(compoundPPMWindow);
 
             matchFragmentation(&group);
 
