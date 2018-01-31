@@ -350,7 +350,7 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     if (group == NULL) return;
     if (group->peakCount() == 0 ) return;
     if (group->meanMz <= 0 ) return;
-    if (group->label == 'x') return; //deleted group
+    if (group->deletedFlag || group->label == 'x') return; //deleted group
 
     NumericTreeWidgetItem *item=NULL;
     if(!root) {
@@ -634,7 +634,12 @@ void TableDockWidget::deleteSelected() {
                 group->setLabel('x');
                 deleteCount++;
             }
+
+            //which items will displayed next
             nextItem = treeWidget->itemBelow(item); //get next item
+            if(!nextItem) nextItem = treeWidget->itemAbove(item);
+
+            //remove item from the tree
             if (item->parent()) {
                  item->parent()->removeChild(item);
             } else {
@@ -643,6 +648,8 @@ void TableDockWidget::deleteSelected() {
         }
     }
 
+    //deleting items from tree causes crash.. not clear yet where bug is
+    /*
     if (deleteCount) {
         for(int i=0; i < allgroups.size(); i++) {
             if(allgroups[i].deletedFlag)  {
@@ -652,6 +659,7 @@ void TableDockWidget::deleteSelected() {
             }
         }
     }
+    */
 
     if (nextItem)  {
         treeWidget->setCurrentItem(nextItem);
