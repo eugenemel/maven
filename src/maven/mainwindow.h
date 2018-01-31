@@ -75,7 +75,7 @@ public:
     MainWindow(QWidget *parent = 0);
     QSettings* getSettings() { return settings; }
     vector <mzSample*> samples;		//list of loadded samples
-    static mzSample* loadSample(QString filename);
+    static mzSample* loadSampleStatic(QString filename);
 
     QDoubleSpinBox 	  *ppmWindowBox;
     QLineEdit         *searchText;
@@ -239,7 +239,7 @@ struct FileLoader {
 		typedef mzSample* result_type;
 
 		mzSample* operator()(const QString filename) {
-				mzSample* sample = MainWindow::loadSample(filename);
+                mzSample* sample = MainWindow::loadSampleStatic(filename);
 				return sample;
 		}
 };
