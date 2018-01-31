@@ -36,6 +36,18 @@ QString mzFileIO::shortSampleName(QString fileName) {
     return sampleName;
 }
 
+bool mzFileIO::checkSampleAlreadyLoaded(QString filename) {
+    bool loaded=false;
+
+    if(_mainwindow) {
+        for(mzSample* s: _mainwindow->getSamples()) {
+         if (s->fileName == filename.toStdString()) return true;
+        }
+    }
+
+    return loaded;
+}
+
 mzSample* mzFileIO::loadSample(QString filename){
 
     //check if file exists
@@ -43,6 +55,10 @@ mzSample* mzFileIO::loadSample(QString filename){
 
     if (!file.exists() ) { 	//couldn't fine this file.. check localdirectory
         qDebug() << "Can't find file " << filename; return 0;
+    }
+
+    if (checkSampleAlreadyLoaded(filename)) {
+        qDebug() <<  "Sample already leaded " << filename; return 0;
     }
 
     mzSample* sample = NULL;

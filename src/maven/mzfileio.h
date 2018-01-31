@@ -16,6 +16,7 @@ Q_OBJECT
         void setMainWindow(MainWindow*);
         int loadPepXML(QString filename);
         static QString shortSampleName(QString filename);
+        bool checkSampleAlreadyLoaded(QString filename);
 
     signals:
         void updateProgressBar(QString,int,int);

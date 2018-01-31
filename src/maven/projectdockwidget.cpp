@@ -464,6 +464,22 @@ int ProjectDockWidget::bookmarkPeakGroup(PeakGroup* group) {
         return -1;
 }
 
+QString ProjectDockWidget::locateSample(QString filepath, QStringList pathlist) {
+
+        //found file, all is good
+        QFileInfo sampleFile(filepath);
+        if (sampleFile.exists())  return filepath;
+
+        //search for file
+        QString fileName = sampleFile.fileName();
+        foreach(QString path, pathlist) {
+            QString filepath= path + QDir::separator() + fileName;
+            QFileInfo checkFile(filepath);
+            if (checkFile.exists())  return filepath;
+        }
+        return ""; //empty string
+}
+
 void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
 
     if(currentProject)  closeProject();
@@ -489,29 +505,47 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
     QStringList filelist;
 
     while (query.next()) {
-        QString fname   = query.value("filename").toString();
+        QString filepath   = query.value("filename").toString();
         QString sname   = query.value("name").toString();
 
         //skip files that have been loaded already
         bool checkLoaded=false;
         foreach(mzSample* loadedFile, _mainwindow->getSamples()) {
             if (loadedFile->sampleName == sname.toStdString()) checkLoaded=true;
-            if (QString(loadedFile->fileName.c_str())== fname) checkLoaded=true;
+            if (QString(loadedFile->fileName.c_str())== filepath) checkLoaded=true;
         }
 
         if(checkLoaded == true) continue;  // skip files that have been loaded already
 
-        //find location of the file
-        QFileInfo sampleFile(fname);
-        if (!sampleFile.exists()) {
-            foreach(QString path, pathlist) {
-                fname= path + QDir::separator() + sampleFile.fileName();
-                if (sampleFile.exists())  break;
-            }
-        }
+        qDebug() << "Looking for sample: " << sname ;
 
-        if (!fname.isEmpty() ) {
-            filelist << fname;
+        //locate file
+        QString locatedpath = locateSample(filepath, pathlist);
+        QFileInfo sampleFile(locatedpath);
+        if (sampleFile.exists()) { filelist << locatedpath; continue; }
+
+        int keepLooking = QMessageBox::Open;
+        while(keepLooking == QMessageBox::Open) {
+            QMessageBox msgBox;
+            msgBox.setText("Could not locate sample");
+            msgBox.setInformativeText(sname + " was not found. Add new sample folder?");
+            msgBox.setStandardButtons(QMessageBox::Open | QMessageBox::Cancel);
+            msgBox.setDefaultButton(QMessageBox::Open);
+            keepLooking = msgBox.exec();
+
+            if (keepLooking) {
+                QString dirName = QFileDialog::getExistingDirectory( this, "Select Folder with Sample Files", projectPath);
+                if (not dirName.isEmpty()) {
+                    QString filepath =  dirName + QDir::separator() + sampleFile.fileName();
+                    QFileInfo checkFile(filepath);
+                    if (checkFile.exists()) {
+                        filelist << filepath;
+                        pathlist << dirName;
+                        keepLooking = QMessageBox::Cancel;
+                        break;
+                    }
+                }
+            }
         }
     }
 
