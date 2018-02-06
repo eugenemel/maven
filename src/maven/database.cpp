@@ -162,7 +162,7 @@ void Database::loadCompoundsSQL(QString databaseName) {
         }
 
         sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
-        qDebug() << "loadCompoundSQL : " << compoundsDB.size();
+        qDebug() << "loadCompoundSQL : " << databaseName << compoundsDB.size();
         if(loadcount > 0 and databaseName != "ALL") loadedDatabase[databaseName] = 1;
 }
 

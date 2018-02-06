@@ -11,10 +11,9 @@ void ProjectDB::saveGroups(vector<PeakGroup>& allgroups, QString setName) {
 
 void ProjectDB::deleteAll() {
     QSqlQuery query(sqlDB);
-    query.exec("drop table peakgroups");
     query.exec("drop table samples");
+    query.exec("drop table peakgroups");
     query.exec("drop table peaks");
-    query.exec("drop table scans");
     query.exec("drop table rt_update_key");
 }
 
@@ -22,6 +21,18 @@ void ProjectDB::deleteGroups() {
     QSqlQuery query(sqlDB);
     query.exec("drop table peakgroups");
     query.exec("drop table peaks");
+}
+
+
+void ProjectDB::deleteSearchResults(QString searchTable) {
+    QSqlQuery query(sqlDB);
+    query.prepare("delete from peaks where groupId in (select groupId from peakgroups where searchTableName = ?");
+    query.addBindValue(searchTable);
+    query.exec();
+
+    query.prepare("delete from peakgroups where searchTableName = ?");
+    query.addBindValue(searchTable);
+    query.exec();
 }
 
 void ProjectDB::assignSampleIds() {
@@ -59,7 +70,9 @@ void ProjectDB::saveScans(vector<mzSample *> &sampleSet) {
     QSqlQuery query0(sqlDB);
 
 	query0.exec("begin transaction");
-	if(!query0.exec("CREATE TABLE IF NOT EXISTS scans(\
+    query0.exec("drop table scans");
+
+    if(!query0.exec("CREATE TABLE IF NOT EXISTS scans(\
 				id INTEGER PRIMARY KEY   AUTOINCREMENT,\
 				sampleId     int       NOT NULL,\
 				scan    int       NOT NULL,\
@@ -532,7 +545,7 @@ void ProjectDB::loadGroupPeaks(PeakGroup* parent) {
      QSqlQuery query(sqlDB);
      query.prepare("select P.*, S.name as sampleName from peaks P, samples S where P.sampleId = S.sampleId and P.groupId = ?");
      query.bindValue(0,parent->groupId);
-     qDebug() << "loadin peaks for group " << parent->groupId;
+     //qDebug() << "loadin peaks for group " << parent->groupId;
      query.exec();
 
      while (query.next()) {
@@ -641,13 +654,15 @@ void ProjectDB::loadSamples() {
 		foreach(mzSample* loadedFile, samples) {
 			if (loadedFile->sampleName == sname.toStdString()) checkLoaded=true;
 			if (QString(loadedFile->fileName.c_str()) == fname) checkLoaded=true;
-		}
-	     	if(checkLoaded == true) continue;  // skip files that have been loaded already
+        }
+
+        if(checkLoaded == true) continue;  // skip files that have been loaded already
+
 
             	mzSample* s = new mzSample();
             	s->loadSample(fname.toLatin1());
                 s->fileName = fname.toStdString();
-                s->sampleId = sampleId;
+                s->setSampleId(sampleId);
                 s->setSampleOrder(sampleOrder);
                 s->isSelected = isSelected;
                 s->color[0]   = color_red;

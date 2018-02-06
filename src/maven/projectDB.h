@@ -30,6 +30,7 @@ class ProjectDB {
             void loadGroupPeaks(PeakGroup* group);
             void deleteAll();
             void deleteGroups();
+            void deleteSearchResults(QString searchTable);
             void deletePeakGroup(PeakGroup* g, QString tableName);
             void assignSampleIds();
             void saveAlignment();

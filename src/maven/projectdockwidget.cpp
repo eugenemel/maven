@@ -508,8 +508,6 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
         QString filepath   = query.value("filename").toString();
         QString sname   = query.value("name").toString();
 
-        qDebug() << "loadProjectSQLITE: " << sname << filepath;
-
         //skip files that have been loaded already
         bool checkLoaded=false;
         foreach(mzSample* loadedFile, _mainwindow->getSamples()) {
@@ -518,8 +516,6 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
         }
 
         if(checkLoaded == true) continue;  // skip files that have been loaded already
-
-        qDebug() << "Looking for sample: " << sname ;
 
         //locate file
         QString locatedpath = locateSample(filepath, pathlist);
@@ -624,7 +620,6 @@ void ProjectDockWidget::loadAllPeakTables() {
     for(int i=0; i < currentProject->allgroups.size(); i++ ) {
         PeakGroup* g = &(currentProject->allgroups[i]);
         currentProject->allgroups[i].groupStatistics();
-        qDebug() <<  "Loading peakgroup" << i;
 
         //put them in right place
         if(g->searchTableName.empty()) g->searchTableName="Bookmarks";
