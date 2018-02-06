@@ -322,6 +322,8 @@ QString TableDockWidget::groupTagString(PeakGroup* group){
         if (group->adduct) parts << group->adduct->name.c_str();
         if (!group->tagString.empty()) parts << group->tagString.c_str();
         parts << group->compound->db.c_str();
+    } else if (!group->tagString.empty()) {
+        parts << group->tagString.c_str();
     } else {
         parts << QString::number(group->meanMz,'f',3) + "@" + QString::number(group->meanRt,'f',2);
     }

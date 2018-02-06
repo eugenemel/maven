@@ -508,6 +508,8 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
         QString filepath   = query.value("filename").toString();
         QString sname   = query.value("name").toString();
 
+        qDebug() << "loadProjectSQLITE: " << sname << filepath;
+
         //skip files that have been loaded already
         bool checkLoaded=false;
         foreach(mzSample* loadedFile, _mainwindow->getSamples()) {
@@ -536,11 +538,13 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
             if (keepLooking) {
                 QString dirName = QFileDialog::getExistingDirectory( this, "Select Folder with Sample Files", projectPath);
                 if (not dirName.isEmpty()) {
-                    QString filepath =  dirName + QDir::separator() + sampleFile.fileName();
+                    QString filepath =  dirName + QDir::separator() + sname;
                     QFileInfo checkFile(filepath);
                     if (checkFile.exists()) {
                         filelist << filepath;
                         pathlist << dirName;
+
+                        qDebug() << "Found!!!! " << filepath;
                         keepLooking = QMessageBox::Cancel;
                         break;
                     }
@@ -556,6 +560,7 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
 }
 
 void ProjectDockWidget::getSampleInfoSQLITE() {
+
 
     QSqlQuery query(currentProject->sqlDB);
     query.exec("select * from samples");
@@ -581,7 +586,8 @@ void ProjectDockWidget::getSampleInfoSQLITE() {
                 if (!sname.isEmpty() )  		s->sampleName = sname.toStdString();
                 if (!setname.isEmpty() )  		s->setSetName(setname.toStdString());
 
-                s->sampleId = sampleId;
+                qDebug() <<  "Loading sampleId" << sampleId << sname;
+                s->setSampleId(sampleId);
                 s->setSampleOrder(sampleOrder);
                 s->isSelected = isSelected;
                 s->color[0]   = color_red;
@@ -618,6 +624,7 @@ void ProjectDockWidget::loadAllPeakTables() {
     for(int i=0; i < currentProject->allgroups.size(); i++ ) {
         PeakGroup* g = &(currentProject->allgroups[i]);
         currentProject->allgroups[i].groupStatistics();
+        qDebug() <<  "Loading peakgroup" << i;
 
         //put them in right place
         if(g->searchTableName.empty()) g->searchTableName="Bookmarks";
@@ -652,7 +659,7 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
     currentProject=project;
 
     if(project->isOpen()) {
-        project->deleteAll();;
+        project->deleteAll(); /// this is crazy
         project->setSamples(sampleSet);
         project->saveSamples(sampleSet);
         project->saveAlignment();

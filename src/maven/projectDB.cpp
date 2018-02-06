@@ -381,6 +381,7 @@ void ProjectDB::loadPeakGroups(QString tableName) {
      query.exec("select * from " + tableName );
 
      while (query.next()) {
+
         PeakGroup g;
         g.groupId = query.value("groupId").toInt();
         int parentGroupId = query.value("parentGroupId").toInt();
@@ -409,8 +410,15 @@ void ProjectDB::loadPeakGroups(QString tableName) {
         }
 
         if (!compoundId.empty()){
-            Compound* c = DB.findSpeciesById(compoundId,compoundDB);
-            if (c) g.compound = c;
+            Compound* compound = DB.findSpeciesById(compoundId,compoundDB);
+
+            if (compound)  {
+                g.compound = compound;
+            } else {
+                g.tagString = compoundName + "|" + adductName + " | id=" + compoundId;
+            }
+
+
         } else if (!compoundName.empty() && !compoundDB.empty()) {
             vector<Compound*>matches = DB.findSpeciesByName(compoundName,compoundDB);
             if (matches.size()>0) g.compound = matches[0];
@@ -421,12 +429,16 @@ void ProjectDB::loadPeakGroups(QString tableName) {
         if (parentGroupId==0) {
             allgroups.push_back(g);
         } else {
+            bool foundParent=false;
             for(PeakGroup& x: allgroups) {
                 if(x.groupId == parentGroupId) {
                     x.children.push_back(g);
+                    foundParent=true;
                     break;
                 }
             }
+            //failed to find a parent group, become a parent
+            if(!foundParent) allgroups.push_back(g);
         }
     }
 
@@ -488,7 +500,7 @@ void ProjectDB::doAlignment() {
      int segCount=0;
      while (query.next()) {
         string sampleName = query.value("name").toString().toStdString();
-		mzUtils::replace(sampleName,".mzXML",""); //bug fix.. alignment.rt files do not strore extensions.
+        //mzUtils::replace(sampleName,".mzXML",""); //bug fix.. alignment.rt files do not strore extensions.
 
         int sampleId =   query.value("sampleId").toString().toInt();
         mzSample* sample = this->getSampleById(sampleId);
@@ -520,7 +532,7 @@ void ProjectDB::loadGroupPeaks(PeakGroup* parent) {
      QSqlQuery query(sqlDB);
      query.prepare("select P.*, S.name as sampleName from peaks P, samples S where P.sampleId = S.sampleId and P.groupId = ?");
      query.bindValue(0,parent->groupId);
-     //qDebug() << "loadin peaks for group " << parent->groupId;
+     qDebug() << "loadin peaks for group " << parent->groupId;
      query.exec();
 
      while (query.next()) {
@@ -566,7 +578,7 @@ void ProjectDB::loadGroupPeaks(PeakGroup* parent) {
             for(int i=0; i< samples.size(); i++ ) {
                 if (samples[i]->sampleName == sampleName ) { p.setSample(samples[i]); break;}
             }
-            //cerr << "\t\t\t" << p.getSample() << " " << p.rt << endl;
+            //cerr << "\t\t\t" << p.getSample()->sampleName << " " << p.rt << endl;
             parent->addPeak(p);
         }
 }
