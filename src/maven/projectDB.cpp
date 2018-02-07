@@ -402,7 +402,7 @@ void ProjectDB::loadPeakGroups(QString tableName) {
         g.metaGroupId = query.value("metaGroupId").toString().toInt();
         g.expectedRtDiff = query.value("expectedRtDiff").toString().toDouble();
         g.groupRank = query.value("groupRank").toString().toInt();
-        g.label     =  query.value("label").toString().toInt();
+        g.label     =  query.value("label").toString().at(0).toLatin1();
         g.ms2EventCount = query.value("ms2EventCount").toString().toInt();
         g.fragMatchScore.mergedScore = query.value("ms2Score").toString().toDouble();
         g.setType( (PeakGroup::GroupType) query.value("type").toString().toInt());
@@ -623,6 +623,25 @@ bool ProjectDB::openDatabaseConnection(QString dbname) {
     return sqlDB.isOpen();
 }
 
+
+QString ProjectDB::locateSample(QString filepath, QStringList pathlist) {
+
+        //found file, all is good
+        QFileInfo sampleFile(filepath);
+        if (sampleFile.exists())  return filepath;
+
+        //search for file
+        QString fileName = sampleFile.fileName();
+        foreach(QString path, pathlist) {
+            QString filepath= path + QDir::separator() + fileName;
+            QFileInfo checkFile(filepath);
+            if (checkFile.exists())  return filepath;
+        }
+        return ""; //empty string
+
+}
+
+
 void ProjectDB::loadSamples() {
 
     	if (!sqlDB.isOpen()) { 
@@ -658,10 +677,14 @@ void ProjectDB::loadSamples() {
 
         if(checkLoaded == true) continue;  // skip files that have been loaded already
 
+        QStringList pathlist;
+        pathlist << projectPath << "./" << "../";
 
+        QString filepath = ProjectDB::locateSample(fname, pathlist);
+        if(!filepath.isEmpty()) {
             	mzSample* s = new mzSample();
-            	s->loadSample(fname.toLatin1());
-                s->fileName = fname.toStdString();
+                s->loadSample(filepath.toLatin1());
+                s->fileName = filepath.toStdString();
                 s->setSampleId(sampleId);
                 s->setSampleOrder(sampleOrder);
                 s->isSelected = isSelected;
@@ -670,7 +693,10 @@ void ProjectDB::loadSamples() {
                 s->color[2]   = color_blue;
                 s->color[3]   = color_alpha;
                 s->setNormalizationConstant(norml_const);
-		if(s->scans.size() > 0) this->samples.push_back(s);
+                if(s->scans.size() > 0) this->samples.push_back(s);
+        } else {
+            qDebug() << "Can't find sample:" << fname;
+        }
     }
 }
 

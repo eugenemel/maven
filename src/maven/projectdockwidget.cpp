@@ -464,22 +464,6 @@ int ProjectDockWidget::bookmarkPeakGroup(PeakGroup* group) {
         return -1;
 }
 
-QString ProjectDockWidget::locateSample(QString filepath, QStringList pathlist) {
-
-        //found file, all is good
-        QFileInfo sampleFile(filepath);
-        if (sampleFile.exists())  return filepath;
-
-        //search for file
-        QString fileName = sampleFile.fileName();
-        foreach(QString path, pathlist) {
-            QString filepath= path + QDir::separator() + fileName;
-            QFileInfo checkFile(filepath);
-            if (checkFile.exists())  return filepath;
-        }
-        return ""; //empty string
-}
-
 void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
 
     if(currentProject)  closeProject();
@@ -518,7 +502,7 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
         if(checkLoaded == true) continue;  // skip files that have been loaded already
 
         //locate file
-        QString locatedpath = locateSample(filepath, pathlist);
+        QString locatedpath = ProjectDB::locateSample(filepath, pathlist);
         QFileInfo sampleFile(locatedpath);
         if (sampleFile.exists()) { filelist << locatedpath; continue; }
 

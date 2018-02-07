@@ -54,8 +54,6 @@ private slots:
     void getSampleInfoSQLITE();
 
 private:
-    QString locateSample(QString filepath, QStringList pathlist);
-
     QTreeWidgetItem* getParentFolder(QString filename);
     QMap<QString,QTreeWidgetItem*> parentMap;
     MainWindow* _mainwindow;

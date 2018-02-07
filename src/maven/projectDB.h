@@ -52,6 +52,7 @@ class ProjectDB {
 
 	    QString  projectPath();
 	    QString  projectName();
+        static QString locateSample(QString filepath, QStringList pathlist);
 
 	    void loadSamples();
 	    vector<mzSample*> getSamples() { return samples; }
