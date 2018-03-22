@@ -1,4 +1,5 @@
 #include "classifierNeuralNet.h"
+#include <stdio.h>
 
 ClassifierNeuralNet::ClassifierNeuralNet() 
 {
@@ -19,6 +20,18 @@ ClassifierNeuralNet::ClassifierNeuralNet()
 	features_names.push_back("peakIntensity");		//f8
 	features_names.push_back("skinnyPeak");			//f9
 //	features_names.push_back("widePeak");			//f10
+
+     defaultModel = "nnlib network weights data file version 1.0\n\
+Size: 9 4 2\n\
+Hidden layer weights:\n\
+0.348244	0.402841	0.550701	0.194118	-0.753584	1.74345	-1.77715	0.00668378	-0.534154\n\
+-0.889052	-0.114491	-1.11209	-1.11362	1.36742	-2.0695	3.25954	-0.105453	0.230226\n\
+-0.189997	0.50211	0.389362	0.0126719	-0.498335	-0.380567	-0.0783285	0.188709	-0.123932\n\
+-0.0173413	-0.379919	0.71529	-0.464644	-0.375341	0.845834	-0.113616	1.18479	-0.386247\n\
+Output layer weights:\n\
+1.74287	-3.31841	-0.520656	0.454478\n\
+-1.33858	3.64759	0.439269	-0.761122\n";
+
 }
 
 ClassifierNeuralNet::~ClassifierNeuralNet() { 
@@ -32,6 +45,19 @@ bool ClassifierNeuralNet::hasModel() {
 void ClassifierNeuralNet::saveModel(string filename) { 
 	if ( brain == NULL ) return; 
 	brain->save((char*) filename.c_str());
+}
+
+void ClassifierNeuralNet::loadDefaultModel(){
+
+    char tmpfilename[L_tmpnam];
+    tmpnam(tmpfilename);
+    printf ("Tempname #1: %s\n",tmpfilename);
+
+    FILE* tmpFile = fopen(tmpfilename,"w");
+    fprintf(tmpFile,"%s",defaultModel.c_str());
+    fclose(tmpFile);
+
+    loadModel(tmpfilename);
 }
 
 void ClassifierNeuralNet::loadModel(string filename) { 

@@ -75,14 +75,20 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     //if(QFile::exists(commonFragments)) DB.fragmentsDB = DB.loadAdducts(commonFragments.toStdString());
 
     QString commonAdducts =     methodsFolder + "/" + "ADDUCTS.csv";
-    if(QFile::exists(commonAdducts))   DB.adductsDB = DB.loadAdducts(commonAdducts.toStdString());
+    if(QFile::exists(commonAdducts))  {
+        DB.adductsDB = DB.loadAdducts(commonAdducts.toStdString());
+    } else {
+        DB.adductsDB  = DB.defaultAdducts();
+    }
 
     clsf = new ClassifierNeuralNet();    //clsf = new ClassifierNaiveBayes();
     QString clsfModelFilename = methodsFolder +  "/"  +   defaultModelFile;
     if(QFile::exists(clsfModelFilename)) {
         clsf->loadModel(clsfModelFilename.toStdString());
     } else {
-        qDebug() << "ERROR: Can't find default.model"  << methodsFolder;
+       clsf->loadDefaultModel();
+        qDebug() << "ERROR: Can't find defult.model in method folder="  << methodsFolder;
+        qDebug() << "       Using build in neural network model";
     }
 
 
@@ -357,11 +363,12 @@ void MainWindow::deletePeakTable(TableDockWidget *x) {
 
 TableDockWidget* MainWindow::addPeaksTable(QString title) {
     QPointer<TableDockWidget> panel	 = new TableDockWidget(this,title,0);
+    panel->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::BottomDockWidgetArea,panel,Qt::Horizontal);
     groupTables.push_back(panel);
 
-    /*
     if (sideBar) {
+        /*
         QToolButton *btnTable = new QToolButton(sideBar);
         btnTable->setIcon(QIcon(rsrcPath + "/featuredetect.png"));
         btnTable->setChecked( panel->isVisible() );
@@ -370,8 +377,8 @@ TableDockWidget* MainWindow::addPeaksTable(QString title) {
         connect(btnTable,SIGNAL(clicked(bool)),panel, SLOT(setVisible(bool)));
         connect(panel,SIGNAL(visibilityChanged(bool)),btnTable,SLOT(setChecked(bool)));
         sideBar->addWidget(btnTable);
+        */
     }
-   */
 
     return panel;
 }
@@ -771,10 +778,15 @@ void MainWindow::writeSettings() {
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
-    settings->setValue("closeEvent", 1 );
-    projectDockWidget->saveProject();
-    writeSettings();
-    event->accept();
+    if (QMessageBox::Yes == QMessageBox::question(this, "Close Confirmation", "Exit Maven?", QMessageBox::Yes | QMessageBox::No)) {
+
+        if (QMessageBox::Yes == QMessageBox::question(this, "Close Confirmation", "Do you want to save current project?", QMessageBox::Yes | QMessageBox::No)) {
+            projectDockWidget->saveProject();
+        }
+        settings->setValue("closeEvent", 1 );
+        writeSettings();
+        event->accept();
+    }
 }
 
 void MainWindow::createMenus() {

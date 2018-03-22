@@ -197,11 +197,13 @@ void TableDockWidget::setupPeakTable() {
     colNames << "rt";
 
     if (viewType == groupView) {
+        colNames << "rtDiff";
+        colNames << "MS2 Score";
+        colNames << "Rank";
         colNames << "Charge";
         colNames << "Istope#";
         colNames << "#Peaks";
         colNames << "#MS2s";
-        colNames << "MS2 Score";
         colNames << "Max Width";
         colNames << "Max Intensity";
         colNames << "Max S/N";
@@ -368,19 +370,24 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     item->setText(1,QString::number(group->meanMz, 'f', 4));
     item->setText(2,QString::number(group->meanRt, 'f', 2));
 
+    if (group->compound and group->compound->expectedRt) {
+        item->setText(3,QString::number(group->meanRt - group->compound->expectedRt, 'f', 2));
+    }
+
     if (group->label == 'g' ) item->setIcon(0,QIcon(":/images/good.png"));
     if (group->label == 'b' ) item->setIcon(0,QIcon(":/images/bad.png"));
 
     if (viewType == groupView) {
-        item->setText(3,QString::number(group->chargeState));
-        item->setText(4,QString::number(group->isotopicIndex));
-        item->setText(5,QString::number(group->sampleCount));
-        item->setText(6,QString::number(group->ms2EventCount));
-        item->setText(7,QString::number(group->fragMatchScore.mergedScore));
-        item->setText(8,QString::number(group->maxNoNoiseObs));
-        item->setText(9,QString::number(group->maxIntensity,'g',2));
-        item->setText(10,QString::number(group->maxSignalBaselineRatio,'f',0));
-        item->setText(11,QString::number(group->maxQuality,'f',2));
+        item->setText(4,QString::number(group->fragMatchScore.mergedScore));
+        item->setText(5,QString::number(group->groupRank,'f',3));
+        item->setText(6,QString::number(group->chargeState));
+        item->setText(7,QString::number(group->isotopicIndex));
+        item->setText(8,QString::number(group->sampleCount));
+        item->setText(9,QString::number(group->ms2EventCount));
+        item->setText(10,QString::number(group->maxNoNoiseObs));
+        item->setText(11,QString::number(group->maxIntensity,'g',2));
+        item->setText(12,QString::number(group->maxSignalBaselineRatio,'f',0));
+        item->setText(13,QString::number(group->maxQuality,'f',2));
     } else if ( viewType == peakView) {
         vector<mzSample*> vsamples = _mainwindow->getVisibleSamples();
         sort(vsamples.begin(), vsamples.end(), mzSample::compSampleOrder);
@@ -952,6 +959,8 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
     QAction* z6 = menu.addAction("Show Hidden Groups");
     connect(z6, SIGNAL(triggered()), SLOT(unhideFocusedGroups()));
 
+    QAction* z7 = menu.addAction("Rescore fragmentation");
+    connect(z7, SIGNAL(triggered()), SLOT(rescoreFragmentation()));
 
 
     QMenu analysis("Cluster Analysis");
@@ -1110,7 +1119,7 @@ PeakGroup* TableDockWidget::readGroupXML(QXmlStreamReader& xml,PeakGroup* parent
     g.tagString = xml.attributes().value("tagString").toString().toStdString();
     g.metaGroupId = xml.attributes().value("metaGroupId").toString().toInt();
     g.expectedRtDiff = xml.attributes().value("expectedRtDiff").toString().toDouble();
-    g.groupRank = xml.attributes().value("grouRank").toString().toInt();
+    g.groupRank = xml.attributes().value("groupRank").toString().toInt();
     g.label     =  xml.attributes().value("label").toString().toInt();
     g.setType( (PeakGroup::GroupType) xml.attributes().value("type").toString().toInt());
 
@@ -1492,5 +1501,19 @@ void TableDockWidget::filterTree(QString needle) {
                         item->setHidden(true);
                 }
         }
+}
+
+void TableDockWidget::rescoreFragmentation() {
+    float ppm=20.0;
+    for(PeakGroup& grp: allgroups) {
+        if(grp.compound) {
+            grp.computeFragPattern(ppm);
+            if(grp.fragmentationPattern.nobs() == 0) continue;
+            Compound* cpd = grp.compound;
+            grp.fragMatchScore = cpd->scoreCompoundHit(&grp.fragmentationPattern,ppm,false);
+            grp.fragMatchScore.mergedScore = grp.fragMatchScore.hypergeomScore;
+        }
+    }
+    updateTable();
 }
 

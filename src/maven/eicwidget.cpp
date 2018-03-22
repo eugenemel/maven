@@ -206,8 +206,8 @@ void EicWidget::mouseDoubleClickEvent(QMouseEvent* event){
 void EicWidget::selectionChangedAction() {}
 
 void EicWidget::setFocusLine(float rt) { 
- //qDebug <<" EicWidget::setFocusLine(float rt)";
-	_focusLineRt = rt;
+     qDebug() <<" EicWidget::setFocusLine(float rt)";
+    _focusLineRt = rt;
     if (_focusLine == NULL ) _focusLine = new QGraphicsLineItem(0);
 	if (_focusLine->scene() != scene() ) scene()->addItem(_focusLine);
 
@@ -832,15 +832,19 @@ void EicWidget::replot(PeakGroup* group ) {
     addEICLines(false);
     showAllPeaks();
 
-    if (group) {
-        if(group->compound != NULL && group->compound->expectedRt>0)
+    if (group && group->compound) {
+        if(group->compound->expectedRt>0) {
             _focusLineRt=group->compound->expectedRt;
+        } else {
+            _focusLineRt=-1;
+        }
     }
+
     if(_showSpline) addCubicSpline();
     if(_showBaseline)  addBaseLine();   //qDebug() << "\tshowBaseLine msec=" << timerX.elapsed();
     if(_showTicLine or _showBicLine)   addTicLine();    //qDebug() << "\tshowTic msec=" << timerX.elapsed();
     if(_showMergedEIC) addMergedEIC();
-    if(_focusLineRt >0) setFocusLine(_focusLineRt);  //qDebug() << "\tsetFocusLine msec=" << timerX.elapsed();
+    setFocusLine(_focusLineRt);  //qDebug() << "\tsetFocusLine msec=" << timerX.elapsed();
     if(_showMS2Events && _slice.mz>0) { addMS2Events(_slice.mzmin, _slice.mzmax); }
 
     addAxes();

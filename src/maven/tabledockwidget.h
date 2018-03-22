@@ -87,6 +87,7 @@ public slots:
           void switchTableView();
           void clearClusters();
           void filterTree(QString needle);
+          void rescoreFragmentation();
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event);

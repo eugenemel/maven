@@ -151,7 +151,7 @@ void SpectraWidget::setScan(Scan* scan, float mzmin, float mzmax) {
     _minX = mzmin;
     _maxX = mzmax;
     findBounds(false,true);
-    mainwindow->getEicWidget()->setFocusLine(scan->rt);
+    //mainwindow->getEicWidget()->setFocusLine(scan->rt);
     drawGraph();
     repaint();
 }

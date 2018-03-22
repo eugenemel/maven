@@ -13,6 +13,7 @@ LibraryMangerDialog::LibraryMangerDialog(QWidget *parent) : QDialog(parent) {
 
 void LibraryMangerDialog::show() {
     updateLibraryStats();
+    this->treeWidget->resizeColumnToContents(0);
     QDialog::show();
 }
 

@@ -2,7 +2,7 @@
 using namespace std;
 
 
-MassCalcWidget::MassCalcWidget(MainWindow* mw) { 
+MassCalcWidget::MassCalcWidget(MainWindow* mw) {
   setupUi(this);
   _mw = mw;
   _mz = 0;
@@ -16,7 +16,8 @@ MassCalcWidget::MassCalcWidget(MainWindow* mw) {
   connect(treeWidget,SIGNAL(itemSelectionChanged()), SLOT(showInfo()));
   connect(databaseSelect, SIGNAL(currentIndexChanged(QString)), this, SLOT(showTable()));
   connect(scoringSchema, SIGNAL(currentIndexChanged(QString)), this, SLOT(showTable()));
-
+  connect(this,SIGNAL(visibilityChanged(bool)),this,SLOT(updateDatabaseList()));
+  connect(databaseSelect,SIGNAL(activated(int)), this, SLOT(updateDatabaseList()));
 
    scoringSchema->clear();
    for(string scoringAlgorithm: FragmentationMatchScore::getScoringAlgorithmNames()) {
@@ -25,6 +26,7 @@ MassCalcWidget::MassCalcWidget(MainWindow* mw) {
 
 
 }
+
 
 void MassCalcWidget::setMass(float mz) { 
     if ( abs(mz-_mz)<0.0005) return;
@@ -43,6 +45,7 @@ void MassCalcWidget::setCharge(float charge) {
 }
 
 void MassCalcWidget::updateDatabaseList() {
+    qDebug() << "updateDatabaseList()";
     databaseSelect->clear();
     QStringList dbnames = DB.getLoadedDatabaseNames();
     databaseSelect->addItem("All");
@@ -84,7 +87,7 @@ void MassCalcWidget::showTable() {
     p->setUpdatesEnabled(false); 
     p->clear(); 
     p->setColumnCount(6);
-    p->setHeaderLabels( QStringList() << "Compound" << "ppmDiff" << "fragScore" << "Adduct" << "Mass" << "DB");
+    p->setHeaderLabels( QStringList() << "Compound"  << "rtDiff" << "ppmDiff" << "fragScore" << "Adduct" << "Mass" << "DB");
     p->setSortingEnabled(false);
     p->setUpdatesEnabled(false);
 
@@ -96,7 +99,8 @@ void MassCalcWidget::showTable() {
         Adduct *  a = matches[i].adductLink;
         QString matchName = QString(matches[i].name.c_str() );
         QString preMz = QString::number( matches[i].mass , 'f', 4);
-        QString ppmDiff = QString::number( matches[i].diff , 'f', 4);
+        QString ppmDiff = QString::number( matches[i].diff , 'f', 2);
+        QString rtDiff = QString::number(matches[i].rtdiff,'f', 1);
         QString matchScore = QString::number( matches[i].fragScore.getScoreByName(scoringAlgorithm) , 'f', 3);
         QString adductName = QString(a->name.c_str());
         QString db = QString(c->db.c_str());
@@ -107,14 +111,15 @@ void MassCalcWidget::showTable() {
         NumericTreeWidgetItem* item = new NumericTreeWidgetItem(treeWidget,Qt::UserRole);
         item->setData(0,Qt::UserRole,QVariant(i));
         item->setText(0,matchName);
-        item->setText(1,ppmDiff);
-        item->setText(2,matchScore);
-        item->setText(3,adductName);
-        item->setText(4,preMz);
-        item->setText(5,db);
+        item->setText(1,rtDiff);
+        item->setText(2,ppmDiff);
+        item->setText(3,matchScore);
+        item->setText(4,adductName);
+        item->setText(5,preMz);
+        item->setText(6,db);
     }
 
-    p->sortByColumn(2,Qt::DescendingOrder);
+    p->sortByColumn(3,Qt::DescendingOrder);
     p->header()->setStretchLastSection(true);
     p->setSortingEnabled(true);
     p->setUpdatesEnabled(true);
@@ -135,6 +140,8 @@ void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
     for(MassCalculator::Match& m: matches ) {
        Compound* cpd = m.compoundLink;
        m.fragScore = cpd->scoreCompoundHit(&grp->fragmentationPattern,fragmentPPM->value(),false);
+       if (cpd->expectedRt > 0) m.rtdiff =  grp->meanRt - cpd->expectedRt;
+
     }
     showTable();
 }

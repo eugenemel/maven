@@ -116,8 +116,6 @@ void Database::loadCompoundsSQL(QString databaseName) {
             string formula = query.value("formula").toString().toStdString();
             int charge = query.value("charge").toInt();
             float exactMass = query.value("mass").toDouble();
-            float precursorMz =  query.value("precursorMz").toDouble();
-
 
             //the neutral mass is computated automatically  inside the constructor
             Compound* compound = new Compound(id,name,formula,charge);
@@ -127,7 +125,7 @@ void Database::loadCompoundsSQL(QString databaseName) {
             compound->expectedRt =  query.value("expectedRt").toDouble();
 
             if (formula.empty()) {
-                if(exactMass >0 ) compound->setExactMass(exactMass);
+                if(exactMass >0) compound->setExactMass(exactMass);
             } else {
                  compound->setExactMass(mcalc.computeNeutralMass(formula));
             }
@@ -362,6 +360,14 @@ vector<Adduct*> Database::loadAdducts(string filename) {
     cerr << "loadAdducts() " << filename << " count=" << adducts.size() << endl;
     return adducts;
     myfile.close();
+}
+
+vector<Adduct*> Database::defaultAdducts() {
+    vector<Adduct*> adducts;
+    adducts.push_back( new Adduct("[M-H]+",  PROTON , 1, 1));
+    adducts.push_back( new Adduct("[M-H]-", -PROTON, -1, 1));
+    adducts.push_back( new Adduct("[M]",0 ,1, 1));
+    return adducts;
 }
 
 

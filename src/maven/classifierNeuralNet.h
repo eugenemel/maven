@@ -23,6 +23,7 @@ public:
     void refineModel(PeakGroup* grp);
     void saveModel(string filename);
     void loadModel(string filename);
+    void loadDefaultModel();
 	bool hasModel();
  
 private:
@@ -32,7 +33,8 @@ private:
 	nnwork* brain;
 	int hidden_layer;
 	int num_outputs;
-	float trainingSize;
+    float trainingSize;
+    string defaultModel;
 
 };
 #endif

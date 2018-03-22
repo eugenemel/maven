@@ -749,8 +749,9 @@ void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g) {
     */
 
     vector<MassCalculator::Match>matchesX = DB.findMathchingCompounds(searchMz,compoundPPMWindow,ionizationMode);
+    //qDebug() << "findMatching" << searchMz << " " << matchesX.size();
 
-    //g->fragmentationPattern.printFragment(productPpmTolr,10);
+  // g->fragmentationPattern.printFragment(productPpmTolr,10);
     MassCalculator::Match bestMatch;
     string scoringAlgorithm = scoringScheme.toStdString();
 
@@ -762,7 +763,7 @@ void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g) {
         if (s.numMatches < minNumFragments ) continue;
         s.mergedScore = s.getScoreByName(scoringAlgorithm);
         s.ppmError = match.diff;
-        // qDebug() << "scoring=" << scoringScheme << " " << s.mergedScore;
+        //qDebug() << "scoring=" << scoringScheme << " " << s.mergedScore;
 
         //cerr << "\t"; cerr << cpd->name << "\t" << cpd->precursorMz << "\tppmDiff=" << m.diff << "\t num=" << s.numMatches << "\t tic" << s.ticMatched <<  " s=" << s.spearmanRankCorrelation << endl;
 

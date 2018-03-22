@@ -24,7 +24,8 @@ public:
 	virtual void train(vector<PeakGroup*>& groups)=0;
 	virtual void refineModel(PeakGroup* grp)=0;
 	virtual void saveModel(string filename)=0;
-	virtual void loadModel(string filename)=0;
+    virtual void loadModel(string filename)=0;
+    virtual void loadDefaultModel()=0;
 	virtual bool hasModel()=0;
 	
 	//common non virtal functions

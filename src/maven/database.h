@@ -34,6 +34,8 @@ class Database {
         bool connect(QString filename);
     
         vector<Adduct*> loadAdducts(string filename);
+        vector<Adduct*> defaultAdducts();
+
         void loadMethodsFolder(QString methodsFolder);
         int  loadCompoundsFile(QString filename);
         vector<Compound*> loadCompoundCSVFile(QString fileName);
