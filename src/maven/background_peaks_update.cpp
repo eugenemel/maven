@@ -135,6 +135,8 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         mzSlice* slice = slices[s];
         Compound* compound = slice->compound;
 
+       // if (compound)  cerr << "Searching for: " << compound->name << "\trt=" << compound->expectedRt << endl;
+
         if ( compound != NULL && compound->hasGroup() )
             compound->unlinkGroup();
 
@@ -162,6 +164,8 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
         //for ( unsigned int j=0; j < eics.size(); j++ )  eics[j]->getPeakPositions(eic_smoothingWindow);
         vector<PeakGroup> peakgroups = EIC::groupPeaks(eics,eic_smoothingWindow,grouping_maxRtWindow);
+        //cerr << "\tFound " << peakgroups.size() << "\n";
+
 
         //score quality of each group
         vector<PeakGroup*> groupsToAppend;
@@ -172,19 +176,9 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             groupCount++;
             peakCount += group.peakCount();
 
-            Peak* peak = group.getHighestIntensityPeak();
-            if(!peak)  continue;
+            Peak* highestpeak = group.getHighestIntensityPeak();
+            if(!highestpeak)  continue;
 
-            vector<Isotope> isotopes = peak->getScan()->getIsotopicPattern(peak->peakMz,compoundPPMWindow,6,10);
-
-            if(isotopes.size() > 0) {
-                group.chargeState = isotopes.front().charge;
-                for(Isotope& isotope: isotopes) {
-                    if (mzUtils::ppmDist((float) isotope.mass, (float) group.meanMz) < compoundPPMWindow) {
-                        group.isotopicIndex=isotope.C13;
-                    }
-                }
-            }
 
             if (clsf->hasModel()) { clsf->classify(&group); group.groupStatistics(); }
             if (clsf->hasModel()&& group.goodPeakCount < minGoodPeakCount) continue;
@@ -193,11 +187,27 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             if (group.maxNoNoiseObs < minNoNoiseObs) continue;
             if (group.maxSignalBaselineRatio < minSignalBaseLineRatio) continue;
             if (group.maxIntensity < minGroupIntensity ) continue;
-            if ((excludeIsotopicPeaks or compound) and not group.isMonoisotopic(compoundPPMWindow)) continue;
+
+            group.chargeState = group.getChargeStateFromMS1(compoundPPMWindow);
+            vector<Isotope> isotopes = highestpeak->getScan()->getIsotopicPattern(highestpeak->peakMz,compoundPPMWindow,6,10);
+
+            if(isotopes.size() > 0) {
+                //group.chargeState = isotopes.front().charge;
+                for(Isotope& isotope: isotopes) {
+                    if (mzUtils::ppmDist((float) isotope.mass, (float) group.meanMz) < compoundPPMWindow) {
+                        group.isotopicIndex=isotope.C13;
+                    }
+                }
+            }
+
+           if ((excludeIsotopicPeaks or compound)) {
+                if (group.chargeState > 0 and not group.isMonoisotopic(compoundPPMWindow)) continue;
+            }
 
             //if (getChargeStateFromMS1(&group) < minPrecursorCharge) continue;
                         //build consensus ms2 specta
             vector<Scan*>ms2events = group.getFragmenationEvents();
+            //cerr << "\tFound ms2events" << ms2events.size() << "\n";
 
             group.computeFragPattern(productPpmTolr);
             // BROKEN group.findHighestPurityMS2Pattern(compoundPPMWindow);
@@ -293,7 +303,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
         if(keepFoundGroups) {
             emit(newPeakGroup(&allgroups[j],false));
-            qDebug() << "Emmiting..." << allgroups[j].meanMz;
+            //qDebug() << "Emmiting..." << allgroups[j].meanMz;
             QCoreApplication::processEvents();
         }
 
