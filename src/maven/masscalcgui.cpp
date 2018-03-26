@@ -17,7 +17,6 @@ MassCalcWidget::MassCalcWidget(MainWindow* mw) {
   connect(databaseSelect, SIGNAL(currentIndexChanged(QString)), this, SLOT(showTable()));
   connect(scoringSchema, SIGNAL(currentIndexChanged(QString)), this, SLOT(showTable()));
   connect(this,SIGNAL(visibilityChanged(bool)),this,SLOT(updateDatabaseList()));
-  connect(databaseSelect,SIGNAL(activated(int)), this, SLOT(updateDatabaseList()));
 
    scoringSchema->clear();
    for(string scoringAlgorithm: FragmentationMatchScore::getScoringAlgorithmNames()) {
