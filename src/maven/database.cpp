@@ -570,6 +570,9 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
         } else if (line.startsWith("SMILE:",Qt::CaseInsensitive)) {
             QString smileString = line.mid(7,line.length()).simplified();
             if(!smileString.isEmpty()) cpd->smileString=smileString.toStdString();
+         } else if (line.startsWith("SMILES:",Qt::CaseInsensitive)) {
+            QString smileString = line.mid(8,line.length()).simplified();
+            if(!smileString.isEmpty()) cpd->smileString=smileString.toStdString();
          } else if (line.startsWith("PRECURSORMZ:",Qt::CaseInsensitive)) {
             cpd->precursorMz = line.mid(13,line.length()).simplified().toDouble();
          } else if (line.startsWith("EXACTMASS:",Qt::CaseInsensitive)) {
