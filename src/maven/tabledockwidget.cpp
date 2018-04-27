@@ -131,7 +131,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     QToolButton *btnX = new QToolButton(toolBar);
     btnX->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
     //btnX->setIcon(QIcon(rsrcPath + "/hide.png"));
-    connect(btnX, SIGNAL(clicked()),SLOT(hide()));
+    connect(btnX, SIGNAL(clicked()),this,SLOT(deleteAll()));
 
     QLineEdit*  filterEditor = new QLineEdit(toolBar);
     filterEditor->setMinimumWidth(15);
@@ -435,6 +435,12 @@ QList<PeakGroup*> TableDockWidget::getGroups() {
 }
 
 void TableDockWidget::deleteAll() {
+
+    if (QMessageBox::No == QMessageBox::question(this, "Delete Confirmation",
+          "Do you want to delete all peakgroups from this table?", QMessageBox::Yes | QMessageBox::No)) {
+        return;
+    }
+
     treeWidget->clear();
     allgroups.clear();
     this->hide();
