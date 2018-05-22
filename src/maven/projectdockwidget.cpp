@@ -643,13 +643,18 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
         project->saveSamples(sampleSet);
         project->saveAlignment();
 
+        set<Compound*> compoundSet;
+
         int groupCount=0;
         for(TableDockWidget* peakTable : _mainwindow->getAllPeakTables() ) {
             for(PeakGroup* group : peakTable->getGroups()) {
                 groupCount++;
                 project->writeGroupSqlite(group,0,peakTable->windowTitle());
+                if(group->compound) compoundSet.insert(group->compound);
             }
         }
+        project->saveCompounds(compoundSet);
+
         _mainwindow->setStatusText(tr("Saved %1 groups to %2").arg(QString::number(groupCount),filename));
     } else {
        qDebug() << "Can't write to closed project" << filename;

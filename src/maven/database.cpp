@@ -21,7 +21,7 @@ void Database::reloadAll() {
     const std::string EmptyString;
     compoundIdMap.clear();
     compoundsDB.clear();
-    loadCompoundsSQL("ALL");
+    loadCompoundsSQL("ALL",ligandDB);
 
     cerr << "compoundsDB=" << compoundsDB.size() << " " << compoundIdMap.size() << endl;
     cerr << "adductsDB=" << adductsDB.size() << endl;
@@ -55,8 +55,8 @@ int Database::loadCompoundsFile(QString filename) {
         compounds = loadCompoundCSVFile(filename);
     }
 
-    deleteCompoundsSQL(dbname.c_str());
-    saveCompoundsSQL(compounds);
+    deleteCompoundsSQL(dbname.c_str(),ligandDB);
+    saveCompoundsSQL(compounds,ligandDB);
 
     sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
     return compounds.size();
@@ -93,14 +93,14 @@ void Database::addCompound(Compound* c) {
     compoundsDB.push_back(c);
 }
 
-void Database::loadCompoundsSQL(QString databaseName) {
+void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection) {
 
         if (loadedDatabase.count(databaseName)) {
             qDebug()  << databaseName << "already loaded";
             return;
         }
 
-        QSqlQuery query(ligandDB);
+        QSqlQuery query(dbConnection);
         QString sql = "select * from compounds where name not like '%DECOY%'";
 
         if (databaseName != "ALL")  sql += " and dbName='" + databaseName + "'";
@@ -197,7 +197,7 @@ Adduct* Database::findAdductByName(string id) {
 
 Compound* Database::findSpeciesById(string id,string db) {
 
-    if (!loadedDatabase.count(db.c_str()))  loadCompoundsSQL(db.c_str());
+    if (!loadedDatabase.count(db.c_str()))  loadCompoundsSQL(db.c_str(),ligandDB);
 
     //cerr << "searching for " << id << " " << compoundIdMap.size() << " " << db << endl;
     if ( compoundIdMap.contains(id + db) ) return compoundIdMap[id + db];
@@ -215,7 +215,7 @@ Compound* Database::findSpeciesById(string id,string db) {
 
 
 vector<Compound*> Database::findSpeciesByName(string name, string dbname) {
-        if (!loadedDatabase.count(dbname.c_str()))  loadCompoundsSQL(dbname.c_str());
+        if (!loadedDatabase.count(dbname.c_str()))  loadCompoundsSQL(dbname.c_str(),ligandDB);
 
         vector<Compound*> set;
         qDebug() << "findSpeciesByName" << name.c_str();
@@ -634,17 +634,17 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
     return compoundSet;
 }
 
-void Database::deleteAllCompoundsSQL() {
-    QSqlQuery query(ligandDB);
+void Database::deleteAllCompoundsSQL(QSqlDatabase& dbConnection) {
+    QSqlQuery query(dbConnection);
     query.prepare("drop table compounds");
     if (!query.exec())  qDebug() << query.lastError();
-    ligandDB.commit();
+    dbConnection.commit();
     qDebug() << "deleteAllCompounds: done";
 }
 
 
-void Database::deleteCompoundsSQL(QString dbName) {
-    QSqlQuery query(ligandDB);
+void Database::deleteCompoundsSQL(QString dbName, QSqlDatabase& dbConnection) {
+    QSqlQuery query(dbConnection);
 
     //create index based on database name.
      query.exec("create index if not exists compound_db_idx on compounds(dbName)");
@@ -652,14 +652,15 @@ void Database::deleteCompoundsSQL(QString dbName) {
     query.prepare("delete from compounds where dbName = ?");
     query.bindValue( 0, dbName );
     if (!query.exec())  qDebug() << query.lastError();
-    ligandDB.commit();
+    dbConnection.commit();
     qDebug() << "deleteCompoundsSQL" << dbName <<  " " << query.numRowsAffected();
 }
 
 
-void Database::saveCompoundsSQL(vector<Compound*> &compoundSet) {
+void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& dbConnection) {
+    qDebug() << "saveCompoundsSQL()" << compoundSet.size();
 
-    QSqlQuery query0(ligandDB);
+    QSqlQuery query0(dbConnection);
     query0.exec("begin transaction");
     if(!query0.exec("create table IF NOT EXISTS compounds(\
                     cid integer primary key AUTOINCREMENT,\
@@ -685,7 +686,7 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet) {
 
         query0.exec("create index if not exists compound_db_idx on compounds(dbName)");
 
-        QSqlQuery query1(ligandDB);
+        QSqlQuery query1(dbConnection);
         query1.prepare("insert into compounds values(NULL, ?,?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?)");
 
         for(Compound* c : compoundSet) {

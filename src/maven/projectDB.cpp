@@ -9,6 +9,24 @@ void ProjectDB::saveGroups(vector<PeakGroup>& allgroups, QString setName) {
     }
 }
 
+void ProjectDB::saveCompounds(set<Compound*>& compoundSet) {
+    //save seen compounds in to project database
+    std::vector<Compound*>compounds(compoundSet.begin(), compoundSet.end());
+    DB.saveCompoundsSQL(compounds,sqlDB);
+}
+
+void ProjectDB::saveCompounds(vector<PeakGroup>& allgroups) {
+    set<Compound*> seenCompounds;
+
+    //find linked compounds
+    for(unsigned int i=0; i < allgroups.size(); i++ ) {
+        Compound* c = allgroups[i].compound;
+        if(c) seenCompounds.insert(c);
+    }
+    saveCompounds(seenCompounds);
+}
+
+
 void ProjectDB::deleteAll() {
     QSqlQuery query(sqlDB);
     query.exec("drop table samples");
@@ -424,6 +442,7 @@ void ProjectDB::loadPeakGroups(QString tableName) {
 
         if (!compoundId.empty()){
             Compound* compound = DB.findSpeciesById(compoundId,compoundDB);
+             cerr << "Locate:"  << compoundId << " in " << compoundDB << "->" << compound;
 
             if (compound)  {
                 g.compound = compound;

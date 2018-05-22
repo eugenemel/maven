@@ -24,6 +24,8 @@ class ProjectDB {
             void clearLoadedPeakGroups() { allgroups.clear(); }
             void saveSamples(vector<mzSample *> &sampleSet);
             void saveGroups(vector<PeakGroup>   &allgroups, QString setName);
+            void saveCompounds(vector<PeakGroup> &allgroups);
+            void saveCompounds(set<Compound*>&compounds);
             void writeSearchResultsToDB();
             int writeGroupSqlite(PeakGroup* group, int parentGroupId, QString tableName);
             void loadPeakGroups(QString tableName);

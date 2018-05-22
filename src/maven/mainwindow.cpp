@@ -67,8 +67,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     if(!QFile::exists(writeLocation))  { QDir dir; dir.mkdir(writeLocation); }
     qDebug() << "WRITE FOLDER=" <<  writeLocation;
     DB.connect(writeLocation + "/ligand.db");
-
-    DB.loadCompoundsSQL("KNOWNS");
+    DB.loadCompoundsSQL("KNOWNS", DB.getLigandDB());
     //DB.loadCompoundsSQL("ALL");
 
     //QString commonFragments =   methodsFolder + "/" + "FRAGMENTS.csv";

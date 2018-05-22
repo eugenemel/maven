@@ -35,7 +35,7 @@ void LibraryMangerDialog::loadLibrary() {
     foreach(QTreeWidgetItem* item, treeWidget->selectedItems() ) {
         QString libraryName = item->text(0);
         qDebug() << "Load Library" << libraryName;
-        DB.loadCompoundsSQL(libraryName);
+        DB.loadCompoundsSQL(libraryName,DB.getLigandDB());
     }
     updateLibraryStats();
 }
@@ -45,7 +45,7 @@ void LibraryMangerDialog::deleteLibrary() {
     foreach(QTreeWidgetItem* item, treeWidget->selectedItems() ) {
         QString libraryName = item->text(0);
         qDebug() << "Delete Library" << libraryName;
-        DB.deleteCompoundsSQL(libraryName);
+        DB.deleteCompoundsSQL(libraryName,DB.getLigandDB());
     }
     updateLibraryStats();
 }
@@ -55,7 +55,7 @@ void LibraryMangerDialog::loadCompoundsFile(QString filename){
     string dbname = mzUtils::cleanFilename(dbfilename);
 
     int compoundCount = DB.loadCompoundsFile(filename);
-    DB.loadCompoundsSQL(dbname.c_str());
+    DB.loadCompoundsSQL(dbname.c_str(),DB.getLigandDB());
 
     if (compoundCount > 0 && mainwindow->ligandWidget) {
         mainwindow->ligandWidget->updateDatabaseList();
@@ -92,7 +92,7 @@ void LibraryMangerDialog::reloadMethodsFolder() {
     methodsFolder = QFileDialog::getExistingDirectory(this,methodsFolder);
 
     if (not methodsFolder.isEmpty()) {
-        DB.deleteAllCompoundsSQL();
+        DB.deleteAllCompoundsSQL(DB.getLigandDB());
         DB.loadMethodsFolder(methodsFolder);
         mainwindow->ligandWidget->updateDatabaseList();
         mainwindow->massCalcWidget->updateDatabaseList();

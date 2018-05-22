@@ -40,10 +40,11 @@ class Database {
         int  loadCompoundsFile(QString filename);
         vector<Compound*> loadCompoundCSVFile(QString fileName);
         vector<Compound*> loadNISTLibrary(QString fileName);
-        void loadCompoundsSQL(QString databaseName);
-        void saveCompoundsSQL(vector<Compound*> &compoundSet);
-        void deleteCompoundsSQL( QString dbName);
-        void deleteAllCompoundsSQL();
+
+        void loadCompoundsSQL(QString databaseName,QSqlDatabase& dbConnection);
+        void saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& dbConnection);
+        void deleteCompoundsSQL(QString dbName, QSqlDatabase& dbConnection);
+        void deleteAllCompoundsSQL(QSqlDatabase& dbConnection);
 
 		multimap<string,Compound*> keywordSearch(string needle);
 		vector<string>   getCompoundReactions(string compound_id);
