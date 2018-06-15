@@ -12,6 +12,7 @@ desktop.files = maven.desktop
 
 #add version information during compilation
 #VERSION = $$system("git describe --tags --always")
+VERSION=8.0.9
 include(gitversion.pri)
 DEFINES += MAVEN_VERSION=\\\"$$VERSION\\\"
 DEFINES += "PLATFORM=\"$$QMAKE_HOST.os\""
