@@ -48,12 +48,20 @@ void ClassifierNeuralNet::saveModel(string filename) {
 }
 
 void ClassifierNeuralNet::loadDefaultModel(){
+    char tmpfilename[]="/tmp/mzclassXXXXXX";
+    int temp_fd=mkstemp(tmpfilename);
 
-    char tmpfilename[L_tmpnam];
-    tmpnam(tmpfilename);
-    printf ("Tempname #1: %s\n",tmpfilename);
+    if(!temp_fd)  {
+        printf("ClassifierNeuralNet: failed to create temp file");
+        return;
+    }
 
+    //char tmpfilename[L_tmpnam];
+    //tmpnam(tmpfilename);
+    //printf ("Tempname #1: %s\n",tmpfilename);
     FILE* tmpFile = fopen(tmpfilename,"w");
+
+
     fprintf(tmpFile,"%s",defaultModel.c_str());
     fclose(tmpFile);
 

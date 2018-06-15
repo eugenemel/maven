@@ -442,10 +442,10 @@ void ProjectDB::loadPeakGroups(QString tableName) {
 
         if (!compoundId.empty()){
             Compound* compound = DB.findSpeciesById(compoundId,compoundDB);
-             cerr << "Locate:"  << compoundId << " in " << compoundDB << "->" << compound;
 
             if (compound)  {
                 g.compound = compound;
+            	//cerr << "Found compound:"  << compound->cid << endl;
             } else {
                 g.tagString = compoundName + "|" + adductName + " | id=" + compoundId;
             }
@@ -718,6 +718,7 @@ void ProjectDB::loadSamples() {
         }
     }
 }
+
 
 bool ProjectDB::closeDatabaseConnection() {
 

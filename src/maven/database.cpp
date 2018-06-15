@@ -101,12 +101,11 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
         }
 
         QSqlQuery query(dbConnection);
-        QString sql = "select * from compounds where name not like '%DECOY%'";
-
-        if (databaseName != "ALL")  sql += " and dbName='" + databaseName + "'";
+        QString sql = "select * from compounds";
+        if (databaseName != "ALL")  sql += " where dbName='" + databaseName + "'";
 
         query.prepare(sql);
-        if(!query.exec()) qDebug() << query.lastError();
+        if(!query.exec()) qDebug() << "loadCompoundsSQL: query error " << query.lastError();
         MassCalculator mcalc;
 
         int loadcount=0;
@@ -116,13 +115,19 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             string formula = query.value("formula").toString().toStdString();
             int charge = query.value("charge").toInt();
             float exactMass = query.value("mass").toDouble();
+	    int cid  =  query.value("cid").toInt();
+            string db   =  query.value("dbName").toString().toStdString();
+            double expectedRt =  query.value("expectedRt").toDouble();
+
+	    //skip already exists in internal database
+    	    if ( compoundIdMap.contains(id + db) ) continue;
 
             //the neutral mass is computated automatically  inside the constructor
             Compound* compound = new Compound(id,name,formula,charge);
+            compound->cid  =  cid;
+            compound->db   =  db;
+            compound->expectedRt =  expectedRt;
 
-            compound->cid  =  query.value("cid").toInt();
-            compound->db   =  query.value("dbName").toString().toStdString();
-            compound->expectedRt =  query.value("expectedRt").toDouble();
 
             if (formula.empty()) {
                 if(exactMass >0) compound->setExactMass(exactMass);
@@ -687,7 +692,7 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
         query0.exec("create index if not exists compound_db_idx on compounds(dbName)");
 
         QSqlQuery query1(dbConnection);
-        query1.prepare("insert into compounds values(NULL, ?,?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?)");
+        query1.prepare("replace into compounds values(?,?,?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?)");
 
         for(Compound* c : compoundSet) {
             QStringList cat;
@@ -698,27 +703,31 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
             for(float f :  c->fragment_mzs) { fragMz << QString::number(f,'f',5); }
             for(float f :  c->fragment_intensity) { fragIntensity << QString::number(f,'f',5); }
 
-            query1.bindValue( 0, QString(c->db.c_str()) );
-            query1.bindValue( 1, QString(c->id.c_str()) );
-            query1.bindValue( 2, QString(c->name.c_str()));
-            query1.bindValue( 3, QString(c->formula.c_str()));
-            query1.bindValue( 4, QString(c->smileString.c_str()));
-            query1.bindValue( 5, QString(c->srmId.c_str()));
+	    QVariant cid =  QVariant(QVariant::Int);
+	    if (c->cid) cid = QVariant(c->cid);
 
-            query1.bindValue( 6, c->getExactMass() );
-            query1.bindValue( 7, c->charge);
-            query1.bindValue( 8, c->expectedRt);
-            query1.bindValue( 9, c->precursorMz);
-            query1.bindValue( 10, c->productMz);
+            query1.bindValue( 0, cid);
+            query1.bindValue( 1, QString(c->db.c_str()) );
+            query1.bindValue( 2, QString(c->id.c_str()) );
+            query1.bindValue( 3, QString(c->name.c_str()));
+            query1.bindValue( 4, QString(c->formula.c_str()));
+            query1.bindValue( 5, QString(c->smileString.c_str()));
+            query1.bindValue( 6, QString(c->srmId.c_str()));
 
-            query1.bindValue( 11, c->collisionEnergy);
-            query1.bindValue( 12, c->logP);
-            query1.bindValue( 13, c->virtualFragmentation);
-            query1.bindValue( 14, c->ionizationMode);
-            query1.bindValue( 15, cat.join(";"));
+            query1.bindValue( 7, c->getExactMass() );
+            query1.bindValue( 8, c->charge);
+            query1.bindValue( 9, c->expectedRt);
+            query1.bindValue( 10, c->precursorMz);
+            query1.bindValue( 11, c->productMz);
 
-            query1.bindValue( 16, fragMz.join(";"));
-            query1.bindValue( 17, fragIntensity.join(";"));
+            query1.bindValue( 12, c->collisionEnergy);
+            query1.bindValue( 13, c->logP);
+            query1.bindValue( 14, c->virtualFragmentation);
+            query1.bindValue( 15, c->ionizationMode);
+            query1.bindValue( 16, cat.join(";"));
+
+            query1.bindValue( 17, fragMz.join(";"));
+            query1.bindValue( 18, fragIntensity.join(";"));
 
             if(!query1.exec())  qDebug() << query1.lastError();
         }

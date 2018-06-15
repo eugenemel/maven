@@ -477,6 +477,9 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
 
     ProjectDB* selectedProject = new ProjectDB(fileName);
 
+    //load compounds stored in the project file
+    DB.loadCompoundsSQL("ALL",selectedProject->sqlDB);
+
     QStringList pathlist;
     pathlist << projectPath
              << "."
@@ -484,6 +487,7 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
              << settings->value("lastDir").value<QString>();
 
     QSqlQuery query(selectedProject->sqlDB);
+
     query.exec("select * from samples");
 
     QStringList filelist;
