@@ -18,7 +18,6 @@ SpectraWidget::SpectraWidget(MainWindow* mw) {
 }
 
 void SpectraWidget::initPlot() {
-    _title = NULL;
     _zoomFactor = 0;
     setScene(new QGraphicsScene(this));
     scene()->setItemIndexMethod(QGraphicsScene::BspTreeIndex);
@@ -55,7 +54,8 @@ void SpectraWidget::initPlot() {
     _vnote->setFont(font);
     _vnote->setDefaultTextColor(Qt::red);
 
-    _title = new QGraphicsTextItem("",0);
+    _title = new QGraphicsTextItem();
+    _title->setVisible(true);
     scene()->addItem(_title);
 
 }
@@ -124,6 +124,10 @@ void SpectraWidget::setTitle() {
 		double purity = _currentScan->getPrecursorPurity(ppm);
         title += " <b>Purity: </b> " + QString::number(purity*100.0,'f',1) + "%";
         title += " <b>IsolWin: </b>" + QString::number(_currentScan->isolationWindow,'f',1);
+    }
+
+    if (_currentScan->injectionTime > 0) {
+        title += " <b>Inject. Time: </b>" + QString::number(_currentScan->injectionTime,'f',1);
     }
 
 	QFont font = QApplication::font();
