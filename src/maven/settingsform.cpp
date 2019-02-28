@@ -191,8 +191,11 @@ void SettingsForm::getFormValues() {
 }
 
 void SettingsForm::selectFolder(QString key) {
-    QString oFolder = ".";
-    if(settings->contains(key)) oFolder =  settings->value(key).toString();
+    QString oFolder =  QApplication::applicationDirPath() + "../";
+    if(settings->contains(key)) {
+        oFolder =  settings->value(key).toString();
+    }
+
     QString newFolder = QFileDialog::getExistingDirectory(this,oFolder);
     if (! newFolder.isEmpty()) {
         settings->setValue(key,newFolder);

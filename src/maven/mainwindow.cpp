@@ -54,8 +54,10 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
             << QApplication::applicationDirPath() + "/../Resources/methods";
 
     QString defaultModelFile =   settings->value("clsfModelFilename").value<QString>();
+    defaultModelFile.replace(QRegExp(".*/"),"");  //clear pathtname..
+    qDebug() << "Searching for method folder:";
     foreach (QString d, dirs) {
-        qDebug() << "Checking dir: " + d;
+        qDebug() << " Checking dir: " + d;
         QFile test(d+ "/" + defaultModelFile);
         if (test.exists()) { methodsFolder=d; settings->setValue("methodsFolder", methodsFolder); break;}
     }
