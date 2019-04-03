@@ -16,3 +16,13 @@ dump
 *.msp
 .DS_Store
 Src/.DS_Store
+
+# eclipse CDT-associated
+.cproject
+.project
+.settings/
+maven.cpp
+maven.pro
+maven.qml
+maven.qrc
+build/**/*
