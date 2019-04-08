@@ -26,3 +26,4 @@ maven.pro
 maven.qml
 maven.qrc
 build/**/*
+/build/
