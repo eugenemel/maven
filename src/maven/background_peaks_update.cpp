@@ -1,8 +1,8 @@
 #include "background_peaks_update.h"
 
 BackgroundPeakUpdate::BackgroundPeakUpdate(QWidget*) { 
-    clsf = NULL;	//initially classifier is not loaded
-    mainwindow = NULL;
+    clsf = nullptr;	//initially classifier is not loaded
+    mainwindow = nullptr;
     _stopped = true;
     //	setTerminationEnabled(false);
 
@@ -137,7 +137,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
        // if (compound)  cerr << "Searching for: " << compound->name << "\trt=" << compound->expectedRt << endl;
 
-        if ( compound != NULL && compound->hasGroup() )
+        if (!compound && compound->hasGroup() )
             compound->unlinkGroup();
 
         if (checkConvergance ) {
@@ -214,10 +214,15 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             matchFragmentation(&group);
 
+            //Issue 21: if a non-null compound could not be associated with a group during matchFragmentation(),
+            //skip over the peak group.
+            if (!group.compound && compound){
+                continue;
+            }
+
             if(mustHaveMS2) {
                 if(group.ms2EventCount == 0) continue;
                 if(group.fragMatchScore.mergedScore < this->minFragmentMatchScore) continue;
-
             }
 
             if (compound) group.compound = compound;
@@ -770,7 +775,10 @@ void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g) {
         if(!compoundDatabase.isEmpty() and  cpd->db != compoundDatabase.toStdString()) continue;
 
         FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productPpmTolr,searchProton);
-        if (s.numMatches < minNumFragments ) continue;
+        if (s.numMatches < minNumFragments){
+            continue;
+        }
+
         s.mergedScore = s.getScoreByName(scoringAlgorithm);
         s.ppmError = match.diff;
         //qDebug() << "scoring=" << scoringScheme << " " << s.mergedScore;
