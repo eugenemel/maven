@@ -2,6 +2,7 @@ include(../maven_core/libmaven.pri)
 TEMPLATE = app
 DESTDIR = bin
 CONFIG += qt thread sql svg console std++14
+CONFIG+=sdk_no_version_check
 QMAKE_STRIP=echo
 #PRECOMPILED_HEADER  = stable.h
 

@@ -217,6 +217,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             if(mustHaveMS2) {
                 if(group.ms2EventCount == 0) continue;
                 if(group.fragMatchScore.mergedScore < this->minFragmentMatchScore) continue;
+                if(group.fragMatchScore.numMatches < this->minNumFragments ) continue;
 
             }
 
