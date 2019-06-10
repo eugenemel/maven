@@ -203,8 +203,16 @@ QStringList ProjectDB::getSearchTableNames() {
     query.prepare("SELECT distinct searchTableName from peakgroups");
     if (!query.exec())  qDebug() << query.lastError();
 
+    qDebug() << "Search Table Names:";
     QStringList dbnames;
-    while (query.next())  dbnames << query.value(0).toString();
+    while (query.next()){
+       QString tableName = query.value(0).toString();
+       dbnames << tableName;
+       qDebug() << "entry=" << tableName;
+    }
+
+    qDebug() << "End Search Table Names.";
+
     return dbnames;
 }
 
@@ -420,7 +428,12 @@ void ProjectDB::loadPeakGroups(QString tableName) {
         g.metaGroupId = query.value("metaGroupId").toString().toInt();
         g.expectedRtDiff = query.value("expectedRtDiff").toString().toDouble();
         g.groupRank = query.value("groupRank").toString().toInt();
-        g.label     =  query.value("label").toString().at(0).toLatin1();
+
+        QVariant label = query.value("label");
+        if (label.toString().size() > 0) {
+            g.label = label.toString().at(0).toLatin1();
+        }
+
         g.ms2EventCount = query.value("ms2EventCount").toString().toInt();
         g.fragMatchScore.mergedScore = query.value("ms2Score").toString().toDouble();
         g.setType( (PeakGroup::GroupType) query.value("type").toString().toInt());

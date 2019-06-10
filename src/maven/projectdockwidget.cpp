@@ -600,11 +600,18 @@ void ProjectDockWidget::loadAllPeakTables() {
         if(!table) _mainwindow->addPeaksTable(searchTableName);
     }
 
+    qDebug() << "Created tables for search results.";
+
     //clear previous results
-    currentProject->clearLoadedPeakGroups();;
+    currentProject->clearLoadedPeakGroups();
+
+    qDebug() << "Cleared loaded peak groups.";
 
     //load all peakgroups
     currentProject->loadPeakGroups("peakgroups");
+
+    qDebug() << "Peakgroups count: " << currentProject->allgroups.size() << endl;
+
     for(int i=0; i < currentProject->allgroups.size(); i++ ) {
         PeakGroup* g = &(currentProject->allgroups[i]);
         currentProject->allgroups[i].groupStatistics();
