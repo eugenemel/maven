@@ -520,7 +520,7 @@ void ProjectDB::saveAlignment() {
 
 
 void ProjectDB::doAlignment() {
-	if (!sqlDB.isOpen() ) { qDebug() << "doAlignment: database is not openned"; return; }
+    if (!sqlDB.isOpen() ) { qDebug() << "doAlignment: database is not opened"; return; }
 
 	QSqlQuery query(sqlDB);
 	query.exec("select S.name, S.sampleId, R.* from rt_update_key R, samples S where S.sampleId = R.sampleId");
