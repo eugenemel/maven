@@ -787,6 +787,8 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         settings->setValue("closeEvent", 1 );
         writeSettings();
         event->accept();
+    } else {
+        event->ignore();
     }
 }
 
