@@ -286,6 +286,7 @@ void EicWidget::computeEICs() {
     //fix suggested by Eugene (2019-06-12)
     if(slice.mzmin > slice.mzmax){
         std::swap(slice.mzmin,slice.mzmax);
+        qDebug() << "swapping slice.mzmin and slice.mzmax.";
     } // why????
 
     //get eics
