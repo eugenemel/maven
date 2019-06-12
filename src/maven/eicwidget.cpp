@@ -282,6 +282,7 @@ void EicWidget::computeEICs() {
 	slice.rtmin=bounds.rtmin;
 	slice.rtmax=bounds.rtmax;
 
+    //Issue 22: TODO: this is a bandaid, does not address fundamental problem!
     //fix suggested by Eugene (2019-06-12)
     if(slice.mzmin > slice.mzmax){
         std::swap(slice.mzmin,slice.mzmax);
