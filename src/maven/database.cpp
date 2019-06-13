@@ -539,7 +539,7 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
 
    QString line;
    MassCalculator mcalc;
-   Compound* cpd = NULL;
+   Compound* cpd = nullptr;
    bool capturePeaks=false;
 
     do {
@@ -559,7 +559,7 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
             capturePeaks=false;
         }
 
-        if(cpd == NULL) continue;
+        if(cpd == nullptr) continue;
 
         if (line.startsWith("MW:",Qt::CaseInsensitive)) {
             cpd->setExactMass( line.mid(3,line.length()).simplified().toDouble());
@@ -631,7 +631,7 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
 
     } while (!line.isNull());
 
-    //if (cpd) compoundSet.push_back(cpd);
+    if (cpd) compoundSet.push_back(cpd);
 
     //compoundSet.push_back(compound);
     qDebug() << "Database::loadNISTLibrary() in" << compoundSet.size()  << " compounds.";
