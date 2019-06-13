@@ -1011,7 +1011,7 @@ void TableDockWidget::findMatchingCompounds() {
     float ionizationMode = _mainwindow->getIonizationMode();
     for(int i=0; i < allgroups.size(); i++ ) {
         PeakGroup& g = allgroups[i];
-        vector<MassCalculator::Match> matches = DB.findMathchingCompounds(g.meanMz,ppm,ionizationMode);
+        vector<MassCalculator::Match> matches = DB.findMatchingCompounds(g.meanMz,ppm,ionizationMode);
         foreach(auto& m, matches) {
             g.compound = m.compoundLink;
             g.adduct   = m.adductLink;

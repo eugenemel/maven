@@ -765,7 +765,7 @@ void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g) {
     if(isotopes.size() > 0) searchMz = isotopes.front().mass;
     */
 
-    vector<MassCalculator::Match>matchesX = DB.findMathchingCompounds(searchMz,compoundPPMWindow,ionizationMode);
+    vector<MassCalculator::Match>matchesX = DB.findMatchingCompounds(searchMz,compoundPPMWindow,ionizationMode);
     //qDebug() << "findMatching" << searchMz << " " << matchesX.size();
 
   // g->fragmentationPattern.printFragment(productPpmTolr,10);

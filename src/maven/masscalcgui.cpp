@@ -67,7 +67,7 @@ void MassCalcWidget::compute() {
      //delete_all(matches);
 	 matches.resize(0); //clean up
 
-    matches = DB.findMathchingCompounds(_mz,_ppm,_charge);
+    matches = DB.findMatchingCompounds(_mz,_ppm,_charge);
 
     if (_mz>0 and matches.size()==0) {
         _mw->setStatusText("Searching for formulas..");
@@ -130,7 +130,7 @@ void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
     if(!grp) return;
 
     _mz = grp->meanMz;
-    matches = DB.findMathchingCompounds(_mz,_ppm,_charge);
+    matches = DB.findMatchingCompounds(_mz,_ppm,_charge);
     cerr << "MassCalcWidget::setPeakGroup(PeakGroup* grp)" << endl;
 
     if(grp->ms2EventCount == 0) grp->computeFragPattern(fragmentPPM->value());
@@ -151,7 +151,7 @@ void MassCalcWidget::setFragmentationScan(Scan* scan) {
     Fragment f(scan,0,0,1024);
 
     _mz = scan->precursorMz;
-    matches = DB.findMathchingCompounds(_mz,_ppm,_charge);
+    matches = DB.findMatchingCompounds(_mz,_ppm,_charge);
     cerr << "MassCalcWidget::setPeakGroup(PeakGroup* grp)" << endl;
 
     for(MassCalculator::Match& m: matches ) {
@@ -163,7 +163,7 @@ void MassCalcWidget::setFragmentationScan(Scan* scan) {
 
 
 void MassCalcWidget::getMatches() {
-    matches = DB.findMathchingCompounds(_mz,_ppm,_charge);
+    matches = DB.findMatchingCompounds(_mz,_ppm,_charge);
 }
 
 void MassCalcWidget::pubChemLink(QString formula){

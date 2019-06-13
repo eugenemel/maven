@@ -1603,7 +1603,7 @@ void MainWindow::getCovariants(Peak* peak ) {
 
     //matching compounds
     for(int i=0; i < links.size(); i++ ) {
-        vector<MassCalculator::Match> matches =  DB.findMathchingCompounds(links[i].mz2, ppm, ionizationMode);
+        vector<MassCalculator::Match> matches =  DB.findMatchingCompounds(links[i].mz2, ppm, ionizationMode);
         for(auto& m: matches) { links[i].note += " |" + m.name; break; }
     }
 

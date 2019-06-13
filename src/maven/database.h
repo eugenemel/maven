@@ -65,7 +65,7 @@ class Database {
         set<Compound*> findSpeciesByMass(float mz, float ppm);
         vector<Compound*> findSpeciesByName(string name, string dbname);
 
-        vector<MassCalculator::Match> findMathchingCompounds(float mz, float ppm, float charge);
+        vector<MassCalculator::Match> findMatchingCompounds(float mz, float ppm, float charge);
         vector<MassCalculator::Match> findMathchingCompoundsSLOW(float mz, float ppm, float charge);
 
         Adduct* findAdductByName(string id);

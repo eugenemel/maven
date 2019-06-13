@@ -250,7 +250,7 @@ Compound* Database::findSpeciesByPrecursor(float precursorMz, float productMz, i
 		return x;
 }
 
-vector<MassCalculator::Match> Database::findMathchingCompounds(float mz, float ppm, float charge) {
+vector<MassCalculator::Match> Database::findMatchingCompounds(float mz, float ppm, float charge) {
     vector<MassCalculator::Match>uniqset;
 
     //compute plausable adducts
