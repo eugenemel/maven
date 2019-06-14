@@ -373,11 +373,42 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
     //search all adducts
     if (searchAdductsFlag) adductList = DB.adductsDB;
 
-    for (Compound* c: set) {
-        if ( c == NULL ) continue;
+    multimap<string, Compound*> stringToCompoundMap = {};
+    std::set<string> formulae = std::set<string>();
 
-        float M0 =  c->getExactMass();
-        if (!c->formula.empty())  M0 = massCalc.computeNeutralMass(c->formula);
+    for(Compound* c : set){
+
+        if (!c){
+            continue;
+        }
+
+        if (c->formula.empty()) {
+            cerr << "skipping Compound \"" << c->name << "\" which is missing chemical formula!" << endl;
+            continue;
+        }
+
+        string key = c->formula;
+
+        formulae.insert(key);
+        pair<string, Compound*> keyValuePair = make_pair(key, c);
+
+        stringToCompoundMap.insert(keyValuePair);
+    }
+
+    typedef multimap<string, Compound*>::iterator compoundIterator;
+
+    for (string formula : formulae) {
+
+        pair<compoundIterator, compoundIterator> compounds = stringToCompoundMap.equal_range(formula);
+
+        Compound *c = nullptr;
+        vector<Compound*> compoundVector;
+        for (compoundIterator it = compounds.first; it != compounds.second; it++) {
+            c = it->second;
+            compoundVector.push_back(c);
+        }
+
+        float M0 = massCalc.computeNeutralMass(c->formula);
         if (M0 <= 0) continue;
 
         for(Adduct* a: adductList) {
@@ -385,7 +416,8 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
 
              mzSlice* slice = new mzSlice();
              slice->mz = a->computeAdductMass(M0);
-             slice->compound = c;
+             slice->compound = c; //this is just a random compound (not to be trusted) TODO: delete me
+             slice->compoundVector = compoundVector;
              slice->adduct   = a;
              slice->mzmin = slice->mz - compoundPPMWindow * slice->mz/1e6;
              slice->mzmax = slice->mz + compoundPPMWindow * slice->mz/1e6;
@@ -401,6 +433,13 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
                 slice->rtmax = 1e9;
             }
 
+            //debugging
+//            cerr << "Formula: " << formula << endl;
+//            for (Compound *c : compoundVector) {
+//                cerr << "Compound: " << c->name << "(formula=" << c->formula << ")" << endl;
+//            }
+//            cerr << endl;
+
             if(mustHaveMS2) {
                 if (not sliceHasMS2Event(slice)) {
                     delete(slice);
@@ -413,10 +452,10 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
     }
 
     //printSettings();
-    processSlices(slices,setName); //old approach
+    //processSlices(slices,setName); //old approach
 
     //new approach
-    //processCompoundSlices(slices, setName); //TODO: implement me
+    processCompoundSlices(slices, setName); //TODO: implement me
     delete_all(slices);
 }
 
