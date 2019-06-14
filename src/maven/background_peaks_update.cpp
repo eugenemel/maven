@@ -413,8 +413,10 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
     }
 
     //printSettings();
-    //processSlices(slices,setName);
-    processCompoundSlices(slices, setName); //TODO: implement me
+    processSlices(slices,setName); //old approach
+
+    //new approach
+    //processCompoundSlices(slices, setName); //TODO: implement me
     delete_all(slices);
 }
 
