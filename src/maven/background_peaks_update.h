@@ -131,6 +131,7 @@ private:
   void processSlices(vector<mzSlice*>&slices,string setName);
   void processSlice(mzSlice& slice);
   void processCompounds(vector<Compound*> set, string setName);
+  void processCompoundSlices(vector<mzSlice*>&slices, string setName);
   void computePeaks();
   void processMassSlices();
   void findPeaksOrbi(void);

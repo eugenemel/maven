@@ -108,6 +108,12 @@ void BackgroundPeakUpdate::processSlice(mzSlice& slice) {
     processSlices(slices,"sliceset");
 }
 
+void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string setName){
+   qDebug() << "BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string setName)";
+
+   qDebug() << "TODO";
+}
+
 void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName) { 
     if (slices.size() == 0 ) return;
     allgroups.clear();
@@ -116,7 +122,8 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
     //process KNOWNS
     QTime timer;
     timer.start();
-    qDebug() << "Proessing slices: setName=" << setName.c_str() << " slices=" << slices.size();
+    qDebug() << "BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName)";
+    qDebug() << "Processing slices: setName=" << setName.c_str() << " slices=" << slices.size();
 
     int converged=0;
     int foundGroups=0;
@@ -137,7 +144,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
        // if (compound)  cerr << "Searching for: " << compound->name << "\trt=" << compound->expectedRt << endl;
 
-        if ( compound != NULL && compound->hasGroup() )
+        if (!compound && compound->hasGroup())
             compound->unlinkGroup();
 
         if (checkConvergance ) {
@@ -349,6 +356,9 @@ void BackgroundPeakUpdate::cleanup() {
 }
 
 void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setName) { 
+
+    qDebug() << "BackgroundPeakUpdate:processCompounds(vector<Compound*> set, string setName)";
+
     if (set.size() == 0 ) return;
 
     vector<mzSlice*>slices;
@@ -403,7 +413,8 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
     }
 
     //printSettings();
-    processSlices(slices,setName);
+    //processSlices(slices,setName);
+    processCompoundSlices(slices, setName); //TODO: implement me
     delete_all(slices);
 }
 
@@ -421,6 +432,8 @@ void BackgroundPeakUpdate::setSamples(vector<mzSample*>&set){
 }
 
 void BackgroundPeakUpdate::processMassSlices() { 
+
+         qDebug() << "BackgroundPeakUpdate:processMassSlices()";
 
 		showProgressFlag=true;
 		checkConvergance=true;
@@ -448,7 +461,7 @@ void BackgroundPeakUpdate::processMassSlices() {
 		for(int i=0; i< massSlices.slices.size(); i++ ) goodslices[i] = massSlices.slices[i];
 
 		if (goodslices.size() == 0 ) {
-			emit (updateProgressBar( "Quting! No good mass slices found", 1, 1 ));
+            emit (updateProgressBar( "Quitting! No good mass slices found", 1, 1 ));
 			return;
 		}
 
