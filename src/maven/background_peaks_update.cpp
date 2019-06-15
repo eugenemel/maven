@@ -245,7 +245,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 
         pair<PeakGroup, pair<Compound*, Adduct*>> compoundMatch = compoundMatches[j];
 
-        //Trying this, but should be unnecessary?
+        //Trying this, but should be unnecessary? --this did not work--
         PeakGroup peakGroup = PeakGroup(compoundMatch.first);
 
         Compound *compound = compoundMatch.second.first;
