@@ -245,7 +245,9 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 
         pair<PeakGroup, pair<Compound*, Adduct*>> compoundMatch = compoundMatches[j];
 
-        PeakGroup peakGroup = compoundMatch.first;
+        //Trying this, but should be unnecessary?
+        PeakGroup peakGroup = PeakGroup(compoundMatch.first);
+
         Compound *compound = compoundMatch.second.first;
         Adduct *adduct = compoundMatch.second.second;
 
@@ -265,13 +267,12 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 
         if (keepFoundGroups) {
             emit(newPeakGroup(&allgroups[j], false));
+            QCoreApplication::processEvents();
         }
 
         if (csvreports) {
             csvreports->addGroup(&peakGroup);
         }
-
-        QCoreApplication::processEvents();
     }
 
     if (csvreports){
