@@ -184,7 +184,7 @@ void PeakDetectionDialog::findPeaks() {
 }
 
 void PeakDetectionDialog::runBackgroupJob(QString funcName) { 
-	if (peakupdater == NULL ) return;
+    if (peakupdater == nullptr ) return;
 
 	if ( peakupdater->isRunning() ) { 
 			cancel(); 
