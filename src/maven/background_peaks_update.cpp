@@ -268,8 +268,9 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 
         cerr << "[BackgroundPeakUpdate::processCompoundSlices] "<< &allgroups[j] << " Id="<< (&allgroups[j])->groupId << ":(" << (&allgroups[j])->meanMz << "," << (&allgroups[j])->meanRt << ") <--> " << (&allgroups[j])->compound->name << ":" << (&allgroups[j])->adduct->name << endl;
 
-        //WARNING: new statement needs delete statement
         PeakGroup *peakGroupPtr = new PeakGroup(compoundMatch.first);
+        //delete(peakGroupPtr) is called in the slot that receives the emit(newPeakGroup()) call
+
         peakGroupPtr->compound = compoundMatch.second.first;
         peakGroupPtr->adduct = compoundMatch.second.second;
         peakGroupPtr->tagString = compoundMatch.second.second->name;
@@ -277,10 +278,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
             peakGroupPtr->expectedRtDiff = abs(compound->expectedRt - (peakGroupPtr->meanRt));
         }
 
-        emit(newPeakGroup(peakGroupPtr, false));
-        //WARNING: new statement needs delete statement - currently leaking memory
-
-       // emit(newPeakGroup(&allgroups[j], false));
+        emit(newPeakGroup(peakGroupPtr, false, true)); // note that 'isDeletePeakGroupPtr' flag is set to true
 
         QCoreApplication::processEvents();
 
@@ -505,7 +503,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
         if(keepFoundGroups) {
             cerr << "[BackgroundPeakUpdate::processSlices] "<< &allgroups[j] << " Id="<< (&allgroups[j])->groupId << ":(" << (&allgroups[j])->meanMz << "," << (&allgroups[j])->meanRt << ") <--> " << (&allgroups[j])->compound->name << ":" << (&allgroups[j])->adduct->name << endl;
-            emit(newPeakGroup(&allgroups[j],false));
+            emit(newPeakGroup(&allgroups[j],false, false));
             //qDebug() << "Emmiting..." << allgroups[j].meanMz;
             QCoreApplication::processEvents();
         }

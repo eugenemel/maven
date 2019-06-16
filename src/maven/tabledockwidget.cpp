@@ -418,12 +418,31 @@ bool TableDockWidget::hasPeakGroup(PeakGroup* group) {
 }
 
 PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable) {
+    return TableDockWidget::addPeakGroup(group,updateTable, false);
+}
+
+/**
+ * This solves the problem of creating a PeakGroup* on a background thread, and ensuring
+ * that the pointer is deleted as soon as possible (that is, once the contents are retrieved and relocated).
+ *
+ * @brief TableDockWidget::addPeakGroup
+ * @param group
+ * @param updateTable
+ * @param isDeletePeakGroupPtr
+ * @return PeakGroup* that is guaranteed to persist as long as allgroups[] field persists
+ */
+PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, bool isDeletePeakGroupPtr) {
     if (!group) return nullptr;
 
     //debugging
-    cerr << "[TableDockWidget::addPeakGroup] "<< group << " Id="<< group->groupId << ":(" << group->meanMz << "," << group->meanRt << ") <--> " << group->compound->name << ":" << group->adduct->name << endl;
+    //cerr << "[TableDockWidget::addPeakGroup] "<< group << " Id="<< group->groupId << ":(" << group->meanMz << "," << group->meanRt << ") <--> " << group->compound->name << ":" << group->adduct->name << endl;
 
     allgroups.push_back(*group);
+
+    if (isDeletePeakGroupPtr){
+       delete(group);
+    }
+
     PeakGroup* g = &allgroups[allgroups.size()-1];
 
     if (updateTable)  showAllGroups();
