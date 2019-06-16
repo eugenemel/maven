@@ -209,7 +209,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
                 groups.push_back(&group);
                 peakCount += group.peakCount();
              }
-         }
+         } // end peak groups
 
          delete_all(eics);
 
@@ -220,7 +220,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
              QString progressText = "Found " + QString::number(compoundMatches.size()) + " Compound <--> Peak Group matches.";
              emit(updateProgressBar( progressText , (s+1), std::min(static_cast<int>(slices.size()),limitGroupCount)));
          }
-    }
+    } //end slices
 
     if(alignSamplesFlag) {
         emit(updateProgressBar("Aligning Samples" ,1, 100));
@@ -245,11 +245,13 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 
         pair<PeakGroup, pair<Compound*, Adduct*>> compoundMatch = compoundMatches[j];
 
-        //Trying this, but should be unnecessary? --this did not work--
-        PeakGroup peakGroup = PeakGroup(compoundMatch.first);
-
+        PeakGroup peakGroup = compoundMatch.first;
         Compound *compound = compoundMatch.second.first;
         Adduct *adduct = compoundMatch.second.second;
+
+        //TODO: testing -- result: did not work
+//        Compound compoundCopy = Compound(compound->id, compound->name, compound->formula, compound->charge);
+//        peakGroup.compound = &compoundCopy;
 
         peakGroup.compound = compound;
         peakGroup.adduct = adduct;
@@ -263,12 +265,24 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
         allgroups.push_back(peakGroup);
 
         //debugging
-        cerr << "[BackgroundPeakUpdate::processCompoundSlices] (" << allgroups[j].meanMz << "," << allgroups[j].meanRt << ") <--> " << allgroups[j].compound->name << ":" << allgroups[j].adduct->name << endl;
 
-        if (keepFoundGroups) {
-            emit(newPeakGroup(&allgroups[j], false));
-            QCoreApplication::processEvents();
+        cerr << "[BackgroundPeakUpdate::processCompoundSlices] "<< &allgroups[j] << " Id="<< (&allgroups[j])->groupId << ":(" << (&allgroups[j])->meanMz << "," << (&allgroups[j])->meanRt << ") <--> " << (&allgroups[j])->compound->name << ":" << (&allgroups[j])->adduct->name << endl;
+
+        //WARNING: new statement needs delete statement
+        PeakGroup *peakGroupPtr = new PeakGroup(compoundMatch.first);
+        peakGroupPtr->compound = compoundMatch.second.first;
+        peakGroupPtr->adduct = compoundMatch.second.second;
+        peakGroupPtr->tagString = compoundMatch.second.second->name;
+        if (matchRtFlag && compound->expectedRt>0) {
+            peakGroupPtr->expectedRtDiff = abs(compound->expectedRt - (peakGroupPtr->meanRt));
         }
+
+        emit(newPeakGroup(peakGroupPtr, false));
+        //WARNING: new statement needs delete statement - currently leaking memory
+
+       // emit(newPeakGroup(&allgroups[j], false));
+
+        QCoreApplication::processEvents();
 
         if (csvreports) {
             csvreports->addGroup(&peakGroup);
@@ -282,10 +296,10 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 
     emit(updateProgressBar("Done" ,1, 1));
 
-    qDebug() << "processSlices() Slices=" << slices.size();
-    qDebug() << "processSlices() EICs="   << eicCount;
-    qDebug() << "processSlices() Groups="   << groups.size();
-    qDebug() << "processSlices() Peaks="   << peakCount;
+    qDebug() << "processCompoundSlices() Slices=" << slices.size();
+    qDebug() << "processCompoundSlices() EICs="   << eicCount;
+    qDebug() << "processCompoundSlices() Groups="   << groups.size();
+    qDebug() << "processCompoundSlices() Peaks="   << peakCount;
     qDebug() << "Compound <--> Peak Group Matches=" << compoundMatches.size();
     qDebug() << "BackgroundPeakUpdate:processCompoundSlices() done. " << timer.elapsed() << " sec.";
 }
@@ -331,7 +345,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
         vector<EIC*>eics = pullEICs(slice,samples,
                                     EicLoader::PeakDetection,
-                                    eic_smoothingWindow,
+                                    static_cast<int>(eic_smoothingWindow),
                                     eic_smoothingAlgorithm,
                                     amuQ1,
                                     amuQ3,
@@ -346,13 +360,13 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         if (eicMaxIntensity < minGroupIntensity) { delete_all(eics); continue; }
 
         //for ( unsigned int j=0; j < eics.size(); j++ )  eics[j]->getPeakPositions(eic_smoothingWindow);
-        vector<PeakGroup> peakgroups = EIC::groupPeaks(eics,eic_smoothingWindow,grouping_maxRtWindow);
+        vector<PeakGroup> peakgroups = EIC::groupPeaks(eics,static_cast<int>(eic_smoothingWindow),grouping_maxRtWindow);
         //cerr << "\tFound " << peakgroups.size() << "\n";
 
 
         //score quality of each group
         vector<PeakGroup*> groupsToAppend;
-        for(int j=0; j < peakgroups.size(); j++ ) {
+        for(unsigned int j=0; j < peakgroups.size(); j++ ) {
             PeakGroup& group = peakgroups[j];
             group.computeAvgBlankArea(eics);
             group.groupStatistics();
@@ -361,7 +375,6 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             Peak* highestpeak = group.getHighestIntensityPeak();
             if(!highestpeak)  continue;
-
 
             if (clsf->hasModel()) { clsf->classify(&group); group.groupStatistics(); }
             if (clsf->hasModel()&& group.goodPeakCount < minGoodPeakCount) continue;
@@ -389,7 +402,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             //if (getChargeStateFromMS1(&group) < minPrecursorCharge) continue;
                         //build consensus ms2 specta
-            vector<Scan*>ms2events = group.getFragmenationEvents();
+            //vector<Scan*>ms2events = group.getFragmenationEvents();
             //cerr << "\tFound ms2events" << ms2events.size() << "\n";
 
             group.computeFragPattern(productPpmTolr);
@@ -465,7 +478,6 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
     double minPeakShapeCorrelation=0.9;
     PeakGroup::clusterGroups(allgroups,samples,maxRtDiff,minSampleCorrelation,minPeakShapeCorrelation,compoundPPMWindow);
 
-
     if (showProgressFlag && pullIsotopesFlag ) {
         emit(updateProgressBar("Calculation Isotopes" ,1, 100));
     }
@@ -492,6 +504,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         }
 
         if(keepFoundGroups) {
+            cerr << "[BackgroundPeakUpdate::processSlices] "<< &allgroups[j] << " Id="<< (&allgroups[j])->groupId << ":(" << (&allgroups[j])->meanMz << "," << (&allgroups[j])->meanRt << ") <--> " << (&allgroups[j])->compound->name << ":" << (&allgroups[j])->adduct->name << endl;
             emit(newPeakGroup(&allgroups[j],false));
             //qDebug() << "Emmiting..." << allgroups[j].meanMz;
             QCoreApplication::processEvents();
@@ -610,7 +623,7 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
             }
 
             //debugging
-//            cerr << "Formula: " << formula << endl;
+//            cerr << "Formula: " << formula <<", Adduct: " << a->name << endl;
 //            for (Compound *c : compoundVector) {
 //                cerr << "Compound: " << c->name << "(formula=" << c->formula << ")" << endl;
 //            }
@@ -629,6 +642,8 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
 
     //printSettings();
     //processSlices(slices,setName); //old approach
+
+    //TODO: check for memory leaks in compoundVector
 
     //new approach
     processCompoundSlices(slices, setName);

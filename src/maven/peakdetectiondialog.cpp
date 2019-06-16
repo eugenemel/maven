@@ -161,7 +161,7 @@ void PeakDetectionDialog::findPeaks() {
 		TableDockWidget* peaksTable = mainwindow->addPeaksTable(title);
 		peaksTable->setWindowTitle(title);
         connect(peakupdater, SIGNAL(newPeakGroup(PeakGroup*,bool)), peaksTable, SLOT(addPeakGroup(PeakGroup*,bool)));
-   		connect(peakupdater, SIGNAL(finished()), peaksTable, SLOT(showAllGroups()));
+        connect(peakupdater, SIGNAL(finished()), peaksTable, SLOT(showAllGroups()));
    		connect(peakupdater, SIGNAL(terminated()), peaksTable, SLOT(showAllGroups()));
    		connect(peakupdater, SIGNAL(finished()), this, SLOT(close()));
    		connect(peakupdater, SIGNAL(terminated()), this, SLOT(close()));
@@ -192,8 +192,16 @@ void PeakDetectionDialog::runBackgroupJob(QString funcName) {
 
 	if ( ! peakupdater->isRunning() ) { 
 		peakupdater->setRunFunction(funcName);			//set thread function
-		peakupdater->start();	//start a background thread
-	}
+
+        qDebug() << "peakdetectiondialog::runBackgroundJob(QString funcName) Started.";
+
+        peakupdater->start();	//start a background thread
+
+        //TODO: decide if this call is needed/desirable or not
+        //peakupdater->wait();    //wait until the background thread is complete
+
+        qDebug() << "peakdetectiondialog::runBackgroundJob(QString funcName) Completed.";
+    }
 }
 
 void PeakDetectionDialog::showInfo(QString text){ statusText->setText(text); }

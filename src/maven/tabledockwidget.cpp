@@ -421,7 +421,7 @@ PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable) {
     if (!group) return nullptr;
 
     //debugging
-    cerr << "[TableDockWidget::addPeakGroup] (" << group->meanMz << "," << group->meanRt << ") <--> " << group->compound->name << ":" << group->adduct->name << endl;
+    cerr << "[TableDockWidget::addPeakGroup] "<< group << " Id="<< group->groupId << ":(" << group->meanMz << "," << group->meanRt << ") <--> " << group->compound->name << ":" << group->adduct->name << endl;
 
     allgroups.push_back(*group);
     PeakGroup* g = &allgroups[allgroups.size()-1];
