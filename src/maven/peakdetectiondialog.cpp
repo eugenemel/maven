@@ -131,7 +131,6 @@ void PeakDetectionDialog::findPeaks() {
         peakupdater->ppmMerge =  ppmStep->value();
         peakupdater->compoundPPMWindow = compoundPPMWindow->value();
 		peakupdater->compoundRTWindow = compoundRTWindow->value();
-        peakupdater->eicMaxGroups = eicMaxGroups->value();
 		peakupdater->avgScanTime = samples[0]->getAverageFullScanTime();
         peakupdater->rtStepSize = rtStep->value();
         peakupdater->mustHaveMS2 = compoundMustHaveMS2->isChecked() || featureMustHaveMs2->isChecked();
