@@ -209,6 +209,9 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
              bool isGroupRetained = false;
 
              //Scan against all compounds associated with slice
+             multimap<double, PeakGroup*> peakGroupCompoundMatches = {};
+             double maxScore = -1;
+
              for (Compound *compound : slice->compoundVector){
 
                  //MS2 criteria
@@ -237,6 +240,62 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
                      csvreports->addGroup(peakGroupPtr);
                  }
 
+                isGroupRetained = true;
+
+                if (s.mergedScore > maxScore){
+                    maxScore = s.mergedScore;
+                }
+
+                peakGroupCompoundMatches.insert(make_pair(s.mergedScore, peakGroupPtr));
+             }
+
+             typedef multimap<double, PeakGroup*>::iterator peakGroupCompoundMatchIterator;
+
+             vector<PeakGroup*> passingPeakGroups;
+             vector<PeakGroup*> failingPeakGroups;
+
+             for (peakGroupCompoundMatchIterator it = peakGroupCompoundMatches.begin(); it != peakGroupCompoundMatches.end(); it++){
+
+                 if (peakGroupCompoundMatchingPolicy == ALL_MATCHES){
+
+                     passingPeakGroups.push_back(it->second);
+
+                 } else if (peakGroupCompoundMatchingPolicy == TOP_SCORE_HITS || peakGroupCompoundMatchingPolicy == SINGLE_TOP_HIT) {
+
+                     if (abs(it->first - maxScore) < 1e-6) { //note tolerance of 1e-6
+                        passingPeakGroups.push_back(it->second);
+                     } else {
+                        failingPeakGroups.push_back(it->second);
+                     }
+                 }
+             }
+
+             if (peakGroupCompoundMatchingPolicy == SINGLE_TOP_HIT && passingPeakGroups.size() > 0) {
+
+                 PeakGroup* bestHit = nullptr;
+
+                 for (auto peakGroupPtr : passingPeakGroups){
+                     if (!bestHit or peakGroupPtr->compound->name.compare(bestHit->compound->name) < 0){
+                         bestHit = peakGroupPtr;
+                     }
+                 }
+
+                 for (auto peakGroupPtr: passingPeakGroups){
+                     if (peakGroupPtr != bestHit){
+                         failingPeakGroups.push_back(peakGroupPtr);
+                     }
+                 }
+
+                 passingPeakGroups.clear();
+                 passingPeakGroups.push_back(bestHit);
+             }
+
+
+             numPassingPeakGroups += passingPeakGroups.size();
+             delete_all(failingPeakGroups); //passingPeakGroups are deleted on main thread with emit() call.
+
+             for (auto peakGroupPtr : passingPeakGroups){
+
                  cerr << "[BackgroundPeakUpdate::processCompoundSlices] "
                       << peakGroupPtr << " Id="
                       << peakGroupPtr->groupId << ":("
@@ -248,24 +307,14 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
                       << peakGroupPtr->ms2EventCount
                       << endl;
 
-                numPassingPeakGroups++;
-
-                //TODO: figure out how to use limitGroupCount
-//                if (numPassingPeakGroups > static_cast<unsigned int>(limitGroupCount)){
-//                    cerr << "Reached the limitGroupCount max of " << limitGroupCount << ", only returning first " << limitGroupCount << " matches." << endl;
-//                    break;
-//                }
-
-                //add group <-> compound match
-                emit(newPeakGroup(peakGroupPtr, false, true)); // note that 'isDeletePeakGroupPtr' flag is set to true
-
-                isGroupRetained = true;
+                 emit(newPeakGroup(peakGroupPtr, false, true)); // note that 'isDeletePeakGroupPtr' flag is set to true
              }
 
              if (isGroupRetained) {
                 groups.push_back(&group);
                 peakCount += group.peakCount();
              }
+
          } // end peak groups
 
          delete_all(eics);
