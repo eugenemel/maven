@@ -92,30 +92,27 @@ void PeakDetectionDialog::show() {
 }
 
 void PeakDetectionDialog::findPeaks() {
-		if (mainwindow == NULL) return;
+        if (mainwindow == nullptr) return;
 
 		vector<mzSample*>samples = mainwindow->getSamples();
 		if ( samples.size() == 0 ) return;
 
-		if ( peakupdater !=  NULL )  {
+        if (peakupdater)  {
 			if ( peakupdater->isRunning() ) cancel();
 			if ( peakupdater->isRunning() ) return;
 		}
 
-		if ( peakupdater != NULL ) {
-				delete(peakupdater); 
-				peakupdater=NULL; 
+        if (peakupdater) {
+            delete(peakupdater);
+            peakupdater=nullptr;
 		}
 
 		peakupdater = new BackgroundPeakUpdate(this);
 		peakupdater->setMainWindow(mainwindow);
 
-		connect(peakupdater, SIGNAL(updateProgressBar(QString,int,int)), 
-						SLOT(setProgressBar(QString, int,int)));
+		connect(peakupdater, SIGNAL(updateProgressBar(QString,int,int)), SLOT(setProgressBar(QString, int,int)));
 	
-
-	
-		if (settings != NULL ) { 
+        if (settings) {
              peakupdater->eic_ppmWindow = settings->value("eic_ppmWindow").toDouble();
              peakupdater->eic_smoothingAlgorithm = settings->value("eic_smoothingAlgorithm").toInt();
 		}
@@ -144,7 +141,7 @@ void PeakDetectionDialog::findPeaks() {
         peakupdater->minNumFragments = fragMinPeaks->value();
         peakupdater->searchAdductsFlag = reportAdducts->isChecked();
         peakupdater->excludeIsotopicPeaks = excludeIsotopicPeaks->isChecked();
-
+        //peakupdater->peakGroupCompoundMatchingPolicy = //TODO
 
         if ( ! outputDirName->text().isEmpty()) {
             peakupdater->setOutputDir(outputDirName->text());
