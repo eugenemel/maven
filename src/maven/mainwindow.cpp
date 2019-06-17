@@ -137,8 +137,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     scatterDockWidget =  new ScatterPlot(this);
     projectDockWidget =  new ProjectDockWidget(this);
     rconsoleDockWidget =  new RconsoleWidget(this);
-    fragmenationSpectraWidget = new SpectraWidget(this);
-    fragmenationSpectraDockWidget =  createDockWidget("Fragmentation Spectra",fragmenationSpectraWidget);
+    fragmentationSpectraWidget = new SpectraWidget(this);
+    fragmenationSpectraDockWidget =  createDockWidget("Fragmentation Spectra",fragmentationSpectraWidget);
     ligandWidget->setVisible(false);
     covariantsPanel->setVisible(false);
     isotopeWidget->setVisible(false);
@@ -459,9 +459,9 @@ void MainWindow::setCompoundFocus(Compound*c) {
     if (massCalcWidget && massCalcWidget->isVisible() )  massCalcWidget->setMass(mz);
 
     //show fragmentation
-    if (fragmenationSpectraWidget->isVisible())  {
+    if (fragmentationSpectraWidget->isVisible())  {
         PeakGroup* group = eicWidget->getSelectedGroup();
-        fragmenationSpectraWidget->overlayPeakGroup(group);
+        fragmentationSpectraWidget->overlayPeakGroup(group);
     }
 
     if (c) setUrl(c);
@@ -1116,8 +1116,8 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
         setUrl(group->compound);
     }
 
-    if(fragmenationSpectraWidget->isVisible()) {
-        fragmenationSpectraWidget->overlayPeakGroup(group);
+    if(fragmentationSpectraWidget->isVisible()) {
+        fragmentationSpectraWidget->overlayPeakGroup(group);
     }
 
     if (massCalcWidget->isVisible()) { massCalcWidget->setPeakGroup(group); }
@@ -1294,9 +1294,9 @@ void MainWindow::showPeakInfo(Peak* _peak) {
         isotopeWidget->setPeak(_peak);
     }
 
-   if (fragmenationSpectraWidget->isVisible()) {
+   if (fragmentationSpectraWidget->isVisible()) {
         vector<Scan*>ms2s = _peak->getFragmenationEvents(getUserPPM());
-        if (ms2s.size()) fragmenationSpectraWidget->setScan(ms2s[0]);
+        if (ms2s.size()) fragmentationSpectraWidget->setScan(ms2s[0]);
     }
 
     if( fragmentationEventsWidget->isVisible() ) {

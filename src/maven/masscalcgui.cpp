@@ -194,7 +194,7 @@ void MassCalcWidget::showInfo() {
     MassCalculator::Match m = matches[mNum];
     if (m.compoundLink) {
         _mw->getEicWidget()->setCompound(m.compoundLink,m.adductLink);
-        _mw->fragmenationSpectraWidget->overlayCompound(m.compoundLink);
+        _mw->fragmentationSpectraWidget->overlayCompound(m.compoundLink);
     }
 }
 

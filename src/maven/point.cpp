@@ -30,7 +30,7 @@ EicPoint::EicPoint(float x, float y, Peak* peak, MainWindow* mw)
          connect(this, SIGNAL(peakGroupFocus(PeakGroup*)), mw->getEicWidget(), SLOT(setSelectedGroup(PeakGroup*)));
          connect(this, SIGNAL(peakGroupFocus(PeakGroup*)), mw->getEicWidget()->scene(), SLOT(update()));
          connect(this, SIGNAL(peakGroupSelected(PeakGroup*)), mw->massCalcWidget, SLOT(setPeakGroup(PeakGroup*)));
-         connect(this, SIGNAL(peakGroupSelected(PeakGroup*)), mw->fragmenationSpectraWidget, SLOT(overlayPeakGroup(PeakGroup*)));
+         connect(this, SIGNAL(peakGroupSelected(PeakGroup*)), mw->fragmentationSpectraWidget, SLOT(overlayPeakGroup(PeakGroup*)));
     }
 
 }
@@ -100,7 +100,7 @@ void EicPoint::mousePressEvent (QGraphicsSceneMouseEvent* event) {
 
     if(_scan) {
         _mw->fragmenationSpectraDockWidget->setVisible(true);
-        _mw->fragmenationSpectraWidget->setScan(_scan);
+        _mw->fragmentationSpectraWidget->setScan(_scan);
         _mw->massCalcWidget->setFragmentationScan(_scan);
 
 		//show last full scan
