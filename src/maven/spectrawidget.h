@@ -91,6 +91,7 @@ public slots:
                     void findBounds(bool checkX, bool checkY);
                     void drawGraph();
                     void drawSpectralHitLines(SpectralHit& hit);
+                    void drawPeakGroupWithCompoundGraph(PeakGroup* group);
 
                     float toX(float x)  { return( (x-_minX)/(_maxX-_minX) * scene()->width()); }
                     float toY(float y, float Norm=1.0, float offset=0)  { float H=scene()->height(); return(H-((y-_minY)/(_maxY-_minY) *H)*Norm)+offset; };

@@ -2,8 +2,8 @@
 
 SpectraWidget::SpectraWidget(MainWindow* mw) { 
     this->mainwindow = mw;
-   _currentScan = NULL;
-   _avgScan = NULL;
+   _currentScan = nullptr;
+   _avgScan = nullptr;
    _log10Transform=false;
 
     initPlot();
@@ -227,6 +227,13 @@ void SpectraWidget::clearOverlay() {
 
 void SpectraWidget::overlayPeakGroup(PeakGroup* group) {
     if(!group) return;
+
+//    //Issue 26: An experimental approach
+//    if (group && group->compound && group->compound->fragment_mzs.size()){
+//        drawPeakGroupWithCompoundGraph(group);
+//        return;
+//    }
+
     Scan* avgScan = group->getAverageFragmenationScan(20);
     setScan(avgScan);
     if (group->compound)  {
@@ -235,6 +242,84 @@ void SpectraWidget::overlayPeakGroup(PeakGroup* group) {
         else  overlayCompound(group->compound);
     }
     delete(avgScan);
+}
+
+/**
+ * Issue 26: Use same routine as Fragment::findFragPairsGreedyMz for consistency.
+ *
+ * @brief SpectraWidget::drawPeakGroupWithCompoundGraph
+ * @param group
+ */
+void SpectraWidget::drawPeakGroupWithCompoundGraph(PeakGroup* group) {
+
+    if (!group or !group->compound or !group->compound->fragment_mzs.size()){
+        return;
+    }
+
+    float productPpmTolr = static_cast<float>(mainwindow->massCalcWidget->fragmentPPM->value());
+
+    Scan* avgScan = group->getAverageFragmenationScan(productPpmTolr);
+
+    _currentScan = avgScan;
+
+    //draw the graph without any spectral matching or reference compounds.
+    clearOverlay();
+    drawGraph();
+
+    Fragment t;
+    Compound *cpd = group->compound;
+
+    t.precursorMz = static_cast<double>(cpd->precursorMz);
+    t.mzs = cpd->fragment_mzs;
+    t.intensity_array = cpd->fragment_intensity;
+    t.annotations = cpd->fragment_iontype;
+
+    float maxDeltaMz = (productPpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
+
+    vector<int> ranks = Fragment::findFragPairsGreedyMz(&t, &(group->fragmentationPattern), maxDeltaMz);
+
+    //remove previous annotations
+    links.clear();
+
+    //add new annotations
+    for(auto ion: cpd->fragment_iontype) {
+          float mz= cpd->fragment_mzs[ion.first];
+          string note = ion.second;
+          links.push_back(mzLink(mz,mz,note));
+    }
+
+    // =========== //
+
+    QPen redpen(Qt::red,1);
+    QPen bluepen(Qt::blue,2);
+    QPen graypen(Qt::gray,1);
+    graypen.setStyle(Qt::DashDotLine);
+
+    float SCALE=0.45;
+
+    //create label
+    QGraphicsTextItem* text = new QGraphicsTextItem(cpd->name.c_str());
+    text->setFont(_title->font());
+    text->setPos(_title->pos().x(),toY(_maxY*0.95,SCALE));
+    scene()->addItem(text);
+    _items.push_back(text);
+
+    for (unsigned int i = 0; i < ranks.size(); i++) {
+
+        int x = toX(t.mzs[i]);
+        int y = toY(t.intensity_array[i]);
+
+        QGraphicsLineItem* line = new QGraphicsLineItem(x,y,x,toY(0),0);
+
+        ranks[i] != -1 ? line->setPen(bluepen) : line->setPen(redpen);
+
+        scene() -> addItem(line);
+        _items.push_back(line);
+    }
+    // =========== //
+
+    //careful - null pointers? multiple delete statements?
+    //delete(avgScan);
 }
 
 void SpectraWidget::overlayTheoreticalSpectra(Compound* c) {
@@ -324,7 +409,6 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
     text->setPos(_title->pos().x(),toY(_maxY*0.95,SCALE));
     scene()->addItem(text);
     _items.push_back(text);
-
 
     for(int i=0; i < hit.mzList.size(); i++) {
         float hitMz=hit.mzList[i];
