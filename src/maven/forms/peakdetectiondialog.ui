@@ -349,7 +349,7 @@
            </widget>
           </item>
           <item row="7" column="2">
-           <widget class="QComboBox" name="comboBox"/>
+           <widget class="QComboBox" name="peakGroupCompoundMatchPolicyBox"/>
           </item>
          </layout>
         </widget>
