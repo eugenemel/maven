@@ -306,7 +306,7 @@ void SpectraWidget::overlayCompound(Compound* c) {
 }
 
 
-void SpectraWidget::drawSpectalHitLines(SpectralHit& hit) {
+void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
 
     float ppmWindow =    hit.productPPM;
     double maxIntensity= hit.getMaxIntensity();
@@ -482,7 +482,7 @@ void SpectraWidget::drawGraph() {
     }
 
     if(_showOverlay and _spectralHit.mzList.size()>0) {
-        drawSpectalHitLines(_spectralHit);
+        drawSpectralHitLines(_spectralHit);
     }
 
     addAxes();
