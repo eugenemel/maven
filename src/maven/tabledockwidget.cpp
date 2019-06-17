@@ -245,7 +245,6 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
     if (clsf != NULL) {
         clsf->classify(group);
         group->updateQuality();
-        if(viewType == groupView) item->setText(8,QString::number(group->maxQuality,'f',2));
         item->setText(0,groupTagString(group));
     }
 
@@ -382,7 +381,7 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
         item->setText(5,QString::number(group->groupRank,'f',3));
         item->setText(6,QString::number(group->chargeState));
         item->setText(7,QString::number(group->isotopicIndex));
-        item->setText(8,QString::number(group->sampleCount));
+        item->setText(8,QString::number(group->peakCount()));
         item->setText(9,QString::number(group->ms2EventCount));
         item->setText(10,QString::number(group->maxNoNoiseObs));
         item->setText(11,QString::number(group->maxIntensity,'g',2));
