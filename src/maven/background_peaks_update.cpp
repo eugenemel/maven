@@ -296,16 +296,17 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 
              for (auto peakGroupPtr : passingPeakGroups){
 
-                 cerr << "[BackgroundPeakUpdate::processCompoundSlices] "
-                      << peakGroupPtr << " Id="
-                      << peakGroupPtr->groupId << ":("
-                      << peakGroupPtr->meanMz << ","
-                      << peakGroupPtr->meanRt << ") <--> "
-                      << peakGroupPtr->compound->name << ":"
-                      << peakGroupPtr->adduct->name << ", score="
-                      << peakGroupPtr->fragMatchScore.mergedScore << ", ms2EventCount="
-                      << peakGroupPtr->ms2EventCount
-                      << endl;
+                 //debugging
+//                 cerr << "[BackgroundPeakUpdate::processCompoundSlices] "
+//                      << peakGroupPtr << " Id="
+//                      << peakGroupPtr->groupId << ":("
+//                      << peakGroupPtr->meanMz << ","
+//                      << peakGroupPtr->meanRt << ") <--> "
+//                      << peakGroupPtr->compound->name << ":"
+//                      << peakGroupPtr->adduct->name << ", score="
+//                      << peakGroupPtr->fragMatchScore.mergedScore << ", ms2EventCount="
+//                      << peakGroupPtr->ms2EventCount
+//                      << endl;
 
                  emit(newPeakGroup(peakGroupPtr, false, true)); // note that 'isDeletePeakGroupPtr' flag is set to true
              }
