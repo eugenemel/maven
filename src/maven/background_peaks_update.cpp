@@ -129,10 +129,20 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
     baseline_smoothingWindow = settings->value("baseline_smoothing").toInt();
     baseline_dropTopX =  settings->value("baseline_quantile").toInt();
 
-    vector<pair<PeakGroup, pair<Compound*, Adduct*>>> compoundMatches;
+    unsigned int numPassingPeakGroups = 0;
     vector<PeakGroup*> groups; //for alignment only
 
+    //write reports
+    CSVReports* csvreports = nullptr;
+    if (writeCSVFlag) {
+        string groupfilename = outputdir + setName + ".csv";
+        csvreports = new CSVReports(samples);
+        csvreports->setUserQuantType(mainwindow->getUserQuantType());
+        csvreports->openGroupReport(groupfilename);
+    }
+
     for (unsigned int s=0; s < slices.size();  s++ ) {
+
         mzSlice* slice = slices[s];
 
         vector<EIC*>eics = pullEICs(slice,samples,
@@ -190,6 +200,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 
                  //MS2 criteria
                  FragmentationMatchScore s = compound->scoreCompoundHit(&group.fragmentationPattern, productPpmTolr, searchProton);
+                 s.mergedScore = s.getScoreByName(scoringScheme.toStdString());
 
                  if (static_cast<float>(s.numMatches) < minNumFragments) continue;
                  if (static_cast<float>(s.mergedScore) < minFragmentMatchScore) continue;
@@ -200,8 +211,40 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
                      if (rtDiff > compoundRTWindow ) continue;
                  }
 
+                 PeakGroup *peakGroupPtr = new PeakGroup(group);
+                 //delete(peakGroupPtr) is called in the slot that receives the emit(newPeakGroup()) call
+
+                 peakGroupPtr->compound = compound;
+                 peakGroupPtr->adduct = slice->adduct;
+                 peakGroupPtr->tagString = slice->adduct->name;
+                 peakGroupPtr->fragMatchScore = s;
+                 peakGroupPtr->ms2EventCount = group.ms2EventCount;
+
+                 if (csvreports) {
+                     csvreports->addGroup(peakGroupPtr);
+                 }
+
+                 cerr << "[BackgroundPeakUpdate::processCompoundSlices] "
+                      << peakGroupPtr << " Id="
+                      << peakGroupPtr->groupId << ":("
+                      << peakGroupPtr->meanMz << ","
+                      << peakGroupPtr->meanRt << ") <--> "
+                      << peakGroupPtr->compound->name << ":"
+                      << peakGroupPtr->adduct->name << ", score="
+                      << peakGroupPtr->fragMatchScore.mergedScore
+                      << endl;
+
+                numPassingPeakGroups++;
+
+                //TODO: figure out how to use limitGroupCount
+//                if (numPassingPeakGroups > static_cast<unsigned int>(limitGroupCount)){
+//                    cerr << "Reached the limitGroupCount max of " << limitGroupCount << ", only returning first " << limitGroupCount << " matches." << endl;
+//                    break;
+//                }
+
                 //add group <-> compound match
-                compoundMatches.push_back(make_pair(group, make_pair(compound, slice->adduct)));
+                emit(newPeakGroup(peakGroupPtr, false, true)); // note that 'isDeletePeakGroupPtr' flag is set to true
+
                 isGroupRetained = true;
              }
 
@@ -213,13 +256,13 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 
          delete_all(eics);
 
-         if (compoundMatches.size() < limitGroupCount ) break;
          if ( stopped() ) break;
 
          if (showProgressFlag && s % 10 == 0) {
-             QString progressText = "Found " + QString::number(compoundMatches.size()) + " Compound <--> Peak Group matches.";
+             QString progressText = "Found " + QString::number(numPassingPeakGroups) + " Compound <--> Peak Group matches.";
              emit(updateProgressBar( progressText , (s+1), std::min(static_cast<int>(slices.size()),limitGroupCount)));
          }
+
     } //end slices
 
     if(alignSamplesFlag) {
@@ -230,62 +273,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
         aligner.doAlignment(groups);
     }
 
-    //write reports
-    CSVReports* csvreports = nullptr;
-    if (writeCSVFlag) {
-        string groupfilename = outputdir + setName + ".csv";
-        csvreports = new CSVReports(samples);
-        csvreports->setUserQuantType(mainwindow->getUserQuantType());
-        csvreports->openGroupReport(groupfilename);
-    }
-
     //NOTE: old approach ran clustering, no longer run
-
-    for (unsigned int j = 0; j < compoundMatches.size(); j++) {
-
-        pair<PeakGroup, pair<Compound*, Adduct*>> compoundMatch = compoundMatches[j];
-
-        PeakGroup peakGroup = compoundMatch.first;
-        Compound *compound = compoundMatch.second.first;
-        Adduct *adduct = compoundMatch.second.second;
-
-        //TODO: testing -- result: did not work
-//        Compound compoundCopy = Compound(compound->id, compound->name, compound->formula, compound->charge);
-//        peakGroup.compound = &compoundCopy;
-
-        peakGroup.compound = compound;
-        peakGroup.adduct = adduct;
-        peakGroup.tagString = adduct->name;
-
-        if (matchRtFlag && compound->expectedRt>0) {
-            peakGroup.expectedRtDiff = abs(compound->expectedRt - (peakGroup.meanRt));
-        }
-
-        //need to keep peakGroup in allgroups array so that it persists after background thread terminates?
-        allgroups.push_back(peakGroup);
-
-        //debugging
-
-        cerr << "[BackgroundPeakUpdate::processCompoundSlices] "<< &allgroups[j] << " Id="<< (&allgroups[j])->groupId << ":(" << (&allgroups[j])->meanMz << "," << (&allgroups[j])->meanRt << ") <--> " << (&allgroups[j])->compound->name << ":" << (&allgroups[j])->adduct->name << endl;
-
-        PeakGroup *peakGroupPtr = new PeakGroup(compoundMatch.first);
-        //delete(peakGroupPtr) is called in the slot that receives the emit(newPeakGroup()) call
-
-        peakGroupPtr->compound = compoundMatch.second.first;
-        peakGroupPtr->adduct = compoundMatch.second.second;
-        peakGroupPtr->tagString = compoundMatch.second.second->name;
-        if (matchRtFlag && compound->expectedRt>0) {
-            peakGroupPtr->expectedRtDiff = abs(compound->expectedRt - (peakGroupPtr->meanRt));
-        }
-
-        emit(newPeakGroup(peakGroupPtr, false, true)); // note that 'isDeletePeakGroupPtr' flag is set to true
-
-        QCoreApplication::processEvents();
-
-        if (csvreports) {
-            csvreports->addGroup(&peakGroup);
-        }
-    }
 
     if (csvreports){
         csvreports->closeFiles();
@@ -298,7 +286,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
     qDebug() << "processCompoundSlices() EICs="   << eicCount;
     qDebug() << "processCompoundSlices() Groups="   << groups.size();
     qDebug() << "processCompoundSlices() Peaks="   << peakCount;
-    qDebug() << "Compound <--> Peak Group Matches=" << compoundMatches.size();
+    qDebug() << "Compound <--> Peak Group Matches=" << numPassingPeakGroups;
     qDebug() << "BackgroundPeakUpdate:processCompoundSlices() done. " << timer.elapsed() << " sec.";
 }
 

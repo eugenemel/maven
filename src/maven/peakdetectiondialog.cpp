@@ -197,9 +197,6 @@ void PeakDetectionDialog::runBackgroupJob(QString funcName) {
 
         peakupdater->start();	//start a background thread
 
-        //TODO: decide if this call is needed/desirable or not
-        //peakupdater->wait();    //wait until the background thread is complete
-
         qDebug() << "peakdetectiondialog::runBackgroundJob(QString funcName) Completed.";
     }
 }
