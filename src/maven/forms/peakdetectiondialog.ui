@@ -349,7 +349,23 @@
            </widget>
           </item>
           <item row="7" column="2">
-           <widget class="QComboBox" name="peakGroupCompoundMatchPolicyBox"/>
+           <widget class="QComboBox" name="peakGroupCompoundMatchPolicyBox">
+            <item>
+             <property name="text">
+              <string>All matches</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>All matches with highest MS2 score</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>One match with highest MS2 score (earliest alphabetically)</string>
+             </property>
+            </item>
+           </widget>
           </item>
          </layout>
         </widget>

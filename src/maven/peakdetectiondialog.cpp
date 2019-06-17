@@ -140,6 +140,22 @@ void PeakDetectionDialog::findPeaks() {
         peakupdater->minNumFragments = fragMinPeaks->value();
         peakupdater->searchAdductsFlag = reportAdducts->isChecked();
         peakupdater->excludeIsotopicPeaks = excludeIsotopicPeaks->isChecked();
+
+        string policyText = peakGroupCompoundMatchPolicyBox->itemText(peakGroupCompoundMatchPolicyBox->currentIndex()).toStdString();
+
+        cerr << "Policy Text:" << policyText << endl;
+
+        if (policyText == "All matches"){
+            peakupdater->peakGroupCompoundMatchingPolicy = ALL_MATCHES;
+            cerr << "[peakdetectiondialog]: set to ALL_MATCHES" << endl;
+        } else if (policyText == "All matches with highest MS2 score") {
+            peakupdater->peakGroupCompoundMatchingPolicy = TOP_SCORE_HITS;
+            cerr << "[peakdetectiondialog]: set to TOP_SCORE_HITS" << endl;
+        } else if (policyText == "One match with highest MS2 score (earliest alphabetically)") {
+            peakupdater->peakGroupCompoundMatchingPolicy = SINGLE_TOP_HIT;
+            cerr << "[peakdetectiondialog]: set to SINGLE_TOP_HIT" << endl;
+        }
+
         //peakupdater->peakGroupCompoundMatchingPolicy = //TODO
 
         if ( ! outputDirName->text().isEmpty()) {
