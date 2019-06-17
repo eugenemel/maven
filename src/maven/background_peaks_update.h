@@ -16,6 +16,12 @@ class EIC;
 
 extern Database DB;
 
+enum PeakGroupCompoundMatchingPolicy {
+    ALL_MATCHES,
+    SINGLE_TOP_HIT,
+    TOP_SCORE_HITS
+};
+
 class BackgroundPeakUpdate : public QThread
 {
   Q_OBJECT
@@ -75,6 +81,8 @@ public:
    //grouping of peaks across samples
    float grouping_maxRtWindow;		//do no group peaks that are greater than differ more than X in retention time
 
+   PeakGroupCompoundMatchingPolicy peakGroupCompoundMatchingPolicy;
+
    //stop looking for groups if group count is greater than X
     int limitGroupCount;
 
@@ -109,7 +117,7 @@ public:
 
 signals:
 	void updateProgressBar(QString,int,int);
-    void newPeakGroup(PeakGroup* group, bool add);
+    void newPeakGroup(PeakGroup* group, bool add, bool isDeletePeakGroupPtr);
 
 protected:
   void run(void);
@@ -131,6 +139,7 @@ private:
   void processSlices(vector<mzSlice*>&slices,string setName);
   void processSlice(mzSlice& slice);
   void processCompounds(vector<Compound*> set, string setName);
+  void processCompoundSlices(vector<mzSlice*>&slices, string setName);
   void computePeaks();
   void processMassSlices();
   void findPeaksOrbi(void);

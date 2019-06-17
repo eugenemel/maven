@@ -294,25 +294,6 @@
             </property>
            </widget>
           </item>
-          <item row="7" column="2">
-           <widget class="QSpinBox" name="eicMaxGroups">
-            <property name="suffix">
-             <string> best</string>
-            </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <number>10000</number>
-            </property>
-            <property name="value">
-             <number>5</number>
-            </property>
-            <property name="displayIntegerBase">
-             <number>10</number>
-            </property>
-           </widget>
-          </item>
           <item row="6" column="2">
            <widget class="QDoubleSpinBox" name="compoundRTWindow">
             <property name="prefix">
@@ -342,7 +323,7 @@
           <item row="7" column="0">
            <widget class="QLabel" name="label_16">
             <property name="text">
-             <string>Number of Reported Groups per Compound</string>
+             <string>Peak Group &lt;--&gt; Compound Matching Policy</string>
             </property>
            </widget>
           </item>
@@ -365,6 +346,25 @@
             <property name="text">
              <string>Report Adducts</string>
             </property>
+           </widget>
+          </item>
+          <item row="7" column="2">
+           <widget class="QComboBox" name="peakGroupCompoundMatchPolicyBox">
+            <item>
+             <property name="text">
+              <string>All matches</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>All matches with highest MS2 score</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>One match with highest MS2 score (earliest alphabetically)</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>

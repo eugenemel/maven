@@ -49,6 +49,5 @@ deploy:
   artifact: /Maven.*\.zip/            # upload Maven zip archive to release assets
   draft: false
   prerelease: false
-  tag: $(APPVEYOR_REPO_TAG_NAME)
   on:
     appveyor_repo_tag: true        # deploy on tag push only

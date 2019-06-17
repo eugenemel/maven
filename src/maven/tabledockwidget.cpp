@@ -245,7 +245,6 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
     if (clsf != NULL) {
         clsf->classify(group);
         group->updateQuality();
-        if(viewType == groupView) item->setText(8,QString::number(group->maxQuality,'f',2));
         item->setText(0,groupTagString(group));
     }
 
@@ -351,7 +350,7 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     group->groupStatistics();
     //cerr << "addRow" << group->groupId << " "  << group->meanMz << " " << group->meanRt << " " << group->children.size() << " " << group->tagString << endl;
 
-    if (group == NULL) return;
+    if (group == nullptr) return;
     if (group->peakCount() == 0 ) return;
     if (group->meanMz <= 0 ) return;
     if (group->deletedFlag || group->label == 'x') return; //deleted group
@@ -382,7 +381,7 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
         item->setText(5,QString::number(group->groupRank,'f',3));
         item->setText(6,QString::number(group->chargeState));
         item->setText(7,QString::number(group->isotopicIndex));
-        item->setText(8,QString::number(group->sampleCount));
+        item->setText(8,QString::number(group->peakCount()));
         item->setText(9,QString::number(group->ms2EventCount));
         item->setText(10,QString::number(group->maxNoNoiseObs));
         item->setText(11,QString::number(group->maxIntensity,'g',2));
@@ -417,9 +416,42 @@ bool TableDockWidget::hasPeakGroup(PeakGroup* group) {
     return false;
 }
 
-PeakGroup* TableDockWidget::addPeakGroup(PeakGroup* group, bool updateTable) {
-    if (group == NULL) return NULL;
+PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable) {
+    return TableDockWidget::addPeakGroup(group,updateTable, false);
+}
+
+/**
+ * This solves the problem of creating a PeakGroup* on a background thread, and ensuring
+ * that the pointer is deleted as soon as possible (that is, once the contents are retrieved and relocated).
+ *
+ * @brief TableDockWidget::addPeakGroup
+ * @param group
+ * @param updateTable
+ * @param isDeletePeakGroupPtr
+ * @return PeakGroup* that is guaranteed to persist as long as allgroups[] field persists
+ */
+PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, bool isDeletePeakGroupPtr) {
+    if (!group) return nullptr;
+
+    //debugging
+//    cerr << "[TableDockWidget::addPeakGroup] "
+//         << group << " Id="
+//         << group->groupId
+//         << ":(" << group->meanMz
+//         << "," << group->meanRt
+//         << ") <--> "
+//         << group->compound->name << ":"
+//         << group->adduct->name << ", score="
+//         << group->fragMatchScore.mergedScore << ", ms2EventCount="
+//         << group->ms2EventCount
+//         << endl;
+
     allgroups.push_back(*group);
+
+    if (isDeletePeakGroupPtr){
+       delete(group);
+    }
+
     PeakGroup* g = &allgroups[allgroups.size()-1];
 
     if (updateTable)  showAllGroups();
@@ -475,7 +507,7 @@ void TableDockWidget::showAllGroups() {
             QTreeWidgetItem* parent = parents[ metaGroupId ];
             addRow(&allgroups[i], parent); 
         } else {
-            addRow(&allgroups[i], NULL);
+            addRow(&allgroups[i], nullptr);
         }
     }
 
@@ -1011,7 +1043,7 @@ void TableDockWidget::findMatchingCompounds() {
     float ionizationMode = _mainwindow->getIonizationMode();
     for(int i=0; i < allgroups.size(); i++ ) {
         PeakGroup& g = allgroups[i];
-        vector<MassCalculator::Match> matches = DB.findMathchingCompounds(g.meanMz,ppm,ionizationMode);
+        vector<MassCalculator::Match> matches = DB.findMatchingCompounds(g.meanMz,ppm,ionizationMode);
         foreach(auto& m, matches) {
             g.compound = m.compoundLink;
             g.adduct   = m.adductLink;

@@ -92,30 +92,27 @@ void PeakDetectionDialog::show() {
 }
 
 void PeakDetectionDialog::findPeaks() {
-		if (mainwindow == NULL) return;
+        if (mainwindow == nullptr) return;
 
 		vector<mzSample*>samples = mainwindow->getSamples();
 		if ( samples.size() == 0 ) return;
 
-		if ( peakupdater !=  NULL )  {
+        if (peakupdater)  {
 			if ( peakupdater->isRunning() ) cancel();
 			if ( peakupdater->isRunning() ) return;
 		}
 
-		if ( peakupdater != NULL ) {
-				delete(peakupdater); 
-				peakupdater=NULL; 
+        if (peakupdater) {
+            delete(peakupdater);
+            peakupdater=nullptr;
 		}
 
 		peakupdater = new BackgroundPeakUpdate(this);
 		peakupdater->setMainWindow(mainwindow);
 
-		connect(peakupdater, SIGNAL(updateProgressBar(QString,int,int)), 
-						SLOT(setProgressBar(QString, int,int)));
+		connect(peakupdater, SIGNAL(updateProgressBar(QString,int,int)), SLOT(setProgressBar(QString, int,int)));
 	
-
-	
-		if (settings != NULL ) { 
+        if (settings) {
              peakupdater->eic_ppmWindow = settings->value("eic_ppmWindow").toDouble();
              peakupdater->eic_smoothingAlgorithm = settings->value("eic_smoothingAlgorithm").toInt();
 		}
@@ -134,7 +131,6 @@ void PeakDetectionDialog::findPeaks() {
         peakupdater->ppmMerge =  ppmStep->value();
         peakupdater->compoundPPMWindow = compoundPPMWindow->value();
 		peakupdater->compoundRTWindow = compoundRTWindow->value();
-        peakupdater->eicMaxGroups = eicMaxGroups->value();
 		peakupdater->avgScanTime = samples[0]->getAverageFullScanTime();
         peakupdater->rtStepSize = rtStep->value();
         peakupdater->mustHaveMS2 = compoundMustHaveMS2->isChecked() || featureMustHaveMs2->isChecked();
@@ -145,6 +141,15 @@ void PeakDetectionDialog::findPeaks() {
         peakupdater->searchAdductsFlag = reportAdducts->isChecked();
         peakupdater->excludeIsotopicPeaks = excludeIsotopicPeaks->isChecked();
 
+        string policyText = peakGroupCompoundMatchPolicyBox->itemText(peakGroupCompoundMatchPolicyBox->currentIndex()).toStdString();
+
+        if (policyText == "All matches"){
+            peakupdater->peakGroupCompoundMatchingPolicy = ALL_MATCHES;
+        } else if (policyText == "All matches with highest MS2 score") {
+            peakupdater->peakGroupCompoundMatchingPolicy = TOP_SCORE_HITS;
+        } else if (policyText == "One match with highest MS2 score (earliest alphabetically)") {
+            peakupdater->peakGroupCompoundMatchingPolicy = SINGLE_TOP_HIT;
+        }
 
         if ( ! outputDirName->text().isEmpty()) {
             peakupdater->setOutputDir(outputDirName->text());
@@ -160,8 +165,8 @@ void PeakDetectionDialog::findPeaks() {
      
 		TableDockWidget* peaksTable = mainwindow->addPeaksTable(title);
 		peaksTable->setWindowTitle(title);
-        connect(peakupdater, SIGNAL(newPeakGroup(PeakGroup*,bool)), peaksTable, SLOT(addPeakGroup(PeakGroup*,bool)));
-   		connect(peakupdater, SIGNAL(finished()), peaksTable, SLOT(showAllGroups()));
+        connect(peakupdater, SIGNAL(newPeakGroup(PeakGroup*,bool, bool)), peaksTable, SLOT(addPeakGroup(PeakGroup*,bool, bool)));
+        connect(peakupdater, SIGNAL(finished()), peaksTable, SLOT(showAllGroups()));
    		connect(peakupdater, SIGNAL(terminated()), peaksTable, SLOT(showAllGroups()));
    		connect(peakupdater, SIGNAL(finished()), this, SLOT(close()));
    		connect(peakupdater, SIGNAL(terminated()), this, SLOT(close()));
@@ -184,7 +189,7 @@ void PeakDetectionDialog::findPeaks() {
 }
 
 void PeakDetectionDialog::runBackgroupJob(QString funcName) { 
-	if (peakupdater == NULL ) return;
+    if (peakupdater == nullptr ) return;
 
 	if ( peakupdater->isRunning() ) { 
 			cancel(); 
@@ -192,8 +197,13 @@ void PeakDetectionDialog::runBackgroupJob(QString funcName) {
 
 	if ( ! peakupdater->isRunning() ) { 
 		peakupdater->setRunFunction(funcName);			//set thread function
-		peakupdater->start();	//start a background thread
-	}
+
+        qDebug() << "peakdetectiondialog::runBackgroundJob(QString funcName) Started.";
+
+        peakupdater->start();	//start a background thread
+
+        qDebug() << "peakdetectiondialog::runBackgroundJob(QString funcName) Completed.";
+    }
 }
 
 void PeakDetectionDialog::showInfo(QString text){ statusText->setText(text); }
