@@ -965,37 +965,42 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
 
             //cerr << "pullIsotopes: " << isotopeMass << " " << rtmin-w << " " <<  rtmin+w << " c=" << c << endl;
 
-            EIC* eic=NULL;
+            EIC* eic=nullptr;
             for( int i=0; i<maxIsotopeScanDiff; i++ ) {
                 float window=i*avgScanTime;
                 eic = sample->getEIC(mzmin,mzmax,rtmin-window,rtmax+window,1);
+                if(!eic) continue;
+
                 eic->setSmootherType((EIC::SmootherType) eic_smoothingAlgorithm);
                 eic->getPeakPositions(eic_smoothingWindow);
-                if ( eic->peaks.size() == 0 ) continue;
-                if ( eic->peaks.size() > 1 ) break;
-            }
-            if (!eic) continue;
+                if (eic->peaks.size() > 1 ) break;
 
-            Peak* nearestPeak=NULL; float d=FLT_MAX;
-            for(int i=0; i < eic->peaks.size(); i++ ) {
-                Peak& x = eic->peaks[i];
-                float dist = abs(x.rt - rt);
-                if ( dist > maxIsotopeScanDiff*avgScanTime) continue;
-                if ( dist < d ) { d=dist; nearestPeak = &x; }
+                //clean up
+                delete(eic); eic=nullptr;
             }
 
-            if (nearestPeak) {
-                if (isotopes.count(isotopeName)==0) {
-                    PeakGroup g;
-                    g.meanMz=isotopeMass;
-                    g.tagString=isotopeName;
-                    g.expectedAbundance=expectedAbundance;
-                    g.isotopeC13count= x.C13;
-                    isotopes[isotopeName] = g;
+            if (eic) {
+                Peak* nearestPeak=nullptr; float d=FLT_MAX;
+                for(int i=0; i < eic->peaks.size(); i++ ) {
+                    Peak& x = eic->peaks[i];
+                    float dist = abs(x.rt - rt);
+                    if ( dist > maxIsotopeScanDiff*avgScanTime) continue;
+                    if ( dist < d ) { d=dist; nearestPeak = &x; }
                 }
-                isotopes[isotopeName].addPeak(*nearestPeak);
+
+                if (nearestPeak) {
+                    if (isotopes.count(isotopeName)==0) {
+                        PeakGroup g;
+                        g.meanMz=isotopeMass;
+                        g.tagString=isotopeName;
+                        g.expectedAbundance=expectedAbundance;
+                        g.isotopeC13count= x.C13;
+                        isotopes[isotopeName] = g;
+                    }
+                    isotopes[isotopeName].addPeak(*nearestPeak);
+                }
+                delete(eic);
             }
-            delete(eic);
         }
     }
 
