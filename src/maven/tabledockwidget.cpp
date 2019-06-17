@@ -351,7 +351,7 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     group->groupStatistics();
     //cerr << "addRow" << group->groupId << " "  << group->meanMz << " " << group->meanRt << " " << group->children.size() << " " << group->tagString << endl;
 
-    if (group == NULL) return;
+    if (group == nullptr) return;
     if (group->peakCount() == 0 ) return;
     if (group->meanMz <= 0 ) return;
     if (group->deletedFlag || group->label == 'x') return; //deleted group
@@ -443,7 +443,8 @@ PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, boo
 //         << ") <--> "
 //         << group->compound->name << ":"
 //         << group->adduct->name << ", score="
-//         << group->fragMatchScore.mergedScore
+//         << group->fragMatchScore.mergedScore << ", ms2EventCount="
+//         << group->ms2EventCount
 //         << endl;
 
     allgroups.push_back(*group);
@@ -507,7 +508,7 @@ void TableDockWidget::showAllGroups() {
             QTreeWidgetItem* parent = parents[ metaGroupId ];
             addRow(&allgroups[i], parent); 
         } else {
-            addRow(&allgroups[i], NULL);
+            addRow(&allgroups[i], nullptr);
         }
     }
 

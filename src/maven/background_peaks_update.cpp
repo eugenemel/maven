@@ -231,7 +231,8 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
                       << peakGroupPtr->meanRt << ") <--> "
                       << peakGroupPtr->compound->name << ":"
                       << peakGroupPtr->adduct->name << ", score="
-                      << peakGroupPtr->fragMatchScore.mergedScore
+                      << peakGroupPtr->fragMatchScore.mergedScore << ", ms2EventCount="
+                      << peakGroupPtr->ms2EventCount
                       << endl;
 
                 numPassingPeakGroups++;
