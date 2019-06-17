@@ -16,6 +16,12 @@ class EIC;
 
 extern Database DB;
 
+enum PeakGroupCompoundMatchingPolicy {
+    ALL_MATCHES,
+    SINGLE_TOP_HIT,
+    TOP_SCORE_HITS
+};
+
 class BackgroundPeakUpdate : public QThread
 {
   Q_OBJECT
@@ -74,6 +80,8 @@ public:
 
    //grouping of peaks across samples
    float grouping_maxRtWindow;		//do no group peaks that are greater than differ more than X in retention time
+
+   PeakGroupCompoundMatchingPolicy peakGroupCompoundMatchingPolicy;
 
    //stop looking for groups if group count is greater than X
     int limitGroupCount;

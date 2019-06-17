@@ -28,6 +28,8 @@ BackgroundPeakUpdate::BackgroundPeakUpdate(QWidget*) {
 
     limitGroupCount=INT_MAX;
 
+    peakGroupCompoundMatchingPolicy=ALL_MATCHES;
+
     //peak detection
     eic_smoothingWindow= 10;
     eic_smoothingAlgorithm= 0;
@@ -109,6 +111,17 @@ void BackgroundPeakUpdate::processSlice(mzSlice& slice) {
 }
 
 void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string setName){
+
+    //for debuggging
+    cerr << "The PeakGroupCompoundMatchingPolicy is set to ";
+
+    if (peakGroupCompoundMatchingPolicy == ALL_MATCHES) {
+        cerr << "ALL_MATCHES" << endl;
+    } else if (peakGroupCompoundMatchingPolicy == SINGLE_TOP_HIT) {
+        cerr << "SINGLE_TOP_HIT" << endl;
+    } else if (peakGroupCompoundMatchingPolicy == TOP_SCORE_HITS) {
+        cerr << "TOP_SCORE_HITS" << endl;
+    }
 
     if (slices.size() == 0 ) return;
 
