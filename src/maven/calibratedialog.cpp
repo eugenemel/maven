@@ -76,7 +76,7 @@ void CalibrateDialog::runCalibration() {
 void CalibrateDialog::addPeakGroup(PeakGroup *grp, bool) {
     PeakGroup copygrp = *grp;
 
-    qDebug() << "ADD GRROUP:" << copygrp.meanMz << " " << copygrp.meanRt;
+    qDebug() << "ADD GROUP:" << copygrp.meanMz << " " << copygrp.meanRt;
     allgroups.push_back(copygrp);
     /*
     for(int i=0; i<allgroups.size(); i++) {
