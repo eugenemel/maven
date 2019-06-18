@@ -1,8 +1,8 @@
 #include "background_peaks_update.h"
 
 BackgroundPeakUpdate::BackgroundPeakUpdate(QWidget*) { 
-    clsf = NULL;	//initially classifier is not loaded
-    mainwindow = NULL;
+    clsf = nullptr;	//initially classifier is not loaded
+    mainwindow = nullptr;
     _stopped = true;
     //	setTerminationEnabled(false);
 
@@ -462,9 +462,12 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             group.computeFragPattern(productPpmTolr);
             // BROKEN group.findHighestPurityMS2Pattern(compoundPPMWindow);
 
-            matchFragmentation(&group);
+            //TODO: restructuring, expect that compound is always nullptr
 
-            if(mustHaveMS2) {
+            matchFragmentation(&group);
+            //If this is successful, then group.compound will not be nullptr.
+
+            if(mustHaveMS2 && group.compound) {
                 if(group.ms2EventCount == 0) continue;
                 if(group.fragMatchScore.mergedScore < this->minFragmentMatchScore) continue;
                 if(group.fragMatchScore.numMatches < this->minNumFragments ) continue;
