@@ -384,7 +384,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
        // if (compound)  cerr << "Searching for: " << compound->name << "\trt=" << compound->expectedRt << endl;
 
-        if (!compound && compound->hasGroup())
+        if (compound && compound->hasGroup())
             compound->unlinkGroup();
 
         if (checkConvergance ) {
