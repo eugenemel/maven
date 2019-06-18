@@ -460,12 +460,6 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             matchFragmentation(&group);
 
-            //if matchFragmentation() failed to match a non-null compound to a peak group,
-            //skip this peak group
-            if (!group.compound && compound) {
-                continue;
-            }
-
             if(mustHaveMS2) {
                 if(group.ms2EventCount == 0) continue;
                 if(group.fragMatchScore.mergedScore < this->minFragmentMatchScore) continue;
@@ -473,7 +467,6 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             }
 
-            if (compound) group.compound = compound;
             if (!slice->srmId.empty()) group.srmId = slice->srmId;
 
             if (matchRtFlag && compound != NULL && compound->expectedRt>0) {
