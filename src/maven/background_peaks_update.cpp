@@ -554,7 +554,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         }
 
         if(keepFoundGroups) {
-            cerr << "[BackgroundPeakUpdate::processSlices] "<< &allgroups[j] << " Id="<< (&allgroups[j])->groupId << ":(" << (&allgroups[j])->meanMz << "," << (&allgroups[j])->meanRt << ") <--> " << (&allgroups[j])->compound->name << ":" << (&allgroups[j])->adduct->name << endl;
+            //cerr << "[BackgroundPeakUpdate::processSlices] "<< &allgroups[j] << " Id="<< (&allgroups[j])->groupId << ":(" << (&allgroups[j])->meanMz << "," << (&allgroups[j])->meanRt << ")" << endl;
             emit(newPeakGroup(&allgroups[j],false, false));
             //qDebug() << "Emmiting..." << allgroups[j].meanMz;
             QCoreApplication::processEvents();
