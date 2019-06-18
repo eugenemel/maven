@@ -221,10 +221,14 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
                  if (static_cast<float>(s.numMatches) < minNumFragments) continue;
                  if (static_cast<float>(s.mergedScore) < minFragmentMatchScore) continue;
 
-                 //Rt criteria
+                 //Rt criteria and group rank
                  if (matchRtFlag && compound->expectedRt>0) {
                      float rtDiff =  abs(compound->expectedRt - (group.meanRt));
+                     group.expectedRtDiff = rtDiff;
+                     group.groupRank = rtDiff*rtDiff*(1.1-group.maxQuality)*(1/log(group.maxIntensity+1));
                      if (rtDiff > compoundRTWindow ) continue;
+                 } else {
+                     group.groupRank = (1.1-group.maxQuality)*(1/log(group.maxIntensity+1));
                  }
 
                  PeakGroup *peakGroupPtr = new PeakGroup(group);
@@ -469,7 +473,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             if (!slice->srmId.empty()) group.srmId = slice->srmId;
 
-            if (matchRtFlag && compound != NULL && compound->expectedRt>0) {
+            if (matchRtFlag && compound && compound->expectedRt>0) {
                 float rtDiff =  abs(compound->expectedRt - (group.meanRt));
                 group.expectedRtDiff = rtDiff;
                 group.groupRank = rtDiff*rtDiff*(1.1-group.maxQuality)*(1/log(group.maxIntensity+1));
