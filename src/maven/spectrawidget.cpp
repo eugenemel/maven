@@ -140,7 +140,7 @@ void SpectraWidget::setTitle() {
 }
 
 void SpectraWidget::setScan(Scan* scan) {
-    if ( scan == NULL ) return;
+    if (!scan) return;
     setCurrentScan(scan);
     cerr << "SpectraWidget::setScan(scan) " << endl;
     findBounds(true,true);
@@ -149,7 +149,7 @@ void SpectraWidget::setScan(Scan* scan) {
 }
 
 void SpectraWidget::setScan(Scan* scan, float mzmin, float mzmax) {
-    if ( scan == NULL ) return;
+    if (!scan) return;
     cerr << "SpectraWidget::setScan(scan,min,max) : " << scan->scannum << endl;
     setCurrentScan(scan);
     _minX = mzmin;
