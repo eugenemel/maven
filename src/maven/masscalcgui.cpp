@@ -185,7 +185,12 @@ void MassCalcWidget::keggLink(QString formula){
 void MassCalcWidget::showInfo() {
     if (matches.size() == 0) return;
 
-    QTreeWidgetItem* item = treeWidget->selectedItems().last();
+    QList<QTreeWidgetItem*> items = treeWidget->selectedItems();
+    if (items.size() == 0) {
+        return;
+    }
+
+    QTreeWidgetItem* item = items.last();
     if(!item) return;
 
     QVariant v = item->data(0,Qt::UserRole);
