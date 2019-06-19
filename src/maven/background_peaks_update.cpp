@@ -212,6 +212,21 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
              multimap<double, PeakGroup*> peakGroupCompoundMatches = {};
              double maxScore = -1;
 
+             vector<pair<Compound*, Adduct*>> compoundAdductMatches;
+
+             //TODO: an effort towards unifying Peaks Dialog and Compounds Dialog
+             //If slices are not pre-associated with compounds, search for them in the database.
+//             if (!slice->compound) {
+//                 vector<MassCalculator::Match> compoundMatches = DB.findMatchingCompounds(group.meanMz, compoundPPMWindow, ionizationMode);
+//                 for (auto match : compoundMatches) {
+//                     compoundAdductMatches.push_back(make_pair(match.compoundLink, match.adductLink));
+//                 }
+//             } else {
+//                 for (auto compound : slice->compoundVector) {
+//                     compoundAdductMatches.push_back(make_pair(compound, slice->adduct));
+//                 }
+//             }
+
              for (Compound *compound : slice->compoundVector){
 
                  //MS2 criteria
