@@ -85,11 +85,11 @@ void BackgroundPeakUpdate::run(void) {
 	if ( runFunction == "findPeaksQQQ" ) {
 		findPeaksQQQ();
 	} else if ( runFunction == "processSlices" ) { 
-                processSlices();
+        processSlices();
 	} else if ( runFunction == "processMassSlices" ) { 
 		processMassSlices();
     } else if  (runFunction == "pullIsotopes" ) {
-                 pullIsotopes(_group);
+        pullIsotopes(_group);
 	} else if  ( runFunction == "computePeaks" ) { 
 		computePeaks();
 	} else {
@@ -651,7 +651,12 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
 
     typedef multimap<string, Compound*>::iterator compoundIterator;
 
+    int counter = 0;
+    int allFormulaeCount = static_cast<int>(formulae.size());
     for (string formula : formulae) {
+
+        counter++;
+        updateProgressBar("Preparing Libraries for Search", counter, allFormulaeCount);
 
         pair<compoundIterator, compoundIterator> compounds = stringToCompoundMap.equal_range(formula);
 
@@ -707,8 +712,6 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
 
     //printSettings();
     //processSlices(slices,setName); //old approach
-
-    //TODO: check for memory leaks in compoundVector
 
     //new approach
     processCompoundSlices(slices, setName);
