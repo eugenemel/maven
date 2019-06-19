@@ -727,7 +727,7 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
 bool BackgroundPeakUpdate::sliceHasMS2Event(mzSlice* slice) {
     //check if slice has ms2events
     for(mzSample* sample: samples) {
-        if(sample->getFragmenationEvents(slice).size() > 0 ) return true;
+        if(sample->getFragmentationEvents(slice).size() > 0 ) return true;
     }
    return false;
 }
