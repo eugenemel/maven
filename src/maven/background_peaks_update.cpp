@@ -617,7 +617,6 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
 
     vector<mzSlice*>slices;
     MassCalculator massCalc;
-    emit (updateProgressBar( "Computing Mass Slices", 1, 10 ));
 
     vector<Adduct*> adductList;
     if (ionizationMode > 0) adductList.push_back(MassCalculator::PlusHAdduct);
@@ -630,7 +629,13 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
     multimap<string, Compound*> stringToCompoundMap = {};
     std::set<string> formulae = std::set<string>();
 
+    int compoundCounter = 0;
+    int numCompounds = static_cast<int>(set.size());
+
     for(Compound* c : set){
+
+        compoundCounter++;
+        emit(updateProgressBar("Computing Mass Slices", compoundCounter, numCompounds));
 
         if (!c){
             continue;
@@ -656,7 +661,7 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
     for (string formula : formulae) {
 
         counter++;
-        updateProgressBar("Preparing Libraries for Search", counter, allFormulaeCount);
+        emit(updateProgressBar("Preparing Libraries for Search", counter, allFormulaeCount));
 
         pair<compoundIterator, compoundIterator> compounds = stringToCompoundMap.equal_range(formula);
 
@@ -699,6 +704,7 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
 //            }
 //            cerr << endl;
 
+            //TODO: this is very slow
             if(mustHaveMS2) {
                 if (not sliceHasMS2Event(slice)) {
                     delete(slice);
