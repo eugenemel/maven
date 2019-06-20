@@ -35,6 +35,8 @@ void MassCalcWidget::setMass(float mz) {
     //delete_all(matches);
 	matches.resize(0); //clean up
     getMatches();
+
+    cerr << "[MassCalcWidget::setPeakGroup()] setMass() call" << endl;
     showTable();
 }
 
@@ -77,6 +79,7 @@ void MassCalcWidget::compute() {
 
     _mw->setStatusText(tr("Found %1 formulas").arg(matches.size()));
 
+     cerr << "[MassCalcWidget::setPeakGroup()] compute() call" << endl;
      showTable(); 
 }
 
@@ -96,6 +99,9 @@ void MassCalcWidget::showTable() {
         //no duplicates in the list
         Compound* c = matches[i].compoundLink;
         Adduct *  a = matches[i].adductLink;
+
+        cerr << c->name << " SCORE=" << matches[i].fragScore.getScoreByName(scoringAlgorithm) << endl;
+
         QString matchName = QString(matches[i].name.c_str() );
         QString preMz = QString::number( matches[i].mass , 'f', 4);
         QString ppmDiff = QString::number( matches[i].diff , 'f', 2);
@@ -133,7 +139,10 @@ void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
     matches = DB.findMatchingCompounds(_mz,_ppm,_charge);
     cerr << "MassCalcWidget::setPeakGroup(PeakGroup* grp)" << endl;
 
-    if(grp->ms2EventCount == 0) grp->computeFragPattern(fragmentPPM->value());
+    if (grp->fragmentationPattern.nobs() == 0){
+        grp->computeFragPattern(fragmentPPM->value());
+    }
+
     if(grp->fragmentationPattern.nobs() == 0) return;
 
     for(MassCalculator::Match& m: matches ) {
@@ -142,6 +151,7 @@ void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
        if (cpd->expectedRt > 0) m.rtdiff =  grp->meanRt - cpd->expectedRt;
 
     }
+    cerr << "[MassCalcWidget::setPeakGroup()] showTable() call" << endl;
     showTable();
 }
 
@@ -158,6 +168,8 @@ void MassCalcWidget::setFragmentationScan(Scan* scan) {
        Compound* cpd = m.compoundLink;
        m.fragScore = cpd->scoreCompoundHit(&f,fragmentPPM->value(),false);
     }
+
+    cerr << "[MassCalcWidget::setFragmentationScan()] showTable() call" << endl;
     showTable();
 }
 

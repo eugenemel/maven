@@ -775,7 +775,7 @@ void MainWindow::writeSettings() {
         }
     }
 
-    qDebug() << "Settings saved to " << settings->fileName();
+    qDebug() << "Settings saved to " << settingsgit stait sta->fileName();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -1099,7 +1099,7 @@ void MainWindow::showSRMList() {
 
 
 void MainWindow::setPeakGroup(PeakGroup* group) {
-    if ( group == NULL ) return;
+    if (!group) return;
 
     qDebug() << "MainWindow::setPeakGroup(PeakGroup)" << group;
     searchText->setText(QString::number(group->meanMz,'f',8));
@@ -1120,7 +1120,9 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
         fragmenationSpectraWidget->overlayPeakGroup(group);
     }
 
-    if (massCalcWidget->isVisible()) { massCalcWidget->setPeakGroup(group); }
+    if (massCalcWidget->isVisible()) {
+        massCalcWidget->setPeakGroup(group);
+    }
 
     /*
     if ( scatterDockWidget->isVisible() ) {
@@ -1128,6 +1130,7 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
     }
     */
 
+    //TODO: remove / restructure this!
     if (group->peaks.size() > 0) showPeakInfo(&(group->peaks[0]));
 }
 
