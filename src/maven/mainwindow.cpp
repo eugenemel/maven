@@ -1122,6 +1122,7 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
 
     if (massCalcWidget->isVisible()) {
         massCalcWidget->setPeakGroup(group);
+        massCalcWidget->lineEdit->setText(QString::number(group->meanMz,'f',5));
     }
 
     /*
@@ -1130,7 +1131,7 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
     }
     */
 
-    //TODO: remove / restructure this!
+    //note that this is the only caller of showPeakInfo()
     if (group->peaks.size() > 0) showPeakInfo(&(group->peaks[0]));
 }
 
@@ -1270,6 +1271,7 @@ vector<mzSlice*> MainWindow::getSrmSlices() {
 }
 
 
+//only caller is setPeakGroup().
 void MainWindow::showPeakInfo(Peak* _peak) {
     if (_peak == NULL) return;
 
@@ -1287,7 +1289,6 @@ void MainWindow::showPeakInfo(Peak* _peak) {
     }
 
     if( massCalcWidget->isVisible() ) {
-        massCalcWidget->setMass(_peak->peakMz);
         massCalcWidget->setCharge(ionizationMode);
     }
 

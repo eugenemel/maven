@@ -99,9 +99,6 @@ void MassCalcWidget::showTable() {
         //no duplicates in the list
         Compound* c = matches[i].compoundLink;
         Adduct *  a = matches[i].adductLink;
-
-        cerr << c->name << " SCORE=" << matches[i].fragScore.getScoreByName(scoringAlgorithm) << endl;
-
         QString matchName = QString(matches[i].name.c_str() );
         QString preMz = QString::number( matches[i].mass , 'f', 4);
         QString ppmDiff = QString::number( matches[i].diff , 'f', 2);
