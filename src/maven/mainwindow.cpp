@@ -775,7 +775,7 @@ void MainWindow::writeSettings() {
         }
     }
 
-    qDebug() << "Settings saved to " << settingsgit stait sta->fileName();
+    qDebug() << "Settings saved to " << settings->fileName();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
