@@ -159,7 +159,6 @@ void MassCalcWidget::setFragmentationScan(Scan* scan) {
 
     _mz = scan->precursorMz;
     matches = DB.findMatchingCompounds(_mz,_ppm,_charge);
-    cerr << "MassCalcWidget::setPeakGroup(PeakGroup* grp)" << endl;
 
     for(MassCalculator::Match& m: matches ) {
        Compound* cpd = m.compoundLink;
