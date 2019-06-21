@@ -143,6 +143,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
     baseline_dropTopX =  settings->value("baseline_quantile").toInt();
 
     unsigned int numPassingPeakGroups = 0;
+    unsigned long numAllPeakGroups = 0;
     vector<PeakGroup*> groups; //for alignment only
 
     //write reports
@@ -170,6 +171,8 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
         eicCount += eics.size();
 
         vector<PeakGroup> peakgroups = EIC::groupPeaks(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow);
+
+        numAllPeakGroups += peakgroups.size();
 
          for (PeakGroup group : peakgroups) {
 
@@ -367,6 +370,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 
     qDebug() << "processCompoundSlices() Slices=" << slices.size();
     qDebug() << "processCompoundSlices() EICs="   << eicCount;
+    qDebug() << "processCompoundSlices() Groups before filtering=" << numAllPeakGroups;
     qDebug() << "processCompoundSlices() Groups="   << groups.size();
     qDebug() << "processCompoundSlices() Peaks="   << peakCount;
     qDebug() << "Compound <--> Peak Group Matches=" << numPassingPeakGroups;
@@ -635,7 +639,7 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
     for(Compound* c : set){
 
         compoundCounter++;
-        emit(updateProgressBar("Computing Mass Slices", compoundCounter, numCompounds));
+        emit(updateProgressBar("Preparing Libraries for Search", compoundCounter, numCompounds));
 
         if (!c){
             continue;
@@ -661,7 +665,7 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
     for (string formula : formulae) {
 
         counter++;
-        emit(updateProgressBar("Preparing Libraries for Search", counter, allFormulaeCount));
+        emit(updateProgressBar("Computing Mass Slices", counter, allFormulaeCount));
 
         pair<compoundIterator, compoundIterator> compounds = stringToCompoundMap.equal_range(formula);
 
