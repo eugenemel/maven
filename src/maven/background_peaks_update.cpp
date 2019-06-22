@@ -660,6 +660,30 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
 
     typedef multimap<string, Compound*>::iterator compoundIterator;
 
+    //TODO: instead of separating by sample, just organize all samples together into a single vector
+    map<mzSample*, vector<Scan*>> allMs2Scans = {};
+
+    if (mustHaveMS2) {
+        for (mzSample *sample : samples){
+
+            vector<Scan*> scanVector;
+
+            for (Scan *scan : sample->scans){
+                if (scan->mslevel == 2){
+                    scanVector.push_back(scan);
+                }
+            }
+
+              sort(scanVector.begin(), scanVector.end(),
+              [ ](const Scan* lhs, const Scan* rhs){
+                    return lhs->precursorMz < rhs->precursorMz;
+                }
+              );
+
+            allMs2Scans.insert(make_pair(sample, scanVector));
+        }
+    }
+
     int counter = 0;
     int allFormulaeCount = static_cast<int>(formulae.size());
     for (string formula : formulae) {
@@ -708,12 +732,41 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
 //            }
 //            cerr << endl;
 
-            //TODO: this is very slow
             if(mustHaveMS2) {
-                if (not sliceHasMS2Event(slice)) {
+
+                bool isKeepSlice = false;
+                for (mzSample *sample : samples){
+                    map<mzSample*, vector<Scan*>>::iterator it = allMs2Scans.find(sample);
+
+                    if (it != allMs2Scans.end()){
+                        vector<Scan*> scanVector = it->second;
+
+                        vector<Scan*>::iterator low = lower_bound(scanVector.begin(), scanVector.end(), slice->mzmin,
+                                               [](const Scan* scan, const double& val){
+                                    return scan->precursorMz < val;
+                        });
+
+                        for (vector<Scan*>::iterator scanIterator = low; scanIterator != scanVector.end(); scanIterator++){
+                             Scan *scan = *scanIterator;
+                             if (scan->precursorMz >= slice->mzmin && scan->precursorMz <= slice->mzmax){
+                                 isKeepSlice = true;
+                                 break;
+                             } else if (scan->precursorMz > slice->mzmax){
+                                 break;
+                             }
+                        }
+                    }
+
+                    if (isKeepSlice){
+                        break;
+                    }
+                }
+
+                if (!isKeepSlice){
                     delete(slice);
                     continue;
                 }
+
             }
 
             slices.push_back(slice);
