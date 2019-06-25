@@ -21,10 +21,10 @@ BackgroundPeakUpdate::BackgroundPeakUpdate(QWidget*) {
     keepFoundGroups=true;
     showProgressFlag=true;
 
-    mzBinStep=0.01;
+    mzBinStep=static_cast<float>(0.01);
     rtStepSize=20;
     ppmMerge=30;
-    avgScanTime=0.2;
+    avgScanTime=static_cast<float>(0.2);
 
     limitGroupCount=INT_MAX;
 
@@ -57,7 +57,7 @@ BackgroundPeakUpdate::BackgroundPeakUpdate(QWidget*) {
 
     //triple quad matching options
     amuQ1=0.25;
-    amuQ3=0.3;
+    amuQ3=static_cast<float>(0.3);
 
 
     //fragmentaiton matching
@@ -72,7 +72,7 @@ BackgroundPeakUpdate::~BackgroundPeakUpdate() {
 
 void BackgroundPeakUpdate::run(void) {
 
-	if(mainwindow == NULL)   { quit(); return; }
+    if(!mainwindow)   { quit(); return; }
 	_stopped = false;
 
     if ( samples.size() == 0) samples = mainwindow->getSamples(); //get samples
@@ -396,8 +396,8 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
     int peakCount=0;
 
     QSettings* settings = mainwindow->getSettings();
-    amuQ1 = settings->value("amuQ1").toDouble();
-    amuQ3 = settings->value("amuQ3").toDouble();
+    amuQ1 = settings->value("amuQ1").toFloat();
+    amuQ3 = settings->value("amuQ3").toFloat();
     baseline_smoothingWindow = settings->value("baseline_smoothing").toInt();
     baseline_dropTopX =  settings->value("baseline_quantile").toInt();
 
