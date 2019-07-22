@@ -40,7 +40,7 @@ void LibraryMangerDialog::loadLibrary() {
         QStringList dataLocations = QStandardPaths::standardLocations(QStandardPaths::DataLocation);
 
         for (QString dataLocation : dataLocations) {
-            qDebug() << "Maven SQLite library may be located at: \"" << dataLocation << "/ligand.db\"" << endl;
+            qDebug() << "Maven SQLite library ligand.db may be located at:" << dataLocation;
         }
     }
     updateLibraryStats();
