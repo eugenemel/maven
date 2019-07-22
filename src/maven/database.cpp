@@ -164,6 +164,22 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             loadcount++;
         }
 
+        bool isHasUnequalMatches = false;
+        for (Compound *cpd : compoundsDB) {
+            if (cpd->fragment_mzs.size() != cpd->fragment_intensity.size()){
+                isHasUnequalMatches = true;
+                cerr << "COMPOUND: " << cpd->name << ": #mzs=" << cpd->fragment_mzs.size() << "; #ints=" << cpd->fragment_intensity.size() << endl;
+            }
+        }
+
+        cerr << "COMPOUND LIBRARY HAS ANY COMPOUNDS WITH MISMATCHED (m/z, intensity) PAIRS? " << (isHasUnequalMatches ? "yes" : "no") << endl;
+        if (isHasUnequalMatches) {
+            qDebug() << "One or more compounds in the library" << databaseName << "does not have proper corresponding (m/z, intensity) pairs in its database.";
+            qDebug() << "Please delete this library and reload it.";
+            qDebug() << "Exiting Program.";
+            abort();
+        }
+
         sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
         qDebug() << "loadCompoundSQL : " << databaseName << compoundsDB.size();
         if(loadcount > 0 and databaseName != "ALL") loadedDatabase[databaseName] = 1;
@@ -633,6 +649,22 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
 
     if (cpd) compoundSet.push_back(cpd);
 
+    bool isHasUnequalMatches = false;
+    for (Compound *cpd : compoundSet) {
+        if (cpd->fragment_mzs.size() != cpd->fragment_intensity.size()){
+            isHasUnequalMatches = true;
+            cerr << "COMPOUND: " << cpd->name << ": #mzs=" << cpd->fragment_mzs.size() << "; #ints=" << cpd->fragment_intensity.size() << endl;
+        }
+    }
+
+    cerr << "COMPOUND LIBRARY HAS ANY COMPOUNDS WITH MISMATCHED (m/z, intensity) PAIRS? " << (isHasUnequalMatches ? "yes" : "no") << endl;
+    if (isHasUnequalMatches) {
+        qDebug() << "One or more compounds in the library" << fileName << "does not have proper corresponding (m/z, intensity) pairs in its database.";
+        qDebug() << "Please delete this library and reload it.";
+        qDebug() << "Exiting Program.";
+        abort();
+    }
+
     //compoundSet.push_back(compound);
     qDebug() << "Database::loadNISTLibrary() in" << compoundSet.size()  << " compounds.";
     //sort(compoundSet.begin(),compoundSet.end(), Compound::compMass);
@@ -700,8 +732,19 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
             QStringList fragIntensity;
 
             for(string s : c->category) { cat << s.c_str(); }
-            for(float f :  c->fragment_mzs) { fragMz << QString::number(f,'f',5); }
-            for(float f :  c->fragment_intensity) { fragIntensity << QString::number(f,'f',5); }
+
+            for (unsigned int i = 0; i < c->fragment_mzs.size(); i++) {
+                float mz = c->fragment_mzs[i];
+                float intensity = c->fragment_intensity[i];
+
+                QString mzQString = QString::number(mz, 'f', 5);
+                QString intensityQString = QString::number(intensity, 'f', 5);
+
+                if (mzQString != "0.00000" && intensityQString != "0.00000") {
+                    fragMz << mzQString;
+                    fragIntensity << intensityQString;
+                }
+            }
 
 	    QVariant cid =  QVariant(QVariant::Int);
 	    if (c->cid) cid = QVariant(c->cid);
