@@ -164,24 +164,27 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             loadcount++;
         }
 
-        bool isHasUnequalMatches = false;
-        for (Compound *cpd : compoundsDB) {
-            if (cpd->fragment_mzs.size() != cpd->fragment_intensity.size()){
-                isHasUnequalMatches = true;
-                cerr << "COMPOUND: " << cpd->name << ": #mzs=" << cpd->fragment_mzs.size() << "; #ints=" << cpd->fragment_intensity.size() << endl;
+        if (loadcount > 0) {
+            bool isHasUnequalMatches = false;
+            for (Compound *cpd : compoundsDB) {
+                if (cpd->fragment_mzs.size() != cpd->fragment_intensity.size()){
+                    isHasUnequalMatches = true;
+                    cerr << "COMPOUND: " << cpd->name << ": #mzs=" << cpd->fragment_mzs.size() << "; #ints=" << cpd->fragment_intensity.size() << endl;
+                }
             }
+
+            cerr << "COMPOUND LIBRARY HAS ANY COMPOUNDS WITH MISMATCHED (m/z, intensity) PAIRS? " << (isHasUnequalMatches ? "yes" : "no") << endl;
+            if (isHasUnequalMatches) {
+                qDebug() << "One or more compounds in the library" << databaseName << "does not have proper corresponding (m/z, intensity) pairs in its database.";
+                qDebug() << "Please delete this library and reload it.";
+                qDebug() << "Exiting Program.";
+                abort();
+            }
+
+            sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
+            qDebug() << "loadCompoundSQL : " << databaseName << compoundsDB.size();
         }
 
-        cerr << "COMPOUND LIBRARY HAS ANY COMPOUNDS WITH MISMATCHED (m/z, intensity) PAIRS? " << (isHasUnequalMatches ? "yes" : "no") << endl;
-        if (isHasUnequalMatches) {
-            qDebug() << "One or more compounds in the library" << databaseName << "does not have proper corresponding (m/z, intensity) pairs in its database.";
-            qDebug() << "Please delete this library and reload it.";
-            qDebug() << "Exiting Program.";
-            abort();
-        }
-
-        sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
-        qDebug() << "loadCompoundSQL : " << databaseName << compoundsDB.size();
         if(loadcount > 0 and databaseName != "ALL") loadedDatabase[databaseName] = 1;
 }
 
