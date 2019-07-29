@@ -1,4 +1,4 @@
 [submodule "src/maven_core"]
 	path = src/maven_core
-	url = git@github.com:eugenemel/maven_core.git
+	url = https://github.com/eugenemel/maven_core.git
 	branch = master
