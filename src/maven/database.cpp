@@ -68,6 +68,9 @@ void Database::closeAll() {
     mzUtils::delete_all(adductsDB);     adductsDB.clear();
     mzUtils::delete_all(compoundsDB);   compoundsDB.clear();
     mzUtils::delete_all(fragmentsDB);   fragmentsDB.clear();
+
+    ligandDB.close();
+    ligandDB.removeDatabase(QSqlDatabase::defaultConnection);
 }
 
 multimap<string,Compound*> Database::keywordSearch(string needle) { 
