@@ -32,6 +32,7 @@ class Database {
         void reloadAll();  //loads all tables
         void closeAll();
         bool connect(QString filename);
+        bool disconnect();
     
         vector<Adduct*> loadAdducts(string filename);
         vector<Adduct*> defaultAdducts();
