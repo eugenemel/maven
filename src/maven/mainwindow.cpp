@@ -40,8 +40,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
  qRegisterMetaType<QTextCursor>("QTextCursor");
 
-  setWindowTitle(PROGRAMNAME + " " + QString(MAVEN_VERSION));
-  qDebug() << "APP=" <<  QApplication::applicationName() << "VER=" <<  QApplication::applicationVersion();
+ setWindowTitle(PROGRAMNAME + " " + QString(MAVEN_VERSION));
+ qDebug() << "APP=" <<  QApplication::applicationName() << "VER=" <<  QApplication::applicationVersion();
 
   readSettings();
 
@@ -72,216 +72,216 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     DB.loadCompoundsSQL("KNOWNS", DB.getLigandDB());
     //DB.loadCompoundsSQL("ALL");
 
-    //QString commonFragments =   methodsFolder + "/" + "FRAGMENTS.csv";
-    //if(QFile::exists(commonFragments)) DB.fragmentsDB = DB.loadAdducts(commonFragments.toStdString());
+//    //QString commonFragments =   methodsFolder + "/" + "FRAGMENTS.csv";
+//    //if(QFile::exists(commonFragments)) DB.fragmentsDB = DB.loadAdducts(commonFragments.toStdString());
 
-    QString commonAdducts =     methodsFolder + "/" + "ADDUCTS.csv";
-    if(QFile::exists(commonAdducts))  {
-        DB.adductsDB = DB.loadAdducts(commonAdducts.toStdString());
-    } else {
-        DB.adductsDB  = DB.defaultAdducts();
-    }
+//    QString commonAdducts =     methodsFolder + "/" + "ADDUCTS.csv";
+//    if(QFile::exists(commonAdducts))  {
+//        DB.adductsDB = DB.loadAdducts(commonAdducts.toStdString());
+//    } else {
+//        DB.adductsDB  = DB.defaultAdducts();
+//    }
 
-    clsf = new ClassifierNeuralNet();    //clsf = new ClassifierNaiveBayes();
-    QString clsfModelFilename = methodsFolder +  "/"  +   defaultModelFile;
-    if(QFile::exists(clsfModelFilename)) {
-        clsf->loadModel(clsfModelFilename.toStdString());
-    } else {
-       clsf->loadDefaultModel();
-        qDebug() << "ERROR: Can't find defult.model in method folder="  << methodsFolder;
-        qDebug() << "       Using build in neural network model";
-    }
-
-
-
-    //progress Bar on the bottom of the page
-    statusText  = new QLabel(this);
-    statusText->setOpenExternalLinks(true);
-    statusBar()->addPermanentWidget(statusText,1);
-
-    progressBar =  new QProgressBar(this);
-    progressBar->hide();
-    statusBar()->addPermanentWidget(progressBar);
-
-    QToolButton *btnBugs = new QToolButton(this);
-    btnBugs->setIcon(QIcon(rsrcPath + "/bug.png"));
-    btnBugs->setToolTip(tr("Bug!"));
-    connect(btnBugs,SIGNAL(clicked()),SLOT(reportBugs()));
-    statusBar()->addPermanentWidget(btnBugs,0);
-
-    setWindowIcon(QIcon(":/images/icon.png"));
-
-    //dock widgets
-    setDockOptions(QMainWindow::AllowNestedDocks | QMainWindow::VerticalTabs | QMainWindow::AnimatedDocks );
-
-    //set main dock widget
-    eicWidget = new EicWidget(this);
-    setCentralWidget(eicWidgetController());
-
-    spectraWidget = new SpectraWidget(this);
-    isotopeWidget =  new IsotopeWidget(this);
-    massCalcWidget =  new MassCalcWidget(this);
-    covariantsPanel= new TreeDockWidget(this,"Covariants",3);
-
-    fragmentationEventsWidget	= new TreeDockWidget(this,"MS2 List", 7);
-    fragmentationEventsWidget->setupScanListHeader();
-
-    srmDockWidget 	= new TreeDockWidget(this,"SRM List", 1);
-    ligandWidget = new LigandWidget(this);
-    heatmap	 = 	  new HeatMap(this);
-    galleryWidget = new GalleryWidget(this);
-    bookmarkedPeaks = addPeaksTable("Bookmarks");
-    spectraDockWidget =  createDockWidget("Spectra",spectraWidget);
-    heatMapDockWidget =  createDockWidget("HeatMap",heatmap);
-    galleryDockWidget =  createDockWidget("Gallery",galleryWidget);
-    scatterDockWidget =  new ScatterPlot(this);
-    projectDockWidget =  new ProjectDockWidget(this);
-    rconsoleDockWidget =  new RconsoleWidget(this);
-    fragmenationSpectraWidget = new SpectraWidget(this);
-    fragmenationSpectraDockWidget =  createDockWidget("Fragmentation Spectra",fragmenationSpectraWidget);
-    ligandWidget->setVisible(false);
-    covariantsPanel->setVisible(false);
-    isotopeWidget->setVisible(false);
-    massCalcWidget->setVisible(false);
-    fragmentationEventsWidget->setVisible(false);
-    bookmarkedPeaks->setVisible(false);
-    spectraDockWidget->setVisible(false);
-    scatterDockWidget->setVisible(false);
-    heatMapDockWidget->setVisible(false);
-    galleryDockWidget->setVisible(false);
-    projectDockWidget->setVisible(false);
-    rconsoleDockWidget->setVisible(false);
-    fragmenationSpectraDockWidget->setVisible(false);    //treemap->setVisible(false);
-    //peaksPanel->setVisible(false);
-    //treeMapDockWidget =  createDockWidget("TreeMap",treemap);
+//    clsf = new ClassifierNeuralNet();    //clsf = new ClassifierNaiveBayes();
+//    QString clsfModelFilename = methodsFolder +  "/"  +   defaultModelFile;
+//    if(QFile::exists(clsfModelFilename)) {
+//        clsf->loadModel(clsfModelFilename.toStdString());
+//    } else {
+//       clsf->loadDefaultModel();
+//        qDebug() << "ERROR: Can't find defult.model in method folder="  << methodsFolder;
+//        qDebug() << "       Using build in neural network model";
+//    }
 
 
 
-    //
-    //DIALOGS
-    //
-    peakDetectionDialog = new PeakDetectionDialog(this);
-    peakDetectionDialog->setMainWindow(this);
-    peakDetectionDialog->setSettings(settings);
+//    //progress Bar on the bottom of the page
+//    statusText  = new QLabel(this);
+//    statusText->setOpenExternalLinks(true);
+//    statusBar()->addPermanentWidget(statusText,1);
 
-    //alignment dialog
-    alignmentDialog	 =  new AlignmentDialog(this);
-    connect(alignmentDialog->alignButton,SIGNAL(clicked()),SLOT(Align()));
-    connect(alignmentDialog->UndoAlignment,SIGNAL(clicked()),SLOT(UndoAlignment()));
+//    progressBar =  new QProgressBar(this);
+//    progressBar->hide();
+//    statusBar()->addPermanentWidget(progressBar);
 
-    //calibration dialog
-    calibrateDialog	 =  new CalibrateDialog(this);
+//    QToolButton *btnBugs = new QToolButton(this);
+//    btnBugs->setIcon(QIcon(rsrcPath + "/bug.png"));
+//    btnBugs->setToolTip(tr("Bug!"));
+//    connect(btnBugs,SIGNAL(clicked()),SLOT(reportBugs()));
+//    statusBar()->addPermanentWidget(btnBugs,0);
 
-    //Compound Library  Manager
-    libraryDialog = new LibraryMangerDialog(this);
-    libraryDialog->setMainWindow(this);
+//    setWindowIcon(QIcon(":/images/icon.png"));
 
+//    //dock widgets
+//    setDockOptions(QMainWindow::AllowNestedDocks | QMainWindow::VerticalTabs | QMainWindow::AnimatedDocks );
 
-    //rconsole dialog
-    //rconsoleDialog	 =  new RConsoleDialog(this);
+//    //set main dock widget
+//    eicWidget = new EicWidget(this);
+//    setCentralWidget(eicWidgetController());
 
-    //settings dialog
-    settingsForm = new SettingsForm(settings,this);
+//    spectraWidget = new SpectraWidget(this);
+//    isotopeWidget =  new IsotopeWidget(this);
+//    massCalcWidget =  new MassCalcWidget(this);
+//    covariantsPanel= new TreeDockWidget(this,"Covariants",3);
 
-    spectraMatchingForm =  new SpectraMatching(this);
+//    fragmentationEventsWidget	= new TreeDockWidget(this,"MS2 List", 7);
+//    fragmentationEventsWidget->setupScanListHeader();
 
-
-    connect(scatterDockWidget, SIGNAL(groupSelected(PeakGroup*)), SLOT(setPeakGroup(PeakGroup*)));
-
-    addDockWidget(Qt::LeftDockWidgetArea,ligandWidget,Qt::Vertical);
-    addDockWidget(Qt::LeftDockWidgetArea,projectDockWidget,Qt::Vertical);
-
-    ligandWidget->setAllowedAreas(Qt::LeftDockWidgetArea);
-    projectDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea);
-
-
-    addDockWidget(Qt::BottomDockWidgetArea,spectraDockWidget,Qt::Horizontal);
-    addDockWidget(Qt::BottomDockWidgetArea,covariantsPanel,Qt::Horizontal);
-    addDockWidget(Qt::BottomDockWidgetArea,fragmentationEventsWidget,Qt::Horizontal);
-    addDockWidget(Qt::BottomDockWidgetArea,scatterDockWidget,Qt::Horizontal);
-    addDockWidget(Qt::BottomDockWidgetArea,bookmarkedPeaks,Qt::Horizontal);
-    addDockWidget(Qt::BottomDockWidgetArea,galleryDockWidget,Qt::Horizontal);
-    addDockWidget(Qt::BottomDockWidgetArea,srmDockWidget,Qt::Horizontal);
-    addDockWidget(Qt::BottomDockWidgetArea,rconsoleDockWidget,Qt::Horizontal);
-    addDockWidget(Qt::BottomDockWidgetArea,fragmenationSpectraDockWidget,Qt::Horizontal);
-
-    //addDockWidget(Qt::BottomDockWidgetArea,peaksPanel,Qt::Horizontal);
-    //addDockWidget(Qt::BottomDockWidgetArea,treeMapDockWidget,Qt::Horizontal);
-    //addDockWidget(Qt::BottomDockWidgetArea,heatMapDockWidget,Qt::Horizontal);
-
-    tabifyDockWidget(ligandWidget,projectDockWidget);
-
-    tabifyDockWidget(spectraDockWidget,massCalcWidget);
-    tabifyDockWidget(spectraDockWidget,isotopeWidget);
-    tabifyDockWidget(spectraDockWidget,massCalcWidget);
-    tabifyDockWidget(spectraDockWidget,fragmentationEventsWidget);
-    tabifyDockWidget(spectraDockWidget,covariantsPanel);
-    tabifyDockWidget(spectraDockWidget,galleryDockWidget);
-    tabifyDockWidget(spectraDockWidget,rconsoleDockWidget);
-
-    setContextMenuPolicy(Qt::NoContextMenu);
-
-    if (settings->contains("windowState")) {
-        restoreState(settings->value("windowState").toByteArray());
-    }
-
-    if ( settings->contains("geometry")) {
-    	restoreGeometry(settings->value("geometry").toByteArray());
-    }
+//    srmDockWidget 	= new TreeDockWidget(this,"SRM List", 1);
+//    ligandWidget = new LigandWidget(this);
+//    heatmap	 = 	  new HeatMap(this);
+//    galleryWidget = new GalleryWidget(this);
+//    bookmarkedPeaks = addPeaksTable("Bookmarks");
+//    spectraDockWidget =  createDockWidget("Spectra",spectraWidget);
+//    heatMapDockWidget =  createDockWidget("HeatMap",heatmap);
+//    galleryDockWidget =  createDockWidget("Gallery",galleryWidget);
+//    scatterDockWidget =  new ScatterPlot(this);
+//    projectDockWidget =  new ProjectDockWidget(this);
+//    rconsoleDockWidget =  new RconsoleWidget(this);
+//    fragmenationSpectraWidget = new SpectraWidget(this);
+//    fragmenationSpectraDockWidget =  createDockWidget("Fragmentation Spectra",fragmenationSpectraWidget);
+//    ligandWidget->setVisible(false);
+//    covariantsPanel->setVisible(false);
+//    isotopeWidget->setVisible(false);
+//    massCalcWidget->setVisible(false);
+//    fragmentationEventsWidget->setVisible(false);
+//    bookmarkedPeaks->setVisible(false);
+//    spectraDockWidget->setVisible(false);
+//    scatterDockWidget->setVisible(false);
+//    heatMapDockWidget->setVisible(false);
+//    galleryDockWidget->setVisible(false);
+//    projectDockWidget->setVisible(false);
+//    rconsoleDockWidget->setVisible(false);
+//    fragmenationSpectraDockWidget->setVisible(false);    //treemap->setVisible(false);
+//    //peaksPanel->setVisible(false);
+//    //treeMapDockWidget =  createDockWidget("TreeMap",treemap);
 
 
 
-    projectDockWidget->show();
-    scatterDockWidget->hide();
-    fragmentationEventsWidget->hide();
+//    //
+//    //DIALOGS
+//    //
+//    peakDetectionDialog = new PeakDetectionDialog(this);
+//    peakDetectionDialog->setMainWindow(this);
+//    peakDetectionDialog->setSettings(settings);
+
+//    //alignment dialog
+//    alignmentDialog	 =  new AlignmentDialog(this);
+//    connect(alignmentDialog->alignButton,SIGNAL(clicked()),SLOT(Align()));
+//    connect(alignmentDialog->UndoAlignment,SIGNAL(clicked()),SLOT(UndoAlignment()));
+
+//    //calibration dialog
+//    calibrateDialog	 =  new CalibrateDialog(this);
+
+//    //Compound Library  Manager
+//    libraryDialog = new LibraryMangerDialog(this);
+//    libraryDialog->setMainWindow(this);
+
+
+//    //rconsole dialog
+//    //rconsoleDialog	 =  new RConsoleDialog(this);
+
+//    //settings dialog
+//    settingsForm = new SettingsForm(settings,this);
+
+//    spectraMatchingForm =  new SpectraMatching(this);
+
+
+//    connect(scatterDockWidget, SIGNAL(groupSelected(PeakGroup*)), SLOT(setPeakGroup(PeakGroup*)));
+
+//    addDockWidget(Qt::LeftDockWidgetArea,ligandWidget,Qt::Vertical);
+//    addDockWidget(Qt::LeftDockWidgetArea,projectDockWidget,Qt::Vertical);
+
+//    ligandWidget->setAllowedAreas(Qt::LeftDockWidgetArea);
+//    projectDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea);
+
+
+//    addDockWidget(Qt::BottomDockWidgetArea,spectraDockWidget,Qt::Horizontal);
+//    addDockWidget(Qt::BottomDockWidgetArea,covariantsPanel,Qt::Horizontal);
+//    addDockWidget(Qt::BottomDockWidgetArea,fragmentationEventsWidget,Qt::Horizontal);
+//    addDockWidget(Qt::BottomDockWidgetArea,scatterDockWidget,Qt::Horizontal);
+//    addDockWidget(Qt::BottomDockWidgetArea,bookmarkedPeaks,Qt::Horizontal);
+//    addDockWidget(Qt::BottomDockWidgetArea,galleryDockWidget,Qt::Horizontal);
+//    addDockWidget(Qt::BottomDockWidgetArea,srmDockWidget,Qt::Horizontal);
+//    addDockWidget(Qt::BottomDockWidgetArea,rconsoleDockWidget,Qt::Horizontal);
+//    addDockWidget(Qt::BottomDockWidgetArea,fragmenationSpectraDockWidget,Qt::Horizontal);
+
+//    //addDockWidget(Qt::BottomDockWidgetArea,peaksPanel,Qt::Horizontal);
+//    //addDockWidget(Qt::BottomDockWidgetArea,treeMapDockWidget,Qt::Horizontal);
+//    //addDockWidget(Qt::BottomDockWidgetArea,heatMapDockWidget,Qt::Horizontal);
+
+//    tabifyDockWidget(ligandWidget,projectDockWidget);
+
+//    tabifyDockWidget(spectraDockWidget,massCalcWidget);
+//    tabifyDockWidget(spectraDockWidget,isotopeWidget);
+//    tabifyDockWidget(spectraDockWidget,massCalcWidget);
+//    tabifyDockWidget(spectraDockWidget,fragmentationEventsWidget);
+//    tabifyDockWidget(spectraDockWidget,covariantsPanel);
+//    tabifyDockWidget(spectraDockWidget,galleryDockWidget);
+//    tabifyDockWidget(spectraDockWidget,rconsoleDockWidget);
+
+//    setContextMenuPolicy(Qt::NoContextMenu);
+
+//    if (settings->contains("windowState")) {
+//        restoreState(settings->value("windowState").toByteArray());
+//    }
+
+//    if ( settings->contains("geometry")) {
+//    	restoreGeometry(settings->value("geometry").toByteArray());
+//    }
 
 
 
-    setUserPPM(5);
-    if ( settings->contains("ppmWindowBox")) {
-    	setUserPPM(settings->value("ppmWindowBox").toDouble());
-    }
-
-    QRectF view = settings->value("mzslice").value<QRectF>();
-    if (view.width() > 0 && view.height() > 0 ) {
-        eicWidget->setMzSlice(mzSlice(view.x(),view.y(),view.width(),view.height()));
-    } else {
-        eicWidget->setMzSlice(mzSlice(0,0,0,100));
-    }
+//    projectDockWidget->show();
+//    scatterDockWidget->hide();
+//    fragmentationEventsWidget->hide();
 
 
-    createMenus();
-    createToolBars();
 
-    ligandWidget->updateDatabaseList();
-    massCalcWidget->updateDatabaseList();
-    ligandWidget->setDatabase("KNOWNS");
-    //if(settings->contains("lastDatabaseFile")) ligandWidget->setDatabase("lastDatabaseFile");
+//    setUserPPM(5);
+//    if ( settings->contains("ppmWindowBox")) {
+//        setUserPPM(settings->value("ppmWindowBox").toDouble());
+//    }
 
-    setIonizationMode(0);
-    if ( settings->contains("ionizationMode")) {
-        setIonizationMode(settings->value("ionizationMode").toInt());
-    }
-
-    setAcceptDrops(true);
-
-    showNormal();	//return from full screen on startup
-
-    //remove close button from dockwidget
-    QList<QDockWidget *> dockWidgets = this->findChildren<QDockWidget *>();
-    for (int i = 0; i < dockWidgets.size(); i++) {
-        dockWidgets[i]->setFeatures( dockWidgets[i]->features() ^ QDockWidget::DockWidgetClosable );
-    }
+//    QRectF view = settings->value("mzslice").value<QRectF>();
+//    if (view.width() > 0 && view.height() > 0 ) {
+//        eicWidget->setMzSlice(mzSlice(view.x(),view.y(),view.width(),view.height()));
+//    } else {
+//        eicWidget->setMzSlice(mzSlice(0,0,0,100));
+//    }
 
 
-    //check if program exited correctly last time
-    if (settings->contains("closeEvent") and settings->value("closeEvent").toInt() == 0) {
+//    createMenus();
+//    createToolBars();
 
-        setUrl("http://genomics-pubs.princeton.edu/mzroll/index.php?show=bugs",
-                "Whoops.. did the program crash last time? Would you like to report a bug?");
-    }
+//    ligandWidget->updateDatabaseList();
+//    massCalcWidget->updateDatabaseList();
+//    ligandWidget->setDatabase("KNOWNS");
+//    //if(settings->contains("lastDatabaseFile")) ligandWidget->setDatabase("lastDatabaseFile");
 
-    settings->setValue("closeEvent", 0 );
+//    setIonizationMode(0);
+//    if ( settings->contains("ionizationMode")) {
+//        setIonizationMode(settings->value("ionizationMode").toInt());
+//    }
+
+//    setAcceptDrops(true);
+
+//    showNormal();	//return from full screen on startup
+
+//    //remove close button from dockwidget
+//    QList<QDockWidget *> dockWidgets = this->findChildren<QDockWidget *>();
+//    for (int i = 0; i < dockWidgets.size(); i++) {
+//        dockWidgets[i]->setFeatures( dockWidgets[i]->features() ^ QDockWidget::DockWidgetClosable );
+//    }
+
+
+//    //check if program exited correctly last time
+//    if (settings->contains("closeEvent") and settings->value("closeEvent").toInt() == 0) {
+
+//        setUrl("http://genomics-pubs.princeton.edu/mzroll/index.php?show=bugs",
+//                "Whoops.. did the program crash last time? Would you like to report a bug?");
+//    }
+
+//    settings->setValue("closeEvent", 0 );
 }
 
 QDockWidget* MainWindow::createDockWidget(QString title, QWidget* w) {
@@ -784,8 +784,11 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         if (QMessageBox::Yes == QMessageBox::question(this, "Close Confirmation", "Do you want to save current project?", QMessageBox::Yes | QMessageBox::No)) {
             projectDockWidget->saveProject();
         }
-        settings->setValue("closeEvent", 1 );
-        writeSettings();
+
+        if (settings) {
+            settings->setValue("closeEvent", 1 );
+            // writeSettings(); //DEBUGGING
+        }
         event->accept();
     } else {
         event->ignore();
