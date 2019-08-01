@@ -15,6 +15,25 @@ bool Database::connect(QString filename) {
     }
 }
 
+bool Database::disconnect() {
+
+    qDebug() << "Disconnecting ligand.db";
+
+    ligandDB.close();
+
+    for (auto connection : ligandDB.connectionNames()) {
+        qDebug() << "Removing connection " << connection;
+        QSqlDatabase::removeDatabase(connection);
+    }
+
+    if (ligandDB.isOpen()) {
+        qDebug() << "Failed to close ligand database.";
+        return false;
+    } else {
+        return true;
+    }
+}
+
 void Database::reloadAll() {
 
 	//compounds subsets
@@ -68,6 +87,8 @@ void Database::closeAll() {
     mzUtils::delete_all(adductsDB);     adductsDB.clear();
     mzUtils::delete_all(compoundsDB);   compoundsDB.clear();
     mzUtils::delete_all(fragmentsDB);   fragmentsDB.clear();
+
+    disconnect();
 }
 
 multimap<string,Compound*> Database::keywordSearch(string needle) { 

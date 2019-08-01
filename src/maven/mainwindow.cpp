@@ -786,6 +786,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         }
         settings->setValue("closeEvent", 1 );
         writeSettings();
+        DB.closeAll();
         event->accept();
     } else {
         event->ignore();
