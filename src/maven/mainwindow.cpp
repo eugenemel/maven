@@ -65,12 +65,12 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     qDebug() << "METHODS FOLDER=" << methodsFolder;
 
     //CONNECT TO COMPOUND DATABASE
-    QString writeLocation = QStandardPaths::standardLocations(QStandardPaths::DataLocation).first();
-    if(!QFile::exists(writeLocation))  { QDir dir; dir.mkdir(writeLocation); }
-    qDebug() << "WRITE FOLDER=" <<  writeLocation;
-    DB.connect(writeLocation + "/ligand.db");
-    DB.loadCompoundsSQL("KNOWNS", DB.getLigandDB());
-    //DB.loadCompoundsSQL("ALL");
+//    QString writeLocation = QStandardPaths::standardLocations(QStandardPaths::DataLocation).first();
+//    if(!QFile::exists(writeLocation))  { QDir dir; dir.mkdir(writeLocation); }
+//    qDebug() << "WRITE FOLDER=" <<  writeLocation;
+//    DB.connect(writeLocation + "/ligand.db");
+//    DB.loadCompoundsSQL("KNOWNS", DB.getLigandDB());
+//    //DB.loadCompoundsSQL("ALL");
 
 //    //QString commonFragments =   methodsFolder + "/" + "FRAGMENTS.csv";
 //    //if(QFile::exists(commonFragments)) DB.fragmentsDB = DB.loadAdducts(commonFragments.toStdString());
@@ -789,6 +789,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
             settings->setValue("closeEvent", 1 );
             // writeSettings(); //DEBUGGING
         }
+        DB.closeAll();
         event->accept();
     } else {
         event->ignore();
