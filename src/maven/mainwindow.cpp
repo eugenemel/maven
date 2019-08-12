@@ -1300,7 +1300,7 @@ void MainWindow::showPeakInfo(Peak* _peak) {
     }
 
    if (fragmenationSpectraWidget->isVisible()) {
-        vector<Scan*>ms2s = _peak->getFragmenationEvents(getUserPPM());
+        vector<Scan*>ms2s = _peak->getFragmentationEvents(getUserPPM());
         if (ms2s.size()) fragmenationSpectraWidget->setScan(ms2s[0]);
     }
 

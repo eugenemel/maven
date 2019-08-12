@@ -227,7 +227,7 @@ void SpectraWidget::clearOverlay() {
 
 void SpectraWidget::overlayPeakGroup(PeakGroup* group) {
     if(!group) return;
-    Scan* avgScan = group->getAverageFragmenationScan(20);
+    Scan* avgScan = group->getAverageFragmentationScan(20);
     setScan(avgScan);
     if (group->compound)  {
         if(group->compound->fragment_mzs.size()) overlayCompound(group->compound);
