@@ -810,11 +810,13 @@ void BackgroundPeakUpdate::processMassSlices() {
 
         if(mustHaveMS2) {
             massSlices.algorithmD(compoundPPMWindow,rtStepSize);
+            //massSlices.algorithmE(compoundPPMWindow,rtStepSize); //TODO: update when available
         } else {
             massSlices.algorithmB(ppmMerge,minGroupIntensity,rtStepSize);
         }
 
 		if (massSlices.slices.size() == 0) massSlices.algorithmA();
+
 		sort(massSlices.slices.begin(), massSlices.slices.end(), mzSlice::compIntensity );
 
 		emit (updateProgressBar( "Computing Mass Slices", 0, 10 ));
