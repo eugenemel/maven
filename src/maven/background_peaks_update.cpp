@@ -809,8 +809,7 @@ void BackgroundPeakUpdate::processMassSlices() {
         massSlices.setSamples(samples);
 
         if(mustHaveMS2) {
-            massSlices.algorithmD(compoundPPMWindow,rtStepSize);
-            //massSlices.algorithmE(compoundPPMWindow,rtStepSize); //TODO: update when available
+            massSlices.algorithmE(compoundPPMWindow,rtStepSize);
         } else {
             massSlices.algorithmB(ppmMerge,minGroupIntensity,rtStepSize);
         }
