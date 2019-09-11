@@ -716,7 +716,7 @@ void EicWidget::addBaseline(PeakGroup* group) {
 
     for( unsigned int i=0; i< eics.size(); i++ ) {
         EIC* eic = eics[i];
-        if (eic->size()==0 or not eic->baseline) continue;
+        if (eic->size()==0 or eic->baseline.size()==0) continue;
         EicLine* line = new EicLine(0,scene());
         line->setEIC(eic);
 
@@ -1377,7 +1377,7 @@ void EicWidget::groupPeaks() {
 	float eic_smoothingWindow =   settings->value("eic_smoothingWindow").toDouble();
 	float grouping_maxRtWindow =  settings->value("grouping_maxRtWindow").toDouble();
 
-    peakgroups = EIC::groupPeaks(eics,eic_smoothingWindow,grouping_maxRtWindow);
+    peakgroups = EIC::groupPeaks(eics, eic_smoothingWindow, grouping_maxRtWindow);
 
     //keep only top X groups ( ranked by intensity )
     qDebug() << "Start groupCount=" << peakgroups.size();
