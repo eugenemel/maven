@@ -100,17 +100,31 @@ vector<float> ClassifierNeuralNet::getFeatures(Peak& p) {
 		return set;
 }
 
-void ClassifierNeuralNet::classify(PeakGroup* grp) {
-	if ( brain == NULL ) return;
+//OLD APPROACH
+//void ClassifierNeuralNet::classify(PeakGroup* grp) {
+//	if ( brain == NULL ) return;
 
-    float result[2] = {0.1,0.1};
-	for (unsigned int j=0; j < grp->peaks.size(); j++ ) {
-		float fts[1000]; 
-		vector<float> features = getFeatures(grp->peaks[j]);
-		for(int k=0;k<num_features;k++) fts[k]=features[k];
-		brain->run(fts, result);
-		grp->peaks[j].quality = result[0];
-	}
+//    float result[2] = {0.1,0.1};
+//	for (unsigned int j=0; j < grp->peaks.size(); j++ ) {
+//		float fts[1000];
+//		vector<float> features = getFeatures(grp->peaks[j]);
+//		for(int k=0;k<num_features;k++) fts[k]=features[k];
+//		brain->run(fts, result);
+//		grp->peaks[j].quality = result[0];
+//	}
+//}
+
+//NEW APPROACH
+void ClassifierNeuralNet::classify(PeakGroup* grp) {
+    if (!brain) return;
+
+    for (unsigned int j=0; j < grp->peaks.size(); j++ ) {
+
+        vector<float> features = getFeatures(grp->peaks[j]);
+        vector<float> result = brain->runMultiThreaded(features);
+
+        grp->peaks[j].quality = result.at(0);
+    }
 }
 
 void ClassifierNeuralNet::refineModel(PeakGroup* grp) {
