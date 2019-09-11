@@ -26,7 +26,6 @@ public:
     void loadDefaultModel();
 	bool hasModel();
  
-private:
 	vector<float> getFeatures(Peak& p);
 
 	//neural net specific features

@@ -39,7 +39,6 @@ public:
 	string getClassifierType() { return clsf_type; }
 	void printLabelDistribution();
 
-private:
 	virtual vector<float> getFeatures(Peak& p) = 0;
 
 protected: 
