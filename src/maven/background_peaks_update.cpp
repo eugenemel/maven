@@ -170,7 +170,9 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 
         eicCount += eics.size();
 
-        vector<PeakGroup> peakgroups = EIC::groupPeaks(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow);
+        //TODO: hard constant, refactor as parameter
+        float minSmoothedPeakIntensity = 1000;
+        vector<PeakGroup> peakgroups = EIC::groupPeaksB(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow, minSmoothedPeakIntensity);
 
         numAllPeakGroups += peakgroups.size();
 
