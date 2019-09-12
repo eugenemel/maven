@@ -104,8 +104,16 @@ void MassCalcWidget::showTable() {
         QString ppmDiff = QString::number( matches[i].diff , 'f', 2);
         QString rtDiff = QString::number(matches[i].rtdiff,'f', 1);
         QString matchScore = QString::number( matches[i].fragScore.getScoreByName(scoringAlgorithm) , 'f', 3);
-        QString adductName = QString(a->name.c_str());
-        QString db = QString(c->db.c_str());
+
+        QString adductName = QString("");
+        if (a) {
+            adductName = QString(a->name.c_str());
+        }
+
+        QString db = QString("");
+        if (c){
+            db = QString(c->db.c_str());
+        }
 
         //filter hits by database
         if (databaseSelect->currentText() != "All" and databaseSelect->currentText() != db) continue;
