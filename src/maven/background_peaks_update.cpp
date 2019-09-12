@@ -802,14 +802,22 @@ void BackgroundPeakUpdate::processMassSlices() {
 		checkConvergance=true;
 		QTime timer; timer.start();
 	
-		if ( samples.size() > 0 ) avgScanTime = samples[0]->getAverageFullScanTime();
+        if (samples.size() > 0 ){
+            avgScanTime = 0;
+            for (auto sample : samples) {
+                float singleSampleAvgFullScanTime = sample->getAverageFullScanTime();
+                avgScanTime += singleSampleAvgFullScanTime;
+            }
+            avgScanTime /= samples.size();
+        }
 
 		emit (updateProgressBar( "Computing Mass Slices", 2, 10 ));
         ParallelMassSlicer massSlices;
         massSlices.setSamples(samples);
 
         if(mustHaveMS2) {
-            massSlices.algorithmE(compoundPPMWindow,rtStepSize);
+            //rsamples must be loaded for this to work
+            massSlices.algorithmE(compoundPPMWindow,rtStepSize*avgScanTime);
         } else {
             massSlices.algorithmB(ppmMerge,minGroupIntensity,rtStepSize);
         }
