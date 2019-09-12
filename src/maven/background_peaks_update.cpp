@@ -434,10 +434,9 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         }
         if (eicMaxIntensity < minGroupIntensity) { delete_all(eics); continue; }
 
-        //for ( unsigned int j=0; j < eics.size(); j++ )  eics[j]->getPeakPositions(eic_smoothingWindow);
-        vector<PeakGroup> peakgroups = EIC::groupPeaks(eics,static_cast<int>(eic_smoothingWindow),grouping_maxRtWindow);
-        //cerr << "\tFound " << peakgroups.size() << "\n";
+        vector<PeakGroup> peakgroups = EIC::groupPeaksB(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow, minGroupIntensity);
 
+        //cerr << "\tFound " << peakgroups.size() << "\n";
 
         //score quality of each group
         vector<PeakGroup*> groupsToAppend;
