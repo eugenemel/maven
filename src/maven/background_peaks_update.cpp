@@ -45,6 +45,7 @@ BackgroundPeakUpdate::BackgroundPeakUpdate(QWidget*) {
     minNoNoiseObs=1;
     minSignalBaseLineRatio=2;
     minGroupIntensity=500;
+    minSmoothedPeakIntensity=1000;
     minQuality=0.5;
 
     //compound detection setting
@@ -171,8 +172,6 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 
         eicCount += eics.size();
 
-        //TODO: hard constant, refactor as parameter
-        float minSmoothedPeakIntensity = 1000;
         vector<PeakGroup> peakgroups = EIC::groupPeaksB(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow, minSmoothedPeakIntensity);
 
         numAllPeakGroups += peakgroups.size();
@@ -435,7 +434,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         }
         if (eicMaxIntensity < minGroupIntensity) { delete_all(eics); continue; }
 
-        vector<PeakGroup> peakgroups = EIC::groupPeaksB(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow, minGroupIntensity);
+        vector<PeakGroup> peakgroups = EIC::groupPeaksB(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow, minSmoothedPeakIntensity);
 
         //cerr << "\tFound " << peakgroups.size() << "\n";
 
@@ -469,7 +468,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             if (group.blankMax*minSignalBlankRatio > group.maxIntensity) continue;
 
             group.chargeState = group.getChargeStateFromMS1(compoundPPMWindow);
-            vector<Isotope> isotopes = highestpeak->getScan()->getIsotopicPattern(highestpeak->peakMz,compoundPPMWindow,6,10);
+            vector<Isotope> isotopes = highestpeak->getScan()->getIsotopicPattern(highestpeak->peakMz,compoundPPMWindow, 6, 10);
 
             if(isotopes.size() > 0) {
                 //group.chargeState = isotopes.front().charge;
