@@ -72,6 +72,7 @@ public:
    float minNoNoiseObs;
    float minSignalBaseLineRatio;
    float minGroupIntensity;
+   float minQuality;
 
   //eic window around compound
    float compoundPPMWindow;

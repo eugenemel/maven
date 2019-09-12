@@ -45,6 +45,7 @@ BackgroundPeakUpdate::BackgroundPeakUpdate(QWidget*) {
     minNoNoiseObs=1;
     minSignalBaseLineRatio=2;
     minGroupIntensity=500;
+    minQuality=0.5;
 
     //compound detection setting
     mustHaveMS2=false;
@@ -441,22 +442,31 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         //score quality of each group
         vector<PeakGroup*> groupsToAppend;
         for(unsigned int j=0; j < peakgroups.size(); j++ ) {
+
             PeakGroup& group = peakgroups[j];
-            group.computeAvgBlankArea(eics);
-            group.groupStatistics();
+
             groupCount++;
             peakCount += group.peakCount();
 
             Peak* highestpeak = group.getHighestIntensityPeak();
             if(!highestpeak)  continue;
 
-            if (clsf->hasModel()) { clsf->classify(&group); group.groupStatistics(); }
+            if (clsf->hasModel()) {
+                clsf->classify(&group);
+            }
+
+            group.computeAvgBlankArea(eics);
+            group.groupStatistics();
+
             if (clsf->hasModel()&& group.goodPeakCount < minGoodPeakCount) continue;
+            if (clsf->hasModel() && group.maxQuality < minQuality) continue;
+
             // if (group.blankMean*minBlankRatio > group.sampleMean ) continue;
-            if (group.blankMax*minSignalBlankRatio > group.maxIntensity) continue;
             if (group.maxNoNoiseObs < minNoNoiseObs) continue;
             if (group.maxSignalBaselineRatio < minSignalBaseLineRatio) continue;
             if (group.maxIntensity < minGroupIntensity ) continue;
+
+            if (group.blankMax*minSignalBlankRatio > group.maxIntensity) continue;
 
             group.chargeState = group.getChargeStateFromMS1(compoundPPMWindow);
             vector<Isotope> isotopes = highestpeak->getScan()->getIsotopicPattern(highestpeak->peakMz,compoundPPMWindow,6,10);
@@ -818,9 +828,9 @@ void BackgroundPeakUpdate::processMassSlices() {
 
         if(mustHaveMS2) {
             //rsamples must be loaded for this to work
-            massSlices.algorithmE(compoundPPMWindow,rtStepSize*avgScanTime);
+            massSlices.algorithmE(compoundPPMWindow, rtStepSize*avgScanTime);
         } else {
-            massSlices.algorithmB(ppmMerge,minGroupIntensity,rtStepSize);
+            massSlices.algorithmB(ppmMerge, minGroupIntensity ,rtStepSize);
         }
 
 		if (massSlices.slices.size() == 0) massSlices.algorithmA();
@@ -922,18 +932,20 @@ vector<EIC*> BackgroundPeakUpdate::pullEICs(mzSlice* slice,
             e = sample->getEIC(slice->srmId);
         } else if ( c && c->precursorMz >0 && c->productMz >0 ) {
             //cout << "computeEIC qqq: " << c->precursorMz << "->" << c->productMz << endl;
-            e = sample->getEIC(c->precursorMz, c->collisionEnergy, c->productMz,amuQ1, amuQ3);
+            e = sample->getEIC(c->precursorMz, c->collisionEnergy, c->productMz, amuQ1, amuQ3);
         } else {
             //cout << "computeEIC mzrange" << setprecision(7) << slice->mzmin  << " " << slice->mzmax << slice->rtmin  << " " << slice->rtmax << endl;
-            e = sample->getEIC(slice->mzmin, slice->mzmax,slice->rtmin,slice->rtmax,1);
+            e = sample->getEIC(slice->mzmin, slice->mzmax, slice->rtmin, slice->rtmax, 1);
         }
 
         if (e) {
-            EIC::SmootherType smootherType = (EIC::SmootherType) smoothingAlgorithm;
-            e->setSmootherType(smootherType);
-            e->setBaselineSmoothingWindow(baseline_smoothingWindow);
-            e->setBaselineDropTopX(baseline_dropTopX);
-            e->getPeakPositions(smoothingWindow);
+
+            //TODO: what should be retained here?
+//            EIC::SmootherType smootherType = (EIC::SmootherType) smoothingAlgorithm;
+//            e->setSmootherType(smootherType);
+//            e->setBaselineSmoothingWindow(baseline_smoothingWindow);
+//            e->setBaselineDropTopX(baseline_dropTopX);
+//            e->getPeakPositions(smoothingWindow);
             eics.push_back(e);
         }
     }
