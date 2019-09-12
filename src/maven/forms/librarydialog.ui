@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>492</width>
-    <height>281</height>
+    <width>1000</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Library Manger</string>
+   <string>Library Manager</string>
   </property>
   <property name="sizeGripEnabled">
    <bool>false</bool>
@@ -56,9 +56,9 @@
     </widget>
    </item>
    <item row="1" column="0" colspan="3">
-	   <widget class="QTreeWidget" name="treeWidget">
+          <widget class="QTreeWidget" name="treeWidget">
      <property name="selectionMode">
-	     <enum>QAbstractItemView::MultiSelection</enum>
+            <enum>QAbstractItemView::MultiSelection</enum>
      </property>
      <property name="expandsOnDoubleClick">
       <bool>true</bool>
