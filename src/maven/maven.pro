@@ -95,7 +95,8 @@ HEADERS +=  stable.h \
             clusterdialog.h \
             projectDB.h \
             librarydialog.h \
-            calibratedialog.h
+            calibratedialog.h \
+            mzsamplecache.h
 
 
 SOURCES +=  mainwindow.cpp  \
@@ -139,8 +140,8 @@ SOURCES +=  mainwindow.cpp  \
             mzfileio.cpp \
             projectDB.cpp \
             librarydialog.cpp \
-            calibratedialog.cpp
-
+            calibratedialog.cpp \
+            mzsample.cpp
 
 sources.files =  $$HEADERS \
   $$RESOURCES \
