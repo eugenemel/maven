@@ -264,7 +264,8 @@ void EicWidget::cleanup() {
 void EicWidget::computeEICs() {
  	qDebug() << " EicWidget::computeEICs()";
     QTime timerX; timerX.start();
-    vector <mzSample*> samples = getMainWindow()->getVisibleSamples();
+    vector<mzSample*> samples = getMainWindow()->getVisibleSamples();
+
     if (samples.size() == 0) return;
 
     QSettings *settings 		= getMainWindow()->getSettings();
@@ -289,16 +290,81 @@ void EicWidget::computeEICs() {
         qDebug() << "swapping slice.mzmin and slice.mzmax.";
     } // why????
 
+    //Load and unload in batches
+    unsigned int batchSize = 2;
+    unsigned int sampCounter = 0;
+    vector<mzSample*> sampleBatch; //TODO: preallocate for speedup
+
+    while(sampCounter < samples.size()) {
+
+        mzSample *sample = samples.at(sampCounter);
+        if (sample->scanCount() == 0){
+            //sample needs to be reloaded
+
+            //load procedure
+            sample->loadSample(sample->fileName.c_str());
+
+            //TODO: are these needed?
+//            sample->enumerateSRMScans();
+//            sample->calculateMzRtRange();
+
+//            //TODO: implement load/unload/reload for speedup instead of new()
+//            mzSample* loadedSample = new mzSample();
+//            loadedSample->loadSample(samples.at(sampCounter)->fileName.c_str());
+//            loadedSample->enumerateSRMScans();
+//            loadedSample->calculateMzRtRange();
+//            loadedSample->fileName = samples.at(sampCounter)->fileName.c_str();
+//            loadedSample->isBlank = samples.at(sampCounter)->isBlank;
+
+//            delete(samples.at(sampCounter));
+//            samples.at(sampCounter) = nullptr;
+
+//            samples.at(sampCounter) = loadedSample;
+
+        }
+
+        sampleBatch.push_back(samples.at(sampCounter));
+
+        if (sampleBatch.size() == batchSize || sampCounter == samples.size()-1) {
+
+            vector<EIC*> cachedSubsetEICS = BackgroundPeakUpdate::pullEICs(&slice,
+                                                     sampleBatch,
+                                                     EicLoader::PeakDetection,
+                                                     eic_smoothingWindow,
+                                                     eic_smoothingAlgorithm,
+                                                     amuQ1,
+                                                     amuQ3,
+                                                     baseline_smoothing,
+                                                     baseline_quantile);
+
+            eics.insert(eics.end(), cachedSubsetEICS.begin(), cachedSubsetEICS.end());
+
+            for (auto sample : sampleBatch){
+
+                //unloading: clearing scans
+                delete_all(sample->scans);
+                //sample->scans
+            }
+
+            delete_all(sampleBatch);
+        }
+
+        sampCounter++;
+
+    }
+
+    //OLD: get eics from all samples
+
     //get eics
-     eics = BackgroundPeakUpdate::pullEICs(&slice,
-                                              samples,
-                                              EicLoader::PeakDetection,
-                                              eic_smoothingWindow,
-                                              eic_smoothingAlgorithm,
-                                              amuQ1,
-                                              amuQ3,
-                                              baseline_smoothing,
-                                              baseline_quantile);
+//     eics = BackgroundPeakUpdate::pullEICs(&slice,
+//                                              samples,
+//                                              EicLoader::PeakDetection,
+//                                              eic_smoothingWindow,
+//                                              eic_smoothingAlgorithm,
+//                                              amuQ1,
+//                                              amuQ3,
+//                                              baseline_smoothing,
+//                                              baseline_quantile);
 
 	//find peaks
 	//for(int i=0; i < eics.size(); i++ )  eics[i]->getPeakPositions(eic_smoothingWindow);
@@ -1556,7 +1622,7 @@ void EicWidget::selectGroupNearRt(float rt) {
 
 void EicWidget::setSelectedGroup(PeakGroup* group ) {
  //qDebug <<"EicWidget::setSelectedGroup(PeakGroup* group ) ";
-	if (_frozen || group == NULL) return;
+    if (_frozen || !group) return;
 	if (_showBarPlot)     addBarPlot(group);
 	if (_showIsotopePlot) addIsotopicPlot(group);
     if (_showBoxPlot)     addBoxPlot(group);
