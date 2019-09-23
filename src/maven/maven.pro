@@ -141,7 +141,7 @@ SOURCES +=  mainwindow.cpp  \
             projectDB.cpp \
             librarydialog.cpp \
             calibratedialog.cpp \
-            mzsample.cpp
+            mzsamplecache.cpp
 
 sources.files =  $$HEADERS \
   $$RESOURCES \
