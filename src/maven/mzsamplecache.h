@@ -4,8 +4,11 @@
 #include <queue>
 class MzSampleCache {
 public:
-    queue<mzSample*> loadedMzSamples;
-    vector<string> allMzSamples;
+    //TODO: consider restructuring to use a queue
 
-    mzSample* getSample();
+    vector<mzSample*> loadedMzSamples; //contains scans data
+    vector<mzSample*> allMzSamples;
+
+    mzSample* getLoadedSample(mzSample* mzSample);
+    mzSample* loadSample(mzSample* mzSample);
 };
