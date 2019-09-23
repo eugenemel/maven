@@ -924,7 +924,7 @@ vector<EIC*> BackgroundPeakUpdate::pullEICs(mzSlice* slice,
 		mzSample* sample = vsamples[i];
 		Compound* c =  slice->compound;
 
-        EIC* e = NULL;
+        EIC* e = nullptr;
 
         if ( ! slice->srmId.empty() ) {
             //cout << "computeEIC srm:" << slice->srmId << endl;
