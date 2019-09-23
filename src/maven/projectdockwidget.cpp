@@ -773,7 +773,10 @@ void ProjectDockWidget::loadProjectXML(QString fileName) {
     vector<mzSample*> samples = _mainwindow->getSamples();
     int sampleCount = _mainwindow->sampleCount();
     updateSampleList();
-    if(_mainwindow->srmDockWidget->isVisible()) _mainwindow->showSRMList();
+
+    //Issue 48: TODO: line below causes crash
+    //if(_mainwindow->srmDockWidget->isVisible()) _mainwindow->showSRMList();
+
     if(_mainwindow->bookmarkedPeaks) _mainwindow->bookmarkedPeaks->loadPeakTableXML(fileName);
     if(_mainwindow->spectraWidget && sampleCount) _mainwindow->spectraWidget->setScan(samples[0]->getScan(0));
 
