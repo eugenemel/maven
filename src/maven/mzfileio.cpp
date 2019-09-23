@@ -71,8 +71,13 @@ mzSample* mzFileIO::loadSample(QString filename){
             sample = mzFileIO::parseMzData(filename);
         } else {
             sample = new mzSample();
-            sample->loadSample( filename.toLatin1().data() );
-            if ( sample->scans.size() == 0 ) { delete(sample); sample=NULL; }
+
+            //Issue 48: OLD
+            //sample->loadSample( filename.toLatin1().data() );
+            //if ( sample->scans.size() == 0 ) { delete(sample); sample=NULL; }
+
+            //Issue 48: NEW
+            sample->sampleName = sample->cleanSampleName(filename.toLatin1().data());
         }
     } catch(...) {
         qDebug() << "loadSample() " << filename << " failed..";
@@ -80,7 +85,23 @@ mzSample* mzFileIO::loadSample(QString filename){
 
     qDebug() << "loadSample time (msec) = " << timer.elapsed();
 
-    if ( sample && sample->scans.size() > 0 ) {
+    //Issue 48: OLD
+//    if ( sample && sample->scans.size() > 0 ) {
+//        sample->enumerateSRMScans();
+
+//        //set min and max values for rt
+//        sample->calculateMzRtRange();
+
+//        //set file path
+//        sample->fileName = file.fileName().toStdString();
+
+//        if (filename.contains("blan",Qt::CaseInsensitive)) sample->isBlank = true;
+//        return sample;
+
+//    }
+
+    //Issue 48: NEW
+    if (sample) {
         sample->enumerateSRMScans();
 
         //set min and max values for rt
@@ -93,7 +114,7 @@ mzSample* mzFileIO::loadSample(QString filename){
         return sample;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 int mzFileIO::loadPepXML(QString fileName) {
@@ -266,7 +287,14 @@ void mzFileIO::fileImport(void) {
                 //check if this is a blank sample
                 sample->fileName = filename.toStdString();
                 if ( filename.contains("blan",Qt::CaseInsensitive)) sample->isBlank = true;
-                if (sample->scans.size()>0) _mainwindow->addSample(sample);
+
+                //Issue 48 OLD: require sample has scans loaded
+//                if (sample->scans.size()>0){
+//                    _mainwindow->addSample(sample);
+//                }
+
+                //Issue 48 NEW: load sample with or without scans
+                _mainwindow->addSample(sample);
 
             }
         }
