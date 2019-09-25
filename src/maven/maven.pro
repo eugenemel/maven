@@ -96,7 +96,8 @@ HEADERS +=  stable.h \
             clusterdialog.h \
             projectDB.h \
             librarydialog.h \
-            calibratedialog.h
+            calibratedialog.h \
+    directinfusiondialog.h
 
 
 SOURCES +=  mainwindow.cpp  \
