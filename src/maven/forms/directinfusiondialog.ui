@@ -2,8 +2,19 @@
 <ui version="4.0">
  <class>directInfusionDialog</class>
  <widget class="QDialog" name="directInfusionDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>421</width>
+    <height>131</height>
+   </rect>
+  </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Analyze Direct Infusion Samples</string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
   </property>
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
@@ -31,7 +42,7 @@
     </rect>
    </property>
    <property name="value">
-    <number>24</number>
+    <number>0</number>
    </property>
   </widget>
   <widget class="QLabel" name="label">
@@ -44,7 +55,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>TextLabel</string>
+    <string>Click OK to Analyze Direct Infusion Samples.</string>
    </property>
   </widget>
  </widget>
