@@ -16,6 +16,7 @@ class DirectInfusionDialog : public QDialog, public Ui_directInfusionDialog{
         void setMainWindow(MainWindow* w) { this->mainwindow = w; }
 
     public slots:
+        void analyze();
         void setProgressBar(QString text, int progress, int totalSteps);
         void show();
 
