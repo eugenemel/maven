@@ -912,6 +912,11 @@ void MainWindow::createToolBars() {
     btnSettings->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnSettings->setToolTip(tr("Change Global Options"));
 
+    QToolButton *btnDirectInfusion = new QToolButton(toolBar);
+    btnDirectInfusion->setText("Direct Infusion");
+    btnDirectInfusion->setIcon(QIcon(rsrcPath +"/averageSpectra.png"));
+    btnDirectInfusion->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnDirectInfusion->setToolTip(tr("Process Direct Infusion Samples"));
 
     connect(btnOpen, SIGNAL(clicked()), SLOT(open()));
     connect(btnLibrary, SIGNAL(clicked()), libraryDialog, SLOT(show()));
@@ -921,7 +926,7 @@ void MainWindow::createToolBars() {
     connect(btnFeatureDetect,SIGNAL(clicked()), SLOT(showMassSlices()));
     connect(btnSettings,SIGNAL(clicked()),settingsForm,SLOT(show()));
     connect(btnSpectraMatching,SIGNAL(clicked()),spectraMatchingForm,SLOT(show()));
-
+    connect(btnDirectInfusion, SIGNAL(clicked()), SLOT(showMassSlices())); //TODO: update with new DI processing
 
     toolBar->addWidget(btnOpen);
     toolBar->addWidget(btnLibrary);
@@ -931,6 +936,7 @@ void MainWindow::createToolBars() {
     toolBar->addWidget(btnFeatureDetect);
     toolBar->addWidget(btnSpectraMatching);
     toolBar->addWidget(btnSettings);
+    toolBar->addWidget(btnDirectInfusion);
 
 
     QWidget *hBox = new QWidget(toolBar);
