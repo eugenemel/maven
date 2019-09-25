@@ -14,6 +14,7 @@
 #include "treedockwidget.h"
 #include "tabledockwidget.h"
 #include "peakdetectiondialog.h"
+#include "directinfusiondialog.h"
 #include "alignmentdialog.h"
 #include "calibratedialog.h"
 //#include "rconsoledialog.h"
@@ -35,6 +36,7 @@ class EicWidget;
 class PlotDockWidget;
 class BackgroundPeakUpdate;
 class PeakDetectionDialog;
+class DirectInfusionDialog;
 class AlignmentDialog;
 class CalibrateDialog;
 //class RConsoleDialog;
@@ -112,6 +114,7 @@ public:
 
     SettingsForm   *settingsForm;
     PeakDetectionDialog *peakDetectionDialog;
+    DirectInfusionDialog *directInfusionDialog;
     AlignmentDialog*	  alignmentDialog;
     CalibrateDialog*	  calibrateDialog;
     RconsoleWidget*       rconsoleDockWidget;

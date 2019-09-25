@@ -160,9 +160,14 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     //
     //DIALOGS
     //
+
+    //peak detection dialog
     peakDetectionDialog = new PeakDetectionDialog(this);
     peakDetectionDialog->setMainWindow(this);
     peakDetectionDialog->setSettings(settings);
+
+    //direct infusion dialog
+    directInfusionDialog = new DirectInfusionDialog(this);
 
     //alignment dialog
     alignmentDialog	 =  new AlignmentDialog(this);
@@ -184,7 +189,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     settingsForm = new SettingsForm(settings,this);
 
     spectraMatchingForm =  new SpectraMatching(this);
-
 
     connect(scatterDockWidget, SIGNAL(groupSelected(PeakGroup*)), SLOT(setPeakGroup(PeakGroup*)));
 
@@ -1091,7 +1095,7 @@ void MainWindow::showMassSlices() {
 
 void MainWindow::showDirectInfusionDialog() {
     qDebug() << "MainWindow::showDirectInfusionDialog()";
-    //TODO
+    directInfusionDialog->show();
 }
 
 void MainWindow::compoundDatabaseSearch() {

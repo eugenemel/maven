@@ -141,7 +141,8 @@ SOURCES +=  mainwindow.cpp  \
             mzfileio.cpp \
             projectDB.cpp \
             librarydialog.cpp \
-            calibratedialog.cpp
+            calibratedialog.cpp \
+    directinfusiondialog.cpp
 
 
 sources.files =  $$HEADERS \
