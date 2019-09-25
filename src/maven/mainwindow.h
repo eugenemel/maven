@@ -187,6 +187,7 @@ public slots:
     void doSearch(QString needle);
     void setupSampleColors();
     void showMassSlices();
+    void showDirectInfusionDialog();
     void showSRMList();
     void addToHistory(const mzSlice& slice);
     void historyNext();

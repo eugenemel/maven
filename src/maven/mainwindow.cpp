@@ -926,7 +926,7 @@ void MainWindow::createToolBars() {
     connect(btnFeatureDetect,SIGNAL(clicked()), SLOT(showMassSlices()));
     connect(btnSettings,SIGNAL(clicked()),settingsForm,SLOT(show()));
     connect(btnSpectraMatching,SIGNAL(clicked()),spectraMatchingForm,SLOT(show()));
-    connect(btnDirectInfusion, SIGNAL(clicked()), SLOT(showMassSlices())); //TODO: update with new DI processing
+    connect(btnDirectInfusion, SIGNAL(clicked()), SLOT(showDirectInfusionDialog()));
 
     toolBar->addWidget(btnOpen);
     toolBar->addWidget(btnLibrary);
@@ -1087,6 +1087,11 @@ bool MainWindow::addSample(mzSample* sample) {
 void MainWindow::showMassSlices() {
     peakDetectionDialog->setFeatureDetection( PeakDetectionDialog::FullSpectrum );
     peakDetectionDialog->show();
+}
+
+void MainWindow::showDirectInfusionDialog() {
+    qDebug() << "MainWindow::showDirectInfusionDialog()";
+    //TODO
 }
 
 void MainWindow::compoundDatabaseSearch() {
