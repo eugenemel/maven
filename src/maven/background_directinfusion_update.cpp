@@ -10,22 +10,38 @@ BackgroundDirectInfusionUpdate::~BackgroundDirectInfusionUpdate() {
 
 void BackgroundDirectInfusionUpdate::run(void) {
 
-//    for (unsigned int i = 0; i < samples.size(); i++){
+    qDebug() << "Direct infusion analysis started.";
+    emit(updateProgressBar("Initializing...", 0, samples.size()));
 
-//        mzSample* sample = samples.at(i);
+    //TODO: remove this, just for testing
+    msleep(500);
 
-//         string msgStart = string("Started sample \"").append(sample->sampleName).append("\"");
-//         emit(updateProgressBar(msgStart.c_str(), i, samples.size()));
+    for (unsigned int i = 0; i < samples.size(); i++){
 
-//         DirectInfusionProcessor::processSingleSample(sample, compounds);
+        mzSample* sample = samples.at(i);
 
-//         string msgFinish = string("Finished sample \"").append(sample->sampleName).append("\"");
-//         emit(updateProgressBar("Finished sample" , i, samples.size()));
+         string msgStart = string("Processing sample ")
+                 .append(to_string(i+1))
+                 .append("/")
+                 .append(to_string(samples.size()))
+                 .append(": \"")
+                 .append(sample->sampleName)
+                 .append("\"");
 
-//    }
+         emit(updateProgressBar(msgStart.c_str(), (i+1), samples.size()));
 
-    qDebug() << "TODO: analyze direct infusion samples.";
+         /**
+          * ACTUAL WORK IS DONE HERE
+          */
+         DirectInfusionProcessor::processSingleSample(sample, compounds);
 
+         //TODO: remove this, just for testing
+         this->sleep(1);
+    }
+
+    qDebug() << "Direct infusion analysis completed.";
+    emit(closeDialog());
     quit();
+
     return;
 }

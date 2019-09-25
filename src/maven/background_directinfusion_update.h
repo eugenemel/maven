@@ -30,6 +30,8 @@ protected:
 
 signals:
     void updateProgressBar(QString, int, int);
+    void closeDialog();
+
 };
 
 #endif // BACKGROUND_DIRECTINFUSION_UPDATE_H

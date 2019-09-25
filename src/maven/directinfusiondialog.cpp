@@ -7,10 +7,14 @@ DirectInfusionDialog::DirectInfusionDialog(QWidget *parent) : QDialog(parent) {
       setupUi(this);
       setModal(true);
 
+      directInfusionUpdate = new BackgroundDirectInfusionUpdate(this);
+
       connect(start, SIGNAL(clicked(bool)), SLOT(analyze()));
 }
 
-DirectInfusionDialog::~DirectInfusionDialog(){ }
+DirectInfusionDialog::~DirectInfusionDialog(){
+    delete(directInfusionUpdate);
+}
 
 void DirectInfusionDialog::show(){
     QDialog::show();
@@ -30,23 +34,15 @@ void DirectInfusionDialog::analyze() {
         return;
     }
 
-    directInfusionUpdate = new BackgroundDirectInfusionUpdate(this);
     directInfusionUpdate->setSamples(mainwindow->samples);
     directInfusionUpdate->setCompounds(DB.compoundsDB);
 
     connect(directInfusionUpdate, SIGNAL(updateProgressBar(QString,int,int)), SLOT(setProgressBar(QString, int,int)));
+    connect(directInfusionUpdate, SIGNAL(closeDialog()), SLOT(hide()));
 
     if ( ! directInfusionUpdate->isRunning() ) {
-
-        qDebug() << "DirectInfusionDialog::analyze() Started.";
-
         directInfusionUpdate->start();	//start a background thread
-        directInfusionUpdate->wait();
-
-        qDebug() << "DirectInfusionDialog::analyze() Completed.";
     }
 
-    delete(directInfusionUpdate);
-
-    QDialog::hide();
+    //when the background thread completes, it will first close this dialog, then destroy itself.
 }
