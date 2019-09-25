@@ -4,6 +4,11 @@
 #include "ui_directinfusiondialog.h"
 #include "stable.h"
 #include "mainwindow.h"
+#include "background_directinfusion_update.h"
+
+class MainWindow;
+class BackgroundDirectInfusionUpdate;
+extern Database DB;
 
 class DirectInfusionDialog : public QDialog, public Ui_directInfusionDialog{
 
@@ -23,6 +28,7 @@ class DirectInfusionDialog : public QDialog, public Ui_directInfusionDialog{
     private:
         QSettings *settings;
         MainWindow *mainwindow;
+        BackgroundDirectInfusionUpdate *directInfusionUpdate;
 };
 
 #endif

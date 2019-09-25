@@ -168,6 +168,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
     //direct infusion dialog
     directInfusionDialog = new DirectInfusionDialog(this);
+    directInfusionDialog->setMainWindow(this);
+    directInfusionDialog->setSettings(settings);
 
     //alignment dialog
     alignmentDialog	 =  new AlignmentDialog(this);

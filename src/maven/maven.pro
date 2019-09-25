@@ -97,7 +97,8 @@ HEADERS +=  stable.h \
             projectDB.h \
             librarydialog.h \
             calibratedialog.h \
-    directinfusiondialog.h
+    directinfusiondialog.h \
+    background_directinfusion_update.h
 
 
 SOURCES +=  mainwindow.cpp  \
@@ -142,7 +143,8 @@ SOURCES +=  mainwindow.cpp  \
             projectDB.cpp \
             librarydialog.cpp \
             calibratedialog.cpp \
-    directinfusiondialog.cpp
+    directinfusiondialog.cpp \
+    background_directinfusion_update.cpp
 
 
 sources.files =  $$HEADERS \
