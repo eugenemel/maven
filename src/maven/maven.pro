@@ -50,6 +50,7 @@ FORMS = forms/settingsform.ui  \
         forms/spectramatching.ui \
         forms/calibrateform.ui \
         forms/librarydialog.ui \
+    	forms/directinfusiondialog.ui
 
 
 HEADERS +=  stable.h \
