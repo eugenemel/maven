@@ -10,11 +10,11 @@ BackgroundDirectInfusionUpdate::~BackgroundDirectInfusionUpdate() {
 
 void BackgroundDirectInfusionUpdate::run(void) {
 
+    QTime timer;
+    timer.start();
+
     qDebug() << "Direct infusion analysis started.";
     emit(updateProgressBar("Initializing...", 0, samples.size()));
-
-    //TODO: remove this, just for testing
-    msleep(500);
 
     for (unsigned int i = 0; i < samples.size(); i++){
 
@@ -39,12 +39,9 @@ void BackgroundDirectInfusionUpdate::run(void) {
          adducts.push_back(MassCalculator::MinusHAdduct);
 
          DirectInfusionProcessor::processSingleSample(sample, compounds, adducts, false);
-
-         //TODO: remove this, just for testing
-         this->sleep(1);
     }
 
-    qDebug() << "Direct infusion analysis completed.";
+    qDebug() << "Direct infusion analysis completed in " <<timer.elapsed() << " msec.";
     emit(closeDialog());
     quit();
 
