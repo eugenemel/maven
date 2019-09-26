@@ -33,7 +33,8 @@ void BackgroundDirectInfusionUpdate::run(void) {
          /**
           * ACTUAL WORK IS DONE HERE
           */
-         DirectInfusionProcessor::processSingleSample(sample, compounds);
+         vector<Adduct*> adductsList;
+         DirectInfusionProcessor::processSingleSample(sample, compounds, adductsList);
 
          //TODO: remove this, just for testing
          this->sleep(1);

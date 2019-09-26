@@ -34,7 +34,7 @@ void DirectInfusionDialog::analyze() {
         return;
     }
 
-    directInfusionUpdate->setSamples(mainwindow->samples);
+    directInfusionUpdate->setSamples(mainwindow->samples); //TODO: getVisibleSamples()
     directInfusionUpdate->setCompounds(DB.compoundsDB);
 
     connect(directInfusionUpdate, SIGNAL(updateProgressBar(QString,int,int)), SLOT(setProgressBar(QString, int,int)));
