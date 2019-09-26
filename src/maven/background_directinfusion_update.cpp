@@ -30,14 +30,13 @@ void BackgroundDirectInfusionUpdate::run(void) {
 
          emit(updateProgressBar(msgStart.c_str(), (i+1), samples.size()));
 
-         /**
-          * ACTUAL WORK IS DONE HERE
-          */
-
          //TODO: actually get adductlist from main window
          vector<Adduct*> adducts;
          adducts.push_back(MassCalculator::MinusHAdduct);
 
+         /**
+          * ACTUAL WORK IS DONE HERE
+          */
          vector<DirectInfusionAnnotation*> results = DirectInfusionProcessor::processSingleSample(sample, compounds, adducts, false);
 
          //TODO: send results to main frame in meaningful way
