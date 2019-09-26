@@ -38,7 +38,7 @@ void BackgroundDirectInfusionUpdate::run(void) {
          vector<Adduct*> adducts;
          adducts.push_back(MassCalculator::MinusHAdduct);
 
-         DirectInfusionProcessor::processSingleSample(sample, compounds, adducts);
+         DirectInfusionProcessor::processSingleSample(sample, compounds, adducts, false);
 
          //TODO: remove this, just for testing
          this->sleep(1);
