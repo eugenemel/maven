@@ -460,11 +460,11 @@ PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, boo
 
 void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* directInfusionAnnotation){
 
-    //TODO: process directInfusionAnnotation and add row to table, instead of just deleting
+    directInfusionClusterNum++;
 
     for (auto tuple : directInfusionAnnotation->compounds){
         PeakGroup pg;
-        pg.metaGroupId = 0; //TODO
+        pg.metaGroupId = directInfusionClusterNum;
 
         Peak p;
         p.scan = directInfusionAnnotation->scan->scannum;
@@ -478,9 +478,15 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* dire
         pg.minRt = 0;
         pg.maxRt = directInfusionAnnotation->sample->maxRt;
 
+        //TODO: for some reason, this is not working!
+        //pg.fragmentationPattern = Fragment(directInfusionAnnotation->fragmentationPattern);
+
+        pg.fragMatchScore = get<3>(tuple);
+
         allgroups.push_back(pg);
     }
 
+    delete(directInfusionAnnotation->fragmentationPattern);
     delete(directInfusionAnnotation);
 
 }

@@ -120,6 +120,7 @@ private:
           tableViewType viewType;
 
           PeakGroup *lastSelectedGroup;
+          int directInfusionClusterNum = 0;
 };
 
 #endif
