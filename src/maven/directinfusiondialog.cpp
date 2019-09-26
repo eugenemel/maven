@@ -41,7 +41,7 @@ void DirectInfusionDialog::analyze() {
     TableDockWidget* resultsTable = mainwindow->addPeaksTable(title.c_str());
     resultsTable->setWindowTitle(title.c_str());
 
-    connect(directInfusionUpdate, SIGNAL(newDirectInfusionAnnotation(DirectInfusionAnnotation*,bool, bool)), resultsTable, SLOT(addDirectInfusionAnnotation(DirectInfusionAnnotation*,bool,bool)));
+    connect(directInfusionUpdate, SIGNAL(newDirectInfusionAnnotation(DirectInfusionAnnotation*)), resultsTable, SLOT(addDirectInfusionAnnotation(DirectInfusionAnnotation*)));
 
     connect(directInfusionUpdate, SIGNAL(updateProgressBar(QString,int,int)), SLOT(setProgressBar(QString, int,int)));
     connect(directInfusionUpdate, SIGNAL(closeDialog()), SLOT(hide()));

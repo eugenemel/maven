@@ -35,7 +35,7 @@ public slots:
 	  //void showInfo(PeakGroup* group);
       PeakGroup* addPeakGroup(PeakGroup* group, bool updateTable);
       PeakGroup* addPeakGroup(PeakGroup* group, bool updateTable, bool isDeletePeakGroupPtr);
-      void addDirectInfusionAnnotation(DirectInfusionAnnotation* directInfusionAnnotation, bool updateTable, bool isDeletePtr);
+      void addDirectInfusionAnnotation(DirectInfusionAnnotation* directInfusionAnnotation);
       void setupPeakTable();
       PeakGroup* getSelectedGroup();
       PeakGroup* getLastBookmarkedGroup();

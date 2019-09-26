@@ -458,16 +458,31 @@ PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, boo
     return g;
 }
 
-void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* directInfusionAnnotation, bool updateTable, bool isDeletePtr){
+void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* directInfusionAnnotation){
 
     //TODO: process directInfusionAnnotation and add row to table, instead of just deleting
 
-    if (isDeletePtr){
-        delete(directInfusionAnnotation);
+    for (auto tuple : directInfusionAnnotation->compounds){
+        PeakGroup pg;
+        pg.metaGroupId = 0; //TODO
+
+        Peak p;
+        p.scan = directInfusionAnnotation->scan->scannum;
+        p.setSample(directInfusionAnnotation->sample);
+        pg.addPeak(p);
+
+        pg.compound = get<0>(tuple);
+        pg.minMz = directInfusionAnnotation->precMzMin;
+        pg.maxMz = directInfusionAnnotation->precMzMax;
+        pg.meanMz = 0.5*(pg.minMz+pg.maxMz);
+        pg.minRt = 0;
+        pg.maxRt = directInfusionAnnotation->sample->maxRt;
+
+        allgroups.push_back(pg);
     }
 
-    //TODO: this should probably be a different method for direct infusion data
-    if (updateTable) showAllGroups();
+    delete(directInfusionAnnotation);
+
 }
 
 QList<PeakGroup*> TableDockWidget::getGroups() {

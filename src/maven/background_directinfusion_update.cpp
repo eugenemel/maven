@@ -38,11 +38,11 @@ void BackgroundDirectInfusionUpdate::run(void) {
          /**
           * ACTUAL WORK IS DONE HERE
           */
-         vector<DirectInfusionAnnotation*> results = DirectInfusionProcessor::processSingleSample(sample, compounds, adducts, false);
+         vector<DirectInfusionAnnotation*> directInfusionAnnotations = DirectInfusionProcessor::processSingleSample(sample, compounds, adducts, false);
 
          //DirectInfusionAnnotation* are deleted by the receiver (TableDockWidget)
-         for (auto annotation : results){
-             emit(newDirectInfusionAnnotation(annotation, false, true));
+         for (auto directInfusionAnnotation : directInfusionAnnotations) {
+             emit(newDirectInfusionAnnotation(directInfusionAnnotation));
          }
     }
 
