@@ -6,8 +6,11 @@
 #include "mainwindow.h"
 #include "database.h"
 
+#include "directinfusionprocessor.h"
+
 class MainWindow;
 class Database;
+class TableDockWidget;
 
 class BackgroundDirectInfusionUpdate : public QThread {
 
@@ -30,6 +33,7 @@ protected:
 
 signals:
     void updateProgressBar(QString, int, int);
+    void newDirectInfusionAnnotation(DirectInfusionAnnotation*, bool, bool);
     void closeDialog();
 
 };

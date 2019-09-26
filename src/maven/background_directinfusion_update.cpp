@@ -2,6 +2,7 @@
 
 #include "directinfusionprocessor.h"
 
+
 BackgroundDirectInfusionUpdate::BackgroundDirectInfusionUpdate(QWidget*){ }
 
 BackgroundDirectInfusionUpdate::~BackgroundDirectInfusionUpdate() {
@@ -39,9 +40,10 @@ void BackgroundDirectInfusionUpdate::run(void) {
           */
          vector<DirectInfusionAnnotation*> results = DirectInfusionProcessor::processSingleSample(sample, compounds, adducts, false);
 
-         //TODO: send results to main frame in meaningful way
-
-         delete_all(results);
+         //DirectInfusionAnnotation* are deleted by the receiver (TableDockWidget)
+         for (auto annotation : results){
+             emit(newDirectInfusionAnnotation(annotation, false, true));
+         }
     }
 
     qDebug() << "Direct infusion analysis completed in" << timer.elapsed() << "msec.";

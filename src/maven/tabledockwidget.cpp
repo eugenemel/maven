@@ -458,6 +458,18 @@ PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, boo
     return g;
 }
 
+void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* directInfusionAnnotation, bool updateTable, bool isDeletePtr){
+
+    //TODO: process directInfusionAnnotation and add row to table, instead of just deleting
+
+    if (isDeletePtr){
+        delete(directInfusionAnnotation);
+    }
+
+    //TODO: this should probably be a different method for direct infusion data
+    if (updateTable) showAllGroups();
+}
+
 QList<PeakGroup*> TableDockWidget::getGroups() {
     QList<PeakGroup*> groups;
     for(int i=0; i < allgroups.size(); i++ ) {

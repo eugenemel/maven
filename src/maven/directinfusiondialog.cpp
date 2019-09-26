@@ -37,6 +37,12 @@ void DirectInfusionDialog::analyze() {
     directInfusionUpdate->setSamples(mainwindow->samples); //TODO: getVisibleSamples()
     directInfusionUpdate->setCompounds(DB.compoundsDB);
 
+    string title = "Direct Infusion Analysis"; //TODO: configurability?
+    TableDockWidget* peaksTable = mainwindow->addPeaksTable(title.c_str());
+    peaksTable->setWindowTitle(title.c_str());
+
+    connect(directInfusionUpdate, SIGNAL(newDirectInfusionAnnotation(DirectInfusionAnnotation*,bool, bool)), peaksTable, SLOT(addDirectInfusionAnnotation(DirectInfusionAnnotation*,bool,bool)));
+
     connect(directInfusionUpdate, SIGNAL(updateProgressBar(QString,int,int)), SLOT(setProgressBar(QString, int,int)));
     connect(directInfusionUpdate, SIGNAL(closeDialog()), SLOT(hide()));
 
