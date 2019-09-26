@@ -38,10 +38,14 @@ void BackgroundDirectInfusionUpdate::run(void) {
          vector<Adduct*> adducts;
          adducts.push_back(MassCalculator::MinusHAdduct);
 
-         DirectInfusionProcessor::processSingleSample(sample, compounds, adducts, false);
+         vector<DirectInfusionAnnotation*> results = DirectInfusionProcessor::processSingleSample(sample, compounds, adducts, false);
+
+         //TODO: send results to main frame in meaningful way
+
+         delete_all(results);
     }
 
-    qDebug() << "Direct infusion analysis completed in " <<timer.elapsed() << " msec.";
+    qDebug() << "Direct infusion analysis completed in" << timer.elapsed() << "msec.";
     emit(closeDialog());
     quit();
 
