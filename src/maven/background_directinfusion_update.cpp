@@ -33,8 +33,12 @@ void BackgroundDirectInfusionUpdate::run(void) {
          /**
           * ACTUAL WORK IS DONE HERE
           */
-         vector<Adduct*> adductsList;
-         DirectInfusionProcessor::processSingleSample(sample, compounds, adductsList);
+
+         //TODO: actually get adductlist from main window
+         vector<Adduct*> adducts;
+         adducts.push_back(MassCalculator::MinusHAdduct);
+
+         DirectInfusionProcessor::processSingleSample(sample, compounds, adducts);
 
          //TODO: remove this, just for testing
          this->sleep(1);
