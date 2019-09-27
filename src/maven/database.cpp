@@ -149,6 +149,10 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             compound->db   =  db;
             compound->expectedRt =  expectedRt;
 
+            //To avoid breaking with old versions
+            if (query.boundValues().find("adductString") != query.boundValues().end()) {
+                compound->adductString = query.value("adductString").toString().toStdString();
+            }
 
             if (formula.empty()) {
                 if(exactMass >0) compound->setExactMass(exactMass);
