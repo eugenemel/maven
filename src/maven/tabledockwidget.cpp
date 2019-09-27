@@ -463,6 +463,7 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* dire
     directInfusionClusterNum++;
 
     for (auto tuple : directInfusionAnnotation->compounds){
+
         PeakGroup pg;
         pg.metaGroupId = directInfusionClusterNum;
 
@@ -474,13 +475,11 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* dire
         pg.compound = get<0>(tuple);
         pg.minMz = directInfusionAnnotation->precMzMin;
         pg.maxMz = directInfusionAnnotation->precMzMax;
-        pg.meanMz = 0.5*(pg.minMz+pg.maxMz);
+        pg.meanMz = 0.5* (pg.minMz + pg.maxMz);
         pg.minRt = 0;
         pg.maxRt = directInfusionAnnotation->sample->maxRt;
 
-        //TODO: for some reason, this is not working!
-        //pg.fragmentationPattern = Fragment(directInfusionAnnotation->fragmentationPattern);
-
+        pg.fragmentationPattern = directInfusionAnnotation->fragmentationPattern->consensus;
         pg.fragMatchScore = get<3>(tuple);
 
         allgroups.push_back(pg);
@@ -488,7 +487,6 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* dire
 
     delete(directInfusionAnnotation->fragmentationPattern);
     delete(directInfusionAnnotation);
-
 }
 
 QList<PeakGroup*> TableDockWidget::getGroups() {
