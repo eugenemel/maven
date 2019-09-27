@@ -481,6 +481,7 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* dire
 
         pg.fragmentationPattern = directInfusionAnnotation->fragmentationPattern->consensus;
         pg.fragMatchScore = get<3>(tuple);
+        pg.fragMatchScore.mergedScore = pg.fragMatchScore.numMatches;
 
         allgroups.push_back(pg);
     }
