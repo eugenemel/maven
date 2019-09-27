@@ -44,9 +44,10 @@ void DirectInfusionDialog::analyze() {
     directInfusionUpdate->params->isRequireAdductPrecursorMatch = this->isRequireAdductMatch;
     directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralDeconvolutionAlgorithm::DO_NOTHING;
 
-    string title = "Direct Infusion Analysis"; //TODO: configurability?
-    TableDockWidget* resultsTable = mainwindow->addPeaksTable(title.c_str());
-    resultsTable->setWindowTitle(title.c_str());
+    QString title = QString("Direct Infusion Analysis");
+
+    TableDockWidget* resultsTable = mainwindow->addPeaksTable(title.toLatin1().data());
+    resultsTable->setWindowTitle(title.toLatin1().data());
 
     connect(directInfusionUpdate, SIGNAL(newDirectInfusionAnnotation(DirectInfusionAnnotation*)), resultsTable, SLOT(addDirectInfusionAnnotation(DirectInfusionAnnotation*)));
 

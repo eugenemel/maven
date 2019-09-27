@@ -504,8 +504,9 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* dire
         allgroups.push_back(pg);
     }
 
-    delete(directInfusionAnnotation->fragmentationPattern);
-    delete(directInfusionAnnotation);
+    //TODO: figure out why this causes problems
+//    delete(directInfusionAnnotation->fragmentationPattern);
+//    delete(directInfusionAnnotation);
 }
 
 QList<PeakGroup*> TableDockWidget::getGroups() {

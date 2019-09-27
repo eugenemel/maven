@@ -59,7 +59,7 @@ void BackgroundDirectInfusionUpdate::run(void) {
                      );
 
          //DirectInfusionAnnotation* are deleted by the receiver (TableDockWidget)
-         for (auto directInfusionAnnotation : directInfusionAnnotations) {
+         for (DirectInfusionAnnotation* directInfusionAnnotation : directInfusionAnnotations) {
              emit(newDirectInfusionAnnotation(directInfusionAnnotation));
          }
     }

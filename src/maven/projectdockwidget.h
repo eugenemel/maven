@@ -16,6 +16,7 @@ public:
     explicit ProjectDockWidget(QMainWindow *parent = 0);
     QColor getSampleColor(mzSample* sample);
     QIcon getSampleIcon(mzSample* sample);
+    ProjectDB* currentProject;
 
 public slots:
     void showInfo();
@@ -63,7 +64,6 @@ private:
     QString lastSavedProject;
     QColor  lastUsedSampleColor;
 
-    ProjectDB* currentProject;
     mzFileIO*  fileLoader;
 
 };
