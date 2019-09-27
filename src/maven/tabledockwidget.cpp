@@ -478,6 +478,10 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* dire
         p.mzmin = meanMz;
         p.mzmax = meanMz;
 
+        //Used by PeakGroup::getFragmentationEvents() - checks RT bounds with scan RT
+        p.rtmin = 0;
+        p.rtmax = FLT_MAX;
+
         //Used by PeakGroup::groupStatistics()
         p.pos = 1;
         p.baseMz = meanMz;
