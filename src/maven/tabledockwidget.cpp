@@ -462,20 +462,34 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* dire
 
     directInfusionClusterNum++;
 
+    float meanMz = 0.5f*(directInfusionAnnotation->precMzMin + directInfusionAnnotation->precMzMax);
+
     for (auto tuple : directInfusionAnnotation->compounds){
 
         PeakGroup pg;
         pg.metaGroupId = directInfusionClusterNum;
 
+        //TODO: much of the information needs to be stuffed into Peak, b/c
+        //when opening a file it all gets re-derived from PeakGroup::groupStatistics()
         Peak p;
         p.scan = directInfusionAnnotation->scan->scannum;
         p.setSample(directInfusionAnnotation->sample);
+        p.peakMz = meanMz;
+        p.mzmin = meanMz;
+        p.mzmax = meanMz;
+
+        //Used by PeakGroup::groupStatistics()
+        p.pos = 1;
+        p.baseMz = meanMz;
+
+        p.peakIntensity = 0; //TODO
         pg.addPeak(p);
 
         pg.compound = get<0>(tuple);
+        pg.adduct = get<1>(tuple);
         pg.minMz = directInfusionAnnotation->precMzMin;
         pg.maxMz = directInfusionAnnotation->precMzMax;
-        pg.meanMz = 0.5* (pg.minMz + pg.maxMz);
+        pg.meanMz = meanMz;
         pg.minRt = 0;
         pg.maxRt = directInfusionAnnotation->sample->maxRt;
 
