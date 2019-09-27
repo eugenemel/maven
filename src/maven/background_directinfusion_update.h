@@ -29,10 +29,12 @@ public:
 private:
     vector<mzSample*> samples;
     vector<Compound*> compounds;
+    vector<Adduct*> adducts;
 
 public:
     void setCompounds(vector<Compound*>& set) {compounds=set; }
     void setSamples(vector<mzSample*>& set) {samples=set; }
+    void setAdducts(vector<Adduct*>& set) {adducts=set;}
 
 protected:
   void run(void);

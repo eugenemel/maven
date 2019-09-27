@@ -36,6 +36,7 @@ void DirectInfusionDialog::analyze() {
 
     directInfusionUpdate->setSamples(mainwindow->samples); //TODO: getVisibleSamples()
     directInfusionUpdate->setCompounds(DB.compoundsDB);
+    directInfusionUpdate->setAdducts(DB.adductsDB);
 
     //TODO: set these values from the GUI
     directInfusionUpdate->params->minNumMatches = this->spnMatchXPeaks->value();

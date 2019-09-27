@@ -17,10 +17,6 @@ void BackgroundDirectInfusionUpdate::run(void) {
     qDebug() << "Direct infusion analysis started.";
     emit(updateProgressBar("Preparing search database...", 0, samples.size()));
 
-    //TODO: actually get adductlist from main window
-    vector<Adduct*> adducts;
-    adducts.push_back(MassCalculator::MinusHAdduct);
-
     /**
      * ACTUAL WORK
      */
