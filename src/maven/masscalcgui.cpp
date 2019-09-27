@@ -106,12 +106,12 @@ void MassCalcWidget::showTable() {
         QString matchScore = QString::number( matches[i].fragScore.getScoreByName(scoringAlgorithm) , 'f', 3);
 
         QString adductName = QString("");
-        if (a) {
+        if (a && !a->name.empty()) {
             adductName = QString(a->name.c_str());
         }
 
         QString db = QString("");
-        if (c){
+        if (c && !c->db.empty()){
             db = QString(c->db.c_str());
         }
 
