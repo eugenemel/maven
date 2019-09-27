@@ -17,6 +17,9 @@ void BackgroundDirectInfusionUpdate::run(void) {
     qDebug() << "Direct infusion analysis started.";
     emit(updateProgressBar("Preparing search database...", 0, samples.size()));
 
+    //TODO: get parameters from the main window
+    shared_ptr<DirectInfusionSearchParameters> params = shared_ptr<DirectInfusionSearchParameters>(new DirectInfusionSearchParameters());
+
     //TODO: actually get adductlist from main window
     vector<Adduct*> adducts;
     adducts.push_back(MassCalculator::MinusHAdduct);
@@ -28,7 +31,7 @@ void BackgroundDirectInfusionUpdate::run(void) {
             DirectInfusionProcessor::getSearchSet(samples.at(0),
                                                   compounds,
                                                   adducts,
-                                                  true, //isRequireAdductPrecursorMatch
+                                                  params,
                                                   false //debug
                                                   );
 
@@ -50,7 +53,13 @@ void BackgroundDirectInfusionUpdate::run(void) {
          /**
           * ACTUAL WORK
           */
-         vector<DirectInfusionAnnotation*> directInfusionAnnotations = DirectInfusionProcessor::processSingleSample(sample, searchDb, false);
+         vector<DirectInfusionAnnotation*> directInfusionAnnotations =
+                 DirectInfusionProcessor::processSingleSample(
+                     sample,
+                     searchDb,
+                     params,
+                     false //debug
+                     );
 
          //DirectInfusionAnnotation* are deleted by the receiver (TableDockWidget)
          for (auto directInfusionAnnotation : directInfusionAnnotations) {
