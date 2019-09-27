@@ -790,6 +790,11 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         if (QMessageBox::Yes == QMessageBox::question(this, "Close Confirmation", "Do you want to save current project?", QMessageBox::Yes | QMessageBox::No)) {
             projectDockWidget->saveProject();
         }
+
+        //Issue 52
+        //avoid some strange bugs when shutting down, specifically a call to updateDatabaseList().
+        massCalcWidget->blockSignals(true);
+
         settings->setValue("closeEvent", 1 );
         writeSettings();
         DB.closeAll();
