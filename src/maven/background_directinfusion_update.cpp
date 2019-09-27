@@ -15,7 +15,22 @@ void BackgroundDirectInfusionUpdate::run(void) {
     timer.start();
 
     qDebug() << "Direct infusion analysis started.";
-    emit(updateProgressBar("Initializing...", 0, samples.size()));
+    emit(updateProgressBar("Preparing search database...", 0, samples.size()));
+
+    //TODO: actually get adductlist from main window
+    vector<Adduct*> adducts;
+    adducts.push_back(MassCalculator::MinusHAdduct);
+
+    /**
+     * ACTUAL WORK
+     */
+    shared_ptr<DirectInfusionSearchSet> searchDb =
+            DirectInfusionProcessor::getSearchSet(samples.at(0),
+                                                  compounds,
+                                                  adducts,
+                                                  true, //isRequireAdductPrecursorMatch
+                                                  false //debug
+                                                  );
 
     for (unsigned int i = 0; i < samples.size(); i++){
 
@@ -29,16 +44,13 @@ void BackgroundDirectInfusionUpdate::run(void) {
                  .append(sample->sampleName)
                  .append("\"");
 
-         emit(updateProgressBar(msgStart.c_str(), (i+1), samples.size()));
+         emit(updateProgressBar(msgStart.c_str(), (i+1), (samples.size()+1)));
 
-         //TODO: actually get adductlist from main window
-         vector<Adduct*> adducts;
-         adducts.push_back(MassCalculator::MinusHAdduct);
 
          /**
-          * ACTUAL WORK IS DONE HERE
+          * ACTUAL WORK
           */
-         vector<DirectInfusionAnnotation*> directInfusionAnnotations = DirectInfusionProcessor::processSingleSample(sample, compounds, adducts, false);
+         vector<DirectInfusionAnnotation*> directInfusionAnnotations = DirectInfusionProcessor::processSingleSample(sample, searchDb, false);
 
          //DirectInfusionAnnotation* are deleted by the receiver (TableDockWidget)
          for (auto directInfusionAnnotation : directInfusionAnnotations) {
