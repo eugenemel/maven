@@ -504,9 +504,11 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* dire
         allgroups.push_back(pg);
     }
 
-    //TODO: figure out why this causes problems
-//    delete(directInfusionAnnotation->fragmentationPattern);
-//    delete(directInfusionAnnotation);
+    //TODO: This doesn't work, probably b/c of Fragment.h / Fragment.cpp (should follow Rule of 3)
+    //https://stackoverflow.com/questions/9498384/how-delete-a-pointer-of-classes-which-has-pointer-members
+    //Currently, massive memory leaks
+    // if (directInfusionAnnotation->fragmentationPattern) delete(directInfusionAnnotation->fragmentationPattern);
+    // if (directInfusionAnnotation) delete(directInfusionAnnotation);
 }
 
 QList<PeakGroup*> TableDockWidget::getGroups() {
