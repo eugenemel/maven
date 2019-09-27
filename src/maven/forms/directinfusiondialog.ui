@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>859</width>
-    <height>131</height>
+    <height>606</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>50</y>
+     <y>540</y>
      <width>841</width>
      <height>41</height>
     </rect>
@@ -29,11 +29,11 @@
     <number>0</number>
    </property>
   </widget>
-  <widget class="QLabel" name="label">
+  <widget class="QLabel" name="lblProgressMsg">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>80</y>
+     <y>580</y>
      <width>841</width>
      <height>21</height>
     </rect>
@@ -45,14 +45,150 @@
   <widget class="QPushButton" name="start">
    <property name="geometry">
     <rect>
-     <x>380</x>
-     <y>20</y>
+     <x>370</x>
+     <y>520</y>
      <width>113</width>
      <height>32</height>
     </rect>
    </property>
    <property name="text">
     <string>Start</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="libraryMatchingGroup">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>40</y>
+     <width>831</width>
+     <height>211</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Library Matching</string>
+   </property>
+   <widget class="QLabel" name="lblMatchXPeaks">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>90</y>
+      <width>151</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Match at Least X Peaks</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="spnMatchXPeaks">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>90</y>
+      <width>211</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>1</number>
+    </property>
+    <property name="maximum">
+     <number>999999999</number>
+    </property>
+    <property name="value">
+     <number>4</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblFragTol">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>40</y>
+      <width>121</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Fragment PPM Tolr</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="spnFragTol">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>40</y>
+      <width>221</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>20</number>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="isRequireAdductMatch">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>150</y>
+      <width>791</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Require compound's associated adduct and searched adduct match</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="spectralDeconvolutionGroup">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>280</y>
+     <width>831</width>
+     <height>231</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Spectral Deconvolution</string>
+   </property>
+   <widget class="QLabel" name="lblSpecDeconvAlg">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>40</y>
+      <width>211</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Spectral Deconvolution Algorithm</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="cmbSpectralDeconvolutionAlgorithm">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>30</y>
+      <width>501</width>
+      <height>32</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QLabel" name="lblHeader">
+   <property name="geometry">
+    <rect>
+     <x>280</x>
+     <y>20</y>
+     <width>281</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Direct Infusion Analysis Configuration Options</string>
    </property>
   </widget>
  </widget>

@@ -65,6 +65,7 @@ void BackgroundDirectInfusionUpdate::run(void) {
     }
 
     qDebug() << "Direct infusion analysis completed in" << timer.elapsed() << "msec.";
+    updateProgressBar("Direct infusion analysis not yet started", 0, 1);
     emit(closeDialog());
     quit();
 

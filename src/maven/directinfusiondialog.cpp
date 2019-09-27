@@ -21,7 +21,7 @@ void DirectInfusionDialog::show(){
 }
 
 void DirectInfusionDialog::setProgressBar(QString text, int progress, int totalSteps){
-    label->setText(text);
+    lblProgressMsg->setText(text);
     progressBar->setRange(0, totalSteps);
     progressBar->setValue(progress);
 }
@@ -38,10 +38,10 @@ void DirectInfusionDialog::analyze() {
     directInfusionUpdate->setCompounds(DB.compoundsDB);
 
     //TODO: set these values from the GUI
-    directInfusionUpdate->params->minNumMatches = 8;
-    directInfusionUpdate->params->productPpmTolr = 20;
-    directInfusionUpdate->params->minNumUniqueMatches = 0;
-    directInfusionUpdate->params->isRequireAdductPrecursorMatch = true;
+    directInfusionUpdate->params->minNumMatches = this->spnMatchXPeaks->value();
+    directInfusionUpdate->params->productPpmTolr = this->spnFragTol->value();
+    directInfusionUpdate->params->minNumUniqueMatches = 0; //TODO: currently unused, what does this do?
+    directInfusionUpdate->params->isRequireAdductPrecursorMatch = this->isRequireAdductMatch;
     directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralDeconvolutionAlgorithm::DO_NOTHING;
 
     string title = "Direct Infusion Analysis"; //TODO: configurability?
