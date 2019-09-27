@@ -37,6 +37,13 @@ void DirectInfusionDialog::analyze() {
     directInfusionUpdate->setSamples(mainwindow->samples); //TODO: getVisibleSamples()
     directInfusionUpdate->setCompounds(DB.compoundsDB);
 
+    //TODO: set these values from the GUI
+    directInfusionUpdate->params->minNumMatches = 8;
+    directInfusionUpdate->params->productPpmTolr = 20;
+    directInfusionUpdate->params->minNumUniqueMatches = 0;
+    directInfusionUpdate->params->isRequireAdductPrecursorMatch = true;
+    directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralDeconvolutionAlgorithm::DO_NOTHING;
+
     string title = "Direct Infusion Analysis"; //TODO: configurability?
     TableDockWidget* resultsTable = mainwindow->addPeaksTable(title.c_str());
     resultsTable->setWindowTitle(title.c_str());
