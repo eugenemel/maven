@@ -152,6 +152,16 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             //To avoid breaking with old versions
             if (query.boundValues().find("adductString") != query.boundValues().end()) {
                 compound->adductString = query.value("adductString").toString().toStdString();
+
+                if (compound->charge == 0){
+                    if (!compound->adductString.empty()){
+                       if (compound->adductString.compare (compound->adductString.length() - 1, 1, "+") != 0){
+                           compound->charge = 1;
+                       } else if (compound->adductString.compare (compound->adductString.length() - 1, 1, "-") != 0) {
+                           compound->charge = -1;
+                       }
+                    }
+                }
             }
 
             if (formula.empty()) {
@@ -629,6 +639,15 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
             cpd->setExactMass(exactMass);
          } else if (line.startsWith("ADDUCT:",Qt::CaseInsensitive)) {
             cpd->adductString = line.mid(8,line.length()).simplified().toStdString();
+
+            if (cpd->charge == 0) {
+                if (cpd->adductString.compare (cpd->adductString.length() - 1, 1, "+") != 0){
+                    cpd->charge = 1;
+                } else if (cpd->adductString.compare (cpd->adductString.length() - 1, 1, "-") != 0) {
+                    cpd->charge = -1;
+                }
+            }
+
          } else if (line.startsWith("FORMULA:",Qt::CaseInsensitive)) {
              QString formula = line.mid(9,line.length()).simplified();
              formula.replace("\"","",Qt::CaseInsensitive);
