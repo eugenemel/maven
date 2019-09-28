@@ -155,9 +155,9 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
 
                 if (compound->charge == 0){
                     if (!compound->adductString.empty()){
-                       if (compound->adductString.compare (compound->adductString.length() - 1, 1, "+") != 0){
+                       if (compound->adductString.compare (compound->adductString.length() - 1, 1, "+") == 0){
                            compound->charge = 1;
-                       } else if (compound->adductString.compare (compound->adductString.length() - 1, 1, "-") != 0) {
+                       } else if (compound->adductString.compare (compound->adductString.length() - 1, 1, "-") == 0) {
                            compound->charge = -1;
                        }
                     }
@@ -641,9 +641,9 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
             cpd->adductString = line.mid(8,line.length()).simplified().toStdString();
 
             if (cpd->charge == 0) {
-                if (cpd->adductString.compare (cpd->adductString.length() - 1, 1, "+") != 0){
+                if (cpd->adductString.compare (cpd->adductString.length() - 1, 1, "+") == 0){
                     cpd->charge = 1;
-                } else if (cpd->adductString.compare (cpd->adductString.length() - 1, 1, "-") != 0) {
+                } else if (cpd->adductString.compare (cpd->adductString.length() - 1, 1, "-") == 0) {
                     cpd->charge = -1;
                 }
             }
