@@ -301,8 +301,9 @@ void EicWidget::computeEICs() {
                                               baseline_quantile);
 
 	//find peaks
-	//for(int i=0; i < eics.size(); i++ )  eics[i]->getPeakPositions(eic_smoothingWindow);
-	//for(int i=0; i < eics.size(); i++ ) mzUtils::printF(eics[i]->intensity);
+    for(int i=0; i < eics.size(); i++ )  eics[i]->getPeakPositions(eic_smoothingWindow);
+
+    //for(int i=0; i < eics.size(); i++ ) mzUtils::printF(eics[i]->intensity);
 
     //interpolate EIC
     //for(int i=0; i < eics.size(); i++ ) eics[i]->interpolate();
@@ -1378,7 +1379,11 @@ void EicWidget::groupPeaks() {
 	float grouping_maxRtWindow =  settings->value("grouping_maxRtWindow").toDouble();
     float minSmoothedPeakIntensity = 1000; //TODO: retrieve from settings
 
-    peakgroups = EIC::groupPeaksB(eics, eic_smoothingWindow, grouping_maxRtWindow, minSmoothedPeakIntensity);
+    //old approach
+    peakgroups = EIC::groupPeaks(eics, eic_smoothingWindow, grouping_maxRtWindow);
+
+    //ms2-centric new approach
+    //peakgroups = EIC::groupPeaksB(eics, eic_smoothingWindow, grouping_maxRtWindow, minSmoothedPeakIntensity);
 
     //keep only top X groups ( ranked by intensity )
     qDebug() << "Start groupCount=" << peakgroups.size();
