@@ -11,11 +11,14 @@ BackgroundDirectInfusionUpdate::~BackgroundDirectInfusionUpdate() {
 
 void BackgroundDirectInfusionUpdate::run(void) {
 
+    int numSteps = samples.size() + 2; //prepare search database + each sample + agglomerate across samples
+    int stepNum = 0;
+
     QTime timer;
     timer.start();
 
     qDebug() << "Direct infusion analysis started.";
-    emit(updateProgressBar("Preparing search database...", 0, samples.size()));
+    emit(updateProgressBar("Preparing search database...", stepNum, numSteps));
 
     /**
      * ACTUAL WORK
@@ -28,7 +31,13 @@ void BackgroundDirectInfusionUpdate::run(void) {
                                                   false //debug
                                                   );
 
+    multimap<int, DirectInfusionAnnotation*> allDirectInfusionsAcrossSamples = {};
+
+    typedef map<int, DirectInfusionAnnotation*>::iterator diSampleIterator;
+
     for (unsigned int i = 0; i < samples.size(); i++){
+
+        stepNum++;
 
         mzSample* sample = samples.at(i);
 
@@ -40,13 +49,13 @@ void BackgroundDirectInfusionUpdate::run(void) {
                  .append(sample->sampleName)
                  .append("\"");
 
-         emit(updateProgressBar(msgStart.c_str(), (i+1), (samples.size()+1)));
+         emit(updateProgressBar(msgStart.c_str(), stepNum, numSteps));
 
 
          /**
           * ACTUAL WORK
           */
-         vector<DirectInfusionAnnotation*> directInfusionAnnotations =
+         map<int, DirectInfusionAnnotation*> directInfusionAnnotations =
                  DirectInfusionProcessor::processSingleSample(
                      sample,
                      searchDb,
@@ -54,11 +63,38 @@ void BackgroundDirectInfusionUpdate::run(void) {
                      false //debug
                      );
 
-         //DirectInfusionAnnotation* are deleted by the receiver (TableDockWidget)
-         for (DirectInfusionAnnotation* directInfusionAnnotation : directInfusionAnnotations) {
-             emit(newDirectInfusionAnnotation(directInfusionAnnotation));
+         for (diSampleIterator it = directInfusionAnnotations.begin(); it != directInfusionAnnotations.end(); ++it){
+             allDirectInfusionsAcrossSamples.insert(make_pair(it->first, it->second));
          }
+
     }
+
+    //TODO: refactor as modular algorithm
+    //Organizing across samples
+    stepNum++;
+    updateProgressBar("Combining results across samples...", stepNum, numSteps);
+
+    for (auto directInfusionAnnotation : allDirectInfusionsAcrossSamples) {
+        emit(newDirectInfusionAnnotation(directInfusionAnnotation.second, directInfusionAnnotation.first));
+    }
+
+//    typedef multimap<int, DirectInfusionAnnotation*>::iterator diMultimapIterator;
+
+//    for (int mapKey : searchDb->mapKeys){
+
+//        pair<diMultimapIterator, diMultimapIterator> directInfusionAnnotations = allDirectInfusionsAcrossSamples.equal_range(mapKey);
+
+//        for (diMultimapIterator it = directInfusionAnnotations.first; it != directInfusionAnnotations.second; ++it){
+//            emit(newDirectInfusionAnnotation(it->second, it->first));
+//        }
+
+//        //for (diMultimapIterator = allDirectInfusionsAcrossSamples.equal_range(mapKey);)
+//    }
+
+    //DirectInfusionAnnotation* are deleted by the receiver (TableDockWidget)
+//    for (DirectInfusionAnnotation* directInfusionAnnotation : directInfusionAnnotations) {
+//        emit(newDirectInfusionAnnotation(directInfusionAnnotation));
+//    }
 
     qDebug() << "Direct infusion analysis completed in" << timer.elapsed() << "msec.";
     updateProgressBar("Direct infusion analysis not yet started", 0, 1);

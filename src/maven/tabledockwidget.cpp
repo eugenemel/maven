@@ -458,16 +458,14 @@ PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, boo
     return g;
 }
 
-void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* directInfusionAnnotation){
-
-    directInfusionClusterNum++;
+void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* directInfusionAnnotation, int clusterNum) {
 
     float meanMz = 0.5f*(directInfusionAnnotation->precMzMin + directInfusionAnnotation->precMzMax);
 
     for (auto tuple : directInfusionAnnotation->compounds){
 
         PeakGroup pg;
-        pg.metaGroupId = directInfusionClusterNum;
+        pg.metaGroupId = clusterNum;
 
         //TODO: much of the information needs to be stuffed into Peak, b/c
         //when opening a file it all gets re-derived from PeakGroup::groupStatistics()
