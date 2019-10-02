@@ -172,7 +172,12 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 
         eicCount += eics.size();
 
-        vector<PeakGroup> peakgroups = EIC::groupPeaksB(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow, minSmoothedPeakIntensity);
+        //find peaks
+        for(int i=0; i < eics.size(); i++ )  eics[i]->getPeakPositions(eic_smoothingWindow);
+        vector<PeakGroup> peakgroups = EIC::groupPeaks(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow);
+
+        //20191002: Too slow! Reverting to previous approach.
+//        vector<PeakGroup> peakgroups = EIC::groupPeaksB(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow, minSmoothedPeakIntensity);
 
         numAllPeakGroups += peakgroups.size();
 
@@ -434,7 +439,13 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         }
         if (eicMaxIntensity < minGroupIntensity) { delete_all(eics); continue; }
 
-        vector<PeakGroup> peakgroups = EIC::groupPeaksB(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow, minSmoothedPeakIntensity);
+        //find peaks
+        for(int i=0; i < eics.size(); i++ )  eics[i]->getPeakPositions(eic_smoothingWindow);
+
+        vector<PeakGroup> peakgroups = EIC::groupPeaks(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow);
+
+        //20191002: Too slow! Reverting to previous approach.
+        //vector<PeakGroup> peakgroups = EIC::groupPeaksB(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow, minSmoothedPeakIntensity);
 
         //cerr << "\tFound " << peakgroups.size() << "\n";
 
