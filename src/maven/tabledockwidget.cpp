@@ -460,9 +460,12 @@ PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, boo
 
 void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* directInfusionAnnotation, int clusterNum) {
 
-    float meanMz = 0.5f*(directInfusionAnnotation->precMzMin + directInfusionAnnotation->precMzMax);
-
     for (auto tuple : directInfusionAnnotation->compounds){
+
+        Compound* compound = get<0>(tuple);
+        Adduct* adduct = get<1>(tuple);
+
+        float theoMz = adduct->computeAdductMass(MassCalculator::computeNeutralMass(compound->getFormula()));
 
         PeakGroup pg;
         pg.metaGroupId = clusterNum;
@@ -472,9 +475,9 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* dire
         Peak p;
         p.scan = directInfusionAnnotation->scan->scannum;
         p.setSample(directInfusionAnnotation->sample);
-        p.peakMz = meanMz;
-        p.mzmin = meanMz;
-        p.mzmax = meanMz;
+        p.peakMz = theoMz;
+        p.mzmin = theoMz;
+        p.mzmax = theoMz;
 
         //Used by PeakGroup::getFragmentationEvents() - checks RT bounds with scan RT
         p.rtmin = 0;
@@ -482,16 +485,16 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* dire
 
         //Used by PeakGroup::groupStatistics()
         p.pos = 1;
-        p.baseMz = meanMz;
+        p.baseMz = theoMz;
 
         p.peakIntensity = 0; //TODO
         pg.addPeak(p);
 
-        pg.compound = get<0>(tuple);
-        pg.adduct = get<1>(tuple);
+        pg.compound = compound;
+        pg.adduct = adduct;
         pg.minMz = directInfusionAnnotation->precMzMin;
         pg.maxMz = directInfusionAnnotation->precMzMax;
-        pg.meanMz = meanMz;
+        pg.meanMz = theoMz;
         pg.minRt = 0;
         pg.maxRt = directInfusionAnnotation->sample->maxRt;
 
