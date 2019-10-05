@@ -476,8 +476,8 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* dire
         p.scan = directInfusionAnnotation->scan->scannum;
         p.setSample(directInfusionAnnotation->sample);
         p.peakMz = theoMz;
-        p.mzmin = theoMz;
-        p.mzmax = theoMz;
+        p.mzmin = directInfusionAnnotation->precMzMin;
+        p.mzmax = directInfusionAnnotation->precMzMax;
 
         //Used by PeakGroup::getFragmentationEvents() - checks RT bounds with scan RT
         p.rtmin = 0;
