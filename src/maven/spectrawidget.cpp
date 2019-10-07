@@ -509,7 +509,7 @@ void SpectraWidget::findBounds(bool checkX, bool checkY) {
 	if( _maxX > maxMZ) _maxX = maxMZ;
 
     if ( checkX ) { _minX = minMZ; _maxX = maxMZ; }
-    if ( _minX == _maxX ) { _minX-=0.5; _maxX+=0.5; }
+    if ( abs(_minX -_maxX)<1e-6 ) { _minX-=0.5; _maxX+=0.5; }
 
     if (checkY)  {
     	_minY = 0; 
