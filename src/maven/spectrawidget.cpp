@@ -429,7 +429,6 @@ void SpectraWidget::drawGraph() {
         } else {
                 sline->addPoint(x,yzero);
                 sline->addPoint(x,y);
-                //sline->addPoint(x,yzero);
         }
 
         if( abs(scan->mz[j]-_focusedMz)<0.005 ) {
