@@ -191,8 +191,11 @@ void SpectraWidget::setScan(Peak* peak) {
     setCurrentScan(scan);
 
     _focusCoord = QPointF(peak->peakMz,peak->peakIntensity);
+
+    //These affect the MS1 plot - do not change
     _minX = peak->peakMz-2;
     _maxX = peak->peakMz+6;
+
     _maxY = peak->peakIntensity*1.3;
     _minY = 0;
 
@@ -376,7 +379,7 @@ void SpectraWidget::drawGraph() {
     //draw title text
     setTitle();
 
-    QColor sampleColor = QColor::fromRgb(0,0,0,255);
+    QColor sampleColor = QColor::fromRgb(0,0,0,255); //black
     string sampleName =  ".";
     QString polarity;
 
