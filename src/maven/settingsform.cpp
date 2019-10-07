@@ -43,6 +43,14 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(scan_filter_min_intensity, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
     connect(ionizationType,SIGNAL(currentIndexChanged(int)),SLOT(getFormValues()));
 
+    //spectra widget display options
+    connect(chkAutoMzMax, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+    connect(chkAutoMzMin, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+    connect(spnMzMinOffset, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+    connect(spnMzMinVal, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+    connect(spnMzMaxOffset, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+    connect(spnMzMaxVal, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+
     setModal(true);
 
 }
@@ -120,6 +128,14 @@ void SettingsForm::setFormValues() {
 
     if(settings->contains("scan_filter_min_quantile"))
         scan_filter_min_quantile->setValue( settings->value("scan_filter_min_quantile").toInt());
+
+    //spectra widget display options
+    chkAutoMzMin->setCheckState((Qt::CheckState) settings->value("chkAutoMzMin").toInt());
+    chkAutoMzMax->setCheckState((Qt::CheckState) settings->value("chkAutoMzMax").toInt());
+    spnMzMinOffset->setValue(settings->value("spnMzMinOffset").toDouble());
+    spnMzMinVal->setValue(settings->value("spnMzMinVal").toDouble());
+    spnMzMaxOffset->setValue(settings->value("spnMzMaxOffset").toDouble());
+    spnMzMaxVal->setValue(settings->value("spnMzMaxVal").toDouble());
 }
 
 
@@ -188,6 +204,15 @@ void SettingsForm::getFormValues() {
     } else {
     	mzSample::setFilter_mslevel(0);
     }
+
+    //spectra widget display options
+    settings->setValue("chkAutoMzMin", chkAutoMzMin->checkState());
+    settings->setValue("chkAutoMzMax", chkAutoMzMax->checkState());
+    settings->setValue("spnMzMinOffset", spnMzMinOffset->value());
+    settings->setValue("spnMzMinVal", spnMzMinVal->value());
+    settings->setValue("spnMzMaxOffset", spnMzMaxOffset->value());
+    settings->setValue("spnMzMaxVal", spnMzMaxVal->value());
+
 }
 
 void SettingsForm::selectFolder(QString key) {
