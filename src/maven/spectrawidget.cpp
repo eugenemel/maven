@@ -289,7 +289,7 @@ void SpectraWidget::overlayCompound(Compound* c) {
    for(int i=0; i < c->fragment_intensity.size(); i++) hit.intensityList << c->fragment_intensity[i];
 
    //remove previous annotations
-   links.clear();;
+   links.clear();
 
    //add new annotations
    for(auto ion: c->fragment_iontype) {
@@ -306,7 +306,7 @@ void SpectraWidget::overlayCompound(Compound* c) {
 }
 
 
-void SpectraWidget::drawSpectalHitLines(SpectralHit& hit) {
+void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
 
     float ppmWindow =    hit.productPPM;
     double maxIntensity= hit.getMaxIntensity();
@@ -482,7 +482,7 @@ void SpectraWidget::drawGraph() {
     }
 
     if(_showOverlay and _spectralHit.mzList.size()>0) {
-        drawSpectalHitLines(_spectralHit);
+        drawSpectralHitLines(_spectralHit);
     }
 
     addAxes();
