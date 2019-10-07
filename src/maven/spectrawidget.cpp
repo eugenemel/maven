@@ -383,7 +383,7 @@ void SpectraWidget::drawGraph() {
     string sampleName =  ".";
     QString polarity;
 
-    QPen pen(Qt::black, 2);
+    QPen blackpen(Qt::black, 2);
     float fontSize = scene()->height()*0.05;
     if ( fontSize < 1) fontSize=1;
     if ( fontSize > 16) fontSize=16;
@@ -427,8 +427,12 @@ void SpectraWidget::drawGraph() {
         if( _profileMode ) {
                sline->addPoint(x,y);
         } else {
-                sline->addPoint(x,yzero);
-                sline->addPoint(x,y);
+
+            QGraphicsLineItem* line = new QGraphicsLineItem(x,y,x,yzero,0);
+            scene()->addItem(line);
+            line->setPen(blackpen);
+            _items.push_back(line);
+
         }
 
         if( abs(scan->mz[j]-_focusedMz)<0.005 ) {
