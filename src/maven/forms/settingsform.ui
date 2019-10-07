@@ -794,66 +794,17 @@
          <string>m/z max offset:</string>
         </property>
        </widget>
-       <widget class="QLabel" name="lblDa1">
-        <property name="geometry">
-         <rect>
-          <x>450</x>
-          <y>50</y>
-          <width>21</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Da</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="lblDa3">
-        <property name="geometry">
-         <rect>
-          <x>450</x>
-          <y>120</y>
-          <width>21</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Da</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="lblDa2">
-        <property name="geometry">
-         <rect>
-          <x>880</x>
-          <y>50</y>
-          <width>21</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Da</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="lblDa4">
-        <property name="geometry">
-         <rect>
-          <x>880</x>
-          <y>120</y>
-          <width>21</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Da</string>
-        </property>
-       </widget>
        <widget class="QDoubleSpinBox" name="spnMzMinOffset">
         <property name="geometry">
          <rect>
           <x>320</x>
           <y>41</y>
-          <width>121</width>
+          <width>151</width>
           <height>31</height>
          </rect>
+        </property>
+        <property name="suffix">
+         <string> amu</string>
         </property>
         <property name="maximum">
          <double>9999999.000000000000000</double>
@@ -870,9 +821,12 @@
          <rect>
           <x>750</x>
           <y>41</y>
-          <width>121</width>
+          <width>151</width>
           <height>31</height>
          </rect>
+        </property>
+        <property name="suffix">
+         <string> amu</string>
         </property>
         <property name="maximum">
          <double>9999999.000000000000000</double>
@@ -886,9 +840,12 @@
          <rect>
           <x>320</x>
           <y>110</y>
-          <width>121</width>
+          <width>151</width>
           <height>31</height>
          </rect>
+        </property>
+        <property name="suffix">
+         <string> amu</string>
         </property>
         <property name="maximum">
          <double>999999.000000000000000</double>
@@ -903,11 +860,14 @@
        <widget class="QDoubleSpinBox" name="spnMzMaxVal">
         <property name="geometry">
          <rect>
-          <x>751</x>
-          <y>111</y>
-          <width>121</width>
+          <x>750</x>
+          <y>110</y>
+          <width>151</width>
           <height>31</height>
          </rect>
+        </property>
+        <property name="suffix">
+         <string> amu</string>
         </property>
         <property name="maximum">
          <double>9999999.000000000000000</double>
