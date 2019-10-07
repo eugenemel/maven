@@ -917,17 +917,17 @@ void MainWindow::createToolBars() {
     btnSpectraMatching->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnSpectraMatching->setToolTip(tr("Seach Spectra for Fragmentation Patterns"));
 
-    QToolButton *btnSettings = new QToolButton(toolBar);
-    btnSettings->setText("Options");
-    btnSettings->setIcon(QIcon(rsrcPath + "/settings.png"));
-    btnSettings->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnSettings->setToolTip(tr("Change Global Options"));
-
     QToolButton *btnDirectInfusion = new QToolButton(toolBar);
     btnDirectInfusion->setText("Direct Infusion");
     btnDirectInfusion->setIcon(QIcon(rsrcPath +"/averageSpectra.png"));
     btnDirectInfusion->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnDirectInfusion->setToolTip(tr("Process Direct Infusion Samples"));
+
+    QToolButton *btnSettings = new QToolButton(toolBar);
+    btnSettings->setText("Options");
+    btnSettings->setIcon(QIcon(rsrcPath + "/settings.png"));
+    btnSettings->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnSettings->setToolTip(tr("Change Global Options"));
 
     connect(btnOpen, SIGNAL(clicked()), SLOT(open()));
     connect(btnLibrary, SIGNAL(clicked()), libraryDialog, SLOT(show()));
@@ -935,9 +935,9 @@ void MainWindow::createToolBars() {
     connect(btnCalibrate,SIGNAL(clicked()), calibrateDialog, SLOT(show()));
     connect(btnDbSearch,SIGNAL(clicked()), SLOT(compoundDatabaseSearch()));
     connect(btnFeatureDetect,SIGNAL(clicked()), SLOT(showMassSlices()));
-    connect(btnSettings,SIGNAL(clicked()),settingsForm,SLOT(show()));
     connect(btnSpectraMatching,SIGNAL(clicked()),spectraMatchingForm,SLOT(show()));
     connect(btnDirectInfusion, SIGNAL(clicked()), SLOT(showDirectInfusionDialog()));
+    connect(btnSettings,SIGNAL(clicked()),settingsForm,SLOT(show()));
 
     toolBar->addWidget(btnOpen);
     toolBar->addWidget(btnLibrary);
@@ -946,9 +946,8 @@ void MainWindow::createToolBars() {
     toolBar->addWidget(btnDbSearch);
     toolBar->addWidget(btnFeatureDetect);
     toolBar->addWidget(btnSpectraMatching);
-    toolBar->addWidget(btnSettings);
     toolBar->addWidget(btnDirectInfusion);
-
+    toolBar->addWidget(btnSettings);
 
     QWidget *hBox = new QWidget(toolBar);
     (void)toolBar->addWidget(hBox);
