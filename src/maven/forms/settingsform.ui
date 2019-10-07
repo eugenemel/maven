@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>766</width>
-    <height>206</height>
+    <width>1008</width>
+    <height>243</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -588,6 +588,31 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tab_3">
+      <attribute name="title">
+       <string>External Programs</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_9">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_24">
+         <property name="text">
+          <string>R Executable </string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QPushButton" name="RProgramSelect">
+         <property name="icon">
+          <iconset resource="../mzroll.qrc">
+           <normaloff>:/images/fileopen.png</normaloff>:/images/fileopen.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLineEdit" name="Rprogram"/>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="tab_2">
       <attribute name="title">
        <string>Web Servers</string>
@@ -672,30 +697,229 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_3">
+     <widget class="QWidget" name="tab_4">
       <attribute name="title">
-       <string>External Programs</string>
+       <string>Display Options</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_9">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_24">
-         <property name="text">
-          <string>R Executable </string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QPushButton" name="RProgramSelect">
-         <property name="icon">
-          <iconset resource="../mzroll.qrc">
-           <normaloff>:/images/fileopen.png</normaloff>:/images/fileopen.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QLineEdit" name="Rprogram"/>
-       </item>
-      </layout>
+      <widget class="QGroupBox" name="grpDisplayOptions">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>961</width>
+         <height>211</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>Spectra Widget</string>
+       </property>
+       <widget class="QCheckBox" name="chkAutoMzMin">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>50</y>
+          <width>141</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Autoscale m/z min</string>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="chkAutoMzMax">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>120</y>
+          <width>151</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Autoscale m/z max</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblMzMin">
+        <property name="geometry">
+         <rect>
+          <x>640</x>
+          <y>50</y>
+          <width>91</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>m/z min value:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblMzMax">
+        <property name="geometry">
+         <rect>
+          <x>640</x>
+          <y>120</y>
+          <width>91</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>m/z max value::</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblMzMinOffset">
+        <property name="geometry">
+         <rect>
+          <x>220</x>
+          <y>50</y>
+          <width>101</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>m/z min offset:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblMzMaxOffset">
+        <property name="geometry">
+         <rect>
+          <x>220</x>
+          <y>120</y>
+          <width>101</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>m/z max offset:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblDa1">
+        <property name="geometry">
+         <rect>
+          <x>450</x>
+          <y>50</y>
+          <width>21</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Da</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblDa3">
+        <property name="geometry">
+         <rect>
+          <x>450</x>
+          <y>120</y>
+          <width>21</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Da</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblDa2">
+        <property name="geometry">
+         <rect>
+          <x>880</x>
+          <y>50</y>
+          <width>21</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Da</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblDa4">
+        <property name="geometry">
+         <rect>
+          <x>880</x>
+          <y>120</y>
+          <width>21</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Da</string>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="spnMzMinOffset">
+        <property name="geometry">
+         <rect>
+          <x>320</x>
+          <y>41</y>
+          <width>121</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="maximum">
+         <double>9999999.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.010000000000000</double>
+        </property>
+        <property name="value">
+         <double>10.000000000000000</double>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="spnMzMinVal">
+        <property name="geometry">
+         <rect>
+          <x>750</x>
+          <y>41</y>
+          <width>121</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="maximum">
+         <double>9999999.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.010000000000000</double>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="spnMzMaxOffset">
+        <property name="geometry">
+         <rect>
+          <x>320</x>
+          <y>110</y>
+          <width>121</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="maximum">
+         <double>999999.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.010000000000000</double>
+        </property>
+        <property name="value">
+         <double>10.000000000000000</double>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="spnMzMaxVal">
+        <property name="geometry">
+         <rect>
+          <x>751</x>
+          <y>111</y>
+          <width>121</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="maximum">
+         <double>9999999.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.010000000000000</double>
+        </property>
+        <property name="value">
+         <double>1200.000000000000000</double>
+        </property>
+       </widget>
+      </widget>
      </widget>
     </widget>
    </item>
