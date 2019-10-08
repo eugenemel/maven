@@ -17,6 +17,11 @@ DirectInfusionDialog::~DirectInfusionDialog(){
 }
 
 void DirectInfusionDialog::show(){
+
+    //populate algorithm options
+    cmbSpectralDeconvolutionAlgorithm->addItem("No Deconvolution");
+    cmbSpectralDeconvolutionAlgorithm->addItem("All Shared Fragments");
+
     QDialog::show();
 }
 
@@ -43,7 +48,12 @@ void DirectInfusionDialog::analyze() {
     directInfusionUpdate->params->productPpmTolr = this->spnFragTol->value();
     directInfusionUpdate->params->minNumUniqueMatches = 0; //TODO: currently unused, what does this do?
     directInfusionUpdate->params->isRequireAdductPrecursorMatch = this->isRequireAdductMatch;
-    directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralDeconvolutionAlgorithm::DO_NOTHING;
+
+    if (cmbSpectralDeconvolutionAlgorithm->currentText() == "No Deconvolution"){
+        directInfusionUpdate->params->spectralDeconvolutionAlgorithm = SpectralDeconvolutionAlgorithm::NO_DECONVOLUTION;
+    } else if (cmbSpectralDeconvolutionAlgorithm->currentText() == "All Shared Fragments"){
+        directInfusionUpdate->params->spectralDeconvolutionAlgorithm = SpectralDeconvolutionAlgorithm::ALL_SHARED_FRAGMENTS;
+    }
 
     QString title = QString("Direct Infusion Analysis");
 
