@@ -130,28 +130,24 @@ void SettingsForm::setFormValues() {
         scan_filter_min_quantile->setValue( settings->value("scan_filter_min_quantile").toInt());
 
     //spectra widget display options
-    chkAutoMzMin->setCheckState((Qt::CheckState) settings->value("chkAutoMzMin").toInt());
-    chkAutoMzMax->setCheckState((Qt::CheckState) settings->value("chkAutoMzMax").toInt());
 
-    spnMzMinOffset->setValue(settings->value("spnMzMinOffset").toDouble());
-    spnMzMaxOffset->setValue(settings->value("spnMzMaxOffset").toDouble());
+    if (settings->contains("chkAutoMzMin"))
+        chkAutoMzMin->setCheckState((Qt::CheckState) settings->value("chkAutoMzMin").toInt());
 
-    double settingsMzMinVal = settings->value("spnMzMinVal").toDouble();
-    if (settingsMzMinVal < 0){
-        settingsMzMinVal = 0;
-    }
+    if (settings->contains("chkAutoMzMax"))
+        chkAutoMzMax->setCheckState((Qt::CheckState) settings->value("chkAutoMzMax").toInt());
 
-    double settingsMzMaxVal = settings->value("spnMzMaxVal").toDouble();
-    if (settingsMzMaxVal <= 0) {
-        settingsMzMaxVal = 1200;
-    }
-    if (settingsMzMaxVal <= (settingsMzMinVal+20)){
-        settingsMzMinVal = 0;
-        settingsMzMaxVal = 1200;
-    }
+    if (settings->contains("spnMzMinOffset"))
+        spnMzMinOffset->setValue(settings->value("spnMzMinOffset").toDouble());
 
-    spnMzMinVal->setValue(settingsMzMinVal);
-    spnMzMaxVal->setValue(settingsMzMaxVal);
+    if (settings->contains("spnMzMaxOffset"))
+        spnMzMaxOffset->setValue(settings->value("spnMzMaxOffset").toDouble());
+
+    if (settings->contains("spnMzMinVal"))
+        spnMzMinVal->setValue(settings->value("spnMzMinVal").toDouble());
+
+    if (settings->contains("spnMzMaxVal"))
+        spnMzMaxVal->setValue(settings->value("spnMzMaxVal").toDouble());
 }
 
 
