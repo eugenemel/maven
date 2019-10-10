@@ -634,23 +634,26 @@ void SpectraWidget::addAxes() {
 
             float maxIntensity = _maxY / _maxIntensityScaleFactor;
 
-
             //scan y-axis
-            Axes* y = new Axes(1,_minY, maxY,10);
+            Axes* y = new Axes(1,_minY, _maxY,10);
             y->setY(showOverlayOffset());
             y->setZValue(999);
             y->showTicLines(false);
             y->setOffset(5);
+
+            scene()->addItem(y);
             _items.push_back(y);
 
             //overlay y-axis
 
         } else {
+
             Axes* y = new Axes(1,_minY, _maxY,10);
-            scene()->addItem(y);
             y->setZValue(999);
             y->showTicLines(false);
             y->setOffset(5);
+
+            scene()->addItem(y);
             _items.push_back(y);
         }
 
