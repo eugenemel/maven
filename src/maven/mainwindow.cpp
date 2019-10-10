@@ -1326,7 +1326,11 @@ void MainWindow::showPeakInfo(Peak* _peak) {
     }
 
     if( fragmentationEventsWidget->isVisible() ) {
-        showFragmentationScans(_peak->peakMz);
+        float mz = _peak->peakMz;
+        if (_peak->mzmax - _peak->mzmin > 0.5f) { //direct infusion peak
+            mz = 0.5f* (_peak->mzmin + _peak->mzmax);
+        }
+        showFragmentationScans(mz);
     }
 }
 
