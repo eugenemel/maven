@@ -99,7 +99,7 @@ public slots:
                     float toY(float y, float Norm=1.0, float offset=0)  { float H=scene()->height(); return(H-((y-_minY)/(_maxY-_minY) *H)*Norm)+offset; };
                     float invX(float x) { return(  x/scene()->width())  * (_maxX-_minX) + _minX; }
                     float invY(float y) { return  -1*((y-scene()->height())/scene()->height() * (_maxY-_minY) + _minY); }
-                    float showOverlayOffset(){return -scene()->height()/2.0f;}
+                    double showOverlayOffset(){return -scene()->height()/2.0;}
 
                     int findNearestMz(QPointF pos);
                     void drawArrow(float mz1, float int1, float mz2, float ints2);
