@@ -407,7 +407,10 @@ void SpectraWidget::drawGraph() {
 
     float SCALE=1.0;
     float OFFSET=0;
-    if (_showOverlay) { SCALE=0.45; OFFSET=-scene()->height()/2.0; }
+    if (_showOverlay) {
+        SCALE= _showOverlayScale;
+        OFFSET= showOverlayOffset();
+    }
 
 
     int yzero = toY(0,SCALE,OFFSET);
@@ -537,7 +540,7 @@ void SpectraWidget::findBounds(bool checkX, bool checkY) {
         }
     }
 
-    _minY=0; _maxY *= 1.3;
+    _minY=0; _maxY *= _maxIntensityScaleFactor;
    // cerr << "findBounds():  mz=" << _minX << "-" << _maxX << " ints=" << _minY << "-" << _maxY << endl;
 }
 
@@ -614,8 +617,21 @@ void SpectraWidget::addAxes() {
 		_items.push_back(x);
 	}
 
+    //converting y values to y points:
+
+   //toY():
+   //return(scene()->height()-((y-_minY)/(_maxY-_minY) *scene()->height())*Norm)+offset; };
+
     if (_drawYAxis ) {
-    	Axes* y = new Axes(1,_minY, _maxY,10);
+
+        Axes* y = new Axes(1,_minY, _maxY,10);
+
+        if (_showOverlay) {
+            y->setY(-scene()->height()/2.0);
+        } else {
+
+        }
+
     	scene()->addItem(y);
 		y->setZValue(999);
         y->showTicLines(false);
