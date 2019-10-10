@@ -72,6 +72,7 @@ void SpectraWidget::setCurrentScan(Scan* scan) {
         //}
         links.clear();
         _currentScan->deepcopy(scan);
+
         if(_log10Transform) {
             _currentScan->log10Transform();
         }
@@ -541,7 +542,8 @@ void SpectraWidget::findBounds(bool checkX, bool checkY) {
     }
 
     _minY=0; _maxY *= _maxIntensityScaleFactor;
-   // cerr << "findBounds():  mz=" << _minX << "-" << _maxX << " ints=" << _minY << "-" << _maxY << endl;
+
+//   cerr << "findBounds():  mz=" << _minX << "-" << _maxX << " ints=" << _minY << "-" << _maxY << endl;
 }
 
 void SpectraWidget::keyPressEvent( QKeyEvent *e ) {
@@ -835,7 +837,7 @@ void SpectraWidget::drawArrow(float mz1, float intensity1, float mz2, float inte
     }
 
 
-    QString note = tr("m/z: %1 &Delta;%2").arg( QString::number(mz1,'f',6),QString::number(distance,'f',3));
+    QString note = tr("m/z: %1 intensity: %2 &Delta;%3").arg( QString::number(mz1,'f',3),QString::number(intensity1,'f',0),QString::number(distance,'f',3));
 
     if (_note  != NULL ) {
         _note->setPos(x2+1,y2-30);
