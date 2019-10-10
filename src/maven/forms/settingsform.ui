@@ -711,7 +711,7 @@
         </rect>
        </property>
        <property name="title">
-        <string>Spectra Widget</string>
+        <string>Spectrum m/z Display Range</string>
        </property>
        <widget class="QCheckBox" name="chkAutoMzMin">
         <property name="geometry">
