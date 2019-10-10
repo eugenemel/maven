@@ -75,7 +75,7 @@ int Database::loadCompoundsFile(QString filename) {
     }
 
     deleteCompoundsSQL(dbname.c_str(),ligandDB);
-    saveCompoundsSQL(compounds,ligandDB);
+    saveCompoundsSQL(compounds,ligandDB,true);
 
     sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
     return compounds.size();
@@ -741,14 +741,16 @@ void Database::deleteCompoundsSQL(QString dbName, QSqlDatabase& dbConnection) {
 }
 
 
-void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& dbConnection) {
+void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& dbConnection, bool isUpdateOldDBVersion) {
     qDebug() << "saveCompoundsSQL()" << compoundSet.size();
 
     /*
      * START CHECK DB VERSION
      *
-     * ENSURE LIBRARY HAS CORRECT SCHEMA
+     * ENSURE DB HAS CORRECT SCHEMA
      * IF IT DOES NOT, DELETE AND START OVER PRIOR TO WRITING THIS COMPOUND SET
+     *
+     * APPLIES BOTH To ligand.db and .mzrollDB files.
      */
 
     QSqlQuery queryCheckCols(dbConnection);
@@ -757,17 +759,23 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
         qDebug() << "Ho..." << queryCheckCols.lastError();
     }
 
-    bool isCurrentVersion = false;
+    bool isHasExistingCols = false;
+    bool isHasAdductString = false;
+
     while (queryCheckCols.next()){
+        isHasExistingCols = true;
         if ("adductString" == queryCheckCols.value(1).toString()){
-            isCurrentVersion = true;
+            isHasAdductString = true;
             break;
         }
     }
 
-    if (!isCurrentVersion) {
-        qDebug() << "ligand.db is not at most current version. Removing all compounds via deleteAllCompoundsSQL()";
+    bool isOldVersion = isHasExistingCols && !isHasAdductString;
+
+    if (isOldVersion && isUpdateOldDBVersion) {
+        qDebug() << "compounds table of DB is not at most current version. Removing all old compounds via deleteAllCompoundsSQL()";
         deleteAllCompoundsSQL(dbConnection);
+        isOldVersion = false;
     }
 
     /*
@@ -801,9 +809,6 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
 
         query0.exec("create index if not exists compound_db_idx on compounds(dbName)");
 
-        QSqlQuery query1(dbConnection);
-        query1.prepare("replace into compounds values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?)");
-
         for(Compound* c : compoundSet) {
             QStringList cat;
             QStringList fragMz;
@@ -825,32 +830,65 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
             }
 
 	    QVariant cid =  QVariant(QVariant::Int);
-	    if (c->cid) cid = QVariant(c->cid);
+        if (c->cid)cid = QVariant(c->cid);
 
-            query1.bindValue( 0, cid);
-            query1.bindValue( 1, QString(c->db.c_str()) );
-            query1.bindValue( 2, QString(c->id.c_str()) );
-            query1.bindValue( 3, QString(c->name.c_str()));
-            query1.bindValue( 4, QString(c->adductString.c_str()));
+            QSqlQuery query1(dbConnection);
 
-            query1.bindValue( 5, QString(c->formula.c_str()));
-            query1.bindValue( 6, QString(c->smileString.c_str()));
-            query1.bindValue( 7, QString(c->srmId.c_str()));
+            if (isOldVersion) {
+                query1.prepare("replace into compounds values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?)");
 
-            query1.bindValue( 8, c->getExactMass() );
-            query1.bindValue( 9, c->charge);
-            query1.bindValue( 10, c->expectedRt);
-            query1.bindValue( 11, c->precursorMz);
-            query1.bindValue( 12, c->productMz);
+                query1.bindValue( 0, cid);
+                query1.bindValue( 1, QString(c->db.c_str()) );
+                query1.bindValue( 2, QString(c->id.c_str()) );
+                query1.bindValue( 3, QString(c->name.c_str()));
 
-            query1.bindValue( 13, c->collisionEnergy);
-            query1.bindValue( 14, c->logP);
-            query1.bindValue( 15, c->virtualFragmentation);
-            query1.bindValue( 16, c->ionizationMode);
-            query1.bindValue( 17, cat.join(";"));
+                query1.bindValue( 4, QString(c->formula.c_str()));
+                query1.bindValue( 5, QString(c->smileString.c_str()));
+                query1.bindValue( 6, QString(c->srmId.c_str()));
 
-            query1.bindValue( 18, fragMz.join(";"));
-            query1.bindValue( 19, fragIntensity.join(";"));
+                query1.bindValue( 7, c->getExactMass() );
+                query1.bindValue( 8, c->charge);
+                query1.bindValue( 9, c->expectedRt);
+                query1.bindValue( 10, c->precursorMz);
+                query1.bindValue( 11, c->productMz);
+
+                query1.bindValue( 12, c->collisionEnergy);
+                query1.bindValue( 13, c->logP);
+                query1.bindValue( 14, c->virtualFragmentation);
+                query1.bindValue( 15, c->ionizationMode);
+                query1.bindValue( 16, cat.join(";"));
+
+                query1.bindValue( 17, fragMz.join(";"));
+                query1.bindValue( 18, fragIntensity.join(";"));
+
+            } else {
+                query1.prepare("replace into compounds values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?)");
+
+                query1.bindValue( 0, cid);
+                query1.bindValue( 1, QString(c->db.c_str()) );
+                query1.bindValue( 2, QString(c->id.c_str()) );
+                query1.bindValue( 3, QString(c->name.c_str()));
+                query1.bindValue( 4, QString(c->adductString.c_str()));
+
+                query1.bindValue( 5, QString(c->formula.c_str()));
+                query1.bindValue( 6, QString(c->smileString.c_str()));
+                query1.bindValue( 7, QString(c->srmId.c_str()));
+
+                query1.bindValue( 8, c->getExactMass() );
+                query1.bindValue( 9, c->charge);
+                query1.bindValue( 10, c->expectedRt);
+                query1.bindValue( 11, c->precursorMz);
+                query1.bindValue( 12, c->productMz);
+
+                query1.bindValue( 13, c->collisionEnergy);
+                query1.bindValue( 14, c->logP);
+                query1.bindValue( 15, c->virtualFragmentation);
+                query1.bindValue( 16, c->ionizationMode);
+                query1.bindValue( 17, cat.join(";"));
+
+                query1.bindValue( 18, fragMz.join(";"));
+                query1.bindValue( 19, fragIntensity.join(";"));
+            }
 
             if(!query1.exec())  qDebug() << query1.lastError();
         }
