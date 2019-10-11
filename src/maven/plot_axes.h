@@ -23,6 +23,9 @@ public:
 	void setMargin(int m) { margin=m; }
 	void setOffset(int o ) { offset=o;  }
 	void showTicLines(bool f) { tickLinesFlag=f; }
+
+    void setRenderScale(float f){ renderScale = f;}
+    void setRenderOffset(float f){ renderOffset = f;}
 	
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -40,6 +43,9 @@ private:
    bool tickLinesFlag;
    QString label;
    QString title;
+
+   float renderScale = 1;
+   float renderOffset= 0;
 };
 
 #endif

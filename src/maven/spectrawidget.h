@@ -71,6 +71,7 @@ public slots:
 
                     float _maxIntensityScaleFactor = 1.3f;
                     float _showOverlayScale = 0.45;
+                    float _showOverlayOffset = 0.50;
 
                     SpectralHit  _spectralHit;
 
@@ -99,7 +100,7 @@ public slots:
                     float toY(float y, float Norm=1.0, float offset=0)  { float H=scene()->height(); return(H-((y-_minY)/(_maxY-_minY) *H)*Norm)+offset; };
                     float invX(float x) { return(  x/scene()->width())  * (_maxX-_minX) + _minX; }
                     float invY(float y) { return  -1*((y-scene()->height())/scene()->height() * (_maxY-_minY) + _minY); }
-                    double showOverlayOffset(){return -scene()->height()/2.0;}
+                    double showOverlayOffset(){return -1*_showOverlayOffset*scene()->height();}
 
                     int findNearestMz(QPointF pos);
                     void drawArrow(float mz1, float int1, float mz2, float ints2);

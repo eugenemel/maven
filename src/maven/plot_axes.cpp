@@ -19,12 +19,12 @@ QRectF Axes::boundingRect() const
 	if(type == 0 ) {
     	return(QRectF(0,scene()->height()-textmargin,scene()->width(),scene()->height()-textmargin));
 	} else {
-    	return(QRectF(0,0,+textmargin,scene()->height()+textmargin));
+        return(QRectF(0,0,+textmargin,scene()->height()+textmargin));
 	}
 }
 
 void Axes::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
-{ 
+{
     QPen pen(Qt::darkGray, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
     painter->setPen(pen);
 
@@ -38,10 +38,11 @@ void Axes::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
     int x0 = margin;
     int x1 = scene()->width()-margin;
 
-    int y0 = scene()->height()-margin;
-    int y1 = margin;
+    //int y0 = scene()->height()-margin;
+    //int y1 = margin;
+    //int y1 = y()-margin;//margin;
 
-	int Y0=scene()->height()-offset;
+    int Y0=scene()->height()-offset;
 	int X0=margin+offset;
 
     float range = (max-min);
@@ -51,7 +52,33 @@ void Axes::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 
     float ticks = range/b;
     float ix = (x1-x0)/ticks;
-    float iy = (y1-y0)/ticks;
+
+    //ORIGINAL
+    //float iy = (y1-y0)/ticks;
+
+    //ATTEMPT 3
+    int lastTickTextHeight = 20;
+    int y0 = rint((scene()->height()-margin) * (1.0f - renderOffset));
+    int y1 = margin+lastTickTextHeight+offset;
+
+    float yRange = y1-y0;
+    float iy = yRange/nticks; //independent variable, use slope to find corresponding intensities
+
+//    //FIRST SLOPE ATTEMPT
+//    //(x1, y1) = (y0, min) and (x2, y2) = (y1, max)
+//    float m = (max-min)/(y1-y0);
+//    float y_intercept = min - m * y0;
+
+//    //SECOND SLOPE ATTEMPT
+
+    float intensityCoordMin = (min/renderScale) * (1 - (y0/(scene()->height())) - renderOffset);
+    float intensityCoordMax = (max/renderScale) * (1 - (y1/(scene()->height())) - renderOffset);
+
+//    //(x1, y1) = (y0, intensityCoordMin) and (x2, y2) = (y1, intensityCoordMax)
+    float m = (intensityCoordMax-intensityCoordMin)/(y1-y0);
+    float y_intercept = min - m * y0;
+
+    ticks = nticks;
 
     if ( b == 0 ) return;
 
@@ -60,16 +87,33 @@ void Axes::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
         for (int i=0; i <= ticks; i++ ) painter->drawLine(x0+ix*i,Y0-5,x0+ix*i,Y0+5);
         for (int i=0; i <= ticks; i++ ) painter->drawText(x0+ix*i,Y0+12,QString::number(min+b*i,'f',2));
     } else if ( type == 1 ) { //Y axes
+
         painter->drawLine(X0,y0,X0,y1);
+
 		for (int i=0; i <= ticks; i++ ) {
 			painter->drawLine(X0-5,y0+iy*i,X0+5,y0+iy*i);
 		}
 
-        for (int i=0; i <= ticks; i++ ) { 
-				QString value = QString::number(min+b*i,'g',2);
-				if ( max < 10000 ) { value = QString::number(min+b*i,'f',1); }
-				painter->drawText(X0+2,y0+iy*i,value);
-		}
+        for (int i=0; i <= ticks; i++ ) {
+
+            int axisCoord = y0+iy*i;
+
+           float val = m*axisCoord + y_intercept;
+
+            QString value;
+
+            if ( max < 10000 ) {
+                value = QString::number(val,'f',1);
+            } else {
+                value = QString::number(val,'g',2);
+            }
+
+            painter->drawText(X0+2,axisCoord,value);
+
+//            qDebug() << "TEXT=" << value << " scene()->height()=" << scene()->height() << " m=" << m << " b=" << y_intercept << " intensityCoordMax=" << intensityCoordMax
+//                     << " @ y0=" << y0 <<", Y0=" << Y0 << "y1= " << y1 << "y()" << y() << ", margin=" << margin << ", i=" << i << ", iy=" << iy
+//                     << ", iy*i=" << iy*i << ", y0+iy*i=" << y0+iy*i;
+        }
 
 		if(tickLinesFlag) {
 			//horizontal tick lines
