@@ -26,6 +26,7 @@ public:
 
     void setRenderScale(float f){ renderScale = f;}
     void setRenderOffset(float f){ renderOffset = f;}
+    void setVerticalOffset(int i){ verticalOffset = i;}
 	
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -46,6 +47,7 @@ private:
 
    float renderScale = 1;
    float renderOffset= 0;
+   int verticalOffset = 0;
 };
 
 #endif

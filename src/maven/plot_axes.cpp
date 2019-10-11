@@ -50,7 +50,7 @@ void Axes::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 
     int lastTickTextHeight = 20;
     int y0 = rint((scene()->height()-margin) * (1.0f - renderOffset));
-    int y1 = margin+lastTickTextHeight+offset;
+    int y1 = margin+lastTickTextHeight+offset+verticalOffset;
 
     float yRange = y1-y0;
     float iy = yRange/nticks; //independent variable, use slope to find corresponding intensities

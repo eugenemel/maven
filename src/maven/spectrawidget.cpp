@@ -640,10 +640,22 @@ void SpectraWidget::addAxes() {
             _items.push_back(y);
 
             //overlay y-axis
+            Axes* yOverlay = new Axes(1, 0, 1.0, 5);
+
+            yOverlay->setRenderScale(_showOverlayScale);
+
+
+            yOverlay->setZValue(999);
+            yOverlay->showTicLines(false);
+            yOverlay->setOffset(5);
+            yOverlay->setVerticalOffset(_showOverlayOffset*scene()->height());
+
+            scene()->addItem(yOverlay);
+            _items.push_back(yOverlay);
 
         } else {
 
-            Axes* y = new Axes(1,_minY, _maxY,10);
+            Axes* y = new Axes(1,_minY, _maxY, 5);
             y->setZValue(999);
             y->showTicLines(false);
             y->setOffset(5);
