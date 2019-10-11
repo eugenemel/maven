@@ -33,14 +33,9 @@ void Axes::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
     font.setBold(true);
     painter->setFont(font);
 
-
     if (nticks == 0 ) nticks = 2;
     int x0 = margin;
     int x1 = scene()->width()-margin;
-
-    //int y0 = scene()->height()-margin;
-    //int y1 = margin;
-    //int y1 = y()-margin;//margin;
 
     int Y0=scene()->height()-offset;
 	int X0=margin+offset;
@@ -53,23 +48,12 @@ void Axes::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
     float ticks = range/b;
     float ix = (x1-x0)/ticks;
 
-    //ORIGINAL
-    //float iy = (y1-y0)/ticks;
-
-    //ATTEMPT 3
     int lastTickTextHeight = 20;
     int y0 = rint((scene()->height()-margin) * (1.0f - renderOffset));
     int y1 = margin+lastTickTextHeight+offset;
 
     float yRange = y1-y0;
     float iy = yRange/nticks; //independent variable, use slope to find corresponding intensities
-
-//    //FIRST SLOPE ATTEMPT
-//    //(x1, y1) = (y0, min) and (x2, y2) = (y1, max)
-//    float m = (max-min)/(y1-y0);
-//    float y_intercept = min - m * y0;
-
-//    //SECOND SLOPE ATTEMPT
 
     float intensityCoordMin = (min/renderScale) * (1 - (y0/(scene()->height())) - renderOffset);
     float intensityCoordMax = (max/renderScale) * (1 - (y1/(scene()->height())) - renderOffset);
