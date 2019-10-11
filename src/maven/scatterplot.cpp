@@ -525,7 +525,11 @@ void ScatterPlot::contrastGroups() {
      MainWindow* mw = (MainWindow*) parent();
      compareSamplesDialog->setQuantitationType(mw->getUserQuantType());
 
+     compareSamplesDialog->setVisible(true);
      compareSamplesDialog->show();
+     compareSamplesDialog->raise();
+     compareSamplesDialog->activateWindow();
+
      mw->scatterDockWidget->setVisible(true);
      mw->scatterDockWidget->raise();
 }
