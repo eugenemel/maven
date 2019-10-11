@@ -622,40 +622,12 @@ void SpectraWidget::addAxes() {
 		_items.push_back(x);
 	}
 
-    //converting y values to y points:
-
-   //
-   //toY(peakIntensity, _showOverlayScale, showOverlayOffset()):
-    //
-   // scene()->height() - ((peakIntensity-_minY)/(_maxY-_minY) *scene()->height())*_showOverlayScale)) + showOverlayOffset();
-    //       height     -                       scaled_height                              +    offset
-    //
-    // here, _showOverlayScale = 0.45 and showOverlayOffset = -0.50 * scene()
-    // so, the total height -
-
-    //what should the new _maxY, in terms of peakIntensity?
-
-    /*
-     * The max intensity peak is drawn starting at 0.95 * scene()
-     * or h - scaled_height*h - 0.5 * h
-     * = h(1 - 0.45 - 0.5)
-     * = h(0.95)
-     *
-     *(x1, y1) and (x2, y2)
-     *(0, 0) and (0.95, max_intensity)
-     * just solve for peakIntensity
-     *
-     */
     if (_drawYAxis ) {
 
         if (_showOverlay) {
 
-            float maxIntensity = _maxY / _maxIntensityScaleFactor;
-
             //scan y-axis
-            Axes* y = new Axes(1,_minY, _maxY, 10);
-            //y->setY(showOverlayOffset());
-            //y->setMaxYSceneFraction(_showOverlayScale+_showOverlayOffset);
+            Axes* y = new Axes(1,_minY, _maxY, 5);
 
             y->setRenderScale((_showOverlayScale));
             y->setRenderOffset(_showOverlayOffset);
