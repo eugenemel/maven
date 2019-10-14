@@ -152,28 +152,28 @@
     </rect>
    </property>
    <property name="title">
-    <string>Spectral Deconvolution</string>
+    <string>Spectral Composition</string>
    </property>
    <widget class="QLabel" name="lblSpecDeconvAlg">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>40</y>
-      <width>211</width>
-      <height>16</height>
+      <x>10</x>
+      <y>30</y>
+      <width>201</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>Spectral Deconvolution Algorithm</string>
+     <string>Spectral Composition Algorithm</string>
     </property>
    </widget>
    <widget class="QComboBox" name="cmbSpectralDeconvolutionAlgorithm">
     <property name="geometry">
      <rect>
-      <x>290</x>
+      <x>220</x>
       <y>30</y>
-      <width>501</width>
-      <height>32</height>
+      <width>571</width>
+      <height>41</height>
      </rect>
     </property>
    </widget>

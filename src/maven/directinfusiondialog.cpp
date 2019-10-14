@@ -10,8 +10,8 @@ DirectInfusionDialog::DirectInfusionDialog(QWidget *parent) : QDialog(parent) {
       directInfusionUpdate = new BackgroundDirectInfusionUpdate(this);
 
       //populate algorithm options
-      cmbSpectralDeconvolutionAlgorithm->addItem("No Deconvolution");
-      cmbSpectralDeconvolutionAlgorithm->addItem("All Shared Fragments");
+      cmbSpectralDeconvolutionAlgorithm->addItem("List All Candidates");
+      cmbSpectralDeconvolutionAlgorithm->addItem("Unique Fragments: Median Intensity Ratio");
 
       connect(start, SIGNAL(clicked(bool)), SLOT(analyze()));
 }
@@ -48,10 +48,10 @@ void DirectInfusionDialog::analyze() {
     directInfusionUpdate->params->minNumUniqueMatches = 0; //TODO: currently unused, what does this do?
     directInfusionUpdate->params->isRequireAdductPrecursorMatch = this->isRequireAdductMatch;
 
-    if (cmbSpectralDeconvolutionAlgorithm->currentText() == "No Deconvolution"){
-        directInfusionUpdate->params->spectralDeconvolutionAlgorithm = SpectralDeconvolutionAlgorithm::NO_DECONVOLUTION;
-    } else if (cmbSpectralDeconvolutionAlgorithm->currentText() == "All Shared Fragments"){
-        directInfusionUpdate->params->spectralDeconvolutionAlgorithm = SpectralDeconvolutionAlgorithm::ALL_SHARED_FRAGMENTS;
+    if (cmbSpectralDeconvolutionAlgorithm->currentText() == "List All Candidates"){
+        directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::ALL_CANDIDATES;
+    } else if (cmbSpectralDeconvolutionAlgorithm->currentText() == "Unique Fragments: Median Intensity Ratio"){
+        directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::MEDIAN_UNIQUE;
     }
 
     QString title = QString("Direct Infusion Analysis");
