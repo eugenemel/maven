@@ -7,8 +7,6 @@ DirectInfusionDialog::DirectInfusionDialog(QWidget *parent) : QDialog(parent) {
       setupUi(this);
       setModal(true);
 
-      directInfusionUpdate = new BackgroundDirectInfusionUpdate(this);
-
       //populate algorithm options
       cmbSpectralDeconvolutionAlgorithm->addItem("List All Candidates");
       cmbSpectralDeconvolutionAlgorithm->addItem("Unique Fragments: Median Intensity Ratio");
@@ -37,6 +35,13 @@ void DirectInfusionDialog::analyze() {
         QDialog::hide();
         return;
     }
+
+    if (directInfusionUpdate) {
+        delete(directInfusionUpdate);
+        directInfusionUpdate = nullptr;
+    }
+
+    directInfusionUpdate = new BackgroundDirectInfusionUpdate(this);
 
     directInfusionUpdate->setSamples(mainwindow->samples); //TODO: getVisibleSamples()
     directInfusionUpdate->setCompounds(DB.compoundsDB);
