@@ -460,10 +460,10 @@ PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, boo
 
 void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* directInfusionAnnotation, int clusterNum) {
 
-    for (auto tuple : directInfusionAnnotation->compounds){
+    for (auto directInfusionMatchData : directInfusionAnnotation->compounds){
 
-        Compound* compound = get<0>(tuple);
-        Adduct* adduct = get<1>(tuple);
+        Compound* compound = directInfusionMatchData.compound;
+        Adduct* adduct = directInfusionMatchData.adduct;
 
         float theoMz = adduct->computeAdductMass(MassCalculator::computeNeutralMass(compound->getFormula()));
 
@@ -499,7 +499,7 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* dire
         pg.maxRt = directInfusionAnnotation->sample->maxRt;
 
         pg.fragmentationPattern = directInfusionAnnotation->fragmentationPattern->consensus;
-        pg.fragMatchScore = get<3>(tuple);
+        pg.fragMatchScore = directInfusionMatchData.fragmentationMatchScore;
         pg.fragMatchScore.mergedScore = pg.fragMatchScore.numMatches;
 
         allgroups.push_back(pg);
