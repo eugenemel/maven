@@ -216,6 +216,28 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
                 abort();
             }
 
+            for (Compound *cpd : compoundsDB) {
+
+                //sort all compounds by m/z (and re-order corresponding intensity vector)
+                vector<pair<float,int>> pairsArray = vector<pair<float,int>>(cpd->fragment_mzs.size());
+                for (unsigned int pos = 0; pos < cpd->fragment_mzs.size(); pos++){
+                    pairsArray.at(pos) = make_pair(cpd->fragment_mzs.at(pos), pos);
+                }
+
+                sort(pairsArray.begin(), pairsArray.end());
+
+                vector<float> sortedMzs = vector<float>(pairsArray.size());
+                vector<float> sortedIntensities = vector<float>(pairsArray.size());
+
+                for (unsigned int pos = 0; pos < pairsArray.size(); pos++) {
+                    sortedMzs.at(pos) = pairsArray.at(pos).first;
+                    sortedIntensities.at(pos) = cpd->fragment_intensity.at(pairsArray.at(pos).second);
+                }
+
+                cpd->fragment_mzs = sortedMzs;
+                cpd->fragment_intensity = sortedIntensities;
+            }
+
             sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
             qDebug() << "loadCompoundSQL : " << databaseName << compoundsDB.size();
         }
