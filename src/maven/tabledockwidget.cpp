@@ -462,8 +462,8 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* dire
 
     for (auto directInfusionMatchData : directInfusionAnnotation->compounds){
 
-        Compound* compound = directInfusionMatchData.compound;
-        Adduct* adduct = directInfusionMatchData.adduct;
+        Compound* compound = directInfusionMatchData->compound;
+        Adduct* adduct = directInfusionMatchData->adduct;
 
         float theoMz = adduct->computeAdductMass(MassCalculator::computeNeutralMass(compound->getFormula()));
 
@@ -499,8 +499,10 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* dire
         pg.maxRt = directInfusionAnnotation->sample->maxRt;
 
         pg.fragmentationPattern = directInfusionAnnotation->fragmentationPattern->consensus;
-        pg.fragMatchScore = directInfusionMatchData.fragmentationMatchScore;
+        pg.fragMatchScore = directInfusionMatchData->fragmentationMatchScore;
         pg.fragMatchScore.mergedScore = pg.fragMatchScore.numMatches;
+
+        pg.groupRank = directInfusionMatchData->proportion;
 
         allgroups.push_back(pg);
     }
