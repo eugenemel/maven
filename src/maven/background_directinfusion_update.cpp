@@ -60,7 +60,7 @@ void BackgroundDirectInfusionUpdate::run(void) {
                      sample,
                      searchDb,
                      params,
-                     true //debug
+                     false //debug
                      );
 
          for (diSampleIterator it = directInfusionAnnotations.begin(); it != directInfusionAnnotations.end(); ++it){
