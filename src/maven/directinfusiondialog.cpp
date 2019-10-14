@@ -9,6 +9,10 @@ DirectInfusionDialog::DirectInfusionDialog(QWidget *parent) : QDialog(parent) {
 
       directInfusionUpdate = new BackgroundDirectInfusionUpdate(this);
 
+      //populate algorithm options
+      cmbSpectralDeconvolutionAlgorithm->addItem("No Deconvolution");
+      cmbSpectralDeconvolutionAlgorithm->addItem("All Shared Fragments");
+
       connect(start, SIGNAL(clicked(bool)), SLOT(analyze()));
 }
 
@@ -17,11 +21,6 @@ DirectInfusionDialog::~DirectInfusionDialog(){
 }
 
 void DirectInfusionDialog::show(){
-
-    //populate algorithm options
-    cmbSpectralDeconvolutionAlgorithm->addItem("No Deconvolution");
-    cmbSpectralDeconvolutionAlgorithm->addItem("All Shared Fragments");
-
     QDialog::show();
 }
 
