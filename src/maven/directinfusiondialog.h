@@ -24,6 +24,7 @@ class DirectInfusionDialog : public QDialog, public Ui_directInfusionDialog{
         void analyze();
         void setProgressBar(QString text, int progress, int totalSteps);
         void show();
+        void updateSpectralCompositionDescription();
 
     private:
         QSettings *settings;

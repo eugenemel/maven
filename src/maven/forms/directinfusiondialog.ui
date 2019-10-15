@@ -177,6 +177,16 @@
      </rect>
     </property>
    </widget>
+   <widget class="QTextBrowser" name="txtSpecCompDescription">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>70</y>
+      <width>791</width>
+      <height>141</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QLabel" name="lblHeader">
    <property name="geometry">

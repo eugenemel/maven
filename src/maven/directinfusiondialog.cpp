@@ -12,6 +12,9 @@ DirectInfusionDialog::DirectInfusionDialog(QWidget *parent) : QDialog(parent) {
       cmbSpectralDeconvolutionAlgorithm->addItem("Unique Fragments: Median Intensity Ratio");
 
       connect(start, SIGNAL(clicked(bool)), SLOT(analyze()));
+      connect(cmbSpectralDeconvolutionAlgorithm, SIGNAL(currentIndexChanged(int)), SLOT(updateSpectralCompositionDescription()));
+
+      updateSpectralCompositionDescription();
 }
 
 DirectInfusionDialog::~DirectInfusionDialog(){
@@ -26,6 +29,37 @@ void DirectInfusionDialog::setProgressBar(QString text, int progress, int totalS
     lblProgressMsg->setText(text);
     progressBar->setRange(0, totalSteps);
     progressBar->setValue(progress);
+}
+
+void DirectInfusionDialog::updateSpectralCompositionDescription() {
+
+    //TODO: hard-coded values
+    int currentIndex = cmbSpectralDeconvolutionAlgorithm->currentIndex();
+
+    QString text("");
+    switch(currentIndex){
+    case 0:
+        text = QString(
+                    "Return all compound matches, without any attempt to determine spectral composition.\n"
+                    "\nEach peak group corresponds to a single sample."
+                    );
+        break;
+    case 1:
+        text = QString(
+                    "Compounds are only retained if they contain unique matches (in addition to other criteria).\n"
+                    "Note that this will exclude chain isomers with identical fragments.\n"
+                    "Assumes that intensities in spectral libraries are normalized to a common max intensity for each spectrum.\n"
+                    "\nCompute:\n"
+                    "\ncompound_relative_abundance = observed_intensity / normalized_theoretical_intensity\n\n"
+                    "Enumerate for all unique fragments, and take median compound_relative_abundance.\n"
+                    "Repeat for all compounds, and return relative proportion as groupRank.\n"
+                    "\nEach peak group corresponds to a single sample."
+                    );
+        break;
+    }
+
+    txtSpecCompDescription->setText(text);
+
 }
 
 void DirectInfusionDialog::analyze() {
