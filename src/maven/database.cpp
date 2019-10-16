@@ -125,6 +125,16 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
         QString sql = "select * from compounds";
         if (databaseName != "ALL")  sql += " where dbName='" + databaseName + "'";
 
+        bool isHasAdductStringColumn = false;
+        QSqlQuery tableInfoQuery(dbConnection);
+        tableInfoQuery.exec("PRAGMA table_info(compounds)");
+        while(tableInfoQuery.next()) {
+            if (tableInfoQuery.value(1).toString() == "adductString") {
+                isHasAdductStringColumn = true;
+                break;
+            }
+        }
+
         query.prepare(sql);
         if(!query.exec()) qDebug() << "loadCompoundsSQL: query error " << query.lastError();
         MassCalculator mcalc;
@@ -149,8 +159,10 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             compound->db   =  db;
             compound->expectedRt =  expectedRt;
 
+            auto boundValues = query.boundValues();
+
             //To avoid breaking with old versions
-            if (query.boundValues().find("adductString") != query.boundValues().end()) {
+            if (isHasAdductStringColumn) {
                 compound->adductString = query.value("adductString").toString().toStdString();
 
                 if (compound->charge == 0){
