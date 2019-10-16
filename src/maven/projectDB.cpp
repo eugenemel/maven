@@ -487,7 +487,7 @@ void ProjectDB::loadPeakGroups(QString tableName) {
         }
     }
 
-   cerr << "ProjectDB Read in " << allgroups.size() << endl;
+   cerr << "ProjectDB: Read in " << allgroups.size() << " peak groups." << endl;
 }
 
 mzSample* ProjectDB::getSampleById(int sampleId) { 

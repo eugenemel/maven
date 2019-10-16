@@ -658,11 +658,13 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
 
         int groupCount=0;
         for(TableDockWidget* peakTable : _mainwindow->getAllPeakTables() ) {
+            int onePeakTableCount = 0;
             for(PeakGroup* group : peakTable->getGroups()) {
                 groupCount++;
                 project->writeGroupSqlite(group,0,peakTable->windowTitle());
                 if(group->compound) compoundSet.insert(group->compound);
             }
+            qDebug() << peakTable->windowTitle() << ": Saved " << onePeakTableCount << "groups.";
         }
         project->saveCompounds(compoundSet);
 
