@@ -477,25 +477,6 @@ void ProjectDB::loadPeakGroups(QString tableName) {
 
         loadGroupPeaks(&g);
 
-        //Issue 62: OLD CODE
-//        if (parentGroupId==0) {
-//            allgroups.push_back(g);
-//        } else {
-//            bool foundParent=false;
-//            for(PeakGroup& x: allgroups) {
-//                if(x.groupId == parentGroupId) {
-//                    x.children.push_back(g);
-//                    foundParent=true;
-//                    break;
-//                }
-//            }
-
-//            //failed to find a parent group, become a parent
-//            if(!foundParent) allgroups.push_back(g);
-
-//        }
-
-        //Issue 62: NEW CODE
         if (parentGroupId == 0) {
             allgroups.push_back(g);
         } else {
@@ -503,7 +484,6 @@ void ProjectDB::loadPeakGroups(QString tableName) {
         }
     }
 
-        //Issue 62: NEW CODE
         sort(peakGroupChildren.begin(), peakGroupChildren.end(), [](const pair<PeakGroup, int>& lhs, const pair<PeakGroup, int>& rhs){
             return lhs.second < rhs.second;
         });
@@ -577,13 +557,6 @@ void ProjectDB::loadPeakGroups(QString tableName) {
             cerr << "All children: " << peakGroupChildren.size() << ", matched children: " << matchedChildren.size() << endl;
             //cerr << "child peakgroup id# " << child.groupId << " is missing parent id# " << parentGroupId << endl;
         }
-
-        //debugging
-//        for (PeakGroup& parent : allgroups){
-//            if (parent.childCount() > 0) {
-//                cerr << parent.groupId << ": " << parent.childCount() << endl;
-//            }
-//        }
 
    cerr << "ProjectDB::loadPeakGroups(): Read in " << (allgroups.size()+matchedChildren.size()) << " total peak groups, "
         << allgroups.size() << " parents and " << matchedChildren.size() << " children." << endl;
