@@ -1086,7 +1086,7 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
 
                 eic->setSmootherType((EIC::SmootherType) eic_smoothingAlgorithm);
                 eic->getPeakPositions(eic_smoothingWindow);
-                if (eic->peaks.size() > 1 ) break;
+                if (eic->peaks.size() >= 1 ) break;
 
                 //clean up
                 delete(eic); eic=nullptr;
