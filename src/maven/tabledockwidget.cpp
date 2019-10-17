@@ -569,6 +569,8 @@ void TableDockWidget::showAllGroups() {
         vScroll->setSliderPosition(vScroll->maximum());
     }
     treeWidget->setSortingEnabled(true);
+
+    treeWidget->expandAll();
     updateStatus();
 
     /*
