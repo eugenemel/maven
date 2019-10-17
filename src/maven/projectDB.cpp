@@ -419,6 +419,10 @@ void ProjectDB::loadPeakGroups(QString tableName) {
      query.exec("create index if not exists peak_group_ids on peaks(groupId)");
      query.exec("select * from " + tableName );
 
+     //Issue 62: NEW CODE
+     vector<PeakGroup> peakGroupParents;
+     vector<pair<PeakGroup, int>> peakGroupChildren;
+
      while (query.next()) {
 
         PeakGroup g;
@@ -471,21 +475,89 @@ void ProjectDB::loadPeakGroups(QString tableName) {
 
         loadGroupPeaks(&g);
 
-        if (parentGroupId==0) {
-            allgroups.push_back(g);
+        //Issue 62: OLD CODE
+//        if (parentGroupId==0) {
+//            allgroups.push_back(g);
+//        } else {
+//            bool foundParent=false;
+//            for(PeakGroup& x: allgroups) {
+//                if(x.groupId == parentGroupId) {
+//                    x.children.push_back(g);
+//                    foundParent=true;
+//                    break;
+//                }
+//            }
+
+//            //failed to find a parent group, become a parent
+//            if(!foundParent) allgroups.push_back(g);
+
+//        }
+
+        //Issue 62: NEW CODE
+        if (parentGroupId == 0) {
+            peakGroupParents.push_back(g);
         } else {
-            bool foundParent=false;
-            for(PeakGroup& x: allgroups) {
-                if(x.groupId == parentGroupId) {
-                    x.children.push_back(g);
-                    foundParent=true;
-                    break;
-                }
-            }
-            //failed to find a parent group, become a parent
-            if(!foundParent) allgroups.push_back(g);
+            peakGroupChildren.push_back(make_pair(g, parentGroupId));
         }
     }
+
+        //Issue 62: NEW CODE
+        sort(peakGroupChildren.begin(), peakGroupChildren.end(), [](const pair<PeakGroup, int>& lhs, const pair<PeakGroup, int>& rhs){
+            return lhs.second < rhs.second;
+        });
+
+        sort(peakGroupParents.begin(), peakGroupParents.end(), [](const PeakGroup& lhs, const PeakGroup& rhs){
+             return lhs.groupId < rhs.groupId;
+        });
+
+        unsigned int childPosition = 0;
+        unsigned int parentPosition = 0;
+
+        while (childPosition < peakGroupChildren.size()-1) {
+
+            pair<PeakGroup, int> pair = peakGroupChildren.at(childPosition);
+
+            PeakGroup child = pair.first;
+            int parentGroupId = pair.second;
+
+            PeakGroup parent = peakGroupParents.at(parentPosition);
+
+            if (parent.groupId == parentGroupId) { //found parent for child
+                parent.children.push_back(child);
+                child.parent = &parent;
+            } else {
+                //debugging
+                cerr << "child peakgroup id# " << child.groupId << " is missing parent id# " << parentGroupId << endl;
+            }
+
+            //multiple children may belong to the same parent
+            if (peakGroupChildren.at(childPosition+1).second != peakGroupChildren.at(childPosition).second){
+                parentPosition++;
+            }
+
+            childPosition++;
+        }
+
+        //last entry
+        for (unsigned int j = parentPosition; j < peakGroupParents.size(); j++){
+
+            PeakGroup parent = peakGroupParents.at(j);
+
+            pair<PeakGroup, int> pair = peakGroupChildren.at(peakGroupChildren.size()-1);
+
+            PeakGroup child = pair.first;
+            int parentGroupId = pair.second;
+
+            if (parent.groupId == parentGroupId) { //found parent for child
+                parent.children.push_back(child);
+                child.parent = &parent;
+            }
+        }
+
+        allgroups = vector<PeakGroup>(peakGroupParents.size());
+        for (unsigned int i = 0; i < peakGroupParents.size(); i++){
+            allgroups.at(i) = peakGroupParents.at(i);
+        }
 
    cerr << "ProjectDB: Read in " << allgroups.size() << " peak groups." << endl;
 }
