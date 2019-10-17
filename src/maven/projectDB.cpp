@@ -482,80 +482,85 @@ void ProjectDB::loadPeakGroups(QString tableName) {
         } else {
             peakGroupChildren.push_back(make_pair(g, parentGroupId));
         }
-    }
 
-        sort(peakGroupChildren.begin(), peakGroupChildren.end(), [](const pair<PeakGroup, int>& lhs, const pair<PeakGroup, int>& rhs){
-            return lhs.second < rhs.second;
-        });
-
-        sort(allgroups.begin(), allgroups.end(), [](const PeakGroup& lhs, const PeakGroup& rhs){
-             return lhs.groupId < rhs.groupId;
-        });
-
-        unsigned int childPosition = 0;
-        unsigned int parentPosition = 0;
+        }
 
         vector<pair<PeakGroup, int>> matchedChildren;
 
-        while (childPosition < peakGroupChildren.size()-1) {
+        if (peakGroupChildren.size() > 0) {
 
-            bool isMatchedChild = false;
+            sort(peakGroupChildren.begin(), peakGroupChildren.end(), [](const pair<PeakGroup, int>& lhs, const pair<PeakGroup, int>& rhs){
+                return lhs.second < rhs.second;
+            });
 
-            pair<PeakGroup, int> pair = peakGroupChildren.at(childPosition);
+            sort(allgroups.begin(), allgroups.end(), [](const PeakGroup& lhs, const PeakGroup& rhs){
+                return lhs.groupId < rhs.groupId;
+            });
 
-            PeakGroup child = pair.first;
-            int parentGroupId = pair.second;
+            unsigned int childPosition = 0;
+            unsigned int parentPosition = 0;
 
-            PeakGroup& parent = allgroups.at(parentPosition);
+            while (childPosition < peakGroupChildren.size()-1) {
 
-            if (parent.groupId == parentGroupId) { //found parent for child
-                parent.children.push_back(child);
-                child.parent = &parent;
-                isMatchedChild = true;
-                matchedChildren.push_back(pair);
-            }
+                bool isMatchedChild = false;
 
-            if (isMatchedChild) { //child matches to current parent, check next child
+                pair<PeakGroup, int> pair = peakGroupChildren.at(childPosition);
 
-                //if the next child has a different parent, check the next parent
-                if (peakGroupChildren.at(childPosition+1).second != peakGroupChildren.at(childPosition).second){
+               PeakGroup child = pair.first;
+                int parentGroupId = pair.second;
+
+                PeakGroup& parent = allgroups.at(parentPosition);
+
+                if (parent.groupId == parentGroupId) { //found parent for child
+                    parent.children.push_back(child);
+                    child.parent = &parent;
+                    isMatchedChild = true;
+                   matchedChildren.push_back(pair);
+               }
+
+              if (isMatchedChild) { //child matches to current parent, check next child
+
+                    //if the next child has a different parent, check the next parent
+                   if (peakGroupChildren.at(childPosition+1).second != peakGroupChildren.at(childPosition).second){
+                        parentPosition++;
+                    }
+
+                    childPosition++;
+
+                } else { //child did not match to the current parent, check next parent
                     parentPosition++;
+                 }
+
+                //All parents have been considered
+                if (parentPosition == allgroups.size()){
+                    break;
                 }
-
-               childPosition++;
-
-            } else { //child did not match to the current parent, check next parent
-                parentPosition++;
             }
 
-            //All parents have been considered
-            if (parentPosition == allgroups.size()){
-                break;
+            //last entry
+            for (unsigned int j = parentPosition; j < allgroups.size(); j++){
+
+                PeakGroup& parent = allgroups.at(j);
+
+                pair<PeakGroup, int> pair = peakGroupChildren.at(peakGroupChildren.size()-1);
+
+                PeakGroup child = pair.first;
+                int parentGroupId = pair.second;
+
+                if (parent.groupId == parentGroupId) { //found parent for child
+                    parent.children.push_back(child);
+                    child.parent = &parent;
+                    matchedChildren.push_back(pair);
+                }
             }
-        }
-
-        //last entry
-        for (unsigned int j = parentPosition; j < allgroups.size(); j++){
-
-            PeakGroup& parent = allgroups.at(j);
-
-            pair<PeakGroup, int> pair = peakGroupChildren.at(peakGroupChildren.size()-1);
-
-            PeakGroup child = pair.first;
-            int parentGroupId = pair.second;
-
-            if (parent.groupId == parentGroupId) { //found parent for child
-                parent.children.push_back(child);
-                child.parent = &parent;
-                matchedChildren.push_back(pair);
-            }
-        }
 
         //debugging
         if (peakGroupChildren.size() != matchedChildren.size()) {
             cerr << "WARNING: some peak groups had parent peak groups that were not included in the file!" << endl;
             cerr << "All children: " << peakGroupChildren.size() << ", matched children: " << matchedChildren.size() << endl;
             //cerr << "child peakgroup id# " << child.groupId << " is missing parent id# " << parentGroupId << endl;
+        }
+
         }
 
    cerr << "ProjectDB::loadPeakGroups(): Read in " << (allgroups.size()+matchedChildren.size()) << " total peak groups, "
