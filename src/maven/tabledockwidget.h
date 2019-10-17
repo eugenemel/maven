@@ -101,6 +101,7 @@ protected slots:
 	  void contextMenuEvent ( QContextMenuEvent * event );
 
 private:
+         bool traverseNode(QTreeWidgetItem *item, QString needle);
           void deletePeaks();
           void addRow(PeakGroup* group, QTreeWidgetItem* root);
           void heatmapBackground(QTreeWidgetItem* item);

@@ -1582,20 +1582,30 @@ void TableDockWidget::switchTableView() {
 
 void TableDockWidget::filterTree(QString needle) {
 
-        //single characters are ignored
-        if (needle.size() < 2) return;
-
         int itemCount = treeWidget->topLevelItemCount();
         for(int i=0; i < itemCount; i++ ) {
              QTreeWidgetItem *item = treeWidget->topLevelItem(i);
                 if (!item) continue;
-
-                if (item->text(0).contains(needle,Qt::CaseInsensitive) ) {
-                        item->setHidden(false);
-                } else {
-                        item->setHidden(true);
-                }
+                traverseNode(item, needle);
         }
+}
+
+bool TableDockWidget::traverseNode(QTreeWidgetItem *item, QString needle) {
+
+    bool isShowThisNode = false;
+    for (int i = 0; i < item->childCount(); ++i){
+        if (traverseNode(item->child(i), needle)){
+            isShowThisNode = true;
+        }
+    }
+
+    if (isShowThisNode || item->text(0).contains(needle, Qt::CaseInsensitive)) {
+        item->setHidden(false);
+    } else {
+        item->setHidden(true);
+    }
+
+    return !(item->isHidden());
 }
 
 void TableDockWidget::rescoreFragmentation() {
