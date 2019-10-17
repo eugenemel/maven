@@ -1581,12 +1581,16 @@ void TableDockWidget::switchTableView() {
 }
 
 void TableDockWidget::filterTree(QString needle) {
+
+        //single characters are ignored
+        if (needle.size() < 2) return;
+
         int itemCount = treeWidget->topLevelItemCount();
         for(int i=0; i < itemCount; i++ ) {
              QTreeWidgetItem *item = treeWidget->topLevelItem(i);
-                if ( item == NULL) continue;
+                if (!item) continue;
 
-                if ( needle.isEmpty() || item->text(0).contains(needle,Qt::CaseInsensitive) ) {
+                if (item->text(0).contains(needle,Qt::CaseInsensitive) ) {
                         item->setHidden(false);
                 } else {
                         item->setHidden(true);
