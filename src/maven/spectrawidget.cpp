@@ -508,14 +508,14 @@ void SpectraWidget::findBounds(bool checkX, bool checkY) {
     //bounds
 	if (_currentScan == NULL || _currentScan->mz.size() == 0) return;
 
-    bool isAutoMzMin = mainwindow->getSettings()->value("chkAutoMzMin").toBool();
-    bool isAutoMzMax = mainwindow->getSettings()->value("chkAutoMzMax").toBool();
+    bool isAutoMzMin = mainwindow->getSettings()->value("chkAutoMzMin", false).toBool();
+    bool isAutoMzMax = mainwindow->getSettings()->value("chkAutoMzMax", true).toBool();
 
-    double mzMinOffset = mainwindow->getSettings()->value("spnMzMinOffset").toDouble();
-    double mzMaxOffset = mainwindow->getSettings()->value("spnMzMaxOffset").toDouble();
+    double mzMinOffset = mainwindow->getSettings()->value("spnMzMinOffset", 10.0).toDouble();
+    double mzMaxOffset = mainwindow->getSettings()->value("spnMzMaxOffset", 10.0).toDouble();
 
-    double mzMinVal = mainwindow->getSettings()->value("spnMzMinVal").toDouble();
-    double mzMaxVal = mainwindow->getSettings()->value("spnMzMaxVal").toDouble();
+    double mzMinVal = mainwindow->getSettings()->value("spnMzMinVal", 0.0).toDouble();
+    double mzMaxVal = mainwindow->getSettings()->value("spnMzMaxVal", 1200.0).toDouble();
 
     float minMZ = isAutoMzMin ? _currentScan->mz[0] - mzMinOffset : mzMinVal;
     float maxMZ = isAutoMzMax ? _currentScan->mz[_currentScan->mz.size()-1] + mzMaxOffset : mzMaxVal;
