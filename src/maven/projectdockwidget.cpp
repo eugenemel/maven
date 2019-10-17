@@ -610,8 +610,6 @@ void ProjectDockWidget::loadAllPeakTables() {
     //load all peakgroups
     currentProject->loadPeakGroups("peakgroups");
 
-    qDebug() << "Peakgroups count: " << currentProject->allgroups.size() << endl;
-
     for(int i=0; i < currentProject->allgroups.size(); i++ ) {
         PeakGroup* g = &(currentProject->allgroups[i]);
         currentProject->allgroups[i].groupStatistics();
@@ -656,24 +654,29 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
 
         set<Compound*> compoundSet;
 
-        int groupCount=0;
+        unsigned int groupCount=0;
         for(TableDockWidget* peakTable : _mainwindow->getAllPeakTables() ) {
 
-            int onePeakTableCount = 0;
+            unsigned int onePeakTableCount = 0;
 
             for(PeakGroup* group : peakTable->getGroups()) {
 
-                groupCount++;
-                onePeakTableCount++;
+                unsigned int numGroupsAdded = 1 + group->childCount();
 
-                int parentGroupId = group->parent ? group->parent->groupId : 0;
+                groupCount = groupCount + numGroupsAdded;
 
-                project->writeGroupSqlite(group, parentGroupId, peakTable->windowTitle());
+                //int parentGroupId = group->parent ? group->parent->groupId : 0;
+
+                //write group. Recursively calls to write children
+                project->writeGroupSqlite(group, 0, peakTable->windowTitle());
+                onePeakTableCount = onePeakTableCount + numGroupsAdded;
 
                 if(group->compound) compoundSet.insert(group->compound);
             }
             qDebug() << peakTable->windowTitle() << ": Saved " << onePeakTableCount << "groups.";
         }
+        qDebug() << "All tables: Saved " << groupCount << "groups.";
+
         project->saveCompounds(compoundSet);
 
         _mainwindow->setStatusText(tr("Saved %1 groups to %2").arg(QString::number(groupCount),filename));
