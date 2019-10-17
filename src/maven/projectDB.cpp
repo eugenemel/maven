@@ -420,7 +420,6 @@ void ProjectDB::loadPeakGroups(QString tableName) {
      query.exec("select * from " + tableName );
 
      //Issue 62: NEW CODE
-     vector<PeakGroup> peakGroupParents;
      vector<pair<PeakGroup, int>> peakGroupChildren;
 
      while (query.next()) {
@@ -495,7 +494,7 @@ void ProjectDB::loadPeakGroups(QString tableName) {
 
         //Issue 62: NEW CODE
         if (parentGroupId == 0) {
-            peakGroupParents.push_back(g);
+            allgroups.push_back(g);
         } else {
             peakGroupChildren.push_back(make_pair(g, parentGroupId));
         }
@@ -506,7 +505,7 @@ void ProjectDB::loadPeakGroups(QString tableName) {
             return lhs.second < rhs.second;
         });
 
-        sort(peakGroupParents.begin(), peakGroupParents.end(), [](const PeakGroup& lhs, const PeakGroup& rhs){
+        sort(allgroups.begin(), allgroups.end(), [](const PeakGroup& lhs, const PeakGroup& rhs){
              return lhs.groupId < rhs.groupId;
         });
 
@@ -524,7 +523,7 @@ void ProjectDB::loadPeakGroups(QString tableName) {
             PeakGroup child = pair.first;
             int parentGroupId = pair.second;
 
-            PeakGroup parent = peakGroupParents.at(parentPosition);
+            PeakGroup& parent = allgroups.at(parentPosition);
 
             if (parent.groupId == parentGroupId) { //found parent for child
                 parent.children.push_back(child);
@@ -547,15 +546,15 @@ void ProjectDB::loadPeakGroups(QString tableName) {
             }
 
             //All parents have been considered
-            if (parentPosition == peakGroupParents.size()){
+            if (parentPosition == allgroups.size()){
                 break;
             }
         }
 
         //last entry
-        for (unsigned int j = parentPosition; j < peakGroupParents.size(); j++){
+        for (unsigned int j = parentPosition; j < allgroups.size(); j++){
 
-            PeakGroup parent = peakGroupParents.at(j);
+            PeakGroup& parent = allgroups.at(j);
 
             pair<PeakGroup, int> pair = peakGroupChildren.at(peakGroupChildren.size()-1);
 
@@ -576,14 +575,15 @@ void ProjectDB::loadPeakGroups(QString tableName) {
             //cerr << "child peakgroup id# " << child.groupId << " is missing parent id# " << parentGroupId << endl;
         }
 
+        //debugging
+//        for (PeakGroup& parent : allgroups){
+//            if (parent.childCount() > 0) {
+//                cerr << parent.groupId << ": " << parent.childCount() << endl;
+//            }
+//        }
 
-        allgroups = vector<PeakGroup>(peakGroupParents.size());
-        for (unsigned int i = 0; i < peakGroupParents.size(); i++){
-            allgroups.at(i) = peakGroupParents.at(i);
-        }
-
-   cerr << "ProjectDB: Read in " << (allgroups.size()+matchedChildren.size()) << "total peak groups, "
-        << allgroups.size() << "parents and " << matchedChildren.size() << " children." << endl;
+   cerr << "ProjectDB::loadPeakGroups(): Read in " << (allgroups.size()+matchedChildren.size()) << " total peak groups, "
+        << allgroups.size() << " parents and " << matchedChildren.size() << " children." << endl;
 }
 
 mzSample* ProjectDB::getSampleById(int sampleId) { 
