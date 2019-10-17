@@ -404,7 +404,10 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
         if ( g->childCount() ) {
            for(int i=0; i < g->children.size(); i++ ) {
                 PeakGroup* child = &(g->children[i]); 
-                writeGroupSqlite(child,lastInsertGroupId,tableName);
+
+                QString searchTableName = child->searchTableName.empty() ? tableName : QString(child->searchTableName.c_str());
+
+                writeGroupSqlite(child, lastInsertGroupId, searchTableName);
             }
         }
 

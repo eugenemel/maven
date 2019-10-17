@@ -668,7 +668,9 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
                 //int parentGroupId = group->parent ? group->parent->groupId : 0;
 
                 //write group. Recursively calls to write children
-                project->writeGroupSqlite(group, 0, peakTable->windowTitle());
+                QString searchTableName = group->searchTableName.empty() ? peakTable->windowTitle() : QString(group->searchTableName.c_str());
+
+                project->writeGroupSqlite(group, 0, searchTableName);
                 onePeakTableCount = onePeakTableCount + numGroupsAdded;
 
                 if(group->compound) compoundSet.insert(group->compound);
