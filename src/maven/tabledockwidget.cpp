@@ -402,7 +402,8 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
 
     if ( group->childCount() > 0 ) {
         //cerr << "Add children!" << endl;
-        for( int i=0; i < group->childCount(); i++ ) addRow(&(group->children[i]), item);
+        QTreeWidgetItem *childRoot = clusterDialog->chkPGDisplay->isChecked() ? root : item;
+        for( int i=0; i < group->childCount(); i++ ) addRow(&(group->children[i]), childRoot);
     }
 }
 
@@ -1416,7 +1417,8 @@ void TableDockWidget::clearClusters() {
 }
 
 void TableDockWidget::changePeakGroupDisplay() {
-    cerr << "TODO: changePeakGroupDisplay(): isChecked? " << clusterDialog->chkPGDisplay->isChecked() << endl;
+    cerr << "TableDockWidget::changePeakGroupDisplay(): flatten peak groups? " << clusterDialog->chkPGDisplay->isChecked() << endl;
+    showAllGroups();
 }
 
 void TableDockWidget::clusterGroups() {
