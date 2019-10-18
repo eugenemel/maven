@@ -15,6 +15,7 @@
 #include "database.h"
 #include "classifier.h"
 #include "classifierNeuralNet.h"
+#include "directinfusionprocessor.h"
 
 //non gui qt classes
 #include <QString>
@@ -32,6 +33,7 @@ Q_DECLARE_METATYPE(Scan*)
 Q_DECLARE_METATYPE(PeakGroup*)
 Q_DECLARE_METATYPE(mzSlice*)
 Q_DECLARE_METATYPE(mzSlice)
+Q_DECLARE_METATYPE(DirectInfusionGroupAnnotation*)
 
 enum itemType {
 		SampleType=4999,

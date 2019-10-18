@@ -41,7 +41,7 @@ protected:
 
 signals:
     void updateProgressBar(QString, int, int);
-    void newDirectInfusionAnnotation(unique_ptr<DirectInfusionGroupAnnotation>, int);
+    void newDirectInfusionAnnotation(DirectInfusionGroupAnnotation*, int);
     void closeDialog();
 
 };

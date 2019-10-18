@@ -460,9 +460,9 @@ PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, boo
     return g;
 }
 
-void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* directInfusionAnnotation, int clusterNum) {
+void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation *directInfusionGroupAnnotation, int clusterNum) {
 
-    for (auto directInfusionMatchData : directInfusionAnnotation->compounds){
+    for (auto directInfusionMatchData : directInfusionGroupAnnotation->compounds){
 
         Compound* compound = directInfusionMatchData->compound;
         Adduct* adduct = directInfusionMatchData->adduct;
@@ -472,35 +472,49 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* dire
         PeakGroup pg;
         pg.metaGroupId = clusterNum;
 
-        //TODO: much of the information needs to be stuffed into Peak, b/c
-        //when opening a file it all gets re-derived from PeakGroup::groupStatistics()
-        Peak p;
-        p.scan = directInfusionAnnotation->scan->scannum;
-        p.setSample(directInfusionAnnotation->sample);
-        p.peakMz = theoMz;
-        p.mzmin = directInfusionAnnotation->precMzMin;
-        p.mzmax = directInfusionAnnotation->precMzMax;
+        unsigned int peakCounter = 1;
+        float maxRt = 0;
 
-        //Used by PeakGroup::getFragmentationEvents() - checks RT bounds with scan RT
-        p.rtmin = 0;
-        p.rtmax = FLT_MAX;
+        for (auto pair : directInfusionGroupAnnotation->annotationBySample) {
 
-        //Used by PeakGroup::groupStatistics()
-        p.pos = 1;
-        p.baseMz = theoMz;
+            mzSample *sample = pair.first;
+            DirectInfusionAnnotation *directInfusionAnntation = pair.second;
 
-        p.peakIntensity = 0; //TODO
-        pg.addPeak(p);
+            Peak p;
+            p.scan = directInfusionAnntation->scan->scannum;
+            p.setSample(sample);
+
+            p.peakMz = theoMz;
+            p.mzmin = directInfusionGroupAnnotation->precMzMin;
+            p.mzmax = directInfusionGroupAnnotation->precMzMax;
+
+            //Used by PeakGroup::getFragmentationEvents() - checks RT bounds with scan RT
+            p.rtmin = 0;
+            p.rtmax = FLT_MAX;
+
+            //Used by PeakGroup::groupStatistics()
+            p.pos = peakCounter;
+            p.baseMz = theoMz;
+            p.peakIntensity = 0; //TODO
+
+            pg.addPeak(p);
+
+            peakCounter++;
+
+            if (sample->maxRt > maxRt) maxRt = sample->maxRt;
+
+        }
 
         pg.compound = compound;
         pg.adduct = adduct;
-        pg.minMz = directInfusionAnnotation->precMzMin;
-        pg.maxMz = directInfusionAnnotation->precMzMax;
+        pg.minMz = directInfusionGroupAnnotation->precMzMin;
+        pg.maxMz = directInfusionGroupAnnotation->precMzMax;
         pg.meanMz = theoMz;
         pg.minRt = 0;
-        pg.maxRt = directInfusionAnnotation->sample->maxRt;
+        pg.maxRt = maxRt;
 
-        pg.fragmentationPattern = directInfusionAnnotation->fragmentationPattern->consensus;
+        pg.fragmentationPattern = directInfusionGroupAnnotation->fragmentationPattern->consensus;
+
         pg.fragMatchScore = directInfusionMatchData->fragmentationMatchScore;
         pg.fragMatchScore.mergedScore = pg.fragMatchScore.numMatches;
 
@@ -509,8 +523,9 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionAnnotation* dire
         allgroups.push_back(pg);
     }
 
-     if (directInfusionAnnotation->fragmentationPattern) delete(directInfusionAnnotation->fragmentationPattern);
-     if (directInfusionAnnotation) delete(directInfusionAnnotation);
+     if (directInfusionGroupAnnotation->fragmentationPattern) delete(directInfusionGroupAnnotation->fragmentationPattern);
+     directInfusionGroupAnnotation->clean();
+     if (directInfusionGroupAnnotation) delete(directInfusionGroupAnnotation);
 }
 
 QList<PeakGroup*> TableDockWidget::getGroups() {
