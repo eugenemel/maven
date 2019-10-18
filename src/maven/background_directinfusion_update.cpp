@@ -31,7 +31,12 @@ void BackgroundDirectInfusionUpdate::run(void) {
                                                   false //debug
                                                   );
 
-    multimap<int, DirectInfusionAnnotation*> allDirectInfusionsAcrossSamples = {};
+    map<int, vector<DirectInfusionAnnotation*>> allDirectInfusionsAcrossSamples = {};
+
+    for (set<int>::iterator it = searchDb->mapKeys.begin(); it != searchDb->mapKeys.end(); ++it){
+        vector<DirectInfusionAnnotation*> rangeAnnotations;
+        allDirectInfusionsAcrossSamples.insert(make_pair((*it), rangeAnnotations));
+    }
 
     typedef map<int, DirectInfusionAnnotation*>::iterator diSampleIterator;
 
@@ -64,7 +69,7 @@ void BackgroundDirectInfusionUpdate::run(void) {
                      );
 
          for (diSampleIterator it = directInfusionAnnotations.begin(); it != directInfusionAnnotations.end(); ++it){
-             allDirectInfusionsAcrossSamples.insert(make_pair(it->first, it->second));
+             allDirectInfusionsAcrossSamples.at(it->first).push_back(it->second);
          }
 
     }
@@ -74,8 +79,14 @@ void BackgroundDirectInfusionUpdate::run(void) {
     stepNum++;
     updateProgressBar("Combining results across samples...", stepNum, numSteps);
 
+    //TODO
     for (auto directInfusionAnnotation : allDirectInfusionsAcrossSamples) {
-        emit(newDirectInfusionAnnotation(directInfusionAnnotation.second, directInfusionAnnotation.first));
+        if (!directInfusionAnnotation.second.empty()){
+            emit(newDirectInfusionAnnotation(
+                        DirectInfusionGroupAnnotation::createByAverageProportions(directInfusionAnnotation.second),
+                        directInfusionAnnotation.first)
+                    );
+        }
     }
 
 //    typedef multimap<int, DirectInfusionAnnotation*>::iterator diMultimapIterator;
