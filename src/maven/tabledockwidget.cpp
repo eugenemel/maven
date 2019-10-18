@@ -523,8 +523,8 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation 
         allgroups.push_back(pg);
     }
 
-     if (directInfusionGroupAnnotation->fragmentationPattern) delete(directInfusionGroupAnnotation->fragmentationPattern);
      directInfusionGroupAnnotation->clean();
+     if (directInfusionGroupAnnotation->fragmentationPattern) delete(directInfusionGroupAnnotation->fragmentationPattern);
      if (directInfusionGroupAnnotation) delete(directInfusionGroupAnnotation);
 }
 
