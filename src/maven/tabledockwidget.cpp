@@ -34,6 +34,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     clusterDialog->setWindowFlags( clusterDialog->windowFlags() | Qt::WindowStaysOnTopHint);
     connect(clusterDialog->clusterButton,SIGNAL(clicked(bool)),SLOT(clusterGroups()));
     connect(clusterDialog->clearButton,SIGNAL(clicked(bool)),SLOT(clearClusters()));
+    connect(clusterDialog->chkPGDisplay, SIGNAL(clicked(bool)), SLOT(changePeakGroupDisplay()));
 
     QToolBar *toolBar = new QToolBar(this);
     toolBar->setFloatable(false);
@@ -1412,6 +1413,10 @@ void TableDockWidget::loadPeakTableXML(QString fileName) {
 void TableDockWidget::clearClusters() {
     for(unsigned int i=0; i<allgroups.size(); i++) allgroups[i].metaGroupId=0;
     showAllGroups();
+}
+
+void TableDockWidget::changePeakGroupDisplay() {
+    cerr << "TODO: changePeakGroupDisplay(): isChecked? " << clusterDialog->chkPGDisplay->isChecked() << endl;
 }
 
 void TableDockWidget::clusterGroups() {

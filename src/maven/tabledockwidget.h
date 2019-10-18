@@ -91,6 +91,7 @@ public slots:
           void clearClusters();
           void filterTree(QString needle);
           void rescoreFragmentation();
+      void changePeakGroupDisplay();
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event);
