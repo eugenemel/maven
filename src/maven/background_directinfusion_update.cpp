@@ -79,7 +79,9 @@ void BackgroundDirectInfusionUpdate::run(void) {
     stepNum++;
     updateProgressBar("Combining results across samples...", stepNum, numSteps);
 
-    //TODO
+    int totalSteps = numSteps * allDirectInfusionsAcrossSamples.size();
+    int emitCounter = stepNum * allDirectInfusionsAcrossSamples.size();
+
     for (auto directInfusionAnnotation : allDirectInfusionsAcrossSamples) {
         if (!directInfusionAnnotation.second.empty()){
             emit(newDirectInfusionAnnotation(
@@ -87,25 +89,9 @@ void BackgroundDirectInfusionUpdate::run(void) {
                         directInfusionAnnotation.first)
                     );
         }
+        updateProgressBar("Populating results table...", emitCounter, totalSteps);
+        emitCounter++;
     }
-
-//    typedef multimap<int, DirectInfusionAnnotation*>::iterator diMultimapIterator;
-
-//    for (int mapKey : searchDb->mapKeys){
-
-//        pair<diMultimapIterator, diMultimapIterator> directInfusionAnnotations = allDirectInfusionsAcrossSamples.equal_range(mapKey);
-
-//        for (diMultimapIterator it = directInfusionAnnotations.first; it != directInfusionAnnotations.second; ++it){
-//            emit(newDirectInfusionAnnotation(it->second, it->first));
-//        }
-
-//        //for (diMultimapIterator = allDirectInfusionsAcrossSamples.equal_range(mapKey);)
-//    }
-
-    //DirectInfusionAnnotation* are deleted by the receiver (TableDockWidget)
-//    for (DirectInfusionAnnotation* directInfusionAnnotation : directInfusionAnnotations) {
-//        emit(newDirectInfusionAnnotation(directInfusionAnnotation));
-//    }
 
     qDebug() << "Direct infusion analysis completed in" << timer.elapsed() << "msec.";
     updateProgressBar("Direct infusion analysis not yet started", 0, 1);
