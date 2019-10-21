@@ -88,7 +88,7 @@ void BackgroundDirectInfusionUpdate::run(void) {
                         DirectInfusionGroupAnnotation::createByAverageProportions(
                             directInfusionAnnotation.second,
                             params,
-                            true //debug
+                            false //debug
                             ),
                         directInfusionAnnotation.first)
                     );
