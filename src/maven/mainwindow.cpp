@@ -352,7 +352,34 @@ TableDockWidget* MainWindow::findPeakTable(QString title) {
     for(TableDockWidget* x: groupTables) {
         if(x->windowTitle() == title) return x;
     }
-    return NULL;
+    return nullptr;
+}
+
+QString MainWindow::getUniquePeakTableTitle(QString title) {
+
+    if (title.isNull() || title.isEmpty()) {
+        title = QString("Peak Group Table");
+    }
+
+    int counter = 2;
+    while (findPeakTable(title)){
+
+        if (counter != 2) {
+            QStringList list = title.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+            title = QString("");
+            for (unsigned int i = 0; i < list.length()-1; i++) {
+                title.append(list.at(i));
+                title.append(" ");
+            }
+        } else {
+            title.append(" ");
+        }
+
+        title.append(QString::number(counter));
+        counter++;
+    }
+
+    return title;
 }
 
 void MainWindow::deleteAllPeakTables() {

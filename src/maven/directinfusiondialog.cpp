@@ -98,6 +98,8 @@ void DirectInfusionDialog::analyze() {
 
     QString title = QString("Direct Infusion Analysis");
 
+    title = mainwindow->getUniquePeakTableTitle(title);
+
     TableDockWidget* resultsTable = mainwindow->addPeaksTable(title.toLatin1().data());
     resultsTable->setWindowTitle(title.toLatin1().data());
 

@@ -210,6 +210,8 @@ public slots:
 
     TableDockWidget* addPeaksTable(QString title);
     TableDockWidget* findPeakTable(QString title);
+    QString getUniquePeakTableTitle(QString title);
+
     QList< QPointer<TableDockWidget> > getAllPeakTables() { return groupTables; }
 
     void deletePeakTable(TableDockWidget* x);

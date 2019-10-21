@@ -172,6 +172,8 @@ void PeakDetectionDialog::findPeaks() {
                 else if (_featureDetectionType == CompoundDB ) title = "DB Search " + compoundDatabase->currentText();
                 else if (_featureDetectionType == QQQ ) title = "QQQ DB Search " + compoundDatabase->currentText();
      
+        title = mainwindow->getUniquePeakTableTitle(title);
+
 		TableDockWidget* peaksTable = mainwindow->addPeaksTable(title);
 		peaksTable->setWindowTitle(title);
         connect(peakupdater, SIGNAL(newPeakGroup(PeakGroup*,bool, bool)), peaksTable, SLOT(addPeakGroup(PeakGroup*,bool, bool)));
