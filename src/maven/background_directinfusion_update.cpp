@@ -85,7 +85,11 @@ void BackgroundDirectInfusionUpdate::run(void) {
     for (auto directInfusionAnnotation : allDirectInfusionsAcrossSamples) {
         if (!directInfusionAnnotation.second.empty()){
             emit(newDirectInfusionAnnotation(
-                        DirectInfusionGroupAnnotation::createByAverageProportions(directInfusionAnnotation.second, params),
+                        DirectInfusionGroupAnnotation::createByAverageProportions(
+                            directInfusionAnnotation.second,
+                            params,
+                            true //debug
+                            ),
                         directInfusionAnnotation.first)
                     );
         }
