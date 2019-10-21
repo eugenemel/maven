@@ -84,7 +84,6 @@ void DirectInfusionDialog::analyze() {
     directInfusionUpdate->setCompounds(DB.compoundsDB);
     directInfusionUpdate->setAdducts(DB.adductsDB);
 
-    //TODO: set these values from the GUI
     directInfusionUpdate->params->minNumMatches = this->spnMatchXPeaks->value();
     directInfusionUpdate->params->productPpmTolr = this->spnFragTol->value();
     directInfusionUpdate->params->minNumUniqueMatches = 0; //TODO: currently unused, what does this do?
