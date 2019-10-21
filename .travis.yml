@@ -8,7 +8,7 @@ matrix:
 addons:
   apt:
     sources:
-    - sourceline: ppa:beineri/opt-qt58-trusty
+    - sourceline: ppa:beineri/opt-qt591-trusty
     packages:
     - qt58-meta-minimal
     - mesa-common-dev
