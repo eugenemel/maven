@@ -82,6 +82,9 @@ void BackgroundDirectInfusionUpdate::run(void) {
     int totalSteps = numSteps * allDirectInfusionsAcrossSamples.size();
     int emitCounter = stepNum * allDirectInfusionsAcrossSamples.size();
 
+    /**
+     * ACTUAL WORK
+     */
     for (auto directInfusionAnnotation : allDirectInfusionsAcrossSamples) {
         if (!directInfusionAnnotation.second.empty()){
             emit(newDirectInfusionAnnotation(

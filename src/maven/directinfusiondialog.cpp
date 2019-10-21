@@ -9,7 +9,7 @@ DirectInfusionDialog::DirectInfusionDialog(QWidget *parent) : QDialog(parent) {
 
       //populate algorithm options
       cmbSpectralDeconvolutionAlgorithm->addItem("List All Candidates");
-      cmbSpectralDeconvolutionAlgorithm->addItem("Unique Fragments: Median Intensity Ratio");
+      cmbSpectralDeconvolutionAlgorithm->addItem("Unique Fragments Intensity Ratio");
 
       connect(start, SIGNAL(clicked(bool)), SLOT(analyze()));
       connect(cmbSpectralDeconvolutionAlgorithm, SIGNAL(currentIndexChanged(int)), SLOT(updateSpectralCompositionDescription()));
@@ -41,7 +41,8 @@ void DirectInfusionDialog::updateSpectralCompositionDescription() {
     case 0:
         text = QString(
                     "Return all compound matches, without any attempt to determine spectral composition.\n"
-                    "\nEach peak group corresponds to a single sample."
+                    "\nThe group rank for all matches is is 0.0\n"
+                    "\nPeak groups are agglomerated across samples."
                     );
         break;
     case 1:
@@ -51,9 +52,11 @@ void DirectInfusionDialog::updateSpectralCompositionDescription() {
                     "Assumes that intensities in spectral libraries are normalized to a common max intensity for each spectrum.\n"
                     "\nCompute:\n"
                     "\ncompound_relative_abundance = observed_intensity / normalized_theoretical_intensity\n\n"
-                    "Enumerate for all unique fragments, and take median compound_relative_abundance.\n"
-                    "Repeat for all compounds, and return relative proportion as groupRank.\n"
-                    "\nEach peak group corresponds to a single sample."
+                    "Enumerate for all unique fragments. In case there are more than one unique fragment per compound,\n"
+                    "use the highest theoretical intensity.\n"
+                    "\nRepeat for all compounds, and return relative proportion as groupRank.\n"
+                    "\nPeak groups are agglomerated across samples. The average relative ratio is computed.\n"
+                    "If a compound is missing from a sample, the relative proportion for that sample is 0.\n"
                     );
         break;
     }
@@ -89,8 +92,8 @@ void DirectInfusionDialog::analyze() {
 
     if (cmbSpectralDeconvolutionAlgorithm->currentText() == "List All Candidates"){
         directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::ALL_CANDIDATES;
-    } else if (cmbSpectralDeconvolutionAlgorithm->currentText() == "Unique Fragments: Median Intensity Ratio"){
-        directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::MEDIAN_UNIQUE;
+    } else if (cmbSpectralDeconvolutionAlgorithm->currentText() == "Unique Fragments Intensity Ratio"){
+        directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::MAX_THEORETICAL_INTENSITY_UNIQUE;
     }
 
     QString title = QString("Direct Infusion Analysis");
