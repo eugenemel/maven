@@ -86,7 +86,7 @@ public:
     QLabel			  *statusText;
 
     SpectraWidget     *spectraWidget;
-    SpectraWidget     *fragmenationSpectraWidget;
+    SpectraWidget     *fragmentationSpectraWidget;
     MassCalcWidget       *massCalcWidget;
     LigandWidget     *ligandWidget;
     IsotopeWidget    *isotopeWidget;

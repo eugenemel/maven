@@ -87,7 +87,7 @@ void TreeDockWidget::showInfo() {
                         } else if ( itemType == ScanType ) {
                                 Scan*  scan =  v.value<Scan*>();
                                 if (scan->mslevel > 1)  {
-                                    mainwindow->fragmenationSpectraWidget->setScan(scan);
+                                    mainwindow->fragmentationSpectraWidget->setScan(scan);
                                     mainwindow->massCalcWidget->setFragmentationScan(scan);
 
                                     Scan* lastms1 = scan->getLastFullScan(50);
