@@ -1361,7 +1361,7 @@ void MainWindow::showPeakInfo(Peak* _peak) {
     }
 }
 
-void MainWindow::spectaFocused(Peak* _peak) {
+void MainWindow::spectraFocused(Peak* _peak) {
     if (_peak == NULL) return;
 
     mzSample* sample = _peak->getSample();

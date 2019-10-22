@@ -167,7 +167,7 @@ public slots:
     void Align();
     void UndoAlignment();
     void doGuidedAligment(QString filename);
-    void spectaFocused(Peak* _peak);
+    void spectraFocused(Peak* _peak);
     void setCompoundFocus(Compound* c);
     void showFragmentationScans(float pmz);
     QString groupTextExport(PeakGroup* group);
