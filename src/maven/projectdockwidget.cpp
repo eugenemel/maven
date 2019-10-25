@@ -152,7 +152,7 @@ void ProjectDockWidget::selectSample(QTreeWidgetItem* item, int col) {
 
 void ProjectDockWidget::showInfo() {
     QTreeWidgetItem* item = _treeWidget->currentItem();
-    if(item != NULL and item->type() == SampleType) showSample(item,0);
+    if(item and item->type() == SampleType) showSample(item,0);
 }
 
 
@@ -657,6 +657,8 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
         unsigned int groupCount=0;
         for(TableDockWidget* peakTable : _mainwindow->getAllPeakTables() ) {
 
+            qDebug() << peakTable->windowTitle() << ": Starting peak group table save...";
+
             unsigned int onePeakTableCount = 0;
 
             for(PeakGroup* group : peakTable->getGroups()) {
@@ -664,8 +666,6 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
                 unsigned int numGroupsAdded = 1 + group->childCount();
 
                 groupCount = groupCount + numGroupsAdded;
-
-                //int parentGroupId = group->parent ? group->parent->groupId : 0;
 
                 //write group. Recursively calls to write children
                 QString searchTableName = group->searchTableName.empty() ? peakTable->windowTitle() : QString(group->searchTableName.c_str());
