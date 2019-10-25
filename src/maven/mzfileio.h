@@ -17,7 +17,7 @@ Q_OBJECT
         int loadPepXML(QString filename);
         static QString shortSampleName(QString filename);
         bool checkSampleAlreadyLoaded(QString filename);
-
+        QStringList getEmptyFiles();
     signals:
         void updateProgressBar(QString,int,int);
 
@@ -27,6 +27,7 @@ Q_OBJECT
 
     private:
          QStringList filelist;
+         QStringList emptyFiles;
          MainWindow* _mainwindow;
          bool _stopped;
 

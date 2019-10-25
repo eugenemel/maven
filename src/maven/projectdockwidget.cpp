@@ -59,8 +59,33 @@ ProjectDockWidget::ProjectDockWidget(QMainWindow *parent):
     setWidget(_treeWidget);
 
     fileLoader = new mzFileIO(this);
+
+    connect(fileLoader,SIGNAL(finished()),this, SLOT(warnUserEmptySampleFiles()));
+
     connect(fileLoader,SIGNAL(finished()),this, SLOT(getSampleInfoSQLITE()));
     connect(fileLoader,SIGNAL(finished()),this, SLOT(updateSampleList()));
+
+}
+
+void ProjectDockWidget::warnUserEmptySampleFiles() {
+
+    qDebug() << "ProjectDockWidget::warnUserEmptySampleFiles()";
+
+    if (fileLoader->getEmptyFiles().size() > 0){
+        QString msg = QString();
+
+        msg.append("mzFileIO::loadSamples(): The samples\n\n");
+        for (auto file : fileLoader->getEmptyFiles()) {
+            msg.append(file);
+            msg.append("\n\n");
+        }
+        msg.append("\n\ndid not contain any scans.");
+        msg.append("\n\nPlease consider examining and reloading these file(s).");
+
+        QMessageBox messageBox;
+
+        messageBox.critical(nullptr, "Empty samples files",  msg);
+    }
 
 }
 
@@ -541,6 +566,7 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
     currentProject = selectedProject;
     fileLoader->setMainWindow(_mainwindow);
     fileLoader->loadSamples(filelist);
+
 }
 
 void ProjectDockWidget::getSampleInfoSQLITE() {

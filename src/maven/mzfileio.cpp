@@ -17,6 +17,7 @@ void mzFileIO::setMainWindow(MainWindow* mw) {
 
 
 void mzFileIO::loadSamples(QStringList& filenames) {
+    emptyFiles = QStringList(); //reset empty file list as a part of updating file names
     setFileList(filenames);
     start();
 }
@@ -72,7 +73,10 @@ mzSample* mzFileIO::loadSample(QString filename){
         } else {
             sample = new mzSample();
             sample->loadSample( filename.toLatin1().data() );
-            if ( sample->scans.size() == 0 ) { delete(sample); sample=NULL; }
+            if ( sample->scans.size() == 0 ) {
+                delete(sample);
+                sample=nullptr;
+            }
         }
     } catch(...) {
         qDebug() << "loadSample() " << filename << " failed..";
@@ -93,7 +97,7 @@ mzSample* mzFileIO::loadSample(QString filename){
         return sample;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 int mzFileIO::loadPepXML(QString fileName) {
@@ -246,9 +250,13 @@ mzSample* mzFileIO::parseMzData(QString fileName) {
     return currentSample;
 }
 
-void mzFileIO::run(void) { fileImport(); quit(); }
+void mzFileIO::run(void) {
+    fileImport();
+    quit();
+}
 
 void mzFileIO::fileImport(void) {
+
     if ( filelist.size() == 0 ) return;
     emit (updateProgressBar( "Importing files", filelist.size()+0.01, filelist.size()));
 
@@ -259,7 +267,9 @@ void mzFileIO::fileImport(void) {
         if(_mainwindow) {
             qDebug() << "Loading sample:" << filename;
             mzSample* sample = this->loadSample(filename);
+
             if (sample) {
+
                 sample->enumerateSRMScans();
                 //set min and max values for rt
                 sample->calculateMzRtRange();
@@ -268,11 +278,16 @@ void mzFileIO::fileImport(void) {
                 if ( filename.contains("blan",Qt::CaseInsensitive)) sample->isBlank = true;
                 if (sample->scans.size()>0) _mainwindow->addSample(sample);
 
+            } else {
+                emptyFiles.append(filename);
             }
         }
     }
-   emit (updateProgressBar( "Done importing", filelist.size(), filelist.size()));
+
+    emit(updateProgressBar( "Done importing", filelist.size(), filelist.size()));
 }
 
-
+QStringList mzFileIO::getEmptyFiles() {
+    return emptyFiles;
+}
 
