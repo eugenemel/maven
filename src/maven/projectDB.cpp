@@ -29,6 +29,7 @@ void ProjectDB::saveCompounds(vector<PeakGroup>& allgroups) {
 
 void ProjectDB::deleteAll() {
     QSqlQuery query(sqlDB);
+    query.exec("drop table compounds");
     query.exec("drop table samples");
     query.exec("drop table peakgroups");
     query.exec("drop table peaks");
@@ -717,12 +718,12 @@ QString  ProjectDB::projectName() {
     
 bool ProjectDB::openDatabaseConnection(QString dbname) {
     if (sqlDB.isOpen() and  sqlDB.databaseName() == dbname) {
-        qDebug() << "Already oppenned.. ";
+        qDebug() << "Already oppened.. ";
         return true;
     }
 
     if (!sqlDB.isOpen()) {
-        qDebug() << "openning.. " << dbname;
+        qDebug() << "opening.. " << dbname;
         sqlDB = QSqlDatabase::addDatabase("QSQLITE", dbname);
         sqlDB.setDatabaseName(dbname);
         sqlDB.open();
