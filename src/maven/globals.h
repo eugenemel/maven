@@ -22,6 +22,7 @@
 
 const QString rsrcPath = ":/images";
 const QString PROGRAMNAME = "MAVEN";
+const int darkModeBackgroundColor = 30; // QColor(ARGB 1, 0.117647, 0.117647, 0.117647) red == blue == green == 30
 
 static const double Pi = 3.14159265358979323846264338327950288419717;
 

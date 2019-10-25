@@ -384,7 +384,7 @@ void SpectraWidget::drawGraph() {
     string sampleName =  ".";
     QString polarity;
 
-    QPen blackpen(Qt::black, 2);
+    QPen blackpen(mainwindow->getBackgroundAdjustedBlack(this), 2);
     float fontSize = scene()->height()*0.05;
     if ( fontSize < 1) fontSize=1;
     if ( fontSize > 16) fontSize=16;

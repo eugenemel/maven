@@ -1862,3 +1862,15 @@ Adduct* MainWindow::getUserAdduct() {
         return MassCalculator::ZeroMassAdduct;
     }
 }
+
+QColor MainWindow::getBackgroundAdjustedBlack(QWidget *widget){
+
+    //check background color
+    QColor backgroundColor = QWidget::palette().color(widget->backgroundRole());
+
+    if (backgroundColor.red() == darkModeBackgroundColor && backgroundColor.green() == darkModeBackgroundColor && backgroundColor.blue() == darkModeBackgroundColor) {
+         return QColor(225, 225, 225); //off-white
+    } else {
+        return Qt::black;
+    }
+}

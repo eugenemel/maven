@@ -143,6 +143,8 @@ public:
     bool isSampleFileType(QString filename);
     bool isProjectFileType(QString filename);
 
+    QColor getBackgroundAdjustedBlack(QWidget* widget);
+
 protected:
     void closeEvent(QCloseEvent *event);
     void dragEnterEvent(QDragEnterEvent *event);
