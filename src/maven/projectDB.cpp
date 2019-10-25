@@ -363,7 +363,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 			for(int j=0; j < g->peaks.size(); j++ ) { 
 					Peak& p = g->peaks[j];
                     query3.addBindValue(QString::number(lastInsertGroupId));
-                    query3.addBindValue(p.getSample()->getSampleId());
+                    query3.addBindValue(p.getSample()->getSampleId()); //Issue 62: the sampleID is not set if the file is empty. Accessing this field causes a crash.
                     query3.addBindValue(p.pos);
                     query3.addBindValue(p.minpos);
                     query3.addBindValue(p.maxpos);
