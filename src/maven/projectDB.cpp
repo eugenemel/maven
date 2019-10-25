@@ -1,4 +1,6 @@
 #include "projectDB.h"
+#include <QMessageBox>
+
  ProjectDB::ProjectDB(QString dbfilename) {
                 openDatabaseConnection(dbfilename);
             }
@@ -363,8 +365,13 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 			for(int j=0; j < g->peaks.size(); j++ ) { 
 					Peak& p = g->peaks[j];
 
-                    if(!p.getSample()->getSampleId()) {
-                        qDebug() << "ProjectDB::writeGroupSqlite(): p.getSample()->getSampleID() is null, Unable to write peak information to SQLite database. Exiting program." << endl;
+                    if(!p.getSample() || !p.getSample()->getSampleId()) {
+
+                        QString msg = QString("ProjectDB::writeGroupSqlite(): Unable to write null peak information to SQLite database. Exiting program.");
+                        QMessageBox messageBox;
+                        messageBox.critical(nullptr, "Error",  msg);
+
+                        qDebug() << msg;
                         abort();
                     }
 
