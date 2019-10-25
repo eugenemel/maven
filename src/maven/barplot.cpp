@@ -140,7 +140,14 @@ void BarPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
 
         //qDebug() << _yvalues[i] << " " << height << " " << maxYvalue << endl;
 
-        painter->setPen(Qt::black);        // do not draw outline
+        if (_mw && _mw->spectraWidget){
+            painter->setPen(_mw->getBackgroundAdjustedBlack(_mw->spectraWidget));
+        } else {
+            painter->setPen(Qt::black);
+        }
+
+
+        // do not draw outline
         if (_yvalues[i] == 0 ) painter->setPen(Qt::gray);
 
         brush.setColor(_colors[i]);
