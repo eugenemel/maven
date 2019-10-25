@@ -380,7 +380,7 @@ void SpectraWidget::drawGraph() {
     //draw title text
     setTitle();
 
-    QColor sampleColor = QColor::fromRgb(0,0,0,255); //black
+    QColor sampleColor = mainwindow->getBackgroundAdjustedBlack(this); //QColor::fromRgb(0,0,0,255); //black
     string sampleName =  ".";
     QString polarity;
 
