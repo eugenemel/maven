@@ -278,7 +278,6 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                                  (groupId,parentGroupId,tagString,metaGroupId,expectedRtDiff,groupRank,label,type,srmId,ms2EventCount,ms2Score,adductName,compoundId,compoundName,compoundDB,searchTableName)\
                                  values(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
-
      //cerr << "inserting .. " << g->groupId << endl;
 	 QSqlQuery query1(sqlDB);
             query1.prepare(INSERTSQL);
@@ -300,7 +299,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
             query1.addBindValue(QString());
         }
 
-        if (g->compound != NULL) {
+        if (g->compound) {
             query1.addBindValue(QString(g->compound->id.c_str()) );
             query1.addBindValue(QString(g->compound->name.c_str()) );
             query1.addBindValue(QString(g->compound->db.c_str()) );
