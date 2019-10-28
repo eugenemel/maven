@@ -736,23 +736,32 @@ void TableDockWidget::setGroupLabel(char label) {
     updateStatus();
 }
 
+//mark groups to be deleted as 'x'
+void TableDockWidget::traverseAndDeleteGroups(QTreeWidgetItem *item) {
+
+    QVariant v = item->data(0,PeakGroupType);
+    PeakGroup*  group =  v.value<PeakGroup*>();
+
+    if (group) {
+        group->deletedFlag = true;
+        group->setLabel('x');
+        for (int i = 0; i < item->childCount(); ++i){
+            traverseAndDeleteGroups(item->child(i));
+        }
+    }
+
+}
+
 void TableDockWidget::deleteSelected() {
-    //mark groups about to be deleted as x
-    //setGroupLabel('x');
+
     qDebug() << "deleteSelected()";
     QList<PeakGroup*> selectedGroups = getSelectedGroups();
-    QTreeWidgetItem* nextItem=0;
+    QTreeWidgetItem* nextItem = nullptr;
 
-    int deleteCount=0;
     foreach(QTreeWidgetItem* item, treeWidget->selectedItems() ) {
         if (item) {
-            QVariant v = item->data(0,PeakGroupType);
-            PeakGroup*  group =  v.value<PeakGroup*>();
-            if ( group != NULL ) {
-                group->deletedFlag = true;
-                group->setLabel('x');
-                deleteCount++;
-            }
+
+            traverseAndDeleteGroups(item);
 
             //which items will displayed next
             nextItem = treeWidget->itemBelow(item); //get next item
