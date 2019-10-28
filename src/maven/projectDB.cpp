@@ -366,10 +366,10 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 
                     if(!p.getSample()) {
 
-                        string errMsg = "ProjectDB::writeGroupSqlite(): peak sample (peak.getSample()) is null. Illegal access of peak.getSample().getSampleId(). Exiting program.";
+                        string errMsg = "ProjectDB::writeGroupSqlite(): peak sample (peak.getSample()) is null. Illegal memory access of peak.getSample()->getSampleId(). Exiting program.";
                         cerr << errMsg << endl;
 
-                        QString msg = QString("ProjectDB::writeGroupSqlite(): peak sample (peak.getSample()) is null. Illegal access of peak.getSample().getSampleId(). Exiting program.");
+                        QString msg = QString("ProjectDB::writeGroupSqlite(): peak sample (peak.getSample()) is null. Illegal memory access of peak.getSample()->getSampleId(). Exiting program.");
 
                         qDebug() << msg;
                         abort();
