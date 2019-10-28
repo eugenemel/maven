@@ -478,10 +478,10 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation 
         for (auto pair : directInfusionGroupAnnotation->annotationBySample) {
 
             mzSample *sample = pair.first;
-            DirectInfusionAnnotation *directInfusionAnntation = pair.second;
+            DirectInfusionAnnotation *directInfusionAnnotation = pair.second;
 
             Peak p;
-            p.scan = directInfusionAnntation->scan->scannum;
+            p.scan = directInfusionAnnotation->scan->scannum;
             p.setSample(sample);
 
             p.peakMz = theoMz;
