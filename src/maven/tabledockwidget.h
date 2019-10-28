@@ -103,6 +103,7 @@ protected slots:
 
 private:
          bool traverseNode(QTreeWidgetItem *item, QString needle);
+         void traverseAndDeleteGroups(QTreeWidgetItem *item);
           void deletePeaks();
           void addRow(PeakGroup* group, QTreeWidgetItem* root);
           void heatmapBackground(QTreeWidgetItem* item);
