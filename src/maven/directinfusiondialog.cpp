@@ -80,7 +80,9 @@ void DirectInfusionDialog::analyze() {
 
     directInfusionUpdate = new BackgroundDirectInfusionUpdate(this);
 
-    directInfusionUpdate->setSamples(mainwindow->samples); //TODO: getVisibleSamples()
+    vector<mzSample*> visibleSamples = mainwindow->getVisibleSamples();
+
+    directInfusionUpdate->setSamples(visibleSamples);
     directInfusionUpdate->setCompounds(DB.compoundsDB);
     directInfusionUpdate->setAdducts(DB.adductsDB);
 
