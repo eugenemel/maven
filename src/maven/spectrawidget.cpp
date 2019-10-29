@@ -1011,8 +1011,8 @@ void SpectraWidget::spectraToClipboardTop() {
 
 
 void SpectraWidget::gotoScan() { 
-		if (_currentScan == NULL) return;
-		int curScanNum = _currentScan->scannum;
+        if (!_currentScan || !_currentScan->sample || _currentScan->sample->scans.empty()) return;
+        int curScanNum = _currentScan->scannum;
 		int maxScanNum = _currentScan->sample->scans.size()-1;
 		bool ok=false;
 
