@@ -1081,6 +1081,11 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
     QAction* z7 = menu.addAction("Rescore fragmentation");
     connect(z7, SIGNAL(triggered()), SLOT(rescoreFragmentation()));
 
+    if (windowTitle() == "Bookmarks") {
+        QAction* z8 = menu.addAction("Edit Selected Peak Group");
+        connect(z8, SIGNAL(triggered()), SLOT(updateSelectedPeakGroup()));
+    }
+
 
     QMenu analysis("Cluster Analysis");
     QAction* zz0 = analysis.addAction("Cluster Groups by Retention Time");
@@ -1653,5 +1658,9 @@ void TableDockWidget::rescoreFragmentation() {
         }
     }
     updateTable();
+}
+
+void TableDockWidget::updateSelectedPeakGroup() {
+    qDebug() << "TableDockWidget::updateSelectedPeakGroup(): TODO";
 }
 

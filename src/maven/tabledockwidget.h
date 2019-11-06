@@ -92,6 +92,7 @@ public slots:
           void filterTree(QString needle);
           void rescoreFragmentation();
       void changePeakGroupDisplay();
+      void updateSelectedPeakGroup();
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event);
