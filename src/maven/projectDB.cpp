@@ -449,6 +449,19 @@ void ProjectDB::loadPeakGroups(QString tableName) {
             }
         }
 
+        if (!isHasDisplayName) {
+            QSqlQuery queryAdjustPeakGroupsTable(sqlDB);
+
+            QString strAdjustPeakGroupsTable = QString();
+            strAdjustPeakGroupsTable.append("ALTER TABLE ");
+            strAdjustPeakGroupsTable.append(tableName);
+            strAdjustPeakGroupsTable.append(" ADD displayName VARCHAR(254) ");
+
+        if (!queryAdjustPeakGroupsTable.exec(strAdjustPeakGroupsTable)){
+                qDebug() << "Ho..." <<queryCheckCols.lastError();
+            }
+        }
+
         qDebug() << "ProjectDB::loadPeakGroups(): isHasDisplayName? " << isHasDisplayName;
 
      QSqlQuery query(sqlDB);
