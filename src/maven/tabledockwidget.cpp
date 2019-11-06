@@ -317,6 +317,10 @@ void TableDockWidget::heatmapBackground(QTreeWidgetItem* item) {
 QString TableDockWidget::groupTagString(PeakGroup* group){
     if (!group) return QString();
 
+    if (!group->displayName.empty()) {
+        return QString(group->displayName.c_str());
+    }
+
     QStringList parts;
 
     if (group->compound != NULL) {
@@ -705,7 +709,9 @@ QList<PeakGroup*> TableDockWidget::getSelectedGroups() {
         if (item) {
             QVariant v = item->data(0,PeakGroupType);
             PeakGroup*  group =  v.value<PeakGroup*>();
-            if ( group != NULL ) { selectedGroups.append(group); }
+            if (group) {
+                selectedGroups.append(group);
+            }
         }
     }
     return selectedGroups;
@@ -713,13 +719,16 @@ QList<PeakGroup*> TableDockWidget::getSelectedGroups() {
 
 PeakGroup* TableDockWidget::getSelectedGroup() { 
     QTreeWidgetItem *item = treeWidget->currentItem();
-    if (!item) return NULL;
+    if (!item) return nullptr;
 
     QVariant v = item->data(0,PeakGroupType);
     PeakGroup*  group =  v.value<PeakGroup*>();
 
-    if ( group != NULL ) { return group; }
-    return NULL;
+    if (group){
+        return group;
+    }
+
+    return nullptr;
 }
 
 void TableDockWidget::setGroupLabel(char label) {
@@ -1085,7 +1094,6 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
         QAction* z8 = menu.addAction("Edit Selected Peak Group");
         connect(z8, SIGNAL(triggered()), SLOT(updateSelectedPeakGroup()));
     }
-
 
     QMenu analysis("Cluster Analysis");
     QAction* zz0 = analysis.addAction("Cluster Groups by Retention Time");
@@ -1662,5 +1670,8 @@ void TableDockWidget::rescoreFragmentation() {
 
 void TableDockWidget::updateSelectedPeakGroup() {
     qDebug() << "TableDockWidget::updateSelectedPeakGroup(): TODO";
+
+    //QList<PeakGroup*> selected = getSelectedGroupss();
+    PeakGroup *selectedPeakGroup = getSelectedGroup();
 }
 
