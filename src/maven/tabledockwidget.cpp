@@ -1675,6 +1675,7 @@ void TableDockWidget::updateSelectedPeakGroup() {
     //QList<PeakGroup*> selected = getSelectedGroups();
 
     PeakGroup *selectedPeakGroup = getSelectedGroup();
+    if (!selectedPeakGroup) return; //Probably a cluster
 
     selectedPeakGroup->displayName = "testing";
 
