@@ -1671,7 +1671,14 @@ void TableDockWidget::rescoreFragmentation() {
 void TableDockWidget::updateSelectedPeakGroup() {
     qDebug() << "TableDockWidget::updateSelectedPeakGroup(): TODO";
 
-    //QList<PeakGroup*> selected = getSelectedGroupss();
+    //TODO: may want to handle bulk renaming
+    //QList<PeakGroup*> selected = getSelectedGroups();
+
     PeakGroup *selectedPeakGroup = getSelectedGroup();
+
+    selectedPeakGroup->displayName = "testing";
+
+    updateItem(treeWidget->currentItem());
+
 }
 
