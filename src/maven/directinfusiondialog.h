@@ -32,4 +32,4 @@ class DirectInfusionDialog : public QDialog, public Ui_directInfusionDialog{
         BackgroundDirectInfusionUpdate *directInfusionUpdate;
 };
 
-#endif
+#endif //DIRECTINFUSIONDIALOG_H

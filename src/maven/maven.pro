@@ -50,7 +50,8 @@ FORMS = forms/settingsform.ui  \
         forms/spectramatching.ui \
         forms/calibrateform.ui \
         forms/librarydialog.ui \
-    	forms/directinfusiondialog.ui
+        forms/directinfusiondialog.ui \
+        forms/editpeakgroupdialog.ui
 
 
 HEADERS +=  stable.h \
@@ -97,9 +98,9 @@ HEADERS +=  stable.h \
             projectDB.h \
             librarydialog.h \
             calibratedialog.h \
-    directinfusiondialog.h \
-    background_directinfusion_update.h
-
+            directinfusiondialog.h \
+            background_directinfusion_update.h \
+            editpeakgroupingdialog.h
 
 SOURCES +=  mainwindow.cpp  \
             classifier.cpp \
@@ -143,8 +144,9 @@ SOURCES +=  mainwindow.cpp  \
             projectDB.cpp \
             librarydialog.cpp \
             calibratedialog.cpp \
-    directinfusiondialog.cpp \
-    background_directinfusion_update.cpp
+            directinfusiondialog.cpp \
+            background_directinfusion_update.cpp \
+            editpeakgroupingdialog.cpp
 
 
 sources.files =  $$HEADERS \
