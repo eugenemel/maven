@@ -693,8 +693,14 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
 
                 groupCount = groupCount + numGroupsAdded;
 
-                //write group. Recursively calls to write children
-                QString searchTableName = group->searchTableName.empty() ? peakTable->windowTitle() : QString(group->searchTableName.c_str());
+                //Issue 75:
+                //Bookmarks take precedence over original table name (if it exists).
+                QString searchTableName;
+                if (peakTable->windowTitle() == "Bookmarks" || group->searchTableName.empty()) {
+                     searchTableName = peakTable->windowTitle();
+                } else {
+                    searchTableName = QString(group->searchTableName.c_str());
+                }
 
                 //qDebug() << "Write PeakGroup to DB: ID=" << group->groupId << ", table=" << searchTableName;
 
