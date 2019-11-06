@@ -271,19 +271,26 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                         compoundId varchar(254),\
                         compoundName varchar(254),\
                         compoundDB varchar(254),\
-                        searchTableName varchar(254)\
+                        searchTableName varchar(254),\
+                        displayName varchar(254)\
                         )");
 
      if(!query0.exec(TABLESQL)) qDebug() << query0.lastError();
 
      QString INSERTSQL = QString("insert into peakgroups\
-                                 (groupId,parentGroupId,tagString,metaGroupId,expectedRtDiff,groupRank,label,type,srmId,ms2EventCount,ms2Score,adductName,compoundId,compoundName,compoundDB,searchTableName)\
-                                 values(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                                 (groupId,parentGroupId,tagString,metaGroupId,expectedRtDiff, \
+                                    groupRank,label,type,srmId,ms2EventCount, \
+                                    ms2Score,adductName,compoundId,compoundName,compoundDB,\
+                                    searchTableName,displayName)\
+                                    \
+                                 values(NULL,?,?,?,?,\
+                                    ?,?,?,?,?,\
+                                    ?,?,?,?,?,\
+                                    ?,?)");
 
      //cerr << "inserting .. " << g->groupId << endl;
 	 QSqlQuery query1(sqlDB);
             query1.prepare(INSERTSQL);
-            //query1.bindValue( 0, QString::number(g->groupId));
             query1.addBindValue(parentGroupId);
             query1.addBindValue(QString(g->tagString.c_str()));
             query1.addBindValue(g->metaGroupId);
@@ -313,9 +320,15 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 
         query1.addBindValue(tableName);
 
-     if( ! query1.exec() ) {
+        if (!g->displayName.empty()){
+            query1.addBindValue(QString(g->displayName.c_str()) );
+        } else {
+            query1.addBindValue(QString());
+        }
+
+     if(! query1.exec() ) {
         qDebug() << query1.lastError();
-    }
+     }
      int lastInsertGroupId = query1.lastInsertId().toString().toInt();
 
      QSqlQuery query2(sqlDB);
@@ -484,6 +497,11 @@ void ProjectDB::loadPeakGroups(QString tableName) {
         QVariant label = query.value("label");
         if (label.toString().size() > 0) {
             g.label = label.toString().at(0).toLatin1();
+        }
+
+        string displayName = query.value("displayName").toString().toStdString();
+        if (!displayName.empty()) {
+            g.displayName = displayName;
         }
 
         g.ms2EventCount = query.value("ms2EventCount").toString().toInt();
