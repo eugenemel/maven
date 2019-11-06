@@ -431,6 +431,26 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 
 void ProjectDB::loadPeakGroups(QString tableName) {
 
+        QSqlQuery queryCheckCols(sqlDB);
+
+        QString strCheckCols = QString();
+        strCheckCols.append("pragma table_info(");
+        strCheckCols.append(tableName);
+        strCheckCols.append(");");
+
+        if (!queryCheckCols.exec(strCheckCols)) {
+            qDebug() << "Ho..." << queryCheckCols.lastError();
+        }
+
+        bool isHasDisplayName = false;
+        while (queryCheckCols.next()) {
+        if ("displayName" == queryCheckCols.value(1).toString()) {
+                isHasDisplayName = true;
+            }
+        }
+
+        qDebug() << "ProjectDB::loadPeakGroups(): isHasDisplayName? " << isHasDisplayName;
+
      QSqlQuery query(sqlDB);
      query.exec("create index if not exists peak_group_ids on peaks(groupId)");
      query.exec("select * from " + tableName );
