@@ -696,7 +696,7 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
                 //write group. Recursively calls to write children
                 QString searchTableName = group->searchTableName.empty() ? peakTable->windowTitle() : QString(group->searchTableName.c_str());
 
-                qDebug() << "Write PeakGroup to DB: ID=" << group->groupId << ", table=" << searchTableName;
+                //qDebug() << "Write PeakGroup to DB: ID=" << group->groupId << ", table=" << searchTableName;
 
                 project->writeGroupSqlite(group, 0, searchTableName);
                 onePeakTableCount = onePeakTableCount + numGroupsAdded;
