@@ -1076,6 +1076,12 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
 {
     QMenu menu;
 
+    if (windowTitle() == "Bookmarks") {
+        QAction* z8 = menu.addAction("Edit Selected Peak Group ID");
+        connect(z8, SIGNAL(triggered()), SLOT(showEditPeakGroupDialog()));
+        menu.addSeparator();
+    }
+
     QAction* z0 = menu.addAction("Copy to Clipboard");
     connect(z0, SIGNAL(triggered()), this ,SLOT(setClipboard()));
 
@@ -1093,11 +1099,6 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
 
     QAction* z7 = menu.addAction("Rescore fragmentation");
     connect(z7, SIGNAL(triggered()), SLOT(rescoreFragmentation()));
-
-    if (windowTitle() == "Bookmarks") {
-        QAction* z8 = menu.addAction("Edit Selected Peak Group ID");
-        connect(z8, SIGNAL(triggered()), SLOT(showEditPeakGroupDialog()));
-    }
 
     QMenu analysis("Cluster Analysis");
     QAction* zz0 = analysis.addAction("Cluster Groups by Retention Time");
