@@ -1704,6 +1704,22 @@ void TableDockWidget::showEditPeakGroupDialog() {
     QString compoundString = QString();
     if (selectedPeakGroup->compound){
         compoundString.append(selectedPeakGroup->compound->name.c_str());
+    }
+
+    if (compoundString.isEmpty() && _mainwindow->getProjectWidget()->currentProject){
+        //try to get original compound string from matches (mzkitchen workflow)
+
+        if (_mainwindow->getProjectWidget()->currentProject->topMatch.find(selectedPeakGroup->groupId)
+                != _mainwindow->getProjectWidget()->currentProject->topMatch.end()){
+
+            pair<string, float> originalCompoundNameAndScore = _mainwindow->getProjectWidget()->currentProject->topMatch.at(selectedPeakGroup->groupId);
+
+            compoundString.append(originalCompoundNameAndScore.first.c_str());
+        }
+
+    }
+
+    if (!compoundString.isEmpty()){
 
         //try to summarize lipids based on suggestions
         QString strippedCompoundName = compoundString.section(' ', 0, 0);
