@@ -296,7 +296,7 @@ Compound* Database::findSpeciesById(string id,string db) {
     if ( compoundIdMap.contains(id + db) ) return compoundIdMap[id + db];
     if ( compoundIdMap.contains(id) ) return compoundIdMap[id];
 
-    return NULL;
+    return nullptr;
 
     /*Compound* c = NULL;
     for(int i=0; i < compoundsDB.size(); i++ ) {
