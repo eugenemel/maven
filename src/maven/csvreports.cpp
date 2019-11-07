@@ -27,6 +27,7 @@ void CSVReports::openGroupReport(string outputfile) {
                         << "medRt"
                         << "maxQuality"
                         << "note"
+                        << "displayName"
                         << "compound"
                         << "compoundId"
                         << "category"
@@ -98,7 +99,8 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
                 << group->meanMz << SEP
                 << group->meanRt << SEP
                 << group->maxQuality << SEP
-                << group->tagString;
+                << group->tagString << SEP //header is titled 'note'
+                << group->displayName;
 
     string compoundName;
     string compoundCategory;
