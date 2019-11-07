@@ -152,7 +152,7 @@ void SettingsForm::setFormValues() {
 
 
 void SettingsForm::getFormValues() {
-    if (settings == NULL) return;
+    if (!settings) return;
     //qDebug() << "SettingsForm::getFormValues() ";
 
 
