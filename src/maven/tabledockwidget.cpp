@@ -1697,7 +1697,7 @@ void TableDockWidget::showEditPeakGroupDialog() {
     PeakGroup *selectedPeakGroup = getSelectedGroup();
     if (!selectedPeakGroup) return; //Probably a cluster
 
-    set<string> suggestionSet;
+    vector<string> suggestionSet;
     QString suggestionString = QString();
 
     QString compoundString = QString();
@@ -1712,18 +1712,25 @@ void TableDockWidget::showEditPeakGroupDialog() {
         string acylChainCompositionSummarized = LipidSummarizationUtils::getAcylChainCompositionSummary(baseName);
         string lipidClassSummarized = LipidSummarizationUtils::getLipidClassSummary(baseName);
 
-        suggestionSet.insert(baseName);
-        suggestionSet.insert(acylChainLengthSummarized);
-        suggestionSet.insert(acylChainCompositionSummarized);
-        suggestionSet.insert(lipidClassSummarized);
+        suggestionSet.push_back(baseName);
 
-        qDebug() << "baseName: " << baseName.c_str();
-        qDebug() << "chain length summarized: " << acylChainLengthSummarized.c_str();
-        qDebug() << "composition summarized: " << acylChainCompositionSummarized.c_str();
-        qDebug() << "class: " << lipidClassSummarized.c_str() << endl;
+        if (std::find(suggestionSet.begin(), suggestionSet.end(), acylChainLengthSummarized) == suggestionSet.end()) {
+            suggestionSet.push_back(acylChainLengthSummarized);
+        }
 
-        for (string suggestion : suggestionSet) {
-            suggestionString.append(QString(suggestion.c_str())).append("\n");
+        if (std::find(suggestionSet.begin(), suggestionSet.end(), acylChainCompositionSummarized) == suggestionSet.end()) {
+            suggestionSet.push_back(acylChainCompositionSummarized);
+        }
+
+        if (std::find(suggestionSet.begin(), suggestionSet.end(), lipidClassSummarized) == suggestionSet.end()) {
+            suggestionSet.push_back(lipidClassSummarized);
+        }
+
+        for (unsigned int i = 0; i < suggestionSet.size(); i++) {
+            suggestionString.append(QString(suggestionSet.at(i).c_str()));
+            if (i < suggestionSet.size()-1) {
+                suggestionString.append("\n");
+            }
         }
     }
 
