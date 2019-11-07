@@ -631,6 +631,52 @@ void ProjectDB::loadPeakGroups(QString tableName) {
         << allgroups.size() << " parents and " << matchedChildren.size() << " children." << endl;
 }
 
+void ProjectDB::loadMatchTable() {
+
+        qDebug() << "ProjectDB::loadMatchTable()... ";
+
+        QSqlQuery queryCheckTable(sqlDB);
+
+        if (!queryCheckTable.exec("SELECT name FROM sqlite_master WHERE type='table' AND name='matches';")){
+            qDebug() << "Ho..." << queryCheckTable.lastError();
+            qDebug() << "Could not check file for presence or absence of match table. Skipping.";
+            return; // If the match table couldn't be loaded, bail
+        }
+
+        bool isHasMatchesTable = false;
+        while (queryCheckTable.next()) {
+        if ("matches" == queryCheckTable.value(0).toString()){
+                isHasMatchesTable = true;
+                break;
+            }
+        }
+
+        if (!isHasMatchesTable) {
+            qDebug() << "Match table not found in file.";
+            return;
+        }
+
+        QSqlQuery queryMatches(sqlDB);
+        queryMatches.exec("select * from matches;");
+
+        while (queryMatches.next()) {
+            int groupId = queryMatches.value("groupId").toInt();
+            string originalCompoundName = queryMatches.value("originalCompoundName").toString().toStdString();
+            float score = queryMatches.value("score").toFloat();
+
+            if (topMatch.find(groupId) == topMatch.end()) {
+                topMatch.insert(make_pair(groupId, make_pair(originalCompoundName, score)));
+            } else {
+                pair<string, float> oldMatch = topMatch.at(groupId);
+                if (score > oldMatch.second) {
+                    topMatch.at(groupId) = make_pair(originalCompoundName, score);
+                }
+            }
+        }
+
+        qDebug() << "ProjectDB::loadMatchTable(): Loaded " << topMatch.size() << " top matches.";
+}
+
 mzSample* ProjectDB::getSampleById(int sampleId) { 
 	for (mzSample* s: samples) {
 		if (s->sampleId == sampleId)  return s;

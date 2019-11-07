@@ -473,7 +473,7 @@ void ProjectDockWidget::closeProject() {
         saveProjectSQLITE(lastOpennedProject);
         currentProject->closeDatabaseConnection();
         delete(currentProject);
-        currentProject=0;
+        currentProject=nullptr;
 
         _mainwindow->deleteAllPeakTables();
         unloadAllSamples();
@@ -635,6 +635,9 @@ void ProjectDockWidget::loadAllPeakTables() {
 
     //load all peakgroups
     currentProject->loadPeakGroups("peakgroups");
+
+    //Issue 73 / mzkitchen 8: load match table
+    currentProject->loadMatchTable();
 
     for(int i=0; i < currentProject->allgroups.size(); i++ ) {
         PeakGroup* g = &(currentProject->allgroups[i]);

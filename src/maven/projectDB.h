@@ -20,6 +20,7 @@ class ProjectDB {
 
             vector<PeakGroup> allgroups;
             vector<mzSample*> samples;
+            map<int,std::pair<string, float>> topMatch = {};
 
             void clearLoadedPeakGroups() { allgroups.clear(); }
             void saveSamples(vector<mzSample *> &sampleSet);
@@ -30,6 +31,7 @@ class ProjectDB {
             int writeGroupSqlite(PeakGroup* group, int parentGroupId, QString tableName);
             void loadPeakGroups(QString tableName);
             void loadGroupPeaks(PeakGroup* group);
+            void loadMatchTable();
             void deleteAll();
             void deleteGroups();
             void deleteSearchResults(QString searchTable);
@@ -59,5 +61,7 @@ class ProjectDB {
 	    void loadSamples();
 	    vector<mzSample*> getSamples() { return samples; }
 };
+
+typedef map<int,pair<string,float>>::iterator matchIterator;
 
 #endif
