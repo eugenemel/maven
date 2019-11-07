@@ -285,7 +285,7 @@ Adduct* Database::findAdductByName(string id) {
     else if(id == "[M]") return MassCalculator::ZeroMassAdduct;
 
     for(Adduct* a: this->adductsDB)  if (a->name == id) return a;
-    return 0;
+    return nullptr;
 }
 
 Compound* Database::findSpeciesById(string id,string db) {
