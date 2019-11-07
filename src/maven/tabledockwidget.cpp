@@ -1712,6 +1712,7 @@ void TableDockWidget::showEditPeakGroupDialog() {
     editPeakGroupDialog->brsAdduct->setText(adductString);
     editPeakGroupDialog->brsMz->setText(QString::number(selectedPeakGroup->meanMz, 'f', 4));
     editPeakGroupDialog->brsRT->setText(QString::number(selectedPeakGroup->meanRt, 'f', 2));
+    editPeakGroupDialog->txtUpdateID->setText(QString());
 
     //TODO: implement suggestions
 
