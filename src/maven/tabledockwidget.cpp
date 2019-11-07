@@ -36,6 +36,10 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     connect(clusterDialog->clearButton,SIGNAL(clicked(bool)),SLOT(clearClusters()));
     connect(clusterDialog->chkPGDisplay, SIGNAL(clicked(bool)), SLOT(changePeakGroupDisplay()));
 
+    editPeakGroupDialog = new EditPeakGroupDialog(this);
+    connect(editPeakGroupDialog->okButton, SIGNAL(clicked(bool)), SLOT(updateSelectedPeakGroup()));
+    connect(editPeakGroupDialog->cancelButton, SIGNAL(clicked(bool)), SLOT(hideEditPeakGroupDialog()));
+
     QToolBar *toolBar = new QToolBar(this);
     toolBar->setFloatable(false);
     toolBar->setMovable(false);
@@ -1091,8 +1095,8 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
     connect(z7, SIGNAL(triggered()), SLOT(rescoreFragmentation()));
 
     if (windowTitle() == "Bookmarks") {
-        QAction* z8 = menu.addAction("Edit Selected Peak Group");
-        connect(z8, SIGNAL(triggered()), SLOT(updateSelectedPeakGroup()));
+        QAction* z8 = menu.addAction("Edit Selected Peak Group ID");
+        connect(z8, SIGNAL(triggered()), SLOT(showEditPeakGroupDialog()));
     }
 
     QMenu analysis("Cluster Analysis");
@@ -1669,7 +1673,23 @@ void TableDockWidget::rescoreFragmentation() {
 }
 
 void TableDockWidget::updateSelectedPeakGroup() {
-    qDebug() << "TableDockWidget::updateSelectedPeakGroup(): TODO";
+
+    editPeakGroupDialog->hide();
+    string updatedVal = editPeakGroupDialog->txtUpdateID->toPlainText().toStdString();
+
+    if (!updatedVal.empty()) {
+
+        PeakGroup *selectedPeakGroup = getSelectedGroup();
+        if (!selectedPeakGroup) return; //Probably a cluster
+
+        selectedPeakGroup->displayName = updatedVal;
+
+        updateItem(treeWidget->currentItem());
+    }
+
+}
+
+void TableDockWidget::showEditPeakGroupDialog() {
 
     //TODO: may want to handle bulk renaming
     //QList<PeakGroup*> selected = getSelectedGroups();
@@ -1677,9 +1697,28 @@ void TableDockWidget::updateSelectedPeakGroup() {
     PeakGroup *selectedPeakGroup = getSelectedGroup();
     if (!selectedPeakGroup) return; //Probably a cluster
 
-    selectedPeakGroup->displayName = "testing";
+    QString compoundString = QString();
+    if (selectedPeakGroup->compound){
+        compoundString.append(selectedPeakGroup->compound->name.c_str());
+    }
 
-    updateItem(treeWidget->currentItem());
+    QString adductString = QString();
+    if (selectedPeakGroup->adduct){
+        adductString.append(selectedPeakGroup->adduct->name.c_str());
+    }
 
+    editPeakGroupDialog->brsPreviousID->setText(groupTagString(selectedPeakGroup));
+    editPeakGroupDialog->brsCompound->setText(compoundString);
+    editPeakGroupDialog->brsAdduct->setText(adductString);
+    editPeakGroupDialog->brsMz->setText(QString::number(selectedPeakGroup->meanMz, 'f', 4));
+    editPeakGroupDialog->brsRT->setText(QString::number(selectedPeakGroup->meanRt, 'f', 2));
+
+    //TODO: implement suggestions
+
+    editPeakGroupDialog->show();
+}
+
+void TableDockWidget::hideEditPeakGroupDialog() {
+    editPeakGroupDialog->hide();
 }
 

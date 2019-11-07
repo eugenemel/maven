@@ -4,13 +4,13 @@
 #include "ui_editpeakgroupdialog.h"
 #include "stable.h"
 
-class EditPeakGroupingDialog : public QDialog, public Ui_editPeakGroupDialog {
+class EditPeakGroupDialog : public QDialog, public Ui_editPeakGroupDialog {
 
     Q_OBJECT
 
     public:
-        EditPeakGroupingDialog(QWidget *parent);
-        ~EditPeakGroupingDialog();
+        EditPeakGroupDialog(QWidget *parent);
+        ~EditPeakGroupDialog();
 
     public slots:
         void show();

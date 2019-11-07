@@ -1,14 +1,14 @@
 #include "editpeakgroupingdialog.h"
 
-EditPeakGroupingDialog::EditPeakGroupingDialog(QWidget *parent) : QDialog(parent) {
+EditPeakGroupDialog::EditPeakGroupDialog(QWidget *parent) : QDialog(parent) {
     setupUi(this);
     setModal(true);
 }
 
-EditPeakGroupingDialog::~EditPeakGroupingDialog(){
+EditPeakGroupDialog::~EditPeakGroupDialog(){
 
 }
 
-void EditPeakGroupingDialog::show(){
+void EditPeakGroupDialog::show(){
     QDialog::show();
 }

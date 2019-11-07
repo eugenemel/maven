@@ -7,6 +7,7 @@
 #include "clusterdialog.h"
 #include "numeric_treewidgetitem.h"
 #include "directinfusionprocessor.h"
+#include "editpeakgroupingdialog.h"
 
 class MainWindow;
 class TrainDialog;
@@ -93,6 +94,8 @@ public slots:
           void rescoreFragmentation();
       void changePeakGroupDisplay();
       void updateSelectedPeakGroup();
+      void showEditPeakGroupDialog();
+      void hideEditPeakGroupDialog();
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event);
@@ -119,6 +122,7 @@ private:
           TrainDialog* traindialog;
           ClusterDialog*       clusterDialog;
           QDialog* 	 filtersDialog;
+          EditPeakGroupDialog* editPeakGroupDialog;
 
           enum tableViewType{ groupView=0, peakView=1 };
           tableViewType viewType;
