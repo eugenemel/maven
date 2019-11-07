@@ -576,13 +576,20 @@ void TableDockWidget::showAllGroups() {
     for(int i=0; i < allgroups.size(); i++ ) { 
         int metaGroupId  = allgroups[i].metaGroupId;
         if (metaGroupId && allgroups[i].meanMz > 0 && allgroups[i].peakCount()>0) {
+
+            QTreeWidgetItem* parent = nullptr;
             if (!parents.contains(metaGroupId)) {
-                parents[metaGroupId]= new QTreeWidgetItem(treeWidget);
-                parents[metaGroupId]->setText(0,QString("Cluster ") + QString::number(metaGroupId));
-                parents[metaGroupId]->setText(3,QString::number(allgroups[i].meanRt,'f',2));
-                parents[metaGroupId]->setExpanded(true);
+                if (windowTitle() != "Bookmarks") {
+                    parents[metaGroupId]= new QTreeWidgetItem(treeWidget);
+                    parents[metaGroupId]->setText(0,QString("Cluster ") + QString::number(metaGroupId));
+                    parents[metaGroupId]->setText(3,QString::number(allgroups[i].meanRt,'f',2));
+                    parents[metaGroupId]->setExpanded(true);
+                    parent = parents[metaGroupId];
+                }
+            } else {
+                parent = parents[metaGroupId];
             }
-            QTreeWidgetItem* parent = parents[ metaGroupId ];
+
             addRow(&allgroups[i], parent); 
         } else {
             addRow(&allgroups[i], nullptr);
