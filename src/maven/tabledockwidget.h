@@ -8,6 +8,7 @@
 #include "numeric_treewidgetitem.h"
 #include "directinfusionprocessor.h"
 #include "editpeakgroupingdialog.h"
+#include "lipidsummarizationutils.h"
 
 class MainWindow;
 class TrainDialog;

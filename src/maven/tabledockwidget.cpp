@@ -1697,9 +1697,24 @@ void TableDockWidget::showEditPeakGroupDialog() {
     PeakGroup *selectedPeakGroup = getSelectedGroup();
     if (!selectedPeakGroup) return; //Probably a cluster
 
+    set<string> suggestionSet;
+    QString suggestionString = QString();
+
     QString compoundString = QString();
     if (selectedPeakGroup->compound){
         compoundString.append(selectedPeakGroup->compound->name.c_str());
+
+        //try to summarize lipids based on suggestions
+        QString strippedCompoundName = compoundString.section(' ', 0, 0);
+        string baseName = strippedCompoundName.toStdString();
+        suggestionSet.insert(baseName);
+        suggestionSet.insert(LipidSummarizationUtils::getAcylChainLengthSummary(baseName));
+        suggestionSet.insert(LipidSummarizationUtils::getAcylChainCompositionSummary(baseName));
+        suggestionSet.insert(LipidSummarizationUtils::getLipidClassSummary(baseName));
+
+        for (string suggestion : suggestionSet) {
+            suggestionString.append(QString(suggestion.c_str())).append("\n");
+        }
     }
 
     QString adductString = QString();
@@ -1714,7 +1729,7 @@ void TableDockWidget::showEditPeakGroupDialog() {
     editPeakGroupDialog->brsRT->setText(QString::number(selectedPeakGroup->meanRt, 'f', 2));
     editPeakGroupDialog->txtUpdateID->setText(QString());
 
-    //TODO: implement suggestions
+    editPeakGroupDialog->brsSuggestions->setText(suggestionString);
 
     editPeakGroupDialog->show();
 }
