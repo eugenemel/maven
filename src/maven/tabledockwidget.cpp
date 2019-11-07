@@ -1706,11 +1706,21 @@ void TableDockWidget::showEditPeakGroupDialog() {
 
         //try to summarize lipids based on suggestions
         QString strippedCompoundName = compoundString.section(' ', 0, 0);
+
         string baseName = strippedCompoundName.toStdString();
+        string acylChainLengthSummarized = LipidSummarizationUtils::getAcylChainLengthSummary(baseName);
+        string acylChainCompositionSummarized = LipidSummarizationUtils::getAcylChainCompositionSummary(baseName);
+        string lipidClassSummarized = LipidSummarizationUtils::getLipidClassSummary(baseName);
+
         suggestionSet.insert(baseName);
-        suggestionSet.insert(LipidSummarizationUtils::getAcylChainLengthSummary(baseName));
-        suggestionSet.insert(LipidSummarizationUtils::getAcylChainCompositionSummary(baseName));
-        suggestionSet.insert(LipidSummarizationUtils::getLipidClassSummary(baseName));
+        suggestionSet.insert(acylChainLengthSummarized);
+        suggestionSet.insert(acylChainCompositionSummarized);
+        suggestionSet.insert(lipidClassSummarized);
+
+        qDebug() << "baseName: " << baseName.c_str();
+        qDebug() << "chain length summarized: " << acylChainLengthSummarized.c_str();
+        qDebug() << "composition summarized: " << acylChainCompositionSummarized.c_str();
+        qDebug() << "class: " << lipidClassSummarized.c_str() << endl;
 
         for (string suggestion : suggestionSet) {
             suggestionString.append(QString(suggestion.c_str())).append("\n");
