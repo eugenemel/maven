@@ -8,3 +8,5 @@ Travis: [![Travis Build Status](https://travis-ci.org/eugenemel/maven.svg?branch
 ## Download latest release
 
 [Maven Releases](https://github.com/eugenemel/maven/releases)
+
+[Maven Core](https://github.com/eugenemel/maven_core)
