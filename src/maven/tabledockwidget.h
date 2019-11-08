@@ -32,6 +32,7 @@ public:
 	int  groupCount() { return allgroups.size(); }
 	bool hasPeakGroup(PeakGroup* group);
     QList<PeakGroup*> getGroups();
+    QString groupTagString(PeakGroup* group);
 
 public slots: 
 	  //void showInfo(PeakGroup* group);
@@ -115,7 +116,6 @@ private:
 	  PeakGroup* readGroupXML(QXmlStreamReader& xml,PeakGroup* parent);
           void writeGroupXML(QXmlStreamWriter& stream, PeakGroup* g);
 	  void readPeakXML(QXmlStreamReader& xml,PeakGroup* parent);
-	  QString groupTagString(PeakGroup* group);
 
          MainWindow* _mainwindow;
          std::vector<PeakGroup>allgroups;

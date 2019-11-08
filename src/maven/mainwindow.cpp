@@ -456,7 +456,56 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
     if ( bookmarkedPeaks->isVisible() == false ) {
         bookmarkedPeaks->setVisible(true);
     }
-    bookmarkedPeaks->addPeakGroup(group,true);
+
+    bool isWarnMzRt = settings->value("chkBkmkWarnMzRt", false).toBool();
+    bool isWarnMz = settings->value("chkBkmkWarnMz", false).toBool();
+    float mzTol = settings->value("spnBkmkmzTo", 10.0f).toFloat();
+    float rtTol = settings->value("spnBkmkRtTol", 0.50f).toFloat();
+
+    bool isAddBookmark = false;
+    if (isWarnMzRt || isWarnMz) {
+
+        QString warnType = isWarnMzRt ? "m/z and RT" : "m/z";
+
+        QString msg = QString("The following bookmarked peak groups have similar ");
+        msg.append(warnType);
+        msg.append(" values:");
+        msg.append("\n\n");
+
+        bool isFoundSimilarBookmark = false;
+        for (auto pg : bookmarkedPeaks->getGroups()){
+            if (mzUtils::ppmDist(group->meanMz, pg->meanMz) <= mzTol
+                    && (abs(group->meanRt - pg->meanRt) <= rtTol || isWarnMz)) {
+                msg.append(bookmarkedPeaks->groupTagString(pg));
+                msg.append("\n");
+                isFoundSimilarBookmark = true;
+            }
+        }
+
+        msg.append("\n");
+        msg.append("Are you sure you would like to add this bookmark?");
+
+        if (isFoundSimilarBookmark) {
+            QMessageBox::StandardButton reply = QMessageBox::question(
+                        this,
+                        "Similar Bookmark Exists",
+                        msg,
+                        QMessageBox::Yes|QMessageBox::No
+                        );
+
+            isAddBookmark = reply == QMessageBox::Yes;
+        } else {
+            isAddBookmark = true;
+        }
+
+
+    } else {
+        isAddBookmark = true;
+    }
+
+    if (isAddBookmark) {
+        bookmarkedPeaks->addPeakGroup(group,true);
+    }
 }
 
 void MainWindow::setFormulaFocus(QString formula) {
