@@ -148,6 +148,19 @@ void SettingsForm::setFormValues() {
 
     if (settings->contains("spnMzMaxVal"))
         spnMzMaxVal->setValue(settings->value("spnMzMaxVal").toDouble());
+
+    if (settings->contains("chkBkmkWarnMzRt"))
+        chkBkmkWarnMzRt->setCheckState((Qt::CheckState) settings->value("chkBkmkWarnMzRt").toInt());
+
+    if (settings->contains("chkBkmkWarnMz"))
+        chkBkmkWarnMz->setCheckState((Qt::CheckState) settings->value("chkBkmkWarnMz").toInt());
+
+    if (settings->contains("spnBkmkmzTol"))
+        spnBkmkmzTol->setValue(settings->value("spnBkmkmzTol").toDouble());
+
+    if (settings->contains("spnBkmkRtTol"))
+        spnBkmkRtTol->setValue(settings->value("spnBkmkRtTol").toDouble());
+
 }
 
 
@@ -224,6 +237,12 @@ void SettingsForm::getFormValues() {
     settings->setValue("spnMzMinVal", spnMzMinVal->value());
     settings->setValue("spnMzMaxOffset", spnMzMaxOffset->value());
     settings->setValue("spnMzMaxVal", spnMzMaxVal->value());
+
+    //bookmark warn display options
+    settings->setValue("chkBkmkWarnMzRt", chkBkmkWarnMzRt->checkState());
+    settings->setValue("chkBkmkWarnMz", chkBkmkWarnMz->checkState());
+    settings->setValue("spnBkmkmzTol", spnBkmkmzTol->value());
+    settings->setValue("spnBkmkRtTol", spnBkmkRtTol->value());
 
 }
 
