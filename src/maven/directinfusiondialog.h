@@ -10,15 +10,15 @@ class MainWindow;
 class BackgroundDirectInfusionUpdate;
 extern Database DB;
 
-class DirectInfusionDialog : public QDialog, public Ui_directInfusionDialog{
+class DirectInfusionDialog : public QDialog, public Ui_directInfusionDialog {
 
     Q_OBJECT
 
     public:
         DirectInfusionDialog(QWidget* parent);
         ~DirectInfusionDialog();
-        void setSettings(QSettings* settings) { this->settings = settings; }
-        void setMainWindow(MainWindow* w) { this->mainwindow = w; }
+        void setSettings(QSettings* settings) { this->settings = settings;}
+        void setMainWindow(MainWindow* w) { this->mainwindow = w;}
 
     public slots:
         void analyze();
