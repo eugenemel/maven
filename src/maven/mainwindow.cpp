@@ -963,6 +963,12 @@ void MainWindow::createToolBars() {
     btnLibrary->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnLibrary->setToolTip(tr("Library Manager"));
 
+    QToolButton *btnAdducts = new QToolButton(toolBar);
+    btnAdducts->setText("Adducts");
+    btnAdducts->setIcon(QIcon(rsrcPath + "/librarymanager.png"));
+    btnAdducts->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnAdducts->setToolTip(tr("Select Active Adducts"));
+
     QToolButton *btnAlign = new QToolButton(toolBar);
     btnAlign->setText("Align");
     btnAlign->setIcon(QIcon(rsrcPath + "/textcenter.png"));
@@ -1017,6 +1023,7 @@ void MainWindow::createToolBars() {
 
     toolBar->addWidget(btnOpen);
     toolBar->addWidget(btnLibrary);
+    toolBar->addWidget(btnAdducts);
     toolBar->addWidget(btnAlign);
     toolBar->addWidget(btnCalibrate);
     toolBar->addWidget(btnDbSearch);
