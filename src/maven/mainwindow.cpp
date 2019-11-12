@@ -75,12 +75,32 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     //QString commonFragments =   methodsFolder + "/" + "FRAGMENTS.csv";
     //if(QFile::exists(commonFragments)) DB.fragmentsDB = DB.loadAdducts(commonFragments.toStdString());
 
+    // === Issue 76 ========================================== //
+
     QString commonAdducts =     methodsFolder + "/" + "ADDUCTS.csv";
     if(QFile::exists(commonAdducts))  {
-        DB.adductsDB = DB.loadAdducts(commonAdducts.toStdString());
+        availableAdducts = DB.loadAdducts(commonAdducts.toStdString());
     } else {
-        DB.adductsDB  = DB.defaultAdducts();
+        availableAdducts = DB.defaultAdducts();
     }
+
+    //compare with settings to determine which adducts can be used
+    vector<Adduct*> enabledAdducts;
+    if (settings->contains("enabledAdducts")) {
+        QString enabledAdductsList = settings->value("enabledAdducts").toString();
+        QStringList enabledAdductNames = enabledAdductsList.split(";", QString::SkipEmptyParts);
+
+        for (Adduct* adduct : availableAdducts) {
+            if (enabledAdductNames.contains(QString(adduct->name.c_str()))) {
+                enabledAdducts.push_back(adduct);
+            }
+        }
+    } else {
+        enabledAdducts = availableAdducts;
+    }
+
+    DB.adductsDB = availableAdducts;
+    // === Issue 76 ========================================== //
 
     clsf = new ClassifierNeuralNet();    //clsf = new ClassifierNaiveBayes();
     QString clsfModelFilename = methodsFolder +  "/"  +   defaultModelFile;

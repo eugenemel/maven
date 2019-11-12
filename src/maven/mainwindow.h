@@ -77,8 +77,9 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = 0);
     QSettings* getSettings() { return settings; }
-    vector <mzSample*> samples;		//list of loadded samples
+    vector <mzSample*> samples;		//list of loaded samples
     static mzSample* loadSampleStatic(QString filename);
+    vector<Adduct*> availableAdducts; //loaded from file, or fall back to default
 
     QDoubleSpinBox 	  *ppmWindowBox;
     QLineEdit         *searchText;
