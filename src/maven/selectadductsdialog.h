@@ -12,10 +12,8 @@ class SelectAdductsDialog : public QDialog, public Ui_selectAdductsDialog {
     Q_OBJECT
 
     public:
-       SelectAdductsDialog(QWidget* parent);
+       SelectAdductsDialog(QWidget* parent, MainWindow* w, QSettings *settings);
        ~SelectAdductsDialog();
-       void setSettings(QSettings* settings) { this->settings = settings;}
-       void setMainWindow(MainWindow* w) { this->mainwindow = w;}
 
     public slots:
        void show();
