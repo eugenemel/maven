@@ -193,6 +193,7 @@ public slots:
     void setupSampleColors();
     void showMassSlices();
     void showDirectInfusionDialog();
+    void showSelectAdductsDialog();
     void showSRMList();
     void addToHistory(const mzSlice& slice);
     void historyNext();

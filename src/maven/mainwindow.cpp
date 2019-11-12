@@ -1013,6 +1013,7 @@ void MainWindow::createToolBars() {
 
     connect(btnOpen, SIGNAL(clicked()), SLOT(open()));
     connect(btnLibrary, SIGNAL(clicked()), libraryDialog, SLOT(show()));
+    connect(btnAdducts, SIGNAL(clicked()), SLOT(showSelectAdductsDialog()));
     connect(btnAlign,SIGNAL(clicked()), alignmentDialog, SLOT(show()));
     connect(btnCalibrate,SIGNAL(clicked()), calibrateDialog, SLOT(show()));
     connect(btnDbSearch,SIGNAL(clicked()), SLOT(compoundDatabaseSearch()));
@@ -1185,6 +1186,11 @@ void MainWindow::showMassSlices() {
 void MainWindow::showDirectInfusionDialog() {
     qDebug() << "MainWindow::showDirectInfusionDialog()";
     directInfusionDialog->show();
+}
+
+void MainWindow::showSelectAdductsDialog() {
+    qDebug() << "MainWindow::showSelectAdductsDialog()";
+    //TODO
 }
 
 void MainWindow::compoundDatabaseSearch() {
