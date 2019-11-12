@@ -1212,7 +1212,14 @@ void MainWindow::showDirectInfusionDialog() {
 
 void MainWindow::showSelectAdductsDialog() {
     qDebug() << "MainWindow::showSelectAdductsDialog()";
-    selectAdductsDialog->show();
+
+    if (selectAdductsDialog->isVisible()){
+        selectAdductsDialog->show();
+        selectAdductsDialog->raise();
+        selectAdductsDialog->activateWindow();
+    } else {
+        selectAdductsDialog->show();
+    }
 }
 
 void MainWindow::compoundDatabaseSearch() {

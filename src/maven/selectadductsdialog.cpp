@@ -7,37 +7,43 @@ SelectAdductsDialog::SelectAdductsDialog(QWidget *parent, MainWindow *mw, QSetti
     mainwindow = mw;
     settings = sets;
 
-    tblAdducts->setColumnWidth(0, 30);      // enabled
+    tblAdducts->setColumnWidth(0, 75);      // enabled
     tblAdducts->setColumnWidth(1, 300);     // name
-    tblAdducts->setColumnWidth(2, 70);      // nmol
-    tblAdducts->setColumnWidth(3, 190);     // mass (sum = 600 px)
+    tblAdducts->setColumnWidth(2, 75);      // nmol
+    tblAdducts->setColumnWidth(3, 150);     // mass (sum = 600 px)
     tblAdducts->setColumnWidth(4, tblAdducts->width()-600-2);      // z (add 2 px for padding)
 
-    //fill out table with all available
+    //fill out table with all available and valid adducts
+    int counter = 0;
     for (int i = 0; i < mainwindow->availableAdducts.size(); i++) {
 
         Adduct* adduct = mainwindow->availableAdducts.at(i);
 
-        tblAdducts->insertRow(i);
+        if (abs(adduct->charge) < 1e-6) continue; //require charged species
+
+        tblAdducts->insertRow(counter);
+
         QTableWidgetItem *item = new QTableWidgetItem();
         item->setCheckState(Qt::Unchecked);
-        tblAdducts->setItem(i, 0, item);
+        tblAdducts->setItem(counter, 0, item);
 
         QTableWidgetItem *item2 = new QTableWidgetItem();
         item2->setText(adduct->name.c_str());
-        tblAdducts->setItem(i, 1, item2);
+        tblAdducts->setItem(counter, 1, item2);
 
         QTableWidgetItem *item3 = new QTableWidgetItem();
         item3->setText(to_string(adduct->nmol).c_str());
-        tblAdducts->setItem(i, 2, item3);
+        tblAdducts->setItem(counter, 2, item3);
 
         QTableWidgetItem *item4 = new QTableWidgetItem();
         item4->setText(QString::number(adduct->mass,'f', 3));
-        tblAdducts->setItem(i, 3, item4);
+        tblAdducts->setItem(counter, 3, item4);
 
         QTableWidgetItem *item5 = new QTableWidgetItem();
         item5->setText(QString::number(adduct->charge));
-        tblAdducts->setItem(i, 4, item5);
+        tblAdducts->setItem(counter, 4, item5);
+
+        counter++;
     }
 
 }
