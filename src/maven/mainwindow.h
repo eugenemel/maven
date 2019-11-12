@@ -38,6 +38,7 @@ class PlotDockWidget;
 class BackgroundPeakUpdate;
 class PeakDetectionDialog;
 class DirectInfusionDialog;
+class SelectAdductsDialog;
 class AlignmentDialog;
 class CalibrateDialog;
 //class RConsoleDialog;

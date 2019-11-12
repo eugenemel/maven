@@ -182,6 +182,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     //
 
     selectAdductsDialog = new SelectAdductsDialog(this);
+    selectAdductsDialog->setMainWindow(this);
+    selectAdductsDialog->setSettings(settings);
 
     //peak detection dialog
     peakDetectionDialog = new PeakDetectionDialog(this);

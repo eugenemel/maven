@@ -2,7 +2,7 @@
 
 SelectAdductsDialog::SelectAdductsDialog(QWidget *parent) : QDialog(parent) {
     setupUi(this);
-    setModal(true);
+    setModal(false);
 
     tblAdducts->setColumnWidth(0, 70);      // enabled
     tblAdducts->setColumnWidth(1, 300);     // name
