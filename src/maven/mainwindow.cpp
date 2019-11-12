@@ -161,6 +161,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     //DIALOGS
     //
 
+    selectAdductsDialog = new SelectAdductsDialog(this);
+
     //peak detection dialog
     peakDetectionDialog = new PeakDetectionDialog(this);
     peakDetectionDialog->setMainWindow(this);
@@ -1190,7 +1192,7 @@ void MainWindow::showDirectInfusionDialog() {
 
 void MainWindow::showSelectAdductsDialog() {
     qDebug() << "MainWindow::showSelectAdductsDialog()";
-    //TODO
+    selectAdductsDialog->show();
 }
 
 void MainWindow::compoundDatabaseSearch() {

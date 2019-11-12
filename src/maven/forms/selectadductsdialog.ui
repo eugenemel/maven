@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SelectAdducts</class>
- <widget class="QDialog" name="SelectAdducts">
+ <class>selectAdductsDialog</class>
+ <widget class="QDialog" name="selectAdductsDialog">
   <property name="geometry">
    <rect>
     <x>0</x>

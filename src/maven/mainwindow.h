@@ -15,6 +15,7 @@
 #include "tabledockwidget.h"
 #include "peakdetectiondialog.h"
 #include "directinfusiondialog.h"
+#include "selectadductsdialog.h"
 #include "alignmentdialog.h"
 #include "calibratedialog.h"
 //#include "rconsoledialog.h"
@@ -115,6 +116,7 @@ public:
     SettingsForm   *settingsForm;
     PeakDetectionDialog *peakDetectionDialog;
     DirectInfusionDialog *directInfusionDialog;
+    SelectAdductsDialog *selectAdductsDialog;
     AlignmentDialog*	  alignmentDialog;
     CalibrateDialog*	  calibrateDialog;
     RconsoleWidget*       rconsoleDockWidget;
