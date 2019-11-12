@@ -523,7 +523,7 @@ void MainWindow::setFormulaFocus(QString formula) {
 }
 
 void MainWindow::setCompoundFocus(Compound*c) {
-    if (c == NULL ) return;
+    if (!c) return;
 
     /*
     int charge = 0;
