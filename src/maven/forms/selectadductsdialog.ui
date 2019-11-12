@@ -11,9 +11,9 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Select Active Adducts</string>
   </property>
-  <widget class="QTableWidget" name="tableWidget">
+  <widget class="QTableWidget" name="tblAdducts">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -67,7 +67,7 @@
     <string>OK</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="btnCAncel">
+  <widget class="QPushButton" name="btnCancel">
    <property name="geometry">
     <rect>
      <x>342</x>
