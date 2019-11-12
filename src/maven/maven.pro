@@ -51,7 +51,8 @@ FORMS = forms/settingsform.ui  \
         forms/calibrateform.ui \
         forms/librarydialog.ui \
         forms/directinfusiondialog.ui \
-        forms/editpeakgroupdialog.ui
+        forms/editpeakgroupdialog.ui \
+    forms/selectadducts.ui
 
 
 HEADERS +=  stable.h \

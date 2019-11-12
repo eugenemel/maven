@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SelectAdducts</class>
+ <widget class="QDialog" name="SelectAdducts">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>682</width>
+    <height>454</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QTableWidget" name="tableWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>661</width>
+     <height>401</height>
+    </rect>
+   </property>
+   <property name="columnCount">
+    <number>5</number>
+   </property>
+   <attribute name="verticalHeaderVisible">
+    <bool>true</bool>
+   </attribute>
+   <column>
+    <property name="text">
+     <string>enabled</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Name</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>nmol</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>mass</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>z</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QPushButton" name="btnOK">
+   <property name="geometry">
+    <rect>
+     <x>2</x>
+     <y>420</y>
+     <width>341</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>OK</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnCAncel">
+   <property name="geometry">
+    <rect>
+     <x>342</x>
+     <y>420</y>
+     <width>331</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Cancel</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
