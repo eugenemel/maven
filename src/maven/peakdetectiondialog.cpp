@@ -166,7 +166,7 @@ void PeakDetectionDialog::findPeaks() {
 		    peakupdater->writeCSVFlag=false;
 		}
 
-        peakupdater->isRequireMatchingAdduct = chkClusterPeakgroups->isChecked();
+        peakupdater->isRequireMatchingAdduct = chkRequireAdductMatch->isChecked();
         peakupdater->isRetainUnmatchedCompounds = chkRetainUnmatched->isChecked();
         peakupdater->isClusterPeakGroups = chkClusterPeakgroups->isChecked();
 
