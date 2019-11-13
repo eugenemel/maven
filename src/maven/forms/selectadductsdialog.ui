@@ -13,112 +13,78 @@
   <property name="windowTitle">
    <string>Select Active Adducts</string>
   </property>
-  <widget class="QTableWidget" name="tblAdducts">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>711</width>
-     <height>401</height>
-    </rect>
-   </property>
-   <property name="columnCount">
-    <number>5</number>
-   </property>
-   <attribute name="verticalHeaderVisible">
-    <bool>true</bool>
-   </attribute>
-   <column>
-    <property name="text">
-     <string>enabled</string>
-    </property>
-   </column>
-   <column>
-    <property name="text">
-     <string>Name</string>
-    </property>
-   </column>
-   <column>
-    <property name="text">
-     <string>nmol</string>
-    </property>
-   </column>
-   <column>
-    <property name="text">
-     <string>mass</string>
-    </property>
-   </column>
-   <column>
-    <property name="text">
-     <string>z</string>
-    </property>
-   </column>
-  </widget>
-  <widget class="QPushButton" name="btnUpdate">
-   <property name="geometry">
-    <rect>
-     <x>370</x>
-     <y>440</y>
-     <width>171</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Update</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btnCancel">
-   <property name="geometry">
-    <rect>
-     <x>550</x>
-     <y>440</y>
-     <width>171</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Cancel</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btnSelectAll">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>440</y>
-     <width>171</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Select All</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btnDeselectAll">
-   <property name="geometry">
-    <rect>
-     <x>190</x>
-     <y>440</y>
-     <width>171</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Deselect All</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>420</y>
-     <width>681</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>List of active adducts is not updated until 'Update' button pushed.</string>
-   </property>
-  </widget>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0" colspan="4">
+    <widget class="QTableWidget" name="tblAdducts">
+     <property name="columnCount">
+      <number>5</number>
+     </property>
+     <attribute name="verticalHeaderVisible">
+      <bool>true</bool>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>enabled</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Name</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>nmol</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>mass</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>z</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="4">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>List of active adducts is not updated until 'Update' button pushed.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QPushButton" name="btnSelectAll">
+     <property name="text">
+      <string>Select All</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QPushButton" name="btnDeselectAll">
+     <property name="text">
+      <string>Deselect All</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QPushButton" name="btnUpdate">
+     <property name="text">
+      <string>Update</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="3">
+    <widget class="QPushButton" name="btnCancel">
+     <property name="text">
+      <string>Cancel</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>
