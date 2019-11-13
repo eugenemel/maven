@@ -94,9 +94,25 @@ void SelectAdductsDialog::deselectAll() {
 
 void SelectAdductsDialog::updateSelectedAdducts() {
     qDebug() << "SelectAdductsDialog::updateSelectedAdducts()";
+
+    QString enabledAdductNames;
+    vector<Adduct*> updatedEnabledAdducts;
     for (auto it = checkBoxAdduct.begin(); it != checkBoxAdduct.end(); ++it) {
         if (it->first->checkState() == Qt::Checked){
-            qDebug() << "SELECTED ADDUCT: " << it->second->name.c_str();
+            enabledAdductNames.append(it->second->name.c_str());
+            enabledAdductNames.append(";");
+
+            updatedEnabledAdducts.push_back(it->second);
         }
     }
+
+    settings->setValue("enabledAdducts", enabledAdductNames);
+
+    sort(updatedEnabledAdducts.begin(), updatedEnabledAdducts.end(), [](const Adduct* lhs, const Adduct* rhs){
+        return lhs->name < rhs->name;
+    });
+
+    mainwindow->updateAdductComboBox(updatedEnabledAdducts);
+
+    hide();
 }

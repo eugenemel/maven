@@ -1102,9 +1102,7 @@ void MainWindow::createToolBars() {
     connect(quantType,SIGNAL(activated(int)),eicWidget,SLOT(replot()));
 
     adductType = new QComboBox(hBox);
-    for(Adduct* a: DB.adductsDB) {
-        adductType->addItem(a->name.c_str(),QVariant::fromValue(a));
-    }
+    updateAdductComboBox(DB.adductsDB);
     connect(adductType,SIGNAL(currentIndexChanged(QString)),SLOT(changeUserAdduct()));
 
     settings->beginGroup("searchHistory");
@@ -1963,5 +1961,13 @@ QColor MainWindow::getBackgroundAdjustedBlack(QWidget *widget){
          return QColor(225, 225, 225); //off-white
     } else {
         return Qt::black;
+    }
+}
+
+void MainWindow::updateAdductComboBox(vector<Adduct*> enabledAdducts) {
+    DB.adductsDB = enabledAdducts;
+    adductType->clear();
+    for(Adduct* a: DB.adductsDB) {
+        adductType->addItem(a->name.c_str(),QVariant::fromValue(a));
     }
 }
