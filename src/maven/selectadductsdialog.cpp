@@ -66,6 +66,7 @@ SelectAdductsDialog::SelectAdductsDialog(QWidget *parent, MainWindow *mw, QSetti
     connect(btnSelectAll, SIGNAL(clicked()), this, SLOT(selectAll()));
     connect(btnDeselectAll, SIGNAL(clicked()), this, SLOT(deselectAll()));
     connect(btnUpdate, SIGNAL(clicked()), this, SLOT(updateSelectedAdducts()));
+    connect(btnCancel, SIGNAL(clicked()), this, SLOT(hide()));
 
 }
 
