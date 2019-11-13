@@ -36,7 +36,7 @@ SelectAdductsDialog::SelectAdductsDialog(QWidget *parent, MainWindow *mw, QSetti
         tblAdducts->setItem(counter, 2, item3);
 
         QTableWidgetItem *item4 = new QTableWidgetItem();
-        item4->setText(QString::number(adduct->mass,'f', 3));
+        item4->setText(QString::number(adduct->mass,'f', 4));
         tblAdducts->setItem(counter, 3, item4);
 
         QTableWidgetItem *item5 = new QTableWidgetItem();
