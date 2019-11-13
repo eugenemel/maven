@@ -21,6 +21,7 @@ SelectAdductsDialog::SelectAdductsDialog(QWidget *parent, MainWindow *mw, QSetti
 
     tblAdducts->setSortingEnabled(true);
     tblAdducts->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    tblAdducts->setSelectionMode(QAbstractItemView::NoSelection);
 
     //fill out table with all available and valid adducts
     int counter = 0;
