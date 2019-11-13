@@ -88,8 +88,8 @@ void MassCalcWidget::showTable() {
     QTreeWidget *p = treeWidget;
     p->setUpdatesEnabled(false); 
     p->clear(); 
-    p->setColumnCount(6);
-    p->setHeaderLabels( QStringList() << "Compound"  << "rtDiff" << "ppmDiff" << "fragScore" << "Adduct" << "Mass" << "DB");
+    p->setColumnCount(8);
+    p->setHeaderLabels( QStringList() << "Compound" << "Reference Adduct"  << "rtDiff" << "ppmDiff" << "fragScore" << "Observed Adduct" << "Mass" << "DB");
     p->setSortingEnabled(false);
     p->setUpdatesEnabled(false);
 
@@ -99,15 +99,14 @@ void MassCalcWidget::showTable() {
         //no duplicates in the list
         Compound* c = matches[i].compoundLink;
         Adduct *  a = matches[i].adductLink;
-        QString matchName = QString(matches[i].name.c_str() );
         QString preMz = QString::number( matches[i].mass , 'f', 4);
         QString ppmDiff = QString::number( matches[i].diff , 'f', 2);
         QString rtDiff = QString::number(matches[i].rtdiff,'f', 1);
         QString matchScore = QString::number( matches[i].fragScore.getScoreByName(scoringAlgorithm) , 'f', 3);
 
-        QString adductName = QString("");
+        QString observedAdductName = QString("");
         if (a && !a->name.empty()) {
-            adductName = QString(a->name.c_str());
+            observedAdductName = QString(a->name.c_str());
         }
 
         QString db = QString("");
@@ -120,16 +119,18 @@ void MassCalcWidget::showTable() {
 
         NumericTreeWidgetItem* item = new NumericTreeWidgetItem(treeWidget,Qt::UserRole);
         item->setData(0,Qt::UserRole,QVariant(i));
-        item->setText(0,matchName);
-        item->setText(1,rtDiff);
-        item->setText(2,ppmDiff);
-        item->setText(3,matchScore);
-        item->setText(4,adductName);
-        item->setText(5,preMz);
-        item->setText(6,db);
+
+        item->setText(0, c->name.c_str());
+        item->setText(1, c->adductString.c_str());
+        item->setText(2, rtDiff);
+        item->setText(3, ppmDiff);
+        item->setText(4, matchScore);
+        item->setText(5, observedAdductName);
+        item->setText(6, preMz);
+        item->setText(7, db);
     }
 
-    p->sortByColumn(3,Qt::DescendingOrder);
+    p->sortByColumn(4,Qt::DescendingOrder); //decreasing by score
     p->header()->setStretchLastSection(true);
     p->setSortingEnabled(true);
     p->setUpdatesEnabled(true);
