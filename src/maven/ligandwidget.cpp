@@ -189,8 +189,8 @@ void LigandWidget::updateCurrentItemData() {
 void LigandWidget::showTable() { 
     //	treeWidget->clear();
     treeWidget->clear();
-    treeWidget->setColumnCount(4);
-    QStringList header; header << "name" << "M" << "rt" << "formula" << "category";
+    treeWidget->setColumnCount(6);
+    QStringList header; header << "Name" << "Adduct" << "M" << "RT" << "Formula" << "Category";
     treeWidget->setHeaderLabels( header );
     treeWidget->setSortingEnabled(false);
 
@@ -203,11 +203,20 @@ void LigandWidget::showTable() {
         NumericTreeWidgetItem *parent  = new NumericTreeWidgetItem(treeWidget,CompoundType);
 
         QString name(compound->name.c_str() );
+
         parent->setText(0,name.toUpper());  //Feng note: sort names after capitalization
-        parent->setText(1,QString::number(compound->getExactMass()));
-        if(compound->expectedRt > 0) parent->setText(2,QString::number(compound->expectedRt));
-        if (compound->formula.length())parent->setText(3,compound->formula.c_str());
-        if (compound->smileString.length()) parent->setText(3,compound->smileString.c_str());
+        parent->setText(1, compound->adductString.c_str());
+        parent->setText(2, QString::number(compound->getExactMass(), 'f', 4));
+        if(compound->expectedRt > 0) parent->setText(3,QString::number(compound->expectedRt));
+        if (compound->formula.length())parent->setText(4,compound->formula.c_str());
+        if (compound->smileString.length()) parent->setText(4,compound->smileString.c_str());
+        if (compound->hasGroup() ) parent->setIcon(0,QIcon(":/images/link.png"));
+
+        if(compound->category.size() > 0) {
+            QStringList catList;
+            for(string c : compound->category) catList << c.c_str();
+            parent->setText(5,catList.join(";"));
+        }
 
         parent->setData(0, Qt::UserRole, QVariant::fromValue(compound));
         parent->setFlags(Qt::ItemIsSelectable|Qt::ItemIsDragEnabled|Qt::ItemIsEnabled);
@@ -217,13 +226,6 @@ void LigandWidget::showTable() {
         if (compound->productMz) addItem(parent,"Product Mz", compound->productMz);
         if (compound->collisionEnergy) addItem(parent,"Collision Energy", compound->collisionEnergy);
         if (!compound->smileString.empty()) addItem(parent,"Smile", compound->smileString);
-        if (compound->hasGroup() ) parent->setIcon(0,QIcon(":/images/link.png"));
-
-        if(compound->category.size() > 0) {
-            QStringList catList;
-            for(string c : compound->category) catList << c.c_str();
-            parent->setText(4,catList.join(";"));
-        }
 
         /*
         if (compound->fragment_mzs.size()) {
