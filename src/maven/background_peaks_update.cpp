@@ -515,10 +515,23 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
                 continue;
             }
 
-            if(mustHaveMS2 && group.compound) {
+            if(mustHaveMS2) {
                 if(group.ms2EventCount == 0) continue;
-                if(group.fragMatchScore.mergedScore < this->minFragmentMatchScore) continue;
-                if(group.fragMatchScore.numMatches < this->minNumFragments ) continue;
+
+                if (group.compound) {
+                    bool isValidCompound = (group.fragMatchScore.mergedScore >= this->minFragmentMatchScore &&
+                                            group.fragMatchScore.numMatches >= this->minNumFragments);
+
+                    if (!isValidCompound ){
+                        //invalid compound - either skip this group, or replace with unmatched peak.
+
+                        if (isRetainUnmatchedCompounds) {
+                            group.compound = nullptr;
+                        } else {
+                            continue;
+                        }
+                    }
+                }
             }
 
             if (!slice->srmId.empty()) group.srmId = slice->srmId;
@@ -545,7 +558,9 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             bool ok = addPeakGroup(*group);
 
             //force insert when processing compounds.. even if duplicated
-            if (ok == false && compound != NULL ) allgroups.push_back(*group);
+            if (ok == false && compound){
+                allgroups.push_back(*group);
+            }
         }
 
         delete_all(eics);
