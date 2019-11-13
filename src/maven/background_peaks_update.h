@@ -102,6 +102,11 @@ public:
    float amuQ1;
    float amuQ3;
 
+   //matching options
+   bool isRequireMatchingAdduct;
+   bool isRetainUnmatchedCompounds;
+   bool isClusterPeakGroups;
+
 
 
 //CLASS FUNCTIONS

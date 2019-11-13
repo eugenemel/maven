@@ -64,6 +64,11 @@ BackgroundPeakUpdate::BackgroundPeakUpdate(QWidget*) {
     //fragmentaiton matching
     searchProton=false;
 
+    //matching options
+    isRequireMatchingAdduct = false;
+    isRetainUnmatchedCompounds = false;
+    isClusterPeakGroups = false;
+
 
 }
 
