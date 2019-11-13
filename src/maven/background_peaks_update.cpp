@@ -45,7 +45,6 @@ BackgroundPeakUpdate::BackgroundPeakUpdate(QWidget*) {
     minNoNoiseObs=1;
     minSignalBaseLineRatio=2;
     minGroupIntensity=500;
-    minSmoothedPeakIntensity=1000;
     minQuality=0.5;
 
     //compound detection setting

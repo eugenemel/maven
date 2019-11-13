@@ -127,7 +127,6 @@ void PeakDetectionDialog::findPeaks() {
 		peakupdater->minSignalBaseLineRatio = sigBaselineRatio->value();
 		peakupdater->minSignalBlankRatio = sigBlankRatio->value();
 		peakupdater->minGroupIntensity = minGroupIntensity->value();
-        peakupdater->minSmoothedPeakIntensity = minPeakIntensity->value();
         peakupdater->pullIsotopesFlag = reportIsotopes->isChecked();
         peakupdater->ppmMerge =  ppmStep->value();
         peakupdater->compoundPPMWindow = compoundPPMWindow->value();

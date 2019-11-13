@@ -1377,7 +1377,6 @@ void EicWidget::groupPeaks() {
 	QSettings *settings 		= getMainWindow()->getSettings();
 	float eic_smoothingWindow =   settings->value("eic_smoothingWindow").toDouble();
 	float grouping_maxRtWindow =  settings->value("grouping_maxRtWindow").toDouble();
-    float minSmoothedPeakIntensity = 1000; //TODO: retrieve from settings
 
     //old approach
     peakgroups = EIC::groupPeaks(eics, eic_smoothingWindow, grouping_maxRtWindow);
