@@ -99,7 +99,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
         enabledAdducts = availableAdducts;
     }
 
-    DB.adductsDB = availableAdducts;
+    DB.adductsDB = enabledAdducts;
     // === Issue 76 ========================================== //
 
     clsf = new ClassifierNeuralNet();    //clsf = new ClassifierNaiveBayes();
