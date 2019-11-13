@@ -13,6 +13,12 @@ SelectAdductsDialog::SelectAdductsDialog(QWidget *parent, MainWindow *mw, QSetti
     tblAdducts->setColumnWidth(3, 150);     // mass (sum = 600 px)
     tblAdducts->setColumnWidth(4, tblAdducts->width()-600-2);      // z (add 2 px for padding)
 
+    QStringList enabledAdductNames;
+    if (settings->contains("enabledAdducts")) {
+        QString enabledAdductsList = settings->value("enabledAdducts").toString();
+        enabledAdductNames = enabledAdductsList.split(";", QString::SkipEmptyParts);
+    }
+
     //fill out table with all available and valid adducts
     int counter = 0;
     for (int i = 0; i < mainwindow->availableAdducts.size(); i++) {
@@ -24,7 +30,12 @@ SelectAdductsDialog::SelectAdductsDialog(QWidget *parent, MainWindow *mw, QSetti
         tblAdducts->insertRow(counter);
 
         QTableWidgetItem *item = new QTableWidgetItem();
-        item->setCheckState(Qt::Unchecked);
+        if (enabledAdductNames.contains(QString(adduct->name.c_str()))) {
+            item->setCheckState(Qt::Checked);
+        } else {
+            item->setCheckState(Qt::Unchecked);
+        }
+
         tblAdducts->setItem(counter, 0, item);
 
         QTableWidgetItem *item2 = new QTableWidgetItem();
