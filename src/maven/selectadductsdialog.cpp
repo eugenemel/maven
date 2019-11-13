@@ -57,8 +57,8 @@ SelectAdductsDialog::SelectAdductsDialog(QWidget *parent, MainWindow *mw, QSetti
         counter++;
     }
 
-    connect(btnSelectAll, SIGNAL(clicked()), this, SLOT(toggleAll(true)));
-    connect(btnDeselectAll, SIGNAL(clicked()), this, SLOT(toggleAll(false)));
+    connect(btnSelectAll, SIGNAL(clicked()), this, SLOT(selectAll()));
+    connect(btnDeselectAll, SIGNAL(clicked()), this, SLOT(deselectAll()));
 
 }
 
@@ -68,7 +68,12 @@ void SelectAdductsDialog::show() {
     QDialog::show();
 }
 
-void SelectAdductsDialog::toggleAll(bool isSelected) {
-    qDebug() << "SelectAdductsDialog::toggleAll(): " << isSelected;
+void SelectAdductsDialog::selectAll() {
+    qDebug() << "SelectAdductsDialog::selectAll()";
+    //TODO
+}
+
+void SelectAdductsDialog::deselectAll() {
+    qDebug() << "SelectAdductsDialog::deselectAll()";
     //TODO
 }
