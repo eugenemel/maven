@@ -166,6 +166,10 @@ void PeakDetectionDialog::findPeaks() {
 		    peakupdater->writeCSVFlag=false;
 		}
 
+        peakupdater->isRequireMatchingAdduct = chkClusterPeakgroups->isChecked();
+        peakupdater->isRetainUnmatchedCompounds = chkRetainUnmatched->isChecked();
+        peakupdater->isClusterPeakGroups = chkClusterPeakgroups->isChecked();
+
 		QString title;
 		if (_featureDetectionType == FullSpectrum )  title = "Detected Features";
                 else if (_featureDetectionType == CompoundDB ) title = "DB Search " + compoundDatabase->currentText();

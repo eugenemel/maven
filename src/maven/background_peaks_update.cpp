@@ -370,7 +370,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
         aligner.doAlignment(groups);
     }
 
-    //NOTE: old approach ran clustering, no longer run
+    //TODO: respect clustering option
 
     if (csvreports){
         csvreports->closeFiles();
@@ -511,11 +511,14 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             matchFragmentation(&group);
             //If this is successful, then group.compound will not be nullptr.
 
+            if (!isRetainUnmatchedCompounds && !group.compound){
+                continue;
+            }
+
             if(mustHaveMS2 && group.compound) {
                 if(group.ms2EventCount == 0) continue;
                 if(group.fragMatchScore.mergedScore < this->minFragmentMatchScore) continue;
                 if(group.fragMatchScore.numMatches < this->minNumFragments ) continue;
-
             }
 
             if (!slice->srmId.empty()) group.srmId = slice->srmId;
@@ -567,10 +570,12 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
     }
 
     //run clustering
-    double maxRtDiff = 0.2;
-    double minSampleCorrelation= 0.8;
-    double minPeakShapeCorrelation=0.9;
-    PeakGroup::clusterGroups(allgroups,samples,maxRtDiff,minSampleCorrelation,minPeakShapeCorrelation,compoundPPMWindow);
+    if (isClusterPeakGroups){
+        double maxRtDiff = 0.2;
+        double minSampleCorrelation= 0.8;
+        double minPeakShapeCorrelation=0.9;
+        PeakGroup::clusterGroups(allgroups,samples,maxRtDiff,minSampleCorrelation,minPeakShapeCorrelation,compoundPPMWindow);
+    }
 
     if (showProgressFlag && pullIsotopesFlag ) {
         emit(updateProgressBar("Calculation Isotopes" ,1, 100));
@@ -1192,6 +1197,10 @@ void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g) {
     for(MassCalculator::Match match: matchesX ) {
         Compound* cpd = match.compoundLink;
         if(!compoundDatabase.isEmpty() and  cpd->db != compoundDatabase.toStdString()) continue;
+
+        if (isRequireMatchingAdduct && cpd->adductString != match.adductLink->name) {
+            continue;
+        }
 
         FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productPpmTolr,searchProton);
         if (s.numMatches < minNumFragments ) continue;
