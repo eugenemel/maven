@@ -327,11 +327,25 @@ QString TableDockWidget::groupTagString(PeakGroup* group){
 
     QStringList parts;
 
-    if (group->compound != NULL) {
+    if (group->compound) {
         parts << group->compound->name.c_str();
-        if (group->adduct) parts << group->adduct->name.c_str();
-        if (!group->tagString.empty()) parts << group->tagString.c_str();
-        parts << group->compound->db.c_str();
+
+        bool isAddedAdductName = false;
+        if (group->adduct){
+            parts << group->adduct->name.c_str();
+            isAddedAdductName = true;
+        }
+
+        if (!group->tagString.empty()){
+            if (isAddedAdductName && group->adduct->name != group->tagString) {
+                parts << group->tagString.c_str(); //If the adduct name was already added, do not add again.
+            }
+        }
+
+        if (!group->compound->db.empty()) {
+            parts << group->compound->db.c_str();
+        }
+
     } else if (!group->tagString.empty()) {
         parts << group->tagString.c_str();
     } else {
