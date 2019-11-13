@@ -37,12 +37,15 @@ void PeakDetectionDialog::setFeatureDetection(FeatureDetectionType type) {
     if (_featureDetectionType == QQQ ) {
             dbOptions->hide();  
             featureOptions->hide();
+            grpMatchingOptions->hide();
     } else if (_featureDetectionType == FullSpectrum ) {
             dbOptions->hide();  
             featureOptions->show();
+            grpMatchingOptions->show(); //only applicable for Peaks type search.
     } else if (_featureDetectionType == CompoundDB ) {
             dbOptions->show();  
             featureOptions->hide();
+            grpMatchingOptions->hide();
     }
 	adjustSize();
 }
