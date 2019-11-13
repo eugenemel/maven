@@ -20,6 +20,7 @@ SelectAdductsDialog::SelectAdductsDialog(QWidget *parent, MainWindow *mw, QSetti
     }
 
     tblAdducts->setSortingEnabled(true);
+    tblAdducts->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     //fill out table with all available and valid adducts
     int counter = 0;
@@ -75,15 +76,22 @@ void SelectAdductsDialog::show() {
 
 void SelectAdductsDialog::selectAll() {
     qDebug() << "SelectAdductsDialog::selectAll()";
-    //TODO
+    for (auto it = checkBoxAdduct.begin(); it != checkBoxAdduct.end(); ++it) {
+        it->first->setCheckState(Qt::Checked);
+    }
+    tblAdducts->update();
 }
 
 void SelectAdductsDialog::deselectAll() {
     qDebug() << "SelectAdductsDialog::deselectAll()";
-    //TODO
+    for (auto it = checkBoxAdduct.begin(); it != checkBoxAdduct.end(); ++it) {
+        it->first->setCheckState(Qt::Unchecked);
+    }
+    tblAdducts->update();
 }
 
 void SelectAdductsDialog::updateSelectedAdducts() {
+    qDebug() << "SelectAdductsDialog::updateSelectedAdducts()";
     for (auto it = checkBoxAdduct.begin(); it != checkBoxAdduct.end(); ++it) {
         if (it->first->checkState() == Qt::Checked){
             qDebug() << "SELECTED ADDUCT: " << it->second->name.c_str();
