@@ -11,7 +11,7 @@ SelectAdductsDialog::SelectAdductsDialog(QWidget *parent, MainWindow *mw, QSetti
     tblAdducts->setColumnWidth(1, 300);     // name
     tblAdducts->setColumnWidth(2, 75);      // nmol
     tblAdducts->setColumnWidth(3, 150);     // mass (sum = 600 px)
-    tblAdducts->setColumnWidth(4, tblAdducts->width()-600-2);      // z (add 2 px for padding)
+    tblAdducts->setColumnWidth(4, 60);      // z
 
     QStringList enabledAdductNames;
     if (settings->contains("enabledAdducts")) {

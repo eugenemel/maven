@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>725</width>
-    <height>470</height>
+    <width>745</width>
+    <height>476</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>701</width>
+     <width>711</width>
      <height>401</height>
     </rect>
    </property>
@@ -54,30 +54,69 @@
     </property>
    </column>
   </widget>
-  <widget class="QPushButton" name="btnOK">
+  <widget class="QPushButton" name="btnUpdate">
    <property name="geometry">
     <rect>
-     <x>2</x>
-     <y>420</y>
-     <width>361</width>
+     <x>370</x>
+     <y>440</y>
+     <width>171</width>
      <height>32</height>
     </rect>
    </property>
    <property name="text">
-    <string>OK</string>
+    <string>Update</string>
    </property>
   </widget>
   <widget class="QPushButton" name="btnCancel">
    <property name="geometry">
     <rect>
-     <x>360</x>
-     <y>420</y>
-     <width>361</width>
+     <x>550</x>
+     <y>440</y>
+     <width>171</width>
      <height>32</height>
     </rect>
    </property>
    <property name="text">
     <string>Cancel</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnSelectAll">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>440</y>
+     <width>171</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Select All</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnDeselectAll">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>440</y>
+     <width>171</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Deselect All</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>420</y>
+     <width>681</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>List of active adducts is not updated until 'Update' button pushed.</string>
    </property>
   </widget>
  </widget>
