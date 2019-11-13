@@ -17,6 +17,7 @@ class SelectAdductsDialog : public QDialog, public Ui_selectAdductsDialog {
 
     public slots:
        void show();
+       void toggleAll(bool isSelected);
 
     private:
        QSettings *settings;
