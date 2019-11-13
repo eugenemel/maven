@@ -1102,6 +1102,7 @@ void MainWindow::createToolBars() {
     connect(quantType,SIGNAL(activated(int)),eicWidget,SLOT(replot()));
 
     adductType = new QComboBox(hBox);
+    adductType->setMinimumSize(250, 0);
     updateAdductComboBox(DB.adductsDB);
     connect(adductType,SIGNAL(currentIndexChanged(QString)),SLOT(changeUserAdduct()));
 
