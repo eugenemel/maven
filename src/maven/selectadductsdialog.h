@@ -19,10 +19,12 @@ class SelectAdductsDialog : public QDialog, public Ui_selectAdductsDialog {
        void show();
        void selectAll();
        void deselectAll();
+       void updateSelectedAdducts();
 
     private:
        QSettings *settings;
        MainWindow *mainwindow;
+       map<QTableWidgetItem*, Adduct*> checkBoxAdduct = {};
 
 };
 

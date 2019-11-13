@@ -19,6 +19,8 @@ SelectAdductsDialog::SelectAdductsDialog(QWidget *parent, MainWindow *mw, QSetti
         enabledAdductNames = enabledAdductsList.split(";", QString::SkipEmptyParts);
     }
 
+    tblAdducts->setSortingEnabled(true);
+
     //fill out table with all available and valid adducts
     int counter = 0;
     for (int i = 0; i < mainwindow->availableAdducts.size(); i++) {
@@ -35,6 +37,8 @@ SelectAdductsDialog::SelectAdductsDialog(QWidget *parent, MainWindow *mw, QSetti
         } else {
             item->setCheckState(Qt::Unchecked);
         }
+
+        checkBoxAdduct.insert(make_pair(item, adduct));
 
         tblAdducts->setItem(counter, 0, item);
 
@@ -59,6 +63,7 @@ SelectAdductsDialog::SelectAdductsDialog(QWidget *parent, MainWindow *mw, QSetti
 
     connect(btnSelectAll, SIGNAL(clicked()), this, SLOT(selectAll()));
     connect(btnDeselectAll, SIGNAL(clicked()), this, SLOT(deselectAll()));
+    connect(btnUpdate, SIGNAL(clicked()), this, SLOT(updateSelectedAdducts()));
 
 }
 
@@ -76,4 +81,12 @@ void SelectAdductsDialog::selectAll() {
 void SelectAdductsDialog::deselectAll() {
     qDebug() << "SelectAdductsDialog::deselectAll()";
     //TODO
+}
+
+void SelectAdductsDialog::updateSelectedAdducts() {
+    for (auto it = checkBoxAdduct.begin(); it != checkBoxAdduct.end(); ++it) {
+        if (it->first->checkState() == Qt::Checked){
+            qDebug() << "SELECTED ADDUCT: " << it->second->name.c_str();
+        }
+    }
 }
