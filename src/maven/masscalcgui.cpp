@@ -58,6 +58,8 @@ void MassCalcWidget::updateDatabaseList() {
 void MassCalcWidget::setPPM(float diff) { maxppmdiff->setValue(diff); _ppm=diff; }
 
 void MassCalcWidget::compute() {
+    qDebug() << "MassCalcWidget::compute()";
+
 	 bool isDouble =false;
 	 _mz = 		lineEdit->text().toDouble(&isDouble);
   	 _charge =  ionization->value();
@@ -79,7 +81,6 @@ void MassCalcWidget::compute() {
 
     _mw->setStatusText(tr("Found %1 compounds").arg(matches.size()));
 
-     cerr << "[MassCalcWidget::setPeakGroup()] compute() call" << endl;
      showTable(); 
 }
 
@@ -139,11 +140,12 @@ void MassCalcWidget::showTable() {
 }
 
 void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
+     qDebug() << "MassCalcWidget::setPeakGroup()";
+
     if(!grp) return;
 
     _mz = grp->meanMz;
     matches = DB.findMatchingCompounds(_mz,_ppm,_charge);
-    cerr << "MassCalcWidget::setPeakGroup(PeakGroup* grp)" << endl;
 
     if (grp->fragmentationPattern.nobs() == 0){
         grp->computeFragPattern(fragmentPPM->value());
@@ -157,11 +159,12 @@ void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
        if (cpd->expectedRt > 0) m.rtdiff =  grp->meanRt - cpd->expectedRt;
 
     }
-    cerr << "[MassCalcWidget::setPeakGroup()] showTable() call" << endl;
+
     showTable();
 }
 
 void MassCalcWidget::setFragmentationScan(Scan* scan) {
+    qDebug() << "MassCalcWidget::setFragmentationScan()" << endl;
     if(!scan) return;
 
     Fragment f(scan,0,0,1024);
@@ -175,7 +178,6 @@ void MassCalcWidget::setFragmentationScan(Scan* scan) {
        m.fragScore = cpd->scoreCompoundHit(&f,fragmentPPM->value(),false);
     }
 
-    cerr << "[MassCalcWidget::setFragmentationScan()] showTable() call" << endl;
     showTable();
 }
 
