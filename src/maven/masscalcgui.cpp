@@ -77,7 +77,7 @@ void MassCalcWidget::compute() {
     }
 
 
-    _mw->setStatusText(tr("Found %1 formulas").arg(matches.size()));
+    _mw->setStatusText(tr("Found %1 compounds").arg(matches.size()));
 
      cerr << "[MassCalcWidget::setPeakGroup()] compute() call" << endl;
      showTable(); 
@@ -168,6 +168,7 @@ void MassCalcWidget::setFragmentationScan(Scan* scan) {
 
     _mz = scan->precursorMz;
     matches = DB.findMatchingCompounds(_mz,_ppm,_charge);
+    lineEdit->setText(QString::number(_mz,'f',5));
 
     for(MassCalculator::Match& m: matches ) {
        Compound* cpd = m.compoundLink;
