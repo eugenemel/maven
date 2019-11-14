@@ -68,5 +68,6 @@
         <file>images/averageSpectra.png</file>
         <file>images/integrateArea.png</file>
         <file>images/librarymanager.png</file>
+        <file>images/adducts.png</file>
     </qresource>
 </RCC>

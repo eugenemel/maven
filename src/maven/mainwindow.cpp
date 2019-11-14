@@ -987,7 +987,7 @@ void MainWindow::createToolBars() {
 
     QToolButton *btnAdducts = new QToolButton(toolBar);
     btnAdducts->setText("Adducts");
-    btnAdducts->setIcon(QIcon(rsrcPath + "/librarymanager.png"));
+    btnAdducts->setIcon(QIcon(rsrcPath + "/adducts.png"));
     btnAdducts->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnAdducts->setToolTip(tr("Select Active Adducts"));
 
