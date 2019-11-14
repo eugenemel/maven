@@ -79,17 +79,24 @@ void TinyPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
 	_minXValue=_minYValue=FLT_MAX;
 	_maxXValue=_maxYValue=FLT_MIN;
 
-	if (nSeries == 0 ) return;
+    if (data.size() == 0 ) return;
 
 	//find bounds
     for(int i=0; i < nSeries; i++ ) {
 		for(int j=0; j < data[i].size(); j++ ) {
-			if ( data[i][j].y() > _maxYValue ) { _maxYValue=data[i][j].y()*1.2; }
-			if ( data[i][j].y() < _minYValue ) { _minYValue=data[i][j].y()*0.8; }
-			if ( data[i][j].x() > _maxXValue ) { _maxXValue=data[i][j].x()*1.2; }
-			if ( data[i][j].x() < _minXValue ) { _minXValue=data[i][j].x()*0.8; }
+            if ( data[i][j].y() > _maxYValue ) { _maxYValue=data[i][j].y(); }
+            if ( data[i][j].y() < _minYValue ) { _minYValue=data[i][j].y(); }
+            if ( data[i][j].x() > _maxXValue ) { _maxXValue=data[i][j].x(); }
+            if ( data[i][j].x() < _minXValue ) { _minXValue=data[i][j].x(); }
 		}
-	}
+    }
+
+    //Issue 83
+    _minYValue = _minYValue * 0.8f;
+    _maxYValue = _maxYValue * 1.2f;
+
+    _minYValue = _minXValue * 0.8f;
+    _maxXValue = _maxXValue * 1.2f;
 
     float maxPointIntensity=0;
     for(int i=0; i < points.size(); i++ ) {        
