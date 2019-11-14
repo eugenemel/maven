@@ -4,6 +4,7 @@
 #include "stable.h"
 #include "mzUtils.h"
 #include "mzSample.h"
+#include "tabledockwidget.h"
 
 using namespace std;
 using namespace mzUtils;

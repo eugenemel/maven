@@ -22,6 +22,7 @@ void CSVReports::openGroupReport(string outputfile) {
     QStringList Header;
     Header << "label"<< "metaGroupId"
                         << "groupId"
+                        << "ID"
                         << "goodPeakCount"
                         << "medMz"
                         << "medRt"
@@ -95,6 +96,7 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
                 << setprecision(7)
                 << group->metaGroupId << SEP
                 << group->groupId << SEP
+                << TableDockWidget::groupTagString(group).toStdString() << SEP //header is titled 'ID'
                 << group->goodPeakCount << SEP
                 << group->meanMz << SEP
                 << group->meanRt << SEP

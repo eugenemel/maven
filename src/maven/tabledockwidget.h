@@ -32,7 +32,7 @@ public:
 	int  groupCount() { return allgroups.size(); }
 	bool hasPeakGroup(PeakGroup* group);
     QList<PeakGroup*> getGroups();
-    QString groupTagString(PeakGroup* group);
+    static QString groupTagString(PeakGroup* group);
 
 public slots: 
 	  //void showInfo(PeakGroup* group);
