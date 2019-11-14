@@ -1,6 +1,6 @@
 #include "tinyplot.h"
 
-TinyPlot::TinyPlot(QGraphicsItem* parent, QGraphicsScene *scene):QGraphicsItem(parent)  {
+TinyPlot::TinyPlot(QGraphicsItem* parent, QGraphicsScene *scene, MainWindow *mainwindow):QGraphicsItem(parent)  {
 	_width=100;
 	_height=100;
 	_currentXCoord=0;
@@ -9,6 +9,7 @@ TinyPlot::TinyPlot(QGraphicsItem* parent, QGraphicsScene *scene):QGraphicsItem(p
 	//effect->setOffset(8); 
 	//setGraphicsEffect(effect);
     if(scene) scene->addItem(this);
+    if (mainwindow) mw = mainwindow;
 }
 
 
@@ -107,12 +108,19 @@ void TinyPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
 
 
 	//qDebug() << QPointF(_minXValue,_maxXValue) << QPointF(_minYValue,_maxYValue);
+    QColor blackColor = Qt::black;
+    if (mw) {
+        blackColor = mw->getBackgroundAdjustedBlack(mw->spectraWidget);
+    }
 
 	painter->setPen(Qt::gray);   
 	painter->setBrush(Qt::NoBrush);
 	painter->drawRect(boundingRect());
-    QPen shadowPen(Qt::black); shadowPen.setWidth(2);
+
+    QPen shadowPen(blackColor);
+    shadowPen.setWidth(2);
 	painter->setPen(shadowPen);
+
 	painter->drawLine(0,_height+2,_width+2,_height+2);
 	painter->drawLine(_width+2,2,_width+2,_height);
 
@@ -120,8 +128,8 @@ void TinyPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
 	//title
 	if (!_title.isEmpty()) {
 		setToolTip(_title);
-		painter->setBrush(Qt::black);
-		painter->setPen(Qt::black);
+        painter->setBrush(blackColor);
+        painter->setPen(blackColor);
         float _fontH = ((float)_height)/10;
 
         if (_fontH > 15) { _fontH = 15; }
@@ -132,10 +140,10 @@ void TinyPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
 		}
 	}
 
-	if (maxPointIntensity) {
+    if (maxPointIntensity > 0) {
 		setToolTip(_title);
-		painter->setBrush(Qt::black);
-		painter->setPen(Qt::black);
+        painter->setBrush(blackColor);
+        painter->setPen(blackColor);
         float _fontH = ((float)_height)/10;
 
         if (_fontH > 15) { _fontH = 15; }
@@ -160,7 +168,7 @@ void TinyPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
 	if (nColors==0) colors << Qt::blue << Qt::red << Qt::yellow << Qt::green;
 
 	for(int i=0; i < nSeries; i++ ) {
-		painter->setBrush(Qt::black);
+        painter->setBrush(blackColor);
 		painter->setPen(colors[ i % nColors ] );
 
 		int nPoints = data[i].size();
@@ -175,7 +183,7 @@ void TinyPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
 		path << mapToPlot(_minXValue,_minYValue);
 
 		painter->setBrush( colors[ i % nColors ] );
-		if (_width > 20) painter->setPen(Qt::black);
+        if (_width > 20) painter->setPen(blackColor);
 		painter->drawPolygon(path);
 	}
 

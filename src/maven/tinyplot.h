@@ -2,6 +2,7 @@
 #define TINYPLOT_H
 
 #include "stable.h"
+#include "mainwindow.h"
 
 class TinyPlot: public QObject, public QGraphicsItem {
     Q_OBJECT
@@ -11,7 +12,7 @@ class TinyPlot: public QObject, public QGraphicsItem {
 #endif
 
 public:
-    TinyPlot(QGraphicsItem *parent = 0, QGraphicsScene *scene = 0);
+    TinyPlot(QGraphicsItem *parent = nullptr, QGraphicsScene *scene = nullptr, MainWindow *mw = nullptr);
 	void addData(QVector<float>&v);
 	void addData(std::vector<float>&v);
 	void addData(EIC* eic);
@@ -46,6 +47,8 @@ private:
 	QVector< QVector<QPointF> >data;
 	QVector<QColor> colors;
 	QVector<QPointF> points;
+
+    MainWindow *mw;
 };
 
 #endif

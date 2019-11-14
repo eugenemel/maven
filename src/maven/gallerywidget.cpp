@@ -198,7 +198,7 @@ void GalleryWidget::addIdividualEicPlots(std::vector<EIC*>&eics, PeakGroup*group
 
         mzSlice& slice =  mainwindow->getEicWidget()->getMzSlice();
 
-        TinyPlot* plot = new TinyPlot(0,scene());
+        TinyPlot* plot = new TinyPlot(nullptr, scene(), mainwindow);
         plot->setWidth(_boxW);
         plot->setHeight(_boxH);
         plot->addData(eic,slice.rtmin,slice.rtmax);
@@ -270,7 +270,7 @@ TinyPlot* GalleryWidget::addEicPlot(mzSlice& slice) {
 TinyPlot* GalleryWidget::addEicPlot(std::vector<EIC*>& eics) {
 	if(eics.size() == 0 ) return NULL;
 
-	TinyPlot* plot = new TinyPlot(0,0);
+    TinyPlot* plot = new TinyPlot(nullptr, nullptr, mainwindow);
 	plot->setWidth(_boxW);
 	plot->setHeight(_boxH);
 

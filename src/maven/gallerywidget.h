@@ -8,6 +8,7 @@
 #include "statistics.h"
 #include "tinyplot.h"
 
+class TinyPlot;
 
 class GalleryWidget : public QGraphicsView
 {
