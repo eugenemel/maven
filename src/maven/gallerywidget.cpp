@@ -144,8 +144,9 @@ void GalleryWidget::addEicPlots(std::vector<PeakGroup*>&groups) {
 		if(c && !c->srmId.empty()) slice.srmId=c->srmId;
 
 		TinyPlot* plot = addEicPlot(slice);
-		if ( plot ) {
-                        plot->setTitle(QString(group->getName().c_str()));
+        if ( plot ) {
+
+            plot->setTitle(TableDockWidget::groupTagString(group));
 			plot->setData(0, QVariant::fromValue(slice));
 
 			for(int j=0; j < group->peakCount(); j++ ) {
