@@ -48,6 +48,8 @@ private:
 	QVector<QColor> colors;
 	QVector<QPointF> points;
 
+    int rt_axis_offset = 20;
+
     MainWindow *mw;
 };
 

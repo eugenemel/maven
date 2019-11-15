@@ -15,7 +15,7 @@ TinyPlot::TinyPlot(QGraphicsItem* parent, QGraphicsScene *scene, MainWindow *mai
 
 QRectF TinyPlot::boundingRect() const
 {
-	return(QRectF(0,0,_width,_height));
+    return(QRectF(0,0,_width,_height));
 }
 
 void TinyPlot::addDataColor(QColor c) {
@@ -75,6 +75,17 @@ float TinyPlot::predictYValue(float fx) {
 void TinyPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 { 
 
+    /**
+     * Issue 84: Add Rt to plot
+     * Note that it was easier to temporarily swap out the value of _height with an adjusted
+     * value than re-writing everything to include an explicit axis value.
+     * _height prior to x axis adjustment is not the full height, but rather, most of the height,
+     * adjusted for a reserved area for the rt axis.
+     */
+
+    int oldHeight = _height;
+    _height = _height - rt_axis_offset;
+
 	if (_width <= 0 || _height <=0 ) return;
 	float nSeries=data.size();
 	_minXValue=_minYValue=FLT_MAX;
@@ -92,7 +103,7 @@ void TinyPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
 		}
     }
 
-    //Issue 83: Avoid possible RT assignment bug
+    //Issue 84: Avoid possible RT assignment bug
     _minYValue = _minYValue * 0.8f;
     _maxYValue = _maxYValue * 1.2f;
 
@@ -115,14 +126,14 @@ void TinyPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
 
 	painter->setPen(Qt::gray);   
 	painter->setBrush(Qt::NoBrush);
-	painter->drawRect(boundingRect());
+    painter->drawRect(QRectF(0,0,_width+2,_height+2));
 
     QPen shadowPen(blackColor);
     shadowPen.setWidth(2);
 	painter->setPen(shadowPen);
 
-	painter->drawLine(0,_height+2,_width+2,_height+2);
-	painter->drawLine(_width+2,2,_width+2,_height);
+    painter->drawLine(0,_height+2,_width+2,_height+2);
+    painter->drawLine(_width+2, 2, _width+2, _height);
 
 
 	//title
@@ -173,9 +184,9 @@ void TinyPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
 
 		int nPoints = data[i].size();
 		QPolygonF path;
-		if (nPoints >= 1 ) path << mapToPlot(data[i][0].x(),_minYValue);
+        if (nPoints >= 1 ) path << mapToPlot(data[i][0].x(),_minYValue);
 		for(int j=0; j < nPoints; j++ ) {
-			path << mapToPlot(data[i][j].x(),data[i][j].y());
+            path << mapToPlot(data[i][j].x(),data[i][j].y());
 		//	painter->drawEllipse(mapToPlot(data[i][j].x(), data[i][j].y()), 5,5);
 		}
 		//close path
@@ -199,4 +210,26 @@ void TinyPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
 		painter->setPen(Qt::red);
 		painter->drawLine(mapToPlot(x,_minYValue),mapToPlot(x,_maxYValue));
 	}
-}
+
+    //rt axes
+    //much of this is lifted from plot_axes.cpp
+
+    _height = oldHeight;
+
+    QPen pen(Qt::darkGray, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+    painter->setPen(pen);
+
+    QFont font("Helvetica",12);
+    font.setBold(true);
+    painter->setFont(font);
+
+    for (unsigned int i = 1; i <= 10; i++) {
+        float x = ((i+1.0f)/12.0f) * _maxXValue;
+        float px = ((x-_minXValue)/(_maxXValue-_minXValue))*_width;
+
+        //tick mark
+        painter->drawLine(px, _height-rt_axis_offset-5, px, _height-rt_axis_offset+5);
+
+        //label
+        painter->drawText(px, _height-rt_axis_offset+14, QString::number(x,'f',2));
+    }}
