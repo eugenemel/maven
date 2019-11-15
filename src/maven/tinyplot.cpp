@@ -57,7 +57,7 @@ void TinyPlot::addData(EIC* eic,float rtmin, float rtmax) {
 }
 
 QPointF TinyPlot::mapToPlot(float x,float y ) {
-	float xorigin = 0;
+    float xorigin = 0;
 	float yorigin = _height;
 	if (_maxXValue == 0 && _minXValue == 0 ) return QPointF(xorigin,yorigin);
 	if (_maxYValue == 0 && _minYValue == 0 ) return QPointF(xorigin,yorigin);
@@ -74,7 +74,7 @@ float TinyPlot::predictYValue(float fx) {
 
 void TinyPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 { 
-	
+
 	if (_width <= 0 || _height <=0 ) return;
 	float nSeries=data.size();
 	_minXValue=_minYValue=FLT_MAX;
@@ -92,11 +92,11 @@ void TinyPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
 		}
     }
 
-    //Issue 83
+    //Issue 83: Avoid possible RT assignment bug
     _minYValue = _minYValue * 0.8f;
     _maxYValue = _maxYValue * 1.2f;
 
-    _minYValue = _minXValue * 0.8f;
+    _minXValue = _minXValue * 0.8f;
     _maxXValue = _maxXValue * 1.2f;
 
     float maxPointIntensity=0;
