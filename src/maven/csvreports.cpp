@@ -47,7 +47,15 @@ void CSVReports::openGroupReport(string outputfile) {
                         << "mzFragError"
                         << "ms2purity";
 
-    for(unsigned int i=0; i< samples.size(); i++) { Header << samples[i]->sampleName.c_str(); }
+    for(unsigned int i=0; i< samples.size(); i++) {
+        string sample = samples[i]->sampleName + " (intensity)";
+        Header << sample.c_str();
+    }
+
+    for(unsigned int i=0; i< samples.size(); i++) {
+        string sample = samples[i]->sampleName + " (RT width)";
+        Header << sample.c_str();
+    }
 
     foreach(QString h, Header)  groupReport << h.toStdString() << SEP;
     groupReport << endl;
@@ -88,6 +96,20 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
 	*/
 
     vector<float> yvalues = group->getOrderedIntensityVector(samples,qtype);
+
+    map<mzSample*, Peak> sampleToPeak = {};
+    for (auto p : group->peaks) {
+        sampleToPeak.insert(make_pair(p.getSample(), p));
+    }
+
+    vector<float> peakWidths(samples.size(), 0.0);
+
+    for (unsigned int i = 0; i < samples.size(); i++) {
+        mzSample *sample = samples.at(i);
+        if (sampleToPeak.find(sample) != sampleToPeak.end()) {
+            peakWidths.at(i) = sampleToPeak.at(sample).rtmax - sampleToPeak.at(sample).rtmin;
+        }
+    }
 
     char label[2];
     sprintf(label,"%c",group->label);
@@ -148,6 +170,8 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
     groupReport << SEP << group->fragmentationPattern.purity;
 
     for( unsigned int j=0; j < samples.size(); j++) groupReport << SEP <<  yvalues[j];
+    for( unsigned int j=0; j < samples.size(); j++) groupReport << SEP <<  peakWidths[j];
+
     groupReport << endl;
 
     for (unsigned int k=0; k < group->children.size(); k++) {
