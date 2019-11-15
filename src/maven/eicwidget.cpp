@@ -88,8 +88,11 @@ void EicWidget::mouseReleaseEvent(QMouseEvent *event) {
     //user is holding shift while releasing the mouse.. integrate area
     if (_areaIntegration ||  (event->button() == Qt::LeftButton && event->modifiers() == Qt::ShiftModifier) ) {
         toggleAreaIntegration(false);
+
         //minimum size for region to integrate is 0.01 seconds
-        if(rtmax-rtmin> 0.01) integrateRegion(rtmin, rtmax);
+        if(rtmax-rtmin> 0.01){
+            integrateRegion(rtmin, rtmax);
+        }
 
     } else if (_spectraAveraging || ( event->button() == Qt::LeftButton && event->modifiers() == Qt::ControlModifier) ) {
          toggleSpectraAveraging(false);
@@ -123,42 +126,55 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
  //qDebug <<" EicWidget::integrateRegion(float rtmin, float rtmax)";
 	//qDebug << "Integrating area from " << rtmin << " to " << rtmax;
 	this->_integratedGroup.clear();
-	this->_integratedGroup.compound = _slice.compound;
+
+    //may make a copy of an existing compound in bookmarks
+    this->_integratedGroup.compound = _slice.compound;
     this->_integratedGroup.adduct = _slice.adduct;
     this->_integratedGroup.srmId = _slice.srmId;
-    _integratedGroup.adduct = NULL;
+
+    //Is it better to make a copy of an existing compound? or always treat captured content as mz@rt?
+//    _integratedGroup.compound = nullptr;
+//    _integratedGroup.adduct = nullptr;
+//    _integratedGroup.groupRank = 0;
 
 	for(int i=0; i < eics.size(); i++ ) {
 		EIC* eic = eics[i];
 		Peak peak(eic,0);
 
+//        qDebug() << "EicWidget::integrateRegion()   [eic bounds]: mzmin=" << QString::number(eics[i]->mzmin, 'f', 10) << ", mzmax=" << QString::number(eics[i]->mzmax, 'f', 10);
+
 		for( int j=0; j < eic->size(); j++) {
-			if(eic->rt[j] >= rtmin && eic->rt[j] <= rtmax) {
-				if(peak.minpos==0) { peak.minpos=j;  peak.rtmin=eic->rt[j]; }
-				if(peak.maxpos< j) { peak.maxpos=j;  peak.rtmax=eic->rt[j]; }
-				peak.peakArea += eic->intensity[j];
-				peak.rtmin=rtmin;
-				peak.rtmax=rtmax;
-				peak.mzmin=this->_slice.mzmin;
-				peak.mzmax=this->_slice.mzmax;
+
+            if(eic->rt[j] >= rtmin && eic->rt[j] <= rtmax) {
+
+                if(peak.minpos==0) {
+                    peak.minpos=j;
+                }
+
+                if(peak.maxpos< j) {
+                    peak.maxpos=j;
+                }
 
 				if(eic->intensity[j]> peak.peakIntensity) {
 					peak.peakIntensity=eic->intensity[j];
 					peak.pos=j;
-					peak.rt=eic->rt[j];
-					peak.peakMz = eic->mz[j];
 				}
 			}
 		}
 		if (peak.pos > 0) {
 			eic->getPeakDetails(peak);
 			_integratedGroup.addPeak(peak);
-            qDebug() << "integrateRegion: " << eic->sampleName.c_str() << " " << peak.peakArea << " " << peak.peakAreaCorrected;
+            qDebug() << "EicWidget::integrateRegion(): integrateRegion: " << eic->sampleName.c_str() << " " << peak.peakArea << " " << peak.peakAreaCorrected;
 			this->showPeakArea(&peak);
 		}
+
+//        //Issue 84: debugging
+//        qDebug() << "EicWidget::integrateRegion() [peak bounds]: mzmin=" << QString::number(peak.mzmin, 'f', 10) << ", mzmax=" << QString::number(peak.mzmax, 'f', 10);
+
 	}
 
     _integratedGroup.groupStatistics();
+
     setSelectedGroup(&_integratedGroup);
 
     getMainWindow()->bookmarkPeakGroup(&_integratedGroup);
@@ -449,7 +465,7 @@ void EicWidget::addEICLines(bool showSpline) {
     for( unsigned int i=0; i< eics.size(); i++ ) {
         EIC* eic = eics[i];
         if (eic->size()==0) continue;
-        if (eic->sample != NULL && eic->sample->isSelected == false) continue;
+        if (eic->sample && eic->sample->isSelected == false) continue;
         if (eic->maxIntensity <= 0) continue;
         EicLine* line = new EicLine(0,scene());
 
@@ -467,6 +483,7 @@ void EicWidget::addEICLines(bool showSpline) {
             if ( showSpline ) {
                 line->addPoint(QPointF( toX(eic->rt[j]), toY(eic->spline[j])));
             } else {
+                //qDebug() << "EICline:" << eic->rt[j] << " " << eic->intensity[j] << " plots to " << toY(eic->intensity[j]);
                 line->addPoint(QPointF( toX(eic->rt[j]), toY(eic->intensity[j])));
             }
         }
@@ -808,7 +825,7 @@ void EicWidget::clearPlot() {
 
 void EicWidget::replot(PeakGroup* group ) {
 
-    if (group == NULL)  _selectedGroup = PeakGroup();
+    if (!group)  _selectedGroup = PeakGroup();
     qDebug() <<" EicWidget::replot(PeakGroup* group ) group=" << group;
 
     QTime timerX; timerX.start();
@@ -826,7 +843,7 @@ void EicWidget::replot(PeakGroup* group ) {
 
     //score peak quality
     Classifier* clsf = getMainWindow()->getClassifier();
-    if (clsf != NULL) {
+    if (clsf) {
         for(int i=0; i<peakgroups.size(); i++) {
             clsf->classify(&peakgroups[i]);
             peakgroups[i].updateQuality();
@@ -915,9 +932,9 @@ void EicWidget::setTitle() {
 }
 
 void EicWidget::recompute(){
- //qDebug <<" EicWidget::recompute()";
+    qDebug() <<" EicWidget::recompute()";
     cleanup(); //more clean up
-    computeEICs();	//retrive eics
+    computeEICs();	//retrieve eics
 }
 
 void EicWidget::wheelEvent(QWheelEvent *event) {
@@ -1303,7 +1320,7 @@ void EicWidget::setMzSlice(const mzSlice& slice) {
     } else {
         _slice = slice;
     }
-    replot(NULL);
+    replot(nullptr);
 }
 
 void EicWidget::setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax ) {
@@ -1333,10 +1350,11 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
         _slice.rtmax = group->maxRt+ 2 * _zoomFactor;
     }
 
-    //make sure that plot region is within visible samle bounds;
+    //make sure that plot region is within visible sample bounds
     mzSlice bounds = visibleEICBounds();
     if (_slice.rtmin < bounds.rtmin ) _slice.rtmin = bounds.rtmin;
     if (_slice.rtmax > bounds.rtmax ) _slice.rtmax = bounds.rtmax;
+
 
     _slice.mz = group->meanMz;
     if ( group->minMz != _slice.mzmin || group->maxMz != _slice.mzmax ) {
@@ -1367,7 +1385,7 @@ void EicWidget::setMzSlice(float mz){
 	x.mz = mz;
 	x.mzmin = mz - mz/1e6*getMainWindow()->getUserPPM();
     x.mzmax = mz + mz/1e6*getMainWindow()->getUserPPM();
-    x.compound = NULL;
+    x.compound = nullptr;
 	setMzSlice(x);
 }
 
