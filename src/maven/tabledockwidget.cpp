@@ -441,7 +441,7 @@ bool TableDockWidget::hasPeakGroup(PeakGroup* group) {
 }
 
 PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable) {
-    return TableDockWidget::addPeakGroup(group,updateTable, false);
+    return TableDockWidget::addPeakGroup(group, updateTable, false);
 }
 
 /**
