@@ -34,6 +34,8 @@ public slots:
 
     void loadProjectXML(QString filename);
     void saveProjectXML(QString filename, TableDockWidget* peakTable = 0);
+    void allSamplesVisible();
+    void allSamplesInvisible();
 
 protected slots:
       void keyPressEvent( QKeyEvent *e );

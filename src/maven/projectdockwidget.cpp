@@ -891,7 +891,23 @@ void ProjectDockWidget::contextMenuEvent ( QContextMenuEvent * event )
     QAction* z0 = menu.addAction("Unload Selected Sample");
     connect(z0, SIGNAL(triggered()), this ,SLOT(unloadSample()));
 
+    menu.addSeparator();
+
+    QAction *z1 = menu.addAction("All Samples Visible");
+    connect(z1, SIGNAL(triggered()), this, SLOT(allSamplesVisible()));
+
+    QAction *z2 = menu.addAction("All Samples Invisible");
+    connect(z2, SIGNAL(triggered()), this, SLOT(allSamplesInvisible()));
+
     menu.exec(event->globalPos());
+}
+
+void ProjectDockWidget::allSamplesVisible() {
+    qDebug() << "ProjectDockWidget::allSamplesVisible()";
+}
+
+void ProjectDockWidget::allSamplesInvisible() {
+    qDebug() << "ProjectDockWidget::allSamplesInvisible()";
 }
 
 void ProjectDockWidget::keyPressEvent(QKeyEvent *e ) {
