@@ -36,6 +36,7 @@ public slots:
     void saveProjectXML(QString filename, TableDockWidget* peakTable = 0);
     void allSamplesVisible();
     void allSamplesInvisible();
+    void toggleSamplesVisibility(QTreeWidgetItem *item, bool isVisible);
 
 protected slots:
       void keyPressEvent( QKeyEvent *e );
