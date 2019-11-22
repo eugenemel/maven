@@ -496,6 +496,7 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
 
         bool isFoundSimilarBookmark = false;
         for (auto pg : bookmarkedPeaks->getGroups()){
+            if (pg->deletedFlag) continue;
             if (mzUtils::ppmDist(group->meanMz, pg->meanMz) <= mzTol
                     && (abs(group->meanRt - pg->meanRt) <= rtTol || isWarnMz)) {
                 msg.append(bookmarkedPeaks->groupTagString(pg));
