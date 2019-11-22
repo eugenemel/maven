@@ -592,8 +592,8 @@ void MainWindow::showDockWidgets() {
 }
 
 void MainWindow::doSearch(QString needle) {
-    QRegExp formula("C[1-9].*(H[1-9]+|O[1-9]+|N[1-9]+)",Qt::CaseInsensitive,QRegExp::RegExp);
-    if (needle.contains(formula) ){ setFormulaFocus(needle);}
+    QRegExp formula("(C?/d+)?(H?/d+)?(O?/d+)?(N?/d+)?(P?/d+)?(S?/d+)?",Qt::CaseInsensitive, QRegExp::RegExp);
+    if (!needle.isEmpty() && needle.contains(formula) ){ setFormulaFocus(needle);}
 }
 
 void MainWindow::setMzValue() {
