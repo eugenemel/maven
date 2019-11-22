@@ -349,7 +349,7 @@ void ProjectDockWidget::setInfo(vector<mzSample*>&samples) {
 }
 
 void ProjectDockWidget::showSample(QTreeWidgetItem* item, int col) {
-    if (item == NULL) return;
+    if (!item) return;
     bool checked = (item->checkState(0) != Qt::Unchecked );
 
     if (item->type() == SampleType ) {
@@ -891,7 +891,37 @@ void ProjectDockWidget::contextMenuEvent ( QContextMenuEvent * event )
     QAction* z0 = menu.addAction("Unload Selected Sample");
     connect(z0, SIGNAL(triggered()), this ,SLOT(unloadSample()));
 
+    menu.addSeparator();
+
+    QAction *z1 = menu.addAction("All Samples Visible");
+    connect(z1, SIGNAL(triggered()), this, SLOT(allSamplesVisible()));
+
+    QAction *z2 = menu.addAction("All Samples Invisible");
+    connect(z2, SIGNAL(triggered()), this, SLOT(allSamplesInvisible()));
+
     menu.exec(event->globalPos());
+}
+
+void ProjectDockWidget::allSamplesVisible() {
+    qDebug() << "ProjectDockWidget::allSamplesVisible()";
+
+    for (unsigned int i = 0; i < _treeWidget->topLevelItemCount(); i++){
+        QTreeWidgetItem* item = _treeWidget->topLevelItem(i);
+        toggleSamplesVisibility(item, true);
+    }
+
+    _mainwindow->getEicWidget()->replotForced();
+}
+
+void ProjectDockWidget::allSamplesInvisible() {
+    qDebug() << "ProjectDockWidget::allSamplesInvisible()";
+
+    for (unsigned int i = 0; i < _treeWidget->topLevelItemCount(); i++){
+        QTreeWidgetItem* item = _treeWidget->topLevelItem(i);
+        toggleSamplesVisibility(item, false);
+    }
+
+    _mainwindow->getEicWidget()->replotForced();
 }
 
 void ProjectDockWidget::keyPressEvent(QKeyEvent *e ) {
@@ -901,6 +931,22 @@ void ProjectDockWidget::keyPressEvent(QKeyEvent *e ) {
     }
 
     QDockWidget::keyPressEvent(e);
+}
+
+void ProjectDockWidget::toggleSamplesVisibility(QTreeWidgetItem *item, bool isVisible) {
+
+    if (!item) return;
+
+    if(item->type() == SampleType){
+        QVariant v = item->data(0,Qt::UserRole);
+        mzSample*  sample =  v.value<mzSample*>();
+        sample->isSelected = isVisible;
+        item->setCheckState(0, (isVisible ? Qt::Checked : Qt::Unchecked));
+    }
+
+    for (int i = 0; i < item->childCount(); ++i){
+        toggleSamplesVisibility(item->child(i), isVisible);
+    }
 }
 
 void ProjectDockWidget::unloadAllSamples() {
