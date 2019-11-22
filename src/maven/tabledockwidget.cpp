@@ -242,7 +242,7 @@ void TableDockWidget::updateTable() {
 void TableDockWidget::updateItem(QTreeWidgetItem* item) {
     QVariant v = item->data(0,PeakGroupType);
     PeakGroup*  group =  v.value<PeakGroup*>();
-    if ( group == NULL ) return;
+    if (!group) return;
     heatmapBackground(item);
 
     //score peak quality
@@ -373,12 +373,12 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     group->groupStatistics();
     //cerr << "addRow" << group->groupId << " "  << group->meanMz << " " << group->meanRt << " " << group->children.size() << " " << group->tagString << endl;
 
-    if (group == nullptr) return;
+    if (!group) return;
     if (group->peakCount() == 0 ) return;
     if (group->meanMz <= 0 ) return;
     if (group->deletedFlag || group->label == 'x') return; //deleted group
 
-    NumericTreeWidgetItem *item=NULL;
+    NumericTreeWidgetItem *item = nullptr;
     if(!root) {
        item = new NumericTreeWidgetItem(treeWidget,PeakGroupType);
     } else {
@@ -427,6 +427,8 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
         QTreeWidgetItem *childRoot = clusterDialog->chkPGDisplay->isChecked() ? root : item;
         for( int i=0; i < group->childCount(); i++ ) addRow(&(group->children[i]), childRoot);
     }
+
+    groupToItem.insert(make_pair(group, item));
 }
 
 bool TableDockWidget::hasPeakGroup(PeakGroup* group) {
@@ -442,6 +444,17 @@ bool TableDockWidget::hasPeakGroup(PeakGroup* group) {
 
 PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable) {
     return TableDockWidget::addPeakGroup(group, updateTable, false);
+}
+
+void TableDockWidget::selectGroup(PeakGroup* group) {
+
+    //find all items connected to this group
+    pair<rowIterator, rowIterator> tableRows = groupToItem.equal_range(group);
+    for (rowIterator it = tableRows.first; it != tableRows.second; it++) {
+         QTreeWidgetItem *item = it->second;
+         item->setSelected(true);
+    }
+
 }
 
 /**
@@ -567,6 +580,7 @@ void TableDockWidget::deleteAll() {
 
     treeWidget->clear();
     allgroups.clear();
+    groupToItem.clear();
     this->hide();
 
     _mainwindow->getEicWidget()->replotForced();

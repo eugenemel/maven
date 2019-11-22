@@ -526,7 +526,8 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
     }
 
     if (isAddBookmark) {
-        bookmarkedPeaks->addPeakGroup(group,true);
+        PeakGroup *pg = bookmarkedPeaks->addPeakGroup(group,true);
+        bookmarkedPeaks->selectGroup(pg);
     }
 }
 
