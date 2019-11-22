@@ -699,7 +699,22 @@ void TableDockWidget::exportGroupsToSpreadsheet() {
     qDebug() << "Writing report to " << fileName;
     for(int i=0; i<allgroups.size(); i++ ) {
         PeakGroup& group = allgroups[i];
-        csvreports->addGroup(&group);
+
+        //check that group is currently selected
+        bool isSelected = false;
+        PeakGroup *peakGroupPtr = &(group);
+        pair<rowIterator, rowIterator> tableRows = groupToItem.equal_range(peakGroupPtr);
+        for (rowIterator it = tableRows.first; it != tableRows.second; it++) {
+            if (it->second->isSelected()) {
+                isSelected = true;
+                break;
+            }
+        }
+
+        if (isSelected) {
+            csvreports->addGroup(&group);
+        }
+
     }
     csvreports->closeFiles();
 }
