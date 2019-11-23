@@ -11,13 +11,36 @@ BackgroundDirectInfusionUpdate::~BackgroundDirectInfusionUpdate() {
 
 void BackgroundDirectInfusionUpdate::run(void) {
 
-    int numSteps = samples.size() + 2; //prepare search database + each sample + agglomerate across samples
+    int N = static_cast<int>(samples.size());
+
+    /*
+     * numSteps:
+     * 1 * lipid summarizations
+     * 1 * prepare search database
+     * N * each sample individually
+     * 1 * agglomerate across samples
+     *
+     * total = N + 3
+     */
+    int numSteps = N + 3;
+
     int stepNum = 0;
 
     QTime timer;
     timer.start();
 
     qDebug() << "Direct infusion analysis started.";
+
+    emit(updateProgressBar("Enumerating lipid summarizations for compounds...", stepNum, numSteps));
+
+    for (auto compound : compounds) {
+        compound->metaDataMap.insert(make_pair(LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey(), LipidSummarizationUtils::getAcylChainLengthSummary(compound->name)));
+        compound->metaDataMap.insert(make_pair(LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey(), LipidSummarizationUtils::getAcylChainCompositionSummary(compound->name)));
+        compound->metaDataMap.insert(make_pair(LipidSummarizationUtils::getLipidClassSummaryKey(), LipidSummarizationUtils::getLipidClassSummary(compound->name)));
+    }
+
+    stepNum++;
+
     emit(updateProgressBar("Preparing search database...", stepNum, numSteps));
 
     /**
