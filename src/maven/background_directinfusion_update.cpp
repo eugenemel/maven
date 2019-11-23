@@ -36,7 +36,12 @@ void BackgroundDirectInfusionUpdate::run(void) {
     for (auto compound : compounds) {
         compound->metaDataMap.insert(make_pair(LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey(), LipidSummarizationUtils::getAcylChainLengthSummary(compound->name)));
         compound->metaDataMap.insert(make_pair(LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey(), LipidSummarizationUtils::getAcylChainCompositionSummary(compound->name)));
-        compound->metaDataMap.insert(make_pair(LipidSummarizationUtils::getLipidClassSummaryKey(), LipidSummarizationUtils::getLipidClassSummary(compound->name)));
+
+        if (!compound->category.empty()){
+            compound->metaDataMap.insert(make_pair(LipidSummarizationUtils::getLipidClassSummaryKey(), compound->category.at(0)));
+        } else {
+            compound->metaDataMap.insert(make_pair(LipidSummarizationUtils::getLipidClassSummaryKey(), LipidSummarizationUtils::getLipidClassSummary(compound->name)));
+        }
     }
 
     stepNum++;
