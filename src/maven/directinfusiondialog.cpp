@@ -83,7 +83,16 @@ void DirectInfusionDialog::analyze() {
     vector<mzSample*> visibleSamples = mainwindow->getVisibleSamples();
 
     directInfusionUpdate->setSamples(visibleSamples);
-    directInfusionUpdate->setCompounds(DB.compoundsDB);
+
+    vector<Compound*> compoundsWithSummaries = DB.compoundsDB;
+
+    for (auto compound : compoundsWithSummaries) {
+        compound->metaDataMap.insert(make_pair(LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey(), LipidSummarizationUtils::getAcylChainLengthSummary(compound->name)));
+        compound->metaDataMap.insert(make_pair(LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey(), LipidSummarizationUtils::getAcylChainCompositionSummary(compound->name)));
+        compound->metaDataMap.insert(make_pair(LipidSummarizationUtils::getLipidClassSummaryKey(), LipidSummarizationUtils::getLipidClassSummary(compound->name)));
+    }
+
+    directInfusionUpdate->setCompounds(compoundsWithSummaries);
     directInfusionUpdate->setAdducts(DB.adductsDB);
 
     directInfusionUpdate->params->minNumMatches = this->spnMatchXPeaks->value();
