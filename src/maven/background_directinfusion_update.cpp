@@ -42,6 +42,13 @@ void BackgroundDirectInfusionUpdate::run(void) {
         } else {
             compound->metaDataMap.insert(make_pair(LipidSummarizationUtils::getLipidClassSummaryKey(), LipidSummarizationUtils::getLipidClassSummary(compound->name)));
         }
+
+        //debugging
+//        qDebug() << "Compound summary data for " << compound->name.c_str() << ": ";
+//        for (map<string,string>::iterator it = compound->metaDataMap.begin(); it != compound->metaDataMap.end(); ++it){
+//            qDebug() << it->first.c_str() << "=" << it->second.c_str();
+//        }
+//        qDebug() << endl;
     }
 
     stepNum++;
