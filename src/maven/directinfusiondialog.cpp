@@ -9,7 +9,7 @@ DirectInfusionDialog::DirectInfusionDialog(QWidget *parent) : QDialog(parent) {
 
       //populate algorithm options
       cmbSpectralDeconvolutionAlgorithm->addItem("List All Candidates");
-      cmbSpectralDeconvolutionAlgorithm->addItem("Unique Fragments Intensity Ratio");
+      cmbSpectralDeconvolutionAlgorithm->addItem("Auto-summarized Unique Fragments Intensity Ratio");
 
       connect(start, SIGNAL(clicked(bool)), SLOT(analyze()));
       connect(cmbSpectralDeconvolutionAlgorithm, SIGNAL(currentIndexChanged(int)), SLOT(updateSpectralCompositionDescription()));
@@ -48,15 +48,19 @@ void DirectInfusionDialog::updateSpectralCompositionDescription() {
     case 1:
         text = QString(
                     "Compounds are only retained if they contain unique matches (in addition to other criteria).\n"
-                    "Note that this will exclude chain isomers with identical fragments.\n"
-                    "Assumes that intensities in spectral libraries are normalized to a common max intensity for each spectrum.\n"
+                    "\nCompounds are automatically summarized to a higher level if they all contain identical fragment matches\n"
+                    "and can be summarized to a higher level (eg, two acyl chain isomers are described as a single compound).\n"
+                    "\nThis approach assumes that intensities in spectral libraries are normalized to a common max intensity for each spectrum.\n"
+                    "\nWhen a group of compounds are automatically summarized, the theoretical intensity of the summarized compound is"
+                    " the average of the intensity of the all compounds in the group.\n"
                     "\nCompute:\n"
                     "\ncompound_relative_abundance = observed_intensity / normalized_theoretical_intensity\n\n"
-                    "Enumerate for all unique fragments. In case there are more than one unique fragment per compound,\n"
-                    "use the highest theoretical intensity.\n"
-                    "\nRepeat for all compounds, and return relative proportion as groupRank.\n"
+                    "This is applied to all unique fragments in each summarized compound. In case there are more than one unique fragment per summarized compound,"
+                    " the highest theoretical intensity is used.\n"
+                    "\nThis is repeated for all summarized compounds.  The relative proportion of each summaried compound is recorded as the groupRank.\n"
                     "\nPeak groups are agglomerated across samples. The average relative ratio is computed.\n"
-                    "If a compound is missing from a sample, the relative proportion for that sample is 0.\n"
+                    "\nIf a compound is missing from a sample, the relative proportion for that sample is 0.\n"
+                    "\nIf a sample contains no compounds, the sample is not included in the proportion computation."
                     );
         break;
     }
@@ -94,7 +98,7 @@ void DirectInfusionDialog::analyze() {
     if (cmbSpectralDeconvolutionAlgorithm->currentText() == "List All Candidates"){
         directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::ALL_CANDIDATES;
     } else if (cmbSpectralDeconvolutionAlgorithm->currentText() == "Unique Fragments Intensity Ratio"){
-        directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::MAX_THEORETICAL_INTENSITY_UNIQUE;
+        directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE;
     }
 
     QString title = QString("Direct Infusion Analysis");
