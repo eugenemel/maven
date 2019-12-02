@@ -9,7 +9,7 @@ DirectInfusionDialog::DirectInfusionDialog(QWidget *parent) : QDialog(parent) {
 
       //populate algorithm options
       cmbSpectralDeconvolutionAlgorithm->addItem("List All Candidates");
-      cmbSpectralDeconvolutionAlgorithm->addItem("Auto-summarized Unique Fragments Intensity Ratio");
+      cmbSpectralDeconvolutionAlgorithm->addItem("Summarized Compound Unique Fragments Intensity Ratio");
 
       connect(start, SIGNAL(clicked(bool)), SLOT(analyze()));
       connect(cmbSpectralDeconvolutionAlgorithm, SIGNAL(currentIndexChanged(int)), SLOT(updateSpectralCompositionDescription()));
@@ -57,7 +57,7 @@ void DirectInfusionDialog::updateSpectralCompositionDescription() {
                     "\ncompound_relative_abundance = observed_intensity / normalized_theoretical_intensity\n\n"
                     "This is applied to all unique fragments in each summarized compound. In case there are more than one unique fragment per summarized compound,"
                     " the highest theoretical intensity is used.\n"
-                    "\nThis is repeated for all summarized compounds.  The relative proportion of each summaried compound is recorded as the groupRank.\n"
+                    "\nThis is repeated for all summarized compounds.  The relative proportion of each summaried compound is recorded as the Rank.\n"
                     "\nPeak groups are agglomerated across samples. The average relative ratio is computed.\n"
                     "\nIf a compound is missing from a sample, the relative proportion for that sample is 0.\n"
                     "\nIf a sample contains no compounds, the sample is not included in the proportion computation."
@@ -97,7 +97,7 @@ void DirectInfusionDialog::analyze() {
 
     if (cmbSpectralDeconvolutionAlgorithm->currentText() == "List All Candidates"){
         directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::ALL_CANDIDATES;
-    } else if (cmbSpectralDeconvolutionAlgorithm->currentText() == "Unique Fragments Intensity Ratio"){
+    } else if (cmbSpectralDeconvolutionAlgorithm->currentText() == "Summarized Compound Unique Fragments Intensity Ratio"){
         directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE;
     }
 
