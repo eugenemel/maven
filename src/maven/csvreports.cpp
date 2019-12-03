@@ -84,7 +84,7 @@ void CSVReports::openPeakReport(string outputfile) {
 //even when peak height is zero
 void CSVReports::writeGroupInfo(PeakGroup* group) {
     if(! groupReport.is_open()) {
-        cerr << "writeGroupInfo: group Report is closed";
+        cerr << "writeGroupInfo: group Report is closed" << endl;
         return;
     }
 
@@ -114,17 +114,19 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
     char label[2];
     sprintf(label,"%c",group->label);
 
+    string idString = TableDockWidget::groupTagString(group).toStdString();
+
     groupReport << label << SEP
                 << setprecision(7)
                 << group->metaGroupId << SEP
                 << group->groupId << SEP
-                << TableDockWidget::groupTagString(group).toStdString() << SEP //header is titled 'ID'
+                << doubleQuoteString(idString) << SEP //header is titled 'ID'
                 << group->goodPeakCount << SEP
                 << group->meanMz << SEP
                 << group->meanRt << SEP
                 << group->maxQuality << SEP
-                << group->tagString << SEP //header is titled 'note'
-                << group->displayName;
+                << doubleQuoteString(group->tagString) << SEP //header is titled 'note'
+                << doubleQuoteString(group->displayName);
 
     string compoundName;
     string compoundCategory;
