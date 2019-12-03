@@ -84,7 +84,7 @@ void CSVReports::openPeakReport(string outputfile) {
 //even when peak height is zero
 void CSVReports::writeGroupInfo(PeakGroup* group) {
     if(! groupReport.is_open()) {
-        cerr << "writeGroupInfo: group Report is closed" << endl;
+        cerr << "CSVReports::writeGroupInfo(): group Report is closed" << endl;
         return;
     }
 
@@ -135,7 +135,7 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
     float  expectedRtDiff=1000;
     float  ppmDist=1000;
 
-    if ( group->compound != NULL) {
+    if ( group->compound) {
         Compound* c = group->compound;
         ppmDist = group->fragMatchScore.ppmError;
         expectedRtDiff = c->expectedRt-group->meanRt;
@@ -152,7 +152,7 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
     groupReport << SEP << expectedRtDiff;
     groupReport << SEP << ppmDist;
 
-    if ( group->parent != NULL ) {
+    if ( group->parent) {
         groupReport << SEP << group->parent->meanMz;
     } else {
         groupReport << SEP << group->meanMz;
