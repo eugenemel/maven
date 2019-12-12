@@ -32,7 +32,7 @@ private:
     vector<Adduct*> adducts;
 
 public:
-    void setCompounds(vector<Compound*>& set) {compounds=set; }
+    void setCompounds(vector<Compound*> set) {compounds=set; }
     void setSamples(vector<mzSample*>& set) {samples=set; }
     void setAdducts(vector<Adduct*>& set) {adducts=set;}
 

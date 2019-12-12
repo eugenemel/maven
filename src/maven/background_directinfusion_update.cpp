@@ -11,13 +11,48 @@ BackgroundDirectInfusionUpdate::~BackgroundDirectInfusionUpdate() {
 
 void BackgroundDirectInfusionUpdate::run(void) {
 
-    int numSteps = samples.size() + 2; //prepare search database + each sample + agglomerate across samples
+    int N = static_cast<int>(samples.size());
+
+    /*
+     * numSteps:
+     * 1 * lipid summarizations
+     * 1 * prepare search database
+     * N * each sample individually
+     * 1 * agglomerate across samples
+     *
+     * total = N + 3
+     */
+    int numSteps = N + 3;
+
     int stepNum = 0;
 
     QTime timer;
     timer.start();
 
     qDebug() << "Direct infusion analysis started.";
+
+    emit(updateProgressBar("Enumerating lipid summarizations for compounds...", stepNum, numSteps));
+
+    for (auto compound : compounds) {
+        compound->metaDataMap.insert(make_pair(LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey(), LipidSummarizationUtils::getAcylChainLengthSummary(compound->name)));
+        compound->metaDataMap.insert(make_pair(LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey(), LipidSummarizationUtils::getAcylChainCompositionSummary(compound->name)));
+
+        if (!compound->category.empty()){
+            compound->metaDataMap.insert(make_pair(LipidSummarizationUtils::getLipidClassSummaryKey(), compound->category.at(0)));
+        } else {
+            compound->metaDataMap.insert(make_pair(LipidSummarizationUtils::getLipidClassSummaryKey(), LipidSummarizationUtils::getLipidClassSummary(compound->name)));
+        }
+
+        //debugging
+//        qDebug() << "Compound summary data for " << compound->name.c_str() << ": ";
+//        for (map<string,string>::iterator it = compound->metaDataMap.begin(); it != compound->metaDataMap.end(); ++it){
+//            qDebug() << it->first.c_str() << "=" << it->second.c_str();
+//        }
+//        qDebug() << endl;
+    }
+
+    stepNum++;
+
     emit(updateProgressBar("Preparing search database...", stepNum, numSteps));
 
     /**

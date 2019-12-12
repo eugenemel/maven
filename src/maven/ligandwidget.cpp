@@ -40,7 +40,7 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   connect(this, SIGNAL(urlChanged(QString)), mw, SLOT(setUrl(QString)));
 
   QLineEdit*  filterEditor = new QLineEdit(toolBar);
-  filterEditor->setMinimumWidth(10);
+  filterEditor->setMinimumWidth(250);
   filterEditor->setPlaceholderText("Compound Name Filter");
   connect(filterEditor, SIGNAL(textEdited(QString)), this, SLOT(showMatches(QString)));
 

@@ -98,6 +98,7 @@ public slots:
       void updateSelectedPeakGroup();
       void showEditPeakGroupDialog();
       void hideEditPeakGroupDialog();
+      void selectGroup(PeakGroup *group);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event);
@@ -119,6 +120,7 @@ private:
 
          MainWindow* _mainwindow;
          std::vector<PeakGroup>allgroups;
+         std::multimap<PeakGroup*, QTreeWidgetItem*> groupToItem = {};
 
           TrainDialog* traindialog;
           ClusterDialog*       clusterDialog;
@@ -130,5 +132,7 @@ private:
 
           PeakGroup *lastSelectedGroup;
 };
+
+typedef std::multimap<PeakGroup*, QTreeWidgetItem*>::iterator rowIterator;
 
 #endif

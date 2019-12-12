@@ -496,6 +496,7 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
 
         bool isFoundSimilarBookmark = false;
         for (auto pg : bookmarkedPeaks->getGroups()){
+            if (pg->deletedFlag) continue;
             if (mzUtils::ppmDist(group->meanMz, pg->meanMz) <= mzTol
                     && (abs(group->meanRt - pg->meanRt) <= rtTol || isWarnMz)) {
                 msg.append(bookmarkedPeaks->groupTagString(pg));
@@ -526,7 +527,8 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
     }
 
     if (isAddBookmark) {
-        bookmarkedPeaks->addPeakGroup(group,true);
+        PeakGroup *pg = bookmarkedPeaks->addPeakGroup(group,true);
+        bookmarkedPeaks->selectGroup(pg);
     }
 }
 
@@ -591,8 +593,8 @@ void MainWindow::showDockWidgets() {
 }
 
 void MainWindow::doSearch(QString needle) {
-    QRegExp formula("C[1-9].*(H[1-9]+|O[1-9]+|N[1-9]+)",Qt::CaseInsensitive,QRegExp::RegExp);
-    if (needle.contains(formula) ){ setFormulaFocus(needle);}
+    QRegExp formula("(C?/d+)?(H?/d+)?(O?/d+)?(N?/d+)?(P?/d+)?(S?/d+)?",Qt::CaseInsensitive, QRegExp::RegExp);
+    if (!needle.isEmpty() && needle.contains(formula) ){ setFormulaFocus(needle);}
 }
 
 void MainWindow::setMzValue() {
