@@ -442,7 +442,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
     return lastInsertGroupId;
 }
 
-void ProjectDB::loadPeakGroups(QString tableName) {
+void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary) {
 
         QSqlQuery queryCheckCols(sqlDB);
 
@@ -524,11 +524,16 @@ void ProjectDB::loadPeakGroups(QString tableName) {
         }
 
         if (!compoundId.empty()){
-            Compound* compound = DB.findSpeciesById(compoundId,compoundDB);
+            Compound* compound = DB.findSpeciesById(compoundId, compoundDB);
+
+            //Issue 92: fall back to rumsDB table if could not find compound the normal way.
+            if (!compound && g.searchTableName == "rumsDB") {
+                compound = DB.findSpeciesById(compoundId, rumsDBLibrary.toStdString());
+            }
 
             if (compound)  {
                 g.compound = compound;
-            	//cerr << "Found compound:"  << compound->cid << endl;
+            	//cerr << "Found compound:"  << compound->cid << endl;  
             } else {
                 g.tagString = compoundName + "|" + adductName + " | id=" + compoundId;
             }

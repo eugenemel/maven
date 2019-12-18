@@ -29,7 +29,7 @@ class ProjectDB {
             void saveCompounds(set<Compound*>&compounds);
             void writeSearchResultsToDB();
             int writeGroupSqlite(PeakGroup* group, int parentGroupId, QString tableName);
-            void loadPeakGroups(QString tableName);
+            void loadPeakGroups(QString tableName, QString rumsDBLibrary);
             void loadGroupPeaks(PeakGroup* group);
             void loadMatchTable();
             void deleteAll();
