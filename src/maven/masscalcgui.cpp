@@ -19,6 +19,9 @@ MassCalcWidget::MassCalcWidget(MainWindow* mw) {
   connect(this,SIGNAL(visibilityChanged(bool)),this,SLOT(updateDatabaseList()));
 
    scoringSchema->clear();
+
+   scoringSchema->addItem(QString("rumsDB"));
+
    for(string scoringAlgorithm: FragmentationMatchScore::getScoringAlgorithmNames()) {
         scoringSchema->addItem(scoringAlgorithm.c_str());
    }
@@ -103,7 +106,14 @@ void MassCalcWidget::showTable() {
         QString preMz = QString::number( matches[i].mass , 'f', 4);
         QString ppmDiff = QString::number( matches[i].diff , 'f', 2);
         QString rtDiff = QString::number(matches[i].rtdiff,'f', 1);
-        QString matchScore = QString::number( matches[i].fragScore.getScoreByName(scoringAlgorithm) , 'f', 3);
+
+        QString matchScore;
+        if (scoringAlgorithm == "rumsDB") {
+            //retrieve score from database instead of from frag score
+            matchScore = "banana";
+        } else {
+            matchScore = QString::number( matches[i].fragScore.getScoreByName(scoringAlgorithm) , 'f', 3);
+        }
 
         QString observedAdductName = QString("");
         if (a && !a->name.empty()) {
