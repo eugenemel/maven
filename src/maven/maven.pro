@@ -103,7 +103,8 @@ HEADERS +=  stable.h \
             directinfusiondialog.h \
             background_directinfusion_update.h \
             editpeakgroupingdialog.h \
-            selectadductsdialog.h
+            selectadductsdialog.h \
+            setrumsdbdialog.h
 
 SOURCES +=  mainwindow.cpp  \
             classifier.cpp \
@@ -150,7 +151,8 @@ SOURCES +=  mainwindow.cpp  \
             directinfusiondialog.cpp \
             background_directinfusion_update.cpp \
             editpeakgroupingdialog.cpp \
-            selectadductsdialog.cpp
+            selectadductsdialog.cpp \
+            setrumsdbdialog.cpp
 
 
 sources.files =  $$HEADERS \
