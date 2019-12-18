@@ -81,6 +81,7 @@ public:
     vector <mzSample*> samples;		//list of loaded samples
     static mzSample* loadSampleStatic(QString filename);
     vector<Adduct*> availableAdducts; //loaded from file, or fall back to default
+    string rumsDBDatabaseName;
 
     QDoubleSpinBox 	  *ppmWindowBox;
     QLineEdit         *searchText;
