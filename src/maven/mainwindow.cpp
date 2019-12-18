@@ -689,8 +689,13 @@ void MainWindow::open(){
         foreach(QString filename, projects) {
             if (filename.endsWith("mzroll"))    projectDockWidget->loadProjectXML(filename);
             if (filename.endsWith("mzrollDB")) {
-                cout << "TODO: specify a rumsDB name." << endl;
-                projectDockWidget->loadProjectSQLITE(filename);
+
+                SetRumsDBDialog setRumsDBDialog(this);
+                setRumsDBDialog.exec();
+
+                if (!setRumsDBDialog.isCancelled()) {
+                    projectDockWidget->loadProjectSQLITE(filename);
+                }
             }
         }
         return;

@@ -31,6 +31,7 @@
 #include "spectralhit.h"
 #include "rconsolewidget.h"
 #include "librarydialog.h"
+#include "setrumsdbdialog.h"
 
 class SettingsForm;
 class EicWidget;
