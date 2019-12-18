@@ -4,20 +4,32 @@ SetRumsDBDialog::SetRumsDBDialog(QWidget *parent) : QDialog(parent) {
         setupUi(this);
         setModal(true);
 
+        QStringList dbnames = DB.getLoadedDatabaseNames();
+        for (QString db : dbnames) {
+            cmbLoadedLibraries->addItem(db);
+        }
+
         mainWindow = static_cast<MainWindow*>(parent);
+
+
+        QString selectedDB = mainWindow->ligandWidget->getDatabaseName();
+        cmbLoadedLibraries->setCurrentIndex(cmbLoadedLibraries->findText(selectedDB));
 
         connect(btnCancel, SIGNAL(clicked()), this, SLOT(cancelLoading()));
         connect(btnUseSelected, SIGNAL(clicked()), this, SLOT(setRumsDBDatabaseName()));
+
+        QDialog::show();
 }
 
 void SetRumsDBDialog::setRumsDBDatabaseName() {
     _isCancelled = false;
+    mainWindow->rumsDBDatabaseName = cmbLoadedLibraries->currentText();
     close();
 }
 
 void SetRumsDBDialog::useNoRumsDBDatabaseName() {
     _isCancelled = false;
-    mainWindow->rumsDBDatabaseName = "";
+    mainWindow->rumsDBDatabaseName = QString("");
     close();
 }
 

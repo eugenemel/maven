@@ -694,6 +694,7 @@ void MainWindow::open(){
                 setRumsDBDialog.exec();
 
                 if (!setRumsDBDialog.isCancelled()) {
+                    qDebug() << "rumsDB spectral library:\"" << rumsDBDatabaseName << "\"";
                     projectDockWidget->loadProjectSQLITE(filename);
                 }
             }
