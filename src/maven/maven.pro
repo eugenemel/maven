@@ -52,7 +52,8 @@ FORMS = forms/settingsform.ui  \
         forms/librarydialog.ui \
         forms/directinfusiondialog.ui \
         forms/editpeakgroupdialog.ui \
-        forms/selectadductsdialog.ui
+        forms/selectadductsdialog.ui \
+        forms/setrumsDBdialog.ui
 
 
 HEADERS +=  stable.h \
