@@ -15,8 +15,9 @@ SetRumsDBDialog::SetRumsDBDialog(QWidget *parent) : QDialog(parent) {
         QString selectedDB = mainWindow->ligandWidget->getDatabaseName();
         cmbLoadedLibraries->setCurrentIndex(cmbLoadedLibraries->findText(selectedDB));
 
-        connect(btnCancel, SIGNAL(clicked()), this, SLOT(cancelLoading()));
         connect(btnUseSelected, SIGNAL(clicked()), this, SLOT(setRumsDBDatabaseName()));
+        connect(btnNoLibrary, SIGNAL(clicked()), this, SLOT(useNoRumsDBDatabaseName()));
+        connect(btnCancel, SIGNAL(clicked()), this, SLOT(cancelLoading()));
 
         QDialog::show();
 }
