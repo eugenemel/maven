@@ -3,6 +3,7 @@
 SetRumsDBDialog::SetRumsDBDialog(QWidget *parent) : QDialog(parent) {
         setupUi(this);
         setModal(true);
+        _isCancelled = true;
 
         QStringList dbnames = DB.getLoadedDatabaseNames();
         for (QString db : dbnames) {
@@ -18,6 +19,8 @@ SetRumsDBDialog::SetRumsDBDialog(QWidget *parent) : QDialog(parent) {
         connect(btnUseSelected, SIGNAL(clicked()), this, SLOT(setRumsDBDatabaseName()));
         connect(btnNoLibrary, SIGNAL(clicked()), this, SLOT(useNoRumsDBDatabaseName()));
         connect(btnCancel, SIGNAL(clicked()), this, SLOT(cancelLoading()));
+
+        btnUseSelected->setFocus();
 
         QDialog::show();
 }

@@ -24,7 +24,7 @@ class SetRumsDBDialog : public QDialog, public Ui_setrumsDBDialog {
 
     private:
         MainWindow* mainWindow;
-        bool _isCancelled = false;
+        bool _isCancelled = true;
 };
 
 #endif // SETRUMSDBDIALOG_H
