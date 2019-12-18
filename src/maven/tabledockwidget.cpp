@@ -595,7 +595,10 @@ void TableDockWidget::deleteAll() {
 
 
 void TableDockWidget::showAllGroups() {
+
     treeWidget->clear();
+    groupToItem.clear();    //addRow() calls will refill the map
+
     if (allgroups.size() == 0 ) return;
 
     treeWidget->setSortingEnabled(false);
@@ -705,7 +708,7 @@ void TableDockWidget::exportGroupsToSpreadsheet() {
         PeakGroup *peakGroupPtr = &(group);
         pair<rowIterator, rowIterator> tableRows = groupToItem.equal_range(peakGroupPtr);
         for (rowIterator it = tableRows.first; it != tableRows.second; it++) {
-            if (it->second->isSelected()) {
+            if (it->second && it->second->isSelected()) {
                 isSelected = true;
                 break;
             }
