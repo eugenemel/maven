@@ -376,7 +376,7 @@ vector<MassCalculator::Match> Database::findMatchingCompounds(float mz, float pp
     return uniqset;
 }
 
-vector<MassCalculator::Match> Database::findMathchingCompoundsSLOW(float mz, float ppm, float charge) {
+vector<MassCalculator::Match> Database::findMatchingCompoundsSLOW(float mz, float ppm, float charge) {
     vector<MassCalculator::Match>uniqset;
     MassCalculator mcalc;
 
