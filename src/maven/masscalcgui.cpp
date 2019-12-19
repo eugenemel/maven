@@ -124,6 +124,8 @@ void MassCalcWidget::showTablerumsDBMatches(PeakGroup *grp) {
     p->setSortingEnabled(true);
     p->setUpdatesEnabled(true);
     p->update();
+
+    isInRumsDBMode = true;
 }
 
 void MassCalcWidget::showTable() {
@@ -185,6 +187,7 @@ void MassCalcWidget::showTable() {
     p->setUpdatesEnabled(true);
     p->update();
 
+    isInRumsDBMode = true;
 }
 
 void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
@@ -256,6 +259,11 @@ void MassCalcWidget::keggLink(QString formula){
 }
 
 void MassCalcWidget::showInfo() {
+
+    if (isInRumsDBMode){
+        return;
+    }
+
     if (matches.size() == 0) return;
 
     QList<QTreeWidgetItem*> items = treeWidget->selectedItems();

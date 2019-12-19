@@ -50,6 +50,8 @@ private:
 
       void pubChemLink(QString formula);
       void keggLink(QString formula);
+
+      bool isInRumsDBMode = false;
       
 };
 
