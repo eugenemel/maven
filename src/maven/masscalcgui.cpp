@@ -102,14 +102,16 @@ void MassCalcWidget::showTablerumsDBMatches(PeakGroup *grp) {
 
     for (matchIterator it = rumsDBMatches.first; it != rumsDBMatches.second; ++it) {
 
-        tuple<string, string, float> matchInfo = it->second;
+        tuple<string, string, int, float> matchInfo = it->second;
+
         string compoundName = get<0>(matchInfo);
         string adductName = get<1>(matchInfo);
-        float score = get<2>(matchInfo);
+        int compoundId = get<2>(matchInfo);
+        float score = get<3>(matchInfo);
 
         NumericTreeWidgetItem* item = new NumericTreeWidgetItem(treeWidget, Qt::UserRole);
-        item->setData(0, Qt::UserRole, compoundName.c_str());
-        item->setData(1, Qt::UserRole, adductName.c_str());
+        item->setData(0, Qt::UserRole, QVariant(compoundId));
+        item->setData(1, Qt::UserRole, QString(adductName.c_str()));
 
         item->setText(0, compoundName.c_str());
         item->setText(1, adductName.c_str());
@@ -281,10 +283,10 @@ void MassCalcWidget::showInfo() {
 
     } else if (!_mw->rumsDBDatabaseName.isEmpty()) {
 
-        QString compoundName = item->data(0, Qt::UserRole).toString();
+        QVariant compoundId = item->data(0, Qt::UserRole);
         QString adductName = item->data(1, Qt::UserRole).toString();
 
-        Compound *compound = DB.findSpeciesByNameAndAdduct(compoundName.toStdString(), adductName.toStdString(), _mw->rumsDBDatabaseName.toStdString());
+        Compound *compound = DB.findSpeciesById(to_string(compoundId.toInt()), _mw->rumsDBDatabaseName.toStdString());
 
         if (compound) {
             _mw->fragmentationSpectraWidget->overlayCompound(compound);
