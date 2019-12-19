@@ -527,7 +527,7 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary) {
             Compound* compound = DB.findSpeciesById(compoundId, compoundDB);
 
             //Issue 92: fall back to rumsDB table if could not find compound the normal way.
-            if (!compound && g.searchTableName == "rumsDB") {
+            if (!compound && g.searchTableName == "rumsDB" && !rumsDBLibrary.isEmpty()) {
                 compound = DB.findSpeciesById(compoundId, rumsDBLibrary.toStdString());
             }
 
