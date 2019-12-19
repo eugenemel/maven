@@ -87,8 +87,14 @@ void MassCalcWidget::compute() {
      showTable(); 
 }
 
+void MassCalcWidget::showTablerumsDBMatches() {
+
+}
+
 void MassCalcWidget::showTable() {
-        
+
+    string scoringAlgorithm = scoringSchema->currentText().toStdString();
+
     QTreeWidget *p = treeWidget;
     p->setUpdatesEnabled(false); 
     p->clear(); 
@@ -96,8 +102,6 @@ void MassCalcWidget::showTable() {
     p->setHeaderLabels( QStringList() << "Compound" << "Reference Adduct"  << "rtDiff" << "ppmDiff" << "fragScore" << "Observed Adduct" << "Mass" << "DB");
     p->setSortingEnabled(false);
     p->setUpdatesEnabled(false);
-
-    string scoringAlgorithm = scoringSchema->currentText().toStdString();
 
     for(unsigned int i=0;  i < matches.size(); i++ ) {
         //no duplicates in the list
@@ -107,13 +111,7 @@ void MassCalcWidget::showTable() {
         QString ppmDiff = QString::number( matches[i].diff , 'f', 2);
         QString rtDiff = QString::number(matches[i].rtdiff,'f', 1);
 
-        QString matchScore;
-        if (scoringAlgorithm == "rumsDB") {
-            //retrieve score from database instead of from frag score
-            matchScore = "banana";
-        } else {
-            matchScore = QString::number( matches[i].fragScore.getScoreByName(scoringAlgorithm) , 'f', 3);
-        }
+        QString matchScore = QString::number( matches[i].fragScore.getScoreByName(scoringAlgorithm) , 'f', 3);
 
         QString observedAdductName = QString("");
         if (a && !a->name.empty()) {
