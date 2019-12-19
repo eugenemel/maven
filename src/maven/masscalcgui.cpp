@@ -91,8 +91,8 @@ void MassCalcWidget::showTablerumsDBMatches(PeakGroup *grp) {
     QTreeWidget *p = treeWidget;
     p->setUpdatesEnabled(false);
     p->clear();
-    p->setColumnCount(8);
-    p->setHeaderLabels( QStringList() << "Compound" << "Reference Adduct"  << "rtDiff" << "ppmDiff" << "fragScore" << "Observed Adduct" << "Mass" << "DB");
+    p->setColumnCount(4);
+    p->setHeaderLabels( QStringList() << "Compound" << "Adduct"  << "score" << "DB");
     p->setSortingEnabled(false);
     p->setUpdatesEnabled(false);
 
@@ -113,17 +113,13 @@ void MassCalcWidget::showTablerumsDBMatches(PeakGroup *grp) {
 
         item->setText(0, compoundName.c_str());
         item->setText(1, adductName.c_str());
-        item->setText(2, "");
-        item->setText(3, "");
-        item->setText(4, QString::number(score, 'f', 3));
-        item->setText(5, adductName.c_str());
-        item->setText(6, QString::number(grp->meanMz, 'f', 4));
-        item->setText(7, "rumsDB matches");
+        item->setText(2, QString::number(score, 'f', 3));
+        item->setText(3, "rumsDB matches");
 
         counter++;
     }
 
-    p->sortByColumn(4,Qt::DescendingOrder); //decreasing by score
+    p->sortByColumn(2,Qt::DescendingOrder); //decreasing by score
     p->header()->setStretchLastSection(true);
     p->setSortingEnabled(true);
     p->setUpdatesEnabled(true);
