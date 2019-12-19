@@ -65,6 +65,7 @@ class Database {
 		Compound* findSpeciesByPrecursor(float precursorMz, float productMz,int polarity,double amuQ1, double amuQ3);
         set<Compound*> findSpeciesByMass(float mz, float ppm);
         vector<Compound*> findSpeciesByName(string name, string dbname);
+        Compound* findSpeciesByNameAndAdduct(string name, string dbname, string adduct);
 
         vector<MassCalculator::Match> findMatchingCompounds(float mz, float ppm, float charge);
         vector<MassCalculator::Match> findMathchingCompoundsSLOW(float mz, float ppm, float charge);

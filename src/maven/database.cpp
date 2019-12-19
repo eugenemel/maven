@@ -311,13 +311,27 @@ vector<Compound*> Database::findSpeciesByName(string name, string dbname) {
         if (!loadedDatabase.count(dbname.c_str()))  loadCompoundsSQL(dbname.c_str(),ligandDB);
 
         vector<Compound*> set;
-        qDebug() << "findSpeciesByName" << name.c_str();
+        qDebug() << "Database::findSpeciesByName()" << name.c_str();
 		for(unsigned int i=0; i < compoundsDB.size(); i++ ) {
 				if (compoundsDB[i]->name == name && compoundsDB[i]->db == dbname) {
 					set.push_back(compoundsDB[i]);
 				}
 		}
 		return set;
+}
+
+Compound* Database::findSpeciesByNameAndAdduct(string name, string dbname, string adductName){
+
+    if (!loadedDatabase.count(dbname.c_str()))  loadCompoundsSQL(dbname.c_str(),ligandDB);
+
+    qDebug() << "Database::findSpeciesByNameAndAdduct()" << name.c_str();
+    for(unsigned int i=0; i < compoundsDB.size(); i++ ) {
+            if (compoundsDB[i]->name == name && compoundsDB[i]->db == dbname && compoundsDB[i]->adductString == adductName) {
+                return compoundsDB[i];
+            }
+    }
+
+    return nullptr;
 }
 
 Compound* Database::findSpeciesByPrecursor(float precursorMz, float productMz, int polarity,double amuQ1, double amuQ3) {
