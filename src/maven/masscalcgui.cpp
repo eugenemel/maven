@@ -100,7 +100,6 @@ void MassCalcWidget::showTablerumsDBMatches(PeakGroup *grp) {
 
     pair<matchIterator, matchIterator> rumsDBMatches = _mw->getProjectWidget()->currentProject->allMatches.equal_range(peakGroupId);
 
-    unsigned int counter = 0;
     for (matchIterator it = rumsDBMatches.first; it != rumsDBMatches.second; ++it) {
 
         tuple<string, string, float> matchInfo = it->second;
@@ -109,14 +108,13 @@ void MassCalcWidget::showTablerumsDBMatches(PeakGroup *grp) {
         float score = get<2>(matchInfo);
 
         NumericTreeWidgetItem* item = new NumericTreeWidgetItem(treeWidget, Qt::UserRole);
-        item->setData(0,Qt::UserRole,QVariant(counter));
+        item->setData(0, Qt::UserRole, compoundName.c_str());
+        item->setData(1, Qt::UserRole, adductName.c_str());
 
         item->setText(0, compoundName.c_str());
         item->setText(1, adductName.c_str());
         item->setText(2, QString::number(score, 'f', 3));
         item->setText(3, "rumsDB matches");
-
-        counter++;
     }
 
     p->sortByColumn(2,Qt::DescendingOrder); //decreasing by score
@@ -260,12 +258,6 @@ void MassCalcWidget::keggLink(QString formula){
 
 void MassCalcWidget::showInfo() {
 
-    if (isInRumsDBMode){
-        return;
-    }
-
-    if (matches.size() == 0) return;
-
     QList<QTreeWidgetItem*> items = treeWidget->selectedItems();
     if (items.size() == 0) {
         return;
@@ -274,14 +266,37 @@ void MassCalcWidget::showInfo() {
     QTreeWidgetItem* item = items.last();
     if(!item) return;
 
-    QVariant v = item->data(0,Qt::UserRole);
-    int mNum = v.toInt();
+    if (!isInRumsDBMode) {
 
-    MassCalculator::Match m = matches[mNum];
-    if (m.compoundLink) {
-        _mw->getEicWidget()->setCompound(m.compoundLink,m.adductLink);
-        _mw->fragmentationSpectraWidget->overlayCompound(m.compoundLink);
+        if (matches.size() == 0) return;
+
+        QVariant v = item->data(0,Qt::UserRole);
+        int mNum = v.toInt();
+
+        MassCalculator::Match m = matches[mNum];
+        if (m.compoundLink) {
+            _mw->getEicWidget()->setCompound(m.compoundLink,m.adductLink);
+            _mw->fragmentationSpectraWidget->overlayCompound(m.compoundLink);
+        }
+
+    } else if (!_mw->rumsDBDatabaseName.isEmpty()) {
+
+        QString compoundName = item->data(0, Qt::UserRole).toString();
+        QString adductName = item->data(1, Qt::UserRole).toString();
+
+        Compound *compound = DB.findSpeciesByNameAndAdduct(compoundName.toStdString(), adductName.toStdString(), _mw->rumsDBDatabaseName.toStdString());
+
+        if (compound) {
+            _mw->fragmentationSpectraWidget->overlayCompound(compound);
+
+            Adduct *adduct = DB.findAdductByName(adductName.toStdString());
+
+            if (adduct) {
+                _mw->getEicWidget()->setCompound(compound, adduct);
+            }
+        }
     }
+
 }
 
 MassCalcWidget::~MassCalcWidget() { 
