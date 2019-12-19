@@ -668,6 +668,7 @@ void ProjectDB::loadMatchTable() {
             int groupId = queryMatches.value("groupId").toInt();
             string originalCompoundName = queryMatches.value("originalCompoundName").toString().toStdString();
             float score = queryMatches.value("score").toFloat();
+            string adductName = queryMatches.value("adductName").toString().toStdString();
 
             if (topMatch.find(groupId) == topMatch.end()) {
                 topMatch.insert(make_pair(groupId, make_pair(originalCompoundName, score)));
@@ -680,6 +681,7 @@ void ProjectDB::loadMatchTable() {
         }
 
         qDebug() << "ProjectDB::loadMatchTable(): Loaded " << topMatch.size() << " top matches.";
+        qDebug() << "ProjectDB::loadMatchTable(): Loaded " << allMatches.size() << "matches.";
 }
 
 mzSample* ProjectDB::getSampleById(int sampleId) { 

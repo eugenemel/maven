@@ -20,7 +20,8 @@ class ProjectDB {
 
             vector<PeakGroup> allgroups;
             vector<mzSample*> samples;
-            map<int,std::pair<string, float>> topMatch = {};
+            map<int, pair<string, float>> topMatch = {};
+            multimap<int, tuple<string, string, float>> allMatches = {};
 
             void clearLoadedPeakGroups() { allgroups.clear(); }
             void saveSamples(vector<mzSample *> &sampleSet);
