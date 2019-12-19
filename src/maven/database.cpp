@@ -320,13 +320,13 @@ vector<Compound*> Database::findSpeciesByName(string name, string dbname) {
 		return set;
 }
 
-Compound* Database::findSpeciesByNameAndAdduct(string name, string dbname, string adductName){
+Compound* Database::findSpeciesByNameAndAdduct(string compoundName, string adductName, string dbname){
 
     if (!loadedDatabase.count(dbname.c_str()))  loadCompoundsSQL(dbname.c_str(),ligandDB);
 
-    qDebug() << "Database::findSpeciesByNameAndAdduct()" << name.c_str();
+    qDebug() << "Database::findSpeciesByNameAndAdduct()" << compoundName.c_str();
     for(unsigned int i=0; i < compoundsDB.size(); i++ ) {
-            if (compoundsDB[i]->name == name && compoundsDB[i]->db == dbname && compoundsDB[i]->adductString == adductName) {
+            if (compoundsDB[i]->name == compoundName && compoundsDB[i]->db == dbname && compoundsDB[i]->adductString == adductName) {
                 return compoundsDB[i];
             }
     }
