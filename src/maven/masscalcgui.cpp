@@ -67,7 +67,7 @@ void MassCalcWidget::compute() {
 	 _mz = 		lineEdit->text().toDouble(&isDouble);
   	 _charge =  ionization->value();
   	 _ppm = 	maxppmdiff->value();
-     
+          
 	 if (!isDouble) return;
 	 cerr << "massCalcGui:: compute() " << _charge << " " << _mz << endl;
 
@@ -87,8 +87,23 @@ void MassCalcWidget::compute() {
      showTable(); 
 }
 
-void MassCalcWidget::showTablerumsDBMatches() {
+void MassCalcWidget::showTablerumsDBMatches(int peakGroupId) {
 
+    QTreeWidget *p = treeWidget;
+    p->setUpdatesEnabled(false);
+    p->clear();
+    p->setColumnCount(8);
+    p->setHeaderLabels( QStringList() << "Compound" << "Reference Adduct"  << "rtDiff" << "ppmDiff" << "fragScore" << "Observed Adduct" << "Mass" << "DB");
+    p->setSortingEnabled(false);
+    p->setUpdatesEnabled(false);
+
+
+
+    p->sortByColumn(4,Qt::DescendingOrder); //decreasing by score
+    p->header()->setStretchLastSection(true);
+    p->setSortingEnabled(true);
+    p->setUpdatesEnabled(true);
+    p->update();
 }
 
 void MassCalcWidget::showTable() {
@@ -152,7 +167,8 @@ void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
 
     if(!grp) return;
 
-    _mz = grp->meanMz;
+    _mz = grp->meanMz;    
+
     matches = DB.findMatchingCompounds(_mz,_ppm,_charge);
 
     if (grp->fragmentationPattern.nobs() == 0){
@@ -168,7 +184,11 @@ void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
 
     }
 
-    showTable();
+    if (scoringSchema->currentText().toStdString() == "rumsDB") {
+        showTablerumsDBMatches(grp->groupId);
+    } else {
+        showTable();
+    }
 }
 
 void MassCalcWidget::setFragmentationScan(Scan* scan) {

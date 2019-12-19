@@ -666,18 +666,23 @@ void ProjectDB::loadMatchTable() {
 
         while (queryMatches.next()) {
             int groupId = queryMatches.value("groupId").toInt();
+
             string originalCompoundName = queryMatches.value("originalCompoundName").toString().toStdString();
             float score = queryMatches.value("score").toFloat();
             string adductName = queryMatches.value("adductName").toString().toStdString();
 
+            tuple<string, string, float> matchTuple = tuple<string, string, float>(originalCompoundName, adductName, score);
+
             if (topMatch.find(groupId) == topMatch.end()) {
-                topMatch.insert(make_pair(groupId, make_pair(originalCompoundName, score)));
+                topMatch.insert(make_pair(groupId, matchTuple));
             } else {
-                pair<string, float> oldMatch = topMatch.at(groupId);
-                if (score > oldMatch.second) {
-                    topMatch.at(groupId) = make_pair(originalCompoundName, score);
+                tuple<string, string, float> oldMatch = topMatch.at(groupId);
+                if (score > get<2>(oldMatch)) {
+                    topMatch.at(groupId) = matchTuple;
                 }
             }
+
+            allMatches.insert(make_pair(groupId, matchTuple));
         }
 
         qDebug() << "ProjectDB::loadMatchTable(): Loaded " << topMatch.size() << " top matches.";

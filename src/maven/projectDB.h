@@ -20,7 +20,7 @@ class ProjectDB {
 
             vector<PeakGroup> allgroups;
             vector<mzSample*> samples;
-            map<int, pair<string, float>> topMatch = {};
+            map<int, tuple<string, string, float>> topMatch = {};
             multimap<int, tuple<string, string, float>> allMatches = {};
 
             void clearLoadedPeakGroups() { allgroups.clear(); }
@@ -63,6 +63,6 @@ class ProjectDB {
 	    vector<mzSample*> getSamples() { return samples; }
 };
 
-typedef map<int,pair<string,float>>::iterator matchIterator;
+typedef map<int, tuple<string, string, float>>::iterator matchIterator;
 
 #endif

@@ -37,7 +37,7 @@ private slots:
       void showInfo();
 	  void getMatches();
       void showTable();
-      void showTablerumsDBMatches();
+      void showTablerumsDBMatches(int groupId);
    
 private:
       MainWindow* _mw;

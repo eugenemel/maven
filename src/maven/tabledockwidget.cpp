@@ -1765,9 +1765,9 @@ void TableDockWidget::showEditPeakGroupDialog() {
         if (_mainwindow->getProjectWidget()->currentProject->topMatch.find(selectedPeakGroup->groupId)
                 != _mainwindow->getProjectWidget()->currentProject->topMatch.end()){
 
-            pair<string, float> originalCompoundNameAndScore = _mainwindow->getProjectWidget()->currentProject->topMatch.at(selectedPeakGroup->groupId);
+            tuple<string, string, float> originalCompoundNameAndScore = _mainwindow->getProjectWidget()->currentProject->topMatch.at(selectedPeakGroup->groupId);
 
-            compoundString.append(originalCompoundNameAndScore.first.c_str());
+            compoundString.append(get<0>(originalCompoundNameAndScore).c_str());
         }
 
     }
