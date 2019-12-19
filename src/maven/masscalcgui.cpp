@@ -81,13 +81,12 @@ void MassCalcWidget::compute() {
         //matches=mcalc.enumerateMasses(_mz,_charge,_ppm);
     }
 
-
     _mw->setStatusText(tr("Found %1 compounds").arg(matches.size()));
 
      showTable(); 
 }
 
-void MassCalcWidget::showTablerumsDBMatches(int peakGroupId) {
+void MassCalcWidget::showTablerumsDBMatches(PeakGroup *grp) {
 
     QTreeWidget *p = treeWidget;
     p->setUpdatesEnabled(false);
@@ -97,7 +96,32 @@ void MassCalcWidget::showTablerumsDBMatches(int peakGroupId) {
     p->setSortingEnabled(false);
     p->setUpdatesEnabled(false);
 
+    int peakGroupId = grp->groupId;
 
+    pair<matchIterator, matchIterator> rumsDBMatches = _mw->getProjectWidget()->currentProject->allMatches.equal_range(peakGroupId);
+
+    unsigned int counter = 0;
+    for (matchIterator it = rumsDBMatches.first; it != rumsDBMatches.second; ++it) {
+
+        tuple<string, string, float> matchInfo = it->second;
+        string compoundName = get<0>(matchInfo);
+        string adductName = get<1>(matchInfo);
+        float score = get<2>(matchInfo);
+
+        NumericTreeWidgetItem* item = new NumericTreeWidgetItem(treeWidget, Qt::UserRole);
+        item->setData(0,Qt::UserRole,QVariant(counter));
+
+        item->setText(0, compoundName.c_str());
+        item->setText(1, adductName.c_str());
+        item->setText(2, "");
+        item->setText(3, "");
+        item->setText(4, QString::number(score, 'f', 3));
+        item->setText(5, adductName.c_str());
+        item->setText(6, QString::number(grp->meanMz, 'f', 4));
+        item->setText(7, "rumsDB matches");
+
+        counter++;
+    }
 
     p->sortByColumn(4,Qt::DescendingOrder); //decreasing by score
     p->header()->setStretchLastSection(true);
@@ -126,7 +150,12 @@ void MassCalcWidget::showTable() {
         QString ppmDiff = QString::number( matches[i].diff , 'f', 2);
         QString rtDiff = QString::number(matches[i].rtdiff,'f', 1);
 
-        QString matchScore = QString::number( matches[i].fragScore.getScoreByName(scoringAlgorithm) , 'f', 3);
+        QString matchScore;
+        if (scoringAlgorithm == "rumsDB") {
+            matchScore = "N/A";
+        } else {
+            matchScore = QString::number( matches[i].fragScore.getScoreByName(scoringAlgorithm) , 'f', 3);
+        }
 
         QString observedAdductName = QString("");
         if (a && !a->name.empty()) {
@@ -185,7 +214,7 @@ void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
     }
 
     if (scoringSchema->currentText().toStdString() == "rumsDB") {
-        showTablerumsDBMatches(grp->groupId);
+        showTablerumsDBMatches(grp);
     } else {
         showTable();
     }
