@@ -93,6 +93,7 @@ public:
     PlotAxes(int type, int nticks, PlotScene *scene):QGraphicsItem(0){
         this->type = type; this->nticks=nticks; offset=0; tickLinesFlag=false; logTrasformed=false;
         if(scene) scene->addItem(this);
+        _font = QFont("Helvetica", 12);
     };
 
     QRectF boundingRect() const;
@@ -100,6 +101,8 @@ public:
 	void setOffset(int o ) { offset=o;  }
 	void showTicLines(bool f) { tickLinesFlag=f; }
     void setLogTransformed(bool x) { logTrasformed=x; }
+
+    QFont _font;
 	
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

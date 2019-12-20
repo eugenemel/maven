@@ -410,9 +410,7 @@ void PlotAxes::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
 	QPen pen(Qt::black, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
 	painter->setPen(pen);
 
-    float fontsize = 12;
-    QFont font("Helvetica",fontsize);
-	painter->setFont(font);
+    painter->setFont(_font);
 
     if (nticks == 0 ) nticks = 2;
     PlotScene* myscene = (PlotScene*) scene();
@@ -479,11 +477,22 @@ void PlotDockWidget::exportPDF(){
 	printer.setFontEmbeddingEnabled(false);
 	printer.setPageSize(QPrinter::Letter);
     printer.setOrientation(QPrinter::Landscape);
-	printer.setResolution(600);
+//	printer.setResolution(600);
     QPainter painter(&printer);
     painter.setRenderHint(QPainter::Antialiasing);
-	scene()->setFont( QFont("Helvetica",8) );
-	painter.setFont( QFont("Helvetica", 8) );
+
+    QFont font("Helvetica", 8);
+    font.setPixelSize(8.0 / 72.0 * printer.resolution());
+
+//    scene()->setFont(font);
+//    painter.setFont(font);
+
+//    for (auto& item : scene()->items()) {
+//        if (PlotAxes* axes = dynamic_cast<PlotAxes*>(item)) {
+//            axes->_font = font; //This approach does not work
+//        }
+//    }
+
     view()->render(&painter);
 }
 
