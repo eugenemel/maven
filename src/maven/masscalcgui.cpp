@@ -187,7 +187,7 @@ void MassCalcWidget::showTable() {
     p->setUpdatesEnabled(true);
     p->update();
 
-    isInRumsDBMode = true;
+    isInRumsDBMode = false;
 }
 
 void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
