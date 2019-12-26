@@ -98,25 +98,27 @@ void MassCalcWidget::showTablerumsDBMatches(PeakGroup *grp) {
 
     int peakGroupId = grp->groupId;
 
-    pair<matchIterator, matchIterator> rumsDBMatches = _mw->getProjectWidget()->currentProject->allMatches.equal_range(peakGroupId);
+    if (_mw->getProjectWidget()->currentProject){
+        pair<matchIterator, matchIterator> rumsDBMatches = _mw->getProjectWidget()->currentProject->allMatches.equal_range(peakGroupId);
 
-    for (matchIterator it = rumsDBMatches.first; it != rumsDBMatches.second; ++it) {
+        for (matchIterator it = rumsDBMatches.first; it != rumsDBMatches.second; ++it) {
 
-        tuple<string, string, int, float> matchInfo = it->second;
+            tuple<string, string, int, float> matchInfo = it->second;
 
-        string compoundName = get<0>(matchInfo);
-        string adductName = get<1>(matchInfo);
-        int compoundId = get<2>(matchInfo);
-        float score = get<3>(matchInfo);
+            string compoundName = get<0>(matchInfo);
+            string adductName = get<1>(matchInfo);
+            int compoundId = get<2>(matchInfo);
+            float score = get<3>(matchInfo);
 
-        NumericTreeWidgetItem* item = new NumericTreeWidgetItem(treeWidget, Qt::UserRole);
-        item->setData(0, Qt::UserRole, QVariant(compoundId));
-        item->setData(1, Qt::UserRole, QString(adductName.c_str()));
+            NumericTreeWidgetItem* item = new NumericTreeWidgetItem(treeWidget, Qt::UserRole);
+            item->setData(0, Qt::UserRole, QVariant(compoundId));
+            item->setData(1, Qt::UserRole, QString(adductName.c_str()));
 
-        item->setText(0, compoundName.c_str());
-        item->setText(1, adductName.c_str());
-        item->setText(2, QString::number(score, 'f', 3));
-        item->setText(3, "rumsDB matches");
+            item->setText(0, compoundName.c_str());
+            item->setText(1, adductName.c_str());
+            item->setText(2, QString::number(score, 'f', 3));
+            item->setText(3, "rumsDB matches");
+        }
     }
 
     p->sortByColumn(2,Qt::DescendingOrder); //decreasing by score
