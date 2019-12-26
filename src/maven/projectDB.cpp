@@ -665,29 +665,50 @@ void ProjectDB::loadMatchTable() {
         queryMatches.exec("select * from matches;");
 
         while (queryMatches.next()) {
+
             int groupId = queryMatches.value("groupId").toInt();
 
-            string originalCompoundName = queryMatches.value("originalCompoundName").toString().toStdString();
+            int ionId = queryMatches.value("ionId").toInt();
+            string compoundName = queryMatches.value("compoundName").toString().toStdString();
             string adductName = queryMatches.value("adductName").toString().toStdString();
-            int compoundId = queryMatches.value("ionId").toInt();
+            int summarizationLevel = queryMatches.value("summarizationLevel").toInt();
+            string originalCompoundName = queryMatches.value("originalCompoundName").toString().toStdString();
             float score = queryMatches.value("score").toFloat();
+            bool is_match = queryMatches.value("is_match").toBool();
 
-            tuple<string, string, int, float> matchTuple = tuple<string, string, int, float>(originalCompoundName, adductName, compoundId, score);
+            shared_ptr<mzrollDBMatch> mzrollDBMatchPtr = shared_ptr<mzrollDBMatch>(
+                new mzrollDBMatch(
+                groupId,
+                ionId,
+                compoundName,
+                adductName,
+                summarizationLevel,
+                originalCompoundName,
+                score,
+                is_match)
+            );
 
             if (topMatch.find(groupId) == topMatch.end()) {
-                topMatch.insert(make_pair(groupId, matchTuple));
+                topMatch.insert(make_pair(groupId, mzrollDBMatchPtr));
             } else {
-                tuple<string, string, int, float> oldMatch = topMatch.at(groupId);
-                if (score > get<3>(oldMatch)) {
-                    topMatch.at(groupId) = matchTuple;
+                shared_ptr<mzrollDBMatch> oldMatch = topMatch.at(groupId);
+                if (score > oldMatch->score) {
+                    topMatch.at(groupId) = mzrollDBMatchPtr;
                 }
             }
 
-            allMatches.insert(make_pair(groupId, matchTuple));
+            allMatches.insert(make_pair(groupId, mzrollDBMatchPtr));
         }
 
         qDebug() << "ProjectDB::loadMatchTable(): Loaded " << topMatch.size() << " top matches.";
         qDebug() << "ProjectDB::loadMatchTable(): Loaded " << allMatches.size() << "matches.";
+}
+
+void ProjectDB::saveMatchTable() {
+
+        qDebug() << "ProjectDB::saveMatchTable()... ";
+
+        qDebug() << "ProjectDB::loadMatchTable(): Saved " << allMatches.size() << "matches.";
 }
 
 mzSample* ProjectDB::getSampleById(int sampleId) { 

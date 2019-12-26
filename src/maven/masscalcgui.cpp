@@ -102,12 +102,12 @@ void MassCalcWidget::showTablerumsDBMatches(PeakGroup *grp) {
 
         for (matchIterator it = rumsDBMatches.first; it != rumsDBMatches.second; ++it) {
 
-            tuple<string, string, int, float> matchInfo = it->second;
+            shared_ptr<mzrollDBMatch> matchInfo = it->second;
 
-            string compoundName = get<0>(matchInfo);
-            string adductName = get<1>(matchInfo);
-            int compoundId = get<2>(matchInfo);
-            float score = get<3>(matchInfo);
+            string compoundName = matchInfo->compoundName;
+            string adductName = matchInfo->adductName;
+            int compoundId = matchInfo->ionId;
+            float score = matchInfo->score;
 
             NumericTreeWidgetItem* item = new NumericTreeWidgetItem(treeWidget, Qt::UserRole);
             item->setData(0, Qt::UserRole, QVariant(compoundId));

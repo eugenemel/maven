@@ -1770,9 +1770,9 @@ void TableDockWidget::showEditPeakGroupDialog() {
         if (_mainwindow->getProjectWidget()->currentProject->topMatch.find(selectedPeakGroup->groupId)
                 != _mainwindow->getProjectWidget()->currentProject->topMatch.end()){
 
-            tuple<string, string, int, float> originalCompoundNameAndScore = _mainwindow->getProjectWidget()->currentProject->topMatch.at(selectedPeakGroup->groupId);
+            shared_ptr<mzrollDBMatch> originalCompoundNameAndScore = _mainwindow->getProjectWidget()->currentProject->topMatch.at(selectedPeakGroup->groupId);
 
-            compoundString.append(get<0>(originalCompoundNameAndScore).c_str());
+            compoundString.append(originalCompoundNameAndScore->compoundName.c_str());
         }
 
     }
