@@ -20,12 +20,11 @@ MassCalcWidget::MassCalcWidget(MainWindow* mw) {
 
    scoringSchema->clear();
 
-   scoringSchema->addItem(QString("rumsDB"));
-
    for(string scoringAlgorithm: FragmentationMatchScore::getScoringAlgorithmNames()) {
         scoringSchema->addItem(scoringAlgorithm.c_str());
    }
 
+   scoringSchema->addItem(QString("rumsDB"));
 
 }
 
@@ -138,7 +137,7 @@ void MassCalcWidget::showTable() {
     p->setUpdatesEnabled(false); 
     p->clear(); 
     p->setColumnCount(8);
-    p->setHeaderLabels( QStringList() << "Compound" << "Reference Adduct"  << "rtDiff" << "ppmDiff" << "fragScore" << "Observed Adduct" << "Mass" << "DB");
+    p->setHeaderLabels( QStringList() << "Compound" << "Reference Adduct"  << "Observed Adduct" << "Theoretical m/z" << "ppmDiff" <<  "rtDiff" << "Score" << "DB");
     p->setSortingEnabled(false);
     p->setUpdatesEnabled(false);
 
@@ -175,15 +174,15 @@ void MassCalcWidget::showTable() {
 
         item->setText(0, c->name.c_str());
         item->setText(1, c->adductString.c_str());
-        item->setText(2, rtDiff);
-        item->setText(3, ppmDiff);
-        item->setText(4, matchScore);
-        item->setText(5, observedAdductName);
-        item->setText(6, preMz);
+        item->setText(2, observedAdductName);
+        item->setText(3, preMz);
+        item->setText(4, ppmDiff);
+        item->setText(5, rtDiff);
+        item->setText(6, matchScore);
         item->setText(7, db);
     }
 
-    p->sortByColumn(4,Qt::DescendingOrder); //decreasing by score
+    p->sortByColumn(6, Qt::DescendingOrder); //decreasing by score
     p->header()->setStretchLastSection(true);
     p->setSortingEnabled(true);
     p->setUpdatesEnabled(true);
