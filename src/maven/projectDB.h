@@ -7,6 +7,7 @@
 #include <QString>
 #include "mzSample.h"
 #include "database.h"
+#include <memory>
 
 class Database;
 extern Database DB;
