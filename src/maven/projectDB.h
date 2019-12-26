@@ -98,6 +98,6 @@ struct mzrollDBMatch {
     int isMatchAsInt() {return is_match ? 1: 0;}
 };
 
-typedef map<int, shared_ptr<mzrollDBMatch>>::iterator matchIterator;
+typedef multimap<int, shared_ptr<mzrollDBMatch>>::iterator matchIterator;
 
 #endif

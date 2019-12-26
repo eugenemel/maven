@@ -662,7 +662,8 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
     std::vector<mzSample*> sampleSet = _mainwindow->getSamples();
     if(sampleSet.size() == 0) return;
 
-    ProjectDB* project=0;
+    ProjectDB* project = nullptr;
+
     if (currentProject and currentProject->databaseName() == filename and currentProject->isOpen())  {
         qDebug() << "existing project..";
         project = currentProject;
@@ -670,6 +671,11 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
         qDebug() << "new project..";
         project = new ProjectDB(filename);
         project->openDatabaseConnection(filename);
+
+        if (currentProject && currentProject->isOpen()) {
+            project->topMatch = currentProject->topMatch;
+            project->allMatches = currentProject->allMatches;
+        }
     }
 
     lastOpennedProject=filename;
@@ -717,6 +723,8 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
         qDebug() << "All tables: Saved " << groupCount << "groups.";
 
         project->saveCompounds(compoundSet);
+
+        project->saveMatchTable();
 
         _mainwindow->setStatusText(tr("Saved %1 groups to %2").arg(QString::number(groupCount),filename));
     } else {

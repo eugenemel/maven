@@ -30,11 +30,12 @@ void ProjectDB::saveCompounds(vector<PeakGroup>& allgroups) {
 
 void ProjectDB::deleteAll() {
     QSqlQuery query(sqlDB);
-    query.exec("drop table compounds");
-    query.exec("drop table samples");
-    query.exec("drop table peakgroups");
-    query.exec("drop table peaks");
-    query.exec("drop table rt_update_key");
+    query.exec("drop table IF EXISTS compounds");
+    query.exec("drop table IF EXISTS samples");
+    query.exec("drop table IF EXISTS peakgroups");
+    query.exec("drop table IF EXISTS peaks");
+    query.exec("drop table IF EXISTS rt_update_key");
+    query.exec("drop table IF EXISTS matches");
 }
 
 void ProjectDB::deleteGroups() {
@@ -727,7 +728,7 @@ void ProjectDB::saveMatchTable() {
         }
 
         QSqlQuery query1(sqlDB);
-        query1.prepare("INSERT INTO matches (?,?,?,?,?,  ?,?,?)");
+        query1.prepare("INSERT INTO matches VALUES(?,?,?,?,?,  ?,?,?)");
         for (matchIterator it = allMatches.begin(); it != allMatches.end(); ++it){
 
             shared_ptr<mzrollDBMatch> match = it->second;
