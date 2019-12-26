@@ -798,7 +798,7 @@ void TableDockWidget::setGroupLabel(char label) {
         if (item) {
             QVariant v = item->data(0,PeakGroupType);
             PeakGroup*  group =  v.value<PeakGroup*>();
-            if ( group != NULL ) {
+            if (group) {
                  group->setLabel(label);
             }
             updateItem(item);
