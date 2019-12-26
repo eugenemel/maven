@@ -634,6 +634,11 @@ void TableDockWidget::showAllGroups() {
     treeWidget->setSortingEnabled(true);
 
     treeWidget->expandAll();
+
+    if (this->windowTitle() == "rumsDB") {
+        treeWidget->sortByColumn(4,Qt::DescendingOrder); //decreasing by score
+    }
+
     updateStatus();
 
     /*
