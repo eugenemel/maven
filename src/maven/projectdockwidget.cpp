@@ -716,7 +716,10 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
                 project->writeGroupSqlite(group, 0, searchTableName);
                 onePeakTableCount = onePeakTableCount + numGroupsAdded;
 
-                if(group->compound) compoundSet.insert(group->compound);
+                if(group->compound){
+                    compoundSet.insert(group->compound);
+                }
+
             }
             qDebug() << peakTable->windowTitle() << ": Saved " << onePeakTableCount << "groups.";
         }

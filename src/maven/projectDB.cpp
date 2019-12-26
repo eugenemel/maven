@@ -332,6 +332,10 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
      }
      int lastInsertGroupId = query1.lastInsertId().toString().toInt();
 
+     if (tableName == "rumsDB") {
+         rumsDBOldToNewGroupIDs.insert(make_pair(g->groupId, lastInsertGroupId));
+     }
+
      QSqlQuery query2(sqlDB);
      if(!query2.exec("create table IF NOT EXISTS peaks( \
                     peakId integer primary key AUTOINCREMENT, \
@@ -733,7 +737,10 @@ void ProjectDB::saveMatchTable() {
 
             shared_ptr<mzrollDBMatch> match = it->second;
 
-            query1.addBindValue(match->groupId);
+            int updatedGroupId = rumsDBOldToNewGroupIDs.at(match->groupId);
+
+            query1.addBindValue(updatedGroupId);
+
             query1.addBindValue(match->ionId);
             query1.addBindValue(match->compoundName.c_str());
             query1.addBindValue(match->adductName.c_str());

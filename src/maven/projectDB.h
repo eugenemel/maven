@@ -24,6 +24,7 @@ class ProjectDB {
             vector<mzSample*> samples;
             map<int, shared_ptr<mzrollDBMatch>> topMatch = {};
             multimap<int, shared_ptr<mzrollDBMatch>> allMatches = {};
+            map<int, int> rumsDBOldToNewGroupIDs = {};
 
             void clearLoadedPeakGroups() { allgroups.clear(); }
             void saveSamples(vector<mzSample *> &sampleSet);
