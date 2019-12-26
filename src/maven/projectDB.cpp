@@ -674,7 +674,7 @@ void ProjectDB::loadMatchTable() {
             int summarizationLevel = queryMatches.value("summarizationLevel").toInt();
             string originalCompoundName = queryMatches.value("originalCompoundName").toString().toStdString();
             float score = queryMatches.value("score").toFloat();
-            bool is_match = queryMatches.value("is_match").toBool();
+            bool is_match = queryMatches.value("is_match").toInt() == 1;
 
             shared_ptr<mzrollDBMatch> mzrollDBMatchPtr = shared_ptr<mzrollDBMatch>(
                 new mzrollDBMatch(
@@ -707,6 +707,46 @@ void ProjectDB::loadMatchTable() {
 void ProjectDB::saveMatchTable() {
 
         qDebug() << "ProjectDB::saveMatchTable()... ";
+
+        QSqlQuery query0(sqlDB);
+
+        query0.exec("begin transaction");
+
+        //create table if not exists
+        if(!query0.exec("CREATE TABLE IF NOT EXISTS matches("
+                        "groupId INT NOT NULL,"
+                        "ionId INT NOT NULL,"
+                        "compoundName TEXT,"
+                        "adductName TEXT,"
+                        "summarizationLevel INT,"
+                        "originalCompoundName TEXT,"
+                        "score REAL,"
+                        "is_match INT"
+                        ");")){
+        qDebug() << "Ho... " << query0.lastError();
+        }
+
+        QSqlQuery query1(sqlDB);
+        query1.prepare("INSERT INTO matches (?,?,?,?,?,  ?,?,?)");
+        for (matchIterator it = allMatches.begin(); it != allMatches.end(); ++it){
+
+            shared_ptr<mzrollDBMatch> match = it->second;
+
+            query1.addBindValue(match->groupId);
+            query1.addBindValue(match->ionId);
+            query1.addBindValue(match->compoundName.c_str());
+            query1.addBindValue(match->adductName.c_str());
+            query1.addBindValue(match->summarizationLevel);
+            query1.addBindValue(match->originalCompoundName.c_str());
+            query1.addBindValue(match->score);
+            query1.addBindValue(match->isMatchAsInt());
+
+            if(!query1.exec()){
+                qDebug() << query1.lastError();
+            }
+        }
+
+        query0.exec("end transaction");
 
         qDebug() << "ProjectDB::loadMatchTable(): Saved " << allMatches.size() << "matches.";
 }

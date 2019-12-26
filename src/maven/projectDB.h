@@ -94,6 +94,8 @@ struct mzrollDBMatch {
         score = scoreVal;
         is_match = is_matchVal;
     }
+
+    int isMatchAsInt() {return is_match ? 1: 0;}
 };
 
 typedef map<int, shared_ptr<mzrollDBMatch>>::iterator matchIterator;
