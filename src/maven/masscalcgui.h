@@ -38,6 +38,7 @@ private slots:
 	  void getMatches();
       void showTable();
       void showTablerumsDBMatches(PeakGroup* grp);
+      void showTableCheckRumsDB();
    
 private:
       MainWindow* _mw;

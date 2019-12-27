@@ -15,7 +15,7 @@ MassCalcWidget::MassCalcWidget(MainWindow* mw) {
   connect(maxppmdiff,SIGNAL(valueChanged(double)),SLOT(compute()));
   connect(treeWidget,SIGNAL(itemSelectionChanged()), SLOT(showInfo()));
   connect(databaseSelect, SIGNAL(currentIndexChanged(QString)), this, SLOT(showTable()));
-  connect(scoringSchema, SIGNAL(currentIndexChanged(QString)), this, SLOT(showTable()));
+  connect(scoringSchema, SIGNAL(currentIndexChanged(QString)), this, SLOT(showTableCheckRumsDB()));
   connect(this,SIGNAL(visibilityChanged(bool)),this,SLOT(updateDatabaseList()));
 
    scoringSchema->clear();
@@ -127,6 +127,29 @@ void MassCalcWidget::showTablerumsDBMatches(PeakGroup *grp) {
     p->update();
 
     isInRumsDBMode = true;
+}
+
+void MassCalcWidget::showTableCheckRumsDB() {
+
+    PeakGroup *grp = nullptr;
+
+    if (scoringSchema->currentText().toStdString() == "rumsDB") {
+
+        if (_mw->projectDockWidget->currentProject) {
+
+            TableDockWidget* table = _mw->findPeakTable("rumsDB");
+
+            if (table) {
+                grp = table->getSelectedGroup();
+            }
+        }
+    }
+
+    if (grp) {
+        showTablerumsDBMatches(grp);
+    } else {
+        showTable();
+    }
 }
 
 void MassCalcWidget::showTable() {
