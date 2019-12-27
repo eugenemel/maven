@@ -984,6 +984,12 @@ void MainWindow::createToolBars() {
     toolBar->setObjectName("mainToolBar");
     toolBar->setMovable(false);
 
+    QToolButton *btnSave = new QToolButton(toolBar);
+    btnSave->setText("Save");
+    btnSave->setIcon(QIcon(rsrcPath +"/filesave.png"));
+    btnSave->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnSave->setToolTip(tr("Save Project"));
+
     QToolButton *btnOpen = new QToolButton(toolBar);
     btnOpen->setText("Open");
     btnOpen->setIcon(QIcon(rsrcPath + "/fileopen.png"));
@@ -1045,6 +1051,7 @@ void MainWindow::createToolBars() {
     btnSettings->setToolTip(tr("Change Global Options"));
 
     connect(btnOpen, SIGNAL(clicked()), SLOT(open()));
+    connect(btnSave, SIGNAL(clicked()), projectDockWidget, SLOT(saveProject()));
     connect(btnLibrary, SIGNAL(clicked()), libraryDialog, SLOT(show()));
     connect(btnAdducts, SIGNAL(clicked()), SLOT(showSelectAdductsDialog()));
     connect(btnAlign,SIGNAL(clicked()), alignmentDialog, SLOT(show()));
@@ -1056,6 +1063,7 @@ void MainWindow::createToolBars() {
     connect(btnSettings,SIGNAL(clicked()),settingsForm,SLOT(show()));
 
     toolBar->addWidget(btnOpen);
+    toolBar->addWidget(btnSave);
     toolBar->addWidget(btnLibrary);
     toolBar->addWidget(btnAdducts);
     toolBar->addWidget(btnAlign);
