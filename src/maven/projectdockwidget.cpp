@@ -1012,6 +1012,11 @@ void ProjectDockWidget::unloadSample() {
 
 void ProjectDockWidget::loadSampleMetadata(){
 
+    if (_mainwindow->sampleCount() == 0) {
+        QMessageBox::information(this, "No Samples Loaded", "No samples are currently loaded.\nPlease load samples before adding sample organization information.");
+        return;
+    }
+
     QString dir = ".";
 
     if ( _mainwindow->getSettings()->contains("lastDir") ) {
@@ -1025,8 +1030,6 @@ void ProjectDockWidget::loadSampleMetadata(){
             dir,
                   tr("Experiment Metadata File(*.csv);;")+
                   tr("All Files(*.*)"));
-
-    //if (filelist.size() == 0 ) return;
 
     qDebug() << "TODO: selected " << metadataFile;
 }
