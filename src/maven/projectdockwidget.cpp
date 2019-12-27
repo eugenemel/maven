@@ -17,7 +17,7 @@ ProjectDockWidget::ProjectDockWidget(QMainWindow *parent):
 
     lastUsedSampleColor = QColor(Qt::green);
     lastOpennedProject = QString();
-    currentProject = 0;
+    currentProject = nullptr;
 
 
     _treeWidget=new QTreeWidget(this);
@@ -91,13 +91,13 @@ void ProjectDockWidget::warnUserEmptySampleFiles() {
 
 void ProjectDockWidget::changeSampleColor(QTreeWidgetItem* item, int col) {
     if (!item) item = _treeWidget->currentItem();
-    if (item == NULL) return;
+    if (!item) return;
 
     if (col != 0) return;
     QVariant v = item->data(0,Qt::UserRole);
 
     mzSample*  sample =  v.value<mzSample*>();
-    if ( sample == NULL) return;
+    if (!sample) return;
 
      QColor color = QColor::fromRgbF(
             sample->color[0],
@@ -110,7 +110,7 @@ void ProjectDockWidget::changeSampleColor(QTreeWidgetItem* item, int col) {
 
       _treeWidget->update();
       _mainwindow->getEicWidget()->replot();
-      currentProject = 0;
+      currentProject = nullptr;
 
 }
 
@@ -191,7 +191,7 @@ void ProjectDockWidget::changeSampleOrder() {
          if ((*it)->type() == SampleType) {
             QVariant v =(*it)->data(0,Qt::UserRole);
             mzSample*  sample =  v.value<mzSample*>();
-            if ( sample != NULL) {
+            if (sample) {
                 if ( sample->getSampleOrder() != sampleOrder )  changed=true;
                 sample->setSampleOrder(sampleOrder);
                 sampleOrder++;
@@ -1052,6 +1052,8 @@ void ProjectDockWidget::exportSampleMetadata() {
 
     QStringList header;
 
+    const string SEP = ",";
+
     header << "name"
            << "setName"
            << "sampleOrder"
@@ -1063,13 +1065,29 @@ void ProjectDockWidget::exportSampleMetadata() {
 
     for (int i = 0; i < header.size(); i++) {
         if (i > 0) {
-            sampleMetadata << ",";
+            sampleMetadata << SEP;
         }
 
         sampleMetadata << header[i].toStdString();
     }
 
     sampleMetadata << "\n";
+
+    vector<mzSample*>samples = _mainwindow->getSamples();
+    std::sort(samples.begin(), samples.end(), mzSample::compSampleOrder);
+
+    for (auto& sample : samples) {
+
+        sampleMetadata << sample->getSampleName() << SEP
+                       << sample->getSetName() << SEP
+                       << (sample->getSampleOrder()+1) << SEP
+                       << (sample->isSelected ? "1" : "0") << SEP
+                       << sample->color[0] << SEP
+                       << sample->color[1] << SEP
+                       << sample->color[2] << SEP
+                       << sample->color[3] << "\n";
+
+    }
 
     sampleMetadata.close();
 
