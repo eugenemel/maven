@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>771</width>
-    <height>122</height>
+    <height>146</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -55,6 +55,13 @@
        <widget class="QLabel" name="label">
         <property name="text">
          <string>rumsDB library:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0" colspan="2">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Is your library missing from the list? Cancel this dialog, import/load your library, and re-open the mzrollDB file.</string>
         </property>
        </widget>
       </item>
