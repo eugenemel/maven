@@ -1042,4 +1042,35 @@ void ProjectDockWidget::exportSampleMetadata() {
         QMessageBox::information(this, "No Samples Loaded", "No samples are currently loaded.\nPlease load samples before exporting sample organization information.");
         return;
     }
+
+    const QString fileName = QFileDialog::getSaveFileName(
+            this, "Export Sample Organization", QString(),
+            "Comma Separated Value file (*.csv)");
+
+    ofstream sampleMetadata;
+    sampleMetadata.open(fileName.toStdString().c_str());
+
+    QStringList header;
+
+    header << "name"
+           << "setName"
+           << "sampleOrder"
+           << "isSelected"
+           << "color_red"
+           << "color_green"
+           << "color_blue"
+           << "color_alpha";
+
+    for (int i = 0; i < header.size(); i++) {
+        if (i > 0) {
+            sampleMetadata << ",";
+        }
+
+        sampleMetadata << header[i].toStdString();
+    }
+
+    sampleMetadata << "\n";
+
+    sampleMetadata.close();
+
 }
