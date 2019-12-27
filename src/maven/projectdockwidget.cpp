@@ -32,13 +32,13 @@ ProjectDockWidget::ProjectDockWidget(QMainWindow *parent):
 
     QToolButton* uploadSampleOrgButton = new QToolButton(toolBar);
     uploadSampleOrgButton->setIcon(QIcon(rsrcPath + "/metadata_upload.png"));
-    uploadSampleOrgButton->setToolTip("Upload Sample Organization Info");
-    connect(uploadSampleOrgButton,SIGNAL(clicked()), SLOT(loadSampleMetadata()));
+    uploadSampleOrgButton->setToolTip("Import Sample Organization Information");
+    connect(uploadSampleOrgButton,SIGNAL(clicked()), SLOT(importSampleMetadata()));
 
     QToolButton* downloadSampleOrgButton = new QToolButton(toolBar);
     downloadSampleOrgButton->setIcon(QIcon(rsrcPath + "/metadata_download.png"));
-    downloadSampleOrgButton->setToolTip("Download Sample Organization Info");
-    //connect(downloadSampleOrgButton,SIGNAL(clicked()), SLOT(saveProject())); //TODO
+    downloadSampleOrgButton->setToolTip("Export Sample Organization Information");
+    connect(downloadSampleOrgButton,SIGNAL(clicked()), SLOT(exportSampleMetadata()));
 
     QToolButton* colorButton = new QToolButton(toolBar);
     colorButton->setIcon(QIcon(rsrcPath + "/colorfill.png"));
@@ -1010,10 +1010,10 @@ void ProjectDockWidget::unloadSample() {
     _mainwindow->getEicWidget()->replotForced();
 }
 
-void ProjectDockWidget::loadSampleMetadata(){
+void ProjectDockWidget::importSampleMetadata(){
 
     if (_mainwindow->sampleCount() == 0) {
-        QMessageBox::information(this, "No Samples Loaded", "No samples are currently loaded.\nPlease load samples before adding sample organization information.");
+        QMessageBox::information(this, "No Samples Loaded", "No samples are currently loaded.\nPlease load samples before importing sample organization information.");
         return;
     }
 
@@ -1031,5 +1031,15 @@ void ProjectDockWidget::loadSampleMetadata(){
                   tr("Experiment Metadata File(*.csv);;")+
                   tr("All Files(*.*)"));
 
-    qDebug() << "TODO: selected " << metadataFile;
+    qDebug() << "Sample metadata file:" << metadataFile;
+
+    //TODO: parse file
+}
+
+void ProjectDockWidget::exportSampleMetadata() {
+
+    if (_mainwindow->sampleCount() == 0) {
+        QMessageBox::information(this, "No Samples Loaded", "No samples are currently loaded.\nPlease load samples before exporting sample organization information.");
+        return;
+    }
 }
