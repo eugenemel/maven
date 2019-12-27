@@ -30,15 +30,15 @@ ProjectDockWidget::ProjectDockWidget(QMainWindow *parent):
     toolBar->setFloatable(false);
     toolBar->setMovable(false);
 
-    QToolButton* loadButton = new QToolButton(toolBar);
-    loadButton->setIcon(QIcon(rsrcPath + "/fileopen.png"));
-    loadButton->setToolTip("Load Project");
-    connect(loadButton,SIGNAL(clicked()), SLOT(loadProject()));
+    QToolButton* uploadSampleOrgButton = new QToolButton(toolBar);
+    uploadSampleOrgButton->setIcon(QIcon(rsrcPath + "/metadata_upload.png"));
+    uploadSampleOrgButton->setToolTip("Upload Sample Organization Info");
+    //connect(uploadSampleOrgButton,SIGNAL(clicked()), SLOT(loadProject())); //TODO
 
-    QToolButton* saveButton = new QToolButton(toolBar);
-    saveButton->setIcon(QIcon(rsrcPath + "/filesave.png"));
-    saveButton->setToolTip("Save Project");
-    connect(saveButton,SIGNAL(clicked()), SLOT(saveProject()));
+    QToolButton* downloadSampleOrgButton = new QToolButton(toolBar);
+    downloadSampleOrgButton->setIcon(QIcon(rsrcPath + "/metadata_download.png"));
+    downloadSampleOrgButton->setToolTip("Download Sample Organization Info");
+    //connect(downloadSampleOrgButton,SIGNAL(clicked()), SLOT(saveProject())); //TODO
 
     QToolButton* colorButton = new QToolButton(toolBar);
     colorButton->setIcon(QIcon(rsrcPath + "/colorfill.png"));
@@ -52,8 +52,8 @@ ProjectDockWidget::ProjectDockWidget(QMainWindow *parent):
 
     toolBar->addWidget(filterEditor);
     toolBar->addWidget(colorButton);
-    toolBar->addWidget(loadButton);
-    toolBar->addWidget(saveButton);
+    toolBar->addWidget(uploadSampleOrgButton);
+    toolBar->addWidget(downloadSampleOrgButton);
 
     setTitleBarWidget(toolBar);
     setWidget(_treeWidget);

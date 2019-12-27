@@ -69,5 +69,7 @@
         <file>images/integrateArea.png</file>
         <file>images/librarymanager.png</file>
         <file>images/adducts.png</file>
+	<file>images/metadata_download.png</file>
+	<file>images/metadata_upload.png</file>
     </qresource>
 </RCC>
