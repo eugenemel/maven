@@ -57,6 +57,7 @@ private slots:
     void filterTreeItems(QString filterString);
     void getSampleInfoSQLITE();
     void warnUserEmptySampleFiles();
+    void loadSampleMetadata();
 
 private:
     QTreeWidgetItem* getParentFolder(QString filename);

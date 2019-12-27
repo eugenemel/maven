@@ -33,7 +33,7 @@ ProjectDockWidget::ProjectDockWidget(QMainWindow *parent):
     QToolButton* uploadSampleOrgButton = new QToolButton(toolBar);
     uploadSampleOrgButton->setIcon(QIcon(rsrcPath + "/metadata_upload.png"));
     uploadSampleOrgButton->setToolTip("Upload Sample Organization Info");
-    //connect(uploadSampleOrgButton,SIGNAL(clicked()), SLOT(loadProject())); //TODO
+    connect(uploadSampleOrgButton,SIGNAL(clicked()), SLOT(loadSampleMetadata()));
 
     QToolButton* downloadSampleOrgButton = new QToolButton(toolBar);
     downloadSampleOrgButton->setIcon(QIcon(rsrcPath + "/metadata_download.png"));
@@ -1008,4 +1008,25 @@ void ProjectDockWidget::unloadSample() {
     }
 
     _mainwindow->getEicWidget()->replotForced();
+}
+
+void ProjectDockWidget::loadSampleMetadata(){
+
+    QString dir = ".";
+
+    if ( _mainwindow->getSettings()->contains("lastDir") ) {
+        QString ldir = _mainwindow->getSettings()->value("lastDir").value<QString>();
+        QDir test(ldir);
+        if (test.exists()) dir = ldir;
+    }
+
+    QString metadataFile = QFileDialog::getOpenFileName(
+            this, "Select Sample Organization File:",
+            dir,
+                  tr("Experiment Metadata File(*.csv);;")+
+                  tr("All Files(*.*)"));
+
+    //if (filelist.size() == 0 ) return;
+
+    qDebug() << "TODO: selected " << metadataFile;
 }
