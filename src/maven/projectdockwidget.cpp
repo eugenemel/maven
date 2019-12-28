@@ -1044,6 +1044,7 @@ void ProjectDockWidget::importSampleMetadata(){
     {
         string line;
         getline(sampleMetadata, line);
+        replaceAll(line, "\r", "");
         vector<string> headerValues;
         split(line, ',', headerValues);
         for (unsigned int i = 0; i < headerValues.size(); i++) {
@@ -1055,6 +1056,9 @@ void ProjectDockWidget::importSampleMetadata(){
 
     string line;
     while (getline(sampleMetadata, line)) {
+
+        replaceAll(line, "\r", "");
+
         vector<string> values;
         split(line, ',', values);
 
