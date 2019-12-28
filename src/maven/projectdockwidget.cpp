@@ -1010,6 +1010,8 @@ void ProjectDockWidget::unloadSample() {
     _mainwindow->getEicWidget()->replotForced();
 }
 
+const string SEP = ",";
+
 void ProjectDockWidget::importSampleMetadata(){
 
     if (_mainwindow->sampleCount() == 0) {
@@ -1033,7 +1035,129 @@ void ProjectDockWidget::importSampleMetadata(){
 
     qDebug() << "Sample metadata file:" << metadataFile;
 
-    //TODO: parse file
+    ifstream sampleMetadata;
+    sampleMetadata.open(metadataFile.toStdString().c_str());
+
+    //determine column order from the headers
+    map<string, unsigned int> indexOf;
+
+    {
+        string line;
+        getline(sampleMetadata, line);
+        vector<string> headerValues;
+        split(line, ',', headerValues);
+        for (unsigned int i = 0; i < headerValues.size(); i++) {
+            indexOf[headerValues.at(i)] = i;
+        }
+    }
+
+    vector<mzSample*>samples = _mainwindow->getSamples();
+
+    string line;
+    while (getline(sampleMetadata, line)) {
+        vector<string> values;
+        split(line, ',', values);
+
+        if (values.size() != indexOf.size()) {
+            qDebug() << "Skipping line \"" << line.c_str() << "\" b/c of mismatch between header count and value count.";
+            continue;
+        }
+
+        string sampleName;
+        string setName;
+        int sampOrderNum = -1;
+        int isSelectedInt = -1;
+
+        float red = -1.0f;
+        float green = -1.0f;
+        float blue = -1.0f;
+        float alpha = -1.0f;
+
+        if (indexOf.find("sampleName") != indexOf.end()) {
+            sampleName = values.at(indexOf["sampleName"]);
+        }
+
+        if (indexOf.find("setName") != indexOf.end()) {
+            setName = values.at(indexOf["setName"]);
+        }
+
+        if (indexOf.find("sampleOrder") != indexOf.end()) {
+            int sampOrderNumCandidate = stoi(values.at(indexOf["sampleOrder"]))-1; //Remove 1 to store as 0-indexed
+            if (sampOrderNumCandidate >= 0 && sampOrderNumCandidate < static_cast<int>(samples.size())){
+                sampOrderNum = sampOrderNumCandidate;
+            }
+        }
+
+        if (indexOf.find("isSelected") != indexOf.end()) {
+            isSelectedInt = stoi(values.at(indexOf["isSelected"]));
+        }
+
+        if (indexOf.find("color_red") != indexOf.end()) {
+            float redCandidate = stof(values.at(indexOf["color_red"]));
+            if (redCandidate >= 0.0f && redCandidate <= 1.0f) {
+                red = redCandidate;
+            }
+        }
+
+        if (indexOf.find("color_green") != indexOf.end()) {
+            float greenCandidate = stof(values.at(indexOf["color_green"]));
+            if (greenCandidate >= 0.0f && greenCandidate <= 1.0f) {
+                green = greenCandidate;
+            }
+        }
+
+        if (indexOf.find("color_blue") != indexOf.end()) {
+            float blueCandidate = stof(values.at(indexOf["color_blue"]));
+            if (blueCandidate >= 0.0f && blueCandidate <= 1.0f) {
+                blue = blueCandidate;
+            }
+        }
+
+        if (indexOf.find("color_alpha") != indexOf.end()) {
+            float alphaCandidate = stof(values.at(indexOf["color_alpha"]));
+            if (alphaCandidate >= 0.0f && alphaCandidate <= 1.0f) {
+                alpha = alphaCandidate;
+            }
+        }
+
+        if (!sampleName.empty()) {
+            for (auto& sample : samples) {
+                if (sample->getSampleName() == sampleName) {
+
+                    if (sampOrderNum != -1) {
+                        sample->setSampleOrder(sampOrderNum);
+                    }
+
+                    if (!setName.empty()) {
+                        sample->setSetName(setName);
+                    }
+
+                    if (isSelectedInt != -1) {
+                        sample->isSelected = (isSelectedInt == 1 ? true : false);
+                    }
+
+                    if (red > -1.0f && blue > -1.0f && green > -1.0f && alpha > -1.0f) {
+                        sample->color[0] = red;
+                        sample->color[1] = blue;
+                        sample->color[2] = green;
+                        sample->color[3] = alpha;
+                    }
+
+                    break;
+                }
+            }
+        }
+
+    }
+
+    sampleMetadata.close();
+
+    std::sort(samples.begin(), samples.end(), mzSample::compSampleOrder);
+    setInfo(samples);
+
+    if ( _mainwindow->getEicWidget() ) {
+        _mainwindow->getEicWidget()->replotForced();
+    }
 }
 
 void ProjectDockWidget::exportSampleMetadata() {
@@ -1052,9 +1176,7 @@ void ProjectDockWidget::exportSampleMetadata() {
 
     QStringList header;
 
-    const string SEP = ",";
-
-    header << "name"
+    header << "sampleName"
            << "setName"
            << "sampleOrder"
            << "isSelected"
@@ -1080,7 +1202,7 @@ void ProjectDockWidget::exportSampleMetadata() {
 
         sampleMetadata << sample->getSampleName() << SEP
                        << sample->getSetName() << SEP
-                       << (sample->getSampleOrder()+1) << SEP
+                       << (sample->getSampleOrder() + 1) << SEP //Add 1 to display as 1-indexed
                        << (sample->isSelected ? "1" : "0") << SEP
                        << sample->color[0] << SEP
                        << sample->color[1] << SEP
