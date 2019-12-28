@@ -1097,7 +1097,11 @@ void ProjectDockWidget::importSampleMetadata(){
         }
 
         if (indexOf.find("isSelected") != indexOf.end()) {
-            isSelectedInt = stoi(values.at(indexOf["isSelected"]));
+            try {
+                isSelectedInt = stoi(values.at(indexOf["isSelected"]));
+            } catch (...) {
+
+            }
         }
 
         if (indexOf.find("color_red") != indexOf.end()) {
