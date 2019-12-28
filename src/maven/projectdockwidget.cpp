@@ -1166,8 +1166,8 @@ void ProjectDockWidget::importSampleMetadata(){
 
                     if (red > -1.0f && blue > -1.0f && green > -1.0f && alpha > -1.0f) {
                         sample->color[0] = red;
-                        sample->color[1] = blue;
-                        sample->color[2] = green;
+                        sample->color[1] = green;
+                        sample->color[2] = blue;
                         sample->color[3] = alpha;
                     }
 
