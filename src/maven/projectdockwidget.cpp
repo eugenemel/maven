@@ -1086,9 +1086,13 @@ void ProjectDockWidget::importSampleMetadata(){
         }
 
         if (indexOf.find("sampleOrder") != indexOf.end()) {
-            int sampOrderNumCandidate = stoi(values.at(indexOf["sampleOrder"]))-1; //Remove 1 to store as 0-indexed
-            if (sampOrderNumCandidate >= 0 && sampOrderNumCandidate < static_cast<int>(samples.size())){
-                sampOrderNum = sampOrderNumCandidate;
+            try {
+                int sampOrderNumCandidate = stoi(values.at(indexOf["sampleOrder"]))-1; //Remove 1 to store as 0-indexed
+                if (sampOrderNumCandidate >= 0 && sampOrderNumCandidate < static_cast<int>(samples.size())){
+                    sampOrderNum = sampOrderNumCandidate;
+                }
+            } catch (...) {
+
             }
         }
 
@@ -1097,30 +1101,46 @@ void ProjectDockWidget::importSampleMetadata(){
         }
 
         if (indexOf.find("color_red") != indexOf.end()) {
-            float redCandidate = stof(values.at(indexOf["color_red"]));
-            if (redCandidate >= 0.0f && redCandidate <= 1.0f) {
-                red = redCandidate;
+            try {
+                float redCandidate = stof(values.at(indexOf["color_red"]));
+                if (redCandidate >= 0.0f && redCandidate <= 1.0f) {
+                    red = redCandidate;
+                }
+            } catch (...) {
+
             }
         }
 
         if (indexOf.find("color_green") != indexOf.end()) {
-            float greenCandidate = stof(values.at(indexOf["color_green"]));
-            if (greenCandidate >= 0.0f && greenCandidate <= 1.0f) {
-                green = greenCandidate;
+            try {
+                float greenCandidate = stof(values.at(indexOf["color_green"]));
+                if (greenCandidate >= 0.0f && greenCandidate <= 1.0f) {
+                    green = greenCandidate;
+                }
+            } catch (...) {
+
             }
         }
 
         if (indexOf.find("color_blue") != indexOf.end()) {
-            float blueCandidate = stof(values.at(indexOf["color_blue"]));
-            if (blueCandidate >= 0.0f && blueCandidate <= 1.0f) {
-                blue = blueCandidate;
+            try {
+                float blueCandidate = stof(values.at(indexOf["color_blue"]));
+                if (blueCandidate >= 0.0f && blueCandidate <= 1.0f) {
+                    blue = blueCandidate;
+                }
+            } catch (...) {
+
             }
         }
 
         if (indexOf.find("color_alpha") != indexOf.end()) {
-            float alphaCandidate = stof(values.at(indexOf["color_alpha"]));
-            if (alphaCandidate >= 0.0f && alphaCandidate <= 1.0f) {
-                alpha = alphaCandidate;
+            try {
+                float alphaCandidate = stof(values.at(indexOf["color_alpha"]));
+                if (alphaCandidate >= 0.0f && alphaCandidate <= 1.0f) {
+                    alpha = alphaCandidate;
+                }
+            } catch (...) {
+
             }
         }
 
@@ -1187,7 +1207,8 @@ void ProjectDockWidget::exportSampleMetadata() {
            << "color_red"
            << "color_green"
            << "color_blue"
-           << "color_alpha";
+           << "color_alpha"
+           << "after_first_underscore";
 
     for (int i = 0; i < header.size(); i++) {
         if (i > 0) {
@@ -1204,6 +1225,10 @@ void ProjectDockWidget::exportSampleMetadata() {
 
     for (auto& sample : samples) {
 
+        string afterUnderscore = QString(sample->getSampleName().c_str())
+                .section('_', 1)
+                .toStdString();
+
         sampleMetadata << sample->getSampleName() << SEP
                        << sample->getSetName() << SEP
                        << (sample->getSampleOrder() + 1) << SEP //Add 1 to display as 1-indexed
@@ -1211,7 +1236,8 @@ void ProjectDockWidget::exportSampleMetadata() {
                        << sample->color[0] << SEP
                        << sample->color[1] << SEP
                        << sample->color[2] << SEP
-                       << sample->color[3] << "\n";
+                       << sample->color[3] << SEP
+                       << afterUnderscore << "\n";
 
     }
 
