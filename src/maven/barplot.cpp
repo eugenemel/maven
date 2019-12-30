@@ -117,7 +117,7 @@ void BarPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
     font.setPointSizeF(fontsize);
     painter->setFont(font);
     QFontMetrics fm( font );
-    int lagendShift = fm.size(0,"100e+10",0,NULL).width();
+    int legendShift = fm.size(0,"100e+10",0,NULL).width();
 
     QColor color = QColor::fromRgbF(0.2,0.2,0.2,1.0);
     QBrush brush(color);
@@ -136,13 +136,33 @@ void BarPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
     default: title = "?"; break;
     }
 
+    int legendXPosAdj = 0;
+    int peakTitleYPosAdj = 0;
+
+    if (!this->isOnEicWidget) {
+        int maxSampleNameWidth = 0;
+        for (int i = 0; i < _yvalues.size(); i++) {
+            QFontMetrics fm = painter->fontMetrics();
+            int textWidth = fm.width(_labels[i]);
+            if (textWidth > maxSampleNameWidth) {
+                maxSampleNameWidth = textWidth;
+            }
+        }
+
+        int titleHeight = fm.height();
+
+        maxBarHeight = maxSampleNameWidth;
+        legendXPosAdj = legendShift+5;
+        peakTitleYPosAdj = titleHeight+5;
+    }
+
     if (_showQValueType) {
-        painter->drawText(legendX-lagendShift,legendY-1,title);
+        painter->drawText(legendX-legendShift+legendXPosAdj,legendY-1+peakTitleYPosAdj,title);
     }
 
     for(int i=0; i < _yvalues.size(); i++ ) {
         int posX = legendX;
-        int posY = legendY + i*_barwidth;
+        int posY = legendY + i*_barwidth + peakTitleYPosAdj;
         int width = _barwidth;
         int height = _yvalues[i] / maxYvalue * maxBarHeight;
 
@@ -162,10 +182,10 @@ void BarPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
         brush.setStyle(Qt::SolidPattern);
 
         painter->setBrush(brush);
-        painter->drawRect(posX+3,posY,height,width);
+        painter->drawRect(posX+3+legendXPosAdj,posY,height,width);
 
         if (_showSampleNames) {
-            painter->drawText(posX+6,posY+_barwidth-2,_labels[i]);
+            painter->drawText(posX+6+legendXPosAdj,posY+_barwidth-2,_labels[i]);
         }
 
         char numType='g';
@@ -177,7 +197,7 @@ void BarPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
 
         if (_yvalues[i] > 0 && _showIntensityText) {
             QString value = QString::number(_yvalues[i],numType,numPrec);
-            painter->drawText(posX-lagendShift,posY+_barwidth-2,value);
+            painter->drawText(posX-legendShift+legendXPosAdj,posY+_barwidth-2,value);
         }
 
         if ( posY+_barwidth > _height) _height = posY+_barwidth+barSpacer;
@@ -185,8 +205,8 @@ void BarPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
 
     painter->setPen(Qt::black);        // do not draw outline
     painter->setBrush(Qt::NoBrush);
-    painter->drawLine(legendX,legendY,legendX,legendY+_height);
+    painter->drawLine(legendX+legendXPosAdj, legendY+peakTitleYPosAdj, legendX+legendXPosAdj, legendY+_height);
 
-    _width = lagendShift+maxBarHeight;
+    _width = legendShift+maxBarHeight;
 
 }
