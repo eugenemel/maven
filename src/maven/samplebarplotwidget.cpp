@@ -1,15 +1,24 @@
 #include "samplebarplotwidget.h"
 
 SampleBarPlotWidget::SampleBarPlotWidget(MainWindow *mw){
-    setScene(new QGraphicsScene(this));
+
+    _scene = new QGraphicsScene(this);
+    setScene(_scene);
+
     this->_mw = mw;
     _barPlot = new BarPlot(nullptr, scene());
     _barPlot->setMainWindow(_mw);
+
+    scene()->addItem(_barPlot);
 }
 
 SampleBarPlotWidget::~SampleBarPlotWidget(){
     if (_barPlot){
         delete(_barPlot);
+    }
+
+    if (_scene) {
+        delete(_scene);
     }
 }
 
@@ -22,4 +31,6 @@ void SampleBarPlotWidget::setPeakGroup(PeakGroup *peakGroup){
 
     _barPlot->setPos(xpos, ypos);
     _barPlot->setZValue(1000);
+
+    scene()->update();
 }

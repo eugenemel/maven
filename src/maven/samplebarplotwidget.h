@@ -18,6 +18,7 @@ class SampleBarPlotWidget : public QGraphicsView {
         void setPeakGroup(PeakGroup *peakGroup);
 
     private:
+        QGraphicsScene *_scene;
         MainWindow *_mw;
         BarPlot *_barPlot;
 
