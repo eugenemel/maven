@@ -3,6 +3,7 @@
 
 #include "stable.h"
 #include "mainwindow.h"
+#include "barplot.h"
 
 class SampleBarPlotWidget : public QGraphicsView {
 
@@ -18,6 +19,7 @@ class SampleBarPlotWidget : public QGraphicsView {
 
     private:
         MainWindow *_mw;
+        BarPlot *_barPlot;
 
 };
 
