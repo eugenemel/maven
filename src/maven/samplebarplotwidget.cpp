@@ -17,6 +17,7 @@ SampleBarPlotWidget::SampleBarPlotWidget(MainWindow *mw){
 }
 
 SampleBarPlotWidget::~SampleBarPlotWidget(){
+
     if (_barPlot){
         delete(_barPlot);
     }
@@ -27,27 +28,6 @@ SampleBarPlotWidget::~SampleBarPlotWidget(){
 }
 
 void SampleBarPlotWidget::setPeakGroup(PeakGroup *peakGroup){
-
     _barPlot->setPeakGroup(peakGroup);
-
-
-    int bwidth = _barPlot->boundingRect().width();
-    int bheight = _barPlot->boundingRect().height();
-
-    int xpos = scene()->width()*0.10-bwidth;
-    int ypos = scene()->height()*0.95;
-
-    //debugging
-    cout
-            << "width: " << scene()->width()
-            << ", height: " << scene()->height()
-            << ", bwidth: " << bwidth
-            << ", bheight: " << bheight
-            << endl;
-
-    _barPlot->setPos(xpos, ypos);
-
-    _barPlot->setZValue(1000);
-
     scene()->update();
 }
