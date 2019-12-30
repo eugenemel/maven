@@ -66,8 +66,6 @@ void BarPlot::setPeakGroup(PeakGroup* group) {
             _width = 100;
             _barwidth = 20;
             _height = _yvalues.size()*_barwidth;
-
-            cout << "_width=" << _width <<", _barwidth=" << _barwidth <<", _height=" << _height << endl;
         }
     }
 
