@@ -104,7 +104,8 @@ HEADERS +=  stable.h \
             background_directinfusion_update.h \
             editpeakgroupingdialog.h \
             selectadductsdialog.h \
-            setrumsdbdialog.h
+            setrumsdbdialog.h \
+            samplebarplotwidget.h
 
 SOURCES +=  mainwindow.cpp  \
             classifier.cpp \
@@ -152,7 +153,8 @@ SOURCES +=  mainwindow.cpp  \
             background_directinfusion_update.cpp \
             editpeakgroupingdialog.cpp \
             selectadductsdialog.cpp \
-            setrumsdbdialog.cpp
+            setrumsdbdialog.cpp \
+            samplebarplotwidget.cpp
 
 
 sources.files =  $$HEADERS \

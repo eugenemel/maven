@@ -32,6 +32,7 @@
 #include "rconsolewidget.h"
 #include "librarydialog.h"
 #include "setrumsdbdialog.h"
+#include "samplebarplotwidget.h"
 
 class SettingsForm;
 class EicWidget;
@@ -67,6 +68,7 @@ class LogWidget;
 class RconsoleWidget;
 class SpectralHit;
 class LibraryMangerDialog;
+class SampleBarPlotWidget;
 
 
 extern Database DB; 
@@ -117,7 +119,7 @@ public:
     GalleryWidget	 *galleryWidget;
     ScatterPlot		 *scatterplot;
     TreeMap		 *treemap;
-    QWidget     *barPlotWidget;
+    SampleBarPlotWidget     *barPlotWidget;
 
     SettingsForm   *settingsForm;
     PeakDetectionDialog *peakDetectionDialog;

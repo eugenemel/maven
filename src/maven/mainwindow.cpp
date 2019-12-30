@@ -150,7 +150,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     ligandWidget = new LigandWidget(this);
     heatmap	 = 	  new HeatMap(this);
     galleryWidget = new GalleryWidget(this);
-    barPlotWidget = new QWidget(this); //TODO
+    barPlotWidget = new SampleBarPlotWidget(this);
     bookmarkedPeaks = addPeaksTable("Bookmarks");
     spectraDockWidget =  createDockWidget("Spectra",spectraWidget);
     heatMapDockWidget =  createDockWidget("HeatMap",heatmap);
@@ -1266,6 +1266,10 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
 
     if ( eicWidget && eicWidget->isVisible() ) {
         eicWidget->setPeakGroup(group);
+
+        if (barPlotWidget && barPlotWidget->isVisible()) {
+            barPlotWidget->setPeakGroup(group);
+        }
     }
 
     if ( isotopeWidget && isotopeWidget->isVisible() && group->compound != NULL ) {
