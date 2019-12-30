@@ -71,5 +71,6 @@
         <file>images/adducts.png</file>
 	<file>images/metadata_download.png</file>
 	<file>images/metadata_upload.png</file>
+	<file>images/bar_plot_samples.png</file>
     </qresource>
 </RCC>

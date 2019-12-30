@@ -150,10 +150,12 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     ligandWidget = new LigandWidget(this);
     heatmap	 = 	  new HeatMap(this);
     galleryWidget = new GalleryWidget(this);
+    barPlotWidget = new QWidget(this); //TODO
     bookmarkedPeaks = addPeaksTable("Bookmarks");
     spectraDockWidget =  createDockWidget("Spectra",spectraWidget);
     heatMapDockWidget =  createDockWidget("HeatMap",heatmap);
     galleryDockWidget =  createDockWidget("Gallery",galleryWidget);
+    barPlotDockWidget = createDockWidget("Bar Plot",barPlotWidget);
     scatterDockWidget =  new ScatterPlot(this);
     projectDockWidget =  new ProjectDockWidget(this);
     rconsoleDockWidget =  new RconsoleWidget(this);
@@ -1153,8 +1155,7 @@ void MainWindow::createToolBars() {
     QToolButton* btnScatter = addDockWidgetButton(sideBar,scatterDockWidget,QIcon(rsrcPath + "/scatterplot.png"), "Show Scatter Plot Widget");
     QToolButton* btnSRM = addDockWidgetButton(sideBar,srmDockWidget,QIcon(rsrcPath + "/qqq.png"), "Show SRM List (F12)");
     QToolButton* btnRconsole = addDockWidgetButton(sideBar,rconsoleDockWidget,QIcon(rsrcPath + "/R.png"), "Show R Console");
-
-
+    QToolButton* btnBarPlot = addDockWidgetButton(sideBar,barPlotDockWidget, QIcon(rsrcPath + "/bar_plot_samples.png"), "Show EIC Widget Bar Plots");
 
     //btnSamples->setShortcut(Qt::Key_F2);
     btnLigands->setShortcut(Qt::Key_F3);
@@ -1172,6 +1173,7 @@ void MainWindow::createToolBars() {
     sideBar->setMovable(false);
 
     sideBar->addWidget(btnSamples);
+    sideBar->addWidget(btnBarPlot);
     sideBar->addWidget(btnLigands);
     sideBar->addWidget(btnSpectra);
     sideBar->addWidget(btnIsotopes);

@@ -105,6 +105,7 @@ public:
     QDockWidget		 *scatterDockWidget;
     QDockWidget		 *treeMapDockWidget;
     QDockWidget	 	 *galleryDockWidget;
+    QDockWidget      *barPlotDockWidget;
     LogWidget            *logWidget;
     NotesWidget		 *notesDockWidget;
     ProjectDockWidget    *projectDockWidget;
@@ -116,6 +117,7 @@ public:
     GalleryWidget	 *galleryWidget;
     ScatterPlot		 *scatterplot;
     TreeMap		 *treemap;
+    QWidget     *barPlotWidget;
 
     SettingsForm   *settingsForm;
     PeakDetectionDialog *peakDetectionDialog;
