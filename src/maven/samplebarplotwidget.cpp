@@ -13,7 +13,6 @@ SampleBarPlotWidget::SampleBarPlotWidget(MainWindow *mw){
     _barPlot->isOnEicWidget = false;
 
     scene()->addItem(_barPlot);
-
 }
 
 SampleBarPlotWidget::~SampleBarPlotWidget(){
@@ -30,4 +29,8 @@ SampleBarPlotWidget::~SampleBarPlotWidget(){
 void SampleBarPlotWidget::setPeakGroup(PeakGroup *peakGroup){
     _barPlot->setPeakGroup(peakGroup);
     scene()->update();
+
+    //Needed for scroll bars
+    int pixelBuffer = 20;
+    this->setSceneRect(0, 0, _barPlot->_latestWidth+pixelBuffer, _barPlot->_latestHeight+pixelBuffer);
 }

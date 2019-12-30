@@ -34,6 +34,8 @@ public:
         void showQValueType(bool flag) { _showQValueType=flag; }
 
     bool isOnEicWidget = true;
+    int _latestWidth = 1;
+    int _latestHeight = 1;
 
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

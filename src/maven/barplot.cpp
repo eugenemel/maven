@@ -63,6 +63,7 @@ void BarPlot::setPeakGroup(PeakGroup* group) {
             if (_barwidth>15) _barwidth=15;
             _height = _yvalues.size()*_barwidth;
         } else {
+            //dummy constants that get overwritten later
             _width = 100;
             _barwidth = 20;
             _height = _yvalues.size()*_barwidth;
@@ -207,4 +208,6 @@ void BarPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
 
     _width = legendShift+maxBarHeight;
 
+    _latestWidth = _width;
+    _latestHeight = _height;
 }
