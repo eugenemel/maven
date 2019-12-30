@@ -56,11 +56,19 @@ void BarPlot::setPeakGroup(PeakGroup* group) {
     if (vsamples.size() <=0 ) return;
 
     if (scene()) {
-        _width =   scene()->width()*0.20;
-        _barwidth = scene()->height()*0.75/vsamples.size();
-        if (_barwidth<3)  _barwidth=3;
-        if (_barwidth>15) _barwidth=15;
-        _height = _yvalues.size()*_barwidth;
+        if (isOnEicWidget) {
+            _width =   scene()->width()*0.20;
+            _barwidth = scene()->height()*0.75/vsamples.size();
+            if (_barwidth<3)  _barwidth=3;
+            if (_barwidth>15) _barwidth=15;
+            _height = _yvalues.size()*_barwidth;
+        } else {
+            _width = 100;
+            _barwidth = 20;
+            _height = _yvalues.size()*_barwidth;
+
+            cout << "_width=" << _width <<", _barwidth=" << _barwidth <<", _height=" << _height << endl;
+        }
     }
 
     for(int i=0; i < vsamples.size(); i++ ) {

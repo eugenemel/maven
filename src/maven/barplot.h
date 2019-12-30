@@ -33,6 +33,8 @@ public:
         void showIntensityText(bool flag)   { _showIntensityText=flag; }
         void showQValueType(bool flag) { _showQValueType=flag; }
 
+    bool isOnEicWidget = true;
+
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     void mousePressEvent (QGraphicsSceneMouseEvent*) { switchQValue(); update(); }
