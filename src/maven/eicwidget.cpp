@@ -27,7 +27,7 @@ EicWidget::EicWidget(QWidget *p) {
 	showBicLine(false);
     showNotes(false);
     showIsotopePlot(false);
-	showBarPlot(true);
+    showBarPlot(false); // Issue 94: Handled by EIC legend widget now
 	showBoxPlot(false);
     automaticPeakGrouping(true);
     showMergedEIC(false);
@@ -1579,7 +1579,15 @@ void EicWidget::selectGroupNearRt(float rt) {
 void EicWidget::setSelectedGroup(PeakGroup* group ) {
  //qDebug <<"EicWidget::setSelectedGroup(PeakGroup* group ) ";
 	if (_frozen || group == NULL) return;
-	if (_showBarPlot)     addBarPlot(group);
+
+    if (_showBarPlot){
+        addBarPlot(group);
+    }
+
+    if (getMainWindow()->barPlotWidget && getMainWindow()->barPlotWidget->isVisible()) {
+        getMainWindow()->barPlotWidget->setPeakGroup(group);
+    }
+
 	if (_showIsotopePlot) addIsotopicPlot(group);
     if (_showBoxPlot)     addBoxPlot(group);
 
