@@ -1268,6 +1268,11 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
         eicWidget->setPeakGroup(group);
     }
 
+    //Issue 94: visible bar plot widget is handled by eicWidget->setPeakGroup()
+    if (barPlotWidget && !barPlotWidget->isVisible()) {
+        barPlotWidget->setPeakGroup(group);
+    }
+
     if ( isotopeWidget && isotopeWidget->isVisible() && group->compound != NULL ) {
         isotopeWidget->setCompound(group->compound);
     }
