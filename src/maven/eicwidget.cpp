@@ -1584,7 +1584,7 @@ void EicWidget::setSelectedGroup(PeakGroup* group ) {
         addBarPlot(group);
     }
 
-    if (getMainWindow()->barPlotWidget && getMainWindow()->barPlotWidget->isVisible()) {
+    if (getMainWindow()->barPlotWidget) {
         getMainWindow()->barPlotWidget->setPeakGroup(group);
     }
 
