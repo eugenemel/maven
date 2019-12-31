@@ -23,6 +23,7 @@ class BarPlot : public QObject, public QGraphicsItem
 
 public:
 	BarPlot(QGraphicsItem *parent, QGraphicsScene *scene);
+    BarPlot(QGraphicsItem *parent, QGraphicsScene *scene, MainWindow *mainWindow);
 	~BarPlot();
 	void setPeakGroup(PeakGroup *group);
         QRectF boundingRect() const;
@@ -39,7 +40,7 @@ public:
 
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-    void mousePressEvent (QGraphicsSceneMouseEvent*) { switchQValue(); update(); }
+    void mousePressEvent (QGraphicsSceneMouseEvent*) { if (!isOnEicWidget) return; switchQValue(); update(); }
    void	wheelEvent ( QGraphicsSceneWheelEvent * event );
 	
 private:

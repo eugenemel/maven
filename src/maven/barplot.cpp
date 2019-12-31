@@ -17,6 +17,22 @@ BarPlot::BarPlot(QGraphicsItem* parent, QGraphicsScene *scene)
 
 }
 
+//Issue 94: Use this constructor when not putting the BarPlot widget on the EIC plot.
+BarPlot::BarPlot(QGraphicsItem* parent, QGraphicsScene *scene, MainWindow *mainWindow)
+    :QGraphicsItem(parent){
+
+    _mw=mainWindow;
+    _width = 200;
+    _height= 800;
+    _barwidth= 10;
+
+    _showSampleNames=true;
+    _showIntensityText=true;
+    _showQValueType=true;
+
+    isOnEicWidget = false;
+}
+
 void BarPlot::switchQValue() {  
 	BarPlot::qtype = (PeakGroup::QType) (((int) qtype+1) % 6); 
 	PeakGroup* g = NULL;

@@ -8,10 +8,9 @@ SampleBarPlotWidget::SampleBarPlotWidget(MainWindow *mw){
     setAlignment(Qt::AlignTop|Qt::AlignLeft);
 
     this->_mw = mw;
-    _barPlot = new BarPlot(nullptr, scene());
-    _barPlot->setMainWindow(_mw);
-    _barPlot->isOnEicWidget = false;
+    _barPlot = new BarPlot(nullptr, scene(), _mw);
 
+    setDragMode(NoDrag);
     scene()->addItem(_barPlot);
 }
 
