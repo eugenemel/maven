@@ -14,7 +14,6 @@ class SampleBarPlotWidget : public QGraphicsView {
         ~SampleBarPlotWidget();
 
     public slots:
-        void clear() {scene() ->clear();}
         void setPeakGroup(PeakGroup *peakGroup);
 
     private:
