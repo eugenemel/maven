@@ -26,6 +26,9 @@ SampleBarPlotWidget::~SampleBarPlotWidget(){
 }
 
 void SampleBarPlotWidget::setPeakGroup(PeakGroup *peakGroup){
+
+    if(!peakGroup) return;
+
     _barPlot->setPeakGroup(peakGroup);
 
     //Needed to coerce scroll bars to scroll to correct size
