@@ -28,9 +28,11 @@ SampleBarPlotWidget::~SampleBarPlotWidget(){
 
 void SampleBarPlotWidget::setPeakGroup(PeakGroup *peakGroup){
     _barPlot->setPeakGroup(peakGroup);
-    scene()->update();
 
-    //Needed for scroll bars
+    //Needed to coerce scroll bars to scroll to correct size
     int pixelBuffer = 20;
-    this->setSceneRect(0, 0, _barPlot->_latestWidth+pixelBuffer, _barPlot->_latestHeight+pixelBuffer);
+    setSceneRect(0, 0, _barPlot->_latestWidth+pixelBuffer, _barPlot->_latestHeight+pixelBuffer);
+
+    scene()->update();
+    repaint();
 }
