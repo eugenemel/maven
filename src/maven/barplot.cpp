@@ -85,6 +85,7 @@ void BarPlot::setPeakGroup(PeakGroup* group) {
 }
 
 void BarPlot::wheelEvent ( QGraphicsSceneWheelEvent * event ) {
+    if (!isOnEicWidget) return;
     qDebug() << "wheelEvent()" ;
     qreal scale = this->scale();
     event->delta() > 0 ? scale *= 1.2 :  scale *= 0.9;
