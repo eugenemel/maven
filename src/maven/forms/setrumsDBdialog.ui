@@ -7,31 +7,17 @@
     <x>0</x>
     <y>0</y>
     <width>771</width>
-    <height>146</height>
+    <height>152</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Connect Spectral Library to rumsDB Table</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="1">
-    <widget class="QPushButton" name="btnNoLibrary">
-     <property name="text">
-      <string>Proceed without library</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
+   <item row="2" column="0">
     <widget class="QPushButton" name="btnUseSelected">
      <property name="text">
       <string>Use Selected Library</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="2">
-    <widget class="QPushButton" name="btnCancel">
-     <property name="text">
-      <string>Cancel</string>
      </property>
     </widget>
    </item>
@@ -40,7 +26,46 @@
      <property name="title">
       <string>Specify compound library associated with rumsDB table in mzrollDB file</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_6">
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+     <layout class="QGridLayout">
+      <item row="4" column="0" colspan="2">
+       <layout class="QFormLayout" name="formLayout">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetMaximumSize</enum>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLabel" name="lblLibraryMissing">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Is your library missing from the list?</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="btnLibDialog">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Display Library Dialog</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
       <item row="3" column="1">
        <widget class="QComboBox" name="cmbLoadedLibraries">
         <property name="sizePolicy">
@@ -52,20 +77,27 @@
        </widget>
       </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="lblSelectLibrary">
         <property name="text">
          <string>rumsDB library:</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="0" colspan="2">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>Is your library missing from the list? Cancel this dialog, import/load your library, and re-open the mzrollDB file.</string>
-        </property>
-       </widget>
-      </item>
      </layout>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QPushButton" name="btnCancel">
+     <property name="text">
+      <string>Cancel</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QPushButton" name="btnNoLibrary">
+     <property name="text">
+      <string>Proceed without library</string>
+     </property>
     </widget>
    </item>
   </layout>

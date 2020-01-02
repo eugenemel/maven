@@ -19,6 +19,7 @@ SetRumsDBDialog::SetRumsDBDialog(QWidget *parent) : QDialog(parent) {
         connect(btnUseSelected, SIGNAL(clicked()), this, SLOT(setRumsDBDatabaseName()));
         connect(btnNoLibrary, SIGNAL(clicked()), this, SLOT(useNoRumsDBDatabaseName()));
         connect(btnCancel, SIGNAL(clicked()), this, SLOT(cancelLoading()));
+        connect(btnLibDialog, SIGNAL(clicked()), mainWindow->libraryDialog, SLOT(show()));
 
         btnUseSelected->setFocus();
 
@@ -27,8 +28,10 @@ SetRumsDBDialog::SetRumsDBDialog(QWidget *parent) : QDialog(parent) {
 
 void SetRumsDBDialog::setRumsDBDatabaseName() {
     _isCancelled = false;
-    mainWindow->rumsDBDatabaseName = cmbLoadedLibraries->currentText();
-    close();
+    if (!cmbLoadedLibraries->currentText().isEmpty()) {
+        mainWindow->rumsDBDatabaseName = cmbLoadedLibraries->currentText();
+        close();
+    }
 }
 
 void SetRumsDBDialog::useNoRumsDBDatabaseName() {
