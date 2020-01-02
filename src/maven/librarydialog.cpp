@@ -29,6 +29,10 @@ void LibraryMangerDialog::updateLibraryStats() {
         item->setText(1,QString::number(dbcounts[dbname]));
         treeWidget->addTopLevelItem(item);
     }
+
+    if (mainwindow && mainwindow->setRumsDBDialog) {
+        mainwindow->setRumsDBDialog->updateComboBox();
+    }
 }
 
 void LibraryMangerDialog::loadLibrary() {

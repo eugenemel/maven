@@ -5,10 +5,7 @@ SetRumsDBDialog::SetRumsDBDialog(QWidget *parent) : QDialog(parent) {
         setModal(true);
         _isCancelled = true;
 
-        QStringList dbnames = DB.getLoadedDatabaseNames();
-        for (QString db : dbnames) {
-            cmbLoadedLibraries->addItem(db);
-        }
+        updateComboBox();
 
         mainWindow = static_cast<MainWindow*>(parent);
 
@@ -19,11 +16,19 @@ SetRumsDBDialog::SetRumsDBDialog(QWidget *parent) : QDialog(parent) {
         connect(btnUseSelected, SIGNAL(clicked()), this, SLOT(setRumsDBDatabaseName()));
         connect(btnNoLibrary, SIGNAL(clicked()), this, SLOT(useNoRumsDBDatabaseName()));
         connect(btnCancel, SIGNAL(clicked()), this, SLOT(cancelLoading()));
-        connect(btnLibDialog, SIGNAL(clicked()), mainWindow->libraryDialog, SLOT(show()));
+        connect(btnSelectLibrary, SIGNAL(clicked()), mainWindow->libraryDialog, SLOT(show()));
 
         btnUseSelected->setFocus();
 
         QDialog::show();
+}
+
+void SetRumsDBDialog::updateComboBox() {
+    cmbLoadedLibraries->clear();
+    QStringList dbnames = DB.getLoadedDatabaseNames();
+    for (QString db : dbnames) {
+        cmbLoadedLibraries->addItem(db);
+    }
 }
 
 void SetRumsDBDialog::setRumsDBDatabaseName() {

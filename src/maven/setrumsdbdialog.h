@@ -21,6 +21,7 @@ class SetRumsDBDialog : public QDialog, public Ui_setrumsDBDialog {
         void setRumsDBDatabaseName();
         void useNoRumsDBDatabaseName();
         void cancelLoading();
+        void updateComboBox();
 
     private:
         MainWindow* mainWindow;

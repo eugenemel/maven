@@ -694,6 +694,8 @@ void MainWindow::open(){
             if (filename.endsWith("mzroll"))    projectDockWidget->loadProjectXML(filename);
             if (filename.endsWith("mzrollDB")) {
 
+                if (setRumsDBDialog) delete(setRumsDBDialog);
+
                 setRumsDBDialog  = new SetRumsDBDialog(this);
                 setRumsDBDialog->exec();
 
