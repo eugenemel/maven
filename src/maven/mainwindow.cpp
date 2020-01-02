@@ -207,6 +207,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     libraryDialog = new LibraryMangerDialog(this);
     libraryDialog->setMainWindow(this);
 
+    //Set RumsDB dialog
+    //setRumsDBDialog  = new SetRumsDBDialog(this);
 
     //rconsole dialog
     //rconsoleDialog	 =  new RConsoleDialog(this);
@@ -692,10 +694,10 @@ void MainWindow::open(){
             if (filename.endsWith("mzroll"))    projectDockWidget->loadProjectXML(filename);
             if (filename.endsWith("mzrollDB")) {
 
-                SetRumsDBDialog setRumsDBDialog(this);
-                setRumsDBDialog.exec();
+                setRumsDBDialog  = new SetRumsDBDialog(this);
+                setRumsDBDialog->exec();
 
-                if (!setRumsDBDialog.isCancelled()) {
+                if (!setRumsDBDialog->isCancelled()) {
                     qDebug() << "rumsDB spectral library: " << rumsDBDatabaseName;
                     projectDockWidget->loadProjectSQLITE(filename);
                 }

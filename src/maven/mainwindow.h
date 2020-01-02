@@ -69,7 +69,7 @@ class RconsoleWidget;
 class SpectralHit;
 class LibraryMangerDialog;
 class SampleBarPlotWidget;
-
+class SetRumsDBDialog;
 
 extern Database DB; 
 
@@ -129,6 +129,7 @@ public:
     CalibrateDialog*	  calibrateDialog;
     RconsoleWidget*       rconsoleDockWidget;
     LibraryMangerDialog*       libraryDialog;
+    SetRumsDBDialog*           setRumsDBDialog;
 
     QProgressBar  *progressBar;
 
