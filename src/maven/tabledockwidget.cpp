@@ -719,7 +719,7 @@ void TableDockWidget::exportGroupsToSpreadsheet() {
             }
         }
 
-        if (isSelected) {
+        if (isSelected && !group.deletedFlag) { //don't add deleted groups
             csvreports->addGroup(&group);
         }
 
