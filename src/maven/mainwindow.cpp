@@ -208,7 +208,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     libraryDialog->setMainWindow(this);
 
     //Set RumsDB dialog
-    //setRumsDBDialog  = new SetRumsDBDialog(this);
+    setRumsDBDialog  = nullptr; //Issue #121 Intialize to nullptr to avoid Segmentation Fault
 
     //rconsole dialog
     //rconsoleDialog	 =  new RConsoleDialog(this);
@@ -694,7 +694,10 @@ void MainWindow::open(){
             if (filename.endsWith("mzroll"))    projectDockWidget->loadProjectXML(filename);
             if (filename.endsWith("mzrollDB")) {
 
-                if (setRumsDBDialog) delete(setRumsDBDialog);
+                if (setRumsDBDialog){
+                    delete(setRumsDBDialog);
+                    setRumsDBDialog = nullptr;
+                }
 
                 setRumsDBDialog  = new SetRumsDBDialog(this);
                 setRumsDBDialog->exec();
