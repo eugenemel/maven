@@ -52,8 +52,8 @@ ProjectDockWidget::ProjectDockWidget(QMainWindow *parent):
 
     toolBar->addWidget(filterEditor);
     toolBar->addWidget(colorButton);
-    toolBar->addWidget(uploadSampleOrgButton);
     toolBar->addWidget(downloadSampleOrgButton);
+    toolBar->addWidget(uploadSampleOrgButton);
 
     setTitleBarWidget(toolBar);
     setWidget(_treeWidget);
