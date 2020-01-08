@@ -33,6 +33,7 @@
 #include "librarydialog.h"
 #include "setrumsdbdialog.h"
 #include "samplebarplotwidget.h"
+#include "sampleimage.h"
 
 class SettingsForm;
 class EicWidget;
@@ -70,6 +71,7 @@ class SpectralHit;
 class LibraryMangerDialog;
 class SampleBarPlotWidget;
 class SetRumsDBDialog;
+class SampleImageWidget;
 
 extern Database DB; 
 
@@ -108,6 +110,7 @@ public:
     QDockWidget		 *treeMapDockWidget;
     QDockWidget	 	 *galleryDockWidget;
     QDockWidget      *barPlotDockWidget;
+    QDockWidget      *sampleImageDockWidget;
     LogWidget            *logWidget;
     NotesWidget		 *notesDockWidget;
     ProjectDockWidget    *projectDockWidget;
@@ -120,6 +123,7 @@ public:
     ScatterPlot		 *scatterplot;
     TreeMap		 *treemap;
     SampleBarPlotWidget     *barPlotWidget;
+    SampleImageWidget       *sampleImageWidget;
 
     SettingsForm   *settingsForm;
     PeakDetectionDialog *peakDetectionDialog;
@@ -165,7 +169,7 @@ public slots:
     QDockWidget* createDockWidget(QString title, QWidget* w);
     void showPeakInfo(Peak*);
     void setProgressBar(QString, int step, int totalSteps);
-    void setStatusText(QString text = QString::null);
+    void setStatusText(QString text = QString());
     void setMzValue();
     void setMzValue(float mz);
     void loadModel();
@@ -174,7 +178,7 @@ public slots:
 
     bool addSample(mzSample* sample);
     void compoundDatabaseSearch();
-    void setUrl(QString url,QString link=QString::null);
+    void setUrl(QString url,QString link=QString());
     void setUrl(Compound*);
     void setFormulaFocus(QString formula);
     void Align();

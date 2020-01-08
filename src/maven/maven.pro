@@ -105,7 +105,8 @@ HEADERS +=  stable.h \
             editpeakgroupingdialog.h \
             selectadductsdialog.h \
             setrumsdbdialog.h \
-            samplebarplotwidget.h
+            samplebarplotwidget.h \
+            sampleimage.h
 
 SOURCES +=  mainwindow.cpp  \
             classifier.cpp \
@@ -154,7 +155,8 @@ SOURCES +=  mainwindow.cpp  \
             editpeakgroupingdialog.cpp \
             selectadductsdialog.cpp \
             setrumsdbdialog.cpp \
-            samplebarplotwidget.cpp
+            samplebarplotwidget.cpp \
+            sampleimage.cpp
 
 
 sources.files =  $$HEADERS \

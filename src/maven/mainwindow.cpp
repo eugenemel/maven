@@ -151,11 +151,13 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     heatmap	 = 	  new HeatMap(this);
     galleryWidget = new GalleryWidget(this);
     barPlotWidget = new SampleBarPlotWidget(this);
+    sampleImageWidget = new SampleImageWidget(this);
     bookmarkedPeaks = addPeaksTable("Bookmarks");
     spectraDockWidget =  createDockWidget("Spectra",spectraWidget);
     heatMapDockWidget =  createDockWidget("HeatMap",heatmap);
     galleryDockWidget =  createDockWidget("Gallery",galleryWidget);
     barPlotDockWidget = createDockWidget("EIC Legend",barPlotWidget);
+    sampleImageDockWidget = createDockWidget("Sample Image",sampleImageWidget);
     scatterDockWidget =  new ScatterPlot(this);
     projectDockWidget =  new ProjectDockWidget(this);
     rconsoleDockWidget =  new RconsoleWidget(this);
@@ -236,6 +238,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     addDockWidget(Qt::BottomDockWidgetArea,srmDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,rconsoleDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,fragmenationSpectraDockWidget,Qt::Horizontal);
+    addDockWidget(Qt::BottomDockWidgetArea,sampleImageDockWidget,Qt::Horizontal);
 
     //addDockWidget(Qt::BottomDockWidgetArea,peaksPanel,Qt::Horizontal);
     //addDockWidget(Qt::BottomDockWidgetArea,treeMapDockWidget,Qt::Horizontal);
@@ -250,6 +253,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     tabifyDockWidget(spectraDockWidget,covariantsPanel);
     tabifyDockWidget(spectraDockWidget,galleryDockWidget);
     tabifyDockWidget(spectraDockWidget,rconsoleDockWidget);
+    tabifyDockWidget(spectraDockWidget,sampleImageDockWidget);
 
     setContextMenuPolicy(Qt::NoContextMenu);
 
@@ -969,6 +973,11 @@ void MainWindow::createMenus() {
     QAction* aj = widgetsMenu->addAction("Fragmentation Events List");
     aj->setCheckable(true);  aj->setChecked(false);
     connect(aj,SIGNAL(toggled(bool)),fragmentationEventsWidget,SLOT(setVisible(bool)));
+
+    QAction* si = widgetsMenu->addAction("Sample Images");
+    si->setCheckable(true);  si->setChecked(false);
+    connect(si,SIGNAL(toggled(bool)),sampleImageDockWidget,SLOT(setVisible(bool)));
+
 
     menuBar()->show();
 }
