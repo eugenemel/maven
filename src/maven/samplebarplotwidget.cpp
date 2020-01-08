@@ -33,10 +33,15 @@ void SampleBarPlotWidget::setPeakGroup(PeakGroup *peakGroup){
 
     //Needed to coerce scroll bars to scroll to correct size
     int pixelBuffer = 20;
-    setSceneRect(0, 0, _barPlot->_latestWidth+pixelBuffer, _barPlot->_latestHeight+pixelBuffer);
 
-    scene()->update();
     repaint();
 
+    QRectF sceneRect(0, 0, _barPlot->_latestWidth+pixelBuffer, _barPlot->_latestHeight+pixelBuffer);
+
+    setSceneRect(sceneRect);
+    updateSceneRect(sceneRect);
+    scene()->update(sceneRect);
+
     this->verticalScrollBar()->setSliderPosition(0);
+    this->horizontalScrollBar()->setSliderPosition(0);
 }
