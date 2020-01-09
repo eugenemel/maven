@@ -51,6 +51,9 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(spnMzMaxOffset, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
     connect(spnMzMaxVal, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
 
+    //mzrolldb options
+    connect(chkAllowMzRollDBSubset, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+
     setModal(true);
 
 }
@@ -85,7 +88,8 @@ void SettingsForm::updateSmoothingWindowValue(double value) {
 void SettingsForm::setFormValues() {
    // qDebug() << "SettingsForm::setFormValues()";
 
-    if (settings == NULL) return;
+    if (!settings) return;
+
     eic_smoothingAlgorithm->setCurrentIndex(settings->value("eic_smoothingAlgorithm").toInt());
     eic_smoothingWindow->setValue(settings->value("eic_smoothingWindow").toDouble());
     grouping_maxRtWindow->setValue(settings->value("grouping_maxRtWindow").toDouble());
@@ -160,6 +164,9 @@ void SettingsForm::setFormValues() {
 
     if (settings->contains("spnBkmkRtTol"))
         spnBkmkRtTol->setValue(settings->value("spnBkmkRtTol").toDouble());
+
+    if (settings->contains("chkAllowMzRollDBSubset"))
+        chkAllowMzRollDBSubset->setCheckState((Qt::CheckState) settings->value("chkAllowMzRollDBSubset").toInt());
 
 }
 
@@ -243,6 +250,9 @@ void SettingsForm::getFormValues() {
     settings->setValue("chkBkmkWarnMz", chkBkmkWarnMz->checkState());
     settings->setValue("spnBkmkmzTol", spnBkmkmzTol->value());
     settings->setValue("spnBkmkRtTol", spnBkmkRtTol->value());
+
+    //mzrolldb options
+    settings->setValue("chkAllowMzRollDBSubset", chkAllowMzRollDBSubset->checkState());
 
 }
 
