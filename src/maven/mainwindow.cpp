@@ -993,17 +993,17 @@ void MainWindow::createToolBars() {
     toolBar->setObjectName("mainToolBar");
     toolBar->setMovable(false);
 
-    QToolButton *btnSave = new QToolButton(toolBar);
-    btnSave->setText("Save");
-    btnSave->setIcon(QIcon(rsrcPath +"/filesave.png"));
-    btnSave->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnSave->setToolTip(tr("Save Project"));
-
     QToolButton *btnOpen = new QToolButton(toolBar);
     btnOpen->setText("Open");
     btnOpen->setIcon(QIcon(rsrcPath + "/fileopen.png"));
     btnOpen->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnOpen->setToolTip(tr("Read in Mass Spec. Files"));
+
+    QToolButton *btnSave = new QToolButton(toolBar);
+    btnSave->setText("Save");
+    btnSave->setIcon(QIcon(rsrcPath +"/filesave.png"));
+    btnSave->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnSave->setToolTip(tr("Save Project"));
 
     QToolButton *btnLibrary = new QToolButton(toolBar);
     btnLibrary->setText("Library");
