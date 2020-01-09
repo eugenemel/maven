@@ -299,6 +299,13 @@
          </item>
         </widget>
        </item>
+       <item row="1" column="4">
+        <widget class="QCheckBox" name="chkAllowMzRollDBSubset">
+         <property name="text">
+          <string>Allow mzrollDB subset import</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="peakDetectOptions">
