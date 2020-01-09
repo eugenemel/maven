@@ -84,6 +84,14 @@ void EicWidget::mouseReleaseEvent(QMouseEvent *event) {
     float rtmin = invX( std::min(_mouseStartPos.x(), _mouseEndPos.x()) );
     float rtmax = invX( std::max(_mouseStartPos.x(), _mouseEndPos.x()) );
 
+    float mouseStartPosY = _mouseStartPos.y();
+    float mouseEndPosY = _mouseEndPos.y();
+
+    //Issue 104: for debugging
+    //qDebug() << "mouseStartPosY: " << mouseStartPosY << ", mouseEndPosY: " << mouseEndPosY;
+
+    float intensityMax = invY( std::min(mouseStartPosY, mouseEndPosY) );
+
     int deltaX =  _mouseEndPos.x() - _mouseStartPos.x();
     _mouseStartPos = _mouseEndPos; //
 
@@ -112,7 +120,7 @@ void EicWidget::mouseReleaseEvent(QMouseEvent *event) {
                     _slice.rtmax = _selectedGroup.meanRt + d;
                 }
             }
-           _intensityZoomVal = invY( std::max(_mouseStartPos.y(), _mouseEndPos.y()) );
+            _intensityZoomVal = intensityMax;
         } else if ( deltaX < 0 ) {	 //zoomout
             qDebug() << "zoomOut";
             //zoom(_zoomFactor * 1.2 );
@@ -415,9 +423,11 @@ void EicWidget::findPlotBounds() {
         }
     }
 
+    //Issue 104: Do not make this adjustment when zooming
+    if (_intensityZoomVal < 0) {
+         _maxY = (_maxY * 1.3) + 1;
+    }
 
-    //if(_minY <= 0) _minY = 0;
-    _maxY = (_maxY * 1.3) + 1;
     if (_minX > _maxX) swap(_minX,_maxX);
     //qDebug() << "EicWidget::findPlotBounds()" << _slice.rtmin << " " << _slice.rtmax << " " << _minY << " " << _maxY;
 }
