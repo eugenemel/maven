@@ -269,8 +269,13 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
     }
     item->setBackground(0,brush);
 
-    if (group->label == 'g' ) item->setIcon(0,QIcon(":/images/good.png"));
-    if (group->label == 'b' ) item->setIcon(0,QIcon(":/images/bad.png"));
+    if (group->label == 'g' ) {
+        item->setIcon(0,QIcon(":/images/good.png"));
+    } else if (group->label == 'b' ) {
+        item->setIcon(0,QIcon(":/images/bad.png"));
+    } else {
+        item->setIcon(0, QIcon()); //empty icon
+    }
 
 }
 
@@ -799,7 +804,11 @@ void TableDockWidget::setGroupLabel(char label) {
             QVariant v = item->data(0,PeakGroupType);
             PeakGroup*  group =  v.value<PeakGroup*>();
             if (group) {
-                 group->setLabel(label);
+                if (group->label != label) {
+                    group->setLabel(label);
+                } else {
+                    group->setLabel(0); //Issue 125: if group already labeled with this label, return to unlabeled state
+                }
             }
             updateItem(item);
         }
@@ -877,17 +886,17 @@ void TableDockWidget::setClipboard() {
 
 void TableDockWidget::markGroupGood() { 
     setGroupLabel('g');
-    showNextGroup();
+    if (treeWidget->selectedItems().size() == 1) showNextGroup();
 }
 
 void TableDockWidget::markGroupBad() { 
     setGroupLabel('b');
-    showNextGroup();
+    if (treeWidget->selectedItems().size() == 1) showNextGroup();
 }
 
 void TableDockWidget::markGroupIgnored() { 
     setGroupLabel('i');
-    showNextGroup();
+    if (treeWidget->selectedItems().size() == 1) showNextGroup();
 }
 
 void TableDockWidget::showLastGroup() {
@@ -908,10 +917,17 @@ PeakGroup* TableDockWidget::getLastBookmarkedGroup() {
 void TableDockWidget::showNextGroup() {
 
     QTreeWidgetItem *item= treeWidget->currentItem();
-    if ( item == NULL ) return;
+    if ( !item ) return;
 
     QTreeWidgetItem* nextitem = treeWidget->itemBelow(item); //get next item
-    if ( nextitem != NULL )  treeWidget->setCurrentItem(nextitem);
+    if ( nextitem  ){
+        treeWidget->setCurrentItem(nextitem);
+
+        //Issue 125: When working through a list, only keep one item selected at a time.
+        item->setSelected(false);
+
+    }
+
 }
 
 void TableDockWidget::Train() { 
