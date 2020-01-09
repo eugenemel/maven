@@ -694,14 +694,17 @@ void MainWindow::open(){
             if (filename.endsWith("mzroll"))    projectDockWidget->loadProjectXML(filename);
             if (filename.endsWith("mzrollDB")) {
 
-                //TODO: make this an option to appear?
-                QString msg("Would you like to open a subset of this file?");
-                QMessageBox::StandardButton reply;
-                  reply = QMessageBox::question(this, "Large File View", msg,
-                                                QMessageBox::Yes|QMessageBox::No);
+                if (settings->value("chkAllowMzRollDBSubset", false).toBool()){
 
-                if (reply == QMessageBox::Yes) {
-                    qDebug() << "TODO: show dialog to open subset of samples";
+                    QString msg("Would you like to open a subset of this file?");
+                    QMessageBox::StandardButton reply;
+                      reply = QMessageBox::question(this, "Large File View", msg,
+                                                    QMessageBox::Yes|QMessageBox::No);
+
+                    if (reply == QMessageBox::Yes) {
+                        qDebug() << "TODO: show dialog to open subset of samples";
+                    }
+
                 }
 
                 if (setRumsDBDialog){
