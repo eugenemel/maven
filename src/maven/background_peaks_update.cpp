@@ -1003,6 +1003,9 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
     bool   D2Labeled=false;
     int eic_smoothingAlgorithm = 0;
 
+    //TODO: not sure if this is ever used anywhere, certainly not used here
+    bool isotopeC13Correction=true;
+
     //Issue 130: Increase isotope calculation accuracy by using sample-specific mz values
     map<mzSample*, double> sampleToPeakMz{};
     for (Peak& p : parentgroup->peaks) {
@@ -1021,6 +1024,7 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
             D2Labeled   =   settings->value("D2Labeled").toBool();
             QSettings* settings = mainwindow->getSettings();
             eic_smoothingAlgorithm = settings->value("eic_smoothingAlgorithm").toInt();
+            isotopeC13Correction = settings->value("isotopeC13Correction").toBool();
 
 	    //Feng note: assign labeling state to sample
 	    samples[0]->_C13Labeled = C13Labeled;
@@ -1031,8 +1035,23 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
         }
     }
 
+    //TODO: this does not consider the adduct form! problem for expected abundance
     string formula = parentgroup->compound->formula;
-    vector<Isotope> masslist = mcalc.computeIsotopes(formula,ionizationMode);
+
+    //TODO: respecting labels based on a checkbox that performs correction
+    vector<Isotope> masslist {};
+    if (isotopeC13Correction) { //get all isotopes
+         masslist = mcalc.computeIsotopes(formula,ionizationMode);
+    } else {
+         masslist = mcalc.computeIsotopes(formula, ionizationMode, C13Labeled, N15Labeled, S34Labeled, D2Labeled);
+    }
+
+    qDebug() << "masslist:";
+    for (auto &iso : masslist) {
+        qDebug() << "name: " << iso.name.c_str()
+                 << " mass: " << QString::number(iso.mass,'f',6)
+                 << " charge: " << iso.charge;
+    }
 
     map<string,PeakGroup>isotopes;
     map<string,PeakGroup>::iterator itr2;
@@ -1049,6 +1068,8 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
             float rt =  parentgroup->medianRt();
             float rtmin = parentgroup->minRt;
             float rtmax = parentgroup->maxRt;
+
+            qDebug() << isotopeName.c_str() << " mass=" << isotopeMass << " mzmin=" << mzmin <<", mzmax=" << mzmax;
 
             Peak* parentPeak =  parentgroup->getPeak(sample);
             if ( parentPeak ) rt  =   parentPeak->rt;
