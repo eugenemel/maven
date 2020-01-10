@@ -1108,16 +1108,20 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
                 corrMz = sampleToPeakMz[sample];
             }
 
-            double c = sample->correlation(isotopeMass, parentgroup->meanMz, ppm, rtmin-w,rtmax+w);
+            double c = sample->correlation(isotopeMass, corrMz, ppm, rtmin-w,rtmax+w);
             if (c < minIsotopicCorrelation)  continue;
 
             //cerr << "pullIsotopes: " << isotopeMass << " " << rtmin-w << " " <<  rtmin+w << " c=" << c << endl;
 
-            //show correlation values
-            qDebug() << "ISSUE-130-DEBUGGING" << sample->getSampleName().c_str()
-                     << ": mzmin=" << QString::number(mzmin,'f', 6) << ", mzmax=" << QString::number(mzmax,'f',6)
-                     << " rtmin=" << QString::number((rtmin-w), 'f', 6) << ", rtmax=" << QString::number((rtmax+w),'f', 6)
-                     << ", correlation=" << QString::number(c, 'f', 6);
+            if (mzmin > 119 && mzmax < 120) { //Valine [M+1] peak
+
+                //show correlation values
+                qDebug() << "ISSUE-130-DEBUGGING" << sample->getSampleName().c_str() << ": "
+                         << "corrMz= " << QString::number(corrMz, 'f', 6)
+                         << " mzmin=" << QString::number(mzmin,'f', 6) << ", mzmax=" << QString::number(mzmax,'f',6)
+                         << " rtmin=" << QString::number((rtmin-w), 'f', 6) << ", rtmax=" << QString::number((rtmax+w),'f', 6)
+                         << ", correlation=" << QString::number(c, 'f', 6);
+            }
 
             EIC* eic=nullptr;
             for( int i=0; i<maxIsotopeScanDiff; i++ ) {
