@@ -1003,6 +1003,11 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
     bool   D2Labeled=false;
     int eic_smoothingAlgorithm = 0;
 
+    //Issue 130: Increase isotope calculation accuracy by using sample-specific mz values
+    map<mzSample*, double> sampleToPeakMz{};
+    for (Peak& p : parentgroup->peaks) {
+        sampleToPeakMz.insert(make_pair(p.sample, p.peakMz));
+    }
 
     if(mainwindow) {
         QSettings* settings = mainwindow->getSettings();
@@ -1104,6 +1109,7 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
             //show correlation values
             qDebug() << "ISSUE-130-DEBUGGING" << sample->getSampleName().c_str()
                      << ": mzmin=" << QString::number(mzmin,'f', 6) << ", mzmax=" << QString::number(mzmax,'f',6)
+                     << " rtmin=" << QString::number((rtmin-w), 'f', 6) << ", rtmax=" << QString::number((rtmax+w),'f', 6)
                      << ", correlation=" << QString::number(c, 'f', 6);
 
             EIC* eic=nullptr;
