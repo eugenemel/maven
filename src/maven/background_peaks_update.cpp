@@ -1101,7 +1101,14 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
 
 
             float w = maxIsotopeScanDiff*avgScanTime;
-            double c = sample->correlation(isotopeMass,parentgroup->meanMz,ppm, rtmin-w,rtmax+w);
+
+            //Issue 120: Use sample-specific mz value for peaks instead of average mz
+            double corrMz = parentgroup->meanMz;
+            if (sampleToPeakMz.find(sample) != sampleToPeakMz.end()) {
+                corrMz = sampleToPeakMz[sample];
+            }
+
+            double c = sample->correlation(isotopeMass, parentgroup->meanMz, ppm, rtmin-w,rtmax+w);
             if (c < minIsotopicCorrelation)  continue;
 
             //cerr << "pullIsotopes: " << isotopeMass << " " << rtmin-w << " " <<  rtmin+w << " c=" << c << endl;
