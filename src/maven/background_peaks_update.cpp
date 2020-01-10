@@ -959,7 +959,7 @@ vector<EIC*> BackgroundPeakUpdate::pullEICs(mzSlice* slice,
 		mzSample* sample = vsamples[i];
 		Compound* c =  slice->compound;
 
-        EIC* e = NULL;
+        EIC* e = nullptr;
 
         if ( ! slice->srmId.empty() ) {
             //cout << "computeEIC srm:" << slice->srmId << endl;
@@ -1116,8 +1116,8 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
             if (mzmin > 119 && mzmax < 120) { //Valine [M+1] peak
 
                 //show correlation values
-                qDebug() << "ISSUE-130-DEBUGGING" << sample->getSampleName().c_str() << ": "
-                         << "corrMz= " << QString::number(corrMz, 'f', 6)
+                qDebug() << "ISSUE-130-DEBUGGING" << sample->getSampleName().c_str()
+                         << ": corrMz= " << QString::number(corrMz, 'f', 6)
                          << " mzmin=" << QString::number(mzmin,'f', 6) << ", mzmax=" << QString::number(mzmax,'f',6)
                          << " rtmin=" << QString::number((rtmin-w), 'f', 6) << ", rtmax=" << QString::number((rtmax+w),'f', 6)
                          << ", correlation=" << QString::number(c, 'f', 6);
