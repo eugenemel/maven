@@ -1045,7 +1045,6 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
             float rtmin = parentgroup->minRt;
             float rtmax = parentgroup->maxRt;
 
-
             Peak* parentPeak =  parentgroup->getPeak(sample);
             if ( parentPeak ) rt  =   parentPeak->rt;
             if ( parentPeak ) rtmin = parentPeak->rtmin;
@@ -1101,6 +1100,11 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
             if (c < minIsotopicCorrelation)  continue;
 
             //cerr << "pullIsotopes: " << isotopeMass << " " << rtmin-w << " " <<  rtmin+w << " c=" << c << endl;
+
+            //show correlation values
+            qDebug() << "ISSUE-130-DEBUGGING" << sample->getSampleName().c_str()
+                     << ": mzmin=" << QString::number(mzmin,'f', 6) << ", mzmax=" << QString::number(mzmax,'f',6)
+                     << ", correlation=" << QString::number(c, 'f', 6);
 
             EIC* eic=nullptr;
             for( int i=0; i<maxIsotopeScanDiff; i++ ) {
