@@ -29,6 +29,7 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(isotopeC13Correction, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
     connect(chkIgnoreNaturalAbundance, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
     connect(chkExtractNIsotopes, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
+    connect(spnMaxIsotopesToExtract, SIGNAL(valueChanged(int)), SLOT(recomputeIsotopes()));
 
     connect(maxNaturalAbundanceErr, SIGNAL(valueChanged(double)), SLOT(recomputeIsotopes()));
     connect(minIsotopicCorrelation, SIGNAL(valueChanged(double)), SLOT(recomputeIsotopes()));
@@ -105,6 +106,9 @@ void SettingsForm::setFormValues() {
     isotopeC13Correction->setCheckState(  (Qt::CheckState) settings->value("isotopeC13Correction").toInt()  );
     chkIgnoreNaturalAbundance->setCheckState(  (Qt::CheckState) settings->value("chkIgnoreNaturalAbundance").toInt()  );
     chkExtractNIsotopes->setCheckState( (Qt::CheckState) settings->value("chkExtractNIsotopes").toInt() );
+
+    if (settings->contains("spnMaxIsotopesToExtract"))
+        spnMaxIsotopesToExtract->setValue(settings->value("spnMaxIsotopesToExtract").toInt());
 
     centroid_scan_flag->setCheckState( (Qt::CheckState) settings->value("centroid_scan_flag").toInt());
     scan_filter_min_intensity->setValue( settings->value("scan_filter_min_intensity").toInt());
@@ -187,6 +191,7 @@ void SettingsForm::getFormValues() {
     settings->setValue("isotopeC13Correction", isotopeC13Correction->checkState()  );
     settings->setValue("chkIgnoreNaturalAbundance", chkIgnoreNaturalAbundance->checkState() );
     settings->setValue("chkExtractNIsotopes", chkExtractNIsotopes->checkState() );
+    settings->setValue("spnMaxIsotopesToExtract", spnMaxIsotopesToExtract->value());
 
     settings->setValue("amuQ1", amuQ1->value());
     settings->setValue("amuQ3", amuQ3->value());
