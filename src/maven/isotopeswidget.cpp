@@ -151,7 +151,6 @@ void IsotopeWidget::computeIsotopes(string f) {
     //TODO: swap this out with passing in actual adduct
     vector<Isotope> isotopes = mcalc.computeIsotopes(f, SIGN(getCurrentAdduct()->charge), maxNumProtons, C13Labeled, N15Labeled, S34Labeled, D2Labeled);
 
-    //TODO: respect options from settings
     for (int i=0; i < isotopes.size(); i++ ) {
         Isotope& x = isotopes[i];
 
