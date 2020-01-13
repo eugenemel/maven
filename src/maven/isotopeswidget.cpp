@@ -12,12 +12,13 @@ IsotopeWidget::IsotopeWidget(MainWindow* mw) {
 
   tempCompound = new Compound("Unknown", "Unknown", string(), 0 );	 //temp compound
 
+  setupUi(this);
+
   adductComboBox->clear();
   for (Adduct* a : DB.adductsDB) {
     adductComboBox->addItem(a->name.c_str(),QVariant::fromValue(a));
   }
 
-  setupUi(this);
   connect(treeWidget, SIGNAL(itemSelectionChanged()), SLOT(showInfo()));
   connect(formula, SIGNAL(textEdited(QString)), this, SLOT(userChangedFormula(QString)));
   connect(adductComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(userChangedFormula(QString)));
