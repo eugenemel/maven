@@ -157,8 +157,7 @@ void IsotopeWidget::computeIsotopes(string f) {
         maxNumProtons = spnMaxIsotopesToExtract;
     }
 
-    //TODO: swap this out with passing in actual adduct
-    vector<Isotope> isotopes = mcalc.computeIsotopes(f, SIGN(getCurrentAdduct()->charge), maxNumProtons, C13Labeled, N15Labeled, S34Labeled, D2Labeled);
+    vector<Isotope> isotopes = mcalc.computeIsotopes(f, getCurrentAdduct(), maxNumProtons, C13Labeled, N15Labeled, S34Labeled, D2Labeled);
 
     for (int i=0; i < isotopes.size(); i++ ) {
         Isotope& x = isotopes[i];
