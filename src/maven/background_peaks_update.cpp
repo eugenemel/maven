@@ -1003,6 +1003,11 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
     bool   D2Labeled=false;
     int eic_smoothingAlgorithm = 0;
 
+    //Issue 130: new options
+    bool chkIgnoreNaturalAbundance = true;
+    bool chkExtractNIsotopes = false;
+    int spnMaxIsotopesToExtract = 5;
+
     //Issue 130: Increase isotope calculation accuracy by using sample-specific mz values
     map<mzSample*, double> sampleToPeakMz{};
     for (Peak& p : parentgroup->peaks) {
@@ -1021,6 +1026,10 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
             D2Labeled   =   settings->value("D2Labeled").toBool();
             QSettings* settings = mainwindow->getSettings();
             eic_smoothingAlgorithm = settings->value("eic_smoothingAlgorithm").toInt();
+
+            chkIgnoreNaturalAbundance = settings->value("chkIgnoreNaturalAbundance").toBool();
+            chkExtractNIsotopes = settings->value("chkExtractNIsotopes").toBool();
+            spnMaxIsotopesToExtract = settings->value("spnMaxIsotopesToExtract").toInt();
 
 	    //Feng note: assign labeling state to sample
 	    samples[0]->_C13Labeled = C13Labeled;
@@ -1091,25 +1100,26 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
             //if(isotopePeakIntensity==0) continue;
 
             //natural abundance check
-            if (    (x.C13 > 0    && C13Labeled==false)
-                    || (x.N15 > 0 && N15Labeled==false)
-                    || (x.S34 > 0 && S34Labeled==false )
-                    || (x.H2 > 0  && D2Labeled==false )
+            if (chkIgnoreNaturalAbundance) {
+                if (    (x.C13 > 0    && C13Labeled==false)
+                        || (x.N15 > 0 && N15Labeled==false)
+                        || (x.S34 > 0 && S34Labeled==false )
+                        || (x.H2 > 0  && D2Labeled==false )
 
-                    ) {
-                if (expectedAbundance < 1e-8) continue;
-                if (expectedAbundance * parentPeakIntensity < 1) continue;
-                float observedAbundance = isotopePeakIntensity/(parentPeakIntensity+isotopePeakIntensity);
-                float naturalAbundanceError = abs(observedAbundance-expectedAbundance)/expectedAbundance*100;
+                        ) {
+                    if (expectedAbundance < 1e-8) continue;
+                    if (expectedAbundance * parentPeakIntensity < 1) continue;
+                    float observedAbundance = isotopePeakIntensity/(parentPeakIntensity+isotopePeakIntensity);
+                    float naturalAbundanceError = abs(observedAbundance-expectedAbundance)/expectedAbundance*100;
 
-                //cerr << isotopeName << endl;
-                //cerr << "Expected isotopeAbundance=" << expectedAbundance;
-                //cerr << " Observed isotopeAbundance=" << observedAbundance;
-                //cerr << " Error="     << naturalAbundanceError << endl;
+                    //cerr << isotopeName << endl;
+                    //cerr << "Expected isotopeAbundance=" << expectedAbundance;
+                    //cerr << " Observed isotopeAbundance=" << observedAbundance;
+                    //cerr << " Error="     << naturalAbundanceError << endl;
 
-                if (naturalAbundanceError > maxNaturalAbundanceErr )  continue;
+                    if (naturalAbundanceError > maxNaturalAbundanceErr )  continue;
+                }
             }
-
 
             float w = maxIsotopeScanDiff*avgScanTime;
 
