@@ -1043,7 +1043,11 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
     //TODO: this does not consider the adduct form! problem for expected abundance
     string formula = parentgroup->compound->formula;
 
-    vector<Isotope> masslist = mcalc.computeIsotopes(formula, ionizationMode, C13Labeled, N15Labeled, S34Labeled, D2Labeled);
+    int maxNumProtons = INT_MAX;
+    if (chkExtractNIsotopes) {
+        maxNumProtons = spnMaxIsotopesToExtract;
+    }
+    vector<Isotope> masslist = mcalc.computeIsotopes(formula, ionizationMode, maxNumProtons, C13Labeled, N15Labeled, S34Labeled, D2Labeled);
 
     qDebug() << "masslist:";
     for (auto &iso : masslist) {
