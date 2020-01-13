@@ -893,6 +893,9 @@ void EicWidget::replot(PeakGroup* group ) {
     setFocusLine(_focusLineRt);  //qDebug() << "\tsetFocusLine msec=" << timerX.elapsed();
     if(_showMS2Events && _slice.mz>0) { addMS2Events(_slice.mzmin, _slice.mzmax); }
 
+    if (_showIsotopePlot) addIsotopicPlot(group);
+    if (_showBoxPlot)     addBoxPlot(group);
+
     addAxes();
    //setStatusText("Unknown Expected Retention Time!");
 
