@@ -131,6 +131,10 @@ void IsotopeWidget::computeIsotopes(string f) {
     bool S34Labeled   =  settings->value("S34Labeled").toBool();
     bool D2Labeled   =   settings->value("D2Labeled").toBool();
 
+    bool chkIgnoreNaturalAbundance = settings->value("chkIgnoreNaturalAbundance").toBool();
+    bool chkExtractNIsotopes = settings->value("chkExtractNIsotopes").toBool();
+    int spnMaxIsotopesToExtract = settings->value("spnMaxIsotopesToExtract").toInt();
+
     //NO ISOTOPES SELECTED..
     if (C13Labeled == false and N15Labeled == false and S34Labeled == false and D2Labeled == false) {
         showTable();
@@ -139,8 +143,13 @@ void IsotopeWidget::computeIsotopes(string f) {
     qDebug() << "Isotope Calculation: " << C13Labeled << N15Labeled << S34Labeled << D2Labeled;
 
 
+    int maxNumProtons = INT_MAX;
+    if (chkExtractNIsotopes) {
+        maxNumProtons = spnMaxIsotopesToExtract;
+    }
+
     //TODO: swap this out with passing in actual adduct
-    vector<Isotope> isotopes = mcalc.computeIsotopes(f, SIGN(getCurrentAdduct()->charge));
+    vector<Isotope> isotopes = mcalc.computeIsotopes(f, SIGN(getCurrentAdduct()->charge), maxNumProtons, C13Labeled, N15Labeled, S34Labeled, D2Labeled);
 
     //TODO: respect options from settings
     for (int i=0; i < isotopes.size(); i++ ) {
@@ -153,19 +162,22 @@ void IsotopeWidget::computeIsotopes(string f) {
              ((x.N15 > 0 && N15Labeled==true) || x.N15 == 0) &&
              ((x.S34 > 0 && S34Labeled==true) || x.S34 == 0) &&
              ((x.H2 > 0 && D2Labeled==true ) || x.H2 == 0)) {
+
+            if (chkIgnoreNaturalAbundance) {
                 if (expectedAbundance < 1e-8) continue;
                 // if (expectedAbundance * parentPeakIntensity < 500) continue;
                 float isotopePeakIntensity = getIsotopeIntensity(x.mass);
                 float observedAbundance = isotopePeakIntensity/(parentPeakIntensity+isotopePeakIntensity);
                 float naturalAbundanceError = abs(observedAbundance-expectedAbundance)/expectedAbundance*100;
                 if (naturalAbundanceError > maxNaturalAbundanceErr )  continue;
+            }
 
-                link.mz1 = parentMass;
-                link.mz2 = x.mass;
-                link.note= x.name;
-                link.value1 = x.abundance;
-                link.value2 = getIsotopeIntensity(x.mass);
-                links.push_back(link);
+            link.mz1 = parentMass;
+            link.mz2 = x.mass;
+            link.note= x.name;
+            link.value1 = x.abundance;
+            link.value2 = getIsotopeIntensity(x.mass);
+            links.push_back(link);
         }
     }
     sort(links.begin(),links.end(),mzLink::compMz);
