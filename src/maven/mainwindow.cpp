@@ -452,7 +452,6 @@ void MainWindow::setIonizationMode( int x ) {
     qDebug() << "setIonizationMode: " << x;
     _ionizationMode=x;
      massCalcWidget->setCharge(_ionizationMode);
-     isotopeWidget->setCharge(_ionizationMode);
 
      if(x>0) adductType->setCurrentText("[M+H]+");
      else if(x<0) adductType->setCurrentText("[M-H]-");
@@ -1212,9 +1211,6 @@ void MainWindow::addToHistory(const mzSlice& slice) {
     history.addToHistory(slice);
 }
 
-
-
-
 bool MainWindow::addSample(mzSample* sample) {
     if ( sample && sample->scans.size() > 0 ) {
         sample->setSampleOrder(samples.size());
@@ -1275,7 +1271,7 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
         eicWidget->setPeakGroup(group);
     }
 
-    if ( isotopeWidget && isotopeWidget->isVisible() && group->compound != NULL ) {
+    if ( isotopeWidget && isotopeWidget->isVisible() && group->compound ) {
         isotopeWidget->setCompound(group->compound);
     }
 
@@ -1460,8 +1456,6 @@ void MainWindow::showPeakInfo(Peak* _peak) {
     }
 
    if ( isotopeWidget->isVisible() ) {
-        isotopeWidget->setIonizationMode(ionizationMode);
-        isotopeWidget->setCharge(ionizationMode);
         isotopeWidget->setPeak(_peak);
     }
 
@@ -1994,9 +1988,21 @@ QColor MainWindow::getBackgroundAdjustedBlack(QWidget *widget){
 }
 
 void MainWindow::updateAdductComboBox(vector<Adduct*> enabledAdducts) {
+
     DB.adductsDB = enabledAdducts;
+
     adductType->clear();
+
+    if (isotopeWidget) {
+        isotopeWidget->adductComboBox->clear();
+    }
+
     for(Adduct* a: DB.adductsDB) {
         adductType->addItem(a->name.c_str(),QVariant::fromValue(a));
+
+        if (isotopeWidget) {
+            isotopeWidget->adductComboBox->addItem(a->name.c_str(),QVariant::fromValue(a));
+        }
     }
+
 }

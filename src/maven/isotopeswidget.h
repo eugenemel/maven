@@ -15,6 +15,8 @@ class QTextEdit;
 class MainWindow;
 class BackgroundPeakUpdate;
 
+extern Database DB;
+
 using namespace std;
 
 class IsotopeWidget: public QDockWidget, public Ui_isotopesWidget {
@@ -25,13 +27,11 @@ public:
       ~IsotopeWidget();
 
 public slots: 
-	  void setCharge(double charge);
 	  void setFormula(QString f);
 	  void userChangedFormula(QString f);
 	  void computeIsotopes(string f);
 	  void setPeakGroup(PeakGroup* group);
 	  void setCompound(Compound* compound);
-	  void setIonizationMode(int mode);
 	  void setPeak(Peak* peak);
 	  void setClipboard();
 	  void setClipboard(PeakGroup* group);
@@ -48,17 +48,21 @@ private slots:
    
 private:
 	  string _formula;
-	  float _charge;
+
 	  vector<mzLink> links;
       MainWindow* _mw;
-	  Scan* _scan;
+
+      Scan* _scan;
 	  PeakGroup* _group;
 	  Compound*  _compound;
+      Adduct* _adduct;
+
 	  BackgroundPeakUpdate* workerThread;
 	  MassCalculator mcalc;
 	  Compound* tempCompound;
 
      QString groupIsotopeMatrixExport(PeakGroup* group, bool includeSampleHeader);
+     Adduct* getCurrentAdduct();
       
 };
 
