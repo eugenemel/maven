@@ -988,10 +988,20 @@ vector<EIC*> BackgroundPeakUpdate::pullEICs(mzSlice* slice,
 
 void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
 
-    if(parentgroup == NULL) return;
-    if(parentgroup->compound == NULL ) return;
-    if(parentgroup->compound->formula.empty() == true) return;
-    if ( samples.size() == 0 ) return;
+    if (!parentgroup) return;
+    if (!parentgroup->compound) return;
+    if (parentgroup->compound->formula.empty()) return;
+    if (samples.size() == 0) return;
+
+    Adduct *groupAdduct = nullptr;
+
+    if (parentgroup->adduct){
+        groupAdduct = parentgroup->adduct;
+    } else if (mainwindow) {
+        groupAdduct = mainwindow->getUserAdduct();
+    }
+
+    if (!groupAdduct) return;
 
     float ppm = compoundPPMWindow;
     double maxIsotopeScanDiff = 10;
