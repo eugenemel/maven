@@ -28,6 +28,7 @@ public:
 
 public slots: 
 	  void setFormula(QString f);
+      void updateAdduct();
 	  void userChangedFormula(QString f);
 	  void computeIsotopes(string f);
 	  void setPeakGroup(PeakGroup* group);

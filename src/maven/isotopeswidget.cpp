@@ -23,7 +23,7 @@ IsotopeWidget::IsotopeWidget(MainWindow* mw) {
 
   connect(treeWidget, SIGNAL(itemSelectionChanged()), SLOT(showInfo()));
   connect(formula, SIGNAL(textEdited(QString)), this, SLOT(userChangedFormula(QString)));
-  connect(adductComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(userChangedFormula(QString)));
+  connect(adductComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(updateAdduct()));
 
   workerThread = new BackgroundPeakUpdate(mw);
   workerThread->setRunFunction("pullIsotopes");
@@ -116,13 +116,22 @@ void IsotopeWidget::setFormula(QString f) {
 	userChangedFormula(f);
 }
 
+void IsotopeWidget::updateAdduct() {
+    computeIsotopes(_formula);
+}
+
 void IsotopeWidget::computeIsotopes(string f) {
-	if (f.empty()) return;
-        if(links.size() > 0 ) links.clear();
 
-        double parentMass = mcalc.computeMass(f, getCurrentAdduct()->charge);
+    if (f.empty()) return;
+    if(links.size() > 0 ) links.clear();
 
-        float parentPeakIntensity = getIsotopeIntensity(parentMass);
+    //use selected adduct to compute theoretical mass.
+    double neutralMass = mcalc.computeNeutralMass(f);
+    double parentMass = getCurrentAdduct()->computeAdductMass(neutralMass);
+
+    //double parentMass = mcalc.computeMass(f, getCurrentAdduct()->charge);
+    float parentPeakIntensity = getIsotopeIntensity(parentMass);
+
     QSettings* settings = _mw->getSettings();
 
     double maxNaturalAbundanceErr  = settings->value("maxNaturalAbundanceErr").toDouble();
