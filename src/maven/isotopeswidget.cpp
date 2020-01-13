@@ -120,7 +120,7 @@ void IsotopeWidget::computeIsotopes(string f) {
 	if (f.empty()) return;
         if(links.size() > 0 ) links.clear();
 
-        double parentMass = mcalc.computeMass(f,getCurrentAdduct()->charge);
+        double parentMass = mcalc.computeMass(f, getCurrentAdduct()->charge);
 
         float parentPeakIntensity = getIsotopeIntensity(parentMass);
     QSettings* settings = _mw->getSettings();
