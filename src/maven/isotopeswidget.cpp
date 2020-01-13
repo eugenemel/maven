@@ -14,6 +14,8 @@ IsotopeWidget::IsotopeWidget(MainWindow* mw) {
 
   setupUi(this);
 
+  adductComboBox->setMinimumSize(250, 0);
+
   adductComboBox->clear();
   for (Adduct* a : DB.adductsDB) {
     adductComboBox->addItem(a->name.c_str(),QVariant::fromValue(a));
