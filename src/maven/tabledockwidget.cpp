@@ -1817,11 +1817,38 @@ void TableDockWidget::showEditPeakGroupDialog() {
             suggestionSet.push_back(lipidClassSummarized);
         }
 
+//        auto doc = editPeakGroupDialog->brsSuggestions->document();
+//        QTextCursor cur(doc);
+
         for (unsigned int i = 0; i < suggestionSet.size(); i++) {
-            suggestionString.append(QString(suggestionSet.at(i).c_str()));
+
+//            cur.movePosition(QTextCursor::End);
+
+//            QUrl url(suggestionSet.at(i).c_str());
+//            cur.insertText(url.toString());
+
+            //editPeakGroupDialog->brsSuggestions->append(Q);
+//            QTextCharFormat format;
+//            format.setAnchor(true);
+//            format.setAnchorHref(url.toString());
+//            cur.mergeBlockCharFormat(format);
+
+            QString hyperLink =
+                    QString::fromStdString("<a href = \"") +
+                    QString::fromStdString(suggestionSet.at(i).c_str()) +
+                    QString::fromStdString("\" >") +
+                    QString::fromStdString(suggestionSet.at(i).c_str()) +
+                    QString::fromStdString("</a>");
+
+            editPeakGroupDialog->brsSuggestions->append(hyperLink);
+
+            //suggestionString.append(QString(suggestionSet.at(i).c_str()));
             if (i < suggestionSet.size()-1) {
-                suggestionString.append("\n");
+                //cur.insertText(QString("\n"));
+                //suggestionString.append("\n");
+                editPeakGroupDialog->brsSuggestions->append(QString("\n"));
             }
+
         }
     }
 
@@ -1837,7 +1864,10 @@ void TableDockWidget::showEditPeakGroupDialog() {
     editPeakGroupDialog->brsRT->setText(QString::number(selectedPeakGroup->meanRt, 'f', 2));
     editPeakGroupDialog->txtUpdateID->setText(QString());
 
-    editPeakGroupDialog->brsSuggestions->setText(suggestionString);
+    editPeakGroupDialog->brsSuggestions->setOpenLinks(false);
+    editPeakGroupDialog->brsSuggestions->setOpenExternalLinks(false);
+
+    //editPeakGroupDialog->brsSuggestions->setText(suggestionString);
 
     editPeakGroupDialog->show();
 }
