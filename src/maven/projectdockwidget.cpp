@@ -904,10 +904,13 @@ void ProjectDockWidget::contextMenuEvent ( QContextMenuEvent * event )
 
     menu.addSeparator();
 
-    QAction *z1 = menu.addAction("All Samples Visible");
+    QAction *z3 = menu.addAction("Toggle Visibility of Selected Samples");
+    connect(z3, SIGNAL(triggered()), this, SLOT(toggleSelectedSamples()));
+
+    QAction *z1 = menu.addAction("Make All Samples Visible");
     connect(z1, SIGNAL(triggered()), this, SLOT(allSamplesVisible()));
 
-    QAction *z2 = menu.addAction("All Samples Invisible");
+    QAction *z2 = menu.addAction("Make All Samples Invisible");
     connect(z2, SIGNAL(triggered()), this, SLOT(allSamplesInvisible()));
 
     menu.exec(event->globalPos());
@@ -935,6 +938,18 @@ void ProjectDockWidget::allSamplesInvisible() {
     _mainwindow->getEicWidget()->replotForced();
 }
 
+void ProjectDockWidget::toggleSelectedSamples() {
+    qDebug() << "ProjectDockWidget::toggleSelectedSamples()";
+
+    for (unsigned int i = 0; i < _treeWidget->topLevelItemCount(); i++){
+
+        QTreeWidgetItem* item = _treeWidget->topLevelItem(i);
+        toggleSelectedSampleVisibility(item);
+    }
+
+    _mainwindow->getEicWidget()->replotForced();
+}
+
 void ProjectDockWidget::keyPressEvent(QKeyEvent *e ) {
     //cerr << "TableDockWidget::keyPressEvent()" << e->key() << endl;
     if (e->key() == Qt::Key_Delete ) {
@@ -942,6 +957,22 @@ void ProjectDockWidget::keyPressEvent(QKeyEvent *e ) {
     }
 
     QDockWidget::keyPressEvent(e);
+}
+
+void ProjectDockWidget::toggleSelectedSampleVisibility(QTreeWidgetItem *item) {
+
+    if (!item) return;
+
+    if(item->type() == SampleType && item->isSelected()) {
+        QVariant v = item->data(0,Qt::UserRole);
+        mzSample*  sample =  v.value<mzSample*>();
+        sample->isSelected = !sample->isSelected;
+        item->setCheckState(0, (sample->isSelected ? Qt::Checked : Qt::Unchecked));
+    }
+
+    for (int i = 0; i < item->childCount(); ++i){
+        toggleSelectedSampleVisibility(item->child(i));
+    }
 }
 
 void ProjectDockWidget::toggleSamplesVisibility(QTreeWidgetItem *item, bool isVisible) {
