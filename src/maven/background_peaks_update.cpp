@@ -206,7 +206,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
              if(isotopes.size() > 0) {
                  //group.chargeState = isotopes.front().charge;
                  for(Isotope& isotope: isotopes) {
-                     if (mzUtils::ppmDist(static_cast<float>(isotope.mass), static_cast<float>(group.meanMz)) < compoundPPMWindow) {
+                     if (mzUtils::ppmDist(static_cast<float>(isotope.mz), static_cast<float>(group.meanMz)) < compoundPPMWindow) {
                          group.isotopicIndex=isotope.C13;
                      }
                  }
@@ -488,7 +488,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             if(isotopes.size() > 0) {
                 //group.chargeState = isotopes.front().charge;
                 for(Isotope& isotope: isotopes) {
-                    if (mzUtils::ppmDist((float) isotope.mass, (float) group.meanMz) < compoundPPMWindow) {
+                    if (mzUtils::ppmDist((float) isotope.mz, (float) group.meanMz) < compoundPPMWindow) {
                         group.isotopicIndex=isotope.C13;
                     }
                 }
@@ -1058,13 +1058,6 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
     }
     vector<Isotope> masslist = mcalc.computeIsotopes(formula, groupAdduct, maxNumProtons, C13Labeled, N15Labeled, S34Labeled, D2Labeled);
 
-    qDebug() << "masslist:";
-    for (auto &iso : masslist) {
-        qDebug() << "name: " << iso.name.c_str()
-                 << " mass: " << QString::number(iso.mass,'f',6)
-                 << " charge: " << iso.charge;
-    }
-
     map<string,PeakGroup>isotopes;
     map<string,PeakGroup>::iterator itr2;
     for ( unsigned int s=0; s < samples.size(); s++ ) {
@@ -1073,7 +1066,7 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
             if ( stopped() ) break;
             Isotope& x= masslist[k];
             string isotopeName = x.name;
-            double isotopeMass = x.mass;
+            double isotopeMass = x.mz;
             double expectedAbundance = x.abundance;
             float mzmin = isotopeMass-isotopeMass/1e6*ppm;
             float mzmax = isotopeMass+isotopeMass/1e6*ppm;
@@ -1081,7 +1074,7 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
             float rtmin = parentgroup->minRt;
             float rtmax = parentgroup->maxRt;
 
-            qDebug() << isotopeName.c_str() << " mass=" << isotopeMass << " mzmin=" << mzmin <<", mzmax=" << mzmax;
+//            qDebug() << isotopeName.c_str() << " mass=" << isotopeMass << " mzmin=" << mzmin <<", mzmax=" << mzmax;
 
             Peak* parentPeak =  parentgroup->getPeak(sample);
             if ( parentPeak ) rt  =   parentPeak->rt;
@@ -1146,16 +1139,6 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
             if (c < minIsotopicCorrelation)  continue;
 
             //cerr << "pullIsotopes: " << isotopeMass << " " << rtmin-w << " " <<  rtmin+w << " c=" << c << endl;
-
-            if (mzmin > 119 && mzmax < 120) { //Valine [M+1] peak
-
-                //show correlation values
-                qDebug() << "ISSUE-130-DEBUGGING" << sample->getSampleName().c_str()
-                         << ": corrMz= " << QString::number(corrMz, 'f', 6)
-                         << " mzmin=" << QString::number(mzmin,'f', 6) << ", mzmax=" << QString::number(mzmax,'f',6)
-                         << " rtmin=" << QString::number((rtmin-w), 'f', 6) << ", rtmax=" << QString::number((rtmax+w),'f', 6)
-                         << ", correlation=" << QString::number(c, 'f', 6);
-            }
 
             EIC* eic=nullptr;
             for( int i=0; i<maxIsotopeScanDiff; i++ ) {
