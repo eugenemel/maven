@@ -106,7 +106,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
 
     QToolButton *btnBad = new QToolButton(toolBar);
     btnBad->setIcon(QIcon(rsrcPath + "/markbad.png"));
-    btnBad->setToolTip("Mark Good as Bad");
+    btnBad->setToolTip("Mark Group as Bad");
     connect(btnBad, SIGNAL(clicked()), SLOT(markGroupBad()));
 
     QToolButton *btnHeatmapelete = new QToolButton(toolBar);
