@@ -173,17 +173,17 @@ void IsotopeWidget::computeIsotopes(string f) {
             if (chkIgnoreNaturalAbundance) {
                 if (expectedAbundance < 1e-8) continue;
                 // if (expectedAbundance * parentPeakIntensity < 500) continue;
-                float isotopePeakIntensity = getIsotopeIntensity(x.mass);
+                float isotopePeakIntensity = getIsotopeIntensity(x.mz);
                 float observedAbundance = isotopePeakIntensity/(parentPeakIntensity+isotopePeakIntensity);
                 float naturalAbundanceError = abs(observedAbundance-expectedAbundance)/expectedAbundance*100;
                 if (naturalAbundanceError > maxNaturalAbundanceErr )  continue;
             }
 
             link.mz1 = parentMass;
-            link.mz2 = x.mass;
+            link.mz2 = x.mz;
             link.note= x.name;
             link.value1 = x.abundance;
-            link.value2 = getIsotopeIntensity(x.mass);
+            link.value2 = getIsotopeIntensity(x.mz);
             links.push_back(link);
         }
     }
