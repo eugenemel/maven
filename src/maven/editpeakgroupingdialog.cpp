@@ -18,6 +18,5 @@ void EditPeakGroupDialog::show(){
 }
 
 void EditPeakGroupDialog::onAnchorClicked(const QUrl &link){
-    qDebug() << "EditPeakGroupDialog::onAnchorClicked() URL String: " << link.path();
     this->txtUpdateID->setText(link.path());
 }
