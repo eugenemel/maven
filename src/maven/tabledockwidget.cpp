@@ -1156,6 +1156,17 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
         menu.addSeparator();
     }
 
+    QAction *markGood = menu.addAction("Mark Selected Group(s) as Good");
+    connect(markGood, SIGNAL(triggered()), this, SLOT(markGroupGood()));
+
+    QAction *markBad = menu.addAction("Mark Selected Group(s) as Bad");
+    connect(markBad, SIGNAL(triggered()), this, SLOT(markGroupBad()));
+
+    QAction *unmark = menu.addAction("Unmark Selected Group(s)");
+    connect(unmark, SIGNAL(triggered()), this, SLOT(unmarkSelectedGroups()));
+
+    menu.addSeparator();
+
     QAction* z0 = menu.addAction("Copy to Clipboard");
     connect(z0, SIGNAL(triggered()), this ,SLOT(setClipboard()));
 
