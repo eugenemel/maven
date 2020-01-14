@@ -4,6 +4,8 @@ EditPeakGroupDialog::EditPeakGroupDialog(QWidget *parent) : QDialog(parent) {
     setupUi(this);
     setModal(true);
 
+    brsSuggestions->setOpenLinks(false);
+    brsSuggestions->setOpenExternalLinks(false);
     connect(brsSuggestions, SIGNAL(anchorClicked(QUrl)), this, SLOT(onAnchorClicked(QUrl)));
 }
 

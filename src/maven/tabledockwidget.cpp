@@ -1793,6 +1793,8 @@ void TableDockWidget::showEditPeakGroupDialog() {
 
     }
 
+    editPeakGroupDialog->brsSuggestions->setText("");
+
     if (!compoundString.isEmpty()){
 
         //try to summarize lipids based on suggestions
@@ -1817,21 +1819,7 @@ void TableDockWidget::showEditPeakGroupDialog() {
             suggestionSet.push_back(lipidClassSummarized);
         }
 
-//        auto doc = editPeakGroupDialog->brsSuggestions->document();
-//        QTextCursor cur(doc);
-
         for (unsigned int i = 0; i < suggestionSet.size(); i++) {
-
-//            cur.movePosition(QTextCursor::End);
-
-//            QUrl url(suggestionSet.at(i).c_str());
-//            cur.insertText(url.toString());
-
-            //editPeakGroupDialog->brsSuggestions->append(Q);
-//            QTextCharFormat format;
-//            format.setAnchor(true);
-//            format.setAnchorHref(url.toString());
-//            cur.mergeBlockCharFormat(format);
 
             QString hyperLink =
                     QString::fromStdString("<a href = \"") +
@@ -1842,10 +1830,7 @@ void TableDockWidget::showEditPeakGroupDialog() {
 
             editPeakGroupDialog->brsSuggestions->append(hyperLink);
 
-            //suggestionString.append(QString(suggestionSet.at(i).c_str()));
             if (i < suggestionSet.size()-1) {
-                //cur.insertText(QString("\n"));
-                //suggestionString.append("\n");
                 editPeakGroupDialog->brsSuggestions->append(QString("\n"));
             }
 
@@ -1863,11 +1848,6 @@ void TableDockWidget::showEditPeakGroupDialog() {
     editPeakGroupDialog->brsMz->setText(QString::number(selectedPeakGroup->meanMz, 'f', 4));
     editPeakGroupDialog->brsRT->setText(QString::number(selectedPeakGroup->meanRt, 'f', 2));
     editPeakGroupDialog->txtUpdateID->setText(QString());
-
-    editPeakGroupDialog->brsSuggestions->setOpenLinks(false);
-    editPeakGroupDialog->brsSuggestions->setOpenExternalLinks(false);
-
-    //editPeakGroupDialog->brsSuggestions->setText(suggestionString);
 
     editPeakGroupDialog->show();
 }
