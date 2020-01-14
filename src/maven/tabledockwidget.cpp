@@ -899,6 +899,11 @@ void TableDockWidget::markGroupIgnored() {
     if (treeWidget->selectedItems().size() == 1) showNextGroup();
 }
 
+void TableDockWidget::unmarkSelectedGroups() {
+    setGroupLabel('\0');
+    if (treeWidget->selectedItems().size() == 1) showNextGroup();
+}
+
 void TableDockWidget::showLastGroup() {
     QTreeWidgetItem *item= treeWidget->currentItem();
     if ( item != NULL )  {
@@ -985,7 +990,10 @@ void TableDockWidget::keyPressEvent(QKeyEvent *e ) {
         markGroupGood();
     } else if ( e->key() == Qt::Key_B ) {
         markGroupBad();
+    } else if ( e->key() == Qt::Key_U ) {
+        unmarkSelectedGroups();
     }
+
     QDockWidget::keyPressEvent(e);
     updateStatus();
 }
