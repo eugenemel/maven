@@ -925,6 +925,10 @@ void ProjectDockWidget::allSamplesVisible() {
     }
 
     _mainwindow->getEicWidget()->replotForced();
+
+    if (_mainwindow->barPlotWidget->isVisible()) {
+        _mainwindow->barPlotWidget->refresh();
+    }
 }
 
 void ProjectDockWidget::allSamplesInvisible() {
@@ -936,6 +940,10 @@ void ProjectDockWidget::allSamplesInvisible() {
     }
 
     _mainwindow->getEicWidget()->replotForced();
+
+    if (_mainwindow->barPlotWidget->isVisible()) {
+        _mainwindow->barPlotWidget->refresh();
+    }
 }
 
 void ProjectDockWidget::toggleSelectedSamples() {
@@ -948,6 +956,10 @@ void ProjectDockWidget::toggleSelectedSamples() {
     }
 
     _mainwindow->getEicWidget()->replotForced();
+
+    if (_mainwindow->barPlotWidget->isVisible()) {
+        _mainwindow->barPlotWidget->refresh();
+    }
 }
 
 void ProjectDockWidget::keyPressEvent(QKeyEvent *e ) {

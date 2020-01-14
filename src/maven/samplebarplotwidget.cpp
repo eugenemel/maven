@@ -45,3 +45,8 @@ void SampleBarPlotWidget::setPeakGroup(PeakGroup *peakGroup){
     this->verticalScrollBar()->setSliderPosition(0);
     this->horizontalScrollBar()->setSliderPosition(0);
 }
+
+void SampleBarPlotWidget::refresh() {
+    repaint();
+    scene()->update();
+}
