@@ -1830,10 +1830,6 @@ void TableDockWidget::showEditPeakGroupDialog() {
 
             editPeakGroupDialog->brsSuggestions->append(hyperLink);
 
-            if (i < suggestionSet.size()-1) {
-                editPeakGroupDialog->brsSuggestions->append(QString("\n"));
-            }
-
         }
     }
 
