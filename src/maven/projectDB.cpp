@@ -297,7 +297,17 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
             query1.addBindValue(g->metaGroupId);
             query1.addBindValue(g->expectedRtDiff);
             query1.addBindValue(g->groupRank);
-            query1.addBindValue(QString(g->label));
+
+            if (!g->labels.empty()) {
+                QString string;
+                for (char c : g->labels){
+                   string.append(c);
+                }
+                query1.addBindValue(string);
+            } else {
+                query1.addBindValue(QString(g->label));
+            }
+
             query1.addBindValue(g->type());
             query1.addBindValue(QString(g->srmId.c_str()));
             query1.addBindValue(g->ms2EventCount);
@@ -502,6 +512,11 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary) {
         QVariant label = query.value("label");
         if (label.toString().size() > 0) {
             g.label = label.toString().at(0).toLatin1();
+
+            QByteArray bytes = label.toString().toLatin1().data();
+            for (auto &b : bytes) {
+                g.labels.push_back(b);
+            }
         }
 
         string displayName = query.value("displayName").toString().toStdString();
