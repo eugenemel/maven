@@ -894,11 +894,6 @@ void TableDockWidget::markGroupBad() {
     if (treeWidget->selectedItems().size() == 1) showNextGroup();
 }
 
-void TableDockWidget::markGroupIgnored() { 
-    setGroupLabel('i');
-    if (treeWidget->selectedItems().size() == 1) showNextGroup();
-}
-
 void TableDockWidget::unmarkSelectedGroups() {
     setGroupLabel('\0');
     if (treeWidget->selectedItems().size() == 1) showNextGroup();

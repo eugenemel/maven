@@ -74,7 +74,6 @@ public slots:
 
 	  void markGroupBad();
 	  void markGroupGood();
-	  void markGroupIgnored();
       void unmarkSelectedGroups();
           void showAllGroups();
 	  void showHeatMap();
