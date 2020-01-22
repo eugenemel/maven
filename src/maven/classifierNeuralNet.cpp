@@ -127,6 +127,7 @@ void ClassifierNeuralNet::classify(PeakGroup* grp) {
     }
 }
 
+//Issue 127: TODO: restructure this to consider new models
 void ClassifierNeuralNet::refineModel(PeakGroup* grp) {
 		if (grp == NULL ) return;
 		if (brain == NULL ) brain = new nnwork(num_features,hidden_layer,num_outputs);
