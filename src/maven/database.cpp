@@ -944,17 +944,24 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
     query0.exec("end transaction");
 }
 
-//TODO: implement this
-Qt::Key PeakGroupTag::getKeyFromChar(char hotKeyChar) {
+#include <QMetaEnum>
 
-            //        hotkey = Qt::Key_unknown;
+int PeakGroupTag::getKeyFromChar(char hotKeyChar) {
 
-            //        //make string upper case, if it wasn't already
-            //        for_each(hotKeyChar.begin(), hotKeyChar.end(), [](char &c){
-            //            c = ::toupper(c);
-            //        });
+            int enumIndex = qt_getQtMetaObject()->indexOfEnumerator("Key");
+            static const auto keyEnum = qt_getQtMetaObject()->enumerator(enumIndex);
 
-            //        static const auto keyEnum = getEnum("Key");
+            //In case upper-case is required
+//            QString upperHotKey(hotKeyChar);
+//            upperHotKey = upperHotKey.toUpper();
 
-            return Qt::Key_unknown;
+//            QByteArray bytes = upperHotKey.toLatin1().data();
+
+//            const char* modKeyChar = bytes;
+//            int hotkey = keyEnum.keyToValue(modKeyChar);
+
+//            if (modKeyChar) delete(modKeyChar);
+
+            int hotkey = keyEnum.keyToValue(&hotKeyChar);
+            return hotkey;
 }
