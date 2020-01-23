@@ -529,7 +529,7 @@ void Database::loadPeakGroupTags(string filename) {
         usedLabels.push_back(label);
         usedHotKeys.push_back(hotkey);
 
-        peakGroupTags.push_back(tag);
+        peakGroupTags.insert(make_pair(label, tag));
     }
     tagsFile.close();
 

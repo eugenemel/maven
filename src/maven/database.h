@@ -84,7 +84,7 @@ class Database {
         vector<Adduct*> adductsDB;
         vector<Adduct*> fragmentsDB;
         vector<Compound*> compoundsDB;
-        vector<PeakGroupTag*> peakGroupTags;
+        std::map<char, PeakGroupTag*> peakGroupTags;
 
 
       private:

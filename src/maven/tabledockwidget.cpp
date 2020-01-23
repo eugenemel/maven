@@ -277,6 +277,22 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
         item->setIcon(0, QIcon()); //empty icon
     }
 
+    //Issue 127: gather all icons
+    vector<QIcon> icons;
+    for (char c : group->labels) {
+        if (DB.peakGroupTags.find(c) != DB.peakGroupTags.end()) {
+            icons.push_back(DB.peakGroupTags[c]->icon);
+        }
+    }
+
+    if (icons.empty()) {
+        item->setIcon(0, QIcon());
+    } else if (icons.size() == 1) {
+        item->setIcon(0, icons.at(0));
+    } else {
+        //TODO: build merged icon from set
+    }
+
 }
 
 void TableDockWidget::heatmapBackground(QTreeWidgetItem* item) {
@@ -1016,11 +1032,13 @@ void TableDockWidget::keyPressEvent(QKeyEvent *e ) {
     //TODO: respond to event appropriately
     for (auto &x : DB.peakGroupTags) {
 
+        PeakGroupTag *tag = x.second;
+
         QString keyString = QKeySequence(e->key()).toString().toLower();
 
-        if (x->hotkey == keyString.toLatin1().data()[0]){
+        if (tag->hotkey == keyString.toLatin1().data()[0]){
 
-            setGroupLabel(x->label);
+            setGroupLabel(tag->label);
             if (treeWidget->selectedItems().size() == 1) showNextGroup();
 
             break; // found the key, no need to continue searching through tag list
