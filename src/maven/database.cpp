@@ -521,7 +521,12 @@ void Database::loadPeakGroupTags(string filename) {
             continue;
         }
 
-        if (label == 'b' || label == 'g' || label == 'x') {
+        if (
+                label == 'b' || //mark group good
+                label == 'g' || //mark group bad
+                label == 'x' //group deleted
+                )
+        {
             qDebug() << "PeakGroupTag with label ==" << label << "could not be used: reserved label.";
             continue;
         }
