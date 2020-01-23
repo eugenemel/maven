@@ -11,6 +11,7 @@
 #include <QTextStream>
 #include <QDebug>
 #include <QIcon>
+#include <QMetaEnum>
 
 #include "mzSample.h"
 #include "mzUtils.h"
@@ -97,7 +98,7 @@ class PeakGroupTag {
 public:
     string tagName;
     char label;
-    Qt::Key hotkey;
+    int hotkey;
     QIcon icon;
     string description;
 
@@ -111,7 +112,7 @@ public:
         this->description = description;
     }
 
-    static Qt::Key getKeyFromChar(char hotKeyChar);
+    static int getKeyFromChar(char hotKeyChar);
 };
 
 #endif
