@@ -475,6 +475,9 @@ void Database::loadPeakGroupTags(string filename) {
 
     if (! tagsFile.is_open()) return;
 
+    vector<char> usedLabels;
+    vector<char> usedHotKeys;
+
     string line;
     while ( getline(tagsFile, line) ) {
         if (line.empty()) continue;
@@ -486,16 +489,51 @@ void Database::loadPeakGroupTags(string filename) {
         if (fields.size() < 5) continue; //skip lines with missing information
 
         string name = fields[0];
-        char label = fields[1].c_str()[0];
-        char hotkey = fields[2].c_str()[0];
+
+        //Use lower case characters only to fit with previous usage
+        QString labelStr = QString(fields[1].c_str()).toLower();
+        QString hotKeyStr = QString(fields[2].c_str()).toLower();
+
+        char label = labelStr.toStdString().c_str()[0];
+        char hotkey = hotKeyStr.toStdString().c_str()[0];
+
         string icon = fields[3];
         string description = fields[4];
 
+        if (hotkey == 'o' || hotkey == 't' || hotkey == 'g' || hotkey == 'b' || hotkey == 'q' || hotkey == 'x') {
+            qDebug() << "PeakGroupTag with hotkey ==" << hotkey << "could not be used: reserved hotkey.";
+            continue;
+        }
+
+        if (label == 'b' || label == 'g' || label == 'x') {
+            qDebug() << "PeakGroupTag with label ==" << label << "could not be used: reserved label.";
+            continue;
+        }
+
+        for (auto &x : usedLabels) {
+            if (label == x) {
+                qDebug() << "PeakGroupTag encoded as: " << line.c_str() << "could not be used: label already exists.";
+                continue;
+            }
+        }
+
+        for (auto &x : usedHotKeys) {
+            if (hotkey == x) {
+                qDebug() << "PeakGroupTag encoded as: " << line.c_str() << " could not be used: hotkey already exists.";
+                continue;
+            }
+        }
+
         PeakGroupTag *tag = new PeakGroupTag(name, label, hotkey, icon, description);
+
+        usedLabels.push_back(label);
+        usedHotKeys.push_back(hotkey);
 
         peakGroupTags.push_back(tag);
     }
     tagsFile.close();
+
+    qDebug() << "Database::loadPeakGroupTags():" << peakGroupTags.size() << "tags.";
 }
 
 vector<Adduct*> Database::defaultAdducts() {
@@ -971,22 +1009,4 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
         }
 
     query0.exec("end transaction");
-}
-
-int PeakGroupTag::getKeyFromChar(char hotKeyChar) {
-
-            int enumIndex = qt_getQtMetaObject()->indexOfEnumerator("Key");
-            static const auto keyEnum = qt_getQtMetaObject()->enumerator(enumIndex);
-
-            int hotkey = Qt::Key_unknown;
-            for (unsigned int i = 0; i < keyEnum.keyCount(); i++) {
-
-                const char* s = keyEnum.key(i);
-                if (s == &hotKeyChar) {
-                    hotkey = keyEnum.value(i);
-                    break;
-                }
-            }
-
-            return hotkey;
 }

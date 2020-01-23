@@ -11,7 +11,6 @@
 #include <QTextStream>
 #include <QDebug>
 #include <QIcon>
-#include <QMetaEnum>
 
 #include "mzSample.h"
 #include "mzUtils.h"
@@ -99,21 +98,19 @@ class PeakGroupTag {
 public:
     string tagName;
     char label;
-    int hotkey;
+    char hotkey;
     QIcon icon;
     string description;
 
     PeakGroupTag(string tagName, char label, char hotKeyChar, string iconName, string description) {
         this->tagName = tagName;
         this->label = label;
-        this->hotkey = getKeyFromChar(hotKeyChar);
+        this->hotkey = hotKeyChar;
         QString iconPath(":/images/");
         iconPath.append(iconName.c_str());
         this->icon = QIcon(iconPath);
         this->description = description;
     }
-
-    static int getKeyFromChar(char hotKeyChar);
 };
 
 #endif
