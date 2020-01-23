@@ -469,6 +469,35 @@ vector<Adduct*> Database::loadAdducts(string filename) {
     myfile.close();
 }
 
+void Database::loadPeakGroupTags(string filename) {
+
+    ifstream tagsFile(filename.c_str());
+
+    if (! tagsFile.is_open()) return;
+
+    string line;
+    while ( getline(tagsFile, line) ) {
+        if (line.empty()) continue;
+        if (line[0] == '#') continue; //comments
+
+        vector<string> fields;
+        mzUtils::split(line,',', fields);
+
+        if (fields.size() < 5) continue; //skip lines with missing information
+
+        string name = fields[0];
+        char label = fields[1].c_str()[0];
+        char hotkey = fields[2].c_str()[0];
+        string icon = fields[3];
+        string description = fields[4];
+
+        PeakGroupTag *tag = new PeakGroupTag(name, label, hotkey, icon, description);
+
+        peakGroupTags.push_back(tag);
+    }
+    tagsFile.close();
+}
+
 vector<Adduct*> Database::defaultAdducts() {
     vector<Adduct*> adducts;
     adducts.push_back( new Adduct("[M-H]+",  PROTON , 1, 1));
@@ -949,17 +978,15 @@ int PeakGroupTag::getKeyFromChar(char hotKeyChar) {
             int enumIndex = qt_getQtMetaObject()->indexOfEnumerator("Key");
             static const auto keyEnum = qt_getQtMetaObject()->enumerator(enumIndex);
 
-            //In case upper-case is required
-//            QString upperHotKey(hotKeyChar);
-//            upperHotKey = upperHotKey.toUpper();
+            int hotkey = Qt::Key_unknown;
+            for (unsigned int i = 0; i < keyEnum.keyCount(); i++) {
 
-//            QByteArray bytes = upperHotKey.toLatin1().data();
+                const char* s = keyEnum.key(i);
+                if (s == &hotKeyChar) {
+                    hotkey = keyEnum.value(i);
+                    break;
+                }
+            }
 
-//            const char* modKeyChar = bytes;
-//            int hotkey = keyEnum.keyToValue(modKeyChar);
-
-//            if (modKeyChar) delete(modKeyChar);
-
-            int hotkey = keyEnum.keyToValue(&hotKeyChar);
             return hotkey;
 }

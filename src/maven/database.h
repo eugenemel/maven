@@ -80,17 +80,18 @@ class Database {
 
         void saveValidation(Peak* p);
 
+        void loadPeakGroupTags(string filename);
+
         vector<Adduct*> adductsDB;
         vector<Adduct*> fragmentsDB;
         vector<Compound*> compoundsDB;
+        vector<PeakGroupTag*> peakGroupTags;
 
 
       private:
 		QSqlDatabase ligandDB;
         QMap<string,Compound*> compoundIdMap;
         QMap<QString,int> loadedDatabase;
-        QMap<char, PeakGroupTag*> peakGroupTags;
-
 };
 
 class PeakGroupTag {

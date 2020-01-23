@@ -102,6 +102,12 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     DB.adductsDB = enabledAdducts;
     // === Issue 76 ========================================== //
 
+    // Issue 127: Extra peak group tags
+    QString tagsFile = methodsFolder + "/TAGS.csv";
+    if (QFile::exists(tagsFile)) {
+        DB.loadPeakGroupTags(tagsFile.toStdString());
+    }
+
     clsf = new ClassifierNeuralNet();    //clsf = new ClassifierNaiveBayes();
     QString clsfModelFilename = methodsFolder +  "/"  +   defaultModelFile;
     if(QFile::exists(clsfModelFilename)) {
