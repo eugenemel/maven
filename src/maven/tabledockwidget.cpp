@@ -989,6 +989,20 @@ void TableDockWidget::keyPressEvent(QKeyEvent *e ) {
         unmarkSelectedGroups();
     }
 
+    //TODO: respond to event appropriately
+    for (auto &x : DB.peakGroupTags) {
+
+        QString keyString = QKeySequence(e->key()).toString().toLower();
+
+        if (x->label == keyString.toLatin1().data()[0]){
+            qDebug() << "Pressed " + QKeySequence(e->key()).toString();
+            qDebug() << "In Data structure as: " << x->label;
+            qDebug() << "Name: " << x->tagName.c_str();
+            qDebug() << "Desc: " << x->description.c_str() << endl;
+        }
+
+    }
+
     QDockWidget::keyPressEvent(e);
     updateStatus();
 }
