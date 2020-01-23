@@ -10,10 +10,12 @@
 #include <QFile>
 #include <QTextStream>
 #include <QDebug>
-
+#include <QIcon>
 
 #include "mzSample.h"
 #include "mzUtils.h"
+
+class PeakGroupTag;
 
 class Database {
 
@@ -86,9 +88,31 @@ class Database {
 		QSqlDatabase ligandDB;
         QMap<string,Compound*> compoundIdMap;
         QMap<QString,int> loadedDatabase;
+        QMap<char, PeakGroupTag*> peakGroupTags;
 
 };
 
+class PeakGroupTag {
+
+public:
+    string tagName;
+    char label;
+    Qt::Key hotkey;
+    QIcon icon;
+    string description;
+
+    PeakGroupTag(string tagName, char label, char hotKeyChar, string iconName, string description) {
+        this->tagName = tagName;
+        this->label = label;
+        this->hotkey = getKeyFromChar(hotKeyChar);
+        QString iconPath(":/images/");
+        iconPath.append(iconName.c_str());
+        this->icon = QIcon(iconPath);
+        this->description = description;
+    }
+
+    static Qt::Key getKeyFromChar(char hotKeyChar);
+};
 
 #endif
 

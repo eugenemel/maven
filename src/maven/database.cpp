@@ -943,3 +943,18 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
 
     query0.exec("end transaction");
 }
+
+//TODO: implement this
+Qt::Key PeakGroupTag::getKeyFromChar(char hotKeyChar) {
+
+            //        hotkey = Qt::Key_unknown;
+
+            //        //make string upper case, if it wasn't already
+            //        for_each(hotKeyChar.begin(), hotKeyChar.end(), [](char &c){
+            //            c = ::toupper(c);
+            //        });
+
+            //        static const auto keyEnum = getEnum("Key");
+
+            return Qt::Key_unknown;
+}
