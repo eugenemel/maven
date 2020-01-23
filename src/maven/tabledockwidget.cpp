@@ -804,6 +804,30 @@ void TableDockWidget::setGroupLabel(char label) {
             QVariant v = item->data(0,PeakGroupType);
             PeakGroup*  group =  v.value<PeakGroup*>();
             if (group) {
+
+                //check vector of all labels
+                bool isLabelInVector = false;
+                for (auto &x : group->labels) {
+                    if (x == label) {
+                        isLabelInVector = true;
+                        break;
+                    }
+                }
+
+                if (isLabelInVector) {
+                    //erase-remove idiom
+                    group->labels.erase(remove(group->labels.begin(), group->labels.end(), label), group->labels.end());
+                } else {
+                    group->labels.push_back(label);
+                }
+
+                //peak groups can only be labled as good or bad, not both
+                if (label == 'b') {
+                    group->labels.erase(remove(group->labels.begin(), group->labels.end(), 'g'), group->labels.end());
+                } else if (label == 'g') {
+                    group->labels.erase(remove(group->labels.begin(), group->labels.end(), 'b'), group->labels.end());
+                }
+
                 if (group->label != label) {
                     group->setLabel(label);
                 } else {
@@ -995,10 +1019,11 @@ void TableDockWidget::keyPressEvent(QKeyEvent *e ) {
         QString keyString = QKeySequence(e->key()).toString().toLower();
 
         if (x->hotkey == keyString.toLatin1().data()[0]){
-            qDebug() << "Pressed " + QKeySequence(e->key()).toString();
-            qDebug() << "In Data structure as: " << x->label;
-            qDebug() << "Name: " << x->tagName.c_str();
-            qDebug() << "Desc: " << x->description.c_str() << endl;
+
+            setGroupLabel(x->label);
+            if (treeWidget->selectedItems().size() == 1) showNextGroup();
+
+            break; // found the key, no need to continue searching through tag list
         }
 
     }
