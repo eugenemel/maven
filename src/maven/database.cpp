@@ -944,8 +944,6 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
     query0.exec("end transaction");
 }
 
-#include <QMetaEnum>
-
 int PeakGroupTag::getKeyFromChar(char hotKeyChar) {
 
             int enumIndex = qt_getQtMetaObject()->indexOfEnumerator("Key");
