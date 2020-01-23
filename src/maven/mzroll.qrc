@@ -69,8 +69,32 @@
         <file>images/integrateArea.png</file>
         <file>images/librarymanager.png</file>
         <file>images/adducts.png</file>
-	<file>images/metadata_download.png</file>
-	<file>images/metadata_upload.png</file>
-	<file>images/bar_plot_samples.png</file>
+        <file>images/metadata_download.png</file>
+        <file>images/metadata_upload.png</file>
+        <file>images/bar_plot_samples.png</file>
+        <file>images/autofocus.svg</file>
+        <file>images/black_circle.png</file>
+        <file>images/black_star.png</file>
+        <file>images/blue_circle.png</file>
+        <file>images/blue_star.png</file>
+        <file>images/blue_triangle.png</file>
+        <file>images/compound.png</file>
+        <file>images/daffodil_circle.png</file>
+        <file>images/daffodil_triangle.png</file>
+        <file>images/filenew.png</file>
+        <file>images/green_star.png</file>
+        <file>images/green_triangle.png</file>
+        <file>images/icon.icns</file>
+        <file>images/icons.svg</file>
+        <file>images/logo1.svg</file>
+        <file>images/newicons.svg</file>
+        <file>images/orange_circle.png</file>
+        <file>images/orange_star.png</file>
+        <file>images/peakgroup.png</file>
+        <file>images/pink_circle.png</file>
+        <file>images/pink_star.png</file>
+        <file>images/resetzoom2.png</file>
+        <file>images/unknown_ion.png</file>
+        <file>images/yellow_star.png</file>
     </qresource>
 </RCC>
