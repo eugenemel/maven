@@ -821,27 +821,31 @@ void TableDockWidget::setGroupLabel(char label) {
             PeakGroup*  group =  v.value<PeakGroup*>();
             if (group) {
 
-                //check vector of all labels
-                bool isLabelInVector = false;
-                for (auto &x : group->labels) {
-                    if (x == label) {
-                        isLabelInVector = true;
-                        break;
-                    }
-                }
-
-                if (isLabelInVector) {
-                    //erase-remove idiom
-                    group->labels.erase(remove(group->labels.begin(), group->labels.end(), label), group->labels.end());
+                if (label == '\0') {
+                    group->labels.clear();
                 } else {
-                    group->labels.push_back(label);
-                }
+                    //check vector of all labels
+                    bool isLabelInVector = false;
+                    for (auto &x : group->labels) {
+                        if (x == label) {
+                            isLabelInVector = true;
+                            break;
+                        }
+                    }
 
-                //peak groups can only be labled as good or bad, not both
-                if (label == 'b') {
-                    group->labels.erase(remove(group->labels.begin(), group->labels.end(), 'g'), group->labels.end());
-                } else if (label == 'g') {
-                    group->labels.erase(remove(group->labels.begin(), group->labels.end(), 'b'), group->labels.end());
+                    if (isLabelInVector) {
+                        //erase-remove idiom
+                        group->labels.erase(remove(group->labels.begin(), group->labels.end(), label), group->labels.end());
+                    } else {
+                        group->labels.push_back(label);
+                    }
+
+                    //peak groups can only be labled as good or bad, not both
+                    if (label == 'b') {
+                        group->labels.erase(remove(group->labels.begin(), group->labels.end(), 'g'), group->labels.end());
+                    } else if (label == 'g') {
+                        group->labels.erase(remove(group->labels.begin(), group->labels.end(), 'b'), group->labels.end());
+                    }
                 }
 
                 if (group->label != label) {
