@@ -500,7 +500,23 @@ void Database::loadPeakGroupTags(string filename) {
         string icon = fields[3];
         string description = fields[4];
 
-        if (hotkey == 'o' || hotkey == 't' || hotkey == 'g' || hotkey == 'b' || hotkey == 'q' || hotkey == 'x') {
+        if (
+                hotkey == 'o' || //open file
+                hotkey == 't' || //train model
+                hotkey == 'g' || //mark group good
+                hotkey == 'b' || //mark group bad
+                hotkey == 'q' || //quit application
+                hotkey == 'p' || //print
+                hotkey == 'a' || //select all
+                hotkey == 'c' || //copy
+                hotkey == 's' || //save
+                hotkey == 'd' || //add bookmark
+                hotkey == 'f' || //find
+                hotkey == 'h' || //hide window
+                hotkey == 'k' || //yield focus
+                hotkey == 'u'    //unmark group
+                )
+        {
             qDebug() << "PeakGroupTag with hotkey ==" << hotkey << "could not be used: reserved hotkey.";
             continue;
         }
