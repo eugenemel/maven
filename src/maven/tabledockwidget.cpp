@@ -309,8 +309,7 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
         QPainter painter(&comboPixmap);
 
         //always set a white background color, otherwise the images are hard to see
-        painter.setPen(Qt::white);
-        painter.drawRect(0, 0, imgWidth, imgHeight);
+        painter.fillRect(0, 0, imgWidth, imgHeight, Qt::white);
 
         int leftEdge = 0;
         for (auto &x : icons) {
