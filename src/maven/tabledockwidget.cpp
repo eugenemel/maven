@@ -986,6 +986,12 @@ void TableDockWidget::setClipboard() {
     }
 }
 
+void TableDockWidget::tagGroup(const QString &tagLabel){
+    char c = tagLabel.toLatin1().data()[0];
+    setGroupLabel(c);
+    if (treeWidget->selectedItems().size() == 1) showNextGroup();
+}
+
 void TableDockWidget::markGroupGood() { 
     setGroupLabel('g');
     if (treeWidget->selectedItems().size() == 1) showNextGroup();
@@ -1278,10 +1284,31 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
         menu.addSeparator();
     }
 
-    QAction *markGood = menu.addAction("Mark Selected Group(s) as Good");
+    if (!DB.peakGroupTags.empty()) {
+
+        for (auto &x : DB.peakGroupTags) {
+            PeakGroupTag *peakGroupTag = x.second;
+
+            QString actionMsg("Tag Group(s): ");
+            actionMsg.append(peakGroupTag->tagName.c_str());
+            QAction *actionTag = menu.addAction(peakGroupTag->icon, actionMsg);
+
+            QString labelAsQString(peakGroupTag->label);
+
+            QSignalMapper *signalMapper = new QSignalMapper(this);
+            signalMapper -> setMapping(actionTag, labelAsQString);
+
+            connect(actionTag, SIGNAL(triggered()), signalMapper, SLOT(map()));
+            connect(signalMapper, SIGNAL(mapped(const QString &)), this, SLOT(tagGroup(const QString &)));
+        }
+
+        menu.addSeparator();
+    }
+
+    QAction *markGood = menu.addAction(QIcon(":/images/good.png"), "Mark Selected Group(s) as Good");
     connect(markGood, SIGNAL(triggered()), this, SLOT(markGroupGood()));
 
-    QAction *markBad = menu.addAction("Mark Selected Group(s) as Bad");
+    QAction *markBad = menu.addAction(QIcon(":/images/bad.png"), "Mark Selected Group(s) as Bad");
     connect(markBad, SIGNAL(triggered()), this, SLOT(markGroupBad()));
 
     QAction *unmark = menu.addAction("Unmark Selected Group(s)");

@@ -75,6 +75,7 @@ public slots:
 	  void markGroupBad();
 	  void markGroupGood();
       void unmarkSelectedGroups();
+      void tagGroup(const QString& tagLabel);
           void showAllGroups();
 	  void showHeatMap();
 	  void showGallery();
