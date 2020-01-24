@@ -346,7 +346,7 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
         QSize iconSize = treeWidget->iconSize();
 
         //enlarge sizes as needed
-        if (icon.availableSizes().first().width() > iconSize.width()){
+        if (!icon.availableSizes().isEmpty() && icon.availableSizes().first().width() > iconSize.width()){
             treeWidget->setIconSize(icon.availableSizes().first());
         }
     }
