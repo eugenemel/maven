@@ -240,14 +240,17 @@ void TableDockWidget::updateTable() {
 }
 
 void TableDockWidget::updateItem(QTreeWidgetItem* item) {
+
     QVariant v = item->data(0,PeakGroupType);
     PeakGroup*  group =  v.value<PeakGroup*>();
+
     if (!group) return;
+
     heatmapBackground(item);
 
     //score peak quality
     Classifier* clsf = _mainwindow->getClassifier();
-    if (clsf != NULL) {
+    if (clsf) {
         clsf->classify(group);
         group->updateQuality();
         item->setText(0,groupTagString(group));
@@ -259,25 +262,15 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
         group->peaks[i].quality > 0.5 ? good++ : bad++;
     }
 
-    //TODO: Fix this block when code gets removed
-
     QBrush brush=Qt::NoBrush;
-    if (good>0 && group->label == 'b' ) {
+    if (good > 0 && group->isGroupBad() ) {
         float incorrectFraction= ((float) good)/total;
         brush  = QBrush(QColor::fromRgbF(0.8,0,0,incorrectFraction));
-    } else if(bad>0 && group->label == 'g') {
+    } else if(bad>0 && group->isGroupGood()) {
         float incorrectFraction= ((float) bad)/total;
         brush  = QBrush(QColor::fromRgbF(0.8,0,0,incorrectFraction));
     }
     item->setBackground(0,brush);
-
-    if (group->label == 'g' ) {
-        item->setIcon(0,QIcon(":/images/good.png"));
-    } else if (group->label == 'b' ) {
-        item->setIcon(0,QIcon(":/images/bad.png"));
-    } else {
-        item->setIcon(0, QIcon()); //empty icon
-    }
 
     //Issue 127: gather all icons
     vector<QIcon> icons;
@@ -466,7 +459,7 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     if (!group) return;
     if (group->peakCount() == 0 ) return;
     if (group->meanMz <= 0 ) return;
-    if (group->deletedFlag || group->label == 'x') return; //deleted group
+    if (group->deletedFlag || group->isGroupLabeled('x')) return; //deleted group
 
     NumericTreeWidgetItem *item = nullptr;
     if(!root) {
@@ -485,9 +478,6 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     if (group->compound and group->compound->expectedRt) {
         item->setText(3,QString::number(group->meanRt - group->compound->expectedRt, 'f', 2));
     }
-
-    if (group->label == 'g' ) item->setIcon(0,QIcon(":/images/good.png"));
-    if (group->label == 'b' ) item->setIcon(0,QIcon(":/images/bad.png"));
 
     if (viewType == groupView) {
         item->setText(4,QString::number(group->fragMatchScore.mergedScore));
