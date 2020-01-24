@@ -349,8 +349,6 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
         if (icon.availableSizes().first().width() > iconSize.width()){
             treeWidget->setIconSize(icon.availableSizes().first());
         }
-
-        //TODO: build merged icon from set
     }
 
 }
