@@ -290,6 +290,48 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
     } else if (icons.size() == 1) {
         item->setIcon(0, icons.at(0));
     } else {
+
+        QRect rect = treeWidget->visualItemRect(item);
+
+        int imgWidth = 0;
+        int imgHeight = rect.height();
+
+        for (auto &x : icons) {
+            int width = x.availableSizes().first().width();
+            int height = x.availableSizes().first().height();
+
+            imgWidth += width;
+
+            //if (height > imgHeight) imgHeight = height;
+        }
+
+        QPixmap comboPixmap(imgWidth, imgHeight);
+        QPainter painter(&comboPixmap);
+
+        //always set a white background color, otherwise the images are hard to see
+        painter.setPen(Qt::white);
+        painter.drawRect(0, 0, imgWidth, imgHeight);
+
+        int leftEdge = 0;
+        for (auto &x : icons) {
+//            painter.drawPixmap(leftEdge, 0, x.pixmap(x.actualSize(x.availableSizes().first())));
+            painter.drawPixmap(leftEdge, 0, x.pixmap(x.availableSizes().first()));
+
+            leftEdge += x.availableSizes().first().width();
+        }
+
+        QIcon icon;
+        icon.addPixmap(comboPixmap);
+
+        item->setIcon(0, icon);
+
+        QSize iconSize = treeWidget->iconSize();
+
+        //enlarge sizes as needed
+        if (icon.availableSizes().first().width() > iconSize.width()){
+            treeWidget->setIconSize(icon.availableSizes().first());
+        }
+
         //TODO: build merged icon from set
     }
 
