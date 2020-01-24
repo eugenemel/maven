@@ -302,13 +302,23 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
         int imgWidth = 0;
         int imgHeight = rect.height();
 
-        for (auto &x : icons) {
-            int width = x.availableSizes().first().width();
-            int height = x.availableSizes().first().height();
+        vector<int> heightOffsets(icons.size());
 
+        for (unsigned int i = 0; i < icons.size(); i++) {
+
+            QIcon x = icons[i];
+
+            int width = x.availableSizes().first().width();
             imgWidth += width;
 
-            //if (height > imgHeight) imgHeight = height;
+            int height = x.availableSizes().first().height();
+            int heightOffset = (imgHeight - height)/2;
+
+            if (heightOffset > 0) {
+                heightOffsets[i] = heightOffset;
+            }  else {
+                heightOffsets[i] = 0;
+            }
         }
 
         QPixmap comboPixmap(imgWidth, imgHeight);
@@ -318,9 +328,12 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
         painter.fillRect(0, 0, imgWidth, imgHeight, Qt::white);
 
         int leftEdge = 0;
-        for (auto &x : icons) {
-//            painter.drawPixmap(leftEdge, 0, x.pixmap(x.actualSize(x.availableSizes().first())));
-            painter.drawPixmap(leftEdge, 0, x.pixmap(x.availableSizes().first()));
+        for (unsigned int i = 0; i < icons.size(); i++) {
+
+            int heightCoord = heightOffsets[i];
+            QIcon x = icons[i];
+
+            painter.drawPixmap(leftEdge, heightCoord, x.pixmap(x.availableSizes().first()));
 
             leftEdge += x.availableSizes().first().width();
         }
