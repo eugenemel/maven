@@ -892,39 +892,7 @@ void TableDockWidget::setGroupLabel(char label) {
             QVariant v = item->data(0,PeakGroupType);
             PeakGroup*  group =  v.value<PeakGroup*>();
             if (group) {
-
-                if (label == '\0') {
-                    group->labels.clear();
-                } else {
-                    //check vector of all labels
-                    bool isLabelInVector = false;
-                    for (auto &x : group->labels) {
-                        if (x == label) {
-                            isLabelInVector = true;
-                            break;
-                        }
-                    }
-
-                    if (isLabelInVector) {
-                        //erase-remove idiom
-                        group->labels.erase(remove(group->labels.begin(), group->labels.end(), label), group->labels.end());
-                    } else {
-                        group->labels.push_back(label);
-                    }
-
-                    //peak groups can only be labled as good or bad, not both
-                    if (label == 'b') {
-                        group->labels.erase(remove(group->labels.begin(), group->labels.end(), 'g'), group->labels.end());
-                    } else if (label == 'g') {
-                        group->labels.erase(remove(group->labels.begin(), group->labels.end(), 'b'), group->labels.end());
-                    }
-                }
-
-                if (group->label != label) {
-                    group->setLabel(label);
-                } else {
-                    group->setLabel(0); //Issue 125: if group already labeled with this label, return to unlabeled state
-                }
+                group->toggleLabel(label);
             }
             updateItem(item);
         }
@@ -940,7 +908,7 @@ void TableDockWidget::traverseAndDeleteGroups(QTreeWidgetItem *item) {
 
     if (group) {
         group->deletedFlag = true;
-        group->setLabel('x');
+        group->addLabel('x');
         for (int i = 0; i < item->childCount(); ++i){
             traverseAndDeleteGroups(item->child(i));
         }
