@@ -1025,8 +1025,8 @@ void TableDockWidget::Train() {
 
     for(int i=0; i <allgroups.size(); i++ ) {
         PeakGroup* grp = &allgroups[i];
-        if (grp->label == 'g') good_groups.push_back(grp);
-        if (grp->label == 'b') bad_groups.push_back(grp);
+        if (grp->isGroupGood()) good_groups.push_back(grp);
+        if (grp->isGroupBad()) bad_groups.push_back(grp);
     }
 
     mzUtils::shuffle(good_groups);
@@ -1095,11 +1095,10 @@ void TableDockWidget::updateStatus() {
     int totalCount=0;
     int goodCount=0;
     int badCount=0;
-    for(int i=0; i < allgroups.size(); i++ ) {
-        char groupLabel = allgroups[i].label;
-        if (groupLabel == 'g' ) {
+    for(auto &g : allgroups) {
+        if (g.isGroupGood()){
             goodCount++;
-        } else if ( groupLabel == 'b' ) {
+        } else if (g.isGroupBad()) {
             badCount++;
         }
         totalCount++;
@@ -1119,7 +1118,7 @@ float TableDockWidget::showAccuracy(vector<PeakGroup*>&groups) {
     int gc=0;
     int bc=0;
     for(int i=0; i < groups.size(); i++ ) {
-        if (groups[i]->label == 'g' || groups[i]->label == 'b' ) {
+        if (groups[i]->isGroupGood() || groups[i]->isGroupBad()) {
             for(int j=0; j < groups[i]->peaks.size(); j++ ) {
                 float q = groups[i]->peaks[j].quality;
                 char  l = groups[i]->peaks[j].label;
@@ -1335,7 +1334,7 @@ void TableDockWidget::saveModel() {
     if (clsf) {
         vector<PeakGroup*>groups;
         for(int i=0; i < allgroups.size(); i++ )
-            if(allgroups[i].label == 'g' || allgroups[i].label == 'b' )
+            if(allgroups[i].isGroupGood()|| allgroups[i].isGroupBad())
                 groups.push_back(&allgroups[i]);
         clsf->saveFeatures(groups,fileName.toStdString() + ".csv");
     }
@@ -1366,7 +1365,7 @@ void TableDockWidget::writeGroupXML(QXmlStreamWriter& stream, PeakGroup* g) {
     stream.writeAttribute("metaGroupId",  QString::number(g->metaGroupId) );
     stream.writeAttribute("expectedRtDiff",  QString::number(g->expectedRtDiff,'f',4) );
     stream.writeAttribute("groupRank",  QString::number(g->groupRank,'f',4) );
-    stream.writeAttribute("label",  QString::number(g->label ));
+    stream.writeAttribute("label",  QString(g->getPeakGroupLabel().c_str()));
     stream.writeAttribute("type",  QString::number((int)g->type()));
     if(g->srmId.length())	stream.writeAttribute("srmId",  QString(g->srmId.c_str()));
 
@@ -1456,14 +1455,20 @@ void TableDockWidget::align() {
 
 PeakGroup* TableDockWidget::readGroupXML(QXmlStreamReader& xml,PeakGroup* parent) {
     PeakGroup g;
-    PeakGroup* gp=NULL;
+    PeakGroup* gp=nullptr;
 
     g.groupId = xml.attributes().value("groupId").toString().toInt();
     g.tagString = xml.attributes().value("tagString").toString().toStdString();
     g.metaGroupId = xml.attributes().value("metaGroupId").toString().toInt();
     g.expectedRtDiff = xml.attributes().value("expectedRtDiff").toString().toDouble();
     g.groupRank = xml.attributes().value("groupRank").toString().toInt();
-    g.label     =  xml.attributes().value("label").toString().toInt();
+
+    QString label = xml.attributes().value("label").toString();
+    QByteArray bytes = label.toLatin1().data();
+    for (char c : bytes) {
+        g.addLabel(c);
+    }
+
     g.setType( (PeakGroup::GroupType) xml.attributes().value("type").toString().toInt());
 
     string compoundId = xml.attributes().value("compoundId").toString().toStdString();
