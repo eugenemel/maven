@@ -259,6 +259,8 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
         group->peaks[i].quality > 0.5 ? good++ : bad++;
     }
 
+    //TODO: Fix this block when code gets removed
+
     QBrush brush=Qt::NoBrush;
     if (good>0 && group->label == 'b' ) {
         float incorrectFraction= ((float) good)/total;
@@ -301,6 +303,15 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
 
         int imgWidth = 0;
         int imgHeight = rect.height();
+
+        //Issue 127: fall back to height of images if height could not be determined from rectangle
+        if (imgHeight == 0) {
+            for (auto &x : icons) {
+                if (x.availableSizes().first().height() > imgHeight){
+                    imgHeight = x.availableSizes().first().height();
+                }
+            }
+        }
 
         vector<int> heightOffsets(icons.size());
 
@@ -504,7 +515,10 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     if ( group->childCount() > 0 ) {
         //cerr << "Add children!" << endl;
         QTreeWidgetItem *childRoot = clusterDialog->chkPGDisplay->isChecked() ? root : item;
-        for( int i=0; i < group->childCount(); i++ ) addRow(&(group->children[i]), childRoot);
+
+        for(unsigned int i=0; i < group->childCount(); i++ ){
+            addRow(&(group->children[i]), childRoot);
+        }
     }
 
     groupToItem.insert(make_pair(group, item));
