@@ -280,9 +280,15 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
     //Issue 127: gather all icons
     vector<QIcon> icons;
     for (char c : group->labels) {
-        if (DB.peakGroupTags.find(c) != DB.peakGroupTags.end()) {
+
+        if (c == 'g') {
+            icons.push_back(QIcon(":/images/good.png"));
+        } else if (c == 'b') {
+            icons.push_back(QIcon(":/images/bad.png"));
+        } else if (DB.peakGroupTags.find(c) != DB.peakGroupTags.end()) {
             icons.push_back(DB.peakGroupTags[c]->icon);
         }
+
     }
 
     if (icons.empty()) {
