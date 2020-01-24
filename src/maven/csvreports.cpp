@@ -31,6 +31,7 @@ void CSVReports::openGroupReport(string outputfile) {
                         << "displayName"
                         << "compound"
                         << "compoundId"
+                        << "adductName"
                         << "category"
                         << "database"
                         << "expectedRtDiff"
@@ -145,8 +146,14 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
         if (c->category.size()) compoundCategory = c->category[0];
     }
 
+    string adductName;
+    if (group -> adduct) {
+        adductName = group->adduct->name;
+    }
+
     groupReport << SEP << doubleQuoteString(compoundName);
     groupReport << SEP << doubleQuoteString(compoundID);
+    groupReport << SEP << doubleQuoteString(adductName);
     groupReport << SEP << compoundCategory;
     groupReport << SEP << database;
     groupReport << SEP << expectedRtDiff;
