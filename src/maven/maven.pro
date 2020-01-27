@@ -53,10 +53,12 @@ FORMS = forms/settingsform.ui  \
         forms/directinfusiondialog.ui \
         forms/editpeakgroupdialog.ui \
         forms/selectadductsdialog.ui \
-        forms/setrumsDBdialog.ui
+        forms/setrumsDBdialog.ui \
+        forms/filtertagsdialog.ui
 
 
 HEADERS +=  stable.h \
+            filtertagsdialog.h \
             globals.h \
             mainwindow.h \
             tinyplot.h \
@@ -112,6 +114,7 @@ SOURCES +=  mainwindow.cpp  \
             classifierNeuralNet.cpp \
             database.cpp \
             csvreports.cpp \
+            filtertagsdialog.cpp \
             plotdock.cpp \
             treedockwidget.cpp \
             tinyplot.cpp \

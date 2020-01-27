@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>filterTagsDialog</class>
+ <widget class="QDialog" name="filterTagsDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>745</width>
+    <height>344</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Select Active Adducts</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="2" column="0">
+    <widget class="QPushButton" name="btnSelectAll">
+     <property name="text">
+      <string>Select All</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="3">
+    <widget class="QPushButton" name="btnCancel">
+     <property name="text">
+      <string>Cancel</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QPushButton" name="btnDeselectAll">
+     <property name="text">
+      <string>Deselect All</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QPushButton" name="btnApplyFilter">
+     <property name="text">
+      <string>Apply Filter</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="4">
+    <widget class="QTableWidget" name="tblTags">
+     <property name="columnCount">
+      <number>6</number>
+     </property>
+     <attribute name="verticalHeaderVisible">
+      <bool>true</bool>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>enabled</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>tag name</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>label</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>hotkey</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>icon</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>description</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="4">
+    <widget class="QLabel" name="lblInfo">
+     <property name="text">
+      <string>Peak Groups are not filtered until 'Apply Filter' button is pushed.</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
