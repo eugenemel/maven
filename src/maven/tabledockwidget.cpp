@@ -37,7 +37,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     connect(clusterDialog->chkPGDisplay, SIGNAL(clicked(bool)), SLOT(changePeakGroupDisplay()));
 
     filterTagsDialog = new FilterTagsDialog(this);
-    connect(filterTagsDialog->btnApplyFilter, SIGNAL(clicked()), SLOT(updateTagFilter()));
+    connect(filterTagsDialog, SIGNAL(updateFilter()), this, SLOT(updateTagFilter()));
 
     editPeakGroupDialog = new EditPeakGroupDialog(this);
     connect(editPeakGroupDialog->okButton, SIGNAL(clicked(bool)), SLOT(updateSelectedPeakGroup()));

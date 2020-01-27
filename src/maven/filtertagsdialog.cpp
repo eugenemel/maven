@@ -155,7 +155,7 @@ FilterTagsDialog::FilterTagsDialog(QWidget *parent) : QDialog(parent) {
     connect(btnSelectAll, SIGNAL(clicked()), this, SLOT(selectAll()));
     connect(btnDeselectAll, SIGNAL(clicked()), this, SLOT(deselectAll()));
     connect(btnCancel, SIGNAL(clicked()), this, SLOT(hide()));
-    connect(btnApplyFilter, SIGNAL(clicked()), this, SLOT(hide()));
+    connect(btnApplyFilter, SIGNAL(clicked()), this, SLOT(processNewFilter()));
 }
 
 void FilterTagsDialog::selectAll() {
@@ -184,6 +184,15 @@ void FilterTagsDialog::deselectAll() {
     }
 
     tblTags->update();
+}
+
+
+void FilterTagsDialog::processNewFilter() {
+
+    //TODO: check that input is valid, update if appropriate
+
+    hide();
+    updateFilter();
 }
 
 TagFilterState FilterTagsDialog::getFilterState() {
@@ -236,11 +245,12 @@ bool TagFilterState::isPeakGroupPasses(PeakGroup *g){
     if (isAllPass) return true;
     if (g->labels.empty() && (isNoTagsPass || passingLabels.empty())) return true;
 
-    //passingLabels acts like an AND filter (must have every label to be retained).
+    //passingLabels acts like an OR filter (if the label is found, will be retained).
     for (auto &x : passingLabels) {
-        if(!g->isGroupLabeled(x)) return false;
+        if(g->isGroupLabeled(x)) return true;
     }
 
-    return true;
+    return false;
 }
+
 

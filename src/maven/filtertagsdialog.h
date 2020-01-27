@@ -18,9 +18,13 @@ class FilterTagsDialog : public QDialog, public Ui_filterTagsDialog {
         FilterTagsDialog(QWidget *parent);
         TagFilterState getFilterState();
 
+    signals:
+        void updateFilter();
+
     public slots:
         void selectAll();
         void deselectAll();
+        void processNewFilter();
 
     private:
         map<QTableWidgetItem*, PeakGroupTag*> checkBoxTag = {};
