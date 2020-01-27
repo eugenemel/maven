@@ -37,6 +37,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     connect(clusterDialog->chkPGDisplay, SIGNAL(clicked(bool)), SLOT(changePeakGroupDisplay()));
 
     filterTagsDialog = new FilterTagsDialog(this);
+    connect(filterTagsDialog->btnApplyFilter, SIGNAL(clicked()), SLOT(updateTagFilter()));
 
     editPeakGroupDialog = new EditPeakGroupDialog(this);
     connect(editPeakGroupDialog->okButton, SIGNAL(clicked(bool)), SLOT(updateSelectedPeakGroup()));
@@ -136,7 +137,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     btnMoveTo->menu()->addAction(tr("Table Y"));
 */
 
-    QToolButton *btnTagsFilter = new QToolButton(toolBar);
+    btnTagsFilter = new QToolButton(toolBar);
     btnTagsFilter->setIcon(QIcon(":/images/icon_filter.png"));
     btnTagsFilter->setToolTip("Filter peak groups based on tags");
     connect(btnTagsFilter, SIGNAL(clicked()), filterTagsDialog, SLOT(show()));
@@ -1997,5 +1998,17 @@ void TableDockWidget::showEditPeakGroupDialog() {
 
 void TableDockWidget::hideEditPeakGroupDialog() {
     editPeakGroupDialog->hide();
+}
+
+void TableDockWidget::updateTagFilter() {
+
+    qDebug() << "TableDockWidget::updateTagFilter()";
+
+    tagFilterState = filterTagsDialog->getFilterState();
+    if (tagFilterState.isAllPass) {
+        this->btnTagsFilter->setIcon(QIcon(":/images/icon_filter.png"));
+    } else {
+        this->btnTagsFilter->setIcon(QIcon(":/images/icon_filter_selected.png"));
+    }
 }
 

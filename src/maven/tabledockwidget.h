@@ -101,6 +101,7 @@ public slots:
       void showEditPeakGroupDialog();
       void hideEditPeakGroupDialog();
       void selectGroup(PeakGroup *group);
+      void updateTagFilter();
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event);
@@ -126,7 +127,11 @@ private:
 
           TrainDialog* traindialog;
           ClusterDialog*       clusterDialog;
+
+          TagFilterState tagFilterState;
+          QToolButton *btnTagsFilter;
           FilterTagsDialog*     filterTagsDialog;
+
           QDialog* 	 filtersDialog;
           EditPeakGroupDialog* editPeakGroupDialog;
 

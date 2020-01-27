@@ -186,3 +186,61 @@ void FilterTagsDialog::deselectAll() {
     tblTags->update();
 }
 
+TagFilterState FilterTagsDialog::getFilterState() {
+
+    TagFilterState tagFilterState;
+
+    bool isAllPass = true;
+    bool isNoTagsPass = true;
+    vector<char> passingLabels;
+
+    if (noTags->checkState() == Qt::Checked) {
+        isNoTagsPass = true;
+    } else {
+        isNoTagsPass = false;
+        isAllPass = false;
+    }
+
+    if (goodTag->checkState() == Qt::Checked) {
+        passingLabels.push_back('g');
+    } else {
+        isAllPass = false;
+    }
+
+    if (badTag->checkState() == Qt::Checked) {
+        passingLabels.push_back('b');
+    } else {
+        isAllPass = false;
+    }
+
+    for (auto &it : checkBoxTag) {
+        QTableWidgetItem *item = it.first;
+        PeakGroupTag *tag = it.second;
+
+        if (item->checkState() == Qt::Checked) {
+            passingLabels.push_back(tag->label);
+        } else {
+            isAllPass = false;
+        }
+    }
+
+    tagFilterState.isAllPass = isAllPass;
+    tagFilterState.isNoTagsPass = isNoTagsPass;
+    tagFilterState.passingLabels = passingLabels;
+
+    return tagFilterState;
+}
+
+bool TagFilterState::isPeakGroupPasses(PeakGroup *g){
+
+    if (isAllPass) return true;
+    if (g->labels.empty() && (isNoTagsPass || passingLabels.empty())) return true;
+
+    //passingLabels acts like an AND filter (must have every label to be retained).
+    for (auto &x : passingLabels) {
+        if(!g->isGroupLabeled(x)) return false;
+    }
+
+    return true;
+}
+

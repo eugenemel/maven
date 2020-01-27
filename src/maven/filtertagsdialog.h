@@ -8,12 +8,15 @@
 
 extern Database DB;
 
+struct TagFilterState;
+
 class FilterTagsDialog : public QDialog, public Ui_filterTagsDialog {
 
     Q_OBJECT
 
     public:
         FilterTagsDialog(QWidget *parent);
+        TagFilterState getFilterState();
 
     public slots:
         void selectAll();
@@ -25,6 +28,14 @@ class FilterTagsDialog : public QDialog, public Ui_filterTagsDialog {
         QTableWidgetItem *noTags = nullptr;
         QTableWidgetItem *goodTag = nullptr;
         QTableWidgetItem *badTag = nullptr;
+};
+
+struct TagFilterState {
+    bool isAllPass = true;
+    bool isNoTagsPass = true;
+    vector<char> passingLabels;
+
+    bool isPeakGroupPasses(PeakGroup *g);
 };
 
 #endif // FILTERTAGSDIALOG_H
