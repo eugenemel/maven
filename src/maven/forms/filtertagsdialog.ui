@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Select Active Adducts</string>
+   <string>Set Peak Group Tag Filter</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="2" column="0">

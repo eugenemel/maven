@@ -96,5 +96,7 @@
         <file>images/resetzoom2.png</file>
         <file>images/unknown_ion.png</file>
         <file>images/yellow_star.png</file>
+        <file>images/IconFilter_selected.png</file>
+        <file>images/IconFilter.png</file>
     </qresource>
 </RCC>
