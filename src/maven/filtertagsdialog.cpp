@@ -4,12 +4,12 @@ FilterTagsDialog::FilterTagsDialog(QWidget *parent) : QDialog(parent) {
     setupUi(this);
     setModal(true);
 
-    tblTags->setColumnWidth(0, 75);     // enabled
+    tblTags->setColumnWidth(0, 75);     // visible
     tblTags->setColumnWidth(1, 100);    // name
     tblTags->setColumnWidth(2, 50);     // label
     tblTags->setColumnWidth(3, 50);     // hotkey
     tblTags->setColumnWidth(4, 50);     // icon
-    tblTags->setColumnWidth(5, 500);    // description
+    tblTags->setColumnWidth(5, 1000);    // description
 
     tblTags->setSortingEnabled(true);
     tblTags->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -39,7 +39,7 @@ FilterTagsDialog::FilterTagsDialog(QWidget *parent) : QDialog(parent) {
     tblTags->setItem(counter, 2, u_item2);
 
     QTableWidgetItem *u_item3 = new QTableWidgetItem();
-    u_item3->setText("");
+    u_item3->setText("u");
     tblTags->setItem(counter, 3, u_item3);
 
     QTableWidgetItem *u_item4 = new QTableWidgetItem();
@@ -111,13 +111,15 @@ FilterTagsDialog::FilterTagsDialog(QWidget *parent) : QDialog(parent) {
     tblTags->setItem(counter, 4, b_item4);
 
     QTableWidgetItem *b_item5 = new QTableWidgetItem();
-    b_item5->setText("Peak Group is good.");
+    b_item5->setText("Peak Group is bad.");
     tblTags->setItem(counter, 5, b_item5);
 
     counter++;
 
     //Peak group tags
     for (auto &x : DB.peakGroupTags) {
+
+        tblTags->insertRow(counter);
 
         PeakGroupTag *peakGroupTag = x.second;
 
@@ -142,9 +144,10 @@ FilterTagsDialog::FilterTagsDialog(QWidget *parent) : QDialog(parent) {
         tblTags->setItem(counter, 4, item4);
 
         QTableWidgetItem *item5 = new QTableWidgetItem();
-        item5->setIcon(peakGroupTag->icon);
+        item5->setText(peakGroupTag->description.c_str());
         tblTags->setItem(counter, 5, item5);
 
+        counter++;
     }
 }
 

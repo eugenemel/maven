@@ -9,6 +9,7 @@
 #include "directinfusionprocessor.h"
 #include "editpeakgroupingdialog.h"
 #include "lipidsummarizationutils.h"
+#include "filtertagsdialog.h"
 
 class MainWindow;
 class TrainDialog;
@@ -125,6 +126,7 @@ private:
 
           TrainDialog* traindialog;
           ClusterDialog*       clusterDialog;
+          FilterTagsDialog*     filterTagsDialog;
           QDialog* 	 filtersDialog;
           EditPeakGroupDialog* editPeakGroupDialog;
 

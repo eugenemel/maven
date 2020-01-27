@@ -36,6 +36,8 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     connect(clusterDialog->clearButton,SIGNAL(clicked(bool)),SLOT(clearClusters()));
     connect(clusterDialog->chkPGDisplay, SIGNAL(clicked(bool)), SLOT(changePeakGroupDisplay()));
 
+    filterTagsDialog = new FilterTagsDialog(this);
+
     editPeakGroupDialog = new EditPeakGroupDialog(this);
     connect(editPeakGroupDialog->okButton, SIGNAL(clicked(bool)), SLOT(updateSelectedPeakGroup()));
     connect(editPeakGroupDialog->cancelButton, SIGNAL(clicked(bool)), SLOT(hideEditPeakGroupDialog()));
@@ -133,6 +135,11 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     btnMoveTo->menu()->addAction(tr("Table X"));
     btnMoveTo->menu()->addAction(tr("Table Y"));
 */
+
+    QToolButton *btnTagsFilter = new QToolButton(toolBar);
+    btnTagsFilter->setIcon(QIcon(":/images/bug.png")); //TODO
+    connect(btnTagsFilter, SIGNAL(clicked()), filterTagsDialog, SLOT(show()));
+
     QToolButton *btnX = new QToolButton(toolBar);
     btnX->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
     //btnX->setIcon(QIcon(rsrcPath + "/hide.png"));
@@ -170,6 +177,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
 
    // toolBar->addWidget(btnMoveTo);
     toolBar->addWidget(spacer);
+    toolBar->addWidget(btnTagsFilter);
     toolBar->addWidget(filterEditor);
     toolBar->addWidget(btnX);
 
