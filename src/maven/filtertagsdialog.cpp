@@ -28,7 +28,7 @@ FilterTagsDialog::FilterTagsDialog(QWidget *parent) : QDialog(parent) {
     u_item0->setCheckState(Qt::Checked);
     tblTags->setItem(counter, 0, u_item0);
 
-    untaggedPeakGroup = u_item0;
+    noTags = u_item0;
 
     QTableWidgetItem *u_item1 = new QTableWidgetItem();
     u_item1->setText("No Tags");
@@ -127,6 +127,8 @@ FilterTagsDialog::FilterTagsDialog(QWidget *parent) : QDialog(parent) {
         item0->setCheckState(Qt::Checked);
         tblTags->setItem(counter, 0, item0);
 
+        checkBoxTag.insert(make_pair(item0, peakGroupTag));
+
         QTableWidgetItem *item1 = new QTableWidgetItem();
         item1->setText(peakGroupTag->tagName.c_str());
         tblTags->setItem(counter, 1, item1);
@@ -149,6 +151,36 @@ FilterTagsDialog::FilterTagsDialog(QWidget *parent) : QDialog(parent) {
 
         counter++;
     }
+
+    connect(btnSelectAll, SIGNAL(clicked()), this, SLOT(selectAll()));
+    connect(btnDeselectAll, SIGNAL(clicked()), this, SLOT(deselectAll()));
 }
 
+void FilterTagsDialog::selectAll() {
+    qDebug() << "FilterTagsDialog::selectAll()";
+
+    noTags->setCheckState(Qt::Checked);
+    goodTag->setCheckState(Qt::Checked);
+    badTag->setCheckState(Qt::Checked);
+
+    for (auto it = checkBoxTag.begin(); it != checkBoxTag.end(); ++it) {
+        it->first->setCheckState(Qt::Checked);
+    }
+
+    tblTags->update();
+}
+
+void FilterTagsDialog::deselectAll() {
+    qDebug() << "FilterTagsDialog::deselectAll()";
+
+    noTags->setCheckState(Qt::Unchecked);
+    goodTag->setCheckState(Qt::Unchecked);
+    badTag->setCheckState(Qt::Unchecked);
+
+    for (auto it = checkBoxTag.begin(); it != checkBoxTag.end(); ++it) {
+        it->first->setCheckState(Qt::Unchecked);
+    }
+
+    tblTags->update();
+}
 

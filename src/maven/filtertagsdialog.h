@@ -15,10 +15,14 @@ class FilterTagsDialog : public QDialog, public Ui_filterTagsDialog {
     public:
         FilterTagsDialog(QWidget *parent);
 
+    public slots:
+        void selectAll();
+        void deselectAll();
+
     private:
         map<QTableWidgetItem*, PeakGroupTag*> checkBoxTag = {};
 
-        QTableWidgetItem *untaggedPeakGroup = nullptr;
+        QTableWidgetItem *noTags = nullptr;
         QTableWidgetItem *goodTag = nullptr;
         QTableWidgetItem *badTag = nullptr;
 };
