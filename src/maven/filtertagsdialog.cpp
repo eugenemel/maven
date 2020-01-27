@@ -155,6 +155,7 @@ FilterTagsDialog::FilterTagsDialog(QWidget *parent) : QDialog(parent) {
     connect(btnSelectAll, SIGNAL(clicked()), this, SLOT(selectAll()));
     connect(btnDeselectAll, SIGNAL(clicked()), this, SLOT(deselectAll()));
     connect(btnCancel, SIGNAL(clicked()), this, SLOT(hide()));
+    connect(btnApplyFilter, SIGNAL(clicked()), this, SLOT(hide()));
 }
 
 void FilterTagsDialog::selectAll() {
