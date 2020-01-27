@@ -137,7 +137,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
 */
 
     QToolButton *btnTagsFilter = new QToolButton(toolBar);
-    btnTagsFilter->setIcon(QIcon(":/images/bug.png")); //TODO
+    btnTagsFilter->setIcon(QIcon(":/images/icon_filter.png"));
     connect(btnTagsFilter, SIGNAL(clicked()), filterTagsDialog, SLOT(show()));
 
     QToolButton *btnX = new QToolButton(toolBar);
@@ -176,10 +176,10 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     */
 
    // toolBar->addWidget(btnMoveTo);
-    toolBar->addWidget(spacer);
+  //  toolBar->addWidget(spacer);
     toolBar->addWidget(btnTagsFilter);
     toolBar->addWidget(filterEditor);
-    toolBar->addWidget(btnX);
+    //toolBar->addWidget(btnX);
 
     ///LAYOUT
     setTitleBarWidget(toolBar);
