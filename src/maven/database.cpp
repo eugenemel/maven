@@ -498,7 +498,17 @@ void Database::loadPeakGroupTags(string filename) {
         char hotkey = hotKeyStr.toStdString().c_str()[0];
 
         string icon = fields[3];
-        string description = fields[4];
+
+        QString descriptionQ;
+        for (unsigned int i = 4; i < fields.size(); i++) {
+            if (i > 4) {
+                descriptionQ.append(",");
+            }
+            descriptionQ.append(fields[i].c_str());
+        }
+
+        string description = descriptionQ.toStdString();
+        description.erase(remove(description.begin(), description.end(),'\"'), description.end());
 
         if (
                 hotkey == 'o' || //open file
