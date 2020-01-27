@@ -138,16 +138,18 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
 
     QToolButton *btnTagsFilter = new QToolButton(toolBar);
     btnTagsFilter->setIcon(QIcon(":/images/icon_filter.png"));
+    btnTagsFilter->setToolTip("Filter peak groups based on tags");
     connect(btnTagsFilter, SIGNAL(clicked()), filterTagsDialog, SLOT(show()));
 
-    QToolButton *btnX = new QToolButton(toolBar);
-    btnX->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
-    //btnX->setIcon(QIcon(rsrcPath + "/hide.png"));
-    connect(btnX, SIGNAL(clicked()),this,SLOT(deleteAll()));
+//    QToolButton *btnX = new QToolButton(toolBar);
+//    btnX->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
+//    //btnX->setIcon(QIcon(rsrcPath + "/hide.png"));
+//    connect(btnX, SIGNAL(clicked()),this,SLOT(deleteAll()));
 
     QLineEdit*  filterEditor = new QLineEdit(toolBar);
     filterEditor->setMinimumWidth(15);
     filterEditor->setPlaceholderText("Filter");
+    filterEditor->setToolTip("Filter peak groups based on ID string matches");
     connect(filterEditor, SIGNAL(textEdited(QString)), this, SLOT(filterTree(QString)));
 
     QWidget* spacer = new QWidget();
