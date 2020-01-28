@@ -189,7 +189,23 @@ void FilterTagsDialog::deselectAll() {
 
 void FilterTagsDialog::processNewFilter() {
 
-    //TODO: check that input is valid, update if appropriate
+    TagFilterState tagFilterState = getFilterState();
+
+    if (!tagFilterState.isNoTagsPass && tagFilterState.passingLabels.empty()) {
+        QMessageBox msgBox;
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setText("These filter settings will make all Peak Groups invisible, which is disallowed.");
+        msgBox.setInformativeText("Did you mean to make all Peak Groups visible?");
+        msgBox.setDefaultButton(QMessageBox::Yes);
+
+        int ref = msgBox.exec();
+
+        if (ref == QMessageBox::Yes) {
+            selectAll();
+        } else {
+            return;
+        }
+    }
 
     hide();
     updateFilter();
@@ -243,7 +259,7 @@ TagFilterState FilterTagsDialog::getFilterState() {
 bool TagFilterState::isPeakGroupPasses(PeakGroup *g){
 
     if (isAllPass) return true;
-    if (g->labels.empty() && (isNoTagsPass || passingLabels.empty())) return true;
+    if (g->labels.empty() && isNoTagsPass) return true;
 
     //passingLabels acts like an OR filter (if the label is found, will be retained).
     for (auto &x : passingLabels) {
