@@ -9,7 +9,7 @@ FilterTagsDialog::FilterTagsDialog(QWidget *parent) : QDialog(parent) {
     tblTags->setColumnWidth(2, 50);     // label
     tblTags->setColumnWidth(3, 50);     // hotkey
     tblTags->setColumnWidth(4, 50);     // icon
-    tblTags->setColumnWidth(5, 1000);    // description
+    tblTags->setColumnWidth(5, 1000);   // description
 
     tblTags->setSortingEnabled(true);
     tblTags->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -156,6 +156,7 @@ FilterTagsDialog::FilterTagsDialog(QWidget *parent) : QDialog(parent) {
     connect(btnDeselectAll, SIGNAL(clicked()), this, SLOT(deselectAll()));
     connect(btnCancel, SIGNAL(clicked()), this, SLOT(hide()));
     connect(btnApplyFilter, SIGNAL(clicked()), this, SLOT(processNewFilter()));
+    connect(btnClear, SIGNAL(clicked()), this, SLOT(clearFilter()));
 }
 
 void FilterTagsDialog::selectAll() {
@@ -186,6 +187,11 @@ void FilterTagsDialog::deselectAll() {
     tblTags->update();
 }
 
+void FilterTagsDialog::clearFilter() {
+    selectAll();
+    hide();
+    updateFilter();
+}
 
 void FilterTagsDialog::processNewFilter() {
 

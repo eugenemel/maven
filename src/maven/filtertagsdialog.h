@@ -25,6 +25,7 @@ class FilterTagsDialog : public QDialog, public Ui_filterTagsDialog {
         void selectAll();
         void deselectAll();
         void processNewFilter();
+        void clearFilter();
 
     private:
         map<QTableWidgetItem*, PeakGroupTag*> checkBoxTag = {};
