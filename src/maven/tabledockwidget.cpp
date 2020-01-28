@@ -147,7 +147,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
 //    //btnX->setIcon(QIcon(rsrcPath + "/hide.png"));
 //    connect(btnX, SIGNAL(clicked()),this,SLOT(deleteAll()));
 
-    QLineEdit*  filterEditor = new QLineEdit(toolBar);
+    filterEditor = new QLineEdit(toolBar);
     filterEditor->setMinimumWidth(15);
     filterEditor->setPlaceholderText("Filter");
     filterEditor->setToolTip("Filter peak groups based on ID string matches");
@@ -1873,7 +1873,15 @@ bool TableDockWidget::traverseNode(QTreeWidgetItem *item, QString needle) {
     }
 
     if (isShowThisNode || item->text(0).contains(needle, Qt::CaseInsensitive)) {
-        item->setHidden(false);
+
+        QVariant v = item->data(0,PeakGroupType);
+        PeakGroup* group =  v.value<PeakGroup*>();
+
+        if (this->tagFilterState.isPeakGroupPasses(group)) {
+            item->setHidden(false);
+        } else {
+            item->setHidden(true);
+        }
     } else {
         item->setHidden(true);
     }
@@ -2010,5 +2018,7 @@ void TableDockWidget::updateTagFilter() {
     } else {
         this->btnTagsFilter->setIcon(QIcon(":/images/icon_filter_selected.png"));
     }
+
+    filterTree(filterEditor->text());
 }
 

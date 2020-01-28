@@ -128,6 +128,8 @@ private:
           TrainDialog* traindialog;
           ClusterDialog*       clusterDialog;
 
+          QLineEdit*  filterEditor;
+
           TagFilterState tagFilterState;
           QToolButton *btnTagsFilter;
           FilterTagsDialog*     filterTagsDialog;
