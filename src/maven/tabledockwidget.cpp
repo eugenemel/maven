@@ -898,6 +898,10 @@ void TableDockWidget::setGroupLabel(char label) {
             updateItem(item);
         }
     }
+
+    //The labeled group might be filtered out.
+    updateTagFilter();
+
     updateStatus();
 }
 
