@@ -112,12 +112,9 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
         }
     }
 
-    //Issue 127: record all labels in export
-    QString label(group->getPeakGroupLabel().c_str());
-
     string idString = TableDockWidget::groupTagString(group).toStdString();
 
-    groupReport << label.toStdString() << SEP
+    groupReport << group->getPeakGroupLabel() << SEP
                 << setprecision(7)
                 << group->metaGroupId << SEP
                 << group->groupId << SEP
