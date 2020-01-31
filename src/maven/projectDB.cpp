@@ -309,13 +309,20 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
             query1.addBindValue(QString());
         }
 
+        QString compoundName;
+        if (!g->importedCompoundName.empty()){
+              compoundName = QString(g->importedCompoundName.c_str());
+        } else if (g->compound) {
+              compoundName = QString(g->compound->name.c_str());
+        }
+
         if (g->compound) {
             query1.addBindValue(QString(g->compound->id.c_str()) );
-            query1.addBindValue(QString(g->compound->name.c_str()) );
+            query1.addBindValue(compoundName);
             query1.addBindValue(QString(g->compound->db.c_str()) );
         } else{
             query1.addBindValue(QString());
-            query1.addBindValue(QString());
+            query1.addBindValue(compoundName);
             query1.addBindValue(QString());
         }
 
@@ -522,6 +529,8 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary) {
         string compoundDB = query.value("compoundDB").toString().toStdString();
         string compoundName = query.value("compoundName").toString().toStdString();
         string adductName = query.value("adductName").toString().toStdString();
+
+        g.importedCompoundName = compoundName;
 
         //if(!compoundName.empty()) g.tagString=compoundName;
 
