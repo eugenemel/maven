@@ -1058,35 +1058,11 @@ void MainWindow::createToolBars() {
     btnAdducts->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnAdducts->setToolTip(tr("Select Active Adducts"));
 
-//    QToolButton *btnAlign = new QToolButton(toolBar);
-//    btnAlign->setText("Align");
-//    btnAlign->setIcon(QIcon(rsrcPath + "/textcenter.png"));
-//    btnAlign->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-//    btnAlign->setToolTip(tr("Align Samples"));
-
-//    QToolButton *btnCalibrate = new QToolButton(toolBar);
-//    btnCalibrate->setText("Calibrate");
-//    btnCalibrate->setIcon(QIcon(rsrcPath + "/positive_ion.png"));
-//    btnCalibrate->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-//    btnCalibrate->setToolTip(tr("Calibrate"));
-
-//    QToolButton *btnDbSearch = new QToolButton(toolBar);
-//    btnDbSearch->setText("Databases");
-//    btnDbSearch->setIcon(QIcon(rsrcPath + "/dbsearch.png"));
-//    btnDbSearch->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-//    btnDbSearch->setToolTip(tr("Database Search"));
-
     QToolButton *btnFeatureDetect = new QToolButton(toolBar);
     btnFeatureDetect->setText("Peaks");
     btnFeatureDetect->setIcon(QIcon(rsrcPath + "/featuredetect.png"));
     btnFeatureDetect->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnFeatureDetect->setToolTip(tr("Feature Detection"));
-
-//    QToolButton *btnSpectraMatching = new QToolButton(toolBar);
-//    btnSpectraMatching->setText("Match");
-//    btnSpectraMatching->setIcon(QIcon(rsrcPath + "/spectra_search.png"));
-//    btnSpectraMatching->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-//    btnSpectraMatching->setToolTip(tr("Search Spectra for Fragmentation Patterns"));
 
     QToolButton *btnDirectInfusion = new QToolButton(toolBar);
     btnDirectInfusion->setText("Direct Infusion");
@@ -1104,11 +1080,7 @@ void MainWindow::createToolBars() {
     connect(btnSave, SIGNAL(clicked()), projectDockWidget, SLOT(saveProject()));
     connect(btnLibrary, SIGNAL(clicked()), libraryDialog, SLOT(show()));
     connect(btnAdducts, SIGNAL(clicked()), SLOT(showSelectAdductsDialog()));
-//    connect(btnAlign,SIGNAL(clicked()), alignmentDialog, SLOT(show()));
-//    connect(btnCalibrate,SIGNAL(clicked()), calibrateDialog, SLOT(show()));
-//    connect(btnDbSearch,SIGNAL(clicked()), SLOT(compoundDatabaseSearch()));
     connect(btnFeatureDetect,SIGNAL(clicked()), SLOT(showMassSlices()));
-//    connect(btnSpectraMatching,SIGNAL(clicked()),spectraMatchingForm,SLOT(show()));
     connect(btnDirectInfusion, SIGNAL(clicked()), SLOT(showDirectInfusionDialog()));
     connect(btnSettings,SIGNAL(clicked()),settingsForm,SLOT(show()));
 
@@ -1116,11 +1088,7 @@ void MainWindow::createToolBars() {
     toolBar->addWidget(btnSave);
     toolBar->addWidget(btnLibrary);
     toolBar->addWidget(btnAdducts);
-//    toolBar->addWidget(btnAlign);
-//    toolBar->addWidget(btnCalibrate);
-//    toolBar->addWidget(btnDbSearch);
     toolBar->addWidget(btnFeatureDetect);
-//    toolBar->addWidget(btnSpectraMatching);
     toolBar->addWidget(btnDirectInfusion);
     toolBar->addWidget(btnSettings);
 
