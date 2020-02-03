@@ -975,22 +975,33 @@ void MainWindow::createMenus() {
     connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
     fileMenu->addAction(exitAct);
 
-    QAction* hideWidgets = new QAction(tr("Hide Widgets"), this);
-    hideWidgets->setShortcut(tr("F11"));
-    connect(hideWidgets, SIGNAL(triggered()), SLOT(hideDockWidgets()));
-    widgetsMenu->addAction(hideWidgets);
-
     //Issue 144: Reorganize menu contents
+    QAction *actionCalibrate = widgetsMenu->addAction(QIcon(rsrcPath + "/positive_ion.png"), "Calibrate");
+    actionCalibrate->setToolTip("Calibrate");
+    connect(actionCalibrate,SIGNAL(triggered()), calibrateDialog, SLOT(show()));
+
+    QAction *actionAlign = widgetsMenu->addAction(QIcon(rsrcPath + "/textcenter.png"), "Align");
+    QAction *actionMatch = widgetsMenu->addAction(QIcon(rsrcPath + "/spectra_search.png"), "Match");
+    QAction *actionDatabases = widgetsMenu->addAction(QIcon(rsrcPath + "/dbsearch.png"), "Databases");
+
+    widgetsMenu->addSeparator();
+
+    QAction *aMs1Events = widgetsMenu->addAction("MS1 Scans List");
+    aMs1Events->setCheckable(true);
+    aMs1Events->setChecked(false);
+    connect(aMs1Events, SIGNAL(toggled(bool)), ms1ScansListWidget, SLOT(setVisible(bool)));
 
     QAction* aj = widgetsMenu->addAction("MS2 Scans List");
     aj->setCheckable(true);
     aj->setChecked(false);
     connect(aj,SIGNAL(toggled(bool)), fragmentationEventsWidget,SLOT(setVisible(bool)));
 
-    QAction *aMs1Events = widgetsMenu->addAction("MS1 Scans List");
-    aMs1Events->setCheckable(true);
-    aMs1Events->setChecked(false);
-    connect(aMs1Events, SIGNAL(toggled(bool)), ms1ScansListWidget, SLOT(setVisible(bool)));
+    widgetsMenu->addSeparator();
+
+    QAction* hideWidgets = new QAction(tr("Hide Widgets"), this);
+    hideWidgets->setShortcut(tr("F11"));
+    connect(hideWidgets, SIGNAL(triggered()), SLOT(hideDockWidgets()));
+    widgetsMenu->addAction(hideWidgets);
 
     menuBar()->show();
 }
@@ -1067,7 +1078,7 @@ void MainWindow::createToolBars() {
     btnSpectraMatching->setText("Match");
     btnSpectraMatching->setIcon(QIcon(rsrcPath + "/spectra_search.png"));
     btnSpectraMatching->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnSpectraMatching->setToolTip(tr("Seach Spectra for Fragmentation Patterns"));
+    btnSpectraMatching->setToolTip(tr("Search Spectra for Fragmentation Patterns"));
 
     QToolButton *btnDirectInfusion = new QToolButton(toolBar);
     btnDirectInfusion->setText("Direct Infusion");
