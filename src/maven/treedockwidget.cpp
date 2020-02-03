@@ -278,6 +278,34 @@ void TreeDockWidget::addScanItem(Scan* scan) {
         item->setText(8,QString(scan->filterLine.c_str()));
 }
 
+void TreeDockWidget::setupMs1ScanHeader() {
+    QStringList colNames;
+    colNames << "sample" << "filter string" << "scannum" <<"mzmin" << "mzmax" << "rt" << "#peaks";
+    treeWidget->setColumnCount(colNames.size());
+    treeWidget->setHeaderLabels(colNames);
+    treeWidget->setSortingEnabled(true);
+    treeWidget->setHeaderHidden(false);
+}
+
+void TreeDockWidget::addMs1ScanItem(Scan* scan) {
+    if (!scan) return;
+
+    MainWindow* mainwindow = (MainWindow*)parentWidget();
+    QIcon icon = mainwindow->projectDockWidget->getSampleIcon(scan->sample);
+
+    NumericTreeWidgetItem *item = new NumericTreeWidgetItem(treeWidget,ScanType);
+    item->setData(0,Qt::UserRole,QVariant::fromValue(scan));
+    item->setIcon(0,icon);
+
+    item->setText(0,QString(scan->sample->sampleName.c_str()));
+    item->setText(1,QString(scan->filterString.c_str()));
+    item->setText(2,QString::number(scan->scannum));
+    item->setText(3,QString::number(scan->minMz()));
+    item->setText(4,QString::number(scan->maxMz()));
+    item->setText(5,QString::number(scan->rt));
+    item->setText(6,QString::number(scan->nobs()));
+}
+
 
 void TreeDockWidget::setInfo(vector<Compound*>&compounds) {
     clearTree();

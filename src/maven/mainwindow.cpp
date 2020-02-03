@@ -153,7 +153,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     fragmentationEventsWidget->setupScanListHeader();
 
     ms1ScansListWidget = new TreeDockWidget(this, "MS1 List", 7);
-    ms1ScansListWidget->setupScanListHeader();
+    ms1ScansListWidget->setupMs1ScanHeader();
 
     srmDockWidget 	= new TreeDockWidget(this,"SRM List", 1);
     ligandWidget = new LigandWidget(this);
@@ -1634,7 +1634,7 @@ void MainWindow::showMs1Scans(float pmz) {
         for (unsigned int j=0; j < samples[i]->scans.size(); j++ ) {
             Scan* s = samples[i]->scans[j];
             if (s->mslevel == 1 && minMz >= s->minMz() && maxMz <= s->maxMz()) {
-                ms1ScansListWidget->addScanItem(s);
+                ms1ScansListWidget->addMs1ScanItem(s);
             }
         }
     }
