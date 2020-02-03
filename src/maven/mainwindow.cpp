@@ -981,8 +981,16 @@ void MainWindow::createMenus() {
     connect(actionCalibrate,SIGNAL(triggered()), calibrateDialog, SLOT(show()));
 
     QAction *actionAlign = widgetsMenu->addAction(QIcon(rsrcPath + "/textcenter.png"), "Align");
+    actionAlign->setToolTip("Align Samples");
+    connect(actionAlign, SIGNAL(triggered()), alignmentDialog, SLOT(show()));
+
     QAction *actionMatch = widgetsMenu->addAction(QIcon(rsrcPath + "/spectra_search.png"), "Match");
+    actionMatch->setToolTip(tr("Search Spectra for Fragmentation Patterns"));
+    connect(actionMatch, SIGNAL(triggered()), spectraMatchingForm, SLOT(show()));
+
     QAction *actionDatabases = widgetsMenu->addAction(QIcon(rsrcPath + "/dbsearch.png"), "Databases");
+    actionDatabases->setToolTip("Database Search");
+    connect(actionDatabases, SIGNAL(triggered()), SLOT(compoundDatabaseSearch()));
 
     widgetsMenu->addSeparator();
 
