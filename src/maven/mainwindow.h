@@ -183,6 +183,7 @@ public slots:
     void spectraFocused(Peak* _peak);
     void setCompoundFocus(Compound* c);
     void showFragmentationScans(float pmz);
+    void showMs1Scans(float pmz);
     QString groupTextExport(PeakGroup* group);
     void bookmarkPeakGroup(PeakGroup* group);
     void setClipboardToGroup(PeakGroup* group);

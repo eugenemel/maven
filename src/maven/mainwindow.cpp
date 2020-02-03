@@ -1605,6 +1605,9 @@ void MainWindow::showFragmentationScans(float pmz) {
     }
 }
 
+void MainWindow::showMs1Scans(float pmz) {
+    //TODO
+}
 
 QWidget* MainWindow::eicWidgetController() {
 
