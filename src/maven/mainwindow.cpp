@@ -1135,7 +1135,7 @@ void MainWindow::createToolBars() {
     quantType->addItem("Height");
     quantType->addItem("Retention Time");
     quantType->addItem("Quality");
-    quantType->setToolTip("Peak Quntitation Type");
+    quantType->setToolTip("Peak Quantitation Type");
     connect(quantType,SIGNAL(activated(int)),eicWidget,SLOT(replot()));
 
     adductType = new QComboBox(hBox);
