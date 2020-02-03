@@ -980,15 +980,17 @@ void MainWindow::createMenus() {
     connect(hideWidgets, SIGNAL(triggered()), SLOT(hideDockWidgets()));
     widgetsMenu->addAction(hideWidgets);
 
-    QAction* aj = widgetsMenu->addAction("Fragmentation Events List");
+    //Issue 144: Reorganize menu contents
+
+    QAction* aj = widgetsMenu->addAction("MS2 Scans List");
     aj->setCheckable(true);
     aj->setChecked(false);
-    connect(aj,SIGNAL(toggled(bool)),fragmentationEventsWidget,SLOT(setVisible(bool)));
+    connect(aj,SIGNAL(toggled(bool)), fragmentationEventsWidget,SLOT(setVisible(bool)));
 
     QAction *aMs1Events = widgetsMenu->addAction("MS1 Scans List");
     aMs1Events->setCheckable(true);
     aMs1Events->setChecked(false);
-    connect(aMs1Events, SIGNAL(toggled(bool)),ms1ScansListWidget, SLOT(setVisible(bool)));
+    connect(aMs1Events, SIGNAL(toggled(bool)), ms1ScansListWidget, SLOT(setVisible(bool)));
 
     menuBar()->show();
 }
