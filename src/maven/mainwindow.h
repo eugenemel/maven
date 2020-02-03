@@ -99,6 +99,7 @@ public:
     IsotopeWidget    *isotopeWidget;
     TreeDockWidget 	*covariantsPanel;
     TreeDockWidget	 *fragmentationEventsWidget;
+    TreeDockWidget   *ms1ScansListWidget;
     TreeDockWidget	 *srmDockWidget;
     //TreeDockWidget   *peaksPanel;
     QDockWidget         *spectraDockWidget;

@@ -152,6 +152,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     fragmentationEventsWidget	= new TreeDockWidget(this,"MS2 List", 7);
     fragmentationEventsWidget->setupScanListHeader();
 
+    ms1ScansListWidget = new TreeDockWidget(this, "MS1 List", 7);
+    ms1ScansListWidget->setupScanListHeader();
+
     srmDockWidget 	= new TreeDockWidget(this,"SRM List", 1);
     ligandWidget = new LigandWidget(this);
     heatmap	 = 	  new HeatMap(this);
@@ -172,6 +175,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     isotopeWidget->setVisible(false);
     massCalcWidget->setVisible(false);
     fragmentationEventsWidget->setVisible(false);
+    ms1ScansListWidget->setVisible(false);
     bookmarkedPeaks->setVisible(false);
     spectraDockWidget->setVisible(false);
     scatterDockWidget->setVisible(false);
@@ -236,6 +240,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     addDockWidget(Qt::BottomDockWidgetArea,spectraDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,covariantsPanel,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,fragmentationEventsWidget,Qt::Horizontal);
+    addDockWidget(Qt::BottomDockWidgetArea,ms1ScansListWidget, Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,scatterDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,bookmarkedPeaks,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,galleryDockWidget,Qt::Horizontal);
@@ -253,6 +258,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     tabifyDockWidget(spectraDockWidget,isotopeWidget);
     tabifyDockWidget(spectraDockWidget,massCalcWidget);
     tabifyDockWidget(spectraDockWidget,fragmentationEventsWidget);
+    tabifyDockWidget(spectraDockWidget,ms1ScansListWidget);
     tabifyDockWidget(spectraDockWidget,covariantsPanel);
     tabifyDockWidget(spectraDockWidget,galleryDockWidget);
     tabifyDockWidget(spectraDockWidget,rconsoleDockWidget);
@@ -272,6 +278,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     projectDockWidget->show();
     scatterDockWidget->hide();
     fragmentationEventsWidget->hide();
+    ms1ScansListWidget->hide();
 
 
 
@@ -614,6 +621,7 @@ void MainWindow::setMzValue() {
         if(eicWidget->isVisible() ) eicWidget->setMzSlice(mz);
         if(massCalcWidget->isVisible() ) massCalcWidget->setMass(mz);
         if(fragmentationEventsWidget->isVisible()   ) showFragmentationScans(mz);
+        if(ms1ScansListWidget->isVisible() ) showMs1Scans(mz);
     }
     suggestPopup->addToHistory(QString::number(mz,'f',5));
 }
@@ -623,6 +631,7 @@ void MainWindow::setMzValue(float mz) {
     if (eicWidget->isVisible() ) eicWidget->setMzSlice(mz);
     if (massCalcWidget->isVisible() ) massCalcWidget->setMass(mz);
     if (fragmentationEventsWidget->isVisible()   ) showFragmentationScans(mz);
+    if (ms1ScansListWidget->isVisible() ) showMs1Scans(mz);
 }
 
 void MainWindow::print(){
@@ -972,8 +981,14 @@ void MainWindow::createMenus() {
     widgetsMenu->addAction(hideWidgets);
 
     QAction* aj = widgetsMenu->addAction("Fragmentation Events List");
-    aj->setCheckable(true);  aj->setChecked(false);
+    aj->setCheckable(true);
+    aj->setChecked(false);
     connect(aj,SIGNAL(toggled(bool)),fragmentationEventsWidget,SLOT(setVisible(bool)));
+
+    QAction *aMs1Events = widgetsMenu->addAction("MS1 Scans List");
+    aMs1Events->setCheckable(true);
+    aMs1Events->setChecked(false);
+    connect(aMs1Events, SIGNAL(toggled(bool)),ms1ScansListWidget, SLOT(setVisible(bool)));
 
     menuBar()->show();
 }
