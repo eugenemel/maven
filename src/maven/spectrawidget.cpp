@@ -181,13 +181,13 @@ void SpectraWidget::setScan(Peak* peak) {
     cerr << "SpectraWidget::setScan(peak) " << endl;
     links.clear();
 
-    if (peak == NULL ) return;
+    if (!peak) return;
 
     mzSample* sample = peak->getSample();
-    if ( sample == NULL ) return;
+    if (!sample) return;
 
     Scan* scan = sample->getScan(peak->scan);
-    if ( scan == NULL ) return;
+    if (!scan) return;
 
     setCurrentScan(scan);
 
