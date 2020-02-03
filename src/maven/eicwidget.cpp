@@ -893,6 +893,8 @@ void EicWidget::replot(PeakGroup* group ) {
     setFocusLine(_focusLineRt);  //qDebug() << "\tsetFocusLine msec=" << timerX.elapsed();
     if(_showMS2Events && _slice.mz>0) { addMS2Events(_slice.mzmin, _slice.mzmax); }
 
+    if (getMainWindow()) { getMainWindow()->showMs1Scans(_slice.mz); } //Issue 141
+
     if (_showIsotopePlot) addIsotopicPlot(group);
     if (_showBoxPlot)     addBoxPlot(group);
 

@@ -1621,7 +1621,24 @@ void MainWindow::showFragmentationScans(float pmz) {
 }
 
 void MainWindow::showMs1Scans(float pmz) {
-    //TODO
+
+    if (!ms1ScansListWidget || !ms1ScansListWidget->isVisible() || samples.empty()) return;
+
+    float ppm = getUserPPM();
+    float minMz = pmz - ppm / 1e6;
+    float maxMz = pmz + ppm / 1e6;
+
+    ms1ScansListWidget->clearTree();
+
+    for ( unsigned int i=0; i < samples.size(); i++ ) {
+        for (unsigned int j=0; j < samples[i]->scans.size(); j++ ) {
+            Scan* s = samples[i]->scans[j];
+            if (s->mslevel == 1 && minMz >= s->minMz() && maxMz <= s->maxMz()) {
+                ms1ScansListWidget->addScanItem(s);
+            }
+        }
+    }
+
 }
 
 QWidget* MainWindow::eicWidgetController() {
