@@ -191,9 +191,12 @@ void SpectraWidget::setScan(Peak* peak) {
 
     setCurrentScan(scan);
 
+    //direct infusion case: no need to update MS1 scan
+    if (peak->mzmax - peak->mzmin > 0.5) return;
+
     _focusCoord = QPointF(peak->peakMz,peak->peakIntensity);
 
-    //These affect the MS1 plot - do not change
+    //These affect the MS1 plot
     _minX = peak->peakMz-2;
     _maxX = peak->peakMz+6;
 
