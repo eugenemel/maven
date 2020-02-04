@@ -760,15 +760,15 @@ void TableDockWidget::exportGroupsToSpreadsheet() {
 
     if ( settings->contains("lastDir") ) dir = settings->value("lastDir").value<QString>();
 
-    QString groupsTAB = "Groups Summary Matrix Format (*.tab)";
     QString groupsCSV = "Groups Summary Matrix Format Comma Delimited (*.csv)";
-    QString peaksTAB =  "Peaks Detailed Format (*.tab)";
     QString peaksCSV =  "Peaks Detailed Format Comma Delimited  (*.csv)";
+    QString groupsTAB = "Groups Summary Matrix Format (*.tab)";
+    QString peaksTAB =  "Peaks Detailed Format (*.tab)";
 
     QString sFilterSel;
     QString fileName = QFileDialog::getSaveFileName(this, 
             tr("Export Groups"), dir, 
-            groupsTAB + ";;" + peaksTAB + ";;" + groupsCSV + ";;" + peaksCSV,
+            groupsCSV + ";;" + peaksCSV + ";;" + groupsTAB + ";;" + peaksTAB,
             &sFilterSel);
 
     if(fileName.isEmpty()) return;
