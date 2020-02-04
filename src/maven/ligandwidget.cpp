@@ -190,7 +190,7 @@ void LigandWidget::showTable() {
     //	treeWidget->clear();
     treeWidget->clear();
     treeWidget->setColumnCount(7);
-    QStringList header; header << "Name" << "Adduct" << "M" << "RT" << "Formula" << "SMILES" << "Category";
+    QStringList header; header << "Name" << "Adduct" << "Exact Mass" << "RT" << "Formula" << "SMILES" << "Category";
     treeWidget->setHeaderLabels( header );
     treeWidget->setSortingEnabled(false);
 
