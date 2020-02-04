@@ -793,6 +793,16 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
                     cpd->charge = -1;
                 }
             }
+         } else if (line.startsWith("IONIZATION:", Qt::CaseInsensitive)) {
+            QString ionizationString = line.mid(12,line.length()).simplified();
+
+            if (ionizationString.endsWith("+") || ionizationString.endsWith("-")) {
+                cpd->adductString = ionizationString.toStdString();
+            } else if (ionizationString == "[M-H]") {
+                cpd->adductString = "[M-H]-";
+            } else if (ionizationString == "[M+H]") {
+                cpd->adductString = "[M+H]+";
+            }
 
          } else if (line.startsWith("FORMULA:",Qt::CaseInsensitive)) {
              QString formula = line.mid(9,line.length()).simplified();
