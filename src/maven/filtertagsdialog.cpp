@@ -264,8 +264,8 @@ TagFilterState FilterTagsDialog::getFilterState() {
 
 bool TagFilterState::isPeakGroupPasses(PeakGroup *g){
 
-    if (!g) return true; //in practice, this would be a QTreeWidgetItem that does not correspond to a PeakGroup
     if (isAllPass) return true;
+    if (!g) return false; //in practice, this would be a QTreeWidgetItem that does not correspond to a PeakGroup
     if (g->labels.empty() && isNoTagsPass) return true;
 
     //passingLabels acts like an OR filter (if the label is found, will be retained).

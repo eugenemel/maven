@@ -1881,17 +1881,20 @@ bool TableDockWidget::traverseNode(QTreeWidgetItem *item, QString needle) {
         }
     }
 
-    if (isShowThisNode || item->text(0).contains(needle, Qt::CaseInsensitive)) {
+    if (isShowThisNode) { // this node has at least one passing child.
+        item->setHidden(false);
+    } else if (item->text(0).contains(needle, Qt::CaseInsensitive)){ //this node has no passing children, passes string filter.
 
         QVariant v = item->data(0,PeakGroupType);
         PeakGroup* group =  v.value<PeakGroup*>();
 
-        if (this->tagFilterState.isPeakGroupPasses(group)) {
-            item->setHidden(false);
+        if (tagFilterState.isPeakGroupPasses(group)) {
+            item->setHidden(false); //this node has no passing children, string filter passed and tag filter passed.
         } else {
-            item->setHidden(true);
+            item->setHidden(true); //this node has no passing children, string filter passed by tag filter failed.
         }
-    } else {
+
+    } else { //this node has no passing children and the string filter failed.
         item->setHidden(true);
     }
 
