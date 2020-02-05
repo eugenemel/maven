@@ -74,10 +74,16 @@ void ProjectDockWidget::warnUserEmptySampleFiles() {
     if (fileLoader->getEmptyFiles().size() > 0){
         QString msg = QString();
 
+        int counter = 0;
         msg.append("mzFileIO::loadSamples(): The samples\n\n");
         for (auto file : fileLoader->getEmptyFiles()) {
             msg.append(file);
             msg.append("\n\n");
+            if (counter >= 5) {
+                msg.append("... and others...");
+                break;
+            }
+            counter++;
         }
         msg.append("\n\ndid not contain any scans.");
         msg.append("\n\nPlease consider examining and reloading these file(s).");
