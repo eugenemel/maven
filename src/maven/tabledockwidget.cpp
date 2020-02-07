@@ -2040,6 +2040,17 @@ void TableDockWidget::updateTagFilter() {
 void TableDockWidget::exportAlignmentFile() {
     qDebug() << "TableDockWidget::exportAlignmentFile()";
 
+    QList<PeakGroup*> selectedPeakGroups = getSelectedGroups();
+
+    if (selectedPeakGroups.size() < 3) {
+        QMessageBox::information(
+                    this->_mainwindow,
+                    QString("Insufficient number of peak groups selected"),
+                    QString("Please select at least 3 peak groups.")
+                    );
+        return;
+    }
+
     QString dir = ".";
     QSettings* settings = _mainwindow->getSettings();
     if ( settings->contains("lastDir") ) dir = settings->value("lastDir").value<QString>();
@@ -2050,6 +2061,18 @@ void TableDockWidget::exportAlignmentFile() {
 
     if (fileName.isEmpty()) return;
 
+    vector<PeakGroup*> selectedPeakGroupVector(selectedPeakGroups.size());
 
+    for (unsigned int i = 0; i < selectedPeakGroupVector.size(); i++) {
+        selectedPeakGroupVector[i] = selectedPeakGroups[i];
+    }
+
+    Aligner rtAligner;
+    vector<AnchorPointSet> anchorPoints = rtAligner
+            .groupsToAnchorPoints(
+                _mainwindow->samples,
+                selectedPeakGroupVector,
+                5 //TODO retrieve from parameters
+                );
 }
 
