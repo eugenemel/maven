@@ -1272,6 +1272,9 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
     if (windowTitle() == "Bookmarks") {
         QAction* z8 = menu.addAction("Edit Selected Peak Group ID");
         connect(z8, SIGNAL(triggered()), SLOT(showEditPeakGroupDialog()));
+
+        QAction *z9 = menu.addAction("Export RT Alignment from Selected");
+        connect(z9, SIGNAL(triggered()), SLOT(exportAlignmentFile()));
         menu.addSeparator();
     }
 
@@ -2032,5 +2035,21 @@ void TableDockWidget::updateTagFilter() {
     }
 
     filterTree(filterEditor->text());
+}
+
+void TableDockWidget::exportAlignmentFile() {
+    qDebug() << "TableDockWidget::exportAlignmentFile()";
+
+    QString dir = ".";
+    QSettings* settings = _mainwindow->getSettings();
+    if ( settings->contains("lastDir") ) dir = settings->value("lastDir").value<QString>();
+
+    QString fileName = QFileDialog::getSaveFileName(this,
+            tr("Create Alignment File from Selected Groups"), dir,
+            "RT Alignment File (*.txt)");
+
+    if (fileName.isEmpty()) return;
+
+
 }
 

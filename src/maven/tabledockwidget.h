@@ -102,6 +102,7 @@ public slots:
       void hideEditPeakGroupDialog();
       void selectGroup(PeakGroup *group);
       void updateTagFilter();
+      void exportAlignmentFile();
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event);
