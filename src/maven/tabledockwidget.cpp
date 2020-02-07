@@ -2057,7 +2057,7 @@ void TableDockWidget::exportAlignmentFile() {
 
     QString fileName = QFileDialog::getSaveFileName(this,
             tr("Create Alignment File from Selected Groups"), dir,
-            "RT Alignment File (*.txt)");
+            "RT Alignment File (*.rt)");
 
     if (fileName.isEmpty()) return;
 
