@@ -2074,5 +2074,7 @@ void TableDockWidget::exportAlignmentFile() {
                 selectedPeakGroupVector,
                 5 //TODO retrieve from parameters
                 );
+
+    rtAligner.exportAlignmentFile(anchorPoints, _mainwindow->samples[0], fileName.toStdString());
 }
 
