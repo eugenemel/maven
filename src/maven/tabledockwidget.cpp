@@ -1272,6 +1272,9 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
     if (windowTitle() == "Bookmarks") {
         QAction* z8 = menu.addAction("Edit Selected Peak Group ID");
         connect(z8, SIGNAL(triggered()), SLOT(showEditPeakGroupDialog()));
+
+        QAction *z9 = menu.addAction("Export RT Alignment from Selected");
+        connect(z9, SIGNAL(triggered()), SLOT(exportAlignmentFile()));
         menu.addSeparator();
     }
 
@@ -2032,5 +2035,46 @@ void TableDockWidget::updateTagFilter() {
     }
 
     filterTree(filterEditor->text());
+}
+
+void TableDockWidget::exportAlignmentFile() {
+    qDebug() << "TableDockWidget::exportAlignmentFile()";
+
+    QList<PeakGroup*> selectedPeakGroups = getSelectedGroups();
+
+    if (selectedPeakGroups.size() < 3) {
+        QMessageBox::information(
+                    this->_mainwindow,
+                    QString("Insufficient number of peak groups selected"),
+                    QString("Please select at least 3 peak groups.")
+                    );
+        return;
+    }
+
+    QString dir = ".";
+    QSettings* settings = _mainwindow->getSettings();
+    if ( settings->contains("lastDir") ) dir = settings->value("lastDir").value<QString>();
+
+    QString fileName = QFileDialog::getSaveFileName(this,
+            tr("Create Alignment File from Selected Groups"), dir,
+            "RT Alignment File (*.rt)");
+
+    if (fileName.isEmpty()) return;
+
+    vector<PeakGroup*> selectedPeakGroupVector(selectedPeakGroups.size());
+
+    for (unsigned int i = 0; i < selectedPeakGroupVector.size(); i++) {
+        selectedPeakGroupVector[i] = selectedPeakGroups[i];
+    }
+
+    Aligner rtAligner;
+    vector<AnchorPointSet> anchorPoints = rtAligner
+            .groupsToAnchorPoints(
+                _mainwindow->samples,
+                selectedPeakGroupVector,
+                5 //TODO retrieve from parameters
+                );
+
+    rtAligner.exportAlignmentFile(anchorPoints, _mainwindow->samples[0], fileName.toStdString());
 }
 

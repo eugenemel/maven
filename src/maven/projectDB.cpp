@@ -850,7 +850,7 @@ void ProjectDB::doAlignment() {
 	QSqlQuery query(sqlDB);
 	query.exec("select S.name, S.sampleId, R.* from rt_update_key R, samples S where S.sampleId = R.sampleId");
 
-	AligmentSegment* lastSegment=0;
+	AlignmentSegment* lastSegment=0;
 	Aligner aligner;
 	aligner.setSamples(samples);
 
@@ -864,7 +864,7 @@ void ProjectDB::doAlignment() {
         if (!sample) continue;
 		segCount++;
 
-        AligmentSegment* seg = new AligmentSegment();
+        AlignmentSegment* seg = new AlignmentSegment();
         seg->sampleName   = sampleName;
         seg->seg_start = 0;
         seg->seg_end   = query.value("rt").toString().toDouble();
