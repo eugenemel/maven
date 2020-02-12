@@ -132,6 +132,8 @@ void Database::unloadCompounds(QString databaseName) {
                     end(compoundsDB)
                 );
 
+    loadedDatabase.remove(databaseName);
+
 }
 
 void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection) {
