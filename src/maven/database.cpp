@@ -114,6 +114,26 @@ void Database::addCompound(Compound* c) {
     compoundsDB.push_back(c);
 }
 
+void Database::unloadCompounds(QString databaseName) {
+
+    vector<Compound*> compoundsToRemove{};
+
+    for (auto x : compoundsDB) {
+        if (x->db == databaseName.toStdString()) {
+            compoundsToRemove.push_back(x);
+        }
+    }
+
+    compoundsDB.erase(
+                remove_if( begin(compoundsDB),end(compoundsDB),
+                           [&](Compound* x){
+                                return find(begin(compoundsToRemove),end(compoundsToRemove),x)!=end(compoundsToRemove);
+                        }),
+                    end(compoundsDB)
+                );
+
+}
+
 void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection) {
 
         if (loadedDatabase.count(databaseName)) {
