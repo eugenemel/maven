@@ -49,6 +49,7 @@ class Database {
         void deleteCompoundsSQL(QString dbName, QSqlDatabase& dbConnection);
         void deleteAllCompoundsSQL(QSqlDatabase& dbConnection);
         void unloadCompounds(QString databaseName);
+        void unloadAllCompounds();
 
 		multimap<string,Compound*> keywordSearch(string needle);
 		vector<string>   getCompoundReactions(string compound_id);

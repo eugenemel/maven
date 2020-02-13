@@ -141,6 +141,12 @@ void Database::unloadCompounds(QString databaseName) {
 
 }
 
+void Database::unloadAllCompounds() {
+    compoundIdMap.clear();
+    loadedDatabase.clear();
+    delete_all(compoundsDB);
+}
+
 void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection) {
 
         if (loadedDatabase.count(databaseName)) {
