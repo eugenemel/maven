@@ -134,6 +134,11 @@ void Database::unloadCompounds(QString databaseName) {
 
     loadedDatabase.remove(databaseName);
 
+    for (auto &x : compoundsToRemove) {
+         string compoundId = x->id + x->db;
+         compoundIdMap.remove(compoundId);
+    }
+
 }
 
 void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection) {
