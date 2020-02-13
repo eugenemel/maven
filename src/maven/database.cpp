@@ -139,6 +139,8 @@ void Database::unloadCompounds(QString databaseName) {
          compoundIdMap.remove(compoundId);
     }
 
+    delete_all(compoundsToRemove);
+
 }
 
 void Database::unloadAllCompounds() {

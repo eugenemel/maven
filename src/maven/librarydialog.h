@@ -25,6 +25,8 @@ public slots:
 private slots:
     void deleteLibrary();
     void loadLibrary();
+    void unloadLibrary();
+    void unloadAllLibraries();
 
 private:
     void updateLibraryStats();

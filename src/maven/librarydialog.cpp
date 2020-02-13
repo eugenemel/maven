@@ -7,6 +7,8 @@ LibraryMangerDialog::LibraryMangerDialog(QWidget *parent) : QDialog(parent) {
         connect(deleteButton,SIGNAL(clicked(bool)),SLOT(deleteLibrary()));
         connect(importButton,SIGNAL(clicked()),SLOT(loadCompoundsFile()));
         connect(reloadAllButton,SIGNAL(clicked()),SLOT(reloadMethodsFolder()));
+        connect(btnUnload, SIGNAL(clicked()), SLOT(unloadLibrary()));
+        connect(btnUnloadAll, SIGNAL(clicked()), SLOT(unloadAllLibraries()));
 }
 
 
@@ -54,9 +56,25 @@ void LibraryMangerDialog::deleteLibrary() {
 
     foreach(QTreeWidgetItem* item, treeWidget->selectedItems() ) {
         QString libraryName = item->text(0);
-        qDebug() << "Delete Library" << libraryName;
+        qDebug() << "LibraryMangerDialog::deleteLibrary(): Delete Library" << libraryName;
         DB.deleteCompoundsSQL(libraryName,DB.getLigandDB());
     }
+    updateLibraryStats();
+}
+
+void LibraryMangerDialog::unloadLibrary() {
+
+    foreach(QTreeWidgetItem* item, treeWidget->selectedItems() ) {
+        QString libraryName = item->text(0);
+        qDebug() << "LibraryMangerDialog::unloadLibrary(): Unload Library" << libraryName;
+        DB.unloadCompounds(libraryName);
+    }
+    updateLibraryStats();
+}
+
+void LibraryMangerDialog::unloadAllLibraries() {
+    qDebug() << "LibraryMangerDialog::unloadAllLibraries()";
+    DB.unloadAllCompounds();
     updateLibraryStats();
 }
 
