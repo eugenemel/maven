@@ -486,15 +486,6 @@ void ProjectDockWidget::closeProject() {
     }
 }
 
-int ProjectDockWidget::bookmarkPeakGroup(PeakGroup* group) {
-    if (!currentProject) saveProject();
-
-    if (currentProject)
-        return currentProject->writeGroupSqlite(group,0,"Bookmarks");
-    else
-        return -1;
-}
-
 void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
 
     if(currentProject)  closeProject();

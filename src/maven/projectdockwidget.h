@@ -28,7 +28,6 @@ public slots:
     void saveProjectAs();
     void closeProject();
     void loadAllPeakTables();
-    int bookmarkPeakGroup(PeakGroup* group);
     void loadProjectSQLITE(QString filename);
     void saveProjectSQLITE(QString filename);
 
