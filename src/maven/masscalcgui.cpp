@@ -267,7 +267,7 @@ void MassCalcWidget::getMatches() {
 }
 
 void MassCalcWidget::pubChemLink(QString formula){
-	_mw->setStatusText("Searhing pubchem");
+    _mw->setStatusText("Searching pubchem");
 	QString requestStr( 
 		tr("http://pubchem.ncbi.nlm.nih.gov/search/search.cgi?cmd=search&q_type=mf&q_data=%1&simp_schtp=mf")
     .arg(formula));
