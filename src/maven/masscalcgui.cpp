@@ -276,7 +276,7 @@ void MassCalcWidget::pubChemLink(QString formula){
 }
 
 void MassCalcWidget::keggLink(QString formula){
-	_mw->setStatusText("Searhing Kegg");
+    _mw->setStatusText("Searching Kegg");
 	QString requestStr( 
 		tr("http://www.genome.jp/ligand-bin/txtsearch?column=formula&query=%1&DATABASE=compound").arg(formula));
     _mw->setUrl(requestStr);
