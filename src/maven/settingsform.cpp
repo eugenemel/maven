@@ -114,8 +114,6 @@ void SettingsForm::setFormValues() {
     scan_filter_min_intensity->setValue( settings->value("scan_filter_min_intensity").toInt());
     scan_filter_min_quantile->setValue(  settings->value("scan_filter_min_quantile").toInt());
 
-
-
    QStringList folders;       folders << "scriptsFolder" << "methodsFolder" << "Rprogram";
    QList<QLineEdit*> items;    items  << scriptsFolder << methodsFolder << Rprogram;
 
@@ -168,6 +166,9 @@ void SettingsForm::setFormValues() {
 
     if (settings->contains("spnBkmkRtTol"))
         spnBkmkRtTol->setValue(settings->value("spnBkmkRtTol").toDouble());
+
+    if (settings->contains("chkIncludeChildren"))
+        chkIncludeChildren->setCheckState( (Qt::CheckState) settings->value("chkIncludeChildren").toInt());
 
 }
 
@@ -256,6 +257,7 @@ void SettingsForm::getFormValues() {
     settings->setValue("chkBkmkWarnMz", chkBkmkWarnMz->checkState());
     settings->setValue("spnBkmkmzTol", spnBkmkmzTol->value());
     settings->setValue("spnBkmkRtTol", spnBkmkRtTol->value());
+    settings->setValue("chkIncludeChildren", chkIncludeChildren->checkState());
 
 }
 
