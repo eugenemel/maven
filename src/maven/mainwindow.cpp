@@ -543,8 +543,25 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
     }
 
     if (isAddBookmark) {
-        PeakGroup *pg = bookmarkedPeaks->addPeakGroup(group,true);
-        bookmarkedPeaks->selectGroup(pg);
+
+        bool isAddChildren = settings->value("chkIncludeChildren", false).toBool();
+
+        if (isAddChildren) {
+
+            //does not copy/duplicate original group
+            PeakGroup *pg = bookmarkedPeaks->addPeakGroup(group,true);
+            bookmarkedPeaks->selectGroup(pg);
+
+        } else {
+
+            //duplicates original group, removes children from copy.
+            //TODO: memory leak
+            PeakGroup *groupCopy = new PeakGroup(*group);
+            groupCopy->children.clear();
+            groupCopy = bookmarkedPeaks->addPeakGroup(groupCopy, true);
+            bookmarkedPeaks->selectGroup(groupCopy);
+        }
+
     }
 }
 
