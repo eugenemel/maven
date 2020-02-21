@@ -30,6 +30,7 @@ void SampleBarPlotWidget::setPeakGroup(PeakGroup *peakGroup){
     if(!peakGroup) return;
 
     _barPlot->setPeakGroup(peakGroup);
+    _barPlot->update();
 
     //Needed to coerce scroll bars to scroll to correct size
     int pixelBuffer = 20;
