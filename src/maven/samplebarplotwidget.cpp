@@ -38,6 +38,8 @@ void SampleBarPlotWidget::setPeakGroup(PeakGroup *peakGroup){
 
     QRectF sceneRect(0, 0, _barPlot->_latestWidth+pixelBuffer, _barPlot->_latestHeight+pixelBuffer);
 
+    qDebug() << "sampleBarPlotWidget::setPeakGroup(): Scene Rect: w=" << sceneRect.width() << " h=" << sceneRect.height() << endl;
+
     setSceneRect(sceneRect);
     updateSceneRect(sceneRect);
     scene()->update(sceneRect);
