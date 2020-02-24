@@ -825,22 +825,32 @@ void ProjectDB::saveAlignment() {
            QSqlQuery query1(sqlDB);
            query1.prepare("insert into rt_update_key values(?,?,?)");
 
-           for(mzSample* s : samples) {
-                        cerr << "Saving alignment for sample: " << s->sampleName  << " #scans=" << s->scans.size() << endl;
-                        for (int i=0; i < s->scans.size(); i++ ) {
-                            if (i % 200 == 0 || i == s->scans.size()-1) {
-                                Scan* scan = s->scans[i];
-                                float rt_update = scan->rt;
-                                float rt = scan->rt;
-                                if(s->originalRetentionTimes.size() > i) rt = s->originalRetentionTimes[i];
-                                query1.addBindValue( s->getSampleId() );
-                                query1.addBindValue( rt);
-                                query1.addBindValue( rt_update );
-                                if(!query1.exec())  qDebug() << query1.lastError();
-                    }
-           }
+        for(mzSample* s : samples) {
+
+                 cerr << "Saving alignment for sample: " << s->sampleName  << " #scans=" << s->scans.size() << endl;
+
+                 for (int i=0; i < s->scans.size(); i++ ) {
+
+                     if (i % 200 == 0 || i == s->scans.size()-1) {
+
+                             Scan* scan = s->scans[i];
+                             float rt_update = scan->rt;
+                             float rt = scan->rt;
+
+                             if(s->originalRetentionTimes.size() > i){
+                                 rt = s->originalRetentionTimes[i];
+                             }
+
+                             query1.addBindValue( s->getSampleId() );
+                             query1.addBindValue( rt);
+                             query1.addBindValue( rt_update );
+
+                             if(!query1.exec()) {
+                                 qDebug() << query1.lastError();}
+                             }
         }
-        query0.exec("end transaction");
+     }
+     query0.exec("end transaction");
 }
 
 
