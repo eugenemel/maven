@@ -841,6 +841,9 @@ void ProjectDB::saveAlignment() {
                                  rt = s->originalRetentionTimes[i];
                              }
 
+//                           //debugging
+//                           cout << s->sampleName << "\t" << to_string(rt) << "\t" << to_string(rt_update) << "\n";
+
                              query1.addBindValue( s->getSampleId() );
                              query1.addBindValue( rt);
                              query1.addBindValue( rt_update );
