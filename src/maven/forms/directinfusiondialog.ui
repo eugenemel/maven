@@ -215,6 +215,9 @@
     <property name="suffix">
      <string> ions</string>
     </property>
+    <property name="maximum">
+     <double>100000000000000000.000000000000000</double>
+    </property>
    </widget>
    <widget class="QDoubleSpinBox" name="spnFragMinIntensity">
     <property name="geometry">
@@ -227,6 +230,9 @@
     </property>
     <property name="suffix">
      <string> ions</string>
+    </property>
+    <property name="maximum">
+     <double>1000000000000000000.000000000000000</double>
     </property>
    </widget>
    <widget class="QLabel" name="lblFragMinIntensity">
