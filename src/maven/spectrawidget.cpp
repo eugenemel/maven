@@ -337,7 +337,13 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
         float hitMz=hit.mzList[i];
         int hitIntensity= 1;
         if (i < hit.intensityList.size()) hitIntensity=hit.intensityList[i];
-        int pos = _currentScan->findHighestIntensityPos(hitMz,ppmWindow);
+
+        double ppmMz = hitMz;
+        if (_currentScan->precursorMz > 0) {
+            ppmMz = _currentScan->precursorMz;
+        }
+
+        int pos = _currentScan->findHighestIntensityPos(hitMz, ppmMz, ppmWindow);
 
         int x = toX(hitMz);
         int y = toY(hitIntensity/maxIntensity*_maxY,SCALE);
