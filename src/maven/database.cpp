@@ -139,6 +139,9 @@ void Database::unloadCompounds(QString databaseName) {
          compoundIdMap.remove(compoundId);
     }
 
+    //re-sort for matching
+    sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
+
     delete_all(compoundsToRemove);
 
 }

@@ -423,7 +423,10 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
         if (checkConvergance ) {
             allgroups.size()-foundGroups > 0 ? converged=0 : converged++;
-            if ( converged > 1000 ) break;	 //exit main loop
+            if ( converged > 1000 ){
+                cout << "Convergence condition reached. Exiting main loop." << endl;
+                break;	 //exit main loop
+            }
             foundGroups = allgroups.size();
         }
 
@@ -459,6 +462,9 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             PeakGroup& group = peakgroups[j];
 
+            //debugging
+            //cout << "group= (" << group.meanMz << ", " << group.meanRt << "), #" << allgroups.size() << "/" << limitGroupCount << endl;
+
             groupCount++;
             peakCount += group.peakCount();
 
@@ -471,6 +477,15 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             group.computeAvgBlankArea(eics);
             group.groupStatistics();
+
+            //debugging
+//            if (group.medianRt() > 20 && group.medianRt() < 22 && group.meanMz > 794.5 && group.meanMz < 794.6) {
+//                cout << "GROUP: " << endl;
+//                group.summary();
+//                for (auto &comp : DB.compoundsDB) {
+//                    cout << comp->name << endl;
+//                }
+//            }
 
             if (clsf->hasModel()&& group.goodPeakCount < minGoodPeakCount) continue;
             if (clsf->hasModel() && group.maxQuality < minQuality) continue;
@@ -844,8 +859,12 @@ void BackgroundPeakUpdate::processMassSlices() {
          qDebug() << "BackgroundPeakUpdate:processMassSlices()";
 
 		showProgressFlag=true;
-		checkConvergance=true;
-		QTime timer; timer.start();
+
+        //Issue 161:
+        //If this flag is true, if too many groups go by without finding a compound match, this will exit.
+        //checkConvergance=true;
+
+        QTime timer; timer.start();
 	
         if (samples.size() > 0 ){
             avgScanTime = 0;
