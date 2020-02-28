@@ -46,7 +46,6 @@ public:
   bool keepFoundGroups;
   bool processMassSlicesFlag;
   bool pullIsotopesFlag;
-  bool searchAdductsFlag;
   bool showProgressFlag;
   bool matchRtFlag;
   bool checkConvergance;

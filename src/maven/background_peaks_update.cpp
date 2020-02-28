@@ -10,7 +10,6 @@ BackgroundPeakUpdate::BackgroundPeakUpdate(QWidget*) {
     alignSamplesFlag=false;
     processMassSlicesFlag=false;
     pullIsotopesFlag=false;
-    searchAdductsFlag=false;
     matchRtFlag=false;
     checkConvergance=false;
 
@@ -478,7 +477,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             group.computeAvgBlankArea(eics);
             group.groupStatistics();
 
-            //debugging
+//            //debugging
 //            if (group.medianRt() > 20 && group.medianRt() < 22 && group.meanMz > 794.5 && group.meanMz < 794.6) {
 //                cout << "GROUP: " << endl;
 //                group.summary();
@@ -683,12 +682,15 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
     MassCalculator massCalc;
 
     vector<Adduct*> adductList;
-    if (ionizationMode > 0) adductList.push_back(MassCalculator::PlusHAdduct);
-    else if (ionizationMode < 0) adductList.push_back(MassCalculator::MinusHAdduct);
-    else adductList.push_back(MassCalculator::ZeroMassAdduct);
 
-    //search all adducts
-    if (searchAdductsFlag) adductList = DB.adductsDB;
+    //Issue 161: search all adducts unless no adducts are selected.
+    if (DB.adductsDB.empty()) {
+        if (ionizationMode > 0) adductList.push_back(MassCalculator::PlusHAdduct);
+        else if (ionizationMode < 0) adductList.push_back(MassCalculator::MinusHAdduct);
+        else adductList.push_back(MassCalculator::ZeroMassAdduct);
+    } else {
+        adductList = DB.adductsDB;
+    }
 
     multimap<string, Compound*> stringToCompoundMap = {};
     std::set<string> formulae = std::set<string>();
