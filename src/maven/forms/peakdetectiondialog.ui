@@ -122,7 +122,7 @@
           <item row="5" column="1">
            <widget class="QCheckBox" name="excludeIsotopicPeaks">
             <property name="text">
-             <string>Excluded Istopic Peaks</string>
+             <string>Exclude Isotopic Peaks</string>
             </property>
             <property name="checked">
              <bool>true</bool>
