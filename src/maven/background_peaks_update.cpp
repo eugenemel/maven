@@ -249,6 +249,9 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
                  if (static_cast<float>(s.numMatches) < minNumFragments) continue;
                  if (static_cast<float>(s.mergedScore) < minFragmentMatchScore) continue;
 
+                 //Issue 161: new approach
+                 if (isRequireMatchingAdduct && compound->adductString != slice->adduct->name) continue;
+
                  //Rt criteria and group rank
                  if (matchRtFlag && compound->expectedRt>0) {
                      float rtDiff =  abs(compound->expectedRt - (group.meanRt));
@@ -322,6 +325,11 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
                  passingPeakGroups.push_back(bestHit);
              }
 
+             //Issue 161
+             if (isRetainUnmatchedCompounds && passingPeakGroups.empty()) {
+                passingPeakGroups.push_back(new PeakGroup(group));
+             }
+
 
              numPassingPeakGroups += passingPeakGroups.size();
              delete_all(failingPeakGroups); //passingPeakGroups are deleted on main thread with emit() call.
@@ -369,7 +377,13 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
         aligner.doAlignment(groups);
     }
 
-    //TODO: respect clustering option
+    //Issue 161: run clustering
+    if (isClusterPeakGroups){
+        double maxRtDiff = 0.2;
+        double minSampleCorrelation= 0.8;
+        double minPeakShapeCorrelation=0.9;
+        PeakGroup::clusterGroups(allgroups,samples,maxRtDiff,minSampleCorrelation,minPeakShapeCorrelation,compoundPPMWindow);
+    }
 
     if (csvreports){
         csvreports->closeFiles();
@@ -508,7 +522,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
                 }
             }
 
-           if ((excludeIsotopicPeaks or compound)) {
+           if (excludeIsotopicPeaks) {
                 if (group.chargeState > 0 and not group.isMonoisotopic(compoundPPMWindow)) continue;
             }
 
