@@ -510,20 +510,20 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             if (group.blankMax*minSignalBlankRatio > group.maxIntensity) continue;
 
-            group.chargeState = group.getChargeStateFromMS1(compoundPPMWindow);
-            vector<Isotope> isotopes = highestpeak->getScan()->getIsotopicPattern(highestpeak->peakMz,compoundPPMWindow, 6, 10);
+            group.chargeState = group.getChargeStateFromMS1(ppmMerge);
+            vector<Isotope> isotopes = highestpeak->getScan()->getIsotopicPattern(highestpeak->peakMz,ppmMerge, 6, 10);
 
             if(isotopes.size() > 0) {
                 //group.chargeState = isotopes.front().charge;
                 for(Isotope& isotope: isotopes) {
-                    if (mzUtils::ppmDist((float) isotope.mz, (float) group.meanMz) < compoundPPMWindow) {
+                    if (mzUtils::ppmDist((float) isotope.mz, (float) group.meanMz) < ppmMerge) {
                         group.isotopicIndex=isotope.C13;
                     }
                 }
             }
 
            if (excludeIsotopicPeaks) {
-                if (group.chargeState > 0 and not group.isMonoisotopic(compoundPPMWindow)) continue;
+                if (group.chargeState > 0 and not group.isMonoisotopic(ppmMerge)) continue;
             }
 
             //if (getChargeStateFromMS1(&group) < minPrecursorCharge) continue;
@@ -568,7 +568,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
                 float rtDiff =  abs(compound->expectedRt - (group.meanRt));
                 group.expectedRtDiff = rtDiff;
                 group.groupRank = rtDiff*rtDiff*(1.1-group.maxQuality)*(1/log(group.maxIntensity+1));
-                if (group.expectedRtDiff > compoundRTWindow ) continue;
+                if (group.expectedRtDiff > rtStepSize*avgScanTime) continue;
             } else {
                 group.groupRank = (1.1-group.maxQuality)*(1/log(group.maxIntensity+1));
             }
@@ -617,7 +617,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         double maxRtDiff = 0.2;
         double minSampleCorrelation= 0.8;
         double minPeakShapeCorrelation=0.9;
-        PeakGroup::clusterGroups(allgroups,samples,maxRtDiff,minSampleCorrelation,minPeakShapeCorrelation,compoundPPMWindow);
+        PeakGroup::clusterGroups(allgroups,samples,maxRtDiff,minSampleCorrelation,minPeakShapeCorrelation,ppmMerge);
     }
 
     if (showProgressFlag && pullIsotopesFlag ) {
@@ -897,7 +897,7 @@ void BackgroundPeakUpdate::processMassSlices() {
 
         if(mustHaveMS2) {
             //rsamples must be loaded for this to work
-            massSlices.algorithmE(compoundPPMWindow, rtStepSize*avgScanTime);
+            massSlices.algorithmE(ppmMerge, rtStepSize*avgScanTime);
         } else {
             massSlices.algorithmB(ppmMerge, minGroupIntensity ,rtStepSize);
         }
