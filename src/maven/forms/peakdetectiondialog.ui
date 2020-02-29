@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>775</width>
-    <height>900</height>
+    <height>930</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -30,6 +30,117 @@
        <string>Peak Detection</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_10">
+       <property name="bottomMargin">
+        <number>16</number>
+       </property>
+       <item row="5" column="1" rowspan="4">
+        <widget class="QGroupBox" name="dbOptions">
+         <property name="title">
+          <string>Compound Database</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="1">
+           <widget class="QComboBox" name="compoundDatabase"/>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Compound Subset</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_11">
+            <property name="text">
+             <string>EIC Extraction Window  +/- PPM </string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Compound Retention Time Matching Window</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1">
+           <widget class="QComboBox" name="peakGroupCompoundMatchPolicyBox">
+            <item>
+             <property name="text">
+              <string>All matches</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>All matches with highest MS2 score</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>One match with highest MS2 score (earliest alphabetically)</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="7" column="0">
+           <widget class="QLabel" name="label_16">
+            <property name="text">
+             <string>Peak Group &lt;--&gt; Compound Matching Policy</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QDoubleSpinBox" name="compoundPPMWindow">
+            <property name="suffix">
+             <string> ppm</string>
+            </property>
+            <property name="maximum">
+             <double>1000000.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>20.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QDoubleSpinBox" name="compoundRTWindow">
+            <property name="prefix">
+             <string/>
+            </property>
+            <property name="suffix">
+             <string> min</string>
+            </property>
+            <property name="maximum">
+             <double>999999999.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.500000000000000</double>
+            </property>
+            <property name="value">
+             <double>2.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="matchRt">
+            <property name="text">
+             <string>Match Retention Times</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QCheckBox" name="compoundMustHaveMS2">
+            <property name="text">
+             <string>Must Have MS2</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
        <item row="1" column="1" rowspan="2">
         <widget class="QGroupBox" name="featureOptions">
          <property name="enabled">
@@ -51,13 +162,20 @@
           <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="5" column="0">
-           <widget class="QCheckBox" name="featureMustHaveMs2">
+          <item row="5" column="1">
+           <widget class="QCheckBox" name="reportIsotopes">
             <property name="text">
-             <string>Must Have MS2</string>
+             <string>Report Isotopic Peaks</string>
             </property>
             <property name="checked">
-             <bool>true</bool>
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Mass Domain Resolution (ppm)</string>
             </property>
            </widget>
           </item>
@@ -96,10 +214,13 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_7">
+          <item row="5" column="0">
+           <widget class="QCheckBox" name="featureMustHaveMs2">
             <property name="text">
-             <string>Mass Domain Resolution (ppm)</string>
+             <string>Must Have MS2</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -116,16 +237,6 @@
             </property>
             <property name="value">
              <double>20.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1">
-           <widget class="QCheckBox" name="excludeIsotopicPeaks">
-            <property name="text">
-             <string>Exclude Isotopic Peaks</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -248,145 +359,39 @@
          </layout>
         </widget>
        </item>
-       <item row="5" column="1" rowspan="4">
-        <widget class="QGroupBox" name="dbOptions">
-         <property name="title">
-          <string>Compound Database</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_2">
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_16">
-            <property name="text">
-             <string>Peak Group &lt;--&gt; Compound Matching Policy</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <widget class="QComboBox" name="peakGroupCompoundMatchPolicyBox">
-            <item>
-             <property name="text">
-              <string>All matches</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>All matches with highest MS2 score</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>One match with highest MS2 score (earliest alphabetically)</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>Compound Subset</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QCheckBox" name="compoundMustHaveMS2">
-            <property name="text">
-             <string>Must Have MS2</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="matchRt">
-            <property name="text">
-             <string>Match Retention Times</string>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Compound Retention Time Matching Window</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QDoubleSpinBox" name="compoundRTWindow">
-            <property name="prefix">
-             <string/>
-            </property>
-            <property name="suffix">
-             <string> min</string>
-            </property>
-            <property name="maximum">
-             <double>999999999.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.500000000000000</double>
-            </property>
-            <property name="value">
-             <double>2.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="compoundDatabase"/>
-          </item>
-          <item row="2" column="1">
-           <widget class="QDoubleSpinBox" name="compoundPPMWindow">
-            <property name="suffix">
-             <string> ppm</string>
-            </property>
-            <property name="maximum">
-             <double>1000000.000000000000000</double>
-            </property>
-            <property name="value">
-             <double>20.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QCheckBox" name="reportIsotopes">
-            <property name="text">
-             <string>Report Isotopic Peaks</string>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_11">
-            <property name="text">
-             <string>EIC Extraction Window  +/- PPM </string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
        <item row="0" column="1">
         <widget class="QGroupBox" name="grpMassSlicingMethod">
          <property name="enabled">
           <bool>true</bool>
          </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
           <string>Mass Slicing Method</string>
          </property>
-         <widget class="QLabel" name="lblMassSlicingMethod">
-          <property name="geometry">
-           <rect>
-            <x>20</x>
-            <y>30</y>
-            <width>651</width>
-            <height>31</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Description of Mass Slicing Method.</string>
-          </property>
-         </widget>
+         <layout class="QGridLayout" name="gridLayout_13">
+          <item row="0" column="0">
+           <widget class="QLabel" name="lblMassSlicingMethod">
+            <property name="text">
+             <string>Description of Mass Slicing Method.</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="excludeIsotopicPeaks">
+            <property name="text">
+             <string>Exclude Isotopic Peaks</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>
