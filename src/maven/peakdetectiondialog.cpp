@@ -35,18 +35,67 @@ void PeakDetectionDialog::setFeatureDetection(FeatureDetectionType type) {
     _featureDetectionType = type;
 
     if (_featureDetectionType == QQQ ) {
-            dbOptions->hide();  
+
+            setWindowTitle("QQQ Peak Detection");
+            grpMassSlicingMethod->show();
+            lblMassSlicingMethod->setText("Mass slices are determined based on loaded data files (samples).");
+
             featureOptions->hide();
+            dbOptions->hide();
+
             grpMatchingOptions->hide();
+
     } else if (_featureDetectionType == FullSpectrum ) {
-            dbOptions->hide();  
+
+            setWindowTitle("Peak Detection");
+            grpMassSlicingMethod->show();
+            lblMassSlicingMethod->setText("Mass slices are determined based on loaded data files (samples).");
+
             featureOptions->show();
-            grpMatchingOptions->show(); //only applicable for Peaks type search.
+            dbOptions->hide();
+
+            grpMatchingOptions->show();
+
+            QLayout *oldLayout = tabPeakDetection->layout();
+            delete(oldLayout);
+
+            QGridLayout *gridLayout_10 = new QGridLayout(tabPeakDetection);
+            gridLayout_10->setObjectName(QString::fromUtf8("gridLayout_10"));
+            gridLayout_10->setContentsMargins(-1, -1, -1, 16);
+
+            gridLayout_10->addWidget(grpMassSlicingMethod, 0, 1, 1, 1);
+            gridLayout_10->addWidget(featureOptions, 1, 1, 2, 1);
+            gridLayout_10->addWidget(eicOptions, 3, 1, 2, 1);
+
+            tabPeakDetection->setLayout(gridLayout_10);
+
+
     } else if (_featureDetectionType == CompoundDB ) {
-            dbOptions->show();  
+
+            setWindowTitle("Compound DB Search");
+            grpMassSlicingMethod->show();
+            lblMassSlicingMethod->setText("Mass slices are derived from compound theoretical m/z.");
+
             featureOptions->hide();
-            grpMatchingOptions->hide();
+            dbOptions->show();
+
+            grpMatchingOptions->show();
+
+            QLayout *oldLayout = tabPeakDetection->layout();
+            delete(oldLayout);
+
+            QGridLayout *gridLayout_10 = new QGridLayout(tabPeakDetection);
+            gridLayout_10->setObjectName(QString::fromUtf8("gridLayout_10"));
+            gridLayout_10->setContentsMargins(-1, -1, -1, 16);
+
+            gridLayout_10->addWidget(grpMassSlicingMethod, 0, 1, 1, 1);
+            gridLayout_10->addWidget(dbOptions, 1, 1, 2, 1);
+            gridLayout_10->addWidget(eicOptions, 3, 1, 2, 1);
+
+            tabPeakDetection->setLayout(gridLayout_10);
+
     }
+
 	adjustSize();
 }
 void PeakDetectionDialog::loadModel() { 
@@ -75,6 +124,8 @@ void PeakDetectionDialog::show() {
         }
     }
 
+    QString text = compoundDatabase->currentText();
+
     QStringList dbnames = DB.getLoadedDatabaseNames();
     dbnames.push_front("ALL");
     compoundDatabase->clear();
@@ -82,13 +133,22 @@ void PeakDetectionDialog::show() {
         compoundDatabase->addItem(db);
     }
 
+    //Issue 166: if a previous text entry was used, take this value.
+    if (!text.isEmpty()) {
+         int index = compoundDatabase->findText(text);
+         if (index != -1) {
+             compoundDatabase->setCurrentIndex(index);
+         }
+    } else {
+        QString selectedDB = mainwindow->ligandWidget->getDatabaseName();
+        compoundDatabase->setCurrentIndex(compoundDatabase->findText(selectedDB));
+    }
+
     fragScoringAlgorithm->clear();
     for(string scoringAlgorithm: FragmentationMatchScore::getScoringAlgorithmNames()) {
         fragScoringAlgorithm->addItem(scoringAlgorithm.c_str());
     }
 
-    QString selectedDB = mainwindow->ligandWidget->getDatabaseName();
-    compoundDatabase->setCurrentIndex(compoundDatabase->findText(selectedDB));
     compoundPPMWindow->setValue( mainwindow->getUserPPM() );  //total ppm window, not half sized.
 
     QDialog::show();
