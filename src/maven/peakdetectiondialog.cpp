@@ -185,6 +185,7 @@ void PeakDetectionDialog::findPeaks() {
 		peakupdater->eic_smoothingWindow= eic_smoothingWindow->value();
 		peakupdater->grouping_maxRtWindow = grouping_maxRtDiff->value();
 		peakupdater->matchRtFlag =  matchRt->isChecked();
+        peakupdater->featureMatchRtFlag = this->featureMatchRts->isChecked();
 		peakupdater->minGoodPeakCount = minGoodGroupCount->value();
 		peakupdater->minNoNoiseObs = minNoNoiseObs->value();
 		peakupdater->minSignalBaseLineRatio = sigBaselineRatio->value();

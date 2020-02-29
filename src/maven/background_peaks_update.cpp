@@ -564,7 +564,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             if (!slice->srmId.empty()) group.srmId = slice->srmId;
 
-            if (matchRtFlag && group.compound && group.compound->expectedRt>0) {
+            if (featureMatchRtFlag && group.compound && group.compound->expectedRt>0) {
                 float rtDiff =  abs(group.compound->expectedRt - (group.meanRt));
                 group.expectedRtDiff = rtDiff;
                 group.groupRank = rtDiff*rtDiff*(1.1-group.maxQuality)*(1/log(group.maxIntensity+1));

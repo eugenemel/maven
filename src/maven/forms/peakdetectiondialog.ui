@@ -162,20 +162,26 @@
           <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="5" column="1">
-           <widget class="QCheckBox" name="reportIsotopes">
-            <property name="text">
-             <string>Report Isotopic Peaks</string>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_7">
             <property name="text">
              <string>Mass Domain Resolution (ppm)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="ppmStep">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="maximum">
+             <double>1000000000.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>20.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -207,10 +213,27 @@
             </property>
            </widget>
           </item>
+          <item row="5" column="1">
+           <widget class="QCheckBox" name="featureMatchRts">
+            <property name="text">
+             <string>Match Retention Times</string>
+            </property>
+           </widget>
+          </item>
           <item row="4" column="0">
            <widget class="QLabel" name="label">
             <property name="text">
              <string>Time Domain Resolution (scans)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="0">
+           <widget class="QCheckBox" name="reportIsotopes">
+            <property name="text">
+             <string>Report Isotopic Peaks</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -221,22 +244,6 @@
             </property>
             <property name="checked">
              <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="ppmStep">
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="maximum">
-             <double>1000000000.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>1.000000000000000</double>
-            </property>
-            <property name="value">
-             <double>20.000000000000000</double>
             </property>
            </widget>
           </item>
