@@ -491,15 +491,6 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             group.computeAvgBlankArea(eics);
             group.groupStatistics();
 
-//            //debugging
-//            if (group.medianRt() > 20 && group.medianRt() < 22 && group.meanMz > 794.5 && group.meanMz < 794.6) {
-//                cout << "GROUP: " << endl;
-//                group.summary();
-//                for (auto &comp : DB.compoundsDB) {
-//                    cout << comp->name << endl;
-//                }
-//            }
-
             if (clsf->hasModel()&& group.goodPeakCount < minGoodPeakCount) continue;
             if (clsf->hasModel() && group.maxQuality < minQuality) continue;
 
