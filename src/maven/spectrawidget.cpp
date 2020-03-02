@@ -986,9 +986,12 @@ void SpectraWidget::contextMenuEvent(QContextMenuEvent * event) {
     
     QAction* a5 = menu.addAction("Centroided Mode");
     connect(a5, SIGNAL(triggered()), SLOT(setCentroidedMode()));
-        
-    
-   menu.exec(event->globalPos());
+
+    menu.addSeparator();
+    QAction* a7 = menu.addAction("Display Fragment Labels");
+    connect (a7, SIGNAL(triggered()), SLOT(toggleOverlayLabels()));
+
+    menu.exec(event->globalPos());
 }
 
 void SpectraWidget::spectraToClipboard() {
@@ -1136,3 +1139,6 @@ void SpectraWidget::findSimilarScans() {
 
 }
 
+void SpectraWidget::toggleOverlayLabels() {
+    qDebug() << "SpectraWidget::toggleOverlayLabels()";
+}
