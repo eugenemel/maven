@@ -295,6 +295,15 @@ void SpectraWidget::overlayCompound(Compound* c) {
    for(int i=0; i < c->fragment_mzs.size(); i++) 	   hit.mzList << c->fragment_mzs[i];
    for(int i=0; i < c->fragment_intensity.size(); i++) hit.intensityList << c->fragment_intensity[i];
 
+   //Issue 159: Careful to avoid array out of bounds violations
+   for(int i=0; i < c->fragment_mzs.size(); i++) {
+       if (c->fragment_labels.size() == c->fragment_mzs.size()) {
+           hit.fragLabelList << QString(c->fragment_labels[i].c_str());
+       } else {
+           hit.fragLabelList << QString("");
+       }
+   }
+
    //remove previous annotations
    links.clear();
 
@@ -369,7 +378,7 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
 
         //Issue 159: add fragment labels
         if (this->_showOverlayLabels) {
-            Note* label = new Note(QString("TODO: frag label"));
+            Note* label = new Note(QString(hit.fragLabelList[i]));
 
             //position label
             label->setPos(x,y-5);
