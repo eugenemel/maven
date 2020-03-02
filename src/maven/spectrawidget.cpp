@@ -366,6 +366,18 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
             //cerr << "!matched:" << hitMz << endl;
 
         }
+
+        //Issue 159: add fragment labels
+        if (this->_showOverlayLabels) {
+            Note* label = new Note(QString("TODO: frag label"));
+
+            //position label
+            label->setPos(x,y-5);
+            label->setExpanded(true);
+
+            scene()->addItem(label);
+            _items.push_back(label);
+        }
     }
 }
 
@@ -990,6 +1002,8 @@ void SpectraWidget::contextMenuEvent(QContextMenuEvent * event) {
     menu.addSeparator();
     QAction* a7 = menu.addAction("Display Fragment Labels");
     connect (a7, SIGNAL(triggered()), SLOT(toggleOverlayLabels()));
+    a7->setCheckable(true);
+    a7->setChecked(_showOverlayLabels);
 
     menu.exec(event->globalPos());
 }
@@ -1141,4 +1155,7 @@ void SpectraWidget::findSimilarScans() {
 
 void SpectraWidget::toggleOverlayLabels() {
     qDebug() << "SpectraWidget::toggleOverlayLabels()";
+    _showOverlayLabels = !_showOverlayLabels;
+    drawGraph();
+    repaint();
 }

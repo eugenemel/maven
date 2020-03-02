@@ -64,6 +64,7 @@ public slots:
                     bool  _profileMode;
                     bool  _showOverlay;
                     bool  _log10Transform;
+                    bool _showOverlayLabels = true;
 
                     float _minX;
                     float _maxX;
