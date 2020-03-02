@@ -31,6 +31,9 @@ void CSVReports::openGroupReport(string outputfile) {
                         << "displayName"
                         << "compound"
                         << "compoundId"
+                        << "compoundFormula"
+                        << "compoundSMILES"
+                        << "adductName"
                         << "category"
                         << "database"
                         << "expectedRtDiff"
@@ -111,13 +114,9 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
         }
     }
 
-    char label[2];
-    sprintf(label,"%c",group->label);
-
     string idString = TableDockWidget::groupTagString(group).toStdString();
 
-    groupReport << label << SEP
-                << setprecision(7)
+    groupReport << group->getPeakGroupLabel() << SEP << setprecision(7)
                 << group->metaGroupId << SEP
                 << group->groupId << SEP
                 << doubleQuoteString(idString) << SEP //header is titled 'ID'
@@ -132,6 +131,8 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
     string compoundCategory;
     string compoundID;
     string database;
+    string compoundMolecularFormula;
+    string compoundSMILES;
     float  expectedRtDiff=1000;
     float  ppmDist=1000;
 
@@ -142,11 +143,26 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
         compoundName = c->name;
         compoundID =  c->id;
         database = c->db;
+        compoundMolecularFormula = c->formula;
+        compoundSMILES = c->smileString;
         if (c->category.size()) compoundCategory = c->category[0];
+    }
+
+    //Issue 142: imported compound name always takes precedence
+    if (!group->importedCompoundName.empty()){
+        compoundName = group->importedCompoundName;
+    }
+
+    string adductName;
+    if (group -> adduct) {
+        adductName = group->adduct->name;
     }
 
     groupReport << SEP << doubleQuoteString(compoundName);
     groupReport << SEP << doubleQuoteString(compoundID);
+    groupReport << SEP << doubleQuoteString(compoundMolecularFormula);
+    groupReport << SEP << doubleQuoteString(compoundSMILES);
+    groupReport << SEP << doubleQuoteString(adductName);
     groupReport << SEP << compoundCategory;
     groupReport << SEP << database;
     groupReport << SEP << expectedRtDiff;

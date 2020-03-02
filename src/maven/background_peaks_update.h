@@ -46,10 +46,10 @@ public:
   bool keepFoundGroups;
   bool processMassSlicesFlag;
   bool pullIsotopesFlag;
-  bool searchAdductsFlag;
   bool showProgressFlag;
   bool matchRtFlag;
   bool checkConvergance;
+  bool featureMatchRtFlag;
 
   int ionizationMode; //default ionization mode used by mass spec
 

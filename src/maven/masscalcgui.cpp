@@ -267,7 +267,7 @@ void MassCalcWidget::getMatches() {
 }
 
 void MassCalcWidget::pubChemLink(QString formula){
-	_mw->setStatusText("Searhing pubchem");
+    _mw->setStatusText("Searching pubchem");
 	QString requestStr( 
 		tr("http://pubchem.ncbi.nlm.nih.gov/search/search.cgi?cmd=search&q_type=mf&q_data=%1&simp_schtp=mf")
     .arg(formula));
@@ -276,7 +276,7 @@ void MassCalcWidget::pubChemLink(QString formula){
 }
 
 void MassCalcWidget::keggLink(QString formula){
-	_mw->setStatusText("Searhing Kegg");
+    _mw->setStatusText("Searching Kegg");
 	QString requestStr( 
 		tr("http://www.genome.jp/ligand-bin/txtsearch?column=formula&query=%1&DATABASE=compound").arg(formula));
     _mw->setUrl(requestStr);

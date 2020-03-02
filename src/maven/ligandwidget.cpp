@@ -189,8 +189,8 @@ void LigandWidget::updateCurrentItemData() {
 void LigandWidget::showTable() { 
     //	treeWidget->clear();
     treeWidget->clear();
-    treeWidget->setColumnCount(6);
-    QStringList header; header << "Name" << "Adduct" << "M" << "RT" << "Formula" << "Category";
+    treeWidget->setColumnCount(7);
+    QStringList header; header << "Name" << "Adduct" << "Exact Mass" << "RT" << "Formula" << "SMILES" << "Category";
     treeWidget->setHeaderLabels( header );
     treeWidget->setSortingEnabled(false);
 
@@ -208,14 +208,14 @@ void LigandWidget::showTable() {
         parent->setText(1, compound->adductString.c_str());
         parent->setText(2, QString::number(compound->getExactMass(), 'f', 4));
         if(compound->expectedRt > 0) parent->setText(3,QString::number(compound->expectedRt));
-        if (compound->formula.length())parent->setText(4,compound->formula.c_str());
-        if (compound->smileString.length()) parent->setText(4,compound->smileString.c_str());
+        if (compound->formula.length()) parent->setText(4,compound->formula.c_str());
+        if (compound->smileString.length()) parent->setText(5,compound->smileString.c_str());
         if (compound->hasGroup() ) parent->setIcon(0,QIcon(":/images/link.png"));
 
         if(compound->category.size() > 0) {
             QStringList catList;
             for(string c : compound->category) catList << c.c_str();
-            parent->setText(5,catList.join(";"));
+            parent->setText(6, catList.join(";"));
         }
 
         parent->setData(0, Qt::UserRole, QVariant::fromValue(compound));

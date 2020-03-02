@@ -14,6 +14,7 @@ class SpectralHit {
 		QString sampleName;
 		QVector<double>mzList;
         QVector<double>intensityList;
+        QVector<QString> fragLabelList;
 		float productPPM;
 		int matchCount;
 		float precursorMz;

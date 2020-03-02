@@ -127,14 +127,21 @@ void ClassifierNeuralNet::classify(PeakGroup* grp) {
     }
 }
 
+//Issue 127: TODO: restructure this to consider new models
 void ClassifierNeuralNet::refineModel(PeakGroup* grp) {
-		if (grp == NULL ) return;
-		if (brain == NULL ) brain = new nnwork(num_features,hidden_layer,num_outputs);
+        if (!grp) return;
+        if (!brain) brain = new nnwork(num_features,hidden_layer,num_outputs);
 
-		if (grp->label == 'g' || grp->label == 'b' ) {
+        if (grp->isGroupGood() || grp->isGroupBad()) {
 				for (unsigned int j=0; j < grp->peaks.size(); j++ ) {
 					Peak& p = grp->peaks[j];
-					p.label = grp->label;
+
+                    if (grp->isGroupGood()) {
+                        p.label = 'g';
+                    } else {
+                        p.label = 'b';
+                    }
+
 					if ( p.width < 2 )  p.label='b';
 					if ( p.signalBaselineRatio <= 1 )  p.label='b'; 
 

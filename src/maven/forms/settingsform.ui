@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1008</width>
-    <height>243</height>
+    <height>246</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -20,7 +20,7 @@
    <string>Options</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0">
+   <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -503,53 +503,16 @@
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox_4">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
           <string>Filter Isotopic Peaks based on these criteria</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_10">
-            <property name="text">
-             <string>Maximum %Error to Natural Abundance</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QDoubleSpinBox" name="maxNaturalAbundanceErr">
-            <property name="prefix">
-             <string/>
-            </property>
-            <property name="suffix">
-             <string> %</string>
-            </property>
-            <property name="decimals">
-             <number>2</number>
-            </property>
-            <property name="minimum">
-             <double>0.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>999999999.000000000000000</double>
-            </property>
-            <property name="value">
-             <double>100.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_11">
-            <property name="text">
-             <string>Isotope is within [X] scans of parent</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Minimum Isotope-parent correlation</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="1">
            <widget class="QDoubleSpinBox" name="minIsotopicCorrelation">
             <property name="minimum">
@@ -563,6 +526,36 @@
             </property>
             <property name="value">
              <double>0.200000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_11">
+            <property name="text">
+             <string>Isotope is within [X] scans of parent:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QSpinBox" name="spnMaxIsotopesToExtract">
+            <property name="suffix">
+             <string> isotopes</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>999999999</number>
+            </property>
+            <property name="value">
+             <number>5</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Minimum Isotope-parent correlation:</string>
             </property>
            </widget>
           </item>
@@ -582,7 +575,43 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="0" colspan="2">
+          <item row="3" column="1">
+           <widget class="QDoubleSpinBox" name="maxNaturalAbundanceErr">
+            <property name="prefix">
+             <string/>
+            </property>
+            <property name="suffix">
+             <string>%</string>
+            </property>
+            <property name="decimals">
+             <number>2</number>
+            </property>
+            <property name="minimum">
+             <double>0.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>999999999.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>100.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="chkExtractNIsotopes">
+            <property name="text">
+             <string>Extract only first [X] isotopes after monoisotopic:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="chkIgnoreNaturalAbundance">
+            <property name="text">
+             <string>Ignore isotopes based on %Error vs Natural Abundance:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
            <widget class="QCheckBox" name="isotopeC13Correction">
             <property name="text">
              <string>Correct for Natural C13 Isotope Abundance</string>
@@ -715,13 +744,26 @@
            <double>0.500000000000000</double>
           </property>
          </widget>
+         <widget class="QCheckBox" name="chkIncludeChildren">
+          <property name="geometry">
+           <rect>
+            <x>570</x>
+            <y>30</y>
+            <width>301</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Include children peak groups with bookmark</string>
+          </property>
+         </widget>
         </widget>
        </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tab_2">
       <attribute name="title">
-       <string>Web Servers</string>
+       <string>Locations</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>

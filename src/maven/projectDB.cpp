@@ -297,7 +297,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
             query1.addBindValue(g->metaGroupId);
             query1.addBindValue(g->expectedRtDiff);
             query1.addBindValue(g->groupRank);
-            query1.addBindValue(QString(g->label));
+            query1.addBindValue(QString(g->getPeakGroupLabel().c_str()));
             query1.addBindValue(g->type());
             query1.addBindValue(QString(g->srmId.c_str()));
             query1.addBindValue(g->ms2EventCount);
@@ -309,13 +309,20 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
             query1.addBindValue(QString());
         }
 
+        QString compoundName;
+        if (!g->importedCompoundName.empty()){
+              compoundName = QString(g->importedCompoundName.c_str());
+        } else if (g->compound) {
+              compoundName = QString(g->compound->name.c_str());
+        }
+
         if (g->compound) {
             query1.addBindValue(QString(g->compound->id.c_str()) );
-            query1.addBindValue(QString(g->compound->name.c_str()) );
+            query1.addBindValue(compoundName);
             query1.addBindValue(QString(g->compound->db.c_str()) );
         } else{
             query1.addBindValue(QString());
-            query1.addBindValue(QString());
+            query1.addBindValue(compoundName);
             query1.addBindValue(QString());
         }
 
@@ -334,6 +341,8 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 
      if (tableName == "rumsDB") {
          rumsDBOldToNewGroupIDs.insert(make_pair(g->groupId, lastInsertGroupId));
+     } else if (tableName == "Bookmarks") {
+         bookmarksOldToNewGroupIDs.insert(make_pair(g->groupId, lastInsertGroupId));
      }
 
      QSqlQuery query2(sqlDB);
@@ -438,6 +447,11 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 
                 QString searchTableName = child->searchTableName.empty() ? tableName : QString(child->searchTableName.c_str());
 
+                //Issue 143: children of a bookmarked peak group should also be bookmarked
+                if (tableName == "Bookmarks") {
+                    searchTableName = tableName;
+                }
+
                 writeGroupSqlite(child, lastInsertGroupId, searchTableName);
             }
         }
@@ -501,7 +515,11 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary) {
 
         QVariant label = query.value("label");
         if (label.toString().size() > 0) {
-            g.label = label.toString().at(0).toLatin1();
+
+            QByteArray bytes = label.toString().toLatin1().data();
+            for (auto &b : bytes) {
+                g.labels.push_back(b);
+            }
         }
 
         string displayName = query.value("displayName").toString().toStdString();
@@ -518,6 +536,8 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary) {
         string compoundDB = query.value("compoundDB").toString().toStdString();
         string compoundName = query.value("compoundName").toString().toStdString();
         string adductName = query.value("adductName").toString().toStdString();
+
+        g.importedCompoundName = compoundName;
 
         //if(!compoundName.empty()) g.tagString=compoundName;
 
@@ -733,30 +753,53 @@ void ProjectDB::saveMatchTable() {
 
         QSqlQuery query1(sqlDB);
         query1.prepare("INSERT INTO matches VALUES(?,?,?,?,?,  ?,?,?)");
+
         for (matchIterator it = allMatches.begin(); it != allMatches.end(); ++it){
 
             shared_ptr<mzrollDBMatch> match = it->second;
 
-            int updatedGroupId = rumsDBOldToNewGroupIDs.at(match->groupId);
+            if (rumsDBOldToNewGroupIDs.find(match->groupId) != rumsDBOldToNewGroupIDs.end()) {
 
-            query1.addBindValue(updatedGroupId);
+                int updatedGroupId = rumsDBOldToNewGroupIDs.at(match->groupId);
 
-            query1.addBindValue(match->ionId);
-            query1.addBindValue(match->compoundName.c_str());
-            query1.addBindValue(match->adductName.c_str());
-            query1.addBindValue(match->summarizationLevel);
-            query1.addBindValue(match->originalCompoundName.c_str());
-            query1.addBindValue(match->score);
-            query1.addBindValue(match->isMatchAsInt());
+                query1.addBindValue(updatedGroupId);
 
-            if(!query1.exec()){
-                qDebug() << query1.lastError();
+                query1.addBindValue(match->ionId);
+                query1.addBindValue(match->compoundName.c_str());
+                query1.addBindValue(match->adductName.c_str());
+                query1.addBindValue(match->summarizationLevel);
+                query1.addBindValue(match->originalCompoundName.c_str());
+                query1.addBindValue(match->score);
+                query1.addBindValue(match->isMatchAsInt());
+
+                if(!query1.exec()){
+                    qDebug() << query1.lastError();
+                }
+            }
+
+        if (bookmarksOldToNewGroupIDs.find(match->groupId) != bookmarksOldToNewGroupIDs.end()) {
+
+                int updatedGroupId = bookmarksOldToNewGroupIDs.at(match->groupId);
+
+                query1.addBindValue(updatedGroupId);
+
+                query1.addBindValue(match->ionId);
+                query1.addBindValue(match->compoundName.c_str());
+                query1.addBindValue(match->adductName.c_str());
+                query1.addBindValue(match->summarizationLevel);
+                query1.addBindValue(match->originalCompoundName.c_str());
+                query1.addBindValue(match->score);
+                query1.addBindValue(match->isMatchAsInt());
+
+                if(!query1.exec()){
+                    qDebug() << query1.lastError();
+                }
             }
         }
 
         query0.exec("end transaction");
 
-        qDebug() << "ProjectDB::loadMatchTable(): Saved " << allMatches.size() << "matches.";
+        qDebug() << "ProjectDB::saveMatchTable(): Saved " << allMatches.size() << "matches.";
 }
 
 mzSample* ProjectDB::getSampleById(int sampleId) { 
@@ -782,22 +825,35 @@ void ProjectDB::saveAlignment() {
            QSqlQuery query1(sqlDB);
            query1.prepare("insert into rt_update_key values(?,?,?)");
 
-           for(mzSample* s : samples) {
-                        cerr << "Saving alignment for sample: " << s->sampleName  << " #scans=" << s->scans.size() << endl;
-                        for (int i=0; i < s->scans.size(); i++ ) {
-                            if (i % 200 == 0 || i == s->scans.size()-1) {
-                                Scan* scan = s->scans[i];
-                                float rt_update = scan->rt;
-                                float rt = scan->rt;
-                                if(s->originalRetentionTimes.size() > i) rt = s->originalRetentionTimes[i];
-                                query1.addBindValue( s->getSampleId() );
-                                query1.addBindValue( rt);
-                                query1.addBindValue( rt_update );
-                                if(!query1.exec())  qDebug() << query1.lastError();
-                    }
-           }
+        for(mzSample* s : samples) {
+
+                 cerr << "Saving alignment for sample: " << s->sampleName  << " #scans=" << s->scans.size() << endl;
+
+                 for (int i=0; i < s->scans.size(); i++ ) {
+
+                     if (i % 200 == 0 || i == s->scans.size()-1) {
+
+                             Scan* scan = s->scans[i];
+                             float rt_update = scan->rt;
+                             float rt = scan->rt;
+
+                             if(s->originalRetentionTimes.size() > i){
+                                 rt = s->originalRetentionTimes[i];
+                             }
+
+//                           //debugging
+//                           cout << s->sampleName << "\t" << to_string(rt) << "\t" << to_string(rt_update) << "\n";
+
+                             query1.addBindValue( s->getSampleId() );
+                             query1.addBindValue( rt);
+                             query1.addBindValue( rt_update );
+
+                             if(!query1.exec()) {
+                                 qDebug() << query1.lastError();}
+                             }
         }
-        query0.exec("end transaction");
+     }
+     query0.exec("end transaction");
 }
 
 
@@ -807,7 +863,7 @@ void ProjectDB::doAlignment() {
 	QSqlQuery query(sqlDB);
 	query.exec("select S.name, S.sampleId, R.* from rt_update_key R, samples S where S.sampleId = R.sampleId");
 
-	AligmentSegment* lastSegment=0;
+	AlignmentSegment* lastSegment=0;
 	Aligner aligner;
 	aligner.setSamples(samples);
 
@@ -821,7 +877,7 @@ void ProjectDB::doAlignment() {
         if (!sample) continue;
 		segCount++;
 
-        AligmentSegment* seg = new AligmentSegment();
+        AlignmentSegment* seg = new AlignmentSegment();
         seg->sampleName   = sampleName;
         seg->seg_start = 0;
         seg->seg_end   = query.value("rt").toString().toDouble();

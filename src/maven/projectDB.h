@@ -23,9 +23,12 @@ class ProjectDB {
 
             vector<PeakGroup> allgroups;
             vector<mzSample*> samples;
+
+            //both bookmarks and rumsDB can have connections to matches table.
             map<int, shared_ptr<mzrollDBMatch>> topMatch = {};
             multimap<int, shared_ptr<mzrollDBMatch>> allMatches = {};
             map<int, int> rumsDBOldToNewGroupIDs = {};
+            map<int, int> bookmarksOldToNewGroupIDs = {};
 
             void clearLoadedPeakGroups() { allgroups.clear(); }
             void saveSamples(vector<mzSample *> &sampleSet);

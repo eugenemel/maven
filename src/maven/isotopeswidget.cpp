@@ -4,19 +4,26 @@ using namespace std;
 
 IsotopeWidget::IsotopeWidget(MainWindow* mw) {
   _mw = mw;
-  _scan = NULL;
-  _group = NULL;
-  _compound = NULL;
-  _charge = -1;
+
+  _scan = nullptr;
+  _group = nullptr;
+  _compound = nullptr;
+  _adduct = nullptr;
 
   tempCompound = new Compound("Unknown", "Unknown", string(), 0 );	 //temp compound
 
   setupUi(this);
-  connect(treeWidget,SIGNAL(itemSelectionChanged()), SLOT(showInfo()));
-  connect(formula, SIGNAL(textEdited(QString)), this, SLOT(userChangedFormula(QString)));
-  connect(ionization, SIGNAL(valueChanged(double)), this, SLOT(setCharge(double)));
 
-  ionization->setValue(_charge);
+  adductComboBox->setMinimumSize(250, 0);
+
+  adductComboBox->clear();
+  for (Adduct* a : DB.adductsDB) {
+    adductComboBox->addItem(a->name.c_str(),QVariant::fromValue(a));
+  }
+
+  connect(treeWidget, SIGNAL(itemSelectionChanged()), SLOT(showInfo()));
+  connect(formula, SIGNAL(textEdited(QString)), this, SLOT(userChangedFormula(QString)));
+  connect(adductComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(updateAdduct()));
 
   workerThread = new BackgroundPeakUpdate(mw);
   workerThread->setRunFunction("pullIsotopes");
@@ -41,6 +48,20 @@ IsotopeWidget::~IsotopeWidget(){
 	links.clear();
 }
 
+Adduct* IsotopeWidget::getCurrentAdduct() {
+
+    QVariant v = adductComboBox->currentData();
+    Adduct*  adduct =  v.value<Adduct*>();
+
+    if (adduct) {
+        return adduct;
+    } else if (_mw) {
+        return _mw->getUserAdduct();
+    }
+
+    return nullptr;
+}
+
 void IsotopeWidget::setPeakGroup(PeakGroup* grp) {
     if (!grp) return;
 	_group = grp;
@@ -48,36 +69,37 @@ void IsotopeWidget::setPeakGroup(PeakGroup* grp) {
 }
 
 void IsotopeWidget::setPeak(Peak* peak) {
-	if (peak == NULL ) return;
+    if (peak == nullptr ) return;
 
 	mzSample* sample = peak->getSample();
-	if (sample == NULL) return;
+    if (sample == nullptr) return;
 
 	Scan* scan = sample->getScan(peak->scan);
-	if (scan == NULL) return;
+    if (scan == nullptr) return;
 	_scan = scan;
 
-	if (! _formula.empty() ) computeIsotopes(_formula);
+    if (! _formula.empty() ){
+        computeIsotopes(_formula);
+    }
 }
 
 void IsotopeWidget::setCompound(Compound* cpd ) {
-		if (cpd == NULL ) return;
+        if (!cpd) return;
+
 		QString f = QString(cpd->formula.c_str());
-		_group = NULL;
+
+        _group = nullptr;
 		_compound = cpd;
+
 		setWindowTitle("Isotopes:" + QString(cpd->name.c_str()));
 		setFormula(f);
-}
-
-void IsotopeWidget::setIonizationMode(int mode ) {
-		setCharge((float) mode );
 }
 
 void IsotopeWidget::userChangedFormula(QString f) {
 	if (f.toStdString() == _formula ) return;
 
 	_formula = f.toStdString();
-	_group = NULL;
+    _group = nullptr;
 
 	tempCompound->formula = _formula;
 	tempCompound->name =   "Unknown_" + _formula;
@@ -94,19 +116,22 @@ void IsotopeWidget::setFormula(QString f) {
 	userChangedFormula(f);
 }
 
-void IsotopeWidget::setCharge(double charge) {
-	if ( charge != _charge ) {
-		ionization->setValue(charge);
-		_charge = charge;
-		computeIsotopes(_formula);
-	}
+void IsotopeWidget::updateAdduct() {
+    computeIsotopes(_formula);
 }
 
 void IsotopeWidget::computeIsotopes(string f) {
-	if (f.empty()) return;
-        if(links.size() > 0 ) links.clear();
-	double parentMass = mcalc.computeMass(f,_charge);
+
+    if (f.empty()) return;
+    if(links.size() > 0 ) links.clear();
+
+    //use selected adduct to compute theoretical mass.
+    double neutralMass = mcalc.computeNeutralMass(f);
+    double parentMass = getCurrentAdduct()->computeAdductMass(neutralMass);
+
+    //double parentMass = mcalc.computeMass(f, getCurrentAdduct()->charge);
     float parentPeakIntensity = getIsotopeIntensity(parentMass);
+
     QSettings* settings = _mw->getSettings();
 
     double maxNaturalAbundanceErr  = settings->value("maxNaturalAbundanceErr").toDouble();
@@ -114,6 +139,10 @@ void IsotopeWidget::computeIsotopes(string f) {
     bool N15Labeled   =  settings->value("N15Labeled").toBool();
     bool S34Labeled   =  settings->value("S34Labeled").toBool();
     bool D2Labeled   =   settings->value("D2Labeled").toBool();
+
+    bool chkIgnoreNaturalAbundance = settings->value("chkIgnoreNaturalAbundance").toBool();
+    bool chkExtractNIsotopes = settings->value("chkExtractNIsotopes").toBool();
+    int spnMaxIsotopesToExtract = settings->value("spnMaxIsotopesToExtract").toInt();
 
     //NO ISOTOPES SELECTED..
     if (C13Labeled == false and N15Labeled == false and S34Labeled == false and D2Labeled == false) {
@@ -123,9 +152,14 @@ void IsotopeWidget::computeIsotopes(string f) {
     qDebug() << "Isotope Calculation: " << C13Labeled << N15Labeled << S34Labeled << D2Labeled;
 
 
+    int maxNumProtons = INT_MAX;
+    if (chkExtractNIsotopes) {
+        maxNumProtons = spnMaxIsotopesToExtract;
+    }
 
-	vector<Isotope> isotopes = mcalc.computeIsotopes(f,_charge);
-	for (int i=0; i < isotopes.size(); i++ ) {
+    vector<Isotope> isotopes = mcalc.computeIsotopes(f, getCurrentAdduct(), maxNumProtons, C13Labeled, N15Labeled, S34Labeled, D2Labeled);
+
+    for (int i=0; i < isotopes.size(); i++ ) {
         Isotope& x = isotopes[i];
 
         float expectedAbundance    =  x.abundance;
@@ -135,19 +169,22 @@ void IsotopeWidget::computeIsotopes(string f) {
              ((x.N15 > 0 && N15Labeled==true) || x.N15 == 0) &&
              ((x.S34 > 0 && S34Labeled==true) || x.S34 == 0) &&
              ((x.H2 > 0 && D2Labeled==true ) || x.H2 == 0)) {
+
+            if (chkIgnoreNaturalAbundance) {
                 if (expectedAbundance < 1e-8) continue;
                 // if (expectedAbundance * parentPeakIntensity < 500) continue;
-                float isotopePeakIntensity = getIsotopeIntensity(x.mass);
+                float isotopePeakIntensity = getIsotopeIntensity(x.mz);
                 float observedAbundance = isotopePeakIntensity/(parentPeakIntensity+isotopePeakIntensity);
                 float naturalAbundanceError = abs(observedAbundance-expectedAbundance)/expectedAbundance*100;
                 if (naturalAbundanceError > maxNaturalAbundanceErr )  continue;
+            }
 
-                link.mz1 = parentMass;
-                link.mz2 = x.mass;
-                link.note= x.name;
-                link.value1 = x.abundance;
-                link.value2 = getIsotopeIntensity(x.mass);
-                links.push_back(link);
+            link.mz1 = parentMass;
+            link.mz2 = x.mz;
+            link.note= x.name;
+            link.value1 = x.abundance;
+            link.value2 = getIsotopeIntensity(x.mz);
+            links.push_back(link);
         }
     }
     sort(links.begin(),links.end(),mzLink::compMz);
@@ -158,9 +195,9 @@ float IsotopeWidget::getIsotopeIntensity(float mz)  {
     float highestIntensity=0;
 	double ppm = _mw->getUserPPM();
 
-	if (_scan == NULL ) return 0;
+    if (_scan == nullptr ) return 0;
 	mzSample* sample = _scan->getSample();
-	if ( sample == NULL) return 0;
+    if ( sample == nullptr) return 0;
 
 	for(int i=_scan->scannum-2; i < _scan->scannum+2; i++ ) {
 		Scan* s = sample->getScan(i);
@@ -179,7 +216,7 @@ Peak* IsotopeWidget::getSamplePeak(PeakGroup* group, mzSample* sample) {
 					return &(group->peaks[i]);
 				}
 		}
-		return NULL;
+        return nullptr;
 }
 void IsotopeWidget::pullIsotopes(PeakGroup* group) {
 		if(!group) return;
@@ -198,7 +235,7 @@ void IsotopeWidget::pullIsotopes(PeakGroup* group) {
         bool D2Labeled   =   settings->value("D2Labeled").toBool();
         if (C13Labeled == false and N15Labeled == false and S34Labeled == false and D2Labeled == false) return;
 
-		if (group->compound == NULL) {
+        if (group->compound == nullptr) {
 			_mw->setStatusText(tr("Unknown compound. Clipboard set to %1").arg(group->tagString.c_str()));
 			return;
 		}
@@ -264,10 +301,10 @@ void IsotopeWidget::setClipboard(PeakGroup* group) {
 }
 
 QString IsotopeWidget::groupIsotopeMatrixExport(PeakGroup* group, bool includeSampleHeader) {
-    if (group == NULL ) return "";
+    if (group == nullptr ) return "";
 		//header line
 		QString tag(group->tagString.c_str());
-        if ( tag.isEmpty() && group->compound != NULL ) tag = QString(group->compound->name.c_str());
+        if ( tag.isEmpty() && group->compound != nullptr ) tag = QString(group->compound->name.c_str());
         if ( tag.isEmpty() && group->srmId.length()   ) tag = QString(group->srmId.c_str());
         if ( tag.isEmpty() && group->meanMz > 0 )       tag = QString::number(group->meanMz,'f',6) + "@" +  QString::number(group->meanRt,'f',2);
         if ( tag.isEmpty() )  tag = QString::number(group->groupId);
@@ -387,7 +424,7 @@ void IsotopeWidget::showInfo() {
 
 QString IsotopeWidget::groupTextEport(PeakGroup* group) {
 
-		if (group == NULL ) return "";
+        if (group == nullptr ) return "";
 		QStringList info;
 
 		PeakGroup::QType qtype = _mw->getUserQuantType();

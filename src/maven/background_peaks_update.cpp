@@ -10,7 +10,6 @@ BackgroundPeakUpdate::BackgroundPeakUpdate(QWidget*) {
     alignSamplesFlag=false;
     processMassSlicesFlag=false;
     pullIsotopesFlag=false;
-    searchAdductsFlag=false;
     matchRtFlag=false;
     checkConvergance=false;
 
@@ -206,7 +205,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
              if(isotopes.size() > 0) {
                  //group.chargeState = isotopes.front().charge;
                  for(Isotope& isotope: isotopes) {
-                     if (mzUtils::ppmDist(static_cast<float>(isotope.mass), static_cast<float>(group.meanMz)) < compoundPPMWindow) {
+                     if (mzUtils::ppmDist(static_cast<float>(isotope.mz), static_cast<float>(group.meanMz)) < compoundPPMWindow) {
                          group.isotopicIndex=isotope.C13;
                      }
                  }
@@ -249,6 +248,9 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 
                  if (static_cast<float>(s.numMatches) < minNumFragments) continue;
                  if (static_cast<float>(s.mergedScore) < minFragmentMatchScore) continue;
+
+                 //Issue 161: new approach
+                 if (isRequireMatchingAdduct && compound->adductString != slice->adduct->name) continue;
 
                  //Rt criteria and group rank
                  if (matchRtFlag && compound->expectedRt>0) {
@@ -323,6 +325,11 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
                  passingPeakGroups.push_back(bestHit);
              }
 
+             //Issue 161
+             if (isRetainUnmatchedCompounds && passingPeakGroups.empty()) {
+                passingPeakGroups.push_back(new PeakGroup(group));
+             }
+
 
              numPassingPeakGroups += passingPeakGroups.size();
              delete_all(failingPeakGroups); //passingPeakGroups are deleted on main thread with emit() call.
@@ -370,7 +377,13 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
         aligner.doAlignment(groups);
     }
 
-    //TODO: respect clustering option
+    //Issue 161: run clustering
+    if (isClusterPeakGroups){
+        double maxRtDiff = 0.2;
+        double minSampleCorrelation= 0.8;
+        double minPeakShapeCorrelation=0.9;
+        PeakGroup::clusterGroups(allgroups,samples,maxRtDiff,minSampleCorrelation,minPeakShapeCorrelation,compoundPPMWindow);
+    }
 
     if (csvreports){
         csvreports->closeFiles();
@@ -423,7 +436,10 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
         if (checkConvergance ) {
             allgroups.size()-foundGroups > 0 ? converged=0 : converged++;
-            if ( converged > 1000 ) break;	 //exit main loop
+            if ( converged > 1000 ){
+                cout << "Convergence condition reached. Exiting main loop." << endl;
+                break;	 //exit main loop
+            }
             foundGroups = allgroups.size();
         }
 
@@ -459,6 +475,9 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             PeakGroup& group = peakgroups[j];
 
+            //debugging
+            //cout << "group= (" << group.meanMz << ", " << group.meanRt << "), #" << allgroups.size() << "/" << limitGroupCount << endl;
+
             groupCount++;
             peakCount += group.peakCount();
 
@@ -482,20 +501,20 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             if (group.blankMax*minSignalBlankRatio > group.maxIntensity) continue;
 
-            group.chargeState = group.getChargeStateFromMS1(compoundPPMWindow);
-            vector<Isotope> isotopes = highestpeak->getScan()->getIsotopicPattern(highestpeak->peakMz,compoundPPMWindow, 6, 10);
+            group.chargeState = group.getChargeStateFromMS1(ppmMerge);
+            vector<Isotope> isotopes = highestpeak->getScan()->getIsotopicPattern(highestpeak->peakMz,ppmMerge, 6, 10);
 
             if(isotopes.size() > 0) {
                 //group.chargeState = isotopes.front().charge;
                 for(Isotope& isotope: isotopes) {
-                    if (mzUtils::ppmDist((float) isotope.mass, (float) group.meanMz) < compoundPPMWindow) {
+                    if (mzUtils::ppmDist((float) isotope.mz, (float) group.meanMz) < ppmMerge) {
                         group.isotopicIndex=isotope.C13;
                     }
                 }
             }
 
-           if ((excludeIsotopicPeaks or compound)) {
-                if (group.chargeState > 0 and not group.isMonoisotopic(compoundPPMWindow)) continue;
+           if (excludeIsotopicPeaks) {
+                if (group.chargeState > 0 and not group.isMonoisotopic(ppmMerge)) continue;
             }
 
             //if (getChargeStateFromMS1(&group) < minPrecursorCharge) continue;
@@ -536,11 +555,11 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             if (!slice->srmId.empty()) group.srmId = slice->srmId;
 
-            if (matchRtFlag && compound && compound->expectedRt>0) {
-                float rtDiff =  abs(compound->expectedRt - (group.meanRt));
+            if (featureMatchRtFlag && group.compound && group.compound->expectedRt>0) {
+                float rtDiff =  abs(group.compound->expectedRt - (group.meanRt));
                 group.expectedRtDiff = rtDiff;
                 group.groupRank = rtDiff*rtDiff*(1.1-group.maxQuality)*(1/log(group.maxIntensity+1));
-                if (group.expectedRtDiff > compoundRTWindow ) continue;
+                if (group.expectedRtDiff > rtStepSize*avgScanTime) continue;
             } else {
                 group.groupRank = (1.1-group.maxQuality)*(1/log(group.maxIntensity+1));
             }
@@ -589,7 +608,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         double maxRtDiff = 0.2;
         double minSampleCorrelation= 0.8;
         double minPeakShapeCorrelation=0.9;
-        PeakGroup::clusterGroups(allgroups,samples,maxRtDiff,minSampleCorrelation,minPeakShapeCorrelation,compoundPPMWindow);
+        PeakGroup::clusterGroups(allgroups,samples,maxRtDiff,minSampleCorrelation,minPeakShapeCorrelation,ppmMerge);
     }
 
     if (showProgressFlag && pullIsotopesFlag ) {
@@ -668,12 +687,15 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
     MassCalculator massCalc;
 
     vector<Adduct*> adductList;
-    if (ionizationMode > 0) adductList.push_back(MassCalculator::PlusHAdduct);
-    else if (ionizationMode < 0) adductList.push_back(MassCalculator::MinusHAdduct);
-    else adductList.push_back(MassCalculator::ZeroMassAdduct);
 
-    //search all adducts
-    if (searchAdductsFlag) adductList = DB.adductsDB;
+    //Issue 161: search all adducts unless no adducts are selected.
+    if (DB.adductsDB.empty()) {
+        if (ionizationMode > 0) adductList.push_back(MassCalculator::PlusHAdduct);
+        else if (ionizationMode < 0) adductList.push_back(MassCalculator::MinusHAdduct);
+        else adductList.push_back(MassCalculator::ZeroMassAdduct);
+    } else {
+        adductList = DB.adductsDB;
+    }
 
     multimap<string, Compound*> stringToCompoundMap = {};
     std::set<string> formulae = std::set<string>();
@@ -844,8 +866,12 @@ void BackgroundPeakUpdate::processMassSlices() {
          qDebug() << "BackgroundPeakUpdate:processMassSlices()";
 
 		showProgressFlag=true;
-		checkConvergance=true;
-		QTime timer; timer.start();
+
+        //Issue 161:
+        //If this flag is true, if too many groups go by without finding a compound match, this will exit.
+        //checkConvergance=true;
+
+        QTime timer; timer.start();
 	
         if (samples.size() > 0 ){
             avgScanTime = 0;
@@ -862,7 +888,7 @@ void BackgroundPeakUpdate::processMassSlices() {
 
         if(mustHaveMS2) {
             //rsamples must be loaded for this to work
-            massSlices.algorithmE(compoundPPMWindow, rtStepSize*avgScanTime);
+            massSlices.algorithmE(ppmMerge, rtStepSize*avgScanTime);
         } else {
             massSlices.algorithmB(ppmMerge, minGroupIntensity ,rtStepSize);
         }
@@ -959,7 +985,7 @@ vector<EIC*> BackgroundPeakUpdate::pullEICs(mzSlice* slice,
 		mzSample* sample = vsamples[i];
 		Compound* c =  slice->compound;
 
-        EIC* e = NULL;
+        EIC* e = nullptr;
 
         if ( ! slice->srmId.empty() ) {
             //cout << "computeEIC srm:" << slice->srmId << endl;
@@ -988,10 +1014,20 @@ vector<EIC*> BackgroundPeakUpdate::pullEICs(mzSlice* slice,
 
 void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
 
-    if(parentgroup == NULL) return;
-    if(parentgroup->compound == NULL ) return;
-    if(parentgroup->compound->formula.empty() == true) return;
-    if ( samples.size() == 0 ) return;
+    if (!parentgroup) return;
+    if (!parentgroup->compound) return;
+    if (parentgroup->compound->formula.empty()) return;
+    if (samples.size() == 0) return;
+
+    Adduct *groupAdduct = nullptr;
+
+    if (parentgroup->adduct){
+        groupAdduct = parentgroup->adduct;
+    } else if (mainwindow) {
+        groupAdduct = mainwindow->getUserAdduct();
+    }
+
+    if (!groupAdduct) return;
 
     float ppm = compoundPPMWindow;
     double maxIsotopeScanDiff = 10;
@@ -1003,6 +1039,16 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
     bool   D2Labeled=false;
     int eic_smoothingAlgorithm = 0;
 
+    //Issue 130: new options
+    bool chkIgnoreNaturalAbundance = true;
+    bool chkExtractNIsotopes = false;
+    int spnMaxIsotopesToExtract = 5;
+
+    //Issue 130: Increase isotope calculation accuracy by using sample-specific mz values
+    map<mzSample*, double> sampleToPeakMz{};
+    for (Peak& p : parentgroup->peaks) {
+        sampleToPeakMz.insert(make_pair(p.sample, p.peakMz));
+    }
 
     if(mainwindow) {
         QSettings* settings = mainwindow->getSettings();
@@ -1017,6 +1063,10 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
             QSettings* settings = mainwindow->getSettings();
             eic_smoothingAlgorithm = settings->value("eic_smoothingAlgorithm").toInt();
 
+            chkIgnoreNaturalAbundance = settings->value("chkIgnoreNaturalAbundance").toBool();
+            chkExtractNIsotopes = settings->value("chkExtractNIsotopes").toBool();
+            spnMaxIsotopesToExtract = settings->value("spnMaxIsotopesToExtract").toInt();
+
 	    //Feng note: assign labeling state to sample
 	    samples[0]->_C13Labeled = C13Labeled;
 	    samples[0]->_N15Labeled = N15Labeled;
@@ -1027,7 +1077,12 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
     }
 
     string formula = parentgroup->compound->formula;
-    vector<Isotope> masslist = mcalc.computeIsotopes(formula,ionizationMode);
+
+    int maxNumProtons = INT_MAX;
+    if (chkExtractNIsotopes) {
+        maxNumProtons = spnMaxIsotopesToExtract;
+    }
+    vector<Isotope> masslist = mcalc.computeIsotopes(formula, groupAdduct, maxNumProtons, C13Labeled, N15Labeled, S34Labeled, D2Labeled);
 
     map<string,PeakGroup>isotopes;
     map<string,PeakGroup>::iterator itr2;
@@ -1037,7 +1092,7 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
             if ( stopped() ) break;
             Isotope& x= masslist[k];
             string isotopeName = x.name;
-            double isotopeMass = x.mass;
+            double isotopeMass = x.mz;
             double expectedAbundance = x.abundance;
             float mzmin = isotopeMass-isotopeMass/1e6*ppm;
             float mzmax = isotopeMass+isotopeMass/1e6*ppm;
@@ -1045,6 +1100,7 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
             float rtmin = parentgroup->minRt;
             float rtmax = parentgroup->maxRt;
 
+//            qDebug() << isotopeName.c_str() << " mass=" << isotopeMass << " mzmin=" << mzmin <<", mzmax=" << mzmax;
 
             Peak* parentPeak =  parentgroup->getPeak(sample);
             if ( parentPeak ) rt  =   parentPeak->rt;
@@ -1076,28 +1132,36 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
             //if(isotopePeakIntensity==0) continue;
 
             //natural abundance check
-            if (    (x.C13 > 0    && C13Labeled==false)
-                    || (x.N15 > 0 && N15Labeled==false)
-                    || (x.S34 > 0 && S34Labeled==false )
-                    || (x.H2 > 0  && D2Labeled==false )
+            if (chkIgnoreNaturalAbundance) {
+                if (    (x.C13 > 0    && C13Labeled==false)
+                        || (x.N15 > 0 && N15Labeled==false)
+                        || (x.S34 > 0 && S34Labeled==false )
+                        || (x.H2 > 0  && D2Labeled==false )
 
-                    ) {
-                if (expectedAbundance < 1e-8) continue;
-                if (expectedAbundance * parentPeakIntensity < 1) continue;
-                float observedAbundance = isotopePeakIntensity/(parentPeakIntensity+isotopePeakIntensity);
-                float naturalAbundanceError = abs(observedAbundance-expectedAbundance)/expectedAbundance*100;
+                        ) {
+                    if (expectedAbundance < 1e-8) continue;
+                    if (expectedAbundance * parentPeakIntensity < 1) continue;
+                    float observedAbundance = isotopePeakIntensity/(parentPeakIntensity+isotopePeakIntensity);
+                    float naturalAbundanceError = abs(observedAbundance-expectedAbundance)/expectedAbundance*100;
 
-                //cerr << isotopeName << endl;
-                //cerr << "Expected isotopeAbundance=" << expectedAbundance;
-                //cerr << " Observed isotopeAbundance=" << observedAbundance;
-                //cerr << " Error="     << naturalAbundanceError << endl;
+                    //cerr << isotopeName << endl;
+                    //cerr << "Expected isotopeAbundance=" << expectedAbundance;
+                    //cerr << " Observed isotopeAbundance=" << observedAbundance;
+                    //cerr << " Error="     << naturalAbundanceError << endl;
 
-                if (naturalAbundanceError > maxNaturalAbundanceErr )  continue;
+                    if (naturalAbundanceError > maxNaturalAbundanceErr )  continue;
+                }
             }
 
-
             float w = maxIsotopeScanDiff*avgScanTime;
-            double c = sample->correlation(isotopeMass,parentgroup->meanMz,ppm, rtmin-w,rtmax+w);
+
+            //Issue 120: Use sample-specific mz value for peaks instead of average mz
+            double corrMz = parentgroup->meanMz;
+            if (sampleToPeakMz.find(sample) != sampleToPeakMz.end()) {
+                corrMz = sampleToPeakMz[sample];
+            }
+
+            double c = sample->correlation(isotopeMass, corrMz, ppm, rtmin-w,rtmax+w);
             if (c < minIsotopicCorrelation)  continue;
 
             //cerr << "pullIsotopes: " << isotopeMass << " " << rtmin-w << " " <<  rtmin+w << " c=" << c << endl;

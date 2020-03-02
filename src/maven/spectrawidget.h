@@ -47,6 +47,8 @@ public slots:
                     void constructAverageScan(float rtmin, float rtmax);
                     void findSimilarScans();
                     void clearOverlay();
+                    void toggleOverlayLabels();
+
                     Scan* getCurrentScan() { return _currentScan; }
 
         private:
@@ -62,6 +64,7 @@ public slots:
                     bool  _profileMode;
                     bool  _showOverlay;
                     bool  _log10Transform;
+                    bool _showOverlayLabels = true;
 
                     float _minX;
                     float _maxX;

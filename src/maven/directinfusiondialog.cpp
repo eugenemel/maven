@@ -90,10 +90,22 @@ void DirectInfusionDialog::analyze() {
     directInfusionUpdate->setCompounds(DB.compoundsDB);
     directInfusionUpdate->setAdducts(DB.adductsDB);
 
+    //general
+    directInfusionUpdate->params->isRequireAdductPrecursorMatch = this->isRequireAdductMatch->isChecked();
+
+    //fragment related
     directInfusionUpdate->params->minNumMatches = this->spnMatchXPeaks->value();
     directInfusionUpdate->params->productPpmTolr = this->spnFragTol->value();
+    directInfusionUpdate->params->productMinIntensity = this->spnFragMinIntensity->value();
+
+    //precursor related
+    directInfusionUpdate->params->isFindPrecursorIonInMS1Scan = this->chkFindPrecursorIon->isChecked();
+    directInfusionUpdate->params->parentPpmTolr = this->spnParTol->value();
+    directInfusionUpdate->params->parentMinIntensity = this->spnParentMinIntensity->value();
+    directInfusionUpdate->params->ms1ScanFilter = this->txtMs1ScanFilter->toPlainText().toStdString();
+
+    //unused
     directInfusionUpdate->params->minNumUniqueMatches = 0; //TODO: currently unused, what does this do?
-    directInfusionUpdate->params->isRequireAdductPrecursorMatch = this->isRequireAdductMatch;
 
     if (cmbSpectralDeconvolutionAlgorithm->currentText() == "List All Candidates"){
         directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::ALL_CANDIDATES;

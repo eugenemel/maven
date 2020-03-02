@@ -175,7 +175,7 @@ private:
     bool _frozen;
     int _freezeTime;
     int _timerId;
-
+    float _intensityZoomVal = -1.0f;      //expect to be already converted with invY() --> peak intensity value
 
 
     vector<PeakGroup> peakgroups;	    //peaks grouped across samples

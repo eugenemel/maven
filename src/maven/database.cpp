@@ -114,6 +114,44 @@ void Database::addCompound(Compound* c) {
     compoundsDB.push_back(c);
 }
 
+void Database::unloadCompounds(QString databaseName) {
+
+    vector<Compound*> compoundsToRemove{};
+
+    for (auto x : compoundsDB) {
+        if (x->db == databaseName.toStdString()) {
+            compoundsToRemove.push_back(x);
+        }
+    }
+
+    compoundsDB.erase(
+                remove_if( begin(compoundsDB),end(compoundsDB),
+                           [&](Compound* x){
+                                return find(begin(compoundsToRemove),end(compoundsToRemove),x)!=end(compoundsToRemove);
+                        }),
+                    end(compoundsDB)
+                );
+
+    loadedDatabase.remove(databaseName);
+
+    for (auto &x : compoundsToRemove) {
+         string compoundId = x->id + x->db;
+         compoundIdMap.remove(compoundId);
+    }
+
+    //re-sort for matching
+    sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
+
+    delete_all(compoundsToRemove);
+
+}
+
+void Database::unloadAllCompounds() {
+    compoundIdMap.clear();
+    loadedDatabase.clear();
+    delete_all(compoundsDB);
+}
+
 void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection) {
 
         if (loadedDatabase.count(databaseName)) {
@@ -126,17 +164,34 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
         if (databaseName != "ALL")  sql += " where dbName='" + databaseName + "'";
 
         bool isHasAdductStringColumn = false;
+        bool isHasFragLabelsColumn = false;
+
         QSqlQuery tableInfoQuery(dbConnection);
-        tableInfoQuery.exec("PRAGMA table_info(compounds)");
+        if(!tableInfoQuery.exec("PRAGMA table_info(compounds)")) qDebug() << "Database::loadCompoundsSQL() sql error in query tableInfoQuery: " << query.lastError();
+
         while(tableInfoQuery.next()) {
             if (tableInfoQuery.value(1).toString() == "adductString") {
                 isHasAdductStringColumn = true;
-                break;
+            }
+
+            //Issue 159: Read and write fragment labels from msp databases.
+            if (tableInfoQuery.value(1).toString() == "fragment_labels") {
+                isHasFragLabelsColumn = true;
+            }
+        }
+
+        if (!isHasFragLabelsColumn) {
+            QSqlQuery queryAddFragLabelsColumn(dbConnection);
+            if (!queryAddFragLabelsColumn.exec("ALTER TABLE compounds ADD fragment_labels TEXT;")){
+                qDebug() << "Database::loadCompoundsSQL() sql error in query queryAddFragLabelsColumn: " << queryAddFragLabelsColumn.lastError();
+                qDebug() << "Unable to adjust compounds database with fragment annotation column! exiting program.";
+                abort();
             }
         }
 
         query.prepare(sql);
-        if(!query.exec()) qDebug() << "loadCompoundsSQL: query error " << query.lastError();
+        if(!query.exec()) qDebug() << "Database::loadCompoundsSQL(): query error in sql: " << query.lastError();
+
         MassCalculator mcalc;
 
         int loadcount=0;
@@ -204,6 +259,14 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
                 if(f.toDouble()) {
                     compound->fragment_intensity.push_back(f.toDouble());
                 }
+            }
+
+            if (!query.value("fragment_labels").isNull()) {
+                for (QString f : query.value("fragment_labels").toString().split(";")) {
+                    compound->fragment_labels.push_back(f.toStdString());
+                }
+            } else {
+                compound->fragment_labels = vector<string>(compound->fragment_mzs.size());
             }
 
             compoundIdMap[compound->id + compound->db]=compound;
@@ -469,6 +532,104 @@ vector<Adduct*> Database::loadAdducts(string filename) {
     myfile.close();
 }
 
+void Database::loadPeakGroupTags(string filename) {
+
+    ifstream tagsFile(filename.c_str());
+
+    if (! tagsFile.is_open()) return;
+
+    vector<char> usedLabels;
+    vector<char> usedHotKeys;
+
+    string line;
+    while ( getline(tagsFile, line) ) {
+        if (line.empty()) continue;
+        if (line[0] == '#') continue; //comments
+
+        vector<string> fields;
+        mzUtils::split(line,',', fields);
+
+        if (fields.size() < 5) continue; //skip lines with missing information
+
+        string name = fields[0];
+
+        //Use lower case characters only to fit with previous usage
+        QString labelStr = QString(fields[1].c_str()).toLower();
+        QString hotKeyStr = QString(fields[2].c_str()).toLower();
+
+        char label = labelStr.toStdString().c_str()[0];
+        char hotkey = hotKeyStr.toStdString().c_str()[0];
+
+        string icon = fields[3];
+
+        QString descriptionQ;
+        for (unsigned int i = 4; i < fields.size(); i++) {
+            if (i > 4) {
+                descriptionQ.append(",");
+            }
+            descriptionQ.append(fields[i].c_str());
+        }
+
+        string description = descriptionQ.toStdString();
+        description.erase(remove(description.begin(), description.end(),'\"'), description.end());
+
+        if (
+                hotkey == 'o' || //open file
+                hotkey == 't' || //train model
+                hotkey == 'g' || //mark group good
+                hotkey == 'b' || //mark group bad
+                hotkey == 'q' || //quit application
+                hotkey == 'p' || //print
+                hotkey == 'a' || //select all
+                hotkey == 'c' || //copy
+                hotkey == 's' || //save
+                hotkey == 'd' || //add bookmark
+                hotkey == 'f' || //find
+                hotkey == 'h' || //hide window
+                hotkey == 'k' || //yield focus
+                hotkey == 'u'    //unmark group
+                )
+        {
+            qDebug() << "PeakGroupTag with hotkey ==" << hotkey << "could not be used: reserved hotkey.";
+            continue;
+        }
+
+        if (
+                label == 'b' || //mark group good
+                label == 'g' || //mark group bad
+                label == 'x' //group deleted
+                )
+        {
+            qDebug() << "PeakGroupTag with label ==" << label << "could not be used: reserved label.";
+            continue;
+        }
+
+        for (auto &x : usedLabels) {
+            if (label == x) {
+                qDebug() << "PeakGroupTag encoded as: " << line.c_str() << "could not be used: label already exists.";
+                continue;
+            }
+        }
+
+        for (auto &x : usedHotKeys) {
+            if (hotkey == x) {
+                qDebug() << "PeakGroupTag encoded as: " << line.c_str() << " could not be used: hotkey already exists.";
+                continue;
+            }
+        }
+
+        PeakGroupTag *tag = new PeakGroupTag(name, label, hotkey, icon, description);
+
+        usedLabels.push_back(label);
+        usedHotKeys.push_back(hotkey);
+
+        peakGroupTags.insert(make_pair(label, tag));
+    }
+    tagsFile.close();
+
+    qDebug() << "Database::loadPeakGroupTags():" << peakGroupTags.size() << "tags.";
+}
+
 vector<Adduct*> Database::defaultAdducts() {
     vector<Adduct*> adducts;
     adducts.push_back( new Adduct("[M-H]+",  PROTON , 1, 1));
@@ -695,6 +856,16 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
                     cpd->charge = -1;
                 }
             }
+         } else if (line.startsWith("IONIZATION:", Qt::CaseInsensitive)) {
+            QString ionizationString = line.mid(12,line.length()).simplified();
+
+            if (ionizationString.endsWith("+") || ionizationString.endsWith("-")) {
+                cpd->adductString = ionizationString.toStdString();
+            } else if (ionizationString == "[M-H]") {
+                cpd->adductString = "[M-H]-";
+            } else if (ionizationString == "[M+H]") {
+                cpd->adductString = "[M+H]+";
+            }
 
          } else if (line.startsWith("FORMULA:",Qt::CaseInsensitive)) {
              QString formula = line.mid(9,line.length()).simplified();
@@ -733,9 +904,20 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
                      cpd->fragment_intensity.push_back(ints);
                      cpd->fragment_mzs.push_back(mz);
                      int frag_indx = cpd->fragment_mzs.size()-1;
-					 if(mzintpair.size() >= 3) {
-						 cpd->fragment_iontype[frag_indx] = mzintpair.at(2).toStdString();
-					}
+
+                     if(mzintpair.size() >= 3) {
+                         cpd->fragment_iontype[frag_indx] = mzintpair.at(2).toStdString();
+                         QString fragLabel("");
+                         for (unsigned int k = 2; k < mzintpair.size(); k++) {
+                             if (k > 2) {
+                                 fragLabel.append(" ");
+                             }
+                             fragLabel.append(mzintpair.at(k));
+                         }
+                         cpd->fragment_labels.push_back(fragLabel.toStdString());
+                    } else {
+                         cpd->fragment_labels.push_back("");
+                    }
                  }
              }
          }
@@ -809,21 +991,40 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
 
     bool isHasExistingCols = false;
     bool isHasAdductString = false;
+    bool isHasFragLabelsColumn = false;
 
     while (queryCheckCols.next()){
         isHasExistingCols = true;
+
         if ("adductString" == queryCheckCols.value(1).toString()){
             isHasAdductString = true;
-            break;
         }
+
+        //Issue 159: Read and write fragment labels from msp databases.
+        if ("fragment_labels" == queryCheckCols.value(1).toString()) {
+            isHasFragLabelsColumn = true;
+        }
+
     }
 
-    bool isOldVersion = isHasExistingCols && !isHasAdductString;
+    if (isHasExistingCols) {
+        if (!isHasAdductString) {
+            QSqlQuery queryAddAdductsStringColumn(dbConnection);
+            if (!queryAddAdductsStringColumn.exec("ALTER TABLE compounds ADD adductString varchar(255);")){
+                qDebug() << "Database::saveCompoundsSQL() sql error in query queryAddFragLabelsColumn: " << queryAddAdductsStringColumn.lastError();
+                qDebug() << "Unable to adjust compounds database with adduct string column! exiting program.";
+                abort();
+            }
+        }
 
-    if (isOldVersion && isUpdateOldDBVersion) {
-        qDebug() << "compounds table of DB is not at most current version. Removing all old compounds via deleteAllCompoundsSQL()";
-        deleteAllCompoundsSQL(dbConnection);
-        isOldVersion = false;
+        if (!isHasFragLabelsColumn) {
+            QSqlQuery queryAddFragLabelsColumn(dbConnection);
+            if (!queryAddFragLabelsColumn.exec("ALTER TABLE compounds ADD fragment_labels TEXT;")){
+                qDebug() << "Database::saveCompoundsSQL() sql error in query queryAddFragLabelsColumn: " << queryAddFragLabelsColumn.lastError();
+                qDebug() << "Unable to adjust compounds database with fragment annotation column! exiting program.";
+                abort();
+            }
+        }
     }
 
     /*
@@ -852,7 +1053,8 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
                     ionizationMode int,\
                     category varchar(255),\
                     fragment_mzs text, \
-                    fragment_intensity text \
+                    fragment_intensity text, \
+                    fragment_labels text \
                     )"))  qDebug() << "Ho... " << query0.lastError();
 
         query0.exec("create index if not exists compound_db_idx on compounds(dbName)");
@@ -861,6 +1063,7 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
             QStringList cat;
             QStringList fragMz;
             QStringList fragIntensity;
+            QStringList fragLabels;
 
             for(string s : c->category) { cat << s.c_str(); }
 
@@ -870,10 +1073,12 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
 
                 QString mzQString = QString::number(mz, 'f', 5);
                 QString intensityQString = QString::number(intensity, 'f', 5);
+                QString fragLabel = QString(c->fragment_labels[i].c_str());
 
                 if (mzQString != "0.00000" && intensityQString != "0.00000") {
                     fragMz << mzQString;
                     fragIntensity << intensityQString;
+                    fragLabels << fragLabel;
                 }
             }
 
@@ -882,61 +1087,33 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
 
             QSqlQuery query1(dbConnection);
 
-            if (isOldVersion) {
-                query1.prepare("replace into compounds values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?)");
+            query1.prepare("replace into compounds values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?)");
 
-                query1.bindValue( 0, cid);
-                query1.bindValue( 1, QString(c->db.c_str()) );
-                query1.bindValue( 2, QString(c->id.c_str()) );
-                query1.bindValue( 3, QString(c->name.c_str()));
+            query1.bindValue( 0, cid);
+            query1.bindValue( 1, QString(c->db.c_str()) );
+            query1.bindValue( 2, QString(c->id.c_str()) );
+            query1.bindValue( 3, QString(c->name.c_str()));
+            query1.bindValue( 4, QString(c->adductString.c_str()));
 
-                query1.bindValue( 4, QString(c->formula.c_str()));
-                query1.bindValue( 5, QString(c->smileString.c_str()));
-                query1.bindValue( 6, QString(c->srmId.c_str()));
+            query1.bindValue( 5, QString(c->formula.c_str()));
+            query1.bindValue( 6, QString(c->smileString.c_str()));
+            query1.bindValue( 7, QString(c->srmId.c_str()));
 
-                query1.bindValue( 7, c->getExactMass() );
-                query1.bindValue( 8, c->charge);
-                query1.bindValue( 9, c->expectedRt);
-                query1.bindValue( 10, c->precursorMz);
-                query1.bindValue( 11, c->productMz);
+            query1.bindValue( 8, c->getExactMass() );
+            query1.bindValue( 9, c->charge);
+            query1.bindValue( 10, c->expectedRt);
+            query1.bindValue( 11, c->precursorMz);
+            query1.bindValue( 12, c->productMz);
 
-                query1.bindValue( 12, c->collisionEnergy);
-                query1.bindValue( 13, c->logP);
-                query1.bindValue( 14, c->virtualFragmentation);
-                query1.bindValue( 15, c->ionizationMode);
-                query1.bindValue( 16, cat.join(";"));
+            query1.bindValue( 13, c->collisionEnergy);
+            query1.bindValue( 14, c->logP);
+            query1.bindValue( 15, c->virtualFragmentation);
+            query1.bindValue( 16, c->ionizationMode);
+            query1.bindValue( 17, cat.join(";"));
 
-                query1.bindValue( 17, fragMz.join(";"));
-                query1.bindValue( 18, fragIntensity.join(";"));
-
-            } else {
-                query1.prepare("replace into compounds values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?)");
-
-                query1.bindValue( 0, cid);
-                query1.bindValue( 1, QString(c->db.c_str()) );
-                query1.bindValue( 2, QString(c->id.c_str()) );
-                query1.bindValue( 3, QString(c->name.c_str()));
-                query1.bindValue( 4, QString(c->adductString.c_str()));
-
-                query1.bindValue( 5, QString(c->formula.c_str()));
-                query1.bindValue( 6, QString(c->smileString.c_str()));
-                query1.bindValue( 7, QString(c->srmId.c_str()));
-
-                query1.bindValue( 8, c->getExactMass() );
-                query1.bindValue( 9, c->charge);
-                query1.bindValue( 10, c->expectedRt);
-                query1.bindValue( 11, c->precursorMz);
-                query1.bindValue( 12, c->productMz);
-
-                query1.bindValue( 13, c->collisionEnergy);
-                query1.bindValue( 14, c->logP);
-                query1.bindValue( 15, c->virtualFragmentation);
-                query1.bindValue( 16, c->ionizationMode);
-                query1.bindValue( 17, cat.join(";"));
-
-                query1.bindValue( 18, fragMz.join(";"));
-                query1.bindValue( 19, fragIntensity.join(";"));
-            }
+            query1.bindValue( 18, fragMz.join(";"));
+            query1.bindValue( 19, fragIntensity.join(";"));
+            query1.bindValue( 20, fragLabels.join(";"));
 
             if(!query1.exec())  qDebug() << query1.lastError();
         }

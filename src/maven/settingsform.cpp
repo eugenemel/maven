@@ -27,6 +27,9 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(S34Labeled,SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
     connect(D2Labeled, SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
     connect(isotopeC13Correction, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
+    connect(chkIgnoreNaturalAbundance, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
+    connect(chkExtractNIsotopes, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
+    connect(spnMaxIsotopesToExtract, SIGNAL(valueChanged(int)), SLOT(recomputeIsotopes()));
 
     connect(maxNaturalAbundanceErr, SIGNAL(valueChanged(double)), SLOT(recomputeIsotopes()));
     connect(minIsotopicCorrelation, SIGNAL(valueChanged(double)), SLOT(recomputeIsotopes()));
@@ -101,12 +104,15 @@ void SettingsForm::setFormValues() {
     S34Labeled->setCheckState( (Qt::CheckState) settings->value("S34Labeled").toInt() );
     D2Labeled->setCheckState(  (Qt::CheckState) settings->value("D2Labeled").toInt()  );
     isotopeC13Correction->setCheckState(  (Qt::CheckState) settings->value("isotopeC13Correction").toInt()  );
+    chkIgnoreNaturalAbundance->setCheckState(  (Qt::CheckState) settings->value("chkIgnoreNaturalAbundance").toInt()  );
+    chkExtractNIsotopes->setCheckState( (Qt::CheckState) settings->value("chkExtractNIsotopes").toInt() );
+
+    if (settings->contains("spnMaxIsotopesToExtract"))
+        spnMaxIsotopesToExtract->setValue(settings->value("spnMaxIsotopesToExtract").toInt());
 
     centroid_scan_flag->setCheckState( (Qt::CheckState) settings->value("centroid_scan_flag").toInt());
     scan_filter_min_intensity->setValue( settings->value("scan_filter_min_intensity").toInt());
     scan_filter_min_quantile->setValue(  settings->value("scan_filter_min_quantile").toInt());
-
-
 
    QStringList folders;       folders << "scriptsFolder" << "methodsFolder" << "Rprogram";
    QList<QLineEdit*> items;    items  << scriptsFolder << methodsFolder << Rprogram;
@@ -161,6 +167,9 @@ void SettingsForm::setFormValues() {
     if (settings->contains("spnBkmkRtTol"))
         spnBkmkRtTol->setValue(settings->value("spnBkmkRtTol").toDouble());
 
+    if (settings->contains("chkIncludeChildren"))
+        chkIncludeChildren->setCheckState( (Qt::CheckState) settings->value("chkIncludeChildren").toInt());
+
 }
 
 
@@ -174,12 +183,17 @@ void SettingsForm::getFormValues() {
     settings->setValue("grouping_maxRtWindow",grouping_maxRtWindow->value());
     settings->setValue("maxNaturalAbundanceErr",maxNaturalAbundanceErr->value());
     settings->setValue("maxIsotopeScanDiff",maxIsotopeScanDiff->value());
+
     settings->setValue("minIsotopicCorrelation",minIsotopicCorrelation->value());
     settings->setValue("C13Labeled",C13Labeled->checkState() );
     settings->setValue("N15Labeled",N15Labeled->checkState() );
     settings->setValue("S34Labeled",S34Labeled->checkState() );
     settings->setValue("D2Labeled", D2Labeled->checkState()  );
     settings->setValue("isotopeC13Correction", isotopeC13Correction->checkState()  );
+    settings->setValue("chkIgnoreNaturalAbundance", chkIgnoreNaturalAbundance->checkState() );
+    settings->setValue("chkExtractNIsotopes", chkExtractNIsotopes->checkState() );
+    settings->setValue("spnMaxIsotopesToExtract", spnMaxIsotopesToExtract->value());
+
     settings->setValue("amuQ1", amuQ1->value());
     settings->setValue("amuQ3", amuQ3->value());
     settings->setValue("baseline_quantile", baseline_quantile->value());
@@ -243,6 +257,7 @@ void SettingsForm::getFormValues() {
     settings->setValue("chkBkmkWarnMz", chkBkmkWarnMz->checkState());
     settings->setValue("spnBkmkmzTol", spnBkmkmzTol->value());
     settings->setValue("spnBkmkRtTol", spnBkmkRtTol->value());
+    settings->setValue("chkIncludeChildren", chkIncludeChildren->checkState());
 
 }
 

@@ -35,8 +35,10 @@ public slots:
 	  void setInfo(vector<mzLink>&links);
       void setInfo(vector<mzSlice*>&slices);
       void setupScanListHeader();
+      void setupMs1ScanHeader();
 
 	  void addScanItem(Scan* scan);
+      void addMs1ScanItem(Scan *scan);
 	  void clearTree();
 	  void filterTree(QString needle);
       void copyToClipbard();

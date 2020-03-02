@@ -74,10 +74,16 @@ void ProjectDockWidget::warnUserEmptySampleFiles() {
     if (fileLoader->getEmptyFiles().size() > 0){
         QString msg = QString();
 
+        int counter = 0;
         msg.append("mzFileIO::loadSamples(): The samples\n\n");
         for (auto file : fileLoader->getEmptyFiles()) {
             msg.append(file);
             msg.append("\n\n");
+            if (counter >= 5) {
+                msg.append("... and others...");
+                break;
+            }
+            counter++;
         }
         msg.append("\n\ndid not contain any scans.");
         msg.append("\n\nPlease consider examining and reloading these file(s).");
@@ -478,15 +484,6 @@ void ProjectDockWidget::closeProject() {
         _mainwindow->deleteAllPeakTables();
         unloadAllSamples();
     }
-}
-
-int ProjectDockWidget::bookmarkPeakGroup(PeakGroup* group) {
-    if (!currentProject) saveProject();
-
-    if (currentProject)
-        return currentProject->writeGroupSqlite(group,0,"Bookmarks");
-    else
-        return -1;
 }
 
 void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
@@ -904,10 +901,13 @@ void ProjectDockWidget::contextMenuEvent ( QContextMenuEvent * event )
 
     menu.addSeparator();
 
-    QAction *z1 = menu.addAction("All Samples Visible");
+    QAction *z3 = menu.addAction("Toggle Visibility of Selected Samples");
+    connect(z3, SIGNAL(triggered()), this, SLOT(toggleSelectedSamples()));
+
+    QAction *z1 = menu.addAction("Make All Samples Visible");
     connect(z1, SIGNAL(triggered()), this, SLOT(allSamplesVisible()));
 
-    QAction *z2 = menu.addAction("All Samples Invisible");
+    QAction *z2 = menu.addAction("Make All Samples Invisible");
     connect(z2, SIGNAL(triggered()), this, SLOT(allSamplesInvisible()));
 
     menu.exec(event->globalPos());
@@ -922,6 +922,10 @@ void ProjectDockWidget::allSamplesVisible() {
     }
 
     _mainwindow->getEicWidget()->replotForced();
+
+    if (_mainwindow->barPlotWidget->isVisible()) {
+        _mainwindow->barPlotWidget->refresh();
+    }
 }
 
 void ProjectDockWidget::allSamplesInvisible() {
@@ -933,6 +937,26 @@ void ProjectDockWidget::allSamplesInvisible() {
     }
 
     _mainwindow->getEicWidget()->replotForced();
+
+    if (_mainwindow->barPlotWidget->isVisible()) {
+        _mainwindow->barPlotWidget->refresh();
+    }
+}
+
+void ProjectDockWidget::toggleSelectedSamples() {
+    qDebug() << "ProjectDockWidget::toggleSelectedSamples()";
+
+    for (unsigned int i = 0; i < _treeWidget->topLevelItemCount(); i++){
+
+        QTreeWidgetItem* item = _treeWidget->topLevelItem(i);
+        toggleSelectedSampleVisibility(item);
+    }
+
+    _mainwindow->getEicWidget()->replotForced();
+
+    if (_mainwindow->barPlotWidget->isVisible()) {
+        _mainwindow->barPlotWidget->refresh();
+    }
 }
 
 void ProjectDockWidget::keyPressEvent(QKeyEvent *e ) {
@@ -942,6 +966,22 @@ void ProjectDockWidget::keyPressEvent(QKeyEvent *e ) {
     }
 
     QDockWidget::keyPressEvent(e);
+}
+
+void ProjectDockWidget::toggleSelectedSampleVisibility(QTreeWidgetItem *item) {
+
+    if (!item) return;
+
+    if(item->type() == SampleType && item->isSelected()) {
+        QVariant v = item->data(0,Qt::UserRole);
+        mzSample*  sample =  v.value<mzSample*>();
+        sample->isSelected = !sample->isSelected;
+        item->setCheckState(0, (sample->isSelected ? Qt::Checked : Qt::Unchecked));
+    }
+
+    for (int i = 0; i < item->childCount(); ++i){
+        toggleSelectedSampleVisibility(item->child(i));
+    }
 }
 
 void ProjectDockWidget::toggleSamplesVisibility(QTreeWidgetItem *item, bool isVisible) {

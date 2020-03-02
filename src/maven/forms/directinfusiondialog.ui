@@ -70,8 +70,8 @@
    <widget class="QLabel" name="lblMatchXPeaks">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>90</y>
+      <x>460</x>
+      <y>60</y>
       <width>151</width>
       <height>21</height>
      </rect>
@@ -83,8 +83,8 @@
    <widget class="QSpinBox" name="spnMatchXPeaks">
     <property name="geometry">
      <rect>
-      <x>190</x>
-      <y>90</y>
+      <x>610</x>
+      <y>60</y>
       <width>211</width>
       <height>22</height>
      </rect>
@@ -103,7 +103,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>40</y>
+      <y>60</y>
       <width>121</width>
       <height>16</height>
      </rect>
@@ -115,8 +115,8 @@
    <widget class="QSpinBox" name="spnFragTol">
     <property name="geometry">
      <rect>
-      <x>180</x>
-      <y>40</y>
+      <x>150</x>
+      <y>60</y>
       <width>221</width>
       <height>22</height>
      </rect>
@@ -128,8 +128,8 @@
    <widget class="QCheckBox" name="isRequireAdductMatch">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>150</y>
+      <x>10</x>
+      <y>30</y>
       <width>791</width>
       <height>20</height>
      </rect>
@@ -139,6 +139,126 @@
     </property>
     <property name="checked">
      <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="chkFindPrecursorIon">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>120</y>
+      <width>801</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Find precursor Ion in MS1 scan</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblParTol">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>150</y>
+      <width>111</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Parent PPM Tolr</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="spnParTol">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>150</y>
+      <width>221</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>5</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblMs1ScanFilter">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>120</y>
+      <width>141</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>MS1 Scan Filter</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="txtMs1ScanFilter">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>140</y>
+      <width>361</width>
+      <height>61</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="spnParentMinIntensity">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>180</y>
+      <width>221</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="suffix">
+     <string> ions</string>
+    </property>
+    <property name="maximum">
+     <double>100000000000000000.000000000000000</double>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="spnFragMinIntensity">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>90</y>
+      <width>221</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="suffix">
+     <string> ions</string>
+    </property>
+    <property name="maximum">
+     <double>1000000000000000000.000000000000000</double>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblFragMinIntensity">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>90</y>
+      <width>121</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Frag Min Intensity</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblParentMinIntensity">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>180</y>
+      <width>131</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Parent Min Intensity</string>
     </property>
    </widget>
   </widget>

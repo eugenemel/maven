@@ -9,6 +9,7 @@
 #include "directinfusionprocessor.h"
 #include "editpeakgroupingdialog.h"
 #include "lipidsummarizationutils.h"
+#include "filtertagsdialog.h"
 
 class MainWindow;
 class TrainDialog;
@@ -74,7 +75,8 @@ public slots:
 
 	  void markGroupBad();
 	  void markGroupGood();
-	  void markGroupIgnored();
+      void unmarkSelectedGroups();
+      void tagGroup(const QString& tagLabel);
           void showAllGroups();
 	  void showHeatMap();
 	  void showGallery();
@@ -99,6 +101,8 @@ public slots:
       void showEditPeakGroupDialog();
       void hideEditPeakGroupDialog();
       void selectGroup(PeakGroup *group);
+      void updateTagFilter();
+      void exportAlignmentFile();
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event);
@@ -124,6 +128,13 @@ private:
 
           TrainDialog* traindialog;
           ClusterDialog*       clusterDialog;
+
+          QLineEdit*  filterEditor;
+
+          TagFilterState tagFilterState;
+          QToolButton *btnTagsFilter;
+          FilterTagsDialog*     filterTagsDialog;
+
           QDialog* 	 filtersDialog;
           EditPeakGroupDialog* editPeakGroupDialog;
 

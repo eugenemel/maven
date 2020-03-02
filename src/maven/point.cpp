@@ -41,7 +41,7 @@ QRectF EicPoint::boundingRect() const
 }
 
 void EicPoint::hoverEnterEvent (QGraphicsSceneHoverEvent*) {
-    qDebug() << "EicPoint:: hoverEnterEvent()";
+//    qDebug() << "EicPoint:: hoverEnterEvent()";
     //this->setFocus(Qt::MouseFocusReason);
 
 	string sampleName;
@@ -70,7 +70,7 @@ void EicPoint::hoverEnterEvent (QGraphicsSceneHoverEvent*) {
 }
 
 void EicPoint::hoverLeaveEvent ( QGraphicsSceneHoverEvent*) {
-    qDebug() << "EicPoint:: hoverLeaveEvent()";
+//    qDebug() << "EicPoint:: hoverLeaveEvent()";
     clearFocus();
 
     if (_group)  _group->isFocused = false;

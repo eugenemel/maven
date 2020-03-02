@@ -28,7 +28,6 @@ public slots:
     void saveProjectAs();
     void closeProject();
     void loadAllPeakTables();
-    int bookmarkPeakGroup(PeakGroup* group);
     void loadProjectSQLITE(QString filename);
     void saveProjectSQLITE(QString filename);
 
@@ -36,7 +35,9 @@ public slots:
     void saveProjectXML(QString filename, TableDockWidget* peakTable = 0);
     void allSamplesVisible();
     void allSamplesInvisible();
+    void toggleSelectedSamples();
     void toggleSamplesVisibility(QTreeWidgetItem *item, bool isVisible);
+    void toggleSelectedSampleVisibility(QTreeWidgetItem *item);
 
 protected slots:
       void keyPressEvent( QKeyEvent *e );

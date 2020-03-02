@@ -14,6 +14,7 @@ class EditPeakGroupDialog : public QDialog, public Ui_editPeakGroupDialog {
 
     public slots:
         void show();
+        void onAnchorClicked(const QUrl &link);
 
 };
 

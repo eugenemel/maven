@@ -181,19 +181,22 @@ void SpectraWidget::setScan(Peak* peak) {
     cerr << "SpectraWidget::setScan(peak) " << endl;
     links.clear();
 
-    if (peak == NULL ) return;
+    if (!peak) return;
 
     mzSample* sample = peak->getSample();
-    if ( sample == NULL ) return;
+    if (!sample) return;
 
     Scan* scan = sample->getScan(peak->scan);
-    if ( scan == NULL ) return;
+    if (!scan) return;
 
     setCurrentScan(scan);
 
+    //direct infusion case: no need to update MS1 scan
+    if (peak->mzmax - peak->mzmin > 0.5) return;
+
     _focusCoord = QPointF(peak->peakMz,peak->peakIntensity);
 
-    //These affect the MS1 plot - do not change
+    //These affect the MS1 plot
     _minX = peak->peakMz-2;
     _maxX = peak->peakMz+6;
 
@@ -292,6 +295,15 @@ void SpectraWidget::overlayCompound(Compound* c) {
    for(int i=0; i < c->fragment_mzs.size(); i++) 	   hit.mzList << c->fragment_mzs[i];
    for(int i=0; i < c->fragment_intensity.size(); i++) hit.intensityList << c->fragment_intensity[i];
 
+   //Issue 159: Careful to avoid array out of bounds violations
+   for(int i=0; i < c->fragment_mzs.size(); i++) {
+       if (c->fragment_labels.size() == c->fragment_mzs.size()) {
+           hit.fragLabelList << QString(c->fragment_labels[i].c_str());
+       } else {
+           hit.fragLabelList << QString("");
+       }
+   }
+
    //remove previous annotations
    links.clear();
 
@@ -334,7 +346,13 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
         float hitMz=hit.mzList[i];
         int hitIntensity= 1;
         if (i < hit.intensityList.size()) hitIntensity=hit.intensityList[i];
-        int pos = _currentScan->findHighestIntensityPos(hitMz,ppmWindow);
+
+        double ppmMz = hitMz;
+        if (_currentScan->precursorMz > 0) {
+            ppmMz = _currentScan->precursorMz;
+        }
+
+        int pos = _currentScan->findHighestIntensityPos(hitMz, ppmMz, ppmWindow);
 
         int x = toX(hitMz);
         int y = toY(hitIntensity/maxIntensity*_maxY,SCALE);
@@ -356,6 +374,19 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
         } else {
             //cerr << "!matched:" << hitMz << endl;
 
+        }
+
+        //Issue 159: add fragment labels
+        if (this->_showOverlayLabels && !hit.fragLabelList[i].isEmpty()) {
+
+            Note* label = new Note(QString(hit.fragLabelList[i]));
+
+            //position label
+            label->setPos(x,y-5);
+            label->setExpanded(true);
+
+            scene()->addItem(label);
+            _items.push_back(label);
         }
     }
 }
@@ -977,9 +1008,14 @@ void SpectraWidget::contextMenuEvent(QContextMenuEvent * event) {
     
     QAction* a5 = menu.addAction("Centroided Mode");
     connect(a5, SIGNAL(triggered()), SLOT(setCentroidedMode()));
-        
-    
-   menu.exec(event->globalPos());
+
+    menu.addSeparator();
+    QAction* a7 = menu.addAction("Display Fragment Labels");
+    connect (a7, SIGNAL(triggered()), SLOT(toggleOverlayLabels()));
+    a7->setCheckable(true);
+    a7->setChecked(_showOverlayLabels);
+
+    menu.exec(event->globalPos());
 }
 
 void SpectraWidget::spectraToClipboard() {
@@ -1127,3 +1163,9 @@ void SpectraWidget::findSimilarScans() {
 
 }
 
+void SpectraWidget::toggleOverlayLabels() {
+    qDebug() << "SpectraWidget::toggleOverlayLabels()";
+    _showOverlayLabels = !_showOverlayLabels;
+    drawGraph();
+    repaint();
+}

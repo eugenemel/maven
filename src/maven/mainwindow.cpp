@@ -102,6 +102,12 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     DB.adductsDB = enabledAdducts;
     // === Issue 76 ========================================== //
 
+    // Issue 127: Extra peak group tags
+    QString tagsFile = methodsFolder + "/TAGS.csv";
+    if (QFile::exists(tagsFile)) {
+        DB.loadPeakGroupTags(tagsFile.toStdString());
+    }
+
     clsf = new ClassifierNeuralNet();    //clsf = new ClassifierNaiveBayes();
     QString clsfModelFilename = methodsFolder +  "/"  +   defaultModelFile;
     if(QFile::exists(clsfModelFilename)) {
@@ -146,6 +152,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     fragmentationEventsWidget	= new TreeDockWidget(this,"MS2 List", 7);
     fragmentationEventsWidget->setupScanListHeader();
 
+    ms1ScansListWidget = new TreeDockWidget(this, "MS1 List", 7);
+    ms1ScansListWidget->setupMs1ScanHeader();
+
     srmDockWidget 	= new TreeDockWidget(this,"SRM List", 1);
     ligandWidget = new LigandWidget(this);
     heatmap	 = 	  new HeatMap(this);
@@ -168,6 +177,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     isotopeWidget->setVisible(false);
     massCalcWidget->setVisible(false);
     fragmentationEventsWidget->setVisible(false);
+    ms1ScansListWidget->setVisible(false);
     bookmarkedPeaks->setVisible(false);
     spectraDockWidget->setVisible(false);
     scatterDockWidget->setVisible(false);
@@ -232,6 +242,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     addDockWidget(Qt::BottomDockWidgetArea,spectraDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,covariantsPanel,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,fragmentationEventsWidget,Qt::Horizontal);
+    addDockWidget(Qt::BottomDockWidgetArea,ms1ScansListWidget, Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,scatterDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,bookmarkedPeaks,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,galleryDockWidget,Qt::Horizontal);
@@ -250,6 +261,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     tabifyDockWidget(spectraDockWidget,isotopeWidget);
     tabifyDockWidget(spectraDockWidget,massCalcWidget);
     tabifyDockWidget(spectraDockWidget,fragmentationEventsWidget);
+    tabifyDockWidget(spectraDockWidget,ms1ScansListWidget);
     tabifyDockWidget(spectraDockWidget,covariantsPanel);
     tabifyDockWidget(spectraDockWidget,galleryDockWidget);
     tabifyDockWidget(spectraDockWidget,rconsoleDockWidget);
@@ -270,6 +282,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     projectDockWidget->show();
     scatterDockWidget->hide();
     fragmentationEventsWidget->hide();
+    ms1ScansListWidget->hide();
 
 
 
@@ -456,7 +469,6 @@ void MainWindow::setIonizationMode( int x ) {
     qDebug() << "setIonizationMode: " << x;
     _ionizationMode=x;
      massCalcWidget->setCharge(_ionizationMode);
-     isotopeWidget->setCharge(_ionizationMode);
 
      if(x>0) adductType->setCurrentText("[M+H]+");
      else if(x<0) adductType->setCurrentText("[M-H]-");
@@ -535,8 +547,25 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
     }
 
     if (isAddBookmark) {
-        PeakGroup *pg = bookmarkedPeaks->addPeakGroup(group,true);
-        bookmarkedPeaks->selectGroup(pg);
+
+        bool isAddChildren = settings->value("chkIncludeChildren", false).toBool();
+
+        if (isAddChildren) {
+
+            //does not copy/duplicate original group
+            PeakGroup *pg = bookmarkedPeaks->addPeakGroup(group,true);
+            bookmarkedPeaks->selectGroup(pg);
+
+        } else {
+
+            //duplicates original group, removes children from copy.
+            //TODO: memory leak
+            PeakGroup *groupCopy = new PeakGroup(*group);
+            groupCopy->children.clear();
+            groupCopy = bookmarkedPeaks->addPeakGroup(groupCopy, true);
+            bookmarkedPeaks->selectGroup(groupCopy);
+        }
+
     }
 }
 
@@ -613,6 +642,7 @@ void MainWindow::setMzValue() {
         if(eicWidget->isVisible() ) eicWidget->setMzSlice(mz);
         if(massCalcWidget->isVisible() ) massCalcWidget->setMass(mz);
         if(fragmentationEventsWidget->isVisible()   ) showFragmentationScans(mz);
+        if(ms1ScansListWidget->isVisible() ) showMs1Scans(mz);
     }
     suggestPopup->addToHistory(QString::number(mz,'f',5));
 }
@@ -622,6 +652,7 @@ void MainWindow::setMzValue(float mz) {
     if (eicWidget->isVisible() ) eicWidget->setMzSlice(mz);
     if (massCalcWidget->isVisible() ) massCalcWidget->setMass(mz);
     if (fragmentationEventsWidget->isVisible()   ) showFragmentationScans(mz);
+    if (ms1ScansListWidget->isVisible() ) showMs1Scans(mz);
 }
 
 void MainWindow::print(){
@@ -965,19 +996,45 @@ void MainWindow::createMenus() {
     connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
     fileMenu->addAction(exitAct);
 
+    //Issue 144: Reorganize menu contents
+    QAction *actionCalibrate = widgetsMenu->addAction(QIcon(rsrcPath + "/positive_ion.png"), "Calibrate");
+    actionCalibrate->setToolTip("Calibrate");
+    connect(actionCalibrate,SIGNAL(triggered()), calibrateDialog, SLOT(show()));
+
+    QAction *actionAlign = widgetsMenu->addAction(QIcon(rsrcPath + "/textcenter.png"), "Align");
+    actionAlign->setToolTip("Align Samples");
+    connect(actionAlign, SIGNAL(triggered()), alignmentDialog, SLOT(show()));
+
+    QAction *actionMatch = widgetsMenu->addAction(QIcon(rsrcPath + "/spectra_search.png"), "Match");
+    actionMatch->setToolTip(tr("Search Spectra for Fragmentation Patterns"));
+    connect(actionMatch, SIGNAL(triggered()), spectraMatchingForm, SLOT(show()));
+
+    QAction *actionDatabases = widgetsMenu->addAction(QIcon(rsrcPath + "/dbsearch.png"), "Databases");
+    actionDatabases->setToolTip("Database Search");
+    connect(actionDatabases, SIGNAL(triggered()), SLOT(compoundDatabaseSearch()));
+
+    widgetsMenu->addSeparator();
+
+    QAction *aMs1Events = widgetsMenu->addAction("MS1 Scans List");
+    aMs1Events->setCheckable(true);
+    aMs1Events->setChecked(false);
+    connect(aMs1Events, SIGNAL(toggled(bool)), ms1ScansListWidget, SLOT(setVisible(bool)));
+
+    QAction* aj = widgetsMenu->addAction("MS2 Scans List");
+    aj->setCheckable(true);
+    aj->setChecked(false);
+    connect(aj,SIGNAL(toggled(bool)), fragmentationEventsWidget,SLOT(setVisible(bool)));
+
+    widgetsMenu->addSeparator();
+
     QAction* hideWidgets = new QAction(tr("Hide Widgets"), this);
     hideWidgets->setShortcut(tr("F11"));
     connect(hideWidgets, SIGNAL(triggered()), SLOT(hideDockWidgets()));
     widgetsMenu->addAction(hideWidgets);
 
-    QAction* aj = widgetsMenu->addAction("Fragmentation Events List");
-    aj->setCheckable(true);  aj->setChecked(false);
-    connect(aj,SIGNAL(toggled(bool)),fragmentationEventsWidget,SLOT(setVisible(bool)));
-
     QAction* si = widgetsMenu->addAction("Sample Images");
     si->setCheckable(true);  si->setChecked(false);
     connect(si,SIGNAL(toggled(bool)),sampleImageDockWidget,SLOT(setVisible(bool)));
-
 
     menuBar()->show();
 }
@@ -1026,35 +1083,11 @@ void MainWindow::createToolBars() {
     btnAdducts->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnAdducts->setToolTip(tr("Select Active Adducts"));
 
-    QToolButton *btnAlign = new QToolButton(toolBar);
-    btnAlign->setText("Align");
-    btnAlign->setIcon(QIcon(rsrcPath + "/textcenter.png"));
-    btnAlign->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnAlign->setToolTip(tr("Align Samples"));
-
-    QToolButton *btnCalibrate = new QToolButton(toolBar);
-    btnCalibrate->setText("Calibrate");
-    btnCalibrate->setIcon(QIcon(rsrcPath + "/positive_ion.png"));
-    btnCalibrate->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnCalibrate->setToolTip(tr("Calibrate"));
-
-    QToolButton *btnDbSearch = new QToolButton(toolBar);
-    btnDbSearch->setText("Databases");
-    btnDbSearch->setIcon(QIcon(rsrcPath + "/dbsearch.png"));
-    btnDbSearch->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnDbSearch->setToolTip(tr("Database Search"));
-
     QToolButton *btnFeatureDetect = new QToolButton(toolBar);
     btnFeatureDetect->setText("Peaks");
     btnFeatureDetect->setIcon(QIcon(rsrcPath + "/featuredetect.png"));
     btnFeatureDetect->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnFeatureDetect->setToolTip(tr("Feature Detection"));
-
-    QToolButton *btnSpectraMatching = new QToolButton(toolBar);
-    btnSpectraMatching->setText("Match");
-    btnSpectraMatching->setIcon(QIcon(rsrcPath + "/spectra_search.png"));
-    btnSpectraMatching->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnSpectraMatching->setToolTip(tr("Seach Spectra for Fragmentation Patterns"));
 
     QToolButton *btnDirectInfusion = new QToolButton(toolBar);
     btnDirectInfusion->setText("Direct Infusion");
@@ -1072,11 +1105,7 @@ void MainWindow::createToolBars() {
     connect(btnSave, SIGNAL(clicked()), projectDockWidget, SLOT(saveProject()));
     connect(btnLibrary, SIGNAL(clicked()), libraryDialog, SLOT(show()));
     connect(btnAdducts, SIGNAL(clicked()), SLOT(showSelectAdductsDialog()));
-    connect(btnAlign,SIGNAL(clicked()), alignmentDialog, SLOT(show()));
-    connect(btnCalibrate,SIGNAL(clicked()), calibrateDialog, SLOT(show()));
-    connect(btnDbSearch,SIGNAL(clicked()), SLOT(compoundDatabaseSearch()));
     connect(btnFeatureDetect,SIGNAL(clicked()), SLOT(showMassSlices()));
-    connect(btnSpectraMatching,SIGNAL(clicked()),spectraMatchingForm,SLOT(show()));
     connect(btnDirectInfusion, SIGNAL(clicked()), SLOT(showDirectInfusionDialog()));
     connect(btnSettings,SIGNAL(clicked()),settingsForm,SLOT(show()));
 
@@ -1084,11 +1113,7 @@ void MainWindow::createToolBars() {
     toolBar->addWidget(btnSave);
     toolBar->addWidget(btnLibrary);
     toolBar->addWidget(btnAdducts);
-    toolBar->addWidget(btnAlign);
-    toolBar->addWidget(btnCalibrate);
-    toolBar->addWidget(btnDbSearch);
     toolBar->addWidget(btnFeatureDetect);
-    toolBar->addWidget(btnSpectraMatching);
     toolBar->addWidget(btnDirectInfusion);
     toolBar->addWidget(btnSettings);
 
@@ -1135,7 +1160,7 @@ void MainWindow::createToolBars() {
     quantType->addItem("Height");
     quantType->addItem("Retention Time");
     quantType->addItem("Quality");
-    quantType->setToolTip("Peak Quntitation Type");
+    quantType->setToolTip("Peak Quantitation Type");
     connect(quantType,SIGNAL(activated(int)),eicWidget,SLOT(replot()));
 
     adductType = new QComboBox(hBox);
@@ -1221,9 +1246,6 @@ void MainWindow::addToHistory(const mzSlice& slice) {
     history.addToHistory(slice);
 }
 
-
-
-
 bool MainWindow::addSample(mzSample* sample) {
     if ( sample && sample->scans.size() > 0 ) {
         sample->setSampleOrder(samples.size());
@@ -1284,7 +1306,7 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
         eicWidget->setPeakGroup(group);
     }
 
-    if ( isotopeWidget && isotopeWidget->isVisible() && group->compound != NULL ) {
+    if ( isotopeWidget && isotopeWidget->isVisible() && group->compound ) {
         isotopeWidget->setCompound(group->compound);
     }
 
@@ -1469,8 +1491,6 @@ void MainWindow::showPeakInfo(Peak* _peak) {
     }
 
    if ( isotopeWidget->isVisible() ) {
-        isotopeWidget->setIonizationMode(ionizationMode);
-        isotopeWidget->setCharge(ionizationMode);
         isotopeWidget->setPeak(_peak);
     }
 
@@ -1614,6 +1634,26 @@ void MainWindow::showFragmentationScans(float pmz) {
     }
 }
 
+void MainWindow::showMs1Scans(float pmz) {
+
+    if (!ms1ScansListWidget || !ms1ScansListWidget->isVisible() || samples.empty()) return;
+
+    float ppm = getUserPPM();
+    float minMz = pmz - ppm / 1e6;
+    float maxMz = pmz + ppm / 1e6;
+
+    ms1ScansListWidget->clearTree();
+
+    for ( unsigned int i=0; i < samples.size(); i++ ) {
+        for (unsigned int j=0; j < samples[i]->scans.size(); j++ ) {
+            Scan* s = samples[i]->scans[j];
+            if (s->mslevel == 1 && minMz >= s->minMz() && maxMz <= s->maxMz()) {
+                ms1ScansListWidget->addMs1ScanItem(s);
+            }
+        }
+    }
+
+}
 
 QWidget* MainWindow::eicWidgetController() {
 
@@ -1814,7 +1854,7 @@ PeakGroup::QType MainWindow::getUserQuantType() {
 void MainWindow::markGroup(PeakGroup* group, char label) {
     if(!group) return;
 
-    group->setLabel(label);
+    group->addLabel(label);
     bookmarkPeakGroup(group);
     //if (getClassifier()) { getClassifier()->refineModel(group); }
     //getPlotWidget()->scene()->update();
@@ -2003,9 +2043,21 @@ QColor MainWindow::getBackgroundAdjustedBlack(QWidget *widget){
 }
 
 void MainWindow::updateAdductComboBox(vector<Adduct*> enabledAdducts) {
+
     DB.adductsDB = enabledAdducts;
+
     adductType->clear();
+
+    if (isotopeWidget) {
+        isotopeWidget->adductComboBox->clear();
+    }
+
     for(Adduct* a: DB.adductsDB) {
         adductType->addItem(a->name.c_str(),QVariant::fromValue(a));
+
+        if (isotopeWidget) {
+            isotopeWidget->adductComboBox->addItem(a->name.c_str(),QVariant::fromValue(a));
+        }
     }
+
 }

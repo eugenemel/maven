@@ -75,6 +75,7 @@ void EicWidget::mouseReleaseEvent(QMouseEvent *event) {
  //qDebug <<" EicWidget::mouseReleaseEvent(QMouseEvent *event)";
     QGraphicsView::mouseReleaseEvent(event);
 
+    _intensityZoomVal = -1.0f;
 
     //int selectedItemCount = scene()->selectedItems().size();
     mzSlice bounds = visibleEICBounds();
@@ -82,6 +83,15 @@ void EicWidget::mouseReleaseEvent(QMouseEvent *event) {
     _mouseEndPos	= event->pos();
     float rtmin = invX( std::min(_mouseStartPos.x(), _mouseEndPos.x()) );
     float rtmax = invX( std::max(_mouseStartPos.x(), _mouseEndPos.x()) );
+
+    float mouseStartPosY = _mouseStartPos.y();
+    float mouseEndPosY = _mouseEndPos.y();
+
+    //Issue 104: for debugging
+    //qDebug() << "mouseStartPosY: " << mouseStartPosY << ", mouseEndPosY: " << mouseEndPosY;
+
+    float intensityMax = invY( std::min(mouseStartPosY, mouseEndPosY) );
+
     int deltaX =  _mouseEndPos.x() - _mouseStartPos.x();
     _mouseStartPos = _mouseEndPos; //
 
@@ -110,6 +120,7 @@ void EicWidget::mouseReleaseEvent(QMouseEvent *event) {
                     _slice.rtmax = _selectedGroup.meanRt + d;
                 }
             }
+            _intensityZoomVal = intensityMax;
         } else if ( deltaX < 0 ) {	 //zoomout
             qDebug() << "zoomOut";
             //zoom(_zoomFactor * 1.2 );
@@ -119,6 +130,7 @@ void EicWidget::mouseReleaseEvent(QMouseEvent *event) {
             if ( _slice.rtmax > bounds.rtmax) _slice.rtmax=bounds.rtmax;
         }
         replot(getSelectedGroup());
+        _intensityZoomVal = -1.0f;
     }
 }
 
@@ -383,16 +395,23 @@ void EicWidget::findPlotBounds() {
     _minY = 0;
     _maxY = 0;   //intensity
 
+    //Issue 104: use zoomed value if pre-specified
+    if (_intensityZoomVal > 0) {
+        _maxY = _intensityZoomVal;
+    }
+
     //approximate version.. look for maximum intensity peak
-    for(int i=0; i < peakgroups.size(); i++ ) {
-        if ( mzUtils::checkOverlap(peakgroups[i].minRt, peakgroups[i].maxRt, _slice.rtmin, _slice.rtmax) > 0) {
-            if( peakgroups[i].maxIntensity > _maxY ) {
-                _maxY = peakgroups[i].maxIntensity;
+    if (_maxY == 0) {
+        for(int i=0; i < peakgroups.size(); i++ ) {
+            if ( mzUtils::checkOverlap(peakgroups[i].minRt, peakgroups[i].maxRt, _slice.rtmin, _slice.rtmax) > 0) {
+                if( peakgroups[i].maxIntensity > _maxY ) {
+                    _maxY = peakgroups[i].maxIntensity;
+                }
             }
         }
     }
 
-    //no maximum intensity peak was found. .find highest intestingy in EIC.
+    //no maximum intensity peak was found. Find highest intensity in EIC.
     if (_maxY == 0) {
         for(int i=0; i < eics.size(); i++ ) {
             EIC* eic = eics[i];
@@ -404,9 +423,11 @@ void EicWidget::findPlotBounds() {
         }
     }
 
+    //Issue 104: Do not make this adjustment when zooming
+    if (_intensityZoomVal < 0) {
+         _maxY = (_maxY * 1.3) + 1;
+    }
 
-    //if(_minY <= 0) _minY = 0;
-    _maxY = (_maxY * 1.3) + 1;
     if (_minX > _maxX) swap(_minX,_maxX);
     //qDebug() << "EicWidget::findPlotBounds()" << _slice.rtmin << " " << _slice.rtmax << " " << _minY << " " << _maxY;
 }
@@ -871,6 +892,11 @@ void EicWidget::replot(PeakGroup* group ) {
     if(_showMergedEIC) addMergedEIC();
     setFocusLine(_focusLineRt);  //qDebug() << "\tsetFocusLine msec=" << timerX.elapsed();
     if(_showMS2Events && _slice.mz>0) { addMS2Events(_slice.mzmin, _slice.mzmax); }
+
+    if (getMainWindow()) { getMainWindow()->showMs1Scans(_slice.mz); } //Issue 141
+
+    if (_showIsotopePlot) addIsotopicPlot(group);
+    if (_showBoxPlot)     addBoxPlot(group);
 
     addAxes();
    //setStatusText("Unknown Expected Retention Time!");

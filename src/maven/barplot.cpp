@@ -101,13 +101,16 @@ void BarPlot::setPeakGroup(PeakGroup* group) {
 }
 
 void BarPlot::wheelEvent ( QGraphicsSceneWheelEvent * event ) {
-    if (!isOnEicWidget) return;
-    qDebug() << "wheelEvent()" ;
-    qreal scale = this->scale();
-    event->delta() > 0 ? scale *= 1.2 :  scale *= 0.9;
-    if (scale < 0.1) scale=0.1;
-    if (scale > 2 ) scale=2;
-    this->setScale(scale);
+    if (isOnEicWidget) {
+        qDebug() << "BarPlot::wheelEvent()" ;
+        qreal scale = this->scale();
+        event->delta() > 0 ? scale *= 1.2 :  scale *= 0.9;
+        if (scale < 0.1) scale=0.1;
+        if (scale > 2 ) scale=2;
+        this->setScale(scale);
+    } else {
+        QGraphicsItem::wheelEvent(event);
+    }
 }
 
 void BarPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)

@@ -10,10 +10,12 @@
 #include <QFile>
 #include <QTextStream>
 #include <QDebug>
-
+#include <QIcon>
 
 #include "mzSample.h"
 #include "mzUtils.h"
+
+class PeakGroupTag;
 
 class Database {
 
@@ -46,6 +48,8 @@ class Database {
         void saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& dbConnection, bool isUpdateOldDBVersion);
         void deleteCompoundsSQL(QString dbName, QSqlDatabase& dbConnection);
         void deleteAllCompoundsSQL(QSqlDatabase& dbConnection);
+        void unloadCompounds(QString databaseName);
+        void unloadAllCompounds();
 
 		multimap<string,Compound*> keywordSearch(string needle);
 		vector<string>   getCompoundReactions(string compound_id);
@@ -77,18 +81,39 @@ class Database {
 
         void saveValidation(Peak* p);
 
+        void loadPeakGroupTags(string filename);
+
         vector<Adduct*> adductsDB;
         vector<Adduct*> fragmentsDB;
         vector<Compound*> compoundsDB;
+        std::map<char, PeakGroupTag*> peakGroupTags;
 
 
       private:
 		QSqlDatabase ligandDB;
         QMap<string,Compound*> compoundIdMap;
         QMap<QString,int> loadedDatabase;
-
 };
 
+class PeakGroupTag {
+
+public:
+    string tagName;
+    char label;
+    char hotkey;
+    QIcon icon;
+    string description;
+
+    PeakGroupTag(string tagName, char label, char hotKeyChar, string iconName, string description) {
+        this->tagName = tagName;
+        this->label = label;
+        this->hotkey = hotKeyChar;
+        QString iconPath(":/images/");
+        iconPath.append(iconName.c_str());
+        this->icon = QIcon(iconPath);
+        this->description = description;
+    }
+};
 
 #endif
 
