@@ -377,7 +377,8 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
         }
 
         //Issue 159: add fragment labels
-        if (this->_showOverlayLabels) {
+        if (this->_showOverlayLabels && !hit.fragLabelList[i].isEmpty()) {
+
             Note* label = new Note(QString(hit.fragLabelList[i]));
 
             //position label
