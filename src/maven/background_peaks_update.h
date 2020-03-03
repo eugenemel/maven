@@ -91,6 +91,8 @@ public:
 
     //MS2 matching
     bool mustHaveMS2=false;
+    bool compoundMustHaveMs2=false;
+
     bool searchProton=false;    //consider +/-PROTON when matching fragmentation
     float minFragmentMatchScore=0;
     float minNumFragments=0;

@@ -205,7 +205,8 @@ void PeakDetectionDialog::findPeaks() {
         peakupdater->avgScanTime = averageFullScanTime;
 
         peakupdater->rtStepSize = rtStep->value();
-        peakupdater->mustHaveMS2 = compoundMustHaveMS2->isChecked() || featureMustHaveMs2->isChecked();
+        peakupdater->mustHaveMS2 = compoundMustHaveMS2->isChecked();
+        peakupdater->compoundMustHaveMs2 = compoundMustHaveMS2->isChecked();
         peakupdater->productPpmTolr = productPpmTolr->value();
         peakupdater->scoringScheme  = fragScoringAlgorithm->currentText();
         peakupdater->minFragmentMatchScore = fragMinScore->value();

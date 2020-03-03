@@ -217,7 +217,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 
              group.computeFragPattern(productPpmTolr);
 
-             if (mustHaveMS2 && group.ms2EventCount == 0) continue;
+             if (compoundMustHaveMs2 && group.ms2EventCount == 0) continue;
 
              bool isGroupRetained = false;
 
@@ -799,7 +799,7 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
 //            }
 //            cerr << endl;
 
-            if(mustHaveMS2) {
+            if(compoundMustHaveMs2) {
 
                 bool isKeepSlice = false;
                 for (mzSample *sample : samples){
