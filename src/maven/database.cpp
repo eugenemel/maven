@@ -303,14 +303,17 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
 
                 vector<float> sortedMzs = vector<float>(pairsArray.size());
                 vector<float> sortedIntensities = vector<float>(pairsArray.size());
+                vector<string> sortedLabels = vector<string>(pairsArray.size());
 
                 for (unsigned int pos = 0; pos < pairsArray.size(); pos++) {
                     sortedMzs.at(pos) = pairsArray.at(pos).first;
                     sortedIntensities.at(pos) = cpd->fragment_intensity.at(pairsArray.at(pos).second);
+                    sortedLabels.at(pos) = cpd->fragment_labels.at(pairsArray.at(pos).second);
                 }
 
                 cpd->fragment_mzs = sortedMzs;
                 cpd->fragment_intensity = sortedIntensities;
+                cpd->fragment_labels = sortedLabels;
             }
 
             sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
