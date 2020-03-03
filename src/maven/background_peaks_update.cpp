@@ -95,7 +95,7 @@ void BackgroundPeakUpdate::run(void) {
 		processMassSlices();
     } else if  (runFunction == "pullIsotopes" ) {
         pullIsotopes(_group);
-	} else if  ( runFunction == "computePeaks" ) { 
+    } else if  ( runFunction == "computePeaks" ) { // database search, calibrated dialog
 		computePeaks();
 	} else {
 		qDebug() << "Unknown Function " << runFunction.c_str();
@@ -730,7 +730,7 @@ void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setNam
     //TODO: instead of separating by sample, just organize all samples together into a single vector
     map<mzSample*, vector<Scan*>> allMs2Scans = {};
 
-    if (mustHaveMS2) {
+    if (compoundMustHaveMs2) {
         for (mzSample *sample : samples){
 
             vector<Scan*> scanVector;
