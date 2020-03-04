@@ -61,6 +61,7 @@ void SpectraWidget::initPlot() {
 }
 
 void SpectraWidget::setCurrentScan(Scan* scan) {
+    qDebug() << "SpectraWidget::setCurrentScan(scan)";
 
     if (!_currentScan) {
         _currentScan = new Scan(0,0,0,0,0,0); //empty scan;

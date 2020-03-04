@@ -1469,13 +1469,15 @@ vector<mzSlice*> MainWindow::getSrmSlices() {
 
 //only caller is setPeakGroup().
 void MainWindow::showPeakInfo(Peak* _peak) {
-    if (_peak == NULL) return;
+    qDebug() << "MainWindow::showPeakInfo(peak)";
+
+    if (!_peak) return;
 
     mzSample* sample = _peak->getSample();
-    if (sample == NULL) return;
+    if (!sample) return;
 
     Scan* scan = sample->getScan(_peak->scan);
-    if (scan == NULL) return;
+    if (!scan) return;
 
     int ionizationMode = scan->getPolarity();
     if (getIonizationMode()) ionizationMode=getIonizationMode(); //user specified ionization mode
