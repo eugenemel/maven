@@ -203,10 +203,8 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
         }
 
         QSqlQuery countCompounds(dbConnection);
-        QString countSql = "select COUNT(*) from compounds";
+        QString countSql = "select compoundId, dbName from compounds";
         if (databaseName != "ALL")  countSql += " where dbName='" + databaseName + "'";
-
-        int numCompoundsToAdd = 0;
 
         if (!countCompounds.exec(countSql)) {
             qDebug() << "Database::loadCompoundsSQL() sql error in query tableInfoQuery: " << countCompounds.lastError();
@@ -214,9 +212,16 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             abort();
         }
 
+        unsigned long numCompoundsToAdd = 0;
         while (countCompounds.next()) {
-            numCompoundsToAdd = countCompounds.value(0).toInt();
+            string id = countCompounds.value("compoundId").toString().toStdString();
+            string db = countCompounds.value("dbName").toString().toStdString();
+            if (!compoundIdMap.contains(id + db) ){
+                numCompoundsToAdd++;
+            }
         }
+
+        vector<Compound*> addedCompounds(numCompoundsToAdd);
 
         QSqlQuery query(dbConnection);
         QString sql = "select * from compounds";
@@ -227,7 +232,8 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
 
         MassCalculator mcalc;
 
-        int loadcount=0;
+        unsigned long addedCompoundCounter = 0;
+
         while (query.next()) {
             string id =   query.value("compoundId").toString().toStdString();
             string name = query.value("name").toString().toStdString();
@@ -302,58 +308,51 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
                 compound->fragment_labels = vector<string>(compound->fragment_mzs.size());
             }
 
-            compoundIdMap[compound->id + compound->db]=compound;
-            compoundsDB.push_back(compound);
-            loadcount++;
-        }
-
-        if (loadcount > 0) {
-            bool isHasUnequalMatches = false;
-            for (Compound *cpd : compoundsDB) {
-                if (cpd->fragment_mzs.size() != cpd->fragment_intensity.size()){
-                    isHasUnequalMatches = true;
-                    cerr << "COMPOUND: " << cpd->name << ": #mzs=" << cpd->fragment_mzs.size() << "; #ints=" << cpd->fragment_intensity.size() << endl;
-                }
-            }
-
-            cerr << "COMPOUND LIBRARY HAS ANY COMPOUNDS WITH MISMATCHED (m/z, intensity) PAIRS? " << (isHasUnequalMatches ? "yes" : "no") << endl;
-            if (isHasUnequalMatches) {
-                qDebug() << "One or more compounds in the library" << databaseName << "does not have proper corresponding (m/z, intensity) pairs in its database.";
-                qDebug() << "Please delete this library and reload it.";
-                qDebug() << "Exiting Program.";
+            if (compound->fragment_mzs.size() != compound->fragment_intensity.size()) {
+                qDebug() << "COMPOUND: " << compound->name.c_str() << ": #mzs=" << compound->fragment_mzs.size() << "; #ints=" << compound->fragment_intensity.size() << "Has a different number of mz and intensity elements.";
+                qDebug() << "This is not permitted. Please fix this entry in the library file and reload the corrected library.";
+                qDebug() << "Exiting program.";
                 abort();
             }
 
-            for (Compound *cpd : compoundsDB) {
-
-                //sort all compounds by m/z (and re-order corresponding intensity vector)
-                vector<pair<float,int>> pairsArray = vector<pair<float,int>>(cpd->fragment_mzs.size());
-                for (unsigned int pos = 0; pos < cpd->fragment_mzs.size(); pos++){
-                    pairsArray.at(pos) = make_pair(cpd->fragment_mzs.at(pos), pos);
-                }
-
-                sort(pairsArray.begin(), pairsArray.end());
-
-                vector<float> sortedMzs = vector<float>(pairsArray.size());
-                vector<float> sortedIntensities = vector<float>(pairsArray.size());
-                vector<string> sortedLabels = vector<string>(pairsArray.size());
-
-                for (unsigned int pos = 0; pos < pairsArray.size(); pos++) {
-                    sortedMzs.at(pos) = pairsArray.at(pos).first;
-                    sortedIntensities.at(pos) = cpd->fragment_intensity.at(pairsArray.at(pos).second);
-                    sortedLabels.at(pos) = cpd->fragment_labels.at(pairsArray.at(pos).second);
-                }
-
-                cpd->fragment_mzs = sortedMzs;
-                cpd->fragment_intensity = sortedIntensities;
-                cpd->fragment_labels = sortedLabels;
+            //sort all compounds by m/z (and re-order corresponding intensity vector and labels vector)
+            vector<pair<float,int>> pairsArray = vector<pair<float,int>>(compound->fragment_mzs.size());
+            for (unsigned int pos = 0; pos < compound->fragment_mzs.size(); pos++){
+                pairsArray.at(pos) = make_pair(compound->fragment_mzs.at(pos), pos);
             }
 
-            sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
-            qDebug() << "loadCompoundSQL : " << databaseName << compoundsDB.size();
+            sort(pairsArray.begin(), pairsArray.end());
+
+            vector<float> sortedMzs = vector<float>(pairsArray.size());
+            vector<float> sortedIntensities = vector<float>(pairsArray.size());
+            vector<string> sortedLabels = vector<string>(pairsArray.size());
+
+            for (unsigned int pos = 0; pos < pairsArray.size(); pos++) {
+                sortedMzs.at(pos) = pairsArray.at(pos).first;
+                sortedIntensities.at(pos) = compound->fragment_intensity.at(pairsArray.at(pos).second);
+                sortedLabels.at(pos) = compound->fragment_labels.at(pairsArray.at(pos).second);
+            }
+
+            compound->fragment_mzs = sortedMzs;
+            compound->fragment_intensity = sortedIntensities;
+            compound->fragment_labels = sortedLabels;
+
+            compoundIdMap[compound->id + compound->db]=compound;
+            addedCompounds[addedCompoundCounter] = compound;
+            addedCompoundCounter++;
         }
 
-        if(loadcount > 0 and databaseName != "ALL") loadedDatabase[databaseName] = 1;
+        if (addedCompoundCounter > 0 && databaseName != "ALL") {
+            loadedDatabase[databaseName] = 1;
+        }
+
+        qDebug() << "Database::loadCompoundSQL() Finished reading in data for" << databaseName;
+
+        compoundsDB.reserve(compoundsDB.size() + addedCompounds.size());
+        compoundsDB.insert(compoundsDB.end(), addedCompounds.begin(), addedCompounds.end());
+        sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
+
+        qDebug() << "Database::loadCompoundSQL() Finished appending data for" << databaseName << "to compoundDB. new size=" << compoundsDB.size();
 }
 
 set<Compound*> Database::findSpeciesByMass(float mz, float ppm) { 
