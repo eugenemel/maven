@@ -172,15 +172,15 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             return;
         }
 
-        QSqlQuery query(dbConnection);
-        QString sql = "select * from compounds";
-        if (databaseName != "ALL")  sql += " where dbName='" + databaseName + "'";
-
         bool isHasAdductStringColumn = false;
         bool isHasFragLabelsColumn = false;
 
         QSqlQuery tableInfoQuery(dbConnection);
-        if(!tableInfoQuery.exec("PRAGMA table_info(compounds)")) qDebug() << "Database::loadCompoundsSQL() sql error in query tableInfoQuery: " << query.lastError();
+        if(!tableInfoQuery.exec("PRAGMA table_info(compounds)")){
+            qDebug() << "Database::loadCompoundsSQL() sql error in query tableInfoQuery: " << tableInfoQuery.lastError();
+            qDebug() << "Unable to determine information for compounds table. exiting program.";
+            abort();
+        }
 
         while(tableInfoQuery.next()) {
             if (tableInfoQuery.value(1).toString() == "adductString") {
@@ -201,6 +201,26 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
                 abort();
             }
         }
+
+        QSqlQuery countCompounds(dbConnection);
+        QString countSql = "select COUNT(*) from compounds";
+        if (databaseName != "ALL")  countSql += " where dbName='" + databaseName + "'";
+
+        int numCompoundsToAdd = 0;
+
+        if (!countCompounds.exec(countSql)) {
+            qDebug() << "Database::loadCompoundsSQL() sql error in query tableInfoQuery: " << countCompounds.lastError();
+            qDebug() << "Unable to count compounds in compounds table. exiting program.";
+            abort();
+        }
+
+        while (countCompounds.next()) {
+            numCompoundsToAdd = countCompounds.value(0).toInt();
+        }
+
+        QSqlQuery query(dbConnection);
+        QString sql = "select * from compounds";
+        if (databaseName != "ALL")  sql += " where dbName='" + databaseName + "'";
 
         query.prepare(sql);
         if(!query.exec()) qDebug() << "Database::loadCompoundsSQL(): query error in sql: " << query.lastError();
