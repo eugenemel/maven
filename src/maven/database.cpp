@@ -246,15 +246,18 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             string formula = query.value("formula").toString().toStdString();
             int charge = query.value("charge").toInt();
             float exactMass = query.value("mass").toDouble();
-	    int cid  =  query.value("cid").toInt();
+            int cid  =  query.value("cid").toInt();
             string db   =  query.value("dbName").toString().toStdString();
             double expectedRt =  query.value("expectedRt").toDouble();
 
-	    //skip already exists in internal database
-    	    if ( compoundIdMap.contains(id + db) ) continue;
+            //skip compound if it already exists in internal database
+            if ( compoundIdMap.contains(id + db) ) continue;
 
-            //the neutral mass is computated automatically  inside the constructor
-            Compound* compound = new Compound(id,name,formula,charge);
+            if (!formula.empty()) {
+                exactMass = mcalc.computeNeutralMass(formula);
+            }
+
+            Compound* compound = new Compound(id,name,formula,charge,exactMass);
             compound->cid  =  cid;
             compound->db   =  db;
             compound->expectedRt =  expectedRt;
@@ -274,12 +277,6 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
                        }
                     }
                 }
-            }
-
-            if (formula.empty()) {
-                if(exactMass >0) compound->setExactMass(exactMass);
-            } else {
-                 compound->setExactMass(mcalc.computeNeutralMass(formula));
             }
 
             compound->precursorMz =  query.value("precursorMz").toDouble();
