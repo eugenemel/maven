@@ -116,23 +116,39 @@ void Database::addCompound(Compound* c) {
 
 void Database::unloadCompounds(QString databaseName) {
 
-    vector<Compound*> compoundsToRemove{};
+    loadedDatabase.remove(databaseName);
 
+    unsigned long numCompoundsToRemove = 0;
     for (auto x : compoundsDB) {
         if (x->db == databaseName.toStdString()) {
-            compoundsToRemove.push_back(x);
+            numCompoundsToRemove++;
         }
     }
 
-    compoundsDB.erase(
-                remove_if( begin(compoundsDB),end(compoundsDB),
-                           [&](Compound* x){
-                                return find(begin(compoundsToRemove),end(compoundsToRemove),x)!=end(compoundsToRemove);
-                        }),
-                    end(compoundsDB)
-                );
+    vector<Compound*> compoundsToRemove(numCompoundsToRemove);
+    vector<Compound*> updatedCompounds(compoundsDB.size()-numCompoundsToRemove);
 
-    loadedDatabase.remove(databaseName);
+    unsigned int removeCounter = 0;
+    unsigned int updatedCounter = 0;
+
+    for (unsigned int i = 0; i < compoundsDB.size(); i++) {
+        Compound *compound = compoundsDB[i];
+        if (compound->db == databaseName.toStdString()) {
+            compoundsToRemove[removeCounter] = compound;
+            removeCounter++;
+        } else {
+            updatedCompounds[updatedCounter] = compound;
+            updatedCounter++;
+        }
+    }
+
+    qDebug() << "Database::unloadCompounds(): compoundsDB.size()=" << compoundsDB.size()
+             << ", removeCounter=" << removeCounter
+             << ", updatedCounter=" << updatedCounter
+             << ", total=" << (removeCounter+updatedCounter)
+             << endl;
+
+    compoundsDB = updatedCompounds;
 
     for (auto &x : compoundsToRemove) {
          string compoundId = x->id + x->db;
@@ -143,7 +159,6 @@ void Database::unloadCompounds(QString databaseName) {
     sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
 
     delete_all(compoundsToRemove);
-
 }
 
 void Database::unloadAllCompounds() {
