@@ -541,6 +541,9 @@
           <string>Fragmentation Matching</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_9">
+          <item row="4" column="1">
+           <widget class="QComboBox" name="fragScoringAlgorithm"/>
+          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_19">
             <property name="text">
@@ -548,31 +551,21 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
+          <item row="5" column="1">
            <widget class="QDoubleSpinBox" name="fragMinScore">
             <property name="maximum">
              <double>10000000.000000000000000</double>
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
-           <widget class="QComboBox" name="fragScoringAlgorithm"/>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_18">
-            <property name="text">
-             <string>Scoring Algorithm</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
+          <item row="2" column="0">
            <widget class="QLabel" name="label_17">
             <property name="text">
              <string>Fragment PPM Tolr</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="2" column="1">
            <widget class="QDoubleSpinBox" name="productPpmTolr">
             <property name="prefix">
              <string/>
@@ -597,6 +590,20 @@
             </property>
            </widget>
           </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_18">
+            <property name="text">
+             <string>Scoring Algorithm</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_20">
+            <property name="text">
+             <string>Minumum Score</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="1">
            <widget class="QSpinBox" name="fragMinPeaks">
             <property name="suffix">
@@ -616,10 +623,13 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_20">
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="spnMinDiagnostic"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="lblDiagnostic">
             <property name="text">
-             <string>Minumum Score</string>
+             <string>Match at Least X Diagnostic Peaks</string>
             </property>
            </widget>
           </item>
@@ -632,6 +642,8 @@
          <zorder>fragMinScore</zorder>
          <zorder>label_20</zorder>
          <zorder>fragMinPeaks</zorder>
+         <zorder>spnMinDiagnostic</zorder>
+         <zorder>lblDiagnostic</zorder>
         </widget>
        </item>
        <item row="4" column="0">
