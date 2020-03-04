@@ -96,6 +96,7 @@ public:
     bool searchProton=false;    //consider +/-PROTON when matching fragmentation
     float minFragmentMatchScore=0;
     float minNumFragments=0;
+    float minNumDiagnosticFragments=0;
     float productPpmTolr = 20;
     QString scoringScheme="dotProduct"; // ticMatch | spearmanRank | dotProduct
     QString compoundDatabase;

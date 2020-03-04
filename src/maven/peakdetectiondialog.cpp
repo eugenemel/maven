@@ -211,6 +211,7 @@ void PeakDetectionDialog::findPeaks() {
         peakupdater->scoringScheme  = fragScoringAlgorithm->currentText();
         peakupdater->minFragmentMatchScore = fragMinScore->value();
         peakupdater->minNumFragments = fragMinPeaks->value();
+        peakupdater->minNumDiagnosticFragments = spnMinDiagnostic->value();
         peakupdater->excludeIsotopicPeaks = excludeIsotopicPeaks->isChecked();
 
         string policyText = peakGroupCompoundMatchPolicyBox->itemText(peakGroupCompoundMatchPolicyBox->currentIndex()).toStdString();
