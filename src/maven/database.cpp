@@ -294,41 +294,25 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
                 compound->category.push_back(f.toStdString());
             }
 
-            for(QString f: query.value("fragment_mzs").toString().split(";") ) {
-                if(f.toDouble()) {
-                    compound->fragment_mzs.push_back(f.toDouble());
-                }
+            QStringList fragMzsList = query.value("fragment_mzs").toString().split(";");
+            compound->fragment_mzs.resize(fragMzsList.size());
+            for (unsigned int i = 0; i < compound->fragment_mzs.size(); i++) {
+                compound->fragment_mzs[i] = fragMzsList[i].toDouble();
             }
 
-//            QStringList fragMzsList = query.value("fragment_mzs").toString().split(";");
-//            compound->fragment_mzs.resize(fragMzsList.size());
-//            for (unsigned int i = 0; i < compound->fragment_mzs.size(); i++) {
-//                compound->fragment_mzs[i] = fragMzsList[i].toDouble();
-//            }
-
-            for(QString f: query.value("fragment_intensity").toString().split(";") ) {
-                if(f.toDouble()) {
-                    compound->fragment_intensity.push_back(f.toDouble());
-                }
+            QStringList fragIntensityList = query.value("fragment_intensity").toString().split(";");
+            compound->fragment_intensity.resize(fragIntensityList.size());
+            for (unsigned int i = 0; i < compound->fragment_intensity.size(); i++) {
+                compound->fragment_intensity[i] = fragIntensityList[i].toDouble();
             }
-
-//            QStringList fragIntensityList = query.value("fragment_intensity").toString().split(";");
-//            compound->fragment_intensity.resize(fragIntensityList.size());
-//            for (unsigned int i = 0; i < compound->fragment_intensity.size(); i++) {
-//                compound->fragment_intensity[i] = fragIntensityList[i].toDouble();
-//            }
 
             if (!query.value("fragment_labels").isNull()) {
 
-                for (QString f : query.value("fragment_labels").toString().split(";")) {
-                    compound->fragment_labels.push_back(f.toStdString());
+                QStringList fragLabelsList = query.value("fragment_labels").toString().split(";");
+                compound->fragment_labels.resize(fragLabelsList.size());
+                for (unsigned int i = 0; i < compound->fragment_labels.size(); i++) {
+                    compound->fragment_labels[i] = fragLabelsList[i].toStdString();
                 }
-
-//                QStringList fragLabelsList = query.value("fragment_labels").toString().split(";");
-//                compound->fragment_labels.resize(fragLabelsList.size());
-//                for (unsigned int i = 0; i < compound->fragment_labels.size(); i++) {
-//                    compound->fragment_labels[i] = fragLabelsList[i].toStdString();
-//                }
 
             } else {
                 compound->fragment_labels = vector<string>(compound->fragment_mzs.size());
@@ -363,7 +347,7 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             compound->fragment_intensity = sortedIntensities;
             compound->fragment_labels = sortedLabels;
 
-            //compoundIdMap[compound->id + compound->db]=compound; //20% of time spent here
+            compoundIdMap[compound->id + compound->db]=compound; //20% of time spent here
             addedCompounds[addedCompoundCounter] = compound;
             addedCompoundCounter++;
         }
