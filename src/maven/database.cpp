@@ -1,3 +1,4 @@
+#include <QElapsedTimer>
 #include "database.h"
 
 bool Database::connect(QString filename) {
@@ -167,6 +168,9 @@ void Database::unloadAllCompounds() {
 
 void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection) {
 
+        QElapsedTimer *timer = new QElapsedTimer();
+        timer->start();
+
         if (loadedDatabase.count(databaseName)) {
             qDebug()  << databaseName << "already loaded";
             return;
@@ -220,6 +224,8 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
                 numCompoundsToAdd++;
             }
         }
+
+        qDebug() << "Elapsed time after count query:" << timer->elapsed() << "msec";
 
         vector<Compound*> addedCompounds(numCompoundsToAdd);
 
@@ -357,7 +363,7 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             compound->fragment_intensity = sortedIntensities;
             compound->fragment_labels = sortedLabels;
 
-            compoundIdMap[compound->id + compound->db]=compound;
+            //compoundIdMap[compound->id + compound->db]=compound; //20% of time spent here
             addedCompounds[addedCompoundCounter] = compound;
             addedCompoundCounter++;
         }
@@ -372,7 +378,13 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
         compoundsDB.insert(compoundsDB.end(), addedCompounds.begin(), addedCompounds.end());
         sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
 
-        qDebug() << "Database::loadCompoundSQL() Finished appending data for" << databaseName << "to compoundDB. new size=" << compoundsDB.size();
+        qDebug() << "Database::loadCompoundSQL() Finished appending data for"
+                 << databaseName
+                 << "to compoundDB"
+                 << "in" << timer->elapsed() << "msec. size="
+                 << compoundsDB.size();
+
+        delete(timer);
 }
 
 set<Compound*> Database::findSpeciesByMass(float mz, float ppm) { 
