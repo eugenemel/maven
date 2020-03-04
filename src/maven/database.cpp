@@ -176,6 +176,25 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             return;
         }
 
+        QSqlQuery tableHasCompounds(dbConnection);
+        if (!tableHasCompounds.exec("SELECT name FROM sqlite_master WHERE type='table' AND name='compounds';")) {
+            qDebug() << "Database::loadCompoundsSQL() sql error in query tableHasCompounds: " << tableHasCompounds.lastError();
+            qDebug() << "Unable to determine if database has compounds table. exiting program.";
+            abort();
+        }
+
+        bool isHasCompoundsTable = false;
+        while (tableHasCompounds.next()) {
+            isHasCompoundsTable = true;
+        }
+
+        //Issue 172: Automatically add compounds table if it does not already exist.
+        if (!isHasCompoundsTable) {
+            vector<Compound*> emptyCompoundVector(0);
+            saveCompoundsSQL(emptyCompoundVector, dbConnection);
+        }
+
+
         bool isHasAdductStringColumn = false;
         bool isHasFragLabelsColumn = false;
 
