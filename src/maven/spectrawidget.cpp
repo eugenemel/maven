@@ -382,7 +382,7 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
             QString lblString = QString::number(hitMz,'f',4);
 
             if (!hit.fragLabelList[i].isEmpty()) {
-                lblString += QString("\n"+hit.fragLabelList[i]);
+                lblString += QString(" "+ hit.fragLabelList[i]);
             }
 
             //TODO: Issue 171: additional options, updates, expansion direction, etc
