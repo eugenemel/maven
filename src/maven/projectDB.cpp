@@ -13,7 +13,7 @@ void ProjectDB::saveGroups(vector<PeakGroup>& allgroups, QString setName) {
 void ProjectDB::saveCompounds(set<Compound*>& compoundSet) {
     //save seen compounds in to project database
     std::vector<Compound*>compounds(compoundSet.begin(), compoundSet.end());
-    DB.saveCompoundsSQL(compounds,sqlDB,false);
+    DB.saveCompoundsSQL(compounds,sqlDB);
 }
 
 void ProjectDB::saveCompounds(vector<PeakGroup>& allgroups) {

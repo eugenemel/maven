@@ -76,7 +76,7 @@ int Database::loadCompoundsFile(QString filename) {
     }
 
     deleteCompoundsSQL(dbname.c_str(),ligandDB);
-    saveCompoundsSQL(compounds,ligandDB,true);
+    saveCompoundsSQL(compounds,ligandDB);
 
     sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
     return compounds.size();
@@ -225,7 +225,7 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             }
         }
 
-        qDebug() << "Elapsed time after count query:" << timer->elapsed() << "msec";
+        qDebug() << "Database::loadCompoundsSQL(): Elapsed time after count query:" << timer->elapsed() << "msec";
 
         vector<Compound*> addedCompounds(numCompoundsToAdd);
 
@@ -359,7 +359,7 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
         compoundsDB.insert(compoundsDB.end(), addedCompounds.begin(), addedCompounds.end());
         sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
 
-        qDebug() << "Database::loadCompoundSQL() Finished appending data for"
+        qDebug() << "Database::loadCompoundSQL(): Finished appending data for"
                  << databaseName
                  << "to compoundDB"
                  << "in" << timer->elapsed() << "msec. size="
@@ -1019,8 +1019,10 @@ void Database::deleteCompoundsSQL(QString dbName, QSqlDatabase& dbConnection) {
 }
 
 
-void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& dbConnection, bool isUpdateOldDBVersion) {
-    qDebug() << "saveCompoundsSQL()" << compoundSet.size();
+void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& dbConnection) {
+    qDebug() << "Database::saveCompoundsSQL(): Saving"
+             << compoundSet.size()
+             << "Compounds";
 
     /*
      * START CHECK DB VERSION

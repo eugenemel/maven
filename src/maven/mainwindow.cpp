@@ -64,11 +64,17 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
     qDebug() << "METHODS FOLDER=" << methodsFolder;
 
+    vector<Compound*> emptyDb(0);
+
     //CONNECT TO COMPOUND DATABASE
     QString writeLocation = QStandardPaths::standardLocations(QStandardPaths::DataLocation).first();
     if(!QFile::exists(writeLocation))  { QDir dir; dir.mkdir(writeLocation); }
     qDebug() << "WRITE FOLDER=" <<  writeLocation;
     DB.connect(writeLocation + "/ligand.db");
+
+    //Issue 174: Initializes DB schema
+    DB.saveCompoundsSQL(emptyDb, DB.getLigandDB());
+
     DB.loadCompoundsSQL("KNOWNS", DB.getLigandDB());
     //DB.loadCompoundsSQL("ALL");
 

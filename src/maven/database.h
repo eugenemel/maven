@@ -45,7 +45,7 @@ class Database {
         vector<Compound*> loadNISTLibrary(QString fileName);
 
         void loadCompoundsSQL(QString databaseName,QSqlDatabase& dbConnection);
-        void saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& dbConnection, bool isUpdateOldDBVersion);
+        void saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& dbConnection);
         void deleteCompoundsSQL(QString dbName, QSqlDatabase& dbConnection);
         void deleteAllCompoundsSQL(QSqlDatabase& dbConnection);
         void unloadCompounds(QString databaseName);
