@@ -142,10 +142,10 @@ void Database::unloadCompounds(QString databaseName) {
         }
     }
 
-    qDebug() << "Database::unloadCompounds(): start with" << compoundsDB.size()
-             << ", removed " << removeCounter
-             << ", remaining " << updatedCounter
-             << ", (removed+remaining)" << (removeCounter+updatedCounter)
+    qDebug() << "Database::unloadCompounds(): initial=" << compoundsDB.size()
+             << "removing" << removeCounter
+             << "retaining" << updatedCounter
+             << "(removed+retained)" << (removeCounter+updatedCounter)
              << endl;
 
     compoundsDB = updatedCompounds;
