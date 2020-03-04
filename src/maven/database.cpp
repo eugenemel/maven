@@ -118,6 +118,8 @@ void Database::unloadCompounds(QString databaseName) {
 
     loadedDatabase.remove(databaseName);
 
+    string databaseNameStd = databaseName.toStdString();
+
     unsigned long numCompoundsToRemove = 0;
     for (auto x : compoundsDB) {
         if (x->db == databaseName.toStdString()) {
@@ -131,14 +133,16 @@ void Database::unloadCompounds(QString databaseName) {
     unsigned int removeCounter = 0;
     unsigned int updatedCounter = 0;
 
-    for (unsigned int i = 0; i < compoundsDB.size(); i++) {
-        Compound *compound = compoundsDB[i];
-        if (compound->db == databaseName.toStdString()) {
+    for (auto it = compoundIdMap.begin(); it != compoundIdMap.end();) {
+        Compound *compound = it.value();
+        if (compound->db == databaseNameStd) {
             compoundsToRemove[removeCounter] = compound;
+            it = compoundIdMap.erase(it);
             removeCounter++;
         } else {
             updatedCompounds[updatedCounter] = compound;
             updatedCounter++;
+            it++;
         }
     }
 
@@ -148,11 +152,6 @@ void Database::unloadCompounds(QString databaseName) {
              << "(removed+retained)" << (removeCounter+updatedCounter);
 
     compoundsDB = updatedCompounds;
-
-    for (auto &x : compoundsToRemove) {
-         string compoundId = x->id + x->db;
-         compoundIdMap.remove(compoundId);
-    }
 
     //re-sort for matching
     sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
