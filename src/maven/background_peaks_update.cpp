@@ -247,6 +247,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
                  s.mergedScore = s.getScoreByName(scoringScheme.toStdString());
 
                  if (static_cast<float>(s.numMatches) < minNumFragments) continue;
+                 if (Fragment::getNumDiagnosticFragmentsMatched("*",compound->fragment_labels, s.ranks) < minNumDiagnosticFragments) continue;
                  if (static_cast<float>(s.mergedScore) < minFragmentMatchScore) continue;
 
                  //Issue 161: new approach
@@ -1283,6 +1284,8 @@ void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g) {
 
         FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productPpmTolr,searchProton);
         if (s.numMatches < minNumFragments ) continue;
+        if (Fragment::getNumDiagnosticFragmentsMatched("*",cpd->fragment_labels, s.ranks) < minNumDiagnosticFragments) continue;
+
         s.mergedScore = s.getScoreByName(scoringAlgorithm);
         s.ppmError = match.diff;
         //qDebug() << "scoring=" << scoringScheme << " " << s.mergedScore;
