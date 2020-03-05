@@ -193,7 +193,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     //peaksPanel->setVisible(false);
     //treeMapDockWidget =  createDockWidget("TreeMap",treemap);
 
-
+    addDockWidget(Qt::RightDockWidgetArea, barPlotDockWidget, Qt::Horizontal);
 
     //
     //DIALOGS
