@@ -503,6 +503,8 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary) {
      //Issue 62: NEW CODE
      vector<pair<PeakGroup, int>> peakGroupChildren;
 
+     QStringList databaseNames = DB.getDatabaseNames();
+
      while (query.next()) {
 
         PeakGroup g;
@@ -549,7 +551,11 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary) {
         }
 
         if (!compoundId.empty()){
-            Compound* compound = DB.findSpeciesById(compoundId, compoundDB);
+
+            Compound *compound = nullptr;
+            if (databaseNames.contains(QString(compoundDB.c_str()))) {
+                compound = DB.findSpeciesById(compoundId, compoundDB);
+            }
 
             //Issue 92: fall back to rumsDB table if could not find compound the normal way.
             if (!compound && g.searchTableName == "rumsDB" && !rumsDBLibrary.isEmpty()) {
