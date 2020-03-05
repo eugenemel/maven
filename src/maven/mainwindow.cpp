@@ -71,15 +71,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     if(!QFile::exists(writeLocation))  { QDir dir; dir.mkdir(writeLocation); }
     qDebug() << "WRITE FOLDER=" <<  writeLocation;
     DB.connect(writeLocation + "/ligand.db");
-
-    //Issue 174: Initializes DB schema
-    DB.saveCompoundsSQL(emptyDb, DB.getLigandDB());
-
     DB.loadCompoundsSQL("KNOWNS", DB.getLigandDB());
-    //DB.loadCompoundsSQL("ALL");
-
-    //QString commonFragments =   methodsFolder + "/" + "FRAGMENTS.csv";
-    //if(QFile::exists(commonFragments)) DB.fragmentsDB = DB.loadAdducts(commonFragments.toStdString());
 
     // === Issue 76 ========================================== //
 
@@ -845,6 +837,8 @@ void MainWindow::setProgressBar(QString text, int progress, int totalSteps){
 
 void MainWindow::readSettings() {
     settings = new QSettings("mzRoll", "Application Settings");
+
+    qDebug() << "Settings file is located at:" << settings->fileName();
 
     QPoint pos = settings->value("pos", QPoint(200, 200)).toPoint();
     QSize size = settings->value("size", QSize(400, 400)).toSize();
