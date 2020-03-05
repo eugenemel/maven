@@ -244,8 +244,6 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             }
         }
 
-        qDebug() << "Database::loadCompoundsSQL(): Elapsed time after count query:" << timer->elapsed() << "msec";
-
         vector<Compound*> addedCompounds(numCompoundsToAdd);
 
         QSqlQuery query(dbConnection);
