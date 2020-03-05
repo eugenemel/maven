@@ -29,6 +29,9 @@ void Note::setupGraphicOptions() {
     _labelBox = new QGraphicsPathItem(this);
     _labelBox->stackBefore(_label);
 
+    //Necessary for proper display in dark mode
+    _label->setDefaultTextColor(Qt::black);
+
     _timerId=0;
     _elepsedTime=0;
     _timeOutTime=0;
@@ -89,12 +92,12 @@ void Note::showBoundBox() {
 }
 
 void Note::setPlainText(const QString & text ) {
-	if ( _label ) { _label->setPlainText(text); }
+    if ( _label ) { _label->setPlainText(text); }
 	showBoundBox();
 }
 
 void Note::setHtml(const QString & text ) {
-	if ( _label ) { _label->setHtml(text); }
+    if ( _label ) { _label->setHtml(text); }
 	showBoundBox();
 }
 
