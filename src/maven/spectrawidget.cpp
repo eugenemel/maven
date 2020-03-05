@@ -411,7 +411,7 @@ void SpectraWidget::drawGraph() {
 
     scene()->setSceneRect(10,10,this->width()-10, this->height()-10);
     Scan* scan = _currentScan;
-    if (scan == NULL ) return;
+    if (!scan) return;
 
     //draw title text
     setTitle();
@@ -428,7 +428,7 @@ void SpectraWidget::drawGraph() {
     float _focusedMz = _focusCoord.x();
 
     QPen slineColor(sampleColor, 2);
-    EicLine* sline = new EicLine(NULL,scene());
+    EicLine* sline = new EicLine(nullptr, scene());
     sline->setColor(sampleColor);
     sline->setPen(slineColor);
    _items.push_back(sline);
