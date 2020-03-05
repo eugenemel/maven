@@ -407,10 +407,7 @@ void SpectraWidget::drawGraph() {
         _arrow->setVisible(false);
     }
 
-    for(unsigned int i=0; i < _items.size(); i++) {
-        if(_items[i] != NULL) delete(_items[i]); _items[i]=NULL;
-    }
-    _items.clear();
+    delete_all(_items);
 
     scene()->setSceneRect(10,10,this->width()-10, this->height()-10);
     Scan* scan = _currentScan;
