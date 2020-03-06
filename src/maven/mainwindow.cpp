@@ -1180,6 +1180,7 @@ void MainWindow::createToolBars() {
     QToolButton* btnSamples = addDockWidgetButton(sideBar,projectDockWidget,QIcon(rsrcPath + "/samples.png"), "Show Samples Widget (F2)");
     QToolButton* btnLigands = addDockWidgetButton(sideBar,ligandWidget,QIcon(rsrcPath + "/molecule.png"), "Show Compound Widget (F3)");
     QToolButton* btnSpectra = addDockWidgetButton(sideBar,spectraDockWidget,QIcon(rsrcPath + "/spectra.png"), "Show Spectra Widget (F4)");
+    QToolButton* btnFragSpectra = addDockWidgetButton(sideBar, fragmenationSpectraDockWidget, QIcon(rsrcPath + "/spectra_with_2.png"), "Show Fragmentation Spectra Widget");
     QToolButton* btnIsotopes = addDockWidgetButton(sideBar,isotopeWidget,QIcon(rsrcPath + "/isotope.png"), "Show Isotopes Widget (F5)");
     QToolButton* btnFindCompound = addDockWidgetButton(sideBar,massCalcWidget,QIcon(rsrcPath + "/findcompound.png"), "Show Match Compound Widget (F6)");
     QToolButton* btnCovariants = addDockWidgetButton(sideBar,covariantsPanel,QIcon(rsrcPath + "/covariants.png"), "Find Covariants Widget (F7)");
@@ -1209,6 +1210,7 @@ void MainWindow::createToolBars() {
     sideBar->addWidget(btnBarPlot);
     sideBar->addWidget(btnLigands);
     sideBar->addWidget(btnSpectra);
+    sideBar->addWidget(btnFragSpectra);
     sideBar->addWidget(btnIsotopes);
     sideBar->addWidget(btnFindCompound);
     sideBar->addWidget(btnCovariants);
