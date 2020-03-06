@@ -98,5 +98,6 @@
         <file>images/yellow_star.png</file>
         <file>images/icon_filter_selected.png</file>
         <file>images/icon_filter.png</file>
+        <file>images/spectra_with_2.png</file>
     </qresource>
 </RCC>
