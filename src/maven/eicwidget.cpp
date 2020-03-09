@@ -1358,7 +1358,8 @@ void EicWidget::setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax
 void EicWidget::setPeakGroup(PeakGroup* group) {
     qDebug() <<"EicWidget::setPeakGroup(PeakGroup* group) " << group;
 
-    if (group == NULL) return;
+    if (!group) return;
+
     _slice.mz = group->meanMz;
     _slice.compound = group->compound;
     _slice.srmId = group->srmId;
