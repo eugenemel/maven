@@ -1369,7 +1369,7 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
         setSrmId(group->srmId);
     }
 
-    if ( _autoZoom && group->parent != NULL ) {
+    if ( _autoZoom && group->parent) {
         _slice.rtmin = group->parent->minRt- 2 * _zoomFactor;
         _slice.rtmax = group->parent->maxRt+ 2 * _zoomFactor;
     } else if (_autoZoom) {
