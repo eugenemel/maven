@@ -396,7 +396,7 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
             } else if (xFrac >= 0.8 && yFrac >= 0.2) {
                 label->labelOrientation = Note::Orientation::DownLeft;
             } else if (xFrac < 0.8 && yFrac <= 0.2) {
-                label->labelOrientation = Note::Orientation::DownLeft;
+                label->labelOrientation = Note::Orientation::UpRight;
             } else if (xFrac < 0.8 && yFrac > 0.2) {
                 label->labelOrientation = Note::Orientation::DownRight;
             }
