@@ -70,6 +70,36 @@ void Note::showBoundBox() {
 
 	if ( expanded || hovered ) {
 		_label->show();
+
+        double width = _label->boundingRect().width();
+        double height = _label->boundingRect().height();
+
+        qreal xCoord;
+        qreal yCoord;
+
+        if (labelOrientation == Orientation::DownRight) {
+             xCoord = 0;
+             yCoord = 0;
+        } else if (labelOrientation == Orientation::UpRight) {
+            xCoord = 0;
+            yCoord = -height;
+        } else if (labelOrientation == Orientation::UpLeft) {
+            xCoord = -width;
+            yCoord = -height;
+        } else if (labelOrientation == Orientation::DownLeft) {
+            xCoord = -width;
+            yCoord = 0;
+        } else {
+            xCoord = 0;
+            yCoord = 0;
+        }
+
+        _label->setX(xCoord);
+        _label->setY(yCoord);
+
+        _labelBox->setX(xCoord);
+        _labelBox->setY(yCoord);
+
 		_shape.addRect(_label->boundingRect());
         } else if (_style == showNoteIcon) {
             _label->hide();

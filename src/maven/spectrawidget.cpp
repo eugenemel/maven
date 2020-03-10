@@ -386,8 +386,20 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
                 lblString += QString(" "+ hit.fragLabelList[i]);
             }
 
-            //TODO: Issue 171: additional options, updates, expansion direction, etc
             Note* label = new Note(lblString);
+
+            double xFrac = (_currentScan->mz[pos] -_minX) / (_maxX-_minX);
+            double yFrac = (hitIntensity/maxIntensity);
+
+            if (xFrac >= 0.8 && yFrac <= 0.2) {
+                label->labelOrientation = Note::Orientation::UpLeft;
+            } else if (xFrac >= 0.8 && yFrac >= 0.2) {
+                label->labelOrientation = Note::Orientation::DownLeft;
+            } else if (xFrac < 0.8 && yFrac <= 0.2) {
+                label->labelOrientation = Note::Orientation::DownLeft;
+            } else if (xFrac < 0.8 && yFrac > 0.2) {
+                label->labelOrientation = Note::Orientation::DownRight;
+            }
 
             //position label
             label->setPos(x,y-5);
