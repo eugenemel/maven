@@ -104,6 +104,7 @@ public slots:
     void copyToClipboard();
     void selectionChangedAction();
     void freezeView(bool freeze);
+    void groupPeaks();
 protected:
     void moved(QMouseEvent *event);
     void selected(const QRect&);
@@ -181,6 +182,7 @@ private:
     vector<PeakGroup> peakgroups;	    //peaks grouped across samples
     PeakGroup  _selectedGroup;			//currently selected peak group
 	PeakGroup  _integratedGroup;		//manually integrated peak group
+    PeakGroup*  _alwaysDisplayGroup;     //always display this group, whether or not grouping is enabled
     
     //gui related
     QWidget *parent;
@@ -188,7 +190,6 @@ private:
     QGraphicsLineItem* _selectionLine;
 
     void showPeak(float freq, float amplitude);
-    void groupPeaks();
     void computeEICs();
     void cleanup();		//deallocate eics, fragments, peaks, peakgroups
     void clearPlot();	//removes non permenent graphics objects
