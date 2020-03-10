@@ -12,12 +12,13 @@ EicWidget::EicWidget(QWidget *p) {
 
 	setScene(new QGraphicsScene(this));
 
-	_barplot = NULL;
-	_boxplot = NULL;
-	_isotopeplot=NULL;
-	_focusLine = NULL;
-	_selectionLine = NULL;
-	_statusText=NULL;
+    _barplot = nullptr;
+    _boxplot = nullptr;
+    _isotopeplot=nullptr;
+    _focusLine = nullptr;
+    _selectionLine = nullptr;
+    _statusText=nullptr;
+    _alwaysDisplayGroup = nullptr;
 
 	autoZoom(true);
 	showPeaks(true);
@@ -338,10 +339,9 @@ void EicWidget::computeEICs() {
 
         qDebug() << "\tcomputeEICs() pullEics().. msec=" << timerX.elapsed();
 
-	//group peaks
+    //group peaks
+        groupPeaks();
 
-
-    if(_groupPeaks) groupPeaks();
     qDebug() << "\tgroupPeaks() msec="<< timerX.elapsed();
     qDebug() << "\tcomputeEICs() Done.";
 
@@ -1176,16 +1176,42 @@ void EicWidget::addFitLine(PeakGroup* group) {
 }
 
 void EicWidget::showAllPeaks() { 
- //qDebug <<"EicWidget::showAllPeaks() "; 
-	for(int i=0; i < peakgroups.size(); i++ ) {
-	PeakGroup& group = peakgroups[i];
-        addPeakPositions(&group);
+ //qDebug <<"EicWidget::showAllPeaks() ";
+
+    if (_groupPeaks) {
+        for(int i=0; i < peakgroups.size(); i++ ) {
+            PeakGroup& group = peakgroups[i];
+            addPeakPositions(&group);
+        }
+    }
+
+    //Issue 177: Always show this group if any peaks are shown, and the window allows for it
+    if (_alwaysDisplayGroup &&
+            _alwaysDisplayGroup->minMz >= _slice.mzmin && _alwaysDisplayGroup->maxMz <= _slice.mzmax &&
+            _alwaysDisplayGroup->minRt >= _slice.rtmin && _alwaysDisplayGroup->maxRt <= _slice.rtmax) {
+        addPeakPositions(_alwaysDisplayGroup);
     }
 }
 
 void EicWidget::addPeakPositions(PeakGroup* group) {
- 	////qDebug <<"EicWidget::addPeakPositions(PeakGroup* group) ";
-		if ( _showPeaks == false ) return;
+
+        if (!_showPeaks) return;
+        if (!group) return;
+
+        //Issue 177: ensure that each group is not added more than once
+        bool isFoundGroup = false;
+        for (QGraphicsItem *item : scene()->items()) {
+            EicPoint *eicPointPtr = qgraphicsitem_cast<EicPoint*>(item);
+            if (eicPointPtr && eicPointPtr->getPeakGroup()) {
+                PeakGroup *eicPointPeakGroup = eicPointPtr->getPeakGroup();
+                if (abs(eicPointPtr->getPeakGroup()->meanRt - group->meanRt) < 1e-6) {
+                    isFoundGroup = true;
+                    break;
+                }
+            }
+        }
+
+        if (isFoundGroup) return;
 
 		bool setZValue=false;
         if (_selectedGroup.peakCount() && group->tagString == _selectedGroup.tagString ) {
@@ -1196,11 +1222,11 @@ void EicWidget::addPeakPositions(PeakGroup* group) {
 		for( unsigned int i=0; i < group->peaks.size(); i++) {
 				Peak& peak = group->peaks[i];
 
-				if ( peak.getSample() != NULL && peak.getSample()->isSelected == false ) continue;
+                if ( peak.getSample() && peak.getSample()->isSelected == false ) continue;
 				if ( _slice.rtmin != 0 && _slice.rtmax != 0 && (peak.rt < _slice.rtmin || peak.rt > _slice.rtmax) ) continue;
 
 				QColor color = Qt::black;
-				if (peak.getSample() != NULL ) {
+                if (peak.getSample()) {
 						mzSample* s= peak.getSample();
 						color = QColor::fromRgbF( s->color[0], s->color[1], s->color[2], s->color[3] );
 				}
@@ -1358,6 +1384,8 @@ void EicWidget::setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax
 void EicWidget::setPeakGroup(PeakGroup* group) {
     qDebug() <<"EicWidget::setPeakGroup(PeakGroup* group) " << group;
 
+    _alwaysDisplayGroup = group;
+
     if (!group) return;
 
     _slice.mz = group->meanMz;
@@ -1394,7 +1422,6 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
     if (_slice.srmId.length())  for(int i=0; i < peakgroups.size(); i++ )  peakgroups[i].srmId = _slice.srmId;
 
     replot(group);
-    addPeakPositions(group);
 }
 
 void EicWidget::setPPM(double ppm) { 
@@ -1416,7 +1443,10 @@ void EicWidget::setMzSlice(float mz){
 	setMzSlice(x);
 }
 
-void EicWidget::groupPeaks() { 
+void EicWidget::groupPeaks() {
+
+    if (!_groupPeaks) return;
+
 	 //qDebug() << "EicWidget::groupPeaks() " << endl;
 	//delete previous set of pointers to groups
 	QSettings *settings 		= getMainWindow()->getSettings();
@@ -1541,6 +1571,7 @@ void EicWidget::contextMenuEvent(QContextMenuEvent * event) {
     o9->setCheckable(true);
     o9->setChecked(_groupPeaks);
     connect(o9, SIGNAL(toggled(bool)), SLOT(automaticPeakGrouping(bool)));
+    connect(o9, SIGNAL(toggled(bool)), SLOT(groupPeaks()));
     connect(o9, SIGNAL(toggled(bool)), SLOT(replot()));
 
     QPoint pos = this->mapToGlobal(event->pos());
