@@ -166,7 +166,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     scatterDockWidget =  new ScatterPlot(this);
     projectDockWidget =  new ProjectDockWidget(this);
     rconsoleDockWidget =  new RconsoleWidget(this);
-    fragmentationSpectraWidget = new SpectraWidget(this);
+    fragmentationSpectraWidget = new SpectraWidget(this, true);
     fragmenationSpectraDockWidget =  createDockWidget("Fragmentation Spectra",fragmentationSpectraWidget);
     ligandWidget->setVisible(false);
     covariantsPanel->setVisible(false);

@@ -1,9 +1,12 @@
 #include "spectrawidget.h"
 
-SpectraWidget::SpectraWidget(MainWindow* mw) { 
+SpectraWidget::SpectraWidget(MainWindow* mw, bool isMs2Spectrum) {
+
     this->mainwindow = mw;
-   _currentScan = NULL;
-   _avgScan = NULL;
+    this->isMs2Spectrum = isMs2Spectrum;
+
+   _currentScan = nullptr;
+   _avgScan = nullptr;
    _log10Transform=false;
 
     initPlot();
@@ -758,7 +761,7 @@ void SpectraWidget::setMzFocus(Peak* peak) {
 }
 
 void SpectraWidget::setMzFocus(float mz) {
-    if (_currentScan == NULL or _currentScan->mslevel>1) return;
+    if (_currentScan == NULL or _currentScan->mslevel>1 or isMs2Spectrum) return;
     int bestMatch=-1; 
     float bestMatchDiff=FLT_MAX;
 
