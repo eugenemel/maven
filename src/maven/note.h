@@ -13,6 +13,8 @@ class Note : public QObject, public QGraphicsItem {
 
 public:
 	
+    enum Orientation{DownRight = 0, UpRight = 1, UpLeft = 2, DownLeft = 3};
+
 	Note(const QString &text, QGraphicsItem *parent = 0, QGraphicsScene *scene = 0);
 
 	void setEditable(bool f) { editable=f; }
@@ -35,7 +37,9 @@ public:
 	double mzmin;
 	double mzmax;
 	double rt;
-	double intensity;
+    double intensity;
+
+    Orientation labelOrientation = Orientation::DownRight;
 
 public slots:
 	void linkClicked();
