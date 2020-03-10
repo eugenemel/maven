@@ -31,6 +31,9 @@ public:
     void forceFillColor(bool flag) { _forceFill = flag; }
     void setSize(float size) { _cSize=size; }
 
+    enum {Type = UserType + 1};
+
+    int type() const override {return Type;}
 
 protected:
     QRectF boundingRect() const;
