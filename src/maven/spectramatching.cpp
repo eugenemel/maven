@@ -9,6 +9,16 @@ SpectraMatching::SpectraMatching(MainWindow *w): QDialog(w) {
     resultTable->setSortingEnabled(true);
     bound_checking_pattern=false;
     setModal(true);
+
+    QString placeHolderText;
+    placeHolderText.append("frag_1_mz\n");
+    placeHolderText.append("frag_2_mz\n");
+    placeHolderText.append("...\n");
+    placeHolderText.append("\n");
+    placeHolderText.append("frag_1_mz    frag_1_intensity\n");
+    placeHolderText.append("frag_2_mz    frag_2_intensity\n");
+    placeHolderText.append("...\n");
+    this->fragmentsText->setPlaceholderText(placeHolderText);
 }
 
 void SpectraMatching::findMatches() { 
