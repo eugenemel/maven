@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>484</width>
+    <width>567</width>
     <height>492</height>
    </rect>
   </property>
@@ -17,7 +17,7 @@
    <item row="0" column="2">
     <widget class="QLabel" name="label_3">
      <property name="text">
-      <string>Scan Type:</string>
+      <string>Scan Type</string>
      </property>
     </widget>
    </item>
@@ -125,7 +125,7 @@
    <item row="10" column="0" colspan="3">
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>List of mz values OR List of mz intensity pairs seperated by commas</string>
+      <string>List of m/z values OR list of (m/z,intensity) pairs separated by white space or comma</string>
      </property>
     </widget>
    </item>
@@ -148,14 +148,14 @@
    <item row="7" column="0">
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Precurrsor m/z </string>
+      <string>Precursor m/z</string>
      </property>
     </widget>
    </item>
    <item row="0" column="1">
     <widget class="QLabel" name="label_5">
      <property name="text">
-      <string>Mass Tollerance</string>
+      <string>Mass Tolerance</string>
      </property>
     </widget>
    </item>
@@ -178,7 +178,7 @@
    <item row="7" column="1">
     <widget class="QLabel" name="label_6">
      <property name="text">
-      <string>Precursor Mass  Tollerance</string>
+      <string>Precursor Mass Tolerance</string>
      </property>
     </widget>
    </item>
