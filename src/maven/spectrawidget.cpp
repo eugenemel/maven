@@ -217,7 +217,8 @@ void SpectraWidget::overlaySpectralHit(SpectralHit& hit) {
 
         //determine limits of overlayed spectra
         setScan(hit.scan, hit.getMinMz()-0.5, hit.getMaxMz()+0.5);
-        findBounds(false,true);
+
+        findBounds(true, true);
 
         drawGraph();
         repaint();
