@@ -125,7 +125,7 @@
    <item row="10" column="0" colspan="3">
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>List of m/z values OR (m/z,intensity) pairs. Each fragment on its own line.</string>
+      <string>List of fragment m/z OR (m/z, intensity) pairs, one fragment per line.</string>
      </property>
     </widget>
    </item>
