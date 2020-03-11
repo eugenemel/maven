@@ -125,7 +125,7 @@
    <item row="10" column="0" colspan="3">
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>List of m/z values OR list of (m/z,intensity) pairs separated by white space or comma</string>
+      <string>List of m/z values OR (m/z,intensity) pairs. Each fragment on its own line.</string>
      </property>
     </widget>
    </item>
