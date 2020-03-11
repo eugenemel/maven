@@ -55,7 +55,6 @@ void SpectraMatching::getFormValues() {
        QStringList mz_ints_pairs = mzpairs.split(COMMA);
        foreach (QString mzint, mz_ints_pairs) {
            mzint = mzint.simplified();
-           qDebug() << "Pair:" << mzint;
 
            QStringList _mz_int = mzint.split(SPACE);
            if (_mz_int.size() == 4) {
@@ -98,16 +97,19 @@ void SpectraMatching::getFormValues() {
        QStringList mzs = mzpairs.split(SPACE);
        foreach (QString mzstr, mzs) {
            float mz = mzstr.simplified().toDouble();
-           if (mz > 0) _mzsList << mz;
+           if (mz > 0){
+               _mzsList << mz;
+               _intensityList << 0.0;
+           }
        }
    }
 
-   qDebug() << _msScanType;
-   qDebug() << _precursorMz;
-   qDebug() << _mzsList;
-   qDebug() << _intensityList;
-   qDebug() << _intensityMinErr;
-   qDebug() << _intensityMaxErr;
+//   qDebug() << _msScanType;
+//   qDebug() << _precursorMz;
+//   qDebug() << _mzsList;
+//   qDebug() << _intensityList;
+//   qDebug() << _intensityMinErr;
+//   qDebug() << _intensityMaxErr;
 
 }
 
@@ -242,7 +244,7 @@ double SpectraMatching::scoreScan(Scan* scan) {
 
    if(Nc) score=mzUtils::correlation(x.toStdVector(),y.toStdVector());
 
-   if (score > 0 and matchCount > minMatches ) {
+   if (matchCount >= minMatches) {
        QString sampleName(scan->sample->sampleName.c_str());
        float precursorMz = _mzsList[0];
        addHit(score,precursorMz,sampleName,matchCount,scan,_mzsList,_intensityList);
