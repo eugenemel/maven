@@ -30,7 +30,7 @@ void SpectraMatching::getFormValues() {
     //get precursor mass
     _precursorMz = this->precursorMz->text().toDouble();
 
-    //get tollerance
+    //get tolerance
     _precursorPPM = this->precursorPPM->value();
     _productPPM   = this->productPPM->value();
 
