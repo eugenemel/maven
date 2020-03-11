@@ -404,6 +404,12 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
                 label->labelOrientation = Note::Orientation::DownRight;
             }
 
+            QSignalMapper *signalMapper = new QSignalMapper(this);
+            signalMapper->setMapping(label, pos);
+
+            connect(label, SIGNAL(clicked()), signalMapper, SLOT(map()));
+            connect(signalMapper, SIGNAL(mapped(int)), this, SLOT(selectObservedPeak(int)));
+
             //position label
             label->setPos(x,y-5);
             label->setExpanded(true);
@@ -412,6 +418,15 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
             _items.push_back(label);
         }
     }
+}
+
+void SpectraWidget::selectObservedPeak(int peakIndex) {
+    if (peakIndex == -1) return; //no matching peak
+
+    _focusCoord.setX(_currentScan->mz[peakIndex]);
+    _focusCoord.setY(_currentScan->intensity[peakIndex]);
+
+    drawGraph();
 }
 
 void SpectraWidget::drawGraph() {

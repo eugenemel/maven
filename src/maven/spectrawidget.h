@@ -51,6 +51,8 @@ public slots:
 
                     Scan* getCurrentScan() { return _currentScan; }
 
+                    void selectObservedPeak(int peakIndex);
+
         private:
                     bool isMs2Spectrum;
                     MainWindow* mainwindow;
