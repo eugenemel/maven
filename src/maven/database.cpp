@@ -370,6 +370,11 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             loadedDatabase[databaseName] = 1;
         }
 
+        //Issue 184: Duplicate entries in a single DB can lead to mismatch in counts (numCompoundsToAdd can be too high)
+        if (addedCompoundCounter < numCompoundsToAdd) {
+            addedCompounds.resize(addedCompoundCounter);
+        }
+
         qDebug() << "Database::loadCompoundSQL() Finished reading in data for" << databaseName;
 
         compoundsDB.reserve(compoundsDB.size() + addedCompounds.size());
