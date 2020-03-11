@@ -161,10 +161,10 @@ void Note::mouseMoveEvent (QGraphicsSceneMouseEvent* event) {
 
 void Note::mousePressEvent(QGraphicsSceneMouseEvent *event) {
     if(!_link.isEmpty()) QDesktopServices::openUrl(_link);
+    emit(clicked());
 };
 
 void Note::mouseReleaseEvent(QGraphicsSceneMouseEvent *event){
-    qDebug() << "Note::mouseReleaseEvent";
 };
 
 void Note::mouseDoubleClickEvent(QGraphicsSceneMouseEvent*) {

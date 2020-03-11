@@ -47,6 +47,7 @@ public slots:
 signals:
 	void itemChanged(Note*);
 	void linkActivated(const QString& link);
+    void clicked();
 
 protected:
 	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
