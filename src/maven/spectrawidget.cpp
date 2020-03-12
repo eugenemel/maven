@@ -609,7 +609,8 @@ void SpectraWidget::findBounds(bool checkX, bool checkY) {
 
     //No enforcement is done in the GUI options panel - prevent negative range
     if (maxMZ < minMZ) {
-        maxMZ = minMZ;
+        minMZ = 0;
+        maxMZ = 1200;
     }
 
     //cerr << _currentScan->filterLine << " " << _currentScan->nobs() << endl;
