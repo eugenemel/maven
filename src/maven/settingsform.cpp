@@ -1,11 +1,18 @@
 #include "settingsform.h"
 
 SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) { 
+
+    //create components
     setupUi(this);
+
     settings = s;
     mainwindow = w;
+
+    //Fill out GUI based on current settings
     setFormValues();
 
+    //Write values from GUI into current settings
+    getFormValues();
 
     connect(tabWidget, SIGNAL(currentChanged(int)), SLOT(getFormValues()));
 
@@ -47,12 +54,21 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(ionizationType,SIGNAL(currentIndexChanged(int)),SLOT(getFormValues()));
 
     //spectra widget display options
+    //ms1 options
     connect(chkAutoMzMax, SIGNAL(toggled(bool)), SLOT(getFormValues()));
     connect(chkAutoMzMin, SIGNAL(toggled(bool)), SLOT(getFormValues()));
     connect(spnMzMinOffset, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
     connect(spnMzMinVal, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
     connect(spnMzMaxOffset, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
     connect(spnMzMaxVal, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+
+    //ms2 options
+    connect(chkMs2AutoMzMax, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+    connect(chkMs2AutoMzMin, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+    connect(spnMs2MzMinOffset, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+    connect(spnMs2MzMin, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+    connect(spnMs2MzMaxOffset, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+    connect(spnMs2MzMax, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
 
     setModal(true);
 
@@ -88,7 +104,8 @@ void SettingsForm::updateSmoothingWindowValue(double value) {
 void SettingsForm::setFormValues() {
    // qDebug() << "SettingsForm::setFormValues()";
 
-    if (settings == NULL) return;
+    if (!settings) return;
+
     eic_smoothingAlgorithm->setCurrentIndex(settings->value("eic_smoothingAlgorithm").toInt());
     eic_smoothingWindow->setValue(settings->value("eic_smoothingWindow").toDouble());
     grouping_maxRtWindow->setValue(settings->value("grouping_maxRtWindow").toDouble());
@@ -136,7 +153,7 @@ void SettingsForm::setFormValues() {
         scan_filter_min_quantile->setValue( settings->value("scan_filter_min_quantile").toInt());
 
     //spectra widget display options
-
+    //ms1 settings
     if (settings->contains("chkAutoMzMin"))
         chkAutoMzMin->setCheckState((Qt::CheckState) settings->value("chkAutoMzMin").toInt());
 
@@ -155,6 +172,26 @@ void SettingsForm::setFormValues() {
     if (settings->contains("spnMzMaxVal"))
         spnMzMaxVal->setValue(settings->value("spnMzMaxVal").toDouble());
 
+    //ms2 settings
+    if (settings->contains("chkMs2AutoMzMin"))
+        chkMs2AutoMzMin->setCheckState((Qt::CheckState) settings->value("chkMs2AutoMzMin").toInt());
+
+    if (settings->contains("chkMs2AutoMzMax"))
+        chkMs2AutoMzMax->setCheckState((Qt::CheckState) settings->value("chkMs2AutoMzMax").toInt());
+
+    if (settings->contains("spnMs2MzMinOffset"))
+        spnMs2MzMinOffset->setValue(settings->value("spnMs2MzMinOffset").toDouble());
+
+    if (settings->contains("spnMs2MzMaxOffset"))
+        spnMs2MzMaxOffset->setValue(settings->value("spnMs2MzMaxOffset").toDouble());
+
+    if (settings->contains("spnMs2MzMin"))
+        spnMs2MzMin->setValue(settings->value("spnMs2MzMin").toDouble());
+
+    if (settings->contains("spnMs2MzMax"))
+        spnMs2MzMax->setValue(settings->value("spnMs2MzMax").toDouble());
+
+    //bookmark warnings
     if (settings->contains("chkBkmkWarnMzRt"))
         chkBkmkWarnMzRt->setCheckState((Qt::CheckState) settings->value("chkBkmkWarnMzRt").toInt());
 
@@ -245,12 +282,21 @@ void SettingsForm::getFormValues() {
     }
 
     //spectra widget display options
+    //ms1 display settings
     settings->setValue("chkAutoMzMin", chkAutoMzMin->checkState());
     settings->setValue("chkAutoMzMax", chkAutoMzMax->checkState());
     settings->setValue("spnMzMinOffset", spnMzMinOffset->value());
     settings->setValue("spnMzMinVal", spnMzMinVal->value());
     settings->setValue("spnMzMaxOffset", spnMzMaxOffset->value());
     settings->setValue("spnMzMaxVal", spnMzMaxVal->value());
+
+    //ms2 display settings
+    settings->setValue("chkMs2AutoMzMin", chkMs2AutoMzMin->checkState());
+    settings->setValue("chkMs2AutoMzMax", chkMs2AutoMzMax->checkState());
+    settings->setValue("spnMs2MzMinOffset", spnMs2MzMinOffset->value());
+    settings->setValue("spnMs2MzMin", spnMs2MzMin->value());
+    settings->setValue("spnMs2MzMaxOffset", spnMs2MzMaxOffset->value());
+    settings->setValue("spnMs2MzMax", spnMs2MzMax->value());
 
     //bookmark warn display options
     settings->setValue("chkBkmkWarnMzRt", chkBkmkWarnMzRt->checkState());

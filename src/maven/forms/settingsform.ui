@@ -854,179 +854,254 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>961</width>
-         <height>211</height>
+         <width>981</width>
+         <height>101</height>
         </rect>
        </property>
        <property name="title">
-        <string>Spectrum m/z Display Range</string>
+        <string>MS1 Spectrum m/z display range</string>
        </property>
-       <widget class="QCheckBox" name="chkAutoMzMin">
-        <property name="geometry">
-         <rect>
-          <x>20</x>
-          <y>50</y>
-          <width>141</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Autoscale m/z min</string>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="chkAutoMzMax">
-        <property name="geometry">
-         <rect>
-          <x>20</x>
-          <y>120</y>
-          <width>151</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Autoscale m/z max</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QLabel" name="lblMzMin">
-        <property name="geometry">
-         <rect>
-          <x>640</x>
-          <y>50</y>
-          <width>91</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>m/z min value:</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="lblMzMax">
-        <property name="geometry">
-         <rect>
-          <x>640</x>
-          <y>120</y>
-          <width>91</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>m/z max value::</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="lblMzMinOffset">
-        <property name="geometry">
-         <rect>
-          <x>220</x>
-          <y>50</y>
-          <width>101</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>m/z min offset:</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="lblMzMaxOffset">
-        <property name="geometry">
-         <rect>
-          <x>220</x>
-          <y>120</y>
-          <width>101</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>m/z max offset:</string>
-        </property>
-       </widget>
-       <widget class="QDoubleSpinBox" name="spnMzMinOffset">
-        <property name="geometry">
-         <rect>
-          <x>320</x>
-          <y>41</y>
-          <width>151</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="suffix">
-         <string> amu</string>
-        </property>
-        <property name="maximum">
-         <double>9999999.000000000000000</double>
-        </property>
-        <property name="singleStep">
-         <double>0.010000000000000</double>
-        </property>
-        <property name="value">
-         <double>10.000000000000000</double>
-        </property>
-       </widget>
-       <widget class="QDoubleSpinBox" name="spnMzMinVal">
-        <property name="geometry">
-         <rect>
-          <x>750</x>
-          <y>41</y>
-          <width>151</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="suffix">
-         <string> amu</string>
-        </property>
-        <property name="maximum">
-         <double>9999999.000000000000000</double>
-        </property>
-        <property name="singleStep">
-         <double>0.010000000000000</double>
-        </property>
-       </widget>
-       <widget class="QDoubleSpinBox" name="spnMzMaxOffset">
-        <property name="geometry">
-         <rect>
-          <x>320</x>
-          <y>110</y>
-          <width>151</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="suffix">
-         <string> amu</string>
-        </property>
-        <property name="maximum">
-         <double>999999.000000000000000</double>
-        </property>
-        <property name="singleStep">
-         <double>0.010000000000000</double>
-        </property>
-        <property name="value">
-         <double>10.000000000000000</double>
-        </property>
-       </widget>
-       <widget class="QDoubleSpinBox" name="spnMzMaxVal">
-        <property name="geometry">
-         <rect>
-          <x>750</x>
-          <y>110</y>
-          <width>151</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="suffix">
-         <string> amu</string>
-        </property>
-        <property name="maximum">
-         <double>9999999.000000000000000</double>
-        </property>
-        <property name="singleStep">
-         <double>0.010000000000000</double>
-        </property>
-        <property name="value">
-         <double>1200.000000000000000</double>
-        </property>
-       </widget>
+       <layout class="QGridLayout" name="gridLayout_5">
+        <item row="0" column="0">
+         <widget class="QCheckBox" name="chkAutoMzMin">
+          <property name="text">
+           <string>Autoscale m/z min</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="lblMzMinOffset">
+          <property name="text">
+           <string>m/z min offset:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QDoubleSpinBox" name="spnMzMinOffset">
+          <property name="suffix">
+           <string> amu</string>
+          </property>
+          <property name="maximum">
+           <double>9999999.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="value">
+           <double>10.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QLabel" name="lblMzMin">
+          <property name="text">
+           <string>m/z min value:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4">
+         <widget class="QDoubleSpinBox" name="spnMzMinVal">
+          <property name="suffix">
+           <string> amu</string>
+          </property>
+          <property name="maximum">
+           <double>9999999.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.010000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QCheckBox" name="chkAutoMzMax">
+          <property name="text">
+           <string>Autoscale m/z max</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="lblMzMaxOffset">
+          <property name="text">
+           <string>m/z max offset:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QDoubleSpinBox" name="spnMzMaxOffset">
+          <property name="suffix">
+           <string> amu</string>
+          </property>
+          <property name="maximum">
+           <double>999999.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="value">
+           <double>10.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QLabel" name="lblMzMax">
+          <property name="text">
+           <string>m/z max value:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
+         <widget class="QDoubleSpinBox" name="spnMzMaxVal">
+          <property name="suffix">
+           <string> amu</string>
+          </property>
+          <property name="maximum">
+           <double>9999999.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="value">
+           <double>1200.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QGroupBox" name="grpMs2DisplayOptions">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>110</y>
+         <width>981</width>
+         <height>101</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>MS2 Spectrum m/z display range</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_11">
+        <item row="0" column="0">
+         <widget class="QCheckBox" name="chkMs2AutoMzMin">
+          <property name="text">
+           <string>Autoscale m/z min</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="lblMs2MzMinOffset">
+          <property name="text">
+           <string>m/z min offset:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QDoubleSpinBox" name="spnMs2MzMinOffset">
+          <property name="suffix">
+           <string> amu</string>
+          </property>
+          <property name="maximum">
+           <double>9999999.990000000223517</double>
+          </property>
+          <property name="value">
+           <double>10.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QLabel" name="lblMs2MzMin">
+          <property name="text">
+           <string>m/z min value:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4">
+         <widget class="QDoubleSpinBox" name="spnMs2MzMin">
+          <property name="suffix">
+           <string> amu</string>
+          </property>
+          <property name="maximum">
+           <double>9999999.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QCheckBox" name="chkMs2AutoMzMax">
+          <property name="text">
+           <string>Autoscale m/z max</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="lblMs2MzMaxOffset">
+          <property name="text">
+           <string>m/z max offset:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QDoubleSpinBox" name="spnMs2MzMaxOffset">
+          <property name="suffix">
+           <string> amu</string>
+          </property>
+          <property name="maximum">
+           <double>999999.989999999990687</double>
+          </property>
+          <property name="value">
+           <double>10.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QLabel" name="lblMs2MzMax">
+          <property name="text">
+           <string>m/z max value:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
+         <widget class="QDoubleSpinBox" name="spnMs2MzMax">
+          <property name="suffix">
+           <string> amu</string>
+          </property>
+          <property name="maximum">
+           <double>999999.989999999990687</double>
+          </property>
+          <property name="value">
+           <double>1200.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </widget>

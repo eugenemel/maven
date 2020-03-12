@@ -575,17 +575,37 @@ void SpectraWidget::findBounds(bool checkX, bool checkY) {
     //bounds
 	if (_currentScan == NULL || _currentScan->mz.size() == 0) return;
 
-    bool isAutoMzMin = mainwindow->getSettings()->value("chkAutoMzMin", false).toBool();
-    bool isAutoMzMax = mainwindow->getSettings()->value("chkAutoMzMax", true).toBool();
+    float minMZ;
+    float maxMZ;
 
-    double mzMinOffset = mainwindow->getSettings()->value("spnMzMinOffset", 10.0).toDouble();
-    double mzMaxOffset = mainwindow->getSettings()->value("spnMzMaxOffset", 10.0).toDouble();
+    if (isMs2Spectrum) {
 
-    double mzMinVal = mainwindow->getSettings()->value("spnMzMinVal", 0.0).toDouble();
-    double mzMaxVal = mainwindow->getSettings()->value("spnMzMaxVal", 1200.0).toDouble();
+        bool isAutoMzMin = mainwindow->getSettings()->value("chkMs2AutoMzMin", false).toBool();
+        bool isAutoMzMax = mainwindow->getSettings()->value("chkMs2AutoMzMax", true).toBool();
 
-    float minMZ = isAutoMzMin ? _currentScan->mz[0] - mzMinOffset : mzMinVal;
-    float maxMZ = isAutoMzMax ? _currentScan->mz[_currentScan->mz.size()-1] + mzMaxOffset : mzMaxVal;
+        double mzMinOffset = mainwindow->getSettings()->value("spnMs2MzMinOffset", 10.0).toDouble();
+        double mzMaxOffset = mainwindow->getSettings()->value("spnMs2MzMaxOffset", 10.0).toDouble();
+
+        double mzMinVal = mainwindow->getSettings()->value("spnMs2MzMin", 0.0).toDouble();
+        double mzMaxVal = mainwindow->getSettings()->value("spnMs2MzMax", 1200.0).toDouble();
+
+        minMZ = isAutoMzMin ? _currentScan->mz[0] - mzMinOffset : mzMinVal;
+        maxMZ = isAutoMzMax ? _currentScan->mz[_currentScan->mz.size()-1] + mzMaxOffset : mzMaxVal;
+
+    } else {
+
+        bool isAutoMzMin = mainwindow->getSettings()->value("chkAutoMzMin", false).toBool();
+        bool isAutoMzMax = mainwindow->getSettings()->value("chkAutoMzMax", true).toBool();
+
+        double mzMinOffset = mainwindow->getSettings()->value("spnMzMinOffset", 10.0).toDouble();
+        double mzMaxOffset = mainwindow->getSettings()->value("spnMzMaxOffset", 10.0).toDouble();
+
+        double mzMinVal = mainwindow->getSettings()->value("spnMzMinVal", 0.0).toDouble();
+        double mzMaxVal = mainwindow->getSettings()->value("spnMzMaxVal", 1200.0).toDouble();
+
+        minMZ = isAutoMzMin ? _currentScan->mz[0] - mzMinOffset : mzMinVal;
+        maxMZ = isAutoMzMax ? _currentScan->mz[_currentScan->mz.size()-1] + mzMaxOffset : mzMaxVal;
+    }
 
     //No enforcement is done in the GUI options panel - prevent negative range
     if (maxMZ < minMZ) {
