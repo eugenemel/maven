@@ -53,6 +53,7 @@ public slots:
 
                     void selectObservedPeak(int peakIndex);
 
+                    void findBounds(bool checkX, bool checkY);
         private:
                     bool isMs2Spectrum;
                     MainWindow* mainwindow;
@@ -98,7 +99,6 @@ public slots:
 
                     void initPlot();
                     void addAxes();
-                    void findBounds(bool checkX, bool checkY);
                     void drawGraph();
                     void drawSpectralHitLines(SpectralHit& hit);
 

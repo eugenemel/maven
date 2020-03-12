@@ -62,6 +62,13 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(spnMzMaxOffset, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
     connect(spnMzMaxVal, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
 
+    connect(chkAutoMzMax, SIGNAL(toggled(bool)), SLOT(replotMS1Spectrum()));
+    connect(chkAutoMzMin, SIGNAL(toggled(bool)), SLOT(replotMS1Spectrum()));
+    connect(spnMzMinOffset, SIGNAL(valueChanged(double)), SLOT(replotMS1Spectrum()));
+    connect(spnMzMinVal, SIGNAL(valueChanged(double)), SLOT(replotMS1Spectrum()));
+    connect(spnMzMaxOffset, SIGNAL(valueChanged(double)), SLOT(replotMS1Spectrum()));
+    connect(spnMzMaxVal, SIGNAL(valueChanged(double)), SLOT(replotMS1Spectrum()));
+
     //ms2 options
     connect(chkMs2AutoMzMax, SIGNAL(toggled(bool)), SLOT(getFormValues()));
     connect(chkMs2AutoMzMin, SIGNAL(toggled(bool)), SLOT(getFormValues()));
@@ -69,6 +76,13 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(spnMs2MzMin, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
     connect(spnMs2MzMaxOffset, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
     connect(spnMs2MzMax, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+
+    connect(chkMs2AutoMzMax, SIGNAL(toggled(bool)), SLOT(replotMS2Spectrum()));
+    connect(chkMs2AutoMzMin, SIGNAL(toggled(bool)), SLOT(replotMS2Spectrum()));
+    connect(spnMs2MzMinOffset, SIGNAL(valueChanged(double)), SLOT(replotMS2Spectrum()));
+    connect(spnMs2MzMin, SIGNAL(valueChanged(double)), SLOT(replotMS2Spectrum()));
+    connect(spnMs2MzMaxOffset, SIGNAL(valueChanged(double)), SLOT(replotMS2Spectrum()));
+    connect(spnMs2MzMax, SIGNAL(valueChanged(double)), SLOT(replotMS2Spectrum()));
 
     setModal(true);
 
@@ -88,7 +102,7 @@ void SettingsForm::recomputeIsotopes() {
 
 void SettingsForm::recomputeEIC() { 
     getFormValues();
-    if (mainwindow != NULL && mainwindow->getEicWidget() != NULL) {
+    if (mainwindow && mainwindow->getEicWidget()) {
         mainwindow->getEicWidget()->recompute();
         mainwindow->getEicWidget()->replot();
     }
@@ -100,6 +114,21 @@ void SettingsForm::updateSmoothingWindowValue(double value) {
     recomputeEIC();
 }
 
+void SettingsForm::replotMS1Spectrum(){
+    if (mainwindow && mainwindow->spectraWidget && mainwindow->spectraDockWidget && mainwindow->spectraDockWidget->isVisible()) {
+        mainwindow->spectraWidget->findBounds(true, true);
+        mainwindow->spectraWidget->replot();
+        mainwindow->spectraWidget->repaint();
+    }
+}
+
+void SettingsForm::replotMS2Spectrum(){
+    if (mainwindow && mainwindow->fragmentationSpectraWidget && mainwindow->fragmentationSpectraDockWidget && mainwindow->fragmentationSpectraDockWidget->isVisible()) {
+        mainwindow->fragmentationSpectraWidget->findBounds(true, true);
+        mainwindow->fragmentationSpectraWidget->replot();
+        mainwindow->fragmentationSpectraWidget->repaint();
+    }
+}
 
 void SettingsForm::setFormValues() {
    // qDebug() << "SettingsForm::setFormValues()";
