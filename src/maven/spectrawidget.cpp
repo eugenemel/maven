@@ -392,7 +392,7 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
 
             Note* label = new Note(lblString);
 
-            double xFrac = (_currentScan->mz[pos] -_minX) / (_maxX-_minX);
+            double xFrac = (hitMz -_minX) / (_maxX-_minX);
             double yFrac = (hitIntensity/maxIntensity);
 
             if (xFrac >= 0.8 && yFrac <= 0.2) {
