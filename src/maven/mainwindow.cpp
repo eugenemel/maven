@@ -167,7 +167,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     projectDockWidget =  new ProjectDockWidget(this);
     rconsoleDockWidget =  new RconsoleWidget(this);
     fragmentationSpectraWidget = new SpectraWidget(this, true);
-    fragmenationSpectraDockWidget =  createDockWidget("Fragmentation Spectra",fragmentationSpectraWidget);
+    fragmentationSpectraDockWidget =  createDockWidget("Fragmentation Spectra",fragmentationSpectraWidget);
     ligandWidget->setVisible(false);
     covariantsPanel->setVisible(false);
     isotopeWidget->setVisible(false);
@@ -181,7 +181,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     galleryDockWidget->setVisible(false);
     projectDockWidget->setVisible(false);
     rconsoleDockWidget->setVisible(false);
-    fragmenationSpectraDockWidget->setVisible(false);    //treemap->setVisible(false);
+    fragmentationSpectraDockWidget->setVisible(false);    //treemap->setVisible(false);
     //peaksPanel->setVisible(false);
     //treeMapDockWidget =  createDockWidget("TreeMap",treemap);
 
@@ -244,7 +244,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     addDockWidget(Qt::BottomDockWidgetArea,galleryDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,srmDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,rconsoleDockWidget,Qt::Horizontal);
-    addDockWidget(Qt::BottomDockWidgetArea,fragmenationSpectraDockWidget,Qt::Horizontal);
+    addDockWidget(Qt::BottomDockWidgetArea,fragmentationSpectraDockWidget,Qt::Horizontal);
 
     //addDockWidget(Qt::BottomDockWidgetArea,peaksPanel,Qt::Horizontal);
     //addDockWidget(Qt::BottomDockWidgetArea,treeMapDockWidget,Qt::Horizontal);
@@ -1180,7 +1180,7 @@ void MainWindow::createToolBars() {
     QToolButton* btnSamples = addDockWidgetButton(sideBar,projectDockWidget,QIcon(rsrcPath + "/samples.png"), "Show Samples Widget (F2)");
     QToolButton* btnLigands = addDockWidgetButton(sideBar,ligandWidget,QIcon(rsrcPath + "/molecule.png"), "Show Compound Widget (F3)");
     QToolButton* btnSpectra = addDockWidgetButton(sideBar,spectraDockWidget,QIcon(rsrcPath + "/spectra.png"), "Show Spectra Widget (F4)");
-    QToolButton* btnFragSpectra = addDockWidgetButton(sideBar, fragmenationSpectraDockWidget, QIcon(rsrcPath + "/spectra_with_2.png"), "Show Fragmentation Spectra Widget");
+    QToolButton* btnFragSpectra = addDockWidgetButton(sideBar, fragmentationSpectraDockWidget, QIcon(rsrcPath + "/spectra_with_2.png"), "Show Fragmentation Spectra Widget");
     QToolButton* btnIsotopes = addDockWidgetButton(sideBar,isotopeWidget,QIcon(rsrcPath + "/isotope.png"), "Show Isotopes Widget (F5)");
     QToolButton* btnFindCompound = addDockWidgetButton(sideBar,massCalcWidget,QIcon(rsrcPath + "/findcompound.png"), "Show Match Compound Widget (F6)");
     QToolButton* btnCovariants = addDockWidgetButton(sideBar,covariantsPanel,QIcon(rsrcPath + "/covariants.png"), "Find Covariants Widget (F7)");

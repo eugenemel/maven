@@ -103,7 +103,7 @@ public:
     TreeDockWidget	 *srmDockWidget;
     //TreeDockWidget   *peaksPanel;
     QDockWidget         *spectraDockWidget;
-    QDockWidget         *fragmenationSpectraDockWidget;
+    QDockWidget         *fragmentationSpectraDockWidget;
     QDockWidget		 *heatMapDockWidget;
     QDockWidget		 *scatterDockWidget;
     QDockWidget		 *treeMapDockWidget;

@@ -100,7 +100,7 @@ void EicPoint::mousePressEvent (QGraphicsSceneMouseEvent* event) {
     }
 
     if(_scan) {
-        _mw->fragmenationSpectraDockWidget->setVisible(true);
+        _mw->fragmentationSpectraDockWidget->setVisible(true);
         _mw->fragmentationSpectraWidget->setScan(_scan);
         _mw->massCalcWidget->setFragmentationScan(_scan);
 
