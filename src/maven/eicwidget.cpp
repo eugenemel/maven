@@ -482,6 +482,8 @@ void EicWidget::addEICLines(bool showSpline) {
     }
 
 
+    qDebug() << "EicWidget::addMergedEIC(): _slice.rtmin=" << _slice.rtmin << ", _slice.rtmax=" << _slice.rtmax;
+
     //display eics
     for( unsigned int i=0; i< eics.size(); i++ ) {
         EIC* eic = eics[i];
@@ -527,7 +529,12 @@ void EicWidget::addEICLines(bool showSpline) {
         line->setPen(pen);
         line->setColor(pcolor);
         //line->fixEnds();
+
+        if (eic->size() > 0) {
+             qDebug() << "EicWidget::addMergedEIC(): eic->rt[0]=" << eic->rt[0] << ", eic->rt[last]=" << eic->rt[eic->size()-1];
+        }
     }
+
 }
 
 void EicWidget::addCubicSpline() {
@@ -708,6 +715,7 @@ void EicWidget::addMergedEIC() {
     line->setBrush(brush);
     line->setPen(pen);
     line->setColor(color);
+
 }
 
 void EicWidget::addBaseLine() {
@@ -1453,8 +1461,16 @@ void EicWidget::groupPeaks() {
 	float eic_smoothingWindow =   settings->value("eic_smoothingWindow").toDouble();
 	float grouping_maxRtWindow =  settings->value("grouping_maxRtWindow").toDouble();
 
+    qDebug() << "Prior to grouping:";
+    mzSlice bounds = visibleEICBounds();
+    qDebug() << bounds.rtmin << " - " << bounds.rtmax;
+
     //old approach
     peakgroups = EIC::groupPeaks(eics, eic_smoothingWindow, grouping_maxRtWindow);
+
+    qDebug() << "After grouping:";
+    bounds = visibleEICBounds();
+    qDebug() << bounds.rtmin << " - " << bounds.rtmax;
 
     //ms2-centric new approach
     //peakgroups = EIC::groupPeaksB(eics, eic_smoothingWindow, grouping_maxRtWindow, minSmoothedPeakIntensity);

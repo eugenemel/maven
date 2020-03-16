@@ -971,23 +971,34 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
                  float mz = mzintpair.at(0).toDouble(&ok);
                  float ints = mzintpair.at(1).toDouble(&ook);
                  if (ok && ook && mz >= 0 && ints >= 0) {
-                     cpd->fragment_intensity.push_back(ints);
-                     cpd->fragment_mzs.push_back(mz);
-                     int frag_indx = cpd->fragment_mzs.size()-1;
 
-                     if(mzintpair.size() >= 3) {
-                         cpd->fragment_iontype[frag_indx] = mzintpair.at(2).toStdString();
-                         QString fragLabel("");
-                         for (unsigned int k = 2; k < mzintpair.size(); k++) {
-                             if (k > 2) {
-                                 fragLabel.append(" ");
-                             }
-                             fragLabel.append(mzintpair.at(k));
+                     bool isMzAlreadyExists = false;
+                     if (cpd->fragment_mzs.size() > 0) {
+                         float prevMz = cpd->fragment_mzs.at(cpd->fragment_mzs.size()-1);
+                         if (abs(prevMz-mz) < 1e-6) {
+                             isMzAlreadyExists = true;
                          }
-                         cpd->fragment_labels.push_back(fragLabel.toStdString());
-                    } else {
-                         cpd->fragment_labels.push_back("");
-                    }
+                     }
+
+                     if (!isMzAlreadyExists) {
+                         cpd->fragment_intensity.push_back(ints);
+                         cpd->fragment_mzs.push_back(mz);
+                         int frag_indx = cpd->fragment_mzs.size()-1;
+
+                         if(mzintpair.size() >= 3) {
+                             cpd->fragment_iontype[frag_indx] = mzintpair.at(2).toStdString();
+                             QString fragLabel("");
+                             for (unsigned int k = 2; k < mzintpair.size(); k++) {
+                                 if (k > 2) {
+                                     fragLabel.append(" ");
+                                 }
+                                 fragLabel.append(mzintpair.at(k));
+                             }
+                             cpd->fragment_labels.push_back(fragLabel.toStdString());
+                        } else {
+                             cpd->fragment_labels.push_back("");
+                        }
+                     }
                  }
              }
          }
