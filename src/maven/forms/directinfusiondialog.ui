@@ -216,8 +216,15 @@
     <item row="0" column="1">
      <widget class="QComboBox" name="cmbSpectralDeconvolutionAlgorithm"/>
     </item>
-    <item row="1" column="0" colspan="2">
+    <item row="2" column="0" colspan="2">
      <widget class="QTextBrowser" name="txtSpecCompDescription"/>
+    </item>
+    <item row="1" column="0" colspan="2">
+     <widget class="QCheckBox" name="chkAgglomerateAcrossSamples">
+      <property name="text">
+       <string>Agglomerate across samples</string>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
