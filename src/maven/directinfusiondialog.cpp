@@ -42,7 +42,6 @@ void DirectInfusionDialog::updateSpectralCompositionDescription() {
         text = QString(
                     "Return all compound matches, without any attempt to determine spectral composition.\n"
                     "\nThe group rank for all matches is is 0.0\n"
-                    "\nPeak groups are agglomerated across samples."
                     );
         break;
     case 1:
@@ -58,7 +57,7 @@ void DirectInfusionDialog::updateSpectralCompositionDescription() {
                     "This is applied to all unique fragments in each summarized compound. In case there are more than one unique fragment per summarized compound,"
                     " the highest theoretical intensity is used.\n"
                     "\nThis is repeated for all summarized compounds.  The relative proportion of each summaried compound is recorded as the Rank.\n"
-                    "\nPeak groups are agglomerated across samples. The average relative ratio is computed.\n"
+                    "\nIf peak groups are agglomerated across samples, the average relative ratio is computed.\n"
                     "\nIf a compound is missing from a sample, the relative proportion for that sample is 0.\n"
                     "\nIf a sample contains no compounds, the sample is not included in the proportion computation."
                     );
