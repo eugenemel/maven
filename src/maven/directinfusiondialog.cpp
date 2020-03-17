@@ -91,6 +91,7 @@ void DirectInfusionDialog::analyze() {
 
     //general
     directInfusionUpdate->params->isRequireAdductPrecursorMatch = this->isRequireAdductMatch->isChecked();
+    directInfusionUpdate->params->isAgglomerateAcrossSamples = this->chkAgglomerateAcrossSamples->isChecked();
 
     //fragment related
     directInfusionUpdate->params->minNumMatches = this->spnMatchXPeaks->value();
