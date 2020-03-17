@@ -400,18 +400,7 @@ void EicWidget::findPlotBounds() {
         _maxY = _intensityZoomVal;
     }
 
-    //approximate version.. look for maximum intensity peak
-    if (_maxY == 0) {
-        for(int i=0; i < peakgroups.size(); i++ ) {
-            if ( mzUtils::checkOverlap(peakgroups[i].minRt, peakgroups[i].maxRt, _slice.rtmin, _slice.rtmax) > 0) {
-                if( peakgroups[i].maxIntensity > _maxY ) {
-                    _maxY = peakgroups[i].maxIntensity;
-                }
-            }
-        }
-    }
-
-    //no maximum intensity peak was found. Find highest intensity in EIC.
+    //Find highest intensity in EIC.
     if (_maxY == 0) {
         for(int i=0; i < eics.size(); i++ ) {
             EIC* eic = eics[i];
@@ -481,9 +470,6 @@ void EicWidget::addEICLines(bool showSpline) {
         std::sort(eics.begin(), eics.end(), EIC::compMaxIntensity);
     }
 
-
-    qDebug() << "EicWidget::addMergedEIC(): _slice.rtmin=" << _slice.rtmin << ", _slice.rtmax=" << _slice.rtmax;
-
     //display eics
     for( unsigned int i=0; i< eics.size(); i++ ) {
         EIC* eic = eics[i];
@@ -529,10 +515,6 @@ void EicWidget::addEICLines(bool showSpline) {
         line->setPen(pen);
         line->setColor(pcolor);
         //line->fixEnds();
-
-        if (eic->size() > 0) {
-             qDebug() << "EicWidget::addMergedEIC(): eic->rt[0]=" << eic->rt[0] << ", eic->rt[last]=" << eic->rt[eic->size()-1];
-        }
     }
 
 }
@@ -1266,7 +1248,7 @@ void EicWidget::resetZoom() {
     _slice.rtmin=bounds.rtmin;
     _slice.rtmax=bounds.rtmax;
     //qDebug() << "EicWidget::resetZoom() " << _slice.rtmin << " " << _slice.rtmax << endl;
-    replot(NULL);
+    replot(nullptr);
 }
 
 void EicWidget::zoom(float factor) {
