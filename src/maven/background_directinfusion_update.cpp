@@ -138,7 +138,7 @@ void BackgroundDirectInfusionUpdate::run(void) {
                     DirectInfusionGroupAnnotation *directInfusionGroupAnnotation = new DirectInfusionGroupAnnotation();
 
                     directInfusionGroupAnnotation->precMzMin = directInfusionAnnotationEntry->precMzMin;
-                    directInfusionGroupAnnotation->precMzMax = directInfusionGroupAnnotation->precMzMax;
+                    directInfusionGroupAnnotation->precMzMax = directInfusionAnnotationEntry->precMzMax;
 
                     directInfusionGroupAnnotation->sample = directInfusionAnnotationEntry->sample;
                     directInfusionGroupAnnotation->scan = directInfusionAnnotationEntry->scan;
