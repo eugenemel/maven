@@ -117,23 +117,47 @@ void BackgroundDirectInfusionUpdate::run(void) {
     int totalSteps = numSteps * allDirectInfusionsAcrossSamples.size();
     int emitCounter = stepNum * allDirectInfusionsAcrossSamples.size();
 
-    /**
-     * ACTUAL WORK
-     */
     for (auto directInfusionAnnotation : allDirectInfusionsAcrossSamples) {
         if (!directInfusionAnnotation.second.empty()){
-            emit(newDirectInfusionAnnotation(
-                        DirectInfusionGroupAnnotation::createByAverageProportions(
-                            directInfusionAnnotation.second,
-                            params,
-                            false //debug
-                            ),
-                        directInfusionAnnotation.first)
-                    );
+
+            int clusterNum = directInfusionAnnotation.first;
+
+            if (params->isAgglomerateAcrossSamples) {
+                emit(newDirectInfusionAnnotation(
+                            DirectInfusionGroupAnnotation::createByAverageProportions(
+                                directInfusionAnnotation.second,
+                                params,
+                                false //debug
+                                ),
+                            clusterNum)
+                        );
+            } else {
+
+                for (auto directInfusionAnnotationEntry : directInfusionAnnotation.second) {
+
+                    DirectInfusionGroupAnnotation *directInfusionGroupAnnotation = new DirectInfusionGroupAnnotation();
+
+                    directInfusionGroupAnnotation->precMzMin = directInfusionAnnotationEntry->precMzMin;
+                    directInfusionGroupAnnotation->precMzMax = directInfusionGroupAnnotation->precMzMax;
+
+                    directInfusionGroupAnnotation->sample = directInfusionAnnotationEntry->sample;
+                    directInfusionGroupAnnotation->scan = directInfusionAnnotationEntry->scan;
+
+                    directInfusionGroupAnnotation->fragmentationPattern = directInfusionAnnotationEntry->fragmentationPattern;
+                    directInfusionGroupAnnotation->compounds = directInfusionAnnotationEntry->compounds;
+
+                    directInfusionGroupAnnotation->annotationBySample.insert(make_pair(directInfusionAnnotationEntry->sample, directInfusionAnnotationEntry));
+
+                    emit(newDirectInfusionAnnotation(directInfusionGroupAnnotation, clusterNum));
+                }
+
+            }
+
         }
         updateProgressBar("Populating results table...", emitCounter, totalSteps);
         emitCounter++;
     }
+
 
     qDebug() << "Direct infusion analysis completed in" << timer.elapsed() << "msec.";
     updateProgressBar("Direct infusion analysis not yet started", 0, 1);
