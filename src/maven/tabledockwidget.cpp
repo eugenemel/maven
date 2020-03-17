@@ -441,6 +441,11 @@ QString TableDockWidget::groupTagString(PeakGroup* group){
             }
         }
 
+        //direct infusion display for single samples
+        if (group->peaks.size() == 1 && group->peaks[0].mzmax - group->peaks[0].mzmin > 0.5) {
+            parts << group->peaks[0].sample->sampleName.c_str();
+        }
+
         if (!group->compound->db.empty()) {
             parts << group->compound->db.c_str();
         }
