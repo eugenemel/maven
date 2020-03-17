@@ -658,8 +658,10 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation 
     }
 
      directInfusionGroupAnnotation->clean();
-     if (directInfusionGroupAnnotation->fragmentationPattern) delete(directInfusionGroupAnnotation->fragmentationPattern);
-     if (directInfusionGroupAnnotation) delete(directInfusionGroupAnnotation);
+
+     //Issue 100: these delete statements are currently failing
+//     if (directInfusionGroupAnnotation->fragmentationPattern) delete(directInfusionGroupAnnotation->fragmentationPattern);
+//     if (directInfusionGroupAnnotation) delete(directInfusionGroupAnnotation);
 }
 
 QList<PeakGroup*> TableDockWidget::getGroups() {
