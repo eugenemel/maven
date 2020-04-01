@@ -53,6 +53,9 @@ void BackgroundDirectInfusionUpdate::run(void) {
 
     stepNum++;
 
+    int afterLipidSummarization = timer.elapsed();
+    qDebug() << "Enumerated lipid summarizations in " << afterLipidSummarization << "msec.";
+
     emit(updateProgressBar("Preparing search database...", stepNum, numSteps));
 
     /**
@@ -74,6 +77,9 @@ void BackgroundDirectInfusionUpdate::run(void) {
     }
 
     typedef map<int, DirectInfusionAnnotation*>::iterator diSampleIterator;
+
+    int afterDatabasePreparation = timer.elapsed();
+    qDebug() << "Restructured search database in " << afterDatabasePreparation << "msec.";
 
     for (unsigned int i = 0; i < samples.size(); i++){
 
@@ -108,6 +114,9 @@ void BackgroundDirectInfusionUpdate::run(void) {
          }
 
     }
+
+    int afterSampleProcessing = timer.elapsed();
+    qDebug() << "Completed analysis of all individual samples in " << afterSampleProcessing << "msec.";
 
     //TODO: refactor as modular algorithm
     //Organizing across samples
