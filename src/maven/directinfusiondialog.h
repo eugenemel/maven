@@ -27,9 +27,9 @@ class DirectInfusionDialog : public QDialog, public Ui_directInfusionDialog {
         void updateSpectralCompositionDescription();
 
     private:
-        QSettings *settings;
-        MainWindow *mainwindow;
-        BackgroundDirectInfusionUpdate *directInfusionUpdate;
+        QSettings *settings = nullptr;
+        MainWindow *mainwindow = nullptr;
+        BackgroundDirectInfusionUpdate *directInfusionUpdate = nullptr;
 };
 
 #endif //DIRECTINFUSIONDIALOG_H

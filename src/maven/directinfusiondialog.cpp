@@ -18,7 +18,7 @@ DirectInfusionDialog::DirectInfusionDialog(QWidget *parent) : QDialog(parent) {
 }
 
 DirectInfusionDialog::~DirectInfusionDialog(){
-    delete(directInfusionUpdate);
+    if (directInfusionUpdate) delete(directInfusionUpdate);
 }
 
 void DirectInfusionDialog::show(){
