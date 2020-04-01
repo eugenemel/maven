@@ -1443,26 +1443,13 @@ void EicWidget::groupPeaks() {
 	float eic_smoothingWindow =   settings->value("eic_smoothingWindow").toDouble();
 	float grouping_maxRtWindow =  settings->value("grouping_maxRtWindow").toDouble();
 
-    qDebug() << "Prior to grouping:";
-    mzSlice bounds = visibleEICBounds();
-    qDebug() << bounds.rtmin << " - " << bounds.rtmax;
-
     //old approach
     peakgroups = EIC::groupPeaks(eics, eic_smoothingWindow, grouping_maxRtWindow);
-
-    qDebug() << "After grouping:";
-    bounds = visibleEICBounds();
-    qDebug() << bounds.rtmin << " - " << bounds.rtmax;
 
     //ms2-centric new approach
     //peakgroups = EIC::groupPeaksB(eics, eic_smoothingWindow, grouping_maxRtWindow, minSmoothedPeakIntensity);
 
-    //keep only top X groups ( ranked by intensity )
-    qDebug() << "Start groupCount=" << peakgroups.size();
-
     EIC::removeLowRankGroups(peakgroups,50);
-
-    qDebug() << "Stop groupCount=" << peakgroups.size();
 }
 
 void EicWidget::print(QPaintDevice* printer) {
