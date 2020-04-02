@@ -244,7 +244,7 @@ void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
 }
 
 void MassCalcWidget::setFragmentationScan(Scan* scan) {
-    qDebug() << "MassCalcWidget::setFragmentationScan()" << endl;
+    qDebug() << "MassCalcWidget::setFragmentationScan()";
     if(!scan) return;
 
     Fragment f(scan,0,0,1024);

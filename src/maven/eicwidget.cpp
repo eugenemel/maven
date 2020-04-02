@@ -235,7 +235,7 @@ void EicWidget::mouseDoubleClickEvent(QMouseEvent* event){
 void EicWidget::selectionChangedAction() {}
 
 void EicWidget::setFocusLine(float rt) { 
-     qDebug() <<" EicWidget::setFocusLine(float rt)";
+     //qDebug() <<"EicWidget::setFocusLine(float rt)";
     _focusLineRt = rt;
     if (_focusLine == NULL ) _focusLine = new QGraphicsLineItem(0);
 	if (_focusLine->scene() != scene() ) scene()->addItem(_focusLine);
