@@ -572,6 +572,13 @@ QStringList Database::getDatabaseNames() {
     return dbnames;
 }
 
+/**
+ * @brief Database::loadAdducts
+ * @param filename
+ * @return
+ *
+ * @deprecated in favor of Adduct::loadAdducts().
+ */
 vector<Adduct*> Database::loadAdducts(string filename) {
     vector<Adduct*> adducts;
     ifstream myfile(filename.c_str());
@@ -597,9 +604,8 @@ vector<Adduct*> Database::loadAdducts(string filename) {
         Adduct* a = new Adduct(name,mass,charge,nmol);
         adducts.push_back(a);
     }
-    cerr << "loadAdducts() " << filename << " count=" << adducts.size() << endl;
-    return adducts;
     myfile.close();
+    return adducts;
 }
 
 void Database::loadPeakGroupTags(string filename) {
