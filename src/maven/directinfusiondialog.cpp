@@ -89,6 +89,12 @@ void DirectInfusionDialog::analyze() {
     directInfusionUpdate->setCompounds(DB.compoundsDB);
     directInfusionUpdate->setAdducts(DB.adductsDB);
 
+    //consensus spectrum formation related
+    directInfusionUpdate->params->isIntensityAvgByObserved = true;
+    directInfusionUpdate->params->isNormalizeIntensityArray = false;
+    directInfusionUpdate->params->minNumMs2ScansForConsensus = 0;
+    directInfusionUpdate->params->minFractionMs2ScansForConsensus = 0;
+
     //general
     directInfusionUpdate->params->isRequireAdductPrecursorMatch = this->isRequireAdductMatch->isChecked();
     directInfusionUpdate->params->isAgglomerateAcrossSamples = this->chkAgglomerateAcrossSamples->isChecked();
