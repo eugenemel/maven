@@ -206,6 +206,9 @@
         <property name="suffix">
          <string> scans</string>
         </property>
+        <property name="maximum">
+         <number>999999999</number>
+        </property>
        </widget>
       </item>
       <item row="3" column="0">
@@ -236,7 +239,14 @@
        </widget>
       </item>
       <item row="4" column="1">
-       <widget class="QDoubleSpinBox" name="spnMinIndividualMs2ScanIntensity"/>
+       <widget class="QDoubleSpinBox" name="spnMinIndividualMs2ScanIntensity">
+        <property name="maximum">
+         <double>9999999999.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.000100000000000</double>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
