@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>859</width>
-    <height>606</height>
+    <height>661</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,231 +16,203 @@
   <property name="modal">
    <bool>true</bool>
   </property>
-  <widget class="QProgressBar" name="progressBar">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>540</y>
-     <width>841</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="value">
-    <number>0</number>
-   </property>
-  </widget>
-  <widget class="QLabel" name="lblProgressMsg">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>580</y>
-     <width>841</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Direct infusion analysis not yet started</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="start">
-   <property name="geometry">
-    <rect>
-     <x>370</x>
-     <y>520</y>
-     <width>113</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Start</string>
-   </property>
-  </widget>
-  <widget class="QGroupBox" name="libraryMatchingGroup">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>40</y>
-     <width>831</width>
-     <height>228</height>
-    </rect>
-   </property>
-   <property name="title">
-    <string>Library Matching</string>
-   </property>
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0" colspan="4">
-     <widget class="QCheckBox" name="isRequireAdductMatch">
-      <property name="text">
-       <string>Require compound's associated adduct and searched adduct match</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="lblFragTol">
-      <property name="text">
-       <string>Fragment PPM Tolr</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QSpinBox" name="spnFragTol">
-      <property name="value">
-       <number>20</number>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="2">
-     <widget class="QLabel" name="lblMatchXPeaks">
-      <property name="text">
-       <string>Match at Least X Peaks</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="3">
-     <widget class="QSpinBox" name="spnMatchXPeaks">
-      <property name="minimum">
-       <number>0</number>
-      </property>
-      <property name="maximum">
-       <number>999999999</number>
-      </property>
-      <property name="value">
-       <number>4</number>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="lblFragMinIntensity">
-      <property name="text">
-       <string>Frag Min Intensity</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="1">
-     <widget class="QDoubleSpinBox" name="spnFragMinIntensity">
-      <property name="suffix">
-       <string> ions</string>
-      </property>
-      <property name="maximum">
-       <double>1000000000000000000.000000000000000</double>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="2">
-     <widget class="QLabel" name="lblMatchDiagnostic">
-      <property name="text">
-       <string>Match at Least X Diagnostic Peaks</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0">
-     <widget class="QLabel" name="lblParTol">
-      <property name="text">
-       <string>Parent PPM Tolr</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="1">
-     <widget class="QSpinBox" name="spnParTol">
-      <property name="value">
-       <number>5</number>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="2" rowspan="2" colspan="2">
-     <widget class="QTextEdit" name="txtMs1ScanFilter"/>
-    </item>
-    <item row="5" column="0">
-     <widget class="QLabel" name="lblParentMinIntensity">
-      <property name="text">
-       <string>Parent Min Intensity</string>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="1">
-     <widget class="QDoubleSpinBox" name="spnParentMinIntensity">
-      <property name="suffix">
-       <string> ions</string>
-      </property>
-      <property name="maximum">
-       <double>100000000000000000.000000000000000</double>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="3">
-     <widget class="QSpinBox" name="spnMatchXDiagnosticPeaks">
-      <property name="maximum">
-       <number>9999999</number>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0" colspan="2">
-     <widget class="QCheckBox" name="chkFindPrecursorIon">
-      <property name="text">
-       <string>Find precursor Ion in MS1 scan</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="2" colspan="2">
-     <widget class="QLabel" name="lblMs1ScanFilter">
-      <property name="text">
-       <string>MS1 Scan Filter</string>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QGroupBox" name="spectralDeconvolutionGroup">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>280</y>
-     <width>831</width>
-     <height>241</height>
-    </rect>
-   </property>
-   <property name="title">
-    <string>Spectral Composition</string>
-   </property>
-   <layout class="QFormLayout" name="formLayout">
-    <item row="0" column="0">
-     <widget class="QLabel" name="lblSpecDeconvAlg">
-      <property name="text">
-       <string>Spectral Composition Algorithm</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QComboBox" name="cmbSpectralDeconvolutionAlgorithm"/>
-    </item>
-    <item row="2" column="0" colspan="2">
-     <widget class="QTextBrowser" name="txtSpecCompDescription"/>
-    </item>
-    <item row="1" column="0" colspan="2">
-     <widget class="QCheckBox" name="chkAgglomerateAcrossSamples">
-      <property name="text">
-       <string>Agglomerate across samples</string>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QLabel" name="lblHeader">
-   <property name="geometry">
-    <rect>
-     <x>280</x>
-     <y>20</y>
-     <width>281</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Direct Infusion Analysis Configuration Options</string>
-   </property>
-  </widget>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="1" column="0" colspan="3">
+    <widget class="QGroupBox" name="libraryMatchingGroup">
+     <property name="title">
+      <string>Library Matching</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0" colspan="4">
+       <widget class="QCheckBox" name="isRequireAdductMatch">
+        <property name="text">
+         <string>Require compound's associated adduct and searched adduct match</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="lblFragTol">
+        <property name="text">
+         <string>Fragment PPM Tolr</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="spnFragTol">
+        <property name="value">
+         <number>20</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="lblMatchXPeaks">
+        <property name="text">
+         <string>Match at Least X Peaks</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QSpinBox" name="spnMatchXPeaks">
+        <property name="minimum">
+         <number>0</number>
+        </property>
+        <property name="maximum">
+         <number>999999999</number>
+        </property>
+        <property name="value">
+         <number>4</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="lblFragMinIntensity">
+        <property name="text">
+         <string>Frag Min Intensity</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QDoubleSpinBox" name="spnFragMinIntensity">
+        <property name="suffix">
+         <string> ions</string>
+        </property>
+        <property name="maximum">
+         <double>1000000000000000000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="lblMatchDiagnostic">
+        <property name="text">
+         <string>Match at Least X Diagnostic Peaks</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="lblParTol">
+        <property name="text">
+         <string>Parent PPM Tolr</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QSpinBox" name="spnParTol">
+        <property name="value">
+         <number>5</number>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2" rowspan="2" colspan="2">
+       <widget class="QTextEdit" name="txtMs1ScanFilter"/>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="lblParentMinIntensity">
+        <property name="text">
+         <string>Parent Min Intensity</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QDoubleSpinBox" name="spnParentMinIntensity">
+        <property name="suffix">
+         <string> ions</string>
+        </property>
+        <property name="maximum">
+         <double>100000000000000000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QSpinBox" name="spnMatchXDiagnosticPeaks">
+        <property name="maximum">
+         <number>9999999</number>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="2">
+       <widget class="QCheckBox" name="chkFindPrecursorIon">
+        <property name="text">
+         <string>Find precursor Ion in MS1 scan</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2" colspan="2">
+       <widget class="QLabel" name="lblMs1ScanFilter">
+        <property name="text">
+         <string>MS1 Scan Filter</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="3">
+    <widget class="QLabel" name="lblHeader">
+     <property name="text">
+      <string>Direct Infusion Analysis Configuration Options</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0" colspan="3">
+    <widget class="QLabel" name="lblProgressMsg">
+     <property name="text">
+      <string>Direct infusion analysis not yet started</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="3">
+    <widget class="QGroupBox" name="spectralDeconvolutionGroup">
+     <property name="title">
+      <string>Spectral Composition</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="lblSpecDeconvAlg">
+        <property name="text">
+         <string>Spectral Composition Algorithm</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="cmbSpectralDeconvolutionAlgorithm"/>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QCheckBox" name="chkAgglomerateAcrossSamples">
+        <property name="text">
+         <string>Agglomerate across samples</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QTextBrowser" name="txtSpecCompDescription"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="3">
+    <widget class="QProgressBar" name="progressBar">
+     <property name="value">
+      <number>0</number>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QPushButton" name="start">
+     <property name="text">
+      <string>Start</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>
