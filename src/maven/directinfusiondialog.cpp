@@ -90,6 +90,7 @@ void DirectInfusionDialog::analyze() {
     directInfusionUpdate->setAdducts(DB.adductsDB);
 
     //consensus spectrum formation related
+    directInfusionUpdate->params->minIndividualMs2ScanIntensity = 0;
     directInfusionUpdate->params->isIntensityAvgByObserved = true;
     directInfusionUpdate->params->isNormalizeIntensityArray = false;
     directInfusionUpdate->params->minNumMs2ScansForConsensus = 0;
