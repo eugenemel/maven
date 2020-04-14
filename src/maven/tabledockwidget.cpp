@@ -659,6 +659,10 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation 
 
         pg.groupRank = directInfusionMatchData->proportion;
 
+        //avoid writing random junk to table
+        pg.maxNoNoiseObs = 0;
+        pg.maxQuality = 0;
+
         allgroups.push_back(pg);
     }
 
