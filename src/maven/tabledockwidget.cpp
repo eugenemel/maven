@@ -634,7 +634,7 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation 
             //Used by PeakGroup::groupStatistics()
             p.pos = peakCounter;
             p.baseMz = theoMz;
-            p.peakIntensity = 0; //TODO
+            p.peakIntensity = directInfusionMatchData->fragmentMaxObservedIntensity;
 
             pg.addPeak(p);
 
