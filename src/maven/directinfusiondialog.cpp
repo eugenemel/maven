@@ -90,11 +90,11 @@ void DirectInfusionDialog::analyze() {
     directInfusionUpdate->setAdducts(DB.adductsDB);
 
     //consensus spectrum formation related
-    directInfusionUpdate->params->minIndividualMs2ScanIntensity = 0;
-    directInfusionUpdate->params->isIntensityAvgByObserved = true;
-    directInfusionUpdate->params->isNormalizeIntensityArray = false;
-    directInfusionUpdate->params->minNumMs2ScansForConsensus = 0;
-    directInfusionUpdate->params->minFractionMs2ScansForConsensus = 0;
+    directInfusionUpdate->params->minIndividualMs2ScanIntensity = static_cast<float>(this->spnMinIndividualMs2ScanIntensity->value());
+    directInfusionUpdate->params->isIntensityAvgByObserved = this->chkIsIntensityAvgByObserved->isChecked();
+    directInfusionUpdate->params->isNormalizeIntensityArray = this->chkIsNormalizeIntensityArray->isChecked();
+    directInfusionUpdate->params->minNumMs2ScansForConsensus = this->spnMinNumMs2ScansForConsensus->value();
+    directInfusionUpdate->params->minFractionMs2ScansForConsensus = static_cast<float>(this->spnMinFractionMs2ScansForConsensus->value()/100.0); //displayed as a perentage
 
     //general
     directInfusionUpdate->params->isRequireAdductPrecursorMatch = this->isRequireAdductMatch->isChecked();
