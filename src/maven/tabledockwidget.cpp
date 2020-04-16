@@ -1,6 +1,6 @@
 #include "tabledockwidget.h"
 
-TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
+TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QString parametersString) {
     setAllowedAreas(Qt::AllDockWidgetAreas);
     setFloating(false);
     _mainwindow = mw;
@@ -39,7 +39,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     searchParamsDialog = new SearchParamsDialog(this);
     searchParamsDialog->setWindowTitle(title);
     searchParamsDialog->setWindowFlags(searchParamsDialog->windowFlags() | Qt::WindowStaysOnTopHint);
-    searchParamsDialog->txtSrchParams->setText(QString("TODO"));
+    searchParamsDialog->txtSrchParams->setText(parametersString);
 
     filterTagsDialog = new FilterTagsDialog(this);
     connect(filterTagsDialog, SIGNAL(updateFilter()), this, SLOT(updateTagFilter()));

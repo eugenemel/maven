@@ -29,7 +29,7 @@ public:
     QHBoxLayout *horizontalLayout;
     QTreeWidget *treeWidget;
 
-    TableDockWidget(MainWindow* mw, QString title, int numColms);
+    TableDockWidget(MainWindow* mw, QString title, int numColms, QString parametersString="");
 	~TableDockWidget();
 
 	int  groupCount() { return allgroups.size(); }
