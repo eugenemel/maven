@@ -49,7 +49,7 @@ class ProjectDB {
             void assignSampleIds();
             void saveAlignment();
             QStringList getSearchTableNames();
-
+            QString getSearchParams(QString tableName);
 
             void setSamples(vector<mzSample*>set) { samples = set; }
             bool isOpen() { return sqlDB.isOpen(); }

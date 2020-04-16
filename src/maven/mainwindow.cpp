@@ -158,7 +158,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     heatmap	 = 	  new HeatMap(this);
     galleryWidget = new GalleryWidget(this);
     barPlotWidget = new SampleBarPlotWidget(this);
-    bookmarkedPeaks = addPeaksTable("Bookmarks");
+    bookmarkedPeaks = addPeaksTable("Bookmarks", QString("This is a reserved table containing manually curated \"bookmarked\" peak groups."));
     spectraDockWidget =  createDockWidget("Spectra",spectraWidget);
     heatMapDockWidget =  createDockWidget("HeatMap",heatmap);
     galleryDockWidget =  createDockWidget("Gallery",galleryWidget);
@@ -432,8 +432,8 @@ void MainWindow::deletePeakTable(TableDockWidget *x) {
         groupTables.removeOne(x);
 }
 
-TableDockWidget* MainWindow::addPeaksTable(QString title) {
-    QPointer<TableDockWidget> panel	 = new TableDockWidget(this,title,0);
+TableDockWidget* MainWindow::addPeaksTable(QString title, QString tableInfo) {
+    QPointer<TableDockWidget> panel	 = new TableDockWidget(this, title, 0, tableInfo);
     panel->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::BottomDockWidgetArea,panel,Qt::Horizontal);
     groupTables.push_back(panel);

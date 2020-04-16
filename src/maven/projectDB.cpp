@@ -1109,3 +1109,42 @@ void ProjectDB::savePeakGroupsTableData(map<QString, QString> searchTableData){
         query0.exec("end transaction");
         qDebug() << "ProjectDB::savePeakGroupsTableData(): Saved" << searchTableData.size() << "searches.";
 }
+
+QString ProjectDB::getSearchParams(QString tableName) {
+
+        qDebug() << "ProjectDB::getSearchParams()... ";
+
+        QString noInfo("");
+
+        QSqlQuery queryCheckTable(sqlDB);
+
+        if (!queryCheckTable.exec("SELECT name FROM sqlite_master WHERE type='table' AND name='search_params';")){
+            qDebug() << "Ho..." << queryCheckTable.lastError();
+            qDebug() << "Could not check file for presence or absence of search_params table. Skipping.";
+            return noInfo;
+        }
+
+        bool isHasSearchParamsTable = false;
+        while (queryCheckTable.next()) {
+        if ("search_params" == queryCheckTable.value(0).toString()){
+                isHasSearchParamsTable = true;
+                break;
+            }
+        }
+
+        if (!isHasSearchParamsTable) return noInfo;
+
+        QSqlQuery queryMatches(sqlDB);
+        queryMatches.exec("select * from search_params;");
+
+        while (queryMatches.next()) {
+
+            QString searchTableName = queryMatches.value("searchTableName").toString();
+
+            if (searchTableName == tableName) {
+                return queryMatches.value("parameters").toString();
+            }
+        }
+
+        return noInfo;
+}

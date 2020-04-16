@@ -225,7 +225,7 @@ public slots:
     double getUserPPM() { return _ppmWindow; }
 
 
-    TableDockWidget* addPeaksTable(QString title);
+    TableDockWidget* addPeaksTable(QString title, QString info=QString(""));
     TableDockWidget* findPeakTable(QString title);
     QString getUniquePeakTableTitle(QString title);
 

@@ -620,7 +620,7 @@ void ProjectDockWidget::loadAllPeakTables() {
     QStringList tableNames = currentProject->getSearchTableNames();
     for(QString searchTableName : tableNames) {
         TableDockWidget* table = _mainwindow->findPeakTable(searchTableName);
-        if(!table) _mainwindow->addPeaksTable(searchTableName);
+        if(!table) _mainwindow->addPeaksTable(searchTableName, currentProject->getSearchParams(searchTableName));
     }
 
     qDebug() << "Created tables for search results.";
