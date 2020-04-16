@@ -5,6 +5,7 @@
 #include "mainwindow.h"
 #include "traindialog.h"
 #include "clusterdialog.h"
+#include "searchparamsdialog.h"
 #include "numeric_treewidgetitem.h"
 #include "directinfusionprocessor.h"
 #include "editpeakgroupingdialog.h"
@@ -14,6 +15,7 @@
 class MainWindow;
 class TrainDialog;
 class ClusterDialog;
+class SearchParamsDialog;
 class NumericTreeWidgetItem;
 class ProjectDB;
 
@@ -128,6 +130,7 @@ private:
 
           TrainDialog* traindialog;
           ClusterDialog*       clusterDialog;
+          SearchParamsDialog*   searchParamsDialog;
 
           QLineEdit*  filterEditor;
 

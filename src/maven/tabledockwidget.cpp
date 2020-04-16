@@ -36,6 +36,11 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     connect(clusterDialog->clearButton,SIGNAL(clicked(bool)),SLOT(clearClusters()));
     connect(clusterDialog->chkPGDisplay, SIGNAL(clicked(bool)), SLOT(changePeakGroupDisplay()));
 
+    searchParamsDialog = new SearchParamsDialog(this);
+    searchParamsDialog->setWindowTitle(title);
+    searchParamsDialog->setWindowFlags(searchParamsDialog->windowFlags() | Qt::WindowStaysOnTopHint);
+    searchParamsDialog->txtSrchParams->setText(QString("TODO"));
+
     filterTagsDialog = new FilterTagsDialog(this);
     connect(filterTagsDialog, SIGNAL(updateFilter()), this, SLOT(updateTagFilter()));
 
@@ -85,10 +90,10 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     btnCluster->setToolTip("Cluster Groups");
     connect(btnCluster, SIGNAL(clicked()),clusterDialog,SLOT(show()));
 
-    QToolButton *btnTrain = new QToolButton(toolBar);
-    btnTrain->setIcon(QIcon(rsrcPath + "/train.png"));
-    btnTrain->setToolTip("Train Neural Net");
-    connect(btnTrain,SIGNAL(clicked()),traindialog,SLOT(show()));
+    QToolButton *btnSettings = new QToolButton(toolBar);
+    btnSettings->setIcon(QIcon(rsrcPath + "/settings.png"));
+    btnSettings->setToolTip("Show Search Settings");
+    connect(btnSettings, SIGNAL(clicked()), searchParamsDialog, SLOT(show()));
 
     /*
     QToolButton *btnXML = new QToolButton(toolBar);
@@ -138,7 +143,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
 */
 
     btnTagsFilter = new QToolButton(toolBar);
-    btnTagsFilter->setIcon(QIcon(":/images/icon_filter.png"));
+    btnTagsFilter->setIcon(QIcon(rsrcPath + "/icon_filter.png"));
     btnTagsFilter->setToolTip("Filter peak groups based on tags");
     connect(btnTagsFilter, SIGNAL(clicked()), filterTagsDialog, SLOT(show()));
 
@@ -158,7 +163,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms) {
     toolBar->addWidget(btnSwitchView);
     toolBar->addWidget(btnGood);
     toolBar->addWidget(btnBad);
-    toolBar->addWidget(btnTrain);
+    toolBar->addWidget(btnSettings);
     toolBar->addWidget(btnHeatmapelete);
     toolBar->addSeparator();
 
@@ -288,9 +293,9 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
     for (char c : group->labels) {
 
         if (c == 'g') {
-            icons.push_back(QIcon(":/images/good.png"));
+            icons.push_back(QIcon(rsrcPath + "/good.png"));
         } else if (c == 'b') {
-            icons.push_back(QIcon(":/images/bad.png"));
+            icons.push_back(QIcon(rsrcPath + "/bad.png"));
         } else if (DB.peakGroupTags.find(c) != DB.peakGroupTags.end()) {
             icons.push_back(DB.peakGroupTags[c]->icon);
         }
@@ -683,8 +688,12 @@ QList<PeakGroup*> TableDockWidget::getGroups() {
 
 void TableDockWidget::deleteAll() {
 
+    QString msg("Are you sure you want to delete peak groups table \"");
+    msg.append(this->windowTitle());
+    msg.append("\" and all peak groups therein?");
+
     if (QMessageBox::No == QMessageBox::question(this, "Delete Confirmation",
-          "Do you want to delete all peakgroups from this table?", QMessageBox::Yes | QMessageBox::No)) {
+          msg, QMessageBox::Yes | QMessageBox::No)) {
         return;
     }
 
@@ -1310,14 +1319,22 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
         menu.addSeparator();
     }
 
-    QAction *markGood = menu.addAction(QIcon(":/images/good.png"), "Mark Selected Group(s) as Good");
+    QAction *markGood = menu.addAction(QIcon(rsrcPath + "/good.png"), "Mark Selected Group(s) as Good");
     connect(markGood, SIGNAL(triggered()), this, SLOT(markGroupGood()));
 
-    QAction *markBad = menu.addAction(QIcon(":/images/bad.png"), "Mark Selected Group(s) as Bad");
+    QAction *markBad = menu.addAction(QIcon(rsrcPath + "/bad.png"), "Mark Selected Group(s) as Bad");
     connect(markBad, SIGNAL(triggered()), this, SLOT(markGroupBad()));
 
     QAction *unmark = menu.addAction("Unmark Selected Group(s)");
     connect(unmark, SIGNAL(triggered()), this, SLOT(unmarkSelectedGroups()));
+
+    menu.addSeparator();
+
+    QAction* z5 = menu.addAction("Delete This Peak Table");
+    connect(z5, SIGNAL(triggered()), SLOT(deleteAll()));
+
+    QAction *zTrain = menu.addAction(QIcon(rsrcPath + "/train.png"), "Train Model");
+    connect(zTrain, SIGNAL(triggered()), traindialog, SLOT(show()));
 
     menu.addSeparator();
 
@@ -1329,9 +1346,6 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
 
     QAction* z4 = menu.addAction("Find Matching Compound");
     connect(z4, SIGNAL(triggered()), SLOT(findMatchingCompounds()));
-
-    QAction* z5 = menu.addAction("Delete All Groups");
-    connect(z5, SIGNAL(triggered()), SLOT(deleteAll()));
 
     QAction* z6 = menu.addAction("Show Hidden Groups");
     connect(z6, SIGNAL(triggered()), SLOT(unhideFocusedGroups()));
@@ -2040,9 +2054,9 @@ void TableDockWidget::updateTagFilter() {
 
     tagFilterState = filterTagsDialog->getFilterState();
     if (tagFilterState.isAllPass) {
-        this->btnTagsFilter->setIcon(QIcon(":/images/icon_filter.png"));
+        this->btnTagsFilter->setIcon(QIcon(rsrcPath + "/icon_filter.png"));
     } else {
-        this->btnTagsFilter->setIcon(QIcon(":/images/icon_filter_selected.png"));
+        this->btnTagsFilter->setIcon(QIcon(rsrcPath + "/icon_filter_selected.png"));
     }
 
     filterTree(filterEditor->text());
