@@ -36,6 +36,7 @@ class ProjectDB {
             void saveCompounds(vector<PeakGroup> &allgroups);
             void saveCompounds(set<Compound*>&compounds);
             void saveMatchTable();
+            void savePeakGroupsTableData(map<QString, QString> searchTableData);
             void writeSearchResultsToDB();
             int writeGroupSqlite(PeakGroup* group, int parentGroupId, QString tableName);
             void loadPeakGroups(QString tableName, QString rumsDBLibrary);

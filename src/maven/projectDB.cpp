@@ -36,12 +36,14 @@ void ProjectDB::deleteAll() {
     query.exec("drop table IF EXISTS peaks");
     query.exec("drop table IF EXISTS rt_update_key");
     query.exec("drop table IF EXISTS matches");
+    query.exec("drop table IF EXISTS search_params"); //Issue 197
 }
 
 void ProjectDB::deleteGroups() {
     QSqlQuery query(sqlDB);
     query.exec("drop table peakgroups");
     query.exec("drop table peaks");
+    query.exec("drop table IF EXISTS search_params"); //Issue 197
 }
 
 
@@ -1072,4 +1074,38 @@ bool ProjectDB::closeDatabaseConnection() {
     }
 
     return !sqlDB.isOpen();
+}
+
+void ProjectDB::savePeakGroupsTableData(map<QString, QString> searchTableData){
+
+        QSqlQuery query0(sqlDB);
+
+        query0.exec("begin transaction");
+
+        //create table if not exists
+        if(!query0.exec("CREATE TABLE IF NOT EXISTS search_params("
+                        "searchTableName TEXT,"
+                        "parameters TEXT"
+                        ");")){
+
+            qDebug() << "Ho... " << query0.lastError();
+        }
+
+        QSqlQuery query1(sqlDB);
+        query1.prepare("INSERT INTO search_params VALUES(?,?)");
+
+        for (auto it = searchTableData.begin(); it != searchTableData.end(); ++it) {
+
+            QString tableName = it->first;
+            QString encodedTableData = it->second;
+
+            query1.addBindValue(tableName);
+            query1.addBindValue(encodedTableData);
+
+            if(!query1.exec())  qDebug() << query1.lastError();
+
+        }
+
+        query0.exec("end transaction");
+        qDebug() << "ProjectDB::savePeakGroupsTableData(): Saved" << searchTableData.size() << "searches.";
 }

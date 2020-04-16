@@ -687,6 +687,9 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
         set<Compound*> compoundSet;
 
         unsigned int groupCount=0;
+
+        map<QString, QString> searchTableData{};
+
         for(TableDockWidget* peakTable : _mainwindow->getAllPeakTables() ) {
 
             qDebug() << peakTable->windowTitle() << ": Starting peak group table save...";
@@ -718,9 +721,16 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
                 }
 
             }
+
+            //Issue 197: TODO
+            searchTableData.insert(make_pair(peakTable->windowTitle(), "TODO"));
+
             qDebug() << peakTable->windowTitle() << ": Saved " << onePeakTableCount << "groups.";
         }
-        qDebug() << "All tables: Saved " << groupCount << "groups.";
+
+        project->savePeakGroupsTableData(searchTableData);
+
+        qDebug() << "All tables: Saved" << groupCount << "groups.";
 
         project->saveCompounds(compoundSet);
 
