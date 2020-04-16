@@ -118,7 +118,6 @@ void BackgroundDirectInfusionUpdate::run(void) {
     int afterSampleProcessing = timer.elapsed();
     qDebug() << "Completed analysis of all individual samples in " << afterSampleProcessing << "msec.";
 
-    //TODO: refactor as modular algorithm
     //Organizing across samples
     stepNum++;
     updateProgressBar("Combining results across samples...", stepNum, numSteps);
