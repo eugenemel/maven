@@ -54,8 +54,8 @@ FORMS = forms/settingsform.ui  \
         forms/editpeakgroupdialog.ui \
         forms/selectadductsdialog.ui \
         forms/setrumsDBdialog.ui \
-        forms/filtertagsdialog.ui
-
+        forms/filtertagsdialog.ui \
+        forms/searchparamsdialog.ui
 
 HEADERS +=  stable.h \
             filtertagsdialog.h \
