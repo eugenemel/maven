@@ -722,8 +722,7 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
 
             }
 
-            //Issue 197: TODO
-            searchTableData.insert(make_pair(peakTable->windowTitle(), "TODO"));
+            searchTableData.insert(make_pair(peakTable->windowTitle(), peakTable->getTableInfo()));
 
             qDebug() << peakTable->windowTitle() << ": Saved " << onePeakTableCount << "groups.";
         }
