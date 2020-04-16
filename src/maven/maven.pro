@@ -117,6 +117,7 @@ SOURCES +=  mainwindow.cpp  \
             csvreports.cpp \
             filtertagsdialog.cpp \
             plotdock.cpp \
+            searchparamsdialog.cpp \
             treedockwidget.cpp \
             tinyplot.cpp \
             settingsform.cpp \
