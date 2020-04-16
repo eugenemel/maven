@@ -61,6 +61,7 @@ HEADERS +=  stable.h \
             filtertagsdialog.h \
             globals.h \
             mainwindow.h \
+            searchparamsdialog.h \
             tinyplot.h \
             plotdock.h \
             settingsform.h \
