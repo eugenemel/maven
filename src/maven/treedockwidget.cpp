@@ -103,25 +103,44 @@ void TreeDockWidget::showInfo() {
                         Fragment *brother = new Fragment(scan);
                         f->addFragment(brother);
                     } else {
-                        f = new Fragment(scan); //TODO: more complicated model of buildling fragment based on parameters
+                        f = new Fragment(scan); //TODO: more complicated model of building fragment based on parameters
                         mslevel = scan->mslevel;
                         sample = scan->sample;
                     }
 
                 }
 
-               //TODO: customizability around these parameters
-               f->buildConsensus(static_cast<float>(mainwindow->massCalcWidget->fragmentPPM->value()), false, false, 0, 0.0f);
+                //necessary for buildConsensus() to merge peaks together
+                if (mslevel == 1 && f) {
+                    if (!f->mzs.empty()) {
+                        f->precursorMz = static_cast<double>(f->mzs[f->mzs.size()-1]);
+                    }
+                    for (auto frag : f->brothers){
+                        if (frag && !frag->mzs.empty()) {
+                            frag->precursorMz = static_cast<double>(frag->mzs[frag->mzs.size()-1]);
+                        }
+                    }
+                }
 
-               if (mslevel == 1){
-                   mainwindow->getSpectraWidget()->setCurrentFragment(f->consensus, sample, mslevel);
-               } else {
-                   mainwindow->fragmentationSpectraWidget->setCurrentFragment(f->consensus, sample, mslevel);
-                   mainwindow->massCalcWidget->setFragment(f->consensus);
-               }
-               mainwindow->getEicWidget()->setFocusLine(f->rt); //TODO: should be multiple lines!
+                double ppmValue = 20.0;
+                if (mslevel == 1) {
+                    ppmValue = mainwindow->getUserPPM();
+                } else if (mslevel == 2) {
+                    ppmValue = mainwindow->massCalcWidget->fragmentPPM->value();
+                }
 
-               if (f) delete(f);
+                //TODO: customizability around these parameters
+                f->buildConsensus(static_cast<float>(ppmValue), false, false, 0, 0.0f);
+
+                if (mslevel == 1){
+                    mainwindow->getSpectraWidget()->setCurrentFragment(f->consensus, sample, mslevel);
+                } else {
+                    mainwindow->fragmentationSpectraWidget->setCurrentFragment(f->consensus, sample, mslevel);
+                    mainwindow->massCalcWidget->setFragment(f->consensus);
+                }
+                mainwindow->getEicWidget()->setFocusLine(f->rt); //TODO: should be multiple lines!
+
+                if (f) delete(f);
             }
         } else {
             foreach(QTreeWidgetItem* item, treeWidget->selectedItems() ) {
