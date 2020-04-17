@@ -67,7 +67,7 @@ void SpectraWidget::setCurrentScan(Scan* scan) {
     qDebug() << "SpectraWidget::setCurrentScan(scan)";
 
     if (!_currentScan) {
-        _currentScan = new Scan(0,0,0,0,0,0); //empty scan;
+        _currentScan = new Scan(nullptr,0,0,0,0,0); //empty scan
     }
 
     if (scan ) {
@@ -81,6 +81,26 @@ void SpectraWidget::setCurrentScan(Scan* scan) {
             _currentScan->log10Transform();
         }
     }
+}
+
+void SpectraWidget::setCurrentFragment(Fragment *fragment, mzSample* sample, int mslevel) {
+    qDebug() << "SpectraWidget::setCurrentScan(fragment)";
+
+    if (fragment) {
+        Scan *scan = new Scan(sample, fragment->scanNum, fragment->rt, mslevel, fragment->precursorMz, (fragment->precursorCharge > 0 ? 1: -1));
+
+        scan->mz = fragment->mzs;
+        scan->intensity = fragment->intensity_array;
+
+        //TODO: title should be adjusted to reflect multiple selection
+        setCurrentScan(scan);
+        findBounds(true, true);
+        drawGraph();
+        repaint();
+
+        delete(scan);
+    }
+
 }
 
 void SpectraWidget::replot() {

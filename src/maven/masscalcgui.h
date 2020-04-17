@@ -27,6 +27,7 @@ protected:
 public slots:
       void setPeakGroup(PeakGroup* grp);
       void setFragmentationScan(Scan* scan);
+      void setFragment(Fragment *fragment);
  	  void setMass(float mz);
 	  void setCharge(float charge);
 	  void setPPM(float ppm);

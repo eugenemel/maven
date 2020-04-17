@@ -44,6 +44,7 @@ public slots:
                     void setCentroidedMode() { _profileMode=false; }
                     void setLog10Transform(bool flag) { _log10Transform=flag; }
                     void setCurrentScan(Scan* scan);
+                    void setCurrentFragment(Fragment* fragment, mzSample* sample, int mslevel=2);
                     void constructAverageScan(float rtmin, float rtmax);
                     void findSimilarScans();
                     void clearOverlay();

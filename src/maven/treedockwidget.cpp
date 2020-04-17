@@ -89,7 +89,38 @@ void TreeDockWidget::showInfo() {
                 mainwindow->getEicWidget()->setFocusLine(scan->rt);
 
             } else if (treeWidget->selectedItems().size() > 1) {
-                //Issue 189: generate consensus spectrum, display on appropriate scan plot
+
+                int mslevel = -1;
+                mzSample *sample = nullptr;
+
+                Fragment *f = nullptr;
+                for (QTreeWidgetItem *item : treeWidget->selectedItems()){
+
+                    QVariant v =   item->data(0,Qt::UserRole);
+                    Scan*  scan =  v.value<Scan*>();
+
+                    if (f) {
+                        Fragment *brother = new Fragment(scan);
+                        f->addFragment(brother);
+                    } else {
+                        f = new Fragment(scan); //TODO: more complicated model of buildling fragment based on parameters
+                        mslevel = scan->mslevel;
+                        sample = scan->sample;
+                    }
+
+                }
+
+               f->buildConsensus(static_cast<float>(mainwindow->massCalcWidget->fragmentPPM->value()));
+
+               if (mslevel == 1){
+                   mainwindow->getSpectraWidget()->setCurrentFragment(f->consensus, sample, mslevel);
+               } else {
+                   mainwindow->fragmentationSpectraWidget->setCurrentFragment(f->consensus, sample, mslevel);
+                   mainwindow->massCalcWidget->setFragment(f->consensus);
+               }
+               mainwindow->getEicWidget()->setFocusLine(f->rt); //TODO: should be multiple lines!
+
+               if (f) delete(f);
             }
         } else {
             foreach(QTreeWidgetItem* item, treeWidget->selectedItems() ) {

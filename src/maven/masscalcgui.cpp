@@ -243,6 +243,22 @@ void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
     }
 }
 
+void MassCalcWidget::setFragment(Fragment * f){
+    qDebug() << "MassCalcWidget::setFragment()";
+    if (!f) return;
+
+    _mz = f->precursorMz;
+    matches = DB.findMatchingCompounds(_mz,_ppm,_charge);
+    lineEdit->setText(QString::number(_mz,'f',5));
+
+    for(MassCalculator::Match& m: matches ) {
+       Compound* cpd = m.compoundLink;
+       m.fragScore = cpd->scoreCompoundHit(f,fragmentPPM->value(),false);
+    }
+
+    showTable();
+}
+
 void MassCalcWidget::setFragmentationScan(Scan* scan) {
     qDebug() << "MassCalcWidget::setFragmentationScan()";
     if(!scan) return;
