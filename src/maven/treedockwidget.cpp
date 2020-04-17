@@ -74,8 +74,19 @@ void TreeDockWidget::showInfo() {
         if ( ! mainwindow ) return;
 
         if (this->exclusiveItemType == ScanType) {
-            qDebug() << "TODO: Exclusive scan type";
             if (treeWidget->selectedItems().size() == 1) {
+
+                QTreeWidgetItem *item = treeWidget->selectedItems().at(0);
+                QVariant v =   item->data(0,Qt::UserRole);
+                Scan*  scan =  v.value<Scan*>();
+
+                if (scan->mslevel == 1){
+                    mainwindow->getSpectraWidget()->setScan(scan);
+                } else {
+                    mainwindow->fragmentationSpectraWidget->setScan(scan);
+                    mainwindow->massCalcWidget->setFragmentationScan(scan);
+                }
+                mainwindow->getEicWidget()->setFocusLine(scan->rt);
 
             } else if (treeWidget->selectedItems().size() > 1) {
                 //Issue 189: generate consensus spectrum, display on appropriate scan plot
