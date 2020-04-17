@@ -84,7 +84,7 @@ void SpectraWidget::setCurrentScan(Scan* scan) {
 }
 
 void SpectraWidget::setCurrentFragment(Fragment *fragment, mzSample* sample, int mslevel) {
-    qDebug() << "SpectraWidget::setCurrentScan(fragment)";
+    qDebug() << "SpectraWidget::setCurrentFragment(fragment)";
 
     if (fragment) {
         Scan *scan = new Scan(sample, fragment->scanNum, fragment->rt, mslevel, fragment->precursorMz, (fragment->precursorCharge > 0 ? 1: -1));
