@@ -507,6 +507,8 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary) {
 
      QStringList databaseNames = DB.getDatabaseNames();
 
+     QStringList projectFileDatabaseNames = getCompoundDatabaseNames();
+
      while (query.next()) {
 
         PeakGroup g;
@@ -562,6 +564,11 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary) {
             //Issue 92: fall back to rumsDB table if could not find compound the normal way.
             if (!compound && g.searchTableName == "rumsDB" && !rumsDBLibrary.isEmpty()) {
                 compound = DB.findSpeciesById(compoundId, rumsDBLibrary.toStdString());
+            }
+
+            //Issue 190: fall back to data stored within the file
+            if (!compound && projectFileDatabaseNames.contains(QString(compoundDB.c_str()))) {
+                compound = DB.findSpeciesById(compoundId, compoundDB);
             }
 
             if (compound)  {
@@ -1148,3 +1155,14 @@ QString ProjectDB::getSearchParams(QString tableName) {
 
         return noInfo;
 }
+
+        QStringList ProjectDB::getCompoundDatabaseNames() {
+            QSqlQuery query(sqlDB);
+            query.prepare("SELECT distinct dbName from compounds");
+            if (!query.exec())  qDebug() << query.lastError();
+
+            QStringList dbnames;
+            while (query.next())  dbnames << query.value(0).toString();
+            return dbnames;
+        }
+
