@@ -110,7 +110,8 @@ void TreeDockWidget::showInfo() {
 
                 }
 
-               f->buildConsensus(static_cast<float>(mainwindow->massCalcWidget->fragmentPPM->value()));
+               //TODO: customizability around these parameters
+               f->buildConsensus(static_cast<float>(mainwindow->massCalcWidget->fragmentPPM->value()), false, false, 0, 0.0f);
 
                if (mslevel == 1){
                    mainwindow->getSpectraWidget()->setCurrentFragment(f->consensus, sample, mslevel);
