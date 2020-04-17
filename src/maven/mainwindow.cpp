@@ -149,11 +149,13 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
     fragmentationEventsWidget	= new TreeDockWidget(this,"MS2 List", 7);
     fragmentationEventsWidget->setupScanListHeader();
+    fragmentationEventsWidget->setExclusiveItemType(ScanType); //Issue 189
 
     ms1ScansListWidget = new TreeDockWidget(this, "MS1 List", 7);
     ms1ScansListWidget->setupMs1ScanHeader();
+    ms1ScansListWidget->setExclusiveItemType(ScanType);
 
-    srmDockWidget 	= new TreeDockWidget(this,"SRM List", 1);
+    srmDockWidget 	= new TreeDockWidget(this,"SRM List", 1); //Issue 189
     ligandWidget = new LigandWidget(this);
     heatmap	 = 	  new HeatMap(this);
     galleryWidget = new GalleryWidget(this);

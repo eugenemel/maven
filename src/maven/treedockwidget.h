@@ -19,6 +19,8 @@ public:
 
     TreeDockWidget(MainWindow*, QString title, int numColms);
 
+    //this->treeWidget will contain items only of this type
+    inline void setExclusiveItemType(int exclusiveItemType){this->exclusiveItemType = exclusiveItemType;}
 
 public slots: 
 	  //void showInfo(PeakGroup* group);
@@ -60,6 +62,7 @@ public slots:
 
     private:
       void itemToClipboard(QTreeWidgetItem* item, QString& clipboardtext);
+      int exclusiveItemType = -1; //this->treeWidget should only contain items of this type. If -1, any type.
 };
 
 #endif

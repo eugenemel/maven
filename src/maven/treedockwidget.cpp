@@ -73,43 +73,52 @@ void TreeDockWidget::showInfo() {
     MainWindow* mainwindow = (MainWindow*)parentWidget();
         if ( ! mainwindow ) return;
 
-        foreach(QTreeWidgetItem* item, treeWidget->selectedItems() ) {
-                        QString text = item->text(0);
-                        QVariant v =   item->data(0,Qt::UserRole);
-                        int itemType = item->type();
+        if (this->exclusiveItemType == ScanType) {
+            qDebug() << "TODO: Exclusive scan type";
+            if (treeWidget->selectedItems().size() == 1) {
 
-                        if ( itemType == CompoundType ) {
-                                Compound* c =  v.value<Compound*>();
-                                if (c) mainwindow->setCompoundFocus(c);
-                        } else if ( itemType == PeakGroupType ) {
-                                PeakGroup* group =  v.value<PeakGroup*>();
-                                if (group) mainwindow->setPeakGroup(group);
-                        } else if ( itemType == ScanType ) {
-                                Scan*  scan =  v.value<Scan*>();
-                                if (scan->mslevel > 1)  {
-                                    mainwindow->fragmentationSpectraWidget->setScan(scan);
-                                    mainwindow->massCalcWidget->setFragmentationScan(scan);
+            } else if (treeWidget->selectedItems().size() > 1) {
+                //Issue 189: generate consensus spectrum, display on appropriate scan plot
+            }
+        } else {
+            foreach(QTreeWidgetItem* item, treeWidget->selectedItems() ) {
+                            QString text = item->text(0);
+                            QVariant v =   item->data(0,Qt::UserRole);
+                            int itemType = item->type();
 
-                                    Scan* lastms1 = scan->getLastFullScan(50);
-                                    if(lastms1) {
-                                        mainwindow->getSpectraWidget()->setScan(lastms1);
-                                        mainwindow->getSpectraWidget()->zoomRegion(scan->precursorMz,2);
+                            if ( itemType == CompoundType ) {
+                                    Compound* c =  v.value<Compound*>();
+                                    if (c) mainwindow->setCompoundFocus(c);
+                            } else if ( itemType == PeakGroupType ) {
+                                    PeakGroup* group =  v.value<PeakGroup*>();
+                                    if (group) mainwindow->setPeakGroup(group);
+                            } else if ( itemType == ScanType ) {
+                                    Scan*  scan =  v.value<Scan*>();
+                                    if (scan->mslevel > 1)  {
+                                        mainwindow->fragmentationSpectraWidget->setScan(scan);
+                                        mainwindow->massCalcWidget->setFragmentationScan(scan);
+
+                                        Scan* lastms1 = scan->getLastFullScan(50);
+                                        if(lastms1) {
+                                            mainwindow->getSpectraWidget()->setScan(lastms1);
+                                            mainwindow->getSpectraWidget()->zoomRegion(scan->precursorMz,2);
+                                        }
                                     }
-                                }
-                                else mainwindow->getSpectraWidget()->setScan(scan);
-                                mainwindow->getEicWidget()->setFocusLine(scan->rt);
-                        } else if (itemType == EICType ) {
-                                mainwindow->getEicWidget()->setSrmId(text.toStdString());
-                        } else if (itemType == mzSliceType ) {
-                                 mzSlice slice =  v.value<mzSlice>();
-                                 mainwindow->getEicWidget()->setMzSlice(slice);
-                                 mainwindow->getEicWidget()->resetZoom();
-                                 qDebug() << "showInfo() mzSlice: " << slice.srmId.c_str();
-                        } else if (itemType == mzLinkType ) {
-                                 if (text.toDouble()) { mainwindow->getEicWidget()->setMzSlice(text.toDouble());  }
-                        } else {
-                                cerr << "UNKNOWN TYPE=" << v.type() << endl;
-                        }
+                                    else mainwindow->getSpectraWidget()->setScan(scan);
+                                    mainwindow->getEicWidget()->setFocusLine(scan->rt);
+                            } else if (itemType == EICType ) {
+                                    mainwindow->getEicWidget()->setSrmId(text.toStdString());
+                            } else if (itemType == mzSliceType ) {
+                                     mzSlice slice =  v.value<mzSlice>();
+                                     mainwindow->getEicWidget()->setMzSlice(slice);
+                                     mainwindow->getEicWidget()->resetZoom();
+                                     qDebug() << "showInfo() mzSlice: " << slice.srmId.c_str();
+                            } else if (itemType == mzLinkType ) {
+                                     if (text.toDouble()) { mainwindow->getEicWidget()->setMzSlice(text.toDouble());  }
+                            } else {
+                                    cerr << "UNKNOWN TYPE=" << v.type() << endl;
+                            }
+            }
         }
 }
 
