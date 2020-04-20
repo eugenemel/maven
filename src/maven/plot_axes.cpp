@@ -64,12 +64,19 @@ void Axes::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 
     ticks = nticks;
 
-    if ( b == 0 ) return;
+    if ( b <= 0 ) return;
 
     if ( type == 0) { 	//X axes
         painter->drawLine(x0,Y0,x1,Y0);
-        for (int i=0; i <= ticks; i++ ) painter->drawLine(x0+ix*i,Y0-5,x0+ix*i,Y0+5);
-        for (int i=0; i <= ticks; i++ ) painter->drawText(x0+ix*i,Y0+12,QString::number(min+b*i,'f',2));
+        for (int i=0; i <= ticks; i++ ){
+
+            float xCoord = x0+ix*i;
+
+            if (xCoord > x1) continue;
+
+            painter->drawLine(static_cast<int>(xCoord),Y0-5,static_cast<int>(xCoord),Y0+5);
+            painter->drawText(static_cast<int>(xCoord),Y0+12,QString::number(min+b*i,'f',2));
+        }
     } else if ( type == 1 ) { //Y axes
 
         painter->drawLine(X0,y0,X0,y1);
