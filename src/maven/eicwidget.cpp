@@ -234,15 +234,65 @@ void EicWidget::mouseDoubleClickEvent(QMouseEvent* event){
 
 void EicWidget::selectionChangedAction() {}
 
-void EicWidget::setFocusLine(float rt) { 
-     //qDebug() <<"EicWidget::setFocusLine(float rt)";
-    _focusLineRt = rt;
-    if (_focusLine == NULL ) _focusLine = new QGraphicsLineItem(0);
-	if (_focusLine->scene() != scene() ) scene()->addItem(_focusLine);
+void EicWidget::setFocusLine(float rt) {
 
-	QPen pen(Qt::red, 2, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin);
-	_focusLine->setPen(pen);
-	_focusLine->setLine(toX(rt), 0, toX(rt), height() );
+    //delete old focus lines
+    for (QGraphicsItem *item : _focusLines){
+        if (item && scene() && item->scene() == scene()){
+            scene()->removeItem(item);
+        }
+    }
+    delete_all(_focusLines);
+
+    if (_focusLine){
+        if (scene() && _focusLine->scene() == scene()) {
+            scene()->removeItem(_focusLine);
+        }
+    }
+
+    //new single focus line
+    _focusLineRt = rt;
+
+    if (_focusLine) delete(_focusLine);
+
+    _focusLine = new QGraphicsLineItem(nullptr);
+    QPen pen(Qt::red, 2, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin);
+    _focusLine->setPen(pen);
+    _focusLine->setLine(toX(rt), 0, toX(rt), height() );
+
+    scene()->addItem(_focusLine);
+
+}
+
+void EicWidget::setFocusLines(vector<float> rts){
+
+    //delete old focus lines
+    for (QGraphicsItem *item : _focusLines){
+        if (scene() && item && item->scene() == scene()){
+            scene()->removeItem(item);
+        }
+    }
+    delete_all(_focusLines);
+
+    if (_focusLine){
+        if (scene() && _focusLine->scene() == scene()) {
+            scene()->removeItem(_focusLine);
+        }
+    }
+
+    //new collection of focus lines
+    for (float rt : rts){
+        QGraphicsLineItem *focusLine = new QGraphicsLineItem(nullptr);
+
+        QPen pen(Qt::red, 2, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin);
+        focusLine->setPen(pen);
+        focusLine->setLine(toX(rt), 0, toX(rt), height() );
+
+        _focusLines.push_back(focusLine);
+
+        scene()->addItem(focusLine);
+    }
+
 }
 
 void EicWidget::drawSelectionLine(float rtmin, float rtmax) { 

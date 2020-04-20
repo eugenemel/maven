@@ -1,4 +1,5 @@
 #include "treedockwidget.h"
+#include <unordered_set>
 
 
 
@@ -92,12 +93,15 @@ void TreeDockWidget::showInfo() {
 
                 int mslevel = -1;
                 mzSample *sample = nullptr;
+                unordered_set<float> rts{};
 
                 Fragment *f = nullptr;
                 for (QTreeWidgetItem *item : treeWidget->selectedItems()){
 
                     QVariant v =   item->data(0,Qt::UserRole);
                     Scan*  scan =  v.value<Scan*>();
+
+                    rts.insert(scan->rt);
 
                     if (f) {
                         Fragment *brother = new Fragment(scan);
@@ -138,7 +142,10 @@ void TreeDockWidget::showInfo() {
                     mainwindow->fragmentationSpectraWidget->setCurrentFragment(f->consensus, sample, mslevel);
                     mainwindow->massCalcWidget->setFragment(f->consensus);
                 }
-                mainwindow->getEicWidget()->setFocusLine(f->rt); //TODO: should be multiple lines!
+
+                vector<float> rtsVector;
+                rtsVector.assign(rts.begin(), rts.end());
+                mainwindow->getEicWidget()->setFocusLines(rtsVector);
 
                 if (f) delete(f);
             }

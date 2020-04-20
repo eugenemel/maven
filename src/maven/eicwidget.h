@@ -54,6 +54,7 @@ public slots:
     void addTicLine();
     void addMergedEIC();
     void setFocusLine(float rt);
+    void setFocusLines(vector<float> rts);
     void drawSelectionLine(float rtmin,float rtmax);
     void addFocusLine(PeakGroup*);
     void addBarPlot(PeakGroup*);
@@ -188,6 +189,8 @@ private:
     QWidget *parent;
     QGraphicsLineItem* _focusLine;
     QGraphicsLineItem* _selectionLine;
+
+    vector<QGraphicsLineItem*> _focusLines;
 
     void showPeak(float freq, float amplitude);
     void computeEICs();
