@@ -476,8 +476,8 @@ void EicWidget::findPlotBounds() {
 }
 
 float EicWidget::toX(float x) {
-    if(_minX ==_maxX || x < _minX || x > _maxX) return 0;
-    return( (x-_minX)/(_maxX-_minX)*scene()->width());
+    if(_minX ==_maxX || x < _minX || x > _maxX) return 0+_xAxisPlotMargin;
+    return( (x-_minX)/(_maxX-_minX)*(scene()->width()-2*_xAxisPlotMargin)) + static_cast<float>(_xAxisPlotMargin);
 }
 
 float EicWidget::toY(float y) {
@@ -1062,6 +1062,9 @@ void EicWidget::addAxes() {
 //	 qDebug() << "EicWidget: addAxes() " << _minY << " " << _maxY << endl;
     Axes* x = new Axes(0,_minX, _maxX,10);
     Axes* y = new Axes(1,_minY, _maxY,10);
+
+    x->setMargin(_xAxisPlotMargin);
+
     scene()->addItem(x);
     scene()->addItem(y);
 	y->setOffset(20);

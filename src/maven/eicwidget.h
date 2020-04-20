@@ -179,6 +179,7 @@ private:
     int _timerId;
     float _intensityZoomVal = -1.0f;      //expect to be already converted with invY() --> peak intensity value
 
+    int _xAxisPlotMargin = 20;
 
     vector<PeakGroup> peakgroups;	    //peaks grouped across samples
     PeakGroup  _selectedGroup;			//currently selected peak group
