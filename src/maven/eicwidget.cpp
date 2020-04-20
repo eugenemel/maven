@@ -442,6 +442,8 @@ void EicWidget::findPlotBounds() {
     _minX = _slice.rtmin;
     _maxX = _slice.rtmax;
 
+    qDebug() << "EicWidget::findPlotBounds() _minX=" << _minX << "minutes, _maxX=" << _maxX << " minutes";
+
     _minY = 0;
     _maxY = 0;   //intensity
 
@@ -1288,9 +1290,7 @@ void EicWidget::resetZoom() {
  //qDebug <<"EicWidget::resetZoom() "; 
     mzSlice bounds(0,0,0,0);
 
-    if( eics.size() > 0) {
-        bounds = visibleEICBounds();
-    } else if ( getMainWindow()->sampleCount() > 0 ) {
+    if ( getMainWindow()->sampleCount() > 0 ) {
         vector <mzSample*> samples = getMainWindow()->getVisibleSamples();
         bounds  = visibleSamplesBounds();
     }
