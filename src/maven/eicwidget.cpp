@@ -259,6 +259,7 @@ void EicWidget::setFocusLine(float rt) {
     QPen pen(Qt::red, 2, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin);
     _focusLine->setPen(pen);
     _focusLine->setLine(toX(rt), 0, toX(rt), height() );
+    _focusLine->setZValue(1000);
 
     scene()->addItem(_focusLine);
 
@@ -287,6 +288,7 @@ void EicWidget::setFocusLines(vector<float> rts){
         QPen pen(Qt::red, 2, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin);
         focusLine->setPen(pen);
         focusLine->setLine(toX(rt), 0, toX(rt), height() );
+        focusLine->setZValue(1000);
 
         _focusLines.push_back(focusLine);
 
