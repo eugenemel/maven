@@ -16,6 +16,7 @@ EicWidget::EicWidget(QWidget *p) {
     _boxplot = nullptr;
     _isotopeplot=nullptr;
     _focusLine = nullptr;
+    _focusLineRt = -1;
     _selectionLine = nullptr;
     _statusText=nullptr;
     _alwaysDisplayGroup = nullptr;
@@ -261,6 +262,7 @@ void EicWidget::setFocusLine(float rt) {
     _focusLine->setLine(toX(rt), 0, toX(rt), height() );
     _focusLine->setZValue(1000);
 
+    if (_focusLineRt < 0) return;
     scene()->addItem(_focusLine);
 
 }
