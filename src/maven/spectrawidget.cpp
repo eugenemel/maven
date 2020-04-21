@@ -83,20 +83,31 @@ void SpectraWidget::setCurrentScan(Scan* scan) {
     }
 }
 
+/**
+ * @brief SpectraWidget::setCurrentFragment
+ * @param fragment
+ * @param sample
+ * @param mslevel
+ *
+ * Note that this expects a fragment object, but explicitly uses the consensus spectrum.
+ */
 void SpectraWidget::setCurrentFragment(Fragment *fragment, mzSample* sample, int mslevel) {
     qDebug() << "SpectraWidget::setCurrentFragment(fragment)";
 
     if (fragment) {
-        Scan *scan = new Scan(sample, fragment->scanNum, fragment->rt, mslevel, fragment->precursorMz, (fragment->precursorCharge > 0 ? 1: -1));
+        Scan *scan = new Scan(sample, fragment->consensus->scanNum, mslevel, fragment->consensus->rt, fragment->consensus->precursorMz, (fragment->consensus->precursorCharge > 0 ? 1: -1));
 
-        scan->mz = fragment->mzs;
-        scan->intensity = fragment->intensity_array;
+        scan->mz = fragment->consensus->mzs;
+        scan->intensity = fragment->consensus->intensity_array;
 
-        //TODO: title should be adjusted to reflect multiple selection
+        _currentFragment = fragment;
+
         setCurrentScan(scan);
         findBounds(true, true);
         drawGraph();
         repaint();
+
+        _currentFragment = nullptr;
 
         delete(scan);
     }
@@ -113,19 +124,36 @@ void SpectraWidget::setTitle() {
     if (width()<50) return;
 
     QString title;
-    if (_currentScan->sample) {
-         QString sampleName = _currentScan->sample->sampleName.c_str();
-         QString polarity;
-         _currentScan->getPolarity() > 0 ? polarity = "Pos" : polarity = "Neg";
 
-         //QColor sampleColor = QColor::fromRgbF( sample->color[0], sample->color[1], sample->color[2], 1 );
+    if (_currentScan && _currentScan->sample){
+        QString sampleName = _currentScan->sample->sampleName.c_str();
+        QString polarity;
+        _currentScan->getPolarity() > 0 ? polarity = "Pos" : polarity = "Neg";
 
-         title += tr("Sample:<b>%1</b> Scan:<b>%2</b> rt:<b>%3</b> msLevel:<b>%4</b> Ion:<b>%5</b>").arg(
-                             QString(sampleName),
-                             QString::number(_currentScan->scannum),
-                             QString::number(_currentScan->rt,'f',2),
-                             QString::number(_currentScan->mslevel),
-                             polarity);
+        if (_currentFragment) {
+            title += tr("Sample: <b>%1</b> Ion: <b>%2</b> msLevel: <b>%3</b><br>").arg(
+                                QString(sampleName),
+                                polarity,
+                                QString::number(_currentScan->mslevel));
+            title += tr("Consensus spectrum of scans: ");
+
+            QStringList scans;
+            scans.push_back(QString::number(_currentFragment->scanNum));
+            for (auto x : _currentFragment->brothers){
+                scans.push_back(QString::number(x->scanNum));
+            }
+
+            title += tr("<b>%1</b>").arg(scans.join(", "));
+
+        } else {
+            //single scan
+            title += tr("Sample: <b>%1</b> Scan: <b>%2</b> rt:<b>%3</b> msLevel: <b>%4</b> Ion: <b>%5</b>").arg(
+                                QString(sampleName),
+                                QString::number(_currentScan->scannum),
+                                QString::number(_currentScan->rt,'f',2),
+                                QString::number(_currentScan->mslevel),
+                                polarity);
+        }
     }
 
     if (_currentScan->precursorMz) {

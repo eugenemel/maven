@@ -61,6 +61,7 @@ public slots:
                     Scan* _currentScan;
                     Scan* _avgScan;
 
+                    Fragment* _currentFragment = nullptr;
 
                     vector<mzLink> links;
                     bool  _drawXAxis;

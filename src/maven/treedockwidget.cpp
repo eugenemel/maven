@@ -137,9 +137,9 @@ void TreeDockWidget::showInfo() {
                 f->buildConsensus(static_cast<float>(ppmValue), false, false, 0, 0.0f);
 
                 if (mslevel == 1){
-                    mainwindow->getSpectraWidget()->setCurrentFragment(f->consensus, sample, mslevel);
+                    mainwindow->getSpectraWidget()->setCurrentFragment(f, sample, mslevel);
                 } else {
-                    mainwindow->fragmentationSpectraWidget->setCurrentFragment(f->consensus, sample, mslevel);
+                    mainwindow->fragmentationSpectraWidget->setCurrentFragment(f, sample, mslevel);
                     mainwindow->massCalcWidget->setFragment(f->consensus);
                 }
 
