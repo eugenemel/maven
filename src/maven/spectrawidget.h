@@ -43,7 +43,6 @@ public slots:
                     void setProfileMode() { _profileMode=true;  }
                     void setCentroidedMode() { _profileMode=false; }
                     void setLog10Transform(bool flag) { _log10Transform=flag; }
-                    void setCurrentScan(Scan* scan);
                     void setCurrentFragment(Fragment* fragment, map<mzSample*, vector<int>> sampleScanMap, int mslevel=2);
                     void constructAverageScan(float rtmin, float rtmax);
                     void findSimilarScans();
@@ -120,6 +119,9 @@ public slots:
                     void setTitle();
                     void compareScans(Scan*, Scan*);
                     void annotateScan();
+
+                    //strictly for internal adjustment - use setScan(Scan* scan) for slots.
+                    void setCurrentScan(Scan* scan);
 
 		protected:
                     //void leaveEvent ( QEvent * event );
