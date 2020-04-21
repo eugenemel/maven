@@ -44,7 +44,7 @@ public slots:
                     void setCentroidedMode() { _profileMode=false; }
                     void setLog10Transform(bool flag) { _log10Transform=flag; }
                     void setCurrentScan(Scan* scan);
-                    void setCurrentFragment(Fragment* fragment, mzSample* sample, int mslevel=2);
+                    void setCurrentFragment(Fragment* fragment, map<mzSample*, vector<int>> sampleScanMap, int mslevel=2);
                     void constructAverageScan(float rtmin, float rtmax);
                     void findSimilarScans();
                     void clearOverlay();
@@ -62,6 +62,7 @@ public slots:
                     Scan* _avgScan;
 
                     Fragment* _currentFragment = nullptr;
+                    map<mzSample*,vector<int>> _sampleScanMap = {};
 
                     vector<mzLink> links;
                     bool  _drawXAxis;

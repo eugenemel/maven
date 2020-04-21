@@ -91,16 +91,21 @@ void SpectraWidget::setCurrentScan(Scan* scan) {
  *
  * Note that this expects a fragment object, but explicitly uses the consensus spectrum.
  */
-void SpectraWidget::setCurrentFragment(Fragment *fragment, mzSample* sample, int mslevel) {
+void SpectraWidget::setCurrentFragment(Fragment *fragment, map<mzSample*,vector<int>> sampleScanMap, int mslevel) {
     qDebug() << "SpectraWidget::setCurrentFragment(fragment)";
 
     if (fragment) {
-        Scan *scan = new Scan(sample, fragment->consensus->scanNum, mslevel, fragment->consensus->rt, fragment->consensus->precursorMz, (fragment->consensus->precursorCharge > 0 ? 1: -1));
 
-        scan->mz = fragment->consensus->mzs;
-        scan->intensity = fragment->consensus->intensity_array;
+        mzSample *sample= nullptr;
+        if (sampleScanMap.size() > 0) sample = sampleScanMap.begin()->first;
+
+        Scan *scan = new Scan(sample, fragment->scanNum, mslevel, fragment->rt, fragment->precursorMz, (fragment->precursorCharge > 0 ? 1: -1));
+
+        scan->mz = fragment->mzs;
+        scan->intensity = fragment->intensity_array;
 
         _currentFragment = fragment;
+        _sampleScanMap = sampleScanMap;
 
         setCurrentScan(scan);
         findBounds(true, true);
@@ -108,6 +113,7 @@ void SpectraWidget::setCurrentFragment(Fragment *fragment, mzSample* sample, int
         repaint();
 
         _currentFragment = nullptr;
+        _sampleScanMap = {};
 
         delete(scan);
     }
@@ -131,19 +137,22 @@ void SpectraWidget::setTitle() {
         _currentScan->getPolarity() > 0 ? polarity = "Pos" : polarity = "Neg";
 
         if (_currentFragment) {
-            title += tr("Sample: <b>%1</b> Ion: <b>%2</b> msLevel: <b>%3</b><br>").arg(
-                                QString(sampleName),
-                                polarity,
-                                QString::number(_currentScan->mslevel));
-            title += tr("Consensus spectrum of scans: ");
 
-            QStringList scans;
-            scans.push_back(QString::number(_currentFragment->scanNum));
-            for (auto x : _currentFragment->brothers){
-                scans.push_back(QString::number(x->scanNum));
+            title += tr("<b>MS%1 Consensus spectrum</b>").arg(QString::number(_currentScan->mslevel));
+
+            for (auto it = _sampleScanMap.begin(); it != _sampleScanMap.end(); ++it){
+
+                vector<int> scans = it->second;
+                sort(scans.begin(), scans.end());
+
+                QStringList scansList;
+                for (auto x : scans){
+                    scansList.push_back(QString::number(x));
+                }
+
+                title += tr("<br><b>%1</b>").arg(QString(it->first->sampleName.c_str()));
+                title += tr(" scans: <b>%1</b>").arg(scansList.join(", "));
             }
-
-            title += tr("<b>%1</b>").arg(scans.join(", "));
 
         } else {
             //single scan
@@ -290,13 +299,19 @@ void SpectraWidget::clearOverlay() {
 
 void SpectraWidget::overlayPeakGroup(PeakGroup* group) {
     if(!group) return;
+
     Scan* avgScan = group->getAverageFragmentationScan(20);
     setScan(avgScan);
+
+    //TODO: swap to this
+    // this->setCurrentFragment(&(group->fragmentationPattern), map<mzSample*,vector<int>>{}, 2);
+
     if (group->compound)  {
         if(group->compound->fragment_mzs.size()) overlayCompound(group->compound);
         else if (!group->compound->smileString.empty()) overlayTheoreticalSpectra(group->compound);
         else  overlayCompound(group->compound);
     }
+
     delete(avgScan);
 }
 
