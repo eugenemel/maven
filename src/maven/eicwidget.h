@@ -106,6 +106,7 @@ public slots:
     void selectionChangedAction();
     void freezeView(bool freeze);
     void groupPeaks();
+    void clearEICLines();
 protected:
     void moved(QMouseEvent *event);
     void selected(const QRect&);
@@ -191,7 +192,7 @@ private:
     QGraphicsLineItem* _focusLine;
     QGraphicsLineItem* _selectionLine;
 
-    vector<QGraphicsLineItem*> _focusLines;
+    QVector<QGraphicsLineItem*> _focusLines;
 
     void showPeak(float freq, float amplitude);
     void computeEICs();

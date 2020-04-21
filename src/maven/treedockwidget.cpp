@@ -87,6 +87,7 @@ void TreeDockWidget::showInfo() {
                     mainwindow->fragmentationSpectraWidget->setScan(scan);
                     mainwindow->massCalcWidget->setFragmentationScan(scan);
                 }
+                mainwindow->getEicWidget()->clearEICLines();
                 mainwindow->getEicWidget()->setFocusLine(scan->rt);
 
             } else if (treeWidget->selectedItems().size() > 1) {
@@ -145,6 +146,7 @@ void TreeDockWidget::showInfo() {
 
                 vector<float> rtsVector;
                 rtsVector.assign(rts.begin(), rts.end());
+                mainwindow->getEicWidget()->clearEICLines();
                 mainwindow->getEicWidget()->setFocusLines(rtsVector);
 
                 if (f) delete(f);

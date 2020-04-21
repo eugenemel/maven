@@ -235,26 +235,33 @@ void EicWidget::mouseDoubleClickEvent(QMouseEvent* event){
 
 void EicWidget::selectionChangedAction() {}
 
-void EicWidget::setFocusLine(float rt) {
+void EicWidget::clearEICLines() {
 
-    //delete old focus lines
-    for (QGraphicsItem *item : _focusLines){
-        if (item && scene() && item->scene() == scene()){
-            scene()->removeItem(item);
+    //delete, clear out old focus lines
+    for (auto item : _focusLines){
+        if (item){
+            if (item->scene()){
+                scene()->removeItem(item);
+            }
+            delete(item);
+            item = nullptr;
         }
     }
-    delete_all(_focusLines);
+    _focusLines.clear();
 
     if (_focusLine){
-        if (scene() && _focusLine->scene() == scene()) {
+        if (_focusLine->scene()) {
             scene()->removeItem(_focusLine);
         }
+        delete(_focusLine);
+        _focusLine = nullptr;
     }
+}
+
+void EicWidget::setFocusLine(float rt) {
 
     //new single focus line
     _focusLineRt = rt;
-
-    if (_focusLine) delete(_focusLine);
 
     _focusLine = new QGraphicsLineItem(nullptr);
     QPen pen(Qt::red, 2, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin);
@@ -268,20 +275,6 @@ void EicWidget::setFocusLine(float rt) {
 }
 
 void EicWidget::setFocusLines(vector<float> rts){
-
-    //delete old focus lines
-    for (QGraphicsItem *item : _focusLines){
-        if (scene() && item && item->scene() == scene()){
-            scene()->removeItem(item);
-        }
-    }
-    delete_all(_focusLines);
-
-    if (_focusLine){
-        if (scene() && _focusLine->scene() == scene()) {
-            scene()->removeItem(_focusLine);
-        }
-    }
 
     //new collection of focus lines
     for (float rt : rts){
@@ -883,11 +876,11 @@ void EicWidget::clearPlot() {
 	if(_isotopeplot && _isotopeplot->scene()) { _isotopeplot->clear(); scene()->removeItem(_isotopeplot); }
 	if(_barplot && _barplot->scene()) { _barplot->clear(); scene()->removeItem(_barplot);  }
 	if(_boxplot && _boxplot->scene()) { _boxplot->clear(); scene()->removeItem(_boxplot);  }
-	if(_focusLine && _focusLine->scene()) {scene()->removeItem(_focusLine); }
 	if(_selectionLine && _selectionLine->scene()) {scene()->removeItem(_selectionLine); }
 	if(_statusText && _statusText->scene()) { scene()->removeItem(_statusText); }
+    clearEICLines();
 	scene()->clear();
-	scene()->setSceneRect(10,10,this->width()-10, this->height()-10);	
+    scene()->setSceneRect(10,10,this->width()-10, this->height()-10);
 }
 
 void EicWidget::replot(PeakGroup* group ) {
