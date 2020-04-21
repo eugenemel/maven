@@ -58,7 +58,6 @@ EicWidget::EicWidget(QWidget *p) {
 
 EicWidget::~EicWidget() {
 	cleanup();
-	scene()->clear();
 }
 
 void EicWidget::mousePressEvent(QMouseEvent *event) {
