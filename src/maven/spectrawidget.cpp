@@ -156,31 +156,34 @@ void SpectraWidget::setTitle() {
         }
     }
 
-    if (_currentScan->precursorMz) {
-        title += "<br>";
-        QString precursorMzLink= " PreMz: " + QString::number(_currentScan->precursorMz,'f',4);
-        title += precursorMzLink ;
-    }
+    //parameters only apply to a single scan
+    if (!_currentFragment) {
+        if (_currentScan && _currentScan->precursorMz) {
+            title += "<br>";
+            QString precursorMzLink= " PreMz: " + QString::number(_currentScan->precursorMz,'f',4);
+            title += precursorMzLink ;
+        }
 
-    if (_currentScan->collisionEnergy) {
-        QString precursorMzLink= " CE: " + QString::number(_currentScan->collisionEnergy,'f',1);
-        title += precursorMzLink ;
-    }
+        if (_currentScan && _currentScan->collisionEnergy) {
+            QString precursorMzLink= " CE: " + QString::number(_currentScan->collisionEnergy,'f',1);
+            title += precursorMzLink ;
+        }
 
-    if (_currentScan->productMz>0) {
-        QString precursorMzLink= " ProMz: " + QString::number(_currentScan->productMz,'f',4);
-        title += precursorMzLink ;
-    }
+        if (_currentScan && _currentScan->productMz>0) {
+            QString precursorMzLink= " ProMz: " + QString::number(_currentScan->productMz,'f',4);
+            title += precursorMzLink ;
+        }
 
-	if (_currentScan->precursorMz > 0 and _currentScan->sample) {
-		double ppm = 10.0;
-		double purity = _currentScan->getPrecursorPurity(ppm);
-        title += " <b>Purity: </b> " + QString::number(purity*100.0,'f',1) + "%";
-        title += " <b>IsolWin: </b>" + QString::number(_currentScan->isolationWindow,'f',1);
-    }
+        if (_currentScan && _currentScan->precursorMz > 0 and _currentScan->sample) {
+            double ppm = 10.0;
+            double purity = _currentScan->getPrecursorPurity(ppm);
+            title += " <b>Purity: </b> " + QString::number(purity*100.0,'f',1) + "%";
+            title += " <b>IsolWin: </b>" + QString::number(_currentScan->isolationWindow,'f',1);
+        }
 
-    if (_currentScan->injectionTime > 0) {
-        title += " <b>Inject. Time: </b>" + QString::number(_currentScan->injectionTime,'f',1);
+        if (_currentScan && _currentScan->injectionTime > 0) {
+            title += " <b>Inject. Time: </b>" + QString::number(_currentScan->injectionTime,'f',1);
+        }
     }
 
 	QFont font = QApplication::font();
