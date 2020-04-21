@@ -112,9 +112,6 @@ void SpectraWidget::setCurrentFragment(Fragment *fragment, map<mzSample*,vector<
         drawGraph();
         repaint();
 
-        _currentFragment = nullptr;
-        _sampleScanMap = {};
-
         delete(scan);
     }
 
@@ -206,8 +203,12 @@ void SpectraWidget::setTitle() {
 
 void SpectraWidget::setScan(Scan* scan) {
     if (!scan) return;
-    setCurrentScan(scan);
+
+    _currentFragment = nullptr;
+    _sampleScanMap = {};
+
     cerr << "SpectraWidget::setScan(scan) " << endl;
+    setCurrentScan(scan);
     findBounds(true,true);
     drawGraph();
     repaint();
