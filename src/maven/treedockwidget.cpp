@@ -139,7 +139,7 @@ void TreeDockWidget::showInfo() {
                 }
 
                 //TODO: customizability around these parameters
-                f->buildConsensus(static_cast<float>(ppmValue), false, false, 0, 0.0f);
+                f->buildConsensus(static_cast<float>(ppmValue), true, false, 0, 0.0f);
 
                 if (mslevel == 1){
                     mainwindow->getSpectraWidget()->setCurrentFragment(f->consensus, mslevel);
