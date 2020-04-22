@@ -94,7 +94,7 @@ void TreeDockWidget::showInfo() {
 
                 int mslevel = -1;
                 unordered_set<float> rts{};
-                map<mzSample*, vector<int>> sampleScanMap = {};
+                map<mzSample*, unordered_set<int>> sampleScanMap = {};
 
                 Fragment *f = nullptr;
                 for (QTreeWidgetItem *item : treeWidget->selectedItems()){
@@ -113,9 +113,9 @@ void TreeDockWidget::showInfo() {
                     }
 
                     if (sampleScanMap.find(scan->sample) == sampleScanMap.end()) {
-                        sampleScanMap.insert(make_pair(scan->sample, vector<int>()));
+                        sampleScanMap.insert(make_pair(scan->sample, unordered_set<int>()));
                     }
-                    sampleScanMap[scan->sample].push_back(scan->scannum);
+                    sampleScanMap[scan->sample].insert(scan->scannum);
 
                 }
 
@@ -142,9 +142,9 @@ void TreeDockWidget::showInfo() {
                 f->buildConsensus(static_cast<float>(ppmValue), false, false, 0, 0.0f);
 
                 if (mslevel == 1){
-                    mainwindow->getSpectraWidget()->setCurrentFragment(f->consensus, sampleScanMap, mslevel);
+                    mainwindow->getSpectraWidget()->setCurrentFragment(f->consensus, mslevel);
                 } else {
-                    mainwindow->fragmentationSpectraWidget->setCurrentFragment(f->consensus, sampleScanMap, mslevel);
+                    mainwindow->fragmentationSpectraWidget->setCurrentFragment(f->consensus, mslevel);
                     mainwindow->massCalcWidget->setFragment(f->consensus);
                 }
 

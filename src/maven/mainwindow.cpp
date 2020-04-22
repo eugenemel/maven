@@ -1494,10 +1494,11 @@ void MainWindow::showPeakInfo(Peak* _peak) {
         isotopeWidget->setPeak(_peak);
     }
 
-   if (fragmentationSpectraWidget->isVisible()) {
-        vector<Scan*>ms2s = _peak->getFragmentationEvents(getUserPPM());
-        if (ms2s.size()) fragmentationSpectraWidget->setScan(ms2s[0]);
-    }
+   //TODO: remove this
+//   if (fragmentationSpectraWidget->isVisible()) {
+//        vector<Scan*>ms2s = _peak->getFragmentationEvents(getUserPPM());
+//        if (ms2s.size()) fragmentationSpectraWidget->setScan(ms2s[0]);
+//    }
 
     if( fragmentationEventsWidget->isVisible() ) {
         float mz = _peak->peakMz;

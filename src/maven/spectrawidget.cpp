@@ -91,13 +91,13 @@ void SpectraWidget::setCurrentScan(Scan* scan) {
  *
  * Note that this expects a fragment object, but explicitly uses the consensus spectrum.
  */
-void SpectraWidget::setCurrentFragment(Fragment *fragment, map<mzSample*,vector<int>> sampleScanMap, int mslevel) {
+void SpectraWidget::setCurrentFragment(Fragment *fragment, int mslevel) {
     qDebug() << "SpectraWidget::setCurrentFragment(fragment)";
 
     if (fragment) {
 
         mzSample *sample= nullptr;
-        if (sampleScanMap.size() > 0) sample = sampleScanMap.begin()->first;
+        if (fragment->scanNumMap.size() > 0) sample = fragment->scanNumMap.begin()->first;
 
         Scan *scan = new Scan(sample, fragment->scanNum, mslevel, fragment->rt, fragment->precursorMz, (fragment->precursorCharge > 0 ? 1: -1));
 
@@ -105,7 +105,7 @@ void SpectraWidget::setCurrentFragment(Fragment *fragment, map<mzSample*,vector<
         scan->intensity = fragment->intensity_array;
 
         _currentFragment = fragment;
-        _sampleScanMap = sampleScanMap;
+        _sampleScanMap = fragment->scanNumMap;
 
         setCurrentScan(scan);
         findBounds(true, true);
@@ -139,11 +139,14 @@ void SpectraWidget::setTitle() {
 
             for (auto it = _sampleScanMap.begin(); it != _sampleScanMap.end(); ++it){
 
-                vector<int> scans = it->second;
-                sort(scans.begin(), scans.end());
+                unordered_set<int> scans = it->second;
+
+                vector<int> scansVector;
+                scansVector.assign(scans.begin(), scans.end());
+                sort(scansVector.begin(), scansVector.end());
 
                 QStringList scansList;
-                for (auto x : scans){
+                for (auto x : scansVector){
                     scansList.push_back(QString::number(x));
                 }
 
@@ -301,11 +304,24 @@ void SpectraWidget::clearOverlay() {
 void SpectraWidget::overlayPeakGroup(PeakGroup* group) {
     if(!group) return;
 
-    Scan* avgScan = group->getAverageFragmentationScan(20);
-    setScan(avgScan);
+//    Scan* avgScan = group->getAverageFragmentationScan(20);
+//    setScan(avgScan);
 
     //TODO: swap to this
-    // this->setCurrentFragment(&(group->fragmentationPattern), map<mzSample*,vector<int>>{}, 2);
+    Scan* scan = nullptr;
+
+    if (!group->fragmentationPattern.mzs.empty()) {
+        this->setCurrentFragment(&(group->fragmentationPattern), 2);
+    } else if (group->peakCount() > 0){
+        vector<Scan*>ms2s = group->peaks[0].getFragmentationEvents(mainwindow->massCalcWidget->fragmentPPM->value());
+        if (!ms2s.empty()){
+            setScan(ms2s[0]);
+        } else {
+            setScan(scan);
+        }
+    } else {
+        setScan(scan);
+    }
 
     if (group->compound)  {
         if(group->compound->fragment_mzs.size()) overlayCompound(group->compound);
@@ -313,7 +329,7 @@ void SpectraWidget::overlayPeakGroup(PeakGroup* group) {
         else  overlayCompound(group->compound);
     }
 
-    delete(avgScan);
+//    delete(avgScan);
 }
 
 void SpectraWidget::overlayTheoreticalSpectra(Compound* c) {
