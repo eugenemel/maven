@@ -223,6 +223,7 @@ void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
 
     matches = DB.findMatchingCompounds(_mz,_ppm,_charge);
 
+    //TODO: this information should be saved in the file, not computed on the fly like this, unless desired by design.
     if (grp->fragmentationPattern.nobs() == 0){
         grp->computeFragPattern(fragmentPPM->value());
     }

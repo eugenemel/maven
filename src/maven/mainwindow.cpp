@@ -1300,6 +1300,13 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
     qDebug() << "MainWindow::setPeakGroup(PeakGroup)" << group;
     searchText->setText(QString::number(group->meanMz,'f',8));
 
+    if (group->fragmentationPattern.nobs() == 0) {
+        //if saving a loaded fragmentation file, this should all be stored from the file.
+
+        //a last resort
+        group->computeFragPattern(massCalcWidget->fragmentPPM->value());
+    }
+
     if ( eicWidget && eicWidget->isVisible() ) {
         eicWidget->setPeakGroup(group);
     }
