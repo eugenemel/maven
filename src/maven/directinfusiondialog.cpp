@@ -89,31 +89,33 @@ void DirectInfusionDialog::analyze() {
     directInfusionUpdate->setCompounds(DB.compoundsDB);
     directInfusionUpdate->setAdducts(DB.adductsDB);
 
+    //scan filter related
+    directInfusionUpdate->params->scanFilterMinIntensity = static_cast<float>(this->spnMinIndividualMs2ScanIntensity->value());
+
     //consensus spectrum formation related
-    directInfusionUpdate->params->minIndividualMs2ScanIntensity = static_cast<float>(this->spnMinIndividualMs2ScanIntensity->value());
-    directInfusionUpdate->params->isIntensityAvgByObserved = this->chkIsIntensityAvgByObserved->isChecked();
-    directInfusionUpdate->params->isNormalizeIntensityArray = this->chkIsNormalizeIntensityArray->isChecked();
-    directInfusionUpdate->params->minNumMs2ScansForConsensus = this->spnMinNumMs2ScansForConsensus->value();
-    directInfusionUpdate->params->minFractionMs2ScansForConsensus = static_cast<float>(this->spnMinFractionMs2ScansForConsensus->value()/100.0); //displayed as a perentage
+    directInfusionUpdate->params->consensusIsIntensityAvgByObserved = this->chkIsIntensityAvgByObserved->isChecked();
+    directInfusionUpdate->params->consensusIsNormalizeTo10K = this->chkIsNormalizeIntensityArray->isChecked();
+    directInfusionUpdate->params->consensusMinNumMs2Scans = this->spnMinNumMs2ScansForConsensus->value();
+    directInfusionUpdate->params->consensusMinFractionMs2Scans = static_cast<float>(this->spnMinFractionMs2ScansForConsensus->value()/100.0); //displayed as a perentage
 
     //general
-    directInfusionUpdate->params->isRequireAdductPrecursorMatch = this->isRequireAdductMatch->isChecked();
+    directInfusionUpdate->params->ms1IsRequireAdductPrecursorMatch = this->isRequireAdductMatch->isChecked();
     directInfusionUpdate->params->isAgglomerateAcrossSamples = this->chkAgglomerateAcrossSamples->isChecked();
 
     //fragment related
-    directInfusionUpdate->params->minNumMatches = this->spnMatchXPeaks->value();
-    directInfusionUpdate->params->minNumDiagnosticFragments = this->spnMatchXDiagnosticPeaks->value();
-    directInfusionUpdate->params->productPpmTolr = this->spnFragTol->value();
-    directInfusionUpdate->params->productMinIntensity = this->spnFragMinIntensity->value();
+    directInfusionUpdate->params->ms2MinNumMatches = this->spnMatchXPeaks->value();
+    directInfusionUpdate->params->ms2MinNumDiagnosticMatches = this->spnMatchXDiagnosticPeaks->value();
+    directInfusionUpdate->params->ms1PpmTolr = this->spnFragTol->value();
+    directInfusionUpdate->params->ms2MinIntensity = this->spnFragMinIntensity->value();
 
     //precursor related
-    directInfusionUpdate->params->isFindPrecursorIonInMS1Scan = this->chkFindPrecursorIon->isChecked();
-    directInfusionUpdate->params->parentPpmTolr = this->spnParTol->value();
-    directInfusionUpdate->params->parentMinIntensity = this->spnParentMinIntensity->value();
+    directInfusionUpdate->params->ms1IsFindPrecursorIon = this->chkFindPrecursorIon->isChecked();
+    directInfusionUpdate->params->ms1PpmTolr = this->spnParTol->value();
+    directInfusionUpdate->params->ms1MinIntensity = this->spnParentMinIntensity->value();
     directInfusionUpdate->params->ms1ScanFilter = this->txtMs1ScanFilter->toPlainText().toStdString();
 
     //unused
-    directInfusionUpdate->params->minNumUniqueMatches = 0; //TODO: currently unused, what does this do?
+    directInfusionUpdate->params->ms2MinNumUniqueMatches= 0;
 
     if (cmbSpectralDeconvolutionAlgorithm->currentText() == "List All Candidates"){
         directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::ALL_CANDIDATES;
@@ -125,7 +127,7 @@ void DirectInfusionDialog::analyze() {
 
     title = mainwindow->getUniquePeakTableTitle(title);
 
-    TableDockWidget* resultsTable = mainwindow->addPeaksTable(title, QString(directInfusionUpdate->params->getFormattedParams().c_str()));
+    TableDockWidget* resultsTable = mainwindow->addPeaksTable(title, QString(directInfusionUpdate->params->encodeParams().c_str()));
     resultsTable->setWindowTitle(title);
 
     connect(directInfusionUpdate, SIGNAL(newDirectInfusionAnnotation(DirectInfusionGroupAnnotation*, int)), resultsTable, SLOT(addDirectInfusionAnnotation(DirectInfusionGroupAnnotation*, int)));
