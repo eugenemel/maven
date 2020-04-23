@@ -1,6 +1,6 @@
 #include "tabledockwidget.h"
 
-TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QString tableInfo) {
+TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QString encodedTableInfo, QString displayTableInfo) {
     setAllowedAreas(Qt::AllDockWidgetAreas);
     setFloating(false);
     _mainwindow = mw;
@@ -36,11 +36,13 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QS
     connect(clusterDialog->clearButton,SIGNAL(clicked(bool)),SLOT(clearClusters()));
     connect(clusterDialog->chkPGDisplay, SIGNAL(clicked(bool)), SLOT(changePeakGroupDisplay()));
 
-    this->tableInfo = tableInfo;
+    this->encodedTableInfo = encodedTableInfo;
+    this->displayTableInfo = displayTableInfo;
+
     searchParamsDialog = new SearchParamsDialog(this);
     searchParamsDialog->setWindowTitle(title);
     searchParamsDialog->setWindowFlags(searchParamsDialog->windowFlags() | Qt::WindowStaysOnTopHint);
-    searchParamsDialog->txtSrchParams->setText(this->tableInfo);
+    searchParamsDialog->txtSrchParams->setText(this->displayTableInfo);
 
     filterTagsDialog = new FilterTagsDialog(this);
     connect(filterTagsDialog, SIGNAL(updateFilter()), this, SLOT(updateTagFilter()));

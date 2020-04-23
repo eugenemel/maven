@@ -29,7 +29,7 @@ public:
     QHBoxLayout *horizontalLayout;
     QTreeWidget *treeWidget;
 
-    TableDockWidget(MainWindow* mw, QString title, int numColms, QString tableInfo="");
+    TableDockWidget(MainWindow* mw, QString title, int numColms, QString encodedTableInfo="", QString displayTableInfo="");
 	~TableDockWidget();
 
 	int  groupCount() { return allgroups.size(); }
@@ -37,7 +37,8 @@ public:
     QList<PeakGroup*> getGroups();
     static QString groupTagString(PeakGroup* group);
 
-    inline QString getTableInfo(){return tableInfo;}
+    inline QString getDisplayTableInfo(){return displayTableInfo;}
+    inline QString getEncodedTableInfo(){return encodedTableInfo;}
 
 public slots: 
 	  //void showInfo(PeakGroup* group);
@@ -147,7 +148,8 @@ private:
           tableViewType viewType;
 
           PeakGroup *lastSelectedGroup;
-          QString tableInfo;
+          QString displayTableInfo;
+          QString encodedTableInfo;
 };
 
 typedef std::multimap<PeakGroup*, QTreeWidgetItem*>::iterator rowIterator;

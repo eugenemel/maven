@@ -722,7 +722,7 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
 
             }
 
-            searchTableData.insert(make_pair(peakTable->windowTitle(), peakTable->getTableInfo()));
+            searchTableData.insert(make_pair(peakTable->windowTitle(), peakTable->getEncodedTableInfo()));
 
             qDebug() << peakTable->windowTitle() << ": Saved " << onePeakTableCount << "groups.";
         }

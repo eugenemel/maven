@@ -127,7 +127,12 @@ void DirectInfusionDialog::analyze() {
 
     title = mainwindow->getUniquePeakTableTitle(title);
 
-    TableDockWidget* resultsTable = mainwindow->addPeaksTable(title, QString(directInfusionUpdate->params->encodeParams().c_str()));
+    string encodedParams = directInfusionUpdate->params->encodeParams();
+    string displayParams = encodedParams;
+    replace(displayParams.begin(), displayParams.end(), ';', '\n');
+    replace(displayParams.begin(), displayParams.end(), '=', ' ');
+
+    TableDockWidget* resultsTable = mainwindow->addPeaksTable(title, QString(encodedParams.c_str()), QString(displayParams.c_str()));
     resultsTable->setWindowTitle(title);
 
     connect(directInfusionUpdate, SIGNAL(newDirectInfusionAnnotation(DirectInfusionGroupAnnotation*, int)), resultsTable, SLOT(addDirectInfusionAnnotation(DirectInfusionGroupAnnotation*, int)));
