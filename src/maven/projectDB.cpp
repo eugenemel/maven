@@ -1150,9 +1150,12 @@ void ProjectDB::loadSearchParams(){
             QString searchTableName = queryMatches.value("searchTableName").toString();
             QString encodedSearchParams = queryMatches.value("parameters").toString();
 
-            if (DIexpr.indexIn(searchTableName) != -1) {
+            int pos = DIexpr.indexIn(searchTableName);
 
-                shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters = DirectInfusionSearchParameters::decode(encodedSearchParams.toLatin1().data());
+            if (pos != -1) {
+
+                string encodedSearchParamsString = encodedSearchParams.toStdString();
+                shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters = DirectInfusionSearchParameters::decode(encodedSearchParamsString);
                 diSearchParameters.insert(make_pair(searchTableName.toLatin1().data(), directInfusionSearchParameters));
 
             }
