@@ -847,7 +847,7 @@
      </widget>
      <widget class="QWidget" name="tab_4">
       <attribute name="title">
-       <string>Display Options</string>
+       <string>Spectral Display</string>
       </attribute>
       <widget class="QGroupBox" name="grpDisplayOptions">
        <property name="geometry">
