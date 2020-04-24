@@ -1,5 +1,6 @@
 #include "projectDB.h"
 
+
  ProjectDB::ProjectDB(QString dbfilename) {
                 openDatabaseConnection(dbfilename);
             }
@@ -1117,18 +1118,17 @@ void ProjectDB::savePeakGroupsTableData(map<QString, QString> searchTableData){
         qDebug() << "ProjectDB::savePeakGroupsTableData(): Saved" << searchTableData.size() << "searches.";
 }
 
-QString ProjectDB::getSearchParams(QString tableName) {
+void ProjectDB::loadSearchParams(){
+        diSearchParameters.clear();
 
-        qDebug() << "ProjectDB::getSearchParams()... ";
-
-        QString noInfo("");
+        qDebug() << "ProjectDB::loadSearchParams()... ";
 
         QSqlQuery queryCheckTable(sqlDB);
 
         if (!queryCheckTable.exec("SELECT name FROM sqlite_master WHERE type='table' AND name='search_params';")){
             qDebug() << "Ho..." << queryCheckTable.lastError();
             qDebug() << "Could not check file for presence or absence of search_params table. Skipping.";
-            return noInfo;
+            return;
         }
 
         bool isHasSearchParamsTable = false;
@@ -1139,22 +1139,27 @@ QString ProjectDB::getSearchParams(QString tableName) {
             }
         }
 
-        if (!isHasSearchParamsTable) return noInfo;
+        if (!isHasSearchParamsTable) return;
 
         QSqlQuery queryMatches(sqlDB);
         queryMatches.exec("select * from search_params;");
 
+        QRegExp DIexpr("^Direct Infusion Analysis");
         while (queryMatches.next()) {
 
             QString searchTableName = queryMatches.value("searchTableName").toString();
+            QString encodedSearchParams = queryMatches.value("parameters").toString();
 
-            if (searchTableName == tableName) {
-                return queryMatches.value("parameters").toString();
+            if (DIexpr.indexIn(searchTableName) != -1) {
+
+                shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters = DirectInfusionSearchParameters::decode(encodedSearchParams.toLatin1().data());
+                diSearchParameters.insert(make_pair(searchTableName.toLatin1().data(), directInfusionSearchParameters));
+
             }
         }
-
-        return noInfo;
 }
+
+
 
         QStringList ProjectDB::getCompoundDatabaseNames() {
             QSqlQuery query(sqlDB);

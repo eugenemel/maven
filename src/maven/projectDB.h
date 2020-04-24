@@ -7,6 +7,7 @@
 #include <QString>
 #include "mzSample.h"
 #include "database.h"
+#include "directinfusionprocessor.h"
 #include <memory>
 
 class Database;
@@ -29,6 +30,7 @@ class ProjectDB {
             multimap<int, shared_ptr<mzrollDBMatch>> allMatches = {};
             map<int, int> rumsDBOldToNewGroupIDs = {};
             map<int, int> bookmarksOldToNewGroupIDs = {};
+            map<string, shared_ptr<DirectInfusionSearchParameters>> diSearchParameters = {};
 
             void clearLoadedPeakGroups() { allgroups.clear(); }
             void saveSamples(vector<mzSample *> &sampleSet);
@@ -39,9 +41,12 @@ class ProjectDB {
             void savePeakGroupsTableData(map<QString, QString> searchTableData);
             void writeSearchResultsToDB();
             int writeGroupSqlite(PeakGroup* group, int parentGroupId, QString tableName);
+
             void loadPeakGroups(QString tableName, QString rumsDBLibrary);
             void loadGroupPeaks(PeakGroup* group);
             void loadMatchTable();
+            void loadSearchParams();
+
             void deleteAll();
             void deleteGroups();
             void deleteSearchResults(QString searchTable);
