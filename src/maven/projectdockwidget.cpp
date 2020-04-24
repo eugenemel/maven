@@ -617,10 +617,33 @@ void ProjectDockWidget::loadAllPeakTables() {
     currentProject->setSamples(_mainwindow->getSamples());
 
     //create tables for search results
+    currentProject->loadSearchParams();
     QStringList tableNames = currentProject->getSearchTableNames();
     for(QString searchTableName : tableNames) {
+
         TableDockWidget* table = _mainwindow->findPeakTable(searchTableName);
-        if(!table) _mainwindow->addPeaksTable(searchTableName, currentProject->getSearchParams(searchTableName));
+
+        if(!table){
+
+            QString encodedTableInfo("");
+            QString displayTableInfo("");
+
+            string searchTableNameString = searchTableName.toLatin1().data();
+
+            if (currentProject->diSearchParameters.find(searchTableNameString) != currentProject->diSearchParameters.end()) {
+                shared_ptr<DirectInfusionSearchParameters> searchParams = currentProject->diSearchParameters[searchTableNameString];
+
+                string encodedParams = searchParams->encodeParams();
+                string displayParams = encodedParams;
+                replace(displayParams.begin(), displayParams.end(), ';', '\n');
+                replace(displayParams.begin(), displayParams.end(), '=', ' ');
+
+                encodedTableInfo = QString(encodedParams.c_str());
+                displayTableInfo = QString(displayParams.c_str());
+            }
+
+            _mainwindow->addPeaksTable(searchTableName, encodedTableInfo,displayTableInfo);
+        }
     }
 
     qDebug() << "Created tables for search results.";
