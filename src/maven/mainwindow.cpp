@@ -1306,7 +1306,17 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
     if (group->fragmentationPattern.nobs() == 0) {
         //if saving a loaded fragmentation file, this should all be stored from the file.
 
-        //a last resort
+        if (getProjectWidget()->currentProject) {
+            if (getProjectWidget()->currentProject->diSearchParameters.find(group->searchTableName) != getProjectWidget()->currentProject->diSearchParameters.end()) {
+                shared_ptr<DirectInfusionSearchParameters> params = getProjectWidget()->currentProject->diSearchParameters[group->searchTableName];
+
+                group->computeDIFragPattern(params);
+            }
+        }
+    }
+
+    //last resort
+    if (group->fragmentationPattern.nobs() == 0) {
         group->computeFragPattern(massCalcWidget->fragmentPPM->value());
     }
 
