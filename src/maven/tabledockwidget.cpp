@@ -851,8 +851,6 @@ void TableDockWidget::exportGroupsToSpreadsheet() {
 
 
 void TableDockWidget::showSelectedGroup() {
-    //sortBy(treeWidget->header()->sortIndicatorSection());
-
     QTreeWidgetItem *item = treeWidget->currentItem();
     if (!item) return;
     if (item->type() != PeakGroupType) return;
@@ -860,31 +858,7 @@ void TableDockWidget::showSelectedGroup() {
     QVariant v = item->data(0,PeakGroupType);
     PeakGroup*  group =  v.value<PeakGroup*>();
 
-    if ( group != NULL  and lastSelectedGroup != group) {
-        lastSelectedGroup = group;
-        cerr << "showSelectedGroup: group" << group->groupId << " " << group->peaks.size() << " " << group->children.size() << endl;
-        _mainwindow->setPeakGroup(group);
-        _mainwindow->rconsoleDockWidget->updateStatus();
-    }
-
-    /*
-    if ( item->childCount() > 0 ) {
-        vector<PeakGroup*>children;
-        for(int i=0; i < item->childCount(); i++ ) {
-            QTreeWidgetItem* child = item->child(i);
-            QVariant data = child->data(0,Qt::UserRole);
-            PeakGroup*  group =  data.value<PeakGroup*>();
-            if(group) children.push_back(group);
-        }
-
-        //if (children.size() > 0) {
-         //   if (_mainwindow->galleryWidget->isVisible() ) {
-          //      _mainwindow->galleryWidget->clear();
-           //     _mainwindow->galleryWidget->addEicPlots(children);
-        //    }
-        }
-    }
-    */
+    _mainwindow->setPeakGroup(group);
 }
 
 QList<PeakGroup*> TableDockWidget::getSelectedGroups() {
@@ -1024,7 +998,7 @@ void TableDockWidget::unmarkSelectedGroups() {
 
 void TableDockWidget::showLastGroup() {
     QTreeWidgetItem *item= treeWidget->currentItem();
-    if ( item != NULL )  {
+    if (item)  {
         treeWidget->setCurrentItem(treeWidget->itemAbove(item));
     }
 }
@@ -1033,7 +1007,7 @@ PeakGroup* TableDockWidget::getLastBookmarkedGroup() {
     if (allgroups.size() > 0) {
         return &(allgroups.back());
     } else {
-        return 0;
+        return nullptr;
     }
 }
 

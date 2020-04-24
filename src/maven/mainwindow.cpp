@@ -1299,8 +1299,14 @@ void MainWindow::showSRMList() {
 
 void MainWindow::setPeakGroup(PeakGroup* group) {
     if (!group) return;
+    if (_lastSelectedPeakGroup == group) return;
+
+    _lastSelectedPeakGroup = group;
 
     qDebug() << "MainWindow::setPeakGroup(PeakGroup)" << group;
+
+    rconsoleDockWidget->updateStatus();
+
     searchText->setText(QString::number(group->meanMz,'f',8));
 
     if (group->fragmentationPattern.nobs() == 0) {

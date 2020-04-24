@@ -251,6 +251,7 @@ private:
 
     int _ionizationMode;
     double _ppmWindow;
+    PeakGroup* _lastSelectedPeakGroup = nullptr;
 
     QToolBar* sideBar;
     QToolButton* addDockWidgetButton( QToolBar*, QDockWidget*, QIcon, QString);

@@ -147,7 +147,6 @@ private:
           enum tableViewType{ groupView=0, peakView=1 };
           tableViewType viewType;
 
-          PeakGroup *lastSelectedGroup;
           QString displayTableInfo;
           QString encodedTableInfo;
 };
