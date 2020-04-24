@@ -420,6 +420,9 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
     QPen graypen(Qt::gray,1);
     graypen.setStyle(Qt::DashDotLine);
 
+    QPen greenpen(Qt::darkGreen, 2);
+    greenpen.setStyle(Qt::DashDotLine);
+
     float SCALE=0.45;
 
     //create label
@@ -455,8 +458,16 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
             //cerr << "matched:" << hitMz << " " <<  _currentScan->mz[pos] << " "  << hitIntensity << " " << _currentScan->intensity[pos] << endl;
             int x = toX(_currentScan->mz[pos]);
             int y = toY(_maxY,SCALE);
+
             QGraphicsLineItem* line = new QGraphicsLineItem(x,y,x,toY(0),0);
-            line->setPen(graypen);
+
+            QString label = hit.fragLabelList[i];
+            if (label.startsWith("*")) { //diagnostic fragment
+                line->setPen(greenpen);
+            } else {
+                line->setPen(graypen);
+            }
+
             scene()->addItem(line);
             _items.push_back(line);
         } else {
