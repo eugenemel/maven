@@ -24,6 +24,7 @@ class SettingsForm : public QDialog, public Ui_SettingsForm
 				 void recomputeIsotopes();
                  void replotMS1Spectrum();
                  void replotMS2Spectrum();
+                 void recomputeConsensusSpectrum();
                  void selectFolder(QString key);
                  void selectFile(QString key);
 

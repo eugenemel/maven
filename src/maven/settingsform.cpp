@@ -84,6 +84,31 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(spnMs2MzMaxOffset, SIGNAL(valueChanged(double)), SLOT(replotMS2Spectrum()));
     connect(spnMs2MzMax, SIGNAL(valueChanged(double)), SLOT(replotMS2Spectrum()));
 
+    //spectral agglomeration settings
+    connect(spnScanFilterMinIntensity, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+    connect(spnScanFilterMinIntensityFraction, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+    connect(spnScanFilterMinSN, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+    connect(spnScanFilterBaseline, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
+    connect(spnScanFilterRetainTopX, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
+    connect(chkScanFilterRetainHighMzFragments, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+    connect(spnConsensusPeakMatchTolerance, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+    connect(spnConsensusMinPeakPresence, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
+    connect(spnConsensusMinPeakPresenceFraction, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+    connect(chkConsensusAvgOnlyObserved, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+    connect(chkConsensusNormalizeTo10K, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+
+    connect(spnScanFilterMinIntensity, SIGNAL(valueChanged(double)), SLOT(recomputeConsensusSpectrum()));
+    connect(spnScanFilterMinIntensityFraction, SIGNAL(valueChanged(double)), SLOT(recomputeConsensusSpectrum()));
+    connect(spnScanFilterMinSN, SIGNAL(valueChanged(double)), SLOT(recomputeConsensusSpectrum()));
+    connect(spnScanFilterBaseline, SIGNAL(valueChanged(int)), SLOT(recomputeConsensusSpectrum()));
+    connect(spnScanFilterRetainTopX, SIGNAL(valueChanged(int)), SLOT(recomputeConsensusSpectrum()));
+    connect(chkScanFilterRetainHighMzFragments, SIGNAL(toggled(bool)), SLOT(recomputeConsensusSpectrum()));
+    connect(spnConsensusPeakMatchTolerance, SIGNAL(valueChanged(double)), SLOT(recomputeConsensusSpectrum()));
+    connect(spnConsensusMinPeakPresence, SIGNAL(valueChanged(int)), SLOT(recomputeConsensusSpectrum()));
+    connect(spnConsensusMinPeakPresenceFraction, SIGNAL(valueChanged(double)), SLOT(recomputeConsensusSpectrum()));
+    connect(chkConsensusAvgOnlyObserved, SIGNAL(toggled(bool)), SLOT(recomputeConsensusSpectrum()));
+    connect(chkConsensusNormalizeTo10K, SIGNAL(toggled(bool)), SLOT(recomputeConsensusSpectrum()));
+
     setModal(true);
 
 }
@@ -127,6 +152,16 @@ void SettingsForm::replotMS2Spectrum(){
         mainwindow->fragmentationSpectraWidget->findBounds(true, true);
         mainwindow->fragmentationSpectraWidget->replot();
         mainwindow->fragmentationSpectraWidget->repaint();
+    }
+}
+
+void SettingsForm::recomputeConsensusSpectrum() {
+    if (!mainwindow) return;
+    if (mainwindow->ms1ScansListWidget->isVisible() && mainwindow->ms1ScansListWidget->treeWidget->selectedItems().size() > 1){
+        mainwindow->ms1ScansListWidget->showInfo();
+    }
+    if (mainwindow->fragmentationEventsWidget->isVisible() && mainwindow->fragmentationEventsWidget->treeWidget->selectedItems().size() > 1){
+        mainwindow->fragmentationEventsWidget->showInfo();
     }
 }
 
