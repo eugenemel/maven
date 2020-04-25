@@ -339,7 +339,7 @@ void SettingsForm::getFormValues() {
     settings->setValue("spnScanFilterMinIntensityFraction", (0.01 * spnScanFilterMinIntensityFraction->value()));
     settings->setValue("spnScanFilterMinSN", spnScanFilterMinSN->value());
     settings->setValue("spnScanFilterBaseline", spnScanFilterBaseline->value());
-    //settings->setValue("spnScanFilterRetainTopX", ScanFilterRetainTopX->value());
+    settings->setValue("spnScanFilterRetainTopX", spnScanFilterRetainTopX->value());
     settings->setValue("chkScanFilterRetainHighMzFragments", chkScanFilterRetainHighMzFragments->checkState());
 
     settings->setValue("spnConsensusPeakMatchTolerance", spnConsensusPeakMatchTolerance->value());
