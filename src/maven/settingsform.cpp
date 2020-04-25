@@ -236,6 +236,40 @@ void SettingsForm::setFormValues() {
     if (settings->contains("chkIncludeChildren"))
         chkIncludeChildren->setCheckState( (Qt::CheckState) settings->value("chkIncludeChildren").toInt());
 
+    //spectral agglomeration
+    if (settings->contains("spnScanFilterMinIntensity"))
+        spnScanFilterMinIntensity->setValue(settings->value("spnScanFilterMinIntensity").toDouble());
+
+    if (settings->contains("spnScanFilterMinIntensityFraction"))
+        spnScanFilterMinIntensityFraction->setValue(100.0 * settings->value("spnScanFilterMinIntensityFraction").toDouble());
+
+    if (settings->contains("spnScanFilterMinSN"))
+        spnScanFilterMinSN->setValue(settings->value("spnScanFilterMinSN").toDouble());
+
+    if (settings->contains("spnScanFilterBaseline"))
+        spnScanFilterBaseline->setValue(settings->value("spnScanFilterBaseline").toDouble());
+
+    if (settings->contains("spnScanFilterRetainTopX"))
+        spnScanFilterRetainTopX->setValue(settings->value("spnScanFilterRetainTopX").toInt());
+
+    if (settings->contains("chkScanFilterRetainHighMzFragments"))
+        chkScanFilterRetainHighMzFragments->setCheckState((Qt::CheckState) settings->value("chkScanFilterRetainHighMzFragments").toInt());
+
+    if (settings->contains("spnConsensusPeakMatchTolerance"))
+        spnConsensusPeakMatchTolerance->setValue(settings->value("spnConsensusPeakMatchTolerance").toDouble());
+
+    if (settings->contains("spnConsensusMinPeakPresence"))
+        spnConsensusMinPeakPresence->setValue(settings->value("spnConsensusMinPeakPresence").toInt());
+
+    if (settings->contains("spnConsensusMinPeakPresenceFraction"))
+        spnConsensusMinPeakPresenceFraction->setValue(100.0 * settings->value("spnConsensusMinPeakPresenceFraction").toDouble());
+
+    if (settings->contains("chkConsensusAvgOnlyObserved"))
+        chkConsensusAvgOnlyObserved->setCheckState((Qt::CheckState) settings->value("chkConsensusAvgOnlyObserved").toInt());
+
+    if (settings->contains("chkConsensusNormalizeTo10K"))
+        chkConsensusNormalizeTo10K->setCheckState((Qt::CheckState) settings->value("chkConsensusNormalizeTo10K").toInt());
+
 }
 
 
