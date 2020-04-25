@@ -1111,9 +1111,9 @@
       <widget class="QGroupBox" name="groupBox_2">
        <property name="geometry">
         <rect>
-         <x>0</x>
+         <x>20</x>
          <y>0</y>
-         <width>1071</width>
+         <width>1031</width>
          <height>101</height>
         </rect>
        </property>
@@ -1201,7 +1201,7 @@
          </widget>
         </item>
         <item row="0" column="6">
-         <widget class="QSpinBox" name="spinBox">
+         <widget class="QSpinBox" name="spnScanFilterRetainTopX">
           <property name="suffix">
            <string> fragments</string>
           </property>
@@ -1227,7 +1227,11 @@
          </widget>
         </item>
         <item row="0" column="4">
-         <widget class="QDoubleSpinBox" name="spnScanFilterMinSN"/>
+         <widget class="QDoubleSpinBox" name="spnScanFilterMinSN">
+          <property name="maximum">
+           <double>99999999.000000000000000</double>
+          </property>
+         </widget>
         </item>
         <item row="0" column="2" colspan="2">
          <widget class="QLabel" name="lblScanFilterMinSN">
@@ -1244,9 +1248,9 @@
       <widget class="QGroupBox" name="groupBox_5">
        <property name="geometry">
         <rect>
-         <x>0</x>
+         <x>20</x>
          <y>110</y>
-         <width>1071</width>
+         <width>1031</width>
          <height>101</height>
         </rect>
        </property>
@@ -1273,7 +1277,7 @@
            <double>9999999.000000000000000</double>
           </property>
           <property name="singleStep">
-           <double>0.010000000000000</double>
+           <double>1.000000000000000</double>
           </property>
           <property name="value">
            <double>10.000000000000000</double>
@@ -1295,8 +1299,14 @@
           <property name="suffix">
            <string> scans</string>
           </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
           <property name="maximum">
            <number>999999</number>
+          </property>
+          <property name="singleStep">
+           <number>1</number>
           </property>
           <property name="value">
            <number>1</number>

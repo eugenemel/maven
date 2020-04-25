@@ -334,6 +334,20 @@ void SettingsForm::getFormValues() {
     settings->setValue("spnBkmkRtTol", spnBkmkRtTol->value());
     settings->setValue("chkIncludeChildren", chkIncludeChildren->checkState());
 
+    //spectral agglomeration settings
+    settings->setValue("spnScanFilterMinIntensity", spnScanFilterMinIntensity->value());
+    settings->setValue("spnScanFilterMinIntensityFraction", (0.01 * spnScanFilterMinIntensityFraction->value()));
+    settings->setValue("spnScanFilterMinSN", spnScanFilterMinSN->value());
+    settings->setValue("spnScanFilterBaseline", spnScanFilterBaseline->value());
+    //settings->setValue("spnScanFilterRetainTopX", ScanFilterRetainTopX->value());
+    settings->setValue("chkScanFilterRetainHighMzFragments", chkScanFilterRetainHighMzFragments->checkState());
+
+    settings->setValue("spnConsensusPeakMatchTolerance", spnConsensusPeakMatchTolerance->value());
+    settings->setValue("spnConsensusMinPeakPresence", spnConsensusMinPeakPresence->value());
+    settings->setValue("spnConsensusMinPeakPresenceFraction", (0.01 * spnConsensusMinPeakPresenceFraction->value()));
+    settings->setValue("chkConsensusAvgOnlyObserved", chkConsensusAvgOnlyObserved->checkState());
+    settings->setValue("chkConsensusNormalizeTo10K", chkConsensusNormalizeTo10K->checkState());
+
 }
 
 void SettingsForm::selectFolder(QString key) {
