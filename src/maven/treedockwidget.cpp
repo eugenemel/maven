@@ -96,6 +96,23 @@ void TreeDockWidget::showInfo() {
                 unordered_set<float> rts{};
                 map<mzSample*, unordered_set<int>> sampleScanMap = {};
 
+                //retrieve settings
+                //scan filter
+                float minFracIntensity = mainwindow->getSettings()->value("spnScanFilterMinIntensityFraction", 0).toFloat();
+                float minSNRatio = mainwindow->getSettings()->value("spnScanFilterMinSN", 0).toFloat();
+                int maxNumberOfFragments = mainwindow->getSettings()->value("spnScanFilterRetainTopX", -1).toInt();
+                int baseLinePercentile = static_cast<int>(mainwindow->getSettings()->value("spnScanFilterBaseline", 5).toDouble());
+                bool isRetainFragmentsAbovePrecursorMz = mainwindow->getSettings()->value("chkScanFilterRetainHighMzFragments", true).toBool();
+                float precursorPurityPpm = -1;
+                float minIntensity = mainwindow->getSettings()->value("spnScanFilterMinIntensity", 0).toFloat();
+
+                //consensus
+                float productPpmTolr = mainwindow->getSettings()->value("spnConsensusPeakMatchTolerance", 10).toFloat();
+                bool isIntensityAvgByObserved = mainwindow->getSettings()->value("chkConsensusAvgOnlyObserved", true).toBool();
+                bool isNormalizeIntensityArray = mainwindow->getSettings()->value("chkConsensusNormalizeTo10K", false).toBool();
+                int minNumMs2ScansForConsensus = mainwindow->getSettings()->value("spnConsensusMinPeakPresence", 0).toInt();
+                float minFractionMs2ScansForConsensus = mainwindow->getSettings()->value("spnConsensusMinPeakPresenceFraction", 0).toFloat();
+
                 Fragment *f = nullptr;
                 for (QTreeWidgetItem *item : treeWidget->selectedItems()){
 
@@ -105,10 +122,24 @@ void TreeDockWidget::showInfo() {
                     rts.insert(scan->rt);
 
                     if (f) {
-                        Fragment *brother = new Fragment(scan);
+                        Fragment *brother = new Fragment(scan,
+                                                         minFracIntensity,
+                                                         minSNRatio,
+                                                         maxNumberOfFragments,
+                                                         baseLinePercentile,
+                                                         isRetainFragmentsAbovePrecursorMz,
+                                                         precursorPurityPpm,
+                                                         minIntensity);
                         f->addFragment(brother);
                     } else {
-                        f = new Fragment(scan); //TODO: more complicated model of building fragment based on parameters
+                        f = new Fragment(scan,
+                                         minFracIntensity,
+                                         minSNRatio,
+                                         maxNumberOfFragments,
+                                         baseLinePercentile,
+                                         isRetainFragmentsAbovePrecursorMz,
+                                         precursorPurityPpm,
+                                         minIntensity);
                         mslevel = scan->mslevel;
                     }
 
@@ -131,15 +162,11 @@ void TreeDockWidget::showInfo() {
                     }
                 }
 
-                double ppmValue = 20.0;
-                if (mslevel == 1) {
-                    ppmValue = mainwindow->getUserPPM();
-                } else if (mslevel == 2) {
-                    ppmValue = mainwindow->massCalcWidget->fragmentPPM->value();
-                }
-
-                //TODO: customizability around these parameters
-                f->buildConsensus(static_cast<float>(ppmValue), true, false, 0, 0.0f);
+                f->buildConsensus(productPpmTolr,
+                                  isIntensityAvgByObserved,
+                                  isNormalizeIntensityArray,
+                                  minNumMs2ScansForConsensus,
+                                  minFractionMs2ScansForConsensus);
 
                 if (mslevel == 1){
                     mainwindow->getSpectraWidget()->setCurrentFragment(f->consensus, mslevel);
