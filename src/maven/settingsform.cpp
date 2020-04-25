@@ -109,8 +109,6 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(chkConsensusAvgOnlyObserved, SIGNAL(toggled(bool)), SLOT(recomputeConsensusSpectrum()));
     connect(chkConsensusNormalizeTo10K, SIGNAL(toggled(bool)), SLOT(recomputeConsensusSpectrum()));
 
-    setModal(true);
-
 }
 
 void SettingsForm::recomputeIsotopes() { 
@@ -122,6 +120,16 @@ void SettingsForm::recomputeIsotopes() {
         PeakGroup* group =mainwindow->getEicWidget()->getSelectedGroup();
         cerr << "recomputeIsotopes() " << group << endl;
         mainwindow->isotopeWidget->setPeakGroup(group);
+    }
+}
+
+void SettingsForm::bringIntoView(){
+    if (isVisible()){
+        show();
+        raise();
+        activateWindow();
+    } else {
+        show();
     }
 }
 

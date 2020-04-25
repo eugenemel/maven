@@ -1106,7 +1106,7 @@ void MainWindow::createToolBars() {
     connect(btnAdducts, SIGNAL(clicked()), SLOT(showSelectAdductsDialog()));
     connect(btnFeatureDetect,SIGNAL(clicked()), SLOT(showMassSlices()));
     connect(btnDirectInfusion, SIGNAL(clicked()), SLOT(showDirectInfusionDialog()));
-    connect(btnSettings,SIGNAL(clicked()),settingsForm,SLOT(show()));
+    connect(btnSettings,SIGNAL(clicked()),settingsForm,SLOT(bringIntoView()));
 
     toolBar->addWidget(btnOpen);
     toolBar->addWidget(btnSave);
