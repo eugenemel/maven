@@ -264,7 +264,26 @@ void MassCalcWidget::setFragmentationScan(Scan* scan) {
     qDebug() << "MassCalcWidget::setFragmentationScan()";
     if(!scan) return;
 
-    Fragment f(scan,0,0,1024);
+    //retrieve settings
+    //scan filter
+    float minFracIntensity = _mw->getSettings()->value("spnScanFilterMinIntensityFraction", 0).toFloat();
+    float minSNRatio = _mw->getSettings()->value("spnScanFilterMinSN", 0).toFloat();
+    int maxNumberOfFragments = _mw->getSettings()->value("spnScanFilterRetainTopX", -1).toInt();
+    int baseLinePercentile = static_cast<int>(_mw->getSettings()->value("spnScanFilterBaseline", 5).toDouble());
+    bool isRetainFragmentsAbovePrecursorMz = _mw->getSettings()->value("chkScanFilterRetainHighMzFragments", true).toBool();
+    float precursorPurityPpm = -1; //TODO: parameter in settings?
+    float minIntensity = _mw->getSettings()->value("spnScanFilterMinIntensity", 0).toFloat();
+
+    //Issue 189: use settings
+    Fragment f(scan,
+               minFracIntensity,
+               minSNRatio,
+               maxNumberOfFragments,
+               baseLinePercentile,
+               isRetainFragmentsAbovePrecursorMz,
+               precursorPurityPpm,
+               minIntensity
+               );
 
     _mz = scan->precursorMz;
     matches = DB.findMatchingCompounds(_mz,_ppm,_charge);
