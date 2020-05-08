@@ -614,7 +614,11 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation 
         Compound* compound = directInfusionMatchData->compound;
         Adduct* adduct = directInfusionMatchData->adduct;
 
-        float theoMz = adduct->computeAdductMass(MassCalculator::computeNeutralMass(compound->getFormula()));
+        //use the precursor m/z for direct infusion data. Only if this is missing, try to use the formula.
+        float theoMz = compound->precursorMz;
+        if (theoMz <= 0) {
+            float theoMz = adduct->computeAdductMass(MassCalculator::computeNeutralMass(compound->getFormula()));
+        }
 
         PeakGroup pg;
         pg.metaGroupId = clusterNum;
