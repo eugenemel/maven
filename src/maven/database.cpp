@@ -932,6 +932,18 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
                     cpd->charge = -1;
                 }
             }
+
+        } else if (line.startsWith("PRECURSORTYPE:", Qt::CaseInsensitive)) {
+           cpd->adductString = line.mid(15,line.length()).simplified().toStdString();
+
+           if (cpd->charge == 0) {
+               if (cpd->adductString.compare (cpd->adductString.length() - 1, 1, "+") == 0){
+                   cpd->charge = 1;
+               } else if (cpd->adductString.compare (cpd->adductString.length() - 1, 1, "-") == 0) {
+                   cpd->charge = -1;
+               }
+           }
+
          } else if (line.startsWith("IONIZATION:", Qt::CaseInsensitive)) {
             QString ionizationString = line.mid(12,line.length()).simplified();
 
@@ -952,7 +964,9 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
              formula.replace("\"","",Qt::CaseInsensitive);
              if(!formula.isEmpty()) cpd->formula = formula.toStdString();
          } else if (line.startsWith("CATEGORY:",Qt::CaseInsensitive)) {
-             cpd->category.push_back(line.mid(10,line.length()).simplified().toStdString());
+            cpd->category.push_back(line.mid(10,line.length()).simplified().toStdString());
+         } else if (line.startsWith("COMPOUNDCLASS:", Qt::CaseInsensitive)) {
+            cpd->category.push_back(line.mid(15,line.length()).simplified().toStdString());
          } else if (line.startsWith("Tag:",Qt::CaseInsensitive)) {
             if(line.contains("virtual",Qt::CaseInsensitive)) cpd->virtualFragmentation=true;
          } else if (line.startsWith("ion mode:",Qt::CaseInsensitive)) {
