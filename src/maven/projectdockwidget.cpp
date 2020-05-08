@@ -671,7 +671,11 @@ void ProjectDockWidget::loadAllPeakTables() {
 
     //updated display widgets
     for(TableDockWidget* t: _mainwindow->getAllPeakTables()) {
-        t->showAllGroups();
+        if (t->windowTitle() == "rumsDB") {
+            t->showAllGroupsThenSort();
+        } else {
+            t->showAllGroups();
+        }
     }
 }
 

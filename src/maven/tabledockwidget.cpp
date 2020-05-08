@@ -761,10 +761,6 @@ void TableDockWidget::showAllGroups() {
 
     treeWidget->expandAll();
 
-    if (this->windowTitle() == "rumsDB") {
-        treeWidget->sortByColumn(4,Qt::DescendingOrder); //decreasing by score
-    }
-
     updateStatus();
 
     /*
@@ -772,6 +768,11 @@ void TableDockWidget::showAllGroups() {
 		treeWidget->setCurrentItem(treeWidget->topLevelItem(allgroups.size()-1));
 	}
 	(*/
+}
+
+void TableDockWidget::showAllGroupsThenSort() {
+    showAllGroups();
+    treeWidget->sortByColumn(4,Qt::DescendingOrder); //decreasing by score
 }
 
 void TableDockWidget::exportGroupsToSpreadsheet() {

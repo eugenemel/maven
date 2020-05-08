@@ -82,7 +82,8 @@ public slots:
 	  void markGroupGood();
       void unmarkSelectedGroups();
       void tagGroup(const QString& tagLabel);
-          void showAllGroups();
+      void showAllGroups();
+      void showAllGroupsThenSort();
 	  void showHeatMap();
 	  void showGallery();
           void showTreeMap();

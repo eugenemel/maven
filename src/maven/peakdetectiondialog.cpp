@@ -245,7 +245,7 @@ void PeakDetectionDialog::findPeaks() {
 		TableDockWidget* peaksTable = mainwindow->addPeaksTable(title);
 		peaksTable->setWindowTitle(title);
         connect(peakupdater, SIGNAL(newPeakGroup(PeakGroup*,bool, bool)), peaksTable, SLOT(addPeakGroup(PeakGroup*,bool, bool)));
-        connect(peakupdater, SIGNAL(finished()), peaksTable, SLOT(showAllGroups()));
+        connect(peakupdater, SIGNAL(finished()), peaksTable, SLOT(showAllGroupsThenSort()));
    		connect(peakupdater, SIGNAL(terminated()), peaksTable, SLOT(showAllGroups()));
    		connect(peakupdater, SIGNAL(finished()), this, SLOT(close()));
    		connect(peakupdater, SIGNAL(terminated()), this, SLOT(close()));
