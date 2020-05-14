@@ -137,7 +137,7 @@ void SpectraWidget::setTitle() {
 
             title += tr("<b>MS%1 Consensus spectrum</b>").arg(QString::number(_currentScan->mslevel));
 
-            if (_isShowFullTitle) {
+            if (_isDisplayFullTitle) {
                 for (auto it = _sampleScanMap.begin(); it != _sampleScanMap.end(); ++it){
 
                     unordered_set<int> scans = it->second;
@@ -1168,10 +1168,10 @@ void SpectraWidget::contextMenuEvent(QContextMenuEvent * event) {
     a7->setCheckable(true);
     a7->setChecked(_showOverlayLabels);
 
-    QAction *a8 = menu.addAction("Show Full Title");
-    connect(a8, SIGNAL(toggled(bool)), SLOT(toggleShowFullTitle()));
+    QAction *a8 = menu.addAction("Display Full Title");
+    connect(a8, SIGNAL(triggered()), SLOT(toggleDisplayFullTitle()));
     a8->setCheckable(true);
-    a8->setChecked(_isShowFullTitle);
+    a8->setChecked(_isDisplayFullTitle);
 
     menu.exec(event->globalPos());
 }
@@ -1328,9 +1328,9 @@ void SpectraWidget::toggleOverlayLabels() {
     repaint();
 }
 
-void SpectraWidget::toggleShowFullTitle() {
-    qDebug() << "SpectraWidget::toggleShowFullTitle()";
-    _isShowFullTitle= !_isShowFullTitle;
+void SpectraWidget::toggleDisplayFullTitle() {
+    qDebug() << "SpectraWidget::toggleDisplayFullTitle()";
+    _isDisplayFullTitle= !_isDisplayFullTitle;
     drawGraph();
     repaint();
 }
