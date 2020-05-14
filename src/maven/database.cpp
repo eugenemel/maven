@@ -342,7 +342,7 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             //sort all compounds by m/z (and re-order corresponding intensity vector and labels vector)
             vector<pair<float,int>> pairsArray = vector<pair<float,int>>(compound->fragment_mzs.size());
             for (unsigned int pos = 0; pos < compound->fragment_mzs.size(); pos++){
-                pairsArray.at(pos) = make_pair(compound->fragment_mzs.at(pos), pos);
+                pairsArray[pos] = make_pair(compound->fragment_mzs[pos], pos);
             }
 
             sort(pairsArray.begin(), pairsArray.end());
@@ -352,9 +352,9 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             vector<string> sortedLabels = vector<string>(pairsArray.size());
 
             for (unsigned int pos = 0; pos < pairsArray.size(); pos++) {
-                sortedMzs.at(pos) = pairsArray.at(pos).first;
-                sortedIntensities.at(pos) = compound->fragment_intensity.at(pairsArray.at(pos).second);
-                sortedLabels.at(pos) = compound->fragment_labels.at(pairsArray.at(pos).second);
+                sortedMzs[pos] = pairsArray[pos].first;
+                sortedIntensities[pos] = compound->fragment_intensity[pairsArray[pos].second];
+                sortedLabels[pos] = compound->fragment_labels[pairsArray[pos].second];
             }
 
             compound->fragment_mzs = sortedMzs;
