@@ -48,6 +48,7 @@ public slots:
                     void findSimilarScans();
                     void clearOverlay();
                     void toggleOverlayLabels();
+                    void toggleShowFullTitle();
 
                     Scan* getCurrentScan() { return _currentScan; }
 
@@ -62,6 +63,7 @@ public slots:
 
                     Fragment* _currentFragment = nullptr;
                     map<mzSample*,unordered_set<int>> _sampleScanMap = {};
+                    bool _isShowFullTitle=false;
 
                     vector<mzLink> links;
                     bool  _drawXAxis;

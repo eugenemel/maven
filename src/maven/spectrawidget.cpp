@@ -137,21 +137,23 @@ void SpectraWidget::setTitle() {
 
             title += tr("<b>MS%1 Consensus spectrum</b>").arg(QString::number(_currentScan->mslevel));
 
-            for (auto it = _sampleScanMap.begin(); it != _sampleScanMap.end(); ++it){
+            if (_isShowFullTitle) {
+                for (auto it = _sampleScanMap.begin(); it != _sampleScanMap.end(); ++it){
 
-                unordered_set<int> scans = it->second;
+                    unordered_set<int> scans = it->second;
 
-                vector<int> scansVector;
-                scansVector.assign(scans.begin(), scans.end());
-                sort(scansVector.begin(), scansVector.end());
+                    vector<int> scansVector;
+                    scansVector.assign(scans.begin(), scans.end());
+                    sort(scansVector.begin(), scansVector.end());
 
-                QStringList scansList;
-                for (auto x : scansVector){
-                    scansList.push_back(QString::number(x));
+                    QStringList scansList;
+                    for (auto x : scansVector){
+                        scansList.push_back(QString::number(x));
+                    }
+
+                    title += tr("<br><b>%1</b>").arg(QString(it->first->sampleName.c_str()));
+                    title += tr(" scans: <b>%1</b>").arg(scansList.join(", "));
                 }
-
-                title += tr("<br><b>%1</b>").arg(QString(it->first->sampleName.c_str()));
-                title += tr(" scans: <b>%1</b>").arg(scansList.join(", "));
             }
 
         } else {
@@ -1166,6 +1168,11 @@ void SpectraWidget::contextMenuEvent(QContextMenuEvent * event) {
     a7->setCheckable(true);
     a7->setChecked(_showOverlayLabels);
 
+    QAction *a8 = menu.addAction("Show Full Title");
+    connect(a8, SIGNAL(toggled(bool)), SLOT(toggleShowFullTitle()));
+    a8->setCheckable(true);
+    a8->setChecked(_isShowFullTitle);
+
     menu.exec(event->globalPos());
 }
 
@@ -1317,6 +1324,13 @@ void SpectraWidget::findSimilarScans() {
 void SpectraWidget::toggleOverlayLabels() {
     qDebug() << "SpectraWidget::toggleOverlayLabels()";
     _showOverlayLabels = !_showOverlayLabels;
+    drawGraph();
+    repaint();
+}
+
+void SpectraWidget::toggleShowFullTitle() {
+    qDebug() << "SpectraWidget::toggleShowFullTitle()";
+    _isShowFullTitle= !_isShowFullTitle;
     drawGraph();
     repaint();
 }
