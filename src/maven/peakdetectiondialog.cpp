@@ -242,8 +242,15 @@ void PeakDetectionDialog::findPeaks() {
      
         title = mainwindow->getUniquePeakTableTitle(title);
 
-		TableDockWidget* peaksTable = mainwindow->addPeaksTable(title);
+        //Issue 197
+        string encodedParams("test params");
+        string displayParams = encodedParams;
+        replace(displayParams.begin(), displayParams.end(), ';', '\n');
+        replace(displayParams.begin(), displayParams.end(), '=', ' ');
+
+        TableDockWidget* peaksTable = mainwindow->addPeaksTable(title, QString(encodedParams.c_str()), QString(displayParams.c_str()));
 		peaksTable->setWindowTitle(title);
+
         connect(peakupdater, SIGNAL(newPeakGroup(PeakGroup*,bool, bool)), peaksTable, SLOT(addPeakGroup(PeakGroup*,bool, bool)));
         connect(peakupdater, SIGNAL(finished()), peaksTable, SLOT(showAllGroupsThenSort()));
    		connect(peakupdater, SIGNAL(terminated()), peaksTable, SLOT(showAllGroups()));

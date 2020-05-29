@@ -1145,6 +1145,8 @@ void ProjectDB::loadSearchParams(){
         queryMatches.exec("select * from search_params;");
 
         QRegExp DIexpr("^Direct Infusion Analysis");
+        QRegExp LCMSDDAexpr("^Detected Features");
+
         while (queryMatches.next()) {
 
             QString searchTableName = queryMatches.value("searchTableName").toString();
@@ -1156,7 +1158,13 @@ void ProjectDB::loadSearchParams(){
 
                 string encodedSearchParamsString = encodedSearchParams.toStdString();
                 shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters = DirectInfusionSearchParameters::decode(encodedSearchParamsString);
-                diSearchParameters.insert(make_pair(searchTableName.toLatin1().data(), directInfusionSearchParameters));
+                diSearchParameters.insert(make_pair(searchTableName.toStdString(), directInfusionSearchParameters));
+
+            }
+
+            pos = LCMSDDAexpr.indexIn(searchTableName);
+
+            if (pos != -1){
 
             }
         }
