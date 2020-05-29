@@ -121,7 +121,8 @@ public:
                               float amuQ1,
                               float amuQ3,
                               int baselineSmoothingWindow,
-                              int baselineDropTopX
+                              int baselineDropTopX,
+                              string scanFilterString=""
                               );
 
 signals:

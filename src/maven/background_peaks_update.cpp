@@ -943,7 +943,8 @@ vector<EIC*> BackgroundPeakUpdate::pullEICs(mzSlice* slice,
                                             float amuQ1,
                                             float amuQ3,
                                             int baseline_smoothingWindow,
-                                            int baseline_dropTopX) {
+                                            int baseline_dropTopX,
+                                            string scanFilterString) {
 	vector<EIC*> eics; 
 	vector<mzSample*>vsamples;
 
@@ -996,7 +997,7 @@ vector<EIC*> BackgroundPeakUpdate::pullEICs(mzSlice* slice,
             e = sample->getEIC(c->precursorMz, c->collisionEnergy, c->productMz, amuQ1, amuQ3);
         } else {
             //cout << "computeEIC mzrange" << setprecision(7) << slice->mzmin  << " " << slice->mzmax << slice->rtmin  << " " << slice->rtmax << endl;
-            e = sample->getEIC(slice->mzmin, slice->mzmax, slice->rtmin, slice->rtmax, 1);
+            e = sample->getEIC(slice->mzmin, slice->mzmax, slice->rtmin, slice->rtmax, 1, scanFilterString);
         }
 
         if (e) {
