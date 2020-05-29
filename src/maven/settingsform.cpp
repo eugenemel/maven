@@ -191,8 +191,6 @@ void SettingsForm::setFormValues() {
     baseline_smoothing->setValue(settings->value("baseline_smoothing").toDouble());
     baseline_quantile->setValue(settings->value("baseline_quantile").toDouble());
 
-    //    settings->setValue("txtEICScanFilter", txtEICScanFilter->toPlainText());
-
     if (settings->contains("txtEICScanFilter"))
         this->txtEICScanFilter->setPlainText(settings->value("txtEICScanFilter").toString());
 

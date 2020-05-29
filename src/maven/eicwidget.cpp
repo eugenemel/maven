@@ -343,12 +343,14 @@ void EicWidget::computeEICs() {
     if (samples.size() == 0) return;
 
     QSettings *settings 		= getMainWindow()->getSettings();
+
     float eic_smoothingWindow = settings->value("eic_smoothingWindow").toDouble();
     int   eic_smoothingAlgorithm = settings->value("eic_smoothingAlgorithm").toInt();
     float amuQ1 = settings->value("amuQ1").toDouble();
     float amuQ3 = settings->value("amuQ3").toDouble();
     int baseline_smoothing = settings->value("baseline_smoothing").toInt();
     int baseline_quantile =  settings->value("baseline_quantile").toInt();
+    string scanFilterString = settings->value("txtEICScanFilter", "").toString().toStdString();
 
    //qDebug << "eic_smoothingAlgorithm=" << eic_smoothingAlgorithm;
 
@@ -373,7 +375,8 @@ void EicWidget::computeEICs() {
                                               amuQ1,
                                               amuQ3,
                                               baseline_smoothing,
-                                              baseline_quantile);
+                                              baseline_quantile,
+                                              scanFilterString);
 
 	//find peaks
     for(int i=0; i < eics.size(); i++ )  eics[i]->getPeakPositions(eic_smoothingWindow);
