@@ -17,11 +17,15 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(tabWidget, SIGNAL(currentChanged(int)), SLOT(getFormValues()));
 
     connect(recomputeEICButton, SIGNAL(clicked(bool)), SLOT(recomputeEIC()));
-    connect(eic_smoothingWindow, SIGNAL(valueChanged(int)), SLOT(recomputeEIC()));
-    connect(eic_smoothingAlgorithm, SIGNAL(currentIndexChanged(int)), SLOT(recomputeEIC()));
-    connect(grouping_maxRtWindow, SIGNAL(valueChanged(double)), SLOT(recomputeEIC()));
-    connect(baseline_smoothing, SIGNAL(valueChanged(int)), SLOT(recomputeEIC()));
-    connect(baseline_quantile, SIGNAL(valueChanged(int)), SLOT(recomputeEIC()));
+
+    //TODO: either keep button, or make EIC change dynamically
+
+//    connect(eic_smoothingWindow, SIGNAL(valueChanged(int)), SLOT(recomputeEIC()));
+//    connect(eic_smoothingAlgorithm, SIGNAL(currentIndexChanged(int)), SLOT(recomputeEIC()));
+//    connect(grouping_maxRtWindow, SIGNAL(valueChanged(double)), SLOT(recomputeEIC()));
+//    connect(baseline_smoothing, SIGNAL(valueChanged(int)), SLOT(recomputeEIC()));
+//    connect(baseline_quantile, SIGNAL(valueChanged(int)), SLOT(recomputeEIC()));
+//    connect(txtEICScanFilter, SIGNAL(textChanged(QString)), SLOT(recomputeEIC()));
 
     connect(ionizationMode, SIGNAL(currentIndexChanged(int)), SLOT(getFormValues()));
     connect(isotopeC13Correction, SIGNAL(toggled(bool)), SLOT(getFormValues()));
@@ -187,6 +191,10 @@ void SettingsForm::setFormValues() {
     baseline_smoothing->setValue(settings->value("baseline_smoothing").toDouble());
     baseline_quantile->setValue(settings->value("baseline_quantile").toDouble());
 
+    //    settings->setValue("txtEICScanFilter", txtEICScanFilter->toPlainText());
+
+    if (settings->contains("txtEICScanFilter"))
+        this->txtEICScanFilter->setPlainText(settings->value("txtEICScanFilter").toString());
 
     C13Labeled->setCheckState( (Qt::CheckState) settings->value("C13Labeled").toInt() );
     N15Labeled->setCheckState( (Qt::CheckState) settings->value("N15Labeled").toInt()  );
@@ -345,6 +353,7 @@ void SettingsForm::getFormValues() {
     settings->setValue("centroid_scan_flag", centroid_scan_flag->checkState() );
     settings->setValue("scan_filter_min_intensity", scan_filter_min_intensity->value());
     settings->setValue("scan_filter_min_quantile", scan_filter_min_quantile->value());
+    settings->setValue("txtEICScanFilter", txtEICScanFilter->toPlainText());
 
     settings->setValue("data_server_url", data_server_url->text());
 
