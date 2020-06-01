@@ -29,7 +29,6 @@ class SettingsForm : public QDialog, public Ui_SettingsForm
                  void selectFile(QString key);
                  void bringIntoView();
 
-                 void updateSmoothingWindowValue(double value);
                  inline void showInstrumentationTab() { tabWidget->setCurrentIndex(0); }
                  inline void showFileImportTab() { tabWidget->setCurrentIndex(1); }
                  inline void showPeakDetectionTab()   { tabWidget->setCurrentIndex(2); }

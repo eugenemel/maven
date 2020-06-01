@@ -18,15 +18,6 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
 
     connect(recomputeEICButton, SIGNAL(clicked(bool)), SLOT(recomputeEIC()));
 
-    //TODO: either keep button, or make EIC change dynamically
-
-//    connect(eic_smoothingWindow, SIGNAL(valueChanged(int)), SLOT(recomputeEIC()));
-//    connect(eic_smoothingAlgorithm, SIGNAL(currentIndexChanged(int)), SLOT(recomputeEIC()));
-//    connect(grouping_maxRtWindow, SIGNAL(valueChanged(double)), SLOT(recomputeEIC()));
-//    connect(baseline_smoothing, SIGNAL(valueChanged(int)), SLOT(recomputeEIC()));
-//    connect(baseline_quantile, SIGNAL(valueChanged(int)), SLOT(recomputeEIC()));
-//    connect(txtEICScanFilter, SIGNAL(textChanged(QString)), SLOT(recomputeEIC()));
-
     connect(ionizationMode, SIGNAL(currentIndexChanged(int)), SLOT(getFormValues()));
     connect(isotopeC13Correction, SIGNAL(toggled(bool)), SLOT(getFormValues()));
     connect(amuQ1, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
@@ -143,12 +134,6 @@ void SettingsForm::recomputeEIC() {
         mainwindow->getEicWidget()->recompute();
         mainwindow->getEicWidget()->replot();
     }
-}
-
-void SettingsForm::updateSmoothingWindowValue(double value) {
-    settings->setValue("eic_smoothingWindow",value);
-    eic_smoothingWindow->setValue(value);
-    recomputeEIC();
 }
 
 void SettingsForm::replotMS1Spectrum(){
