@@ -1001,13 +1001,11 @@ vector<EIC*> BackgroundPeakUpdate::pullEICs(mzSlice* slice,
         }
 
         if (e) {
-
-            //TODO: what should be retained here?
-//            EIC::SmootherType smootherType = (EIC::SmootherType) smoothingAlgorithm;
-//            e->setSmootherType(smootherType);
-//            e->setBaselineSmoothingWindow(baseline_smoothingWindow);
-//            e->setBaselineDropTopX(baseline_dropTopX);
-//            e->getPeakPositions(smoothingWindow);
+            EIC::SmootherType smootherType = static_cast<EIC::SmootherType>(smoothingAlgorithm);
+            e->setSmootherType(smootherType);
+            e->setBaselineSmoothingWindow(baseline_smoothingWindow);
+            e->setBaselineDropTopX(baseline_dropTopX);
+            e->getPeakPositions(smoothingWindow);
             eics.push_back(e);
         }
     }
