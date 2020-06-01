@@ -163,6 +163,7 @@ void TreeDockWidget::showInfo() {
                 }
 
                 f->buildConsensus(productPpmTolr,
+                                  Fragment::ConsensusIntensityAgglomerationType::Mean, //TODO: Issue 217
                                   isIntensityAvgByObserved,
                                   isNormalizeIntensityArray,
                                   minNumMs2ScansForConsensus,
