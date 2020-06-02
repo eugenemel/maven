@@ -1334,7 +1334,7 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QComboBox" name="comboBox">
+           <widget class="QComboBox" name="cmbConsensusAgglomerationType">
             <item>
              <property name="text">
               <string>Mean</string>
@@ -1348,7 +1348,7 @@
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_5">
+           <widget class="QLabel" name="lblConsensusAgglomerationType">
             <property name="text">
              <string>Intensity Agglomeration:</string>
             </property>
