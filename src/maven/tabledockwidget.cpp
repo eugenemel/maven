@@ -225,7 +225,7 @@ void TableDockWidget::setupPeakTable() {
         colNames << "MS2 Score";
         colNames << "Rank";
         colNames << "Charge";
-        colNames << "Istope#";
+        colNames << "Isotope#";
         colNames << "#Peaks";
         colNames << "#MS2s";
         colNames << "Max Width";
@@ -509,16 +509,16 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     }
 
     if (viewType == groupView) {
-        item->setText(4,QString::number(group->fragMatchScore.mergedScore));
-        item->setText(5,QString::number(group->groupRank,'f',3));
-        item->setText(6,QString::number(group->chargeState));
-        item->setText(7,QString::number(group->isotopicIndex));
-        item->setText(8,QString::number(group->peakCount()));
-        item->setText(9,QString::number(group->ms2EventCount));
-        item->setText(10,QString::number(group->maxNoNoiseObs));
-        item->setText(11,QString::number(group->maxIntensity,'g',2));
-        item->setText(12,QString::number(group->maxSignalBaselineRatio,'f',0));
-        item->setText(13,QString::number(group->maxQuality,'f',2));
+        item->setText(4,QString::number(group->fragMatchScore.mergedScore));        //MS2 Score
+        item->setText(5,QString::number(group->groupRank,'f',3));                   //Rank
+        item->setText(6,QString::number(group->chargeState));                       //Charge
+        item->setText(7,QString::number(group->isotopicIndex));                     //Isotope#
+        item->setText(8,QString::number(group->peakCount()));                       //# Peaks
+        item->setText(9,QString::number(group->ms2EventCount));                     //# MS2s
+        item->setText(10,QString::number(group->maxNoNoiseObs));                    //Max Width
+        item->setText(11,QString::number(group->maxIntensity,'g',2));               //Max Intensity
+        item->setText(12,QString::number(group->maxSignalBaselineRatio,'f',0));     //Max S/N
+        item->setText(13,QString::number(group->maxQuality,'f',2));                 //Max Quality
     } else if ( viewType == peakView) {
         vector<mzSample*> vsamples = _mainwindow->getVisibleSamples();
         sort(vsamples.begin(), vsamples.end(), mzSample::compSampleOrder);
@@ -647,6 +647,12 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation 
             p.pos = peakCounter;
             p.baseMz = theoMz;
             p.peakIntensity = directInfusionMatchData->fragmentMaxObservedIntensity;
+
+            //Issue 219: Avoid filling with junk
+            p.noNoiseObs = 0;
+            p.peakAreaTop = p.peakIntensity;
+            p.peakAreaCorrected = p.peakIntensity;
+            p.peakArea = p.peakIntensity;
 
             pg.addPeak(p);
 
