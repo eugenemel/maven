@@ -83,7 +83,7 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(spnScanFilterMinIntensity, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
     connect(spnScanFilterMinIntensityFraction, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
     connect(spnScanFilterMinSN, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
-    connect(spnScanFilterBaseline, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
+    connect(spnScanFilterBaseline, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
     connect(spnScanFilterRetainTopX, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
     connect(chkScanFilterRetainHighMzFragments, SIGNAL(toggled(bool)), SLOT(getFormValues()));
     connect(spnConsensusPeakMatchTolerance, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
@@ -91,11 +91,12 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(spnConsensusMinPeakPresenceFraction, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
     connect(chkConsensusAvgOnlyObserved, SIGNAL(toggled(bool)), SLOT(getFormValues()));
     connect(chkConsensusNormalizeTo10K, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+    connect(cmbConsensusAgglomerationType, SIGNAL(currentIndexChanged(int)), SLOT(getFormValues()));
 
     connect(spnScanFilterMinIntensity, SIGNAL(valueChanged(double)), SLOT(recomputeConsensusSpectrum()));
     connect(spnScanFilterMinIntensityFraction, SIGNAL(valueChanged(double)), SLOT(recomputeConsensusSpectrum()));
     connect(spnScanFilterMinSN, SIGNAL(valueChanged(double)), SLOT(recomputeConsensusSpectrum()));
-    connect(spnScanFilterBaseline, SIGNAL(valueChanged(int)), SLOT(recomputeConsensusSpectrum()));
+    connect(spnScanFilterBaseline, SIGNAL(valueChanged(double)), SLOT(recomputeConsensusSpectrum()));
     connect(spnScanFilterRetainTopX, SIGNAL(valueChanged(int)), SLOT(recomputeConsensusSpectrum()));
     connect(chkScanFilterRetainHighMzFragments, SIGNAL(toggled(bool)), SLOT(recomputeConsensusSpectrum()));
     connect(spnConsensusPeakMatchTolerance, SIGNAL(valueChanged(double)), SLOT(recomputeConsensusSpectrum()));
@@ -103,6 +104,7 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(spnConsensusMinPeakPresenceFraction, SIGNAL(valueChanged(double)), SLOT(recomputeConsensusSpectrum()));
     connect(chkConsensusAvgOnlyObserved, SIGNAL(toggled(bool)), SLOT(recomputeConsensusSpectrum()));
     connect(chkConsensusNormalizeTo10K, SIGNAL(toggled(bool)), SLOT(recomputeConsensusSpectrum()));
+    connect(cmbConsensusAgglomerationType, SIGNAL(currentIndexChanged(int)), SLOT(recomputeConsensusSpectrum()));
 
 }
 

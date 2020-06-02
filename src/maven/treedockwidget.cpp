@@ -113,6 +113,16 @@ void TreeDockWidget::showInfo() {
                 int minNumMs2ScansForConsensus = mainwindow->getSettings()->value("spnConsensusMinPeakPresence", 0).toInt();
                 float minFractionMs2ScansForConsensus = mainwindow->getSettings()->value("spnConsensusMinPeakPresenceFraction", 0).toFloat();
 
+                //Issue 217
+                Fragment::ConsensusIntensityAgglomerationType consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
+                QString consensusIntensityAgglomerationTypeStr = mainwindow->getSettings()->value("cmbConsensusAgglomerationType").toString();
+
+                if (consensusIntensityAgglomerationTypeStr == "Mean") {
+                    consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
+                } else if (consensusIntensityAgglomerationTypeStr == "Median") {
+                    consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median;
+                }
+
                 Fragment *f = nullptr;
                 for (QTreeWidgetItem *item : treeWidget->selectedItems()){
 
@@ -163,7 +173,7 @@ void TreeDockWidget::showInfo() {
                 }
 
                 f->buildConsensus(productPpmTolr,
-                                  Fragment::ConsensusIntensityAgglomerationType::Mean, //TODO: Issue 217
+                                  consensusIntensityAgglomerationType,
                                   isIntensityAvgByObserved,
                                   isNormalizeIntensityArray,
                                   minNumMs2ScansForConsensus,
