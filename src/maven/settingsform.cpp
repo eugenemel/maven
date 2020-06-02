@@ -304,6 +304,19 @@ void SettingsForm::setFormValues() {
     if (settings->contains("chkConsensusNormalizeTo10K"))
         chkConsensusNormalizeTo10K->setCheckState((Qt::CheckState) settings->value("chkConsensusNormalizeTo10K").toInt());
 
+    if (settings->contains("cmbConsensusAgglomerationType")){
+
+        QString cmbConsensusAgglomerationTypeStr = QString(settings->value("cmbConsensusAgglomerationType").toString());
+
+        for (int i = 0; i < cmbConsensusAgglomerationType->count(); i++){
+            QString itemString = cmbConsensusAgglomerationType->itemText(i);
+            if (itemString == cmbConsensusAgglomerationTypeStr){
+                cmbConsensusAgglomerationType->setCurrentIndex(i);
+                break;
+            }
+        }
+    }
+
 }
 
 
@@ -416,6 +429,7 @@ void SettingsForm::getFormValues() {
     settings->setValue("spnConsensusMinPeakPresenceFraction", (0.01 * spnConsensusMinPeakPresenceFraction->value()));
     settings->setValue("chkConsensusAvgOnlyObserved", chkConsensusAvgOnlyObserved->checkState());
     settings->setValue("chkConsensusNormalizeTo10K", chkConsensusNormalizeTo10K->checkState());
+    settings->setValue("cmbConsensusAgglomerationType", cmbConsensusAgglomerationType->currentText());
 
 }
 
