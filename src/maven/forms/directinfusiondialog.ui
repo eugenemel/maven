@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>859</width>
-    <height>740</height>
+    <height>749</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,10 +33,10 @@
       <string>Library Matching</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="2" column="2">
-       <widget class="QLabel" name="lblMatchDiagnostic">
-        <property name="text">
-         <string>Match at Least X Diagnostic Peaks</string>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="spnFragTol">
+        <property name="value">
+         <number>20</number>
         </property>
        </widget>
       </item>
@@ -50,65 +50,20 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="0">
+      <item row="8" column="1">
+       <widget class="QDoubleSpinBox" name="spnParentMinIntensity">
+        <property name="suffix">
+         <string> ions</string>
+        </property>
+        <property name="maximum">
+         <double>100000000000000000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
        <widget class="QLabel" name="lblParentMinIntensity">
         <property name="text">
          <string>Parent Min Intensity</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="lblParTol">
-        <property name="text">
-         <string>Parent PPM Tolr</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0" colspan="2">
-       <widget class="QCheckBox" name="chkFindPrecursorIon">
-        <property name="text">
-         <string>Find precursor Ion in MS1 scan</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="3">
-       <widget class="QSpinBox" name="spnMatchXPeaks">
-        <property name="minimum">
-         <number>0</number>
-        </property>
-        <property name="maximum">
-         <number>999999999</number>
-        </property>
-        <property name="value">
-         <number>4</number>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QLabel" name="lblMatchXPeaks">
-        <property name="text">
-         <string>Match at Least X Peaks</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QSpinBox" name="spnFragTol">
-        <property name="value">
-         <number>20</number>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3">
-       <widget class="QSpinBox" name="spnMatchXDiagnosticPeaks">
-        <property name="maximum">
-         <number>9999999</number>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="lblFragMinIntensity">
-        <property name="text">
-         <string>Frag Min Intensity</string>
         </property>
        </widget>
       </item>
@@ -122,30 +77,10 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="2" rowspan="2" colspan="2">
-       <widget class="QTextEdit" name="txtMs1ScanFilter"/>
-      </item>
-      <item row="5" column="1">
-       <widget class="QDoubleSpinBox" name="spnParentMinIntensity">
-        <property name="suffix">
-         <string> ions</string>
-        </property>
-        <property name="maximum">
-         <double>100000000000000000.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2" colspan="2">
-       <widget class="QLabel" name="lblMs1ScanFilter">
+      <item row="4" column="2">
+       <widget class="QLabel" name="lblMatchUnique">
         <property name="text">
-         <string>MS1 Scan Filter</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QSpinBox" name="spnParTol">
-        <property name="value">
-         <number>5</number>
+         <string>Match at Least X Unique Peaks</string>
         </property>
        </widget>
       </item>
@@ -153,6 +88,94 @@
        <widget class="QLabel" name="lblFragTol">
         <property name="text">
          <string>Fragment PPM Tolr</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0" colspan="2">
+       <widget class="QCheckBox" name="chkFindPrecursorIon">
+        <property name="text">
+         <string>Find precursor Ion in MS1 scan</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QSpinBox" name="spnMatchXPeaks">
+        <property name="suffix">
+         <string> fragment peaks</string>
+        </property>
+        <property name="minimum">
+         <number>0</number>
+        </property>
+        <property name="maximum">
+         <number>999999999</number>
+        </property>
+        <property name="value">
+         <number>4</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QSpinBox" name="spnMatchXDiagnosticPeaks">
+        <property name="suffix">
+         <string> fragment peaks</string>
+        </property>
+        <property name="maximum">
+         <number>9999999</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="lblMatchDiagnostic">
+        <property name="text">
+         <string>Match at Least X Diagnostic Peaks</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="lblMatchXPeaks">
+        <property name="text">
+         <string>Match at Least X Peaks</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="lblFragMinIntensity">
+        <property name="text">
+         <string>Frag Min Intensity</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="2">
+       <widget class="QLabel" name="lblMs1ScanFilter">
+        <property name="text">
+         <string>MS1 Scan Filter</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QSpinBox" name="spnParTol">
+        <property name="value">
+         <number>5</number>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="lblParTol">
+        <property name="text">
+         <string>Parent PPM Tolr</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="2" rowspan="2" colspan="2">
+       <widget class="QTextEdit" name="txtMs1ScanFilter"/>
+      </item>
+      <item row="4" column="3">
+       <widget class="QSpinBox" name="spnMatchXUniquePeaks">
+        <property name="suffix">
+         <string> fragment peaks</string>
+        </property>
+        <property name="maximum">
+         <number>999999999</number>
         </property>
        </widget>
       </item>

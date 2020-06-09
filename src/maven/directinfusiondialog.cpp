@@ -89,10 +89,10 @@ void DirectInfusionDialog::analyze() {
     directInfusionUpdate->setCompounds(DB.compoundsDB);
     directInfusionUpdate->setAdducts(DB.adductsDB);
 
-    //scan filter related
+    //scan filter
     directInfusionUpdate->params->scanFilterMinIntensity = static_cast<float>(this->spnMinIndividualMs2ScanIntensity->value());
 
-    //consensus spectrum formation related
+    //consensus spectrum formation
     directInfusionUpdate->params->consensusIsIntensityAvgByObserved = this->chkIsIntensityAvgByObserved->isChecked();
     directInfusionUpdate->params->consensusIsNormalizeTo10K = this->chkIsNormalizeIntensityArray->isChecked();
     directInfusionUpdate->params->consensusMinNumMs2Scans = this->spnMinNumMs2ScansForConsensus->value();
@@ -102,20 +102,18 @@ void DirectInfusionDialog::analyze() {
     directInfusionUpdate->params->ms1IsRequireAdductPrecursorMatch = this->isRequireAdductMatch->isChecked();
     directInfusionUpdate->params->isAgglomerateAcrossSamples = this->chkAgglomerateAcrossSamples->isChecked();
 
-    //fragment related
+    //fragment comparison
     directInfusionUpdate->params->ms2MinNumMatches = this->spnMatchXPeaks->value();
     directInfusionUpdate->params->ms2MinNumDiagnosticMatches = this->spnMatchXDiagnosticPeaks->value();
     directInfusionUpdate->params->ms1PpmTolr = this->spnFragTol->value();
     directInfusionUpdate->params->ms2MinIntensity = this->spnFragMinIntensity->value();
+    directInfusionUpdate->params->ms2MinNumUniqueMatches = this->spnMatchXUniquePeaks->value();
 
-    //precursor related
+    //precursor comparison
     directInfusionUpdate->params->ms1IsFindPrecursorIon = this->chkFindPrecursorIon->isChecked();
     directInfusionUpdate->params->ms1PpmTolr = this->spnParTol->value();
     directInfusionUpdate->params->ms1MinIntensity = this->spnParentMinIntensity->value();
     directInfusionUpdate->params->ms1ScanFilter = this->txtMs1ScanFilter->toPlainText().toStdString();
-
-    //unused
-    directInfusionUpdate->params->ms2MinNumUniqueMatches= 0;
 
     if (cmbSpectralDeconvolutionAlgorithm->currentText() == "List All Candidates"){
         directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::ALL_CANDIDATES;
