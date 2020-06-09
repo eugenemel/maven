@@ -456,7 +456,7 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
         _items.push_back(line);
 
         //matched?
-        if (pos > 0 && pos < _currentScan->nobs()) {
+        if (pos >= 0 && pos < _currentScan->nobs()) {
             //cerr << "matched:" << hitMz << " " <<  _currentScan->mz[pos] << " "  << hitIntensity << " " << _currentScan->intensity[pos] << endl;
             int x = toX(_currentScan->mz[pos]);
             int y = toY(_maxY,SCALE);
