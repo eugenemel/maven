@@ -451,7 +451,7 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
         int y = toY(hitIntensity/maxIntensity*_maxY,SCALE);
 
         QGraphicsLineItem* line = new QGraphicsLineItem(x,y,x,toY(0),0);
-        pos > 0 ?  line->setPen(bluepen) : line->setPen(redpen);
+        pos >= 0 ?  line->setPen(bluepen) : line->setPen(redpen);
         scene()->addItem(line);
         _items.push_back(line);
 
