@@ -111,7 +111,7 @@ void DirectInfusionDialog::analyze() {
     //fragment comparison
     directInfusionUpdate->params->ms2MinNumMatches = this->spnMatchXPeaks->value();
     directInfusionUpdate->params->ms2MinNumDiagnosticMatches = this->spnMatchXDiagnosticPeaks->value();
-    directInfusionUpdate->params->ms1PpmTolr = this->spnFragTol->value();
+    directInfusionUpdate->params->ms2PpmTolr = this->spnFragTol->value();
     directInfusionUpdate->params->ms2MinIntensity = this->spnFragMinIntensity->value();
     directInfusionUpdate->params->ms2MinNumUniqueMatches = this->spnMatchXUniquePeaks->value();
 
