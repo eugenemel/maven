@@ -10,7 +10,8 @@ DirectInfusionDialog::DirectInfusionDialog(QWidget *parent) : QDialog(parent) {
       //populate algorithm options
       cmbSpectralDeconvolutionAlgorithm->addItem("List All Candidates");                                    //0
       cmbSpectralDeconvolutionAlgorithm->addItem("Summarize to Acyl Chains or Sum Composition");            //1
-      cmbSpectralDeconvolutionAlgorithm->addItem("Summarize and Unique Fragments Intensity Ratio");   //2
+      cmbSpectralDeconvolutionAlgorithm->addItem("Summarize all with Identical Fragment Matches");          //2
+      cmbSpectralDeconvolutionAlgorithm->addItem("Summarize and Unique Fragments Intensity Ratio");         //3
 
       connect(start, SIGNAL(clicked(bool)), SLOT(analyze()));
       connect(cmbSpectralDeconvolutionAlgorithm, SIGNAL(currentIndexChanged(int)), SLOT(updateSpectralCompositionDescription()));
@@ -52,6 +53,12 @@ void DirectInfusionDialog::updateSpectralCompositionDescription() {
                     );
         break;
     case 2:
+        text = QString(
+                    "Compounds are automatically summarized to a higher level if they all contain identical fragment matches.\n"
+                    "\nThe group rank for all matches is is 0.0\n"
+                    );
+        break;
+    case 3:
         text = QString(
                     "Compounds are automatically summarized to a higher level if they all contain identical fragment matches\n"
                     "and have identical acyl chain isomeric forms or the same summed composition.\n"
@@ -125,6 +132,8 @@ void DirectInfusionDialog::analyze() {
         directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::ALL_CANDIDATES;
     } else if (cmbSpectralDeconvolutionAlgorithm->currentText() == "Summarize to Acyl Chains or Sum Composition") {
         directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::AUTO_SUMMARIZED_ACYL_CHAINS_SUM_COMPOSITION;
+    } else if (cmbSpectralDeconvolutionAlgorithm->currentText() == "Summarize all with Identical Fragment Matches") {
+        directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::AUTO_SUMMARIZED_IDENTICAL_FRAGMENTS;
     } else if (cmbSpectralDeconvolutionAlgorithm->currentText() == "Summarize and Unique Fragments Intensity Ratio"){
         directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE;
     }
