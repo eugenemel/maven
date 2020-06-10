@@ -375,17 +375,19 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             addedCompounds.resize(addedCompoundCounter);
         }
 
-        qDebug() << "Database::loadCompoundSQL() Finished reading in data for" << databaseName;
+        if (databaseName != "summarized") qDebug() << "Database::loadCompoundSQL() Finished reading in data for" << databaseName;
 
         compoundsDB.reserve(compoundsDB.size() + addedCompounds.size());
         compoundsDB.insert(compoundsDB.end(), addedCompounds.begin(), addedCompounds.end());
         sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
 
-        qDebug() << "Database::loadCompoundSQL(): Finished appending data for"
-                 << databaseName
-                 << "to compoundDB"
-                 << "in" << timer->elapsed() << "msec. size="
-                 << compoundsDB.size();
+        if (databaseName != "summarized") {
+            qDebug() << "Database::loadCompoundSQL(): Finished appending data for"
+                     << databaseName
+                     << "to compoundDB"
+                     << "in" << timer->elapsed() << "msec. size="
+                     << compoundsDB.size();
+        }
 
         delete(timer);
 }
