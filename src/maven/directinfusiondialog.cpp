@@ -9,8 +9,8 @@ DirectInfusionDialog::DirectInfusionDialog(QWidget *parent) : QDialog(parent) {
 
       //populate algorithm options
       cmbSpectralDeconvolutionAlgorithm->addItem("List All Candidates");                                    //0
-      cmbSpectralDeconvolutionAlgorithm->addItem("Summarize to Acyl Chains or Sum Composition");            //1
-      cmbSpectralDeconvolutionAlgorithm->addItem("Summarize all with Identical Fragment Matches");          //2
+      cmbSpectralDeconvolutionAlgorithm->addItem("Summarize all with Identical Fragment Matches");          //1
+      cmbSpectralDeconvolutionAlgorithm->addItem("Summarize to Acyl Chains or Sum Composition");            //2
       cmbSpectralDeconvolutionAlgorithm->addItem("Summarize and Unique Fragments Intensity Ratio");         //3
 
       connect(start, SIGNAL(clicked(bool)), SLOT(analyze()));
@@ -47,14 +47,14 @@ void DirectInfusionDialog::updateSpectralCompositionDescription() {
         break;
     case 1:
         text = QString(
-                    "Compounds are automatically summarized to a higher level if they all contain identical fragment matches\n"
-                    "and have identical acyl chain isomeric forms or the same summed composition.\n"
+                    "Compounds are automatically summarized to a higher level if they all contain identical fragment matches.\n"
                     "\nThe group rank for all matches is is 0.0\n"
                     );
         break;
     case 2:
         text = QString(
-                    "Compounds are automatically summarized to a higher level if they all contain identical fragment matches.\n"
+                    "Compounds are automatically summarized to a higher level if they all contain identical fragment matches\n"
+                    "and have identical acyl chain isomeric forms, or the same summed composition.\n"
                     "\nThe group rank for all matches is is 0.0\n"
                     );
         break;
