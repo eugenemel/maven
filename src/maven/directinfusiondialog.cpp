@@ -8,8 +8,9 @@ DirectInfusionDialog::DirectInfusionDialog(QWidget *parent) : QDialog(parent) {
       setModal(true);
 
       //populate algorithm options
-      cmbSpectralDeconvolutionAlgorithm->addItem("List All Candidates");
-      cmbSpectralDeconvolutionAlgorithm->addItem("Summarized Compound Unique Fragments Intensity Ratio");
+      cmbSpectralDeconvolutionAlgorithm->addItem("List All Candidates");                                    //0
+      cmbSpectralDeconvolutionAlgorithm->addItem("Summarize to Acyl Chains or Sum Composition");            //1
+      cmbSpectralDeconvolutionAlgorithm->addItem("Summarize and Unique Fragments Intensity Ratio");   //2
 
       connect(start, SIGNAL(clicked(bool)), SLOT(analyze()));
       connect(cmbSpectralDeconvolutionAlgorithm, SIGNAL(currentIndexChanged(int)), SLOT(updateSpectralCompositionDescription()));
@@ -33,7 +34,6 @@ void DirectInfusionDialog::setProgressBar(QString text, int progress, int totalS
 
 void DirectInfusionDialog::updateSpectralCompositionDescription() {
 
-    //TODO: hard-coded values
     int currentIndex = cmbSpectralDeconvolutionAlgorithm->currentIndex();
 
     QString text("");
@@ -46,9 +46,15 @@ void DirectInfusionDialog::updateSpectralCompositionDescription() {
         break;
     case 1:
         text = QString(
-                    "Compounds are only retained if they contain unique matches (in addition to other criteria).\n"
-                    "\nCompounds are automatically summarized to a higher level if they all contain identical fragment matches\n"
-                    "and can be summarized to a higher level (eg, two acyl chain isomers are described as a single compound).\n"
+                    "Compounds are automatically summarized to a higher level if they all contain identical fragment matches\n"
+                    "and have identical acyl chain isomeric forms or the same summed composition.\n"
+                    "\nThe group rank for all matches is is 0.0\n"
+                    );
+        break;
+    case 2:
+        text = QString(
+                    "Compounds are automatically summarized to a higher level if they all contain identical fragment matches\n"
+                    "and have identical acyl chain isomeric forms or the same summed composition.\n"
                     "\nThis approach assumes that intensities in spectral libraries are normalized to a common max intensity for each spectrum.\n"
                     "\nWhen a group of compounds are automatically summarized, the theoretical intensity of the summarized compound is"
                     " the average of the intensity of the all compounds in the group.\n"
@@ -117,7 +123,9 @@ void DirectInfusionDialog::analyze() {
 
     if (cmbSpectralDeconvolutionAlgorithm->currentText() == "List All Candidates"){
         directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::ALL_CANDIDATES;
-    } else if (cmbSpectralDeconvolutionAlgorithm->currentText() == "Summarized Compound Unique Fragments Intensity Ratio"){
+    } else if (cmbSpectralDeconvolutionAlgorithm->currentText() == "Summarize to Acyl Chains or Sum Composition") {
+        directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::AUTO_SUMMARIZED_ACYL_CHAINS_SUM_COMPOSITION;
+    } else if (cmbSpectralDeconvolutionAlgorithm->currentText() == "Summarize and Unique Fragments Intensity Ratio"){
         directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE;
     }
 
