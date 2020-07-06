@@ -58,9 +58,11 @@ void BackgroundDirectInfusionUpdate::run(void) {
 
     emit(updateProgressBar("Preparing search database...", stepNum, numSteps));
 
-    /**
-     * ACTUAL WORK
-     */
+    if (params->ms3IsMs3Search) {
+        emit(updateProgressBar("Converting loaded compound library to Ms3 Compounds...", stepNum, numSteps));
+        vector<Ms3Compound*> ms3Compounds = DirectInfusionProcessor::getMs3CompoundSet(compounds, false);
+    }
+
     shared_ptr<DirectInfusionSearchSet> searchDb =
             DirectInfusionProcessor::getSearchSet(samples.at(0),
                                                   compounds,
