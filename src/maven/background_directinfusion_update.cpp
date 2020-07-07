@@ -101,7 +101,7 @@ void BackgroundDirectInfusionUpdate::run(void) {
          emit(updateProgressBar(msgStart.c_str(), stepNum, numSteps));
 
          if (params->ms3IsMs3Search) {
-             vector<DirectInfusionAnnotation*> ms3Annotations = DirectInfusionProcessor::processSingleMs3Sample(
+             vector<Ms3SingleSampleMatch*> ms3Annotations = DirectInfusionProcessor::processSingleMs3Sample(
                          sample,
                          ms3Compounds,
                          params,
