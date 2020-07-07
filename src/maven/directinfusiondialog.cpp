@@ -102,6 +102,12 @@ void DirectInfusionDialog::analyze() {
     directInfusionUpdate->setCompounds(DB.compoundsDB);
     directInfusionUpdate->setAdducts(DB.adductsDB);
 
+    //ms3 search related
+    directInfusionUpdate->params->ms3IsMs3Search = this->chkMs3IsMs3Search->isChecked();
+    directInfusionUpdate->params->ms3MinNumMatches = this->spnMs3MinNumMatches->value();
+    directInfusionUpdate->params->ms3PrecursorPpmTolr = this->spnMs3PrecursorPpmTolr->value();
+    directInfusionUpdate->params->ms3PpmTolr = this->spnMs3PpmTolr->value();
+
     //scan filter
     directInfusionUpdate->params->scanFilterMinIntensity = static_cast<float>(this->spnMinIndividualMs2ScanIntensity->value());
 
@@ -110,6 +116,7 @@ void DirectInfusionDialog::analyze() {
     directInfusionUpdate->params->consensusIsNormalizeTo10K = this->chkIsNormalizeIntensityArray->isChecked();
     directInfusionUpdate->params->consensusMinNumMs2Scans = this->spnMinNumMs2ScansForConsensus->value();
     directInfusionUpdate->params->consensusMinFractionMs2Scans = static_cast<float>(this->spnMinFractionMs2ScansForConsensus->value()/100.0); //displayed as a perentage
+    //TODO: ms3 consensus related?
 
     //general
     directInfusionUpdate->params->ms1IsRequireAdductPrecursorMatch = this->isRequireAdductMatch->isChecked();
