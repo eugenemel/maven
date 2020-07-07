@@ -58,9 +58,10 @@ void BackgroundDirectInfusionUpdate::run(void) {
 
     emit(updateProgressBar("Preparing search database...", stepNum, numSteps));
 
+    vector<Ms3Compound*> ms3Compounds;
     if (params->ms3IsMs3Search) {
-        emit(updateProgressBar("Converting loaded compound library to Ms3 Compounds...", stepNum, numSteps));
-        vector<Ms3Compound*> ms3Compounds = DirectInfusionProcessor::getMs3CompoundSet(compounds, false);
+        emit(updateProgressBar("Converting loaded compound library to MS3 Compounds...", stepNum, numSteps));
+        ms3Compounds = DirectInfusionProcessor::getMs3CompoundSet(compounds, false);
     }
 
     shared_ptr<DirectInfusionSearchSet> searchDb =
@@ -99,20 +100,25 @@ void BackgroundDirectInfusionUpdate::run(void) {
 
          emit(updateProgressBar(msgStart.c_str(), stepNum, numSteps));
 
+         if (params->ms3IsMs3Search) {
+             vector<DirectInfusionAnnotation*> ms3Annotations = DirectInfusionProcessor::processSingleMs3Sample(
+                         sample,
+                         ms3Compounds,
+                         params,
+                         true // debug
+                         );
+         } else {
+             map<int, DirectInfusionAnnotation*> directInfusionAnnotations =
+                     DirectInfusionProcessor::processSingleSample(
+                         sample,
+                         searchDb,
+                         params,
+                         false //debug
+                         );
 
-         /**
-          * ACTUAL WORK
-          */
-         map<int, DirectInfusionAnnotation*> directInfusionAnnotations =
-                 DirectInfusionProcessor::processSingleSample(
-                     sample,
-                     searchDb,
-                     params,
-                     false //debug
-                     );
-
-         for (diSampleIterator it = directInfusionAnnotations.begin(); it != directInfusionAnnotations.end(); ++it){
-             allDirectInfusionsAcrossSamples.at(it->first).push_back(it->second);
+             for (diSampleIterator it = directInfusionAnnotations.begin(); it != directInfusionAnnotations.end(); ++it){
+                 allDirectInfusionsAcrossSamples.at(it->first).push_back(it->second);
+             }
          }
 
     }
