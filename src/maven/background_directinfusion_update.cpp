@@ -105,7 +105,7 @@ void BackgroundDirectInfusionUpdate::run(void) {
                          sample,
                          ms3Compounds,
                          params,
-                         true // debug
+                         false // debug
                          );
          } else {
              map<int, DirectInfusionAnnotation*> directInfusionAnnotations =
