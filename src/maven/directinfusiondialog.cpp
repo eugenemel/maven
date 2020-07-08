@@ -17,6 +17,8 @@ DirectInfusionDialog::DirectInfusionDialog(QWidget *parent) : QDialog(parent) {
       connect(cmbSpectralDeconvolutionAlgorithm, SIGNAL(currentIndexChanged(int)), SLOT(updateSpectralCompositionDescription()));
 
       updateSpectralCompositionDescription();
+      this->chkMs3IsMs3Search->setEnabled(false);
+      this->chkMs3IsMs3Search->setToolTip("MS3 search within maven gui is currently not available.");
 }
 
 DirectInfusionDialog::~DirectInfusionDialog(){
