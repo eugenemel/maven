@@ -377,6 +377,7 @@ void SpectraWidget::overlayCompound(Compound* c) {
 
    SpectralHit hit;
    hit.compoundId = c->name.c_str();
+   hit.originalCompoundId = c->id.c_str();
    hit.scan = _currentScan;
    hit.precursorMz = c->precursorMz;
    hit.productPPM=  mainwindow->massCalcWidget->fragmentPPM->value();
@@ -433,6 +434,14 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
     text->setPos(_title->pos().x(),toY(_maxY*0.95,SCALE));
     scene()->addItem(text);
     _items.push_back(text);
+
+    if (_isDisplayCompoundId) {
+        QGraphicsTextItem *compoundIdText = new QGraphicsTextItem(hit.originalCompoundId);
+        compoundIdText->setFont(_title->font());
+        compoundIdText->setPos(_title->pos().x(), text->y() + text->boundingRect().height());
+        scene()->addItem(compoundIdText);
+        _items.push_back(compoundIdText);
+    }
 
 
     for(int i=0; i < hit.mzList.size(); i++) {
