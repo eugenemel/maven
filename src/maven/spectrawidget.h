@@ -49,6 +49,7 @@ public slots:
                     void clearOverlay();
                     void toggleOverlayLabels();
                     void toggleDisplayFullTitle();
+                    void toggleDisplayCompoundId();
 
                     Scan* getCurrentScan() { return _currentScan; }
 
@@ -64,6 +65,7 @@ public slots:
                     Fragment* _currentFragment = nullptr;
                     map<mzSample*,unordered_set<int>> _sampleScanMap = {};
                     bool _isDisplayFullTitle=false;
+                    bool _isDisplayCompoundId=false;
 
                     vector<mzLink> links;
                     bool  _drawXAxis;

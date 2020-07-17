@@ -1173,6 +1173,11 @@ void SpectraWidget::contextMenuEvent(QContextMenuEvent * event) {
     a8->setCheckable(true);
     a8->setChecked(_isDisplayFullTitle);
 
+    QAction *a9 = menu.addAction("Display Compound ID");
+    connect(a9, SIGNAL(triggered()), SLOT(toggleDisplayCompoundId()));
+    a9->setCheckable(true);
+    a9->setChecked(_isDisplayCompoundId);
+
     menu.exec(event->globalPos());
 }
 
@@ -1331,6 +1336,13 @@ void SpectraWidget::toggleOverlayLabels() {
 void SpectraWidget::toggleDisplayFullTitle() {
     qDebug() << "SpectraWidget::toggleDisplayFullTitle()";
     _isDisplayFullTitle= !_isDisplayFullTitle;
+    drawGraph();
+    repaint();
+}
+
+void SpectraWidget::toggleDisplayCompoundId() {
+    qDebug() << "SpectraWidget::toggleDisplayCompoundId()";
+    _isDisplayCompoundId= !_isDisplayCompoundId;
     drawGraph();
     repaint();
 }
