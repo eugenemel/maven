@@ -437,8 +437,9 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
 
     if (_isDisplayCompoundId) {
         QGraphicsTextItem *compoundIdText = new QGraphicsTextItem(hit.originalCompoundId);
+        compoundIdText->setTextWidth(0.90 * (_maxX - _minX));
         compoundIdText->setFont(_title->font());
-        compoundIdText->setPos(_title->pos().x(), text->y() + text->boundingRect().height());
+        compoundIdText->setPos(toX(_minX + 0.05 * (_maxX - _minX)), text->y() + text->boundingRect().height());
         scene()->addItem(compoundIdText);
         _items.push_back(compoundIdText);
     }
