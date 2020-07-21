@@ -1079,7 +1079,7 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
                              }
                              cpd->fragment_labels.push_back(fragLabel.toStdString());
                          } else {
-                              cpd->fragment_labels.push_back("");
+                             cpd->fragment_labels.push_back("");
                          }
                      }
                  }
