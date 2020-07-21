@@ -858,8 +858,8 @@ void EicWidget::setupColors() {
  //qDebug <<" EicWidget::setupColors()";
 	for( unsigned int i=0; i< eics.size(); i++ ) {
 		EIC* eic = eics[i];
-		if (eic == NULL ) continue;
-        if (eic->sample != NULL)  {
+        if (!eic) continue;
+        if (eic->sample)  {
             eic->color[0] = eic->sample->color[0];
             eic->color[1] = eic->sample->color[1];
             eic->color[2] = eic->sample->color[2];
