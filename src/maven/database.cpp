@@ -1015,20 +1015,55 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
          } else if (capturePeaks ) {
              QStringList mzintpair = line.split(whiteSpace);
              if( mzintpair.size() >=2 ) {
-                 bool ok=false; bool ook=false;
+
+                 bool ok=false;
+                 bool ook=false;
                  float mz = mzintpair.at(0).toDouble(&ok);
                  float ints = mzintpair.at(1).toDouble(&ook);
+
                  if (ok && ook && mz >= 0 && ints >= 0) {
 
-                     bool isMzAlreadyExists = false;
+                     long sameMz = -1;
                      if (cpd->fragment_mzs.size() > 0) {
-                         float prevMz = cpd->fragment_mzs.at(cpd->fragment_mzs.size()-1);
-                         if (abs(prevMz-mz) < 1e-6) {
-                             isMzAlreadyExists = true;
+
+                         //Issue 237: do not assume sorted fragment lists
+                         for (unsigned int i = 0; i < cpd->fragment_mzs.size(); i++) {
+                             if (abs(mz - cpd->fragment_mzs[i]) < 1e-6) {
+                                 sameMz = i;
+                                 break;
+                             }
                          }
                      }
 
-                     if (!isMzAlreadyExists) {
+                     //MS3 fragments may have duplicate m/z values, if they have different precursor m/zs.
+                     //This check does not explicitly check the ms2 precursor and the ms3 fragment m/z value
+                     if (sameMz != -1 && mzintpair.size() >= 3) {
+                         string label = mzintpair.at(2).toStdString();
+                         if (label.find("ms3-{", 0) == 0) {
+                            sameMz = -1;
+                         }
+                     }
+
+                     if (sameMz != -1) {
+
+                         cpd->fragment_intensity[sameMz] = 0.5 * (cpd->fragment_intensity[sameMz] + ints);
+
+                         if(mzintpair.size() >= 3) {
+                             QString fragLabel;
+                             if (!cpd->fragment_labels[sameMz].empty()){
+                                 fragLabel.append(cpd->fragment_labels[sameMz].c_str());
+                                 fragLabel.append("/");
+                             }
+                             for (unsigned int k = 2; k < mzintpair.size(); k++) {
+                                 if (k > 2) {
+                                     fragLabel.append(" ");
+                                 }
+                                 fragLabel.append(mzintpair[k]);
+                             }
+                             cpd->fragment_labels[sameMz] = fragLabel.toStdString();
+                         }
+
+                     } else {
                          cpd->fragment_intensity.push_back(ints);
                          cpd->fragment_mzs.push_back(mz);
                          int frag_indx = cpd->fragment_mzs.size()-1;
@@ -1040,12 +1075,12 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
                                  if (k > 2) {
                                      fragLabel.append(" ");
                                  }
-                                 fragLabel.append(mzintpair.at(k));
+                                 fragLabel.append(mzintpair[k]);
                              }
                              cpd->fragment_labels.push_back(fragLabel.toStdString());
-                        } else {
-                             cpd->fragment_labels.push_back("");
-                        }
+                         } else {
+                              cpd->fragment_labels.push_back("");
+                         }
                      }
                  }
              }
