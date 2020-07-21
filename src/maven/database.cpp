@@ -1,5 +1,6 @@
 #include <QElapsedTimer>
 #include "database.h"
+#include <unordered_map>
 
 bool Database::connect(QString filename) {
     qDebug() << "Connecting to " << filename << endl;
@@ -883,6 +884,8 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
    Compound* cpd = nullptr;
    bool capturePeaks=false;
 
+   unordered_map<string, int> nameCounts{};
+
     do {
         line = stream.readLine();
 
@@ -899,6 +902,15 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
 
             //NEW COMPOUND
             QString name = line.mid(5,line.length()).simplified();
+
+            //Issue 235: Ensure no duplicate names by adding counter to duplicated names
+            if (nameCounts.find(name.toStdString()) != nameCounts.end()) {
+                nameCounts[name.toStdString()]++;
+                name = name + "_" + QString::number(nameCounts[name.toStdString()]);
+            } else {
+                nameCounts.insert(make_pair(name.toStdString(), 1));
+            }
+
             cpd = new Compound(name.toStdString(), name.toStdString(),"", 0);
             cpd->db = dbname;
             capturePeaks=false;
@@ -941,7 +953,7 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
                 }
             }
 
-        } else if (line.startsWith("PRECURSORTYPE:", Qt::CaseInsensitive)) {
+        } else if (line.startsWith("PRECURSORTYPE:", Qt::CaseInsensitive) || (line.startsWith("PRECURSOR TYPE:", Qt::CaseInsensitive))) {
            cpd->adductString = line.mid(15,line.length()).simplified().toStdString();
 
            if (!cpd->adductString.empty()){
