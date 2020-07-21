@@ -885,6 +885,10 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
 
     do {
         line = stream.readLine();
+
+        //Issue 235: debugging
+        //qDebug() << line;
+
         if(line.startsWith("Name:",Qt::CaseInsensitive)){
 
             if(cpd and !cpd->name.empty()) {
@@ -927,22 +931,26 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
          } else if (line.startsWith("ADDUCT:",Qt::CaseInsensitive)) {
             cpd->adductString = line.mid(8,line.length()).simplified().toStdString();
 
-            if (cpd->charge == 0) {
-                if (cpd->adductString.compare (cpd->adductString.length() - 1, 1, "+") == 0){
-                    cpd->charge = 1;
-                } else if (cpd->adductString.compare (cpd->adductString.length() - 1, 1, "-") == 0) {
-                    cpd->charge = -1;
+            if (!cpd->adductString.empty()){
+                if (cpd->charge == 0) {
+                    if (cpd->adductString.compare (cpd->adductString.length() - 1, 1, "+") == 0){
+                        cpd->charge = 1;
+                    } else if (cpd->adductString.compare (cpd->adductString.length() - 1, 1, "-") == 0) {
+                        cpd->charge = -1;
+                    }
                 }
             }
 
         } else if (line.startsWith("PRECURSORTYPE:", Qt::CaseInsensitive)) {
            cpd->adductString = line.mid(15,line.length()).simplified().toStdString();
 
-           if (cpd->charge == 0) {
-               if (cpd->adductString.compare (cpd->adductString.length() - 1, 1, "+") == 0){
-                   cpd->charge = 1;
-               } else if (cpd->adductString.compare (cpd->adductString.length() - 1, 1, "-") == 0) {
-                   cpd->charge = -1;
+           if (!cpd->adductString.empty()){
+               if (cpd->charge == 0) {
+                   if (cpd->adductString.compare (cpd->adductString.length() - 1, 1, "+") == 0){
+                       cpd->charge = 1;
+                   } else if (cpd->adductString.compare (cpd->adductString.length() - 1, 1, "-") == 0) {
+                       cpd->charge = -1;
+                   }
                }
            }
 
