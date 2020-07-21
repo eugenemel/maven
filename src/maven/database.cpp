@@ -903,15 +903,20 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
             //NEW COMPOUND
             QString name = line.mid(5,line.length()).simplified();
 
-            //Issue 235: Ensure no duplicate names by adding counter to duplicated names
+            //Issue 235: Avoid duplicate Compound IDs.
+            //By default, ID String is the name, plus a serial number to handle duplicate names
+            //This may be overridden by an explicit "ID:" field in the msp file.
+            QString id;
+
             if (nameCounts.find(name.toStdString()) != nameCounts.end()) {
                 nameCounts[name.toStdString()]++;
-                name = name + "_" + QString::number(nameCounts[name.toStdString()]);
+                id = name + "_" + QString::number(nameCounts[name.toStdString()]);
             } else {
                 nameCounts.insert(make_pair(name.toStdString(), 1));
+                id = name;
             }
 
-            cpd = new Compound(name.toStdString(), name.toStdString(),"", 0);
+            cpd = new Compound(id.toStdString(), name.toStdString(),"", 0);
             cpd->db = dbname;
             capturePeaks=false;
         }
