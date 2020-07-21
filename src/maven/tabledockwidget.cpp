@@ -783,6 +783,8 @@ void TableDockWidget::showAllGroupsThenSort() {
 
 void TableDockWidget::exportGroupsToSpreadsheet() {
 
+    qDebug() << "TableDockWidget::exportGroupsToSpreadsheet()";
+
     if (allgroups.size() == 0 ) {
         QString msg = "Peaks Table is Empty";
         QMessageBox::warning(this, tr("Error"), msg);
