@@ -884,7 +884,7 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
    Compound* cpd = nullptr;
    bool capturePeaks=false;
 
-   unordered_map<string, int> nameCounts{};
+   unordered_map<string, int> idCounts{};
 
     do {
         line = stream.readLine();
@@ -897,26 +897,27 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
             if(cpd and !cpd->name.empty()) {
                 //cerr << "NIST LIBRARY:" << cpd->db << " " << cpd->name << " " << cpd->formula << " " << cpd->id << endl;
                 if(!cpd->formula.empty())  cpd->setExactMass( mcalc.computeMass(cpd->formula,0));
+
+                string id = cpd->id;
+
+                //Issue 235: Ensure that no duplicate IDs are included in the same library.
+                //If an ID is duplicated, add a serial number for each duplicate.
+                if (idCounts.find(id) != idCounts.end()) {
+                    idCounts[id]++;
+                    cpd->id = id + "_" + to_string(idCounts[id]);
+                } else {
+                    idCounts.insert(make_pair(id, 1));
+                }
+
                 compoundSet.push_back(cpd);
             }
 
             //NEW COMPOUND
             QString name = line.mid(5,line.length()).simplified();
 
-            //Issue 235: Avoid duplicate Compound IDs.
-            //By default, ID String is the name, plus a serial number to handle duplicate names
-            //This may be overridden by an explicit "ID:" field in the msp file.
-            QString id;
+            //Issue 235: by default, ID is the name. this can be overwritten later by an explicit "ID:" field in the msp file.
+            cpd = new Compound(name.toStdString(), name.toStdString(),"", 0);
 
-            if (nameCounts.find(name.toStdString()) != nameCounts.end()) {
-                nameCounts[name.toStdString()]++;
-                id = name + "_" + QString::number(nameCounts[name.toStdString()]);
-            } else {
-                nameCounts.insert(make_pair(name.toStdString(), 1));
-                id = name;
-            }
-
-            cpd = new Compound(id.toStdString(), name.toStdString(),"", 0);
             cpd->db = dbname;
             capturePeaks=false;
         }
@@ -1052,7 +1053,23 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
 
     } while (!line.isNull());
 
-    if (cpd) compoundSet.push_back(cpd);
+   if(cpd and !cpd->name.empty()) {
+       //cerr << "NIST LIBRARY:" << cpd->db << " " << cpd->name << " " << cpd->formula << " " << cpd->id << endl;
+       if(!cpd->formula.empty())  cpd->setExactMass( mcalc.computeMass(cpd->formula,0));
+
+       string id = cpd->id;
+
+       //Issue 235: Ensure that no duplicate IDs are included in the same library.
+       //If an ID is duplicated, add a serial number for each duplicate.
+       if (idCounts.find(id) != idCounts.end()) {
+           idCounts[id]++;
+           cpd->id = id + "_" + to_string(idCounts[id]);
+       } else {
+           idCounts.insert(make_pair(id, 1));
+       }
+
+       compoundSet.push_back(cpd);
+   }
 
     bool isHasUnequalMatches = false;
     for (Compound *cpd : compoundSet) {
