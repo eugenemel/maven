@@ -429,8 +429,6 @@ mzSlice EicWidget::visibleSamplesBounds() {
 }
 
 void EicWidget::findPlotBounds() {
- //qDebug <<" EicWidget::findPlotBounds()";
-
     //mzSlice bounds = visibleEICBounds();
 
     //get bounds
@@ -470,6 +468,8 @@ void EicWidget::findPlotBounds() {
 
     if (_minX > _maxX) swap(_minX,_maxX);
     //qDebug() << "EicWidget::findPlotBounds()" << _slice.rtmin << " " << _slice.rtmax << " " << _minY << " " << _maxY;
+
+    qDebug() << "EicWidget::findPlotBounds() _minY=" << _minY << ", _maxY=" << _maxY;
 }
 
 float EicWidget::toX(float x) {
@@ -855,8 +855,9 @@ void EicWidget::showPeakArea(Peak* peak) {
 }
 
 void EicWidget::setupColors() { 
- //qDebug <<" EicWidget::setupColors()";
-	for( unsigned int i=0; i< eics.size(); i++ ) {
+    qDebug() <<" EicWidget::setupColors()";
+
+    for( unsigned int i=0; i< eics.size(); i++ ) {
 		EIC* eic = eics[i];
         if (!eic) continue;
         if (eic->sample)  {
@@ -874,7 +875,7 @@ void EicWidget::setupColors() {
 }
 
 void EicWidget::clearPlot() { 
- //qDebug <<" EicWidget::clearPlot()";
+    qDebug() <<" EicWidget::clearPlot()";
 	if(_isotopeplot && _isotopeplot->scene()) { _isotopeplot->clear(); scene()->removeItem(_isotopeplot); }
 	if(_barplot && _barplot->scene()) { _barplot->clear(); scene()->removeItem(_barplot);  }
 	if(_boxplot && _boxplot->scene()) { _boxplot->clear(); scene()->removeItem(_boxplot);  }
@@ -1654,7 +1655,7 @@ void EicWidget::selectGroupNearRt(float rt) {
  //qDebug <<"EicWidget::selectGroupNearRt(float rt) ";
 	if ( peakgroups.size() == 0 ) return;
 
-    PeakGroup* selGroup = NULL;
+    PeakGroup* selGroup = nullptr;
 
 	for(int i=0; i < peakgroups.size(); i++ ) {
        float diff = abs(peakgroups[i].meanRt - rt);
@@ -1673,7 +1674,7 @@ void EicWidget::selectGroupNearRt(float rt) {
 
 void EicWidget::setSelectedGroup(PeakGroup* group ) {
  //qDebug <<"EicWidget::setSelectedGroup(PeakGroup* group ) ";
-	if (_frozen || group == NULL) return;
+    if (_frozen || !group) return;
 
     if (_showBarPlot){
         addBarPlot(group);
