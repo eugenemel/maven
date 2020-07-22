@@ -128,7 +128,6 @@ void DirectInfusionDialog::analyze() {
         directInfusionUpdate->setCompounds(DB.getCompoundsSubset(cmbSpectralLibrary->currentText().toStdString()) );
     }
 
-    directInfusionUpdate->setCompounds(DB.compoundsDB);
     directInfusionUpdate->setAdducts(DB.adductsDB);
 
     //ms3 search related
