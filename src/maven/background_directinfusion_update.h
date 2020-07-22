@@ -26,6 +26,13 @@ public:
      */
     shared_ptr<DirectInfusionSearchParameters> params = shared_ptr<DirectInfusionSearchParameters>(new DirectInfusionSearchParameters);
 
+    /**
+     * @brief compoundDatabaseString
+     * search database used. by default, set to "ALL", though this should probably be changed
+     * to avoid incorporating "summarized" compounds from other searches (see Issue 238)
+     */
+    string compoundDatabaseString;
+
 private:
     vector<mzSample*> samples;
     vector<Compound*> compounds;

@@ -101,6 +101,16 @@ void DirectInfusionDialog::analyze() {
     vector<mzSample*> visibleSamples = mainwindow->getVisibleSamples();
 
     directInfusionUpdate->setSamples(visibleSamples);
+
+    //Issue 238
+    directInfusionUpdate->compoundDatabaseString = cmbSpectralLibrary->currentText().toStdString();
+
+    if (directInfusionUpdate->compoundDatabaseString == "ALL") {
+        directInfusionUpdate->setCompounds(DB.compoundsDB);
+    } else {
+        directInfusionUpdate->setCompounds(DB.getCompoundsSubset(cmbSpectralLibrary->currentText().toStdString()) );
+    }
+
     directInfusionUpdate->setCompounds(DB.compoundsDB);
     directInfusionUpdate->setAdducts(DB.adductsDB);
 
