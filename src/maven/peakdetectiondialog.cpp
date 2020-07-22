@@ -268,7 +268,7 @@ void PeakDetectionDialog::findPeaks() {
             if(peakupdater->compoundDatabase == "ALL") {
                 peakupdater->setCompounds( DB.compoundsDB );
             } else {
-                peakupdater->setCompounds( DB.getCopoundsSubset(compoundDatabase->currentText().toStdString()) );
+                peakupdater->setCompounds( DB.getCompoundsSubset(compoundDatabase->currentText().toStdString()) );
             }
 			runBackgroupJob("computePeaks");
 		}

@@ -555,7 +555,7 @@ void Database::saveRetentionTime(Compound* c, float rt, QString method) {
 	query.clear();
 }
 
-vector<Compound*> Database::getCopoundsSubset(string dbname) {
+vector<Compound*> Database::getCompoundsSubset(string dbname) {
 	vector<Compound*> subset;
 	for (unsigned int i=0; i < compoundsDB.size(); i++ ) {
 			if (compoundsDB[i]->db == dbname) { 

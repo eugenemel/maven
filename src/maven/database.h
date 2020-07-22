@@ -57,7 +57,7 @@ class Database {
 		void addCompound(Compound*c);
         void loadReactions(string modelName);
 
-        vector<Compound*> getCopoundsSubset(string database);
+        vector<Compound*> getCompoundsSubset(string database);
         vector<Compound*> getKnowns();
 
 

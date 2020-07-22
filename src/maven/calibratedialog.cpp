@@ -56,7 +56,7 @@ void CalibrateDialog::runCalibration() {
     workerThread->compoundPPMWindow = ppmSearch->value();
     workerThread->eic_smoothingAlgorithm = 10;
     workerThread->compoundDatabase = dbName;
-    workerThread->setCompounds( DB.getCopoundsSubset(dbName.toStdString()));
+    workerThread->setCompounds( DB.getCompoundsSubset(dbName.toStdString()));
     workerThread->matchRtFlag = true;
     //workerThread->minGoodPeakCount = 1;
     workerThread->minGroupIntensity =  minGroupIntensity->value();
