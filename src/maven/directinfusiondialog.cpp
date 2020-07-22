@@ -17,6 +17,7 @@ DirectInfusionDialog::DirectInfusionDialog(QWidget *parent) : QDialog(parent) {
       connect(cmbSpectralDeconvolutionAlgorithm, SIGNAL(currentIndexChanged(int)), SLOT(updateSpectralCompositionDescription()));
 
       updateSpectralCompositionDescription();
+
       this->chkMs3IsMs3Search->setEnabled(false);
       this->chkMs3IsMs3Search->setToolTip("MS3 search within maven gui is currently not available.");
 }
@@ -26,6 +27,14 @@ DirectInfusionDialog::~DirectInfusionDialog(){
 }
 
 void DirectInfusionDialog::show(){
+
+    QStringList dbnames = DB.getLoadedDatabaseNames();
+    cmbSpectralLibrary->clear();
+    dbnames.push_front("ALL");
+    for(QString db: dbnames ) {
+        cmbSpectralLibrary->addItem(db);
+    }
+
     QDialog::show();
 }
 
@@ -85,7 +94,7 @@ void DirectInfusionDialog::updateSpectralCompositionDescription() {
 
 void DirectInfusionDialog::analyze() {
 
-    if (DB.compoundsDB.size() == 0 || mainwindow->samples.size() == 0) {
+    if (DB.compoundsDB.size() == 0 || mainwindow->samples.size() == 0 || DB.getLoadedDatabaseNames().length() == 0) {
         qDebug() << "DirectInfusionDialog::analyze() could not be executed b/c no DI samples and/or compounds are loaded.";
         QDialog::hide();
         return;
@@ -106,7 +115,15 @@ void DirectInfusionDialog::analyze() {
     directInfusionUpdate->compoundDatabaseString = cmbSpectralLibrary->currentText().toStdString();
 
     if (directInfusionUpdate->compoundDatabaseString == "ALL") {
-        directInfusionUpdate->setCompounds(DB.compoundsDB);
+
+        //Issue 238: Explicitly remove summarized compounds associated with other searches.
+
+        vector<Compound*> allCompounds = DB.compoundsDB;
+        allCompounds.erase(std::remove_if(allCompounds.begin(), allCompounds.end(), [](Compound *compound){return compound->db == "summarized";}), allCompounds.end());
+
+        qDebug() << "Removed" << (DB.compoundsDB.size() - allCompounds.size()) << "previously computed summarized compounds prior to DI search.";
+
+        directInfusionUpdate->setCompounds(allCompounds);
     } else {
         directInfusionUpdate->setCompounds(DB.getCompoundsSubset(cmbSpectralLibrary->currentText().toStdString()) );
     }
