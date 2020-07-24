@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>880</width>
-    <height>834</height>
+    <height>870</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -295,7 +295,7 @@
       <item row="0" column="0" colspan="2">
        <widget class="QCheckBox" name="chkIsIntensityAvgByObserved">
         <property name="text">
-         <string>Use only observed fragments for average fragment intensity</string>
+         <string>Use only observed spectral peaks for average spectral peak intensity</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -312,7 +312,7 @@
       <item row="2" column="0">
        <widget class="QLabel" name="lblMinNumMs2ScansForConsensus">
         <property name="text">
-         <string>Min number of MS2 scans required to include fragment in consensus spectrum:</string>
+         <string>Min number of scans required to include spectral peak in consensus spectrum:</string>
         </property>
        </widget>
       </item>
@@ -329,7 +329,7 @@
       <item row="3" column="0">
        <widget class="QLabel" name="lblMinFractionMs2ScansForConsensus">
         <property name="text">
-         <string>Min fraction of MS2 scans required to include fragment in consensus spectrum:</string>
+         <string>Min fraction of scans required to include spectral peak in consensus spectrum:</string>
         </property>
        </widget>
       </item>
@@ -349,7 +349,7 @@
       <item row="4" column="0">
        <widget class="QLabel" name="lblMinIndividualMs2ScanIntensity">
         <property name="text">
-         <string>Min scan MS2 fragment intensity to include fragment in consensus spectrum:</string>
+         <string>Min spectral peak intensity to include spectral peak in consensus spectrum:</string>
         </property>
        </widget>
       </item>
