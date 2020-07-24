@@ -136,15 +136,27 @@ void DirectInfusionDialog::analyze() {
     directInfusionUpdate->params->ms3PrecursorPpmTolr = this->spnMs3PrecursorPpmTolr->value();
     directInfusionUpdate->params->ms3PpmTolr = this->spnMs3PpmTolr->value();
 
-    //scan filter
+    //scan filter (applies to all ms1, ms2, and ms3)
     directInfusionUpdate->params->scanFilterMinIntensity = static_cast<float>(this->spnMinIndividualMs2ScanIntensity->value());
 
-    //consensus spectrum formation
+    //consensus spectrum params (all ms levels)
     directInfusionUpdate->params->consensusIsIntensityAvgByObserved = this->chkIsIntensityAvgByObserved->isChecked();
     directInfusionUpdate->params->consensusIsNormalizeTo10K = this->chkIsNormalizeIntensityArray->isChecked();
+
+    //ms1 consensus spectrum params
+    // directInfusionUpdate->params->consensusMs1PpmTolr = 10; //(default)
+    directInfusionUpdate->params->consensusMinNumMs1Scans = this->spnMinNumMs2ScansForConsensus->value();
+    directInfusionUpdate->params->consensusMinFractionMs1Scans = static_cast<float>(this->spnMinFractionMs2ScansForConsensus->value()/100.0); //displayed as a perentage
+
+    //ms2 consensus spectrum params
+    // directInfusionUpdate->params->consensusPpmTolr = 10; //(default)
     directInfusionUpdate->params->consensusMinNumMs2Scans = this->spnMinNumMs2ScansForConsensus->value();
     directInfusionUpdate->params->consensusMinFractionMs2Scans = static_cast<float>(this->spnMinFractionMs2ScansForConsensus->value()/100.0); //displayed as a perentage
-    //TODO: ms3 consensus related?
+
+    //ms3 consensus spectrum params
+    // directInfusionUpdate->params->consensusMs3PpmTolr = 10; //(default)
+    directInfusionUpdate->params->consensusMinNumMs3Scans = this->spnMinNumMs2ScansForConsensus->value();
+    directInfusionUpdate->params->consensusMinFractionMs3Scans = static_cast<float>(this->spnMinFractionMs2ScansForConsensus->value()/100.0); //displayed as a perentage
 
     //general
     directInfusionUpdate->params->ms1IsRequireAdductPrecursorMatch = this->isRequireAdductMatch->isChecked();
