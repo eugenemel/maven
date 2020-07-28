@@ -61,7 +61,7 @@ void BackgroundDirectInfusionUpdate::run(void) {
     vector<Ms3Compound*> ms3Compounds;
     if (params->ms3IsMs3Search) {
         emit(updateProgressBar("Converting loaded compound library to MS3 Compounds...", stepNum, numSteps));
-        ms3Compounds = DirectInfusionProcessor::getMs3CompoundSet(compounds, false);
+        ms3Compounds = DirectInfusionProcessor::getMs3CompoundSet(compounds, true);
     }
 
     shared_ptr<DirectInfusionSearchSet> searchDb =
