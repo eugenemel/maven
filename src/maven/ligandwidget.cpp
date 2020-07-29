@@ -116,13 +116,17 @@ void LigandWidget::setDatabaseAltered(QString name, bool altered) {
 }
 
 void LigandWidget::setCompoundFocus(Compound* c) {
-	if (c==NULL) return;
+    if (!c) return;
 	QString dbname(c->db.c_str());
 	int index = databaseSelect->findText(dbname,Qt::MatchExactly);
         if (index != -1 ) databaseSelect->setCurrentIndex(index);
 
-    QString filterString(c->name.c_str());
+    filterString = QString(c->name.c_str());
     showTable();
+
+    if(!filterString.isEmpty()){
+        showMatches();
+    }
 }
 
 
@@ -212,7 +216,7 @@ void LigandWidget::showTable() {
 
         QString name(compound->name.c_str() );
 
-        parent->setText(0,name.toUpper());  //Feng note: sort names after capitalization
+        parent->setText(0, name); //Issue 246: capitalizing names is annoying for lipid libraries
         parent->setText(1, compound->adductString.c_str());
         parent->setText(2, QString::number(compound->getExactMass(), 'f', 4));
         if(compound->expectedRt > 0) parent->setText(3,QString::number(compound->expectedRt));
