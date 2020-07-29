@@ -160,18 +160,6 @@ void TreeDockWidget::showInfo() {
 
                 }
 
-                //necessary for buildConsensus() to merge peaks together
-                if (mslevel == 1 && f) {
-                    if (!f->mzs.empty()) {
-                        f->precursorMz = static_cast<double>(f->mzs[f->mzs.size()-1]);
-                    }
-                    for (auto frag : f->brothers){
-                        if (frag && !frag->mzs.empty()) {
-                            frag->precursorMz = static_cast<double>(frag->mzs[frag->mzs.size()-1]);
-                        }
-                    }
-                }
-
                 f->buildConsensus(productPpmTolr,
                                   consensusIntensityAgglomerationType,
                                   isIntensityAvgByObserved,
@@ -181,7 +169,7 @@ void TreeDockWidget::showInfo() {
 
                 if (mslevel == 1){
                     mainwindow->getSpectraWidget()->setCurrentFragment(f->consensus, mslevel);
-                } else {
+                } else if (mslevel == 2){
                     mainwindow->fragmentationSpectraWidget->setCurrentFragment(f->consensus, mslevel);
                     mainwindow->massCalcWidget->setFragment(f->consensus);
                 }
