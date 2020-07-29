@@ -42,13 +42,18 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   QLineEdit*  filterEditor = new QLineEdit(toolBar);
   filterEditor->setMinimumWidth(250);
   filterEditor->setPlaceholderText("Compound Name Filter");
-  connect(filterEditor, SIGNAL(textEdited(QString)), this, SLOT(showMatches(QString)));
+
+  typingTimer = new QTimer(this);
+  typingTimer->setSingleShot(true);
+
+  connect(typingTimer, SIGNAL(timeout()), this, SLOT(showMatches()));
+
+  connect(filterEditor, SIGNAL(textChanged(QString)), this, SLOT(setFilterString(QString)));
 
   //toolBar->addWidget(new QLabel("Compounds: "));
   toolBar->addWidget(filterEditor);
   toolBar->addWidget(databaseSelect);
   toolBar->addWidget(galleryButton);
-
 
   setWidget(treeWidget);
   setTitleBarWidget(toolBar);
@@ -94,7 +99,9 @@ void LigandWidget::setDatabase(QString dbname) {
     DB.loadCompoundsSQL(dbname,DB.getLigandDB());
     showTable();
 
-    if(!filterString.isEmpty()) showMatches(filterString);
+    if(!filterString.isEmpty()){
+        showMatches();
+    }
 }
 
 void LigandWidget::databaseChanged(int index) {
@@ -119,16 +126,16 @@ void LigandWidget::setCompoundFocus(Compound* c) {
 }
 
 
-void LigandWidget::setFilterString(QString s) { 
-	if(s != filterString) { 
-        showMatches(s);
+void LigandWidget::setFilterString(QString needle) {
+    if(needle != filterString) {
+        filterString = needle;
+        typingTimer->start(300);
 	} 
 }
 
-void LigandWidget::showMatches(QString needle) { 
-    filterString=needle;
+void LigandWidget::showMatches() {
 
-    QRegExp regexp(needle,Qt::CaseInsensitive,QRegExp::RegExp);
+    QRegExp regexp(filterString, Qt::CaseInsensitive, QRegExp::FixedString);
     if(! regexp.isValid())return;
 
     QTreeWidgetItemIterator itr(treeWidget);
@@ -138,7 +145,7 @@ void LigandWidget::showMatches(QString needle) {
         Compound*  compound =  v.value<Compound*>();
         if (compound) {
                 item->setHidden(true);
-                if (needle.isEmpty()) {
+                if (filterString.isEmpty()) {
                    item->setHidden(false);
                 } else if ( item->text(0).contains(regexp) ){
                    item->setHidden(false);
@@ -146,7 +153,8 @@ void LigandWidget::showMatches(QString needle) {
                     QStringList stack;
                     stack << compound->name.c_str()
                           << compound->id.c_str()
-                          << compound->formula.c_str();
+                          << compound->formula.c_str()
+                          << compound->adductString.c_str();
 
                     if( compound->category.size()) {
                         for(int i=0; i < compound->category.size(); i++) {

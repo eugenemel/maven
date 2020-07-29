@@ -58,7 +58,7 @@ public slots:
     void setDatabase(QString dbname);
     void setFilterString(QString s);
     void showGallery();
-    void showMatches(QString needle);
+    void showMatches(); //relies on filterString
     void saveCompoundList();
     void updateTable() { showTable(); }
     void updateCurrentItemData();
@@ -90,6 +90,8 @@ private:
     QString filterString;
     QTreeWidgetItem* addItem(QTreeWidgetItem* parentItem, string key , float value);
     QTreeWidgetItem* addItem(QTreeWidgetItem* parentItem, string key , string value);
+
+    QTimer *typingTimer;
 
 };
 
