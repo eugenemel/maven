@@ -174,36 +174,6 @@ void LigandWidget::showMatches() {
     connect(ligandWidgetFilterer, SIGNAL(updateProgress(int, QString)), this, SLOT(updateProgressGUI(int, QString)));
 
     ligandWidgetFilterer->start();
-
-    //    unsigned int matchCount = 0;
-
-//    QRegExp regexp(filterString, Qt::CaseInsensitive, QRegExp::FixedString);
-//    if(! regexp.isValid())return;
-
-//    QTreeWidgetItemIterator itr(treeWidget);
-//    while (*itr) {
-
-//        QTreeWidgetItem* item =(*itr);
-
-//        //Issue 246: limit number of matches shown
-//         if (
-//                filterString.isEmpty() ||         // unfiltered tree
-//                item->text(0).contains(regexp) || // name
-//                item->text(1).contains(regexp) || // adduct string
-//                item->text(4).contains(regexp) || // formula
-//                item->text(6).contains(regexp)    // category
-//                ){
-//            matchCount++;
-//            item->setHidden(false);
-//        } else {
-//            item->setHidden(true);
-//        }
-
-//        ++itr;
-//    }
-
-    //Issue 246
-    // qDebug() << "Ligandwidget::showMatches(): Showing" << matchCount << "matches.";
 }
 
 
@@ -404,8 +374,8 @@ void LigandWidget::showLigand() {
 
 void LigandWidgetFilterer::run(void) {
 
-    unsigned int matchCount = 0;
-    unsigned int progressCount = 0;
+    int matchCount = 0;
+    int progressCount = 0;
 
     QRegExp regexp(ligandWidget->filterString, Qt::CaseInsensitive, QRegExp::FixedString);
     if(! regexp.isValid())return;
@@ -424,9 +394,7 @@ void LigandWidgetFilterer::run(void) {
                 item->text(6).contains(regexp)    // category
                 ){
             matchCount++;
-            //item->setHidden(false);
-        } else {
-            //item->setHidden(true);
+            //TODO: add item
         }
 
         progressCount++;
