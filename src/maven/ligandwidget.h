@@ -46,9 +46,8 @@ class LigandWidgetFilterer : public QThread {
     Q_OBJECT
 
     public:
-    LigandWidgetFilterer(LigandWidget* ligandWidget, int numCompoundsInDB){
+    LigandWidgetFilterer(LigandWidget* ligandWidget){
         this->ligandWidget = ligandWidget;
-        this->numCompoundsInDB = numCompoundsInDB;
     }
     ~LigandWidgetFilterer(){}
 
@@ -98,6 +97,9 @@ private slots:
       void databaseChanged(int index);
 
 public:
+
+      vector<Compound*> visibleCompounds; //each compound is one row in the tree widget.
+
       QString filterString;
       QTreeWidget *treeWidget;
 

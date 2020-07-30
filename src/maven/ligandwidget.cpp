@@ -167,7 +167,7 @@ void LigandWidget::showMatches() {
 
     qDebug() << "LigandWidget::showMatches(): Currently loaded database has" << maxSteps << "compounds.";
 
-    ligandWidgetFilterer = new LigandWidgetFilterer(this, maxSteps);
+    ligandWidgetFilterer = new LigandWidgetFilterer(this);
 
     filteringProgressBar->setRange(0, maxSteps);
 
@@ -201,7 +201,7 @@ void LigandWidget::showTable() {
 
     treeWidget->clear();
     treeWidget->setColumnCount(7);
-    QStringList header; header << "Name" << "Adduct" << "Exact Mass" << "RT" << "Formula" << "SMILES" << "Category";
+    QStringList header; header << "Name" << "Adduct" << "Exact Mass" << "Precursor m/z" << "RT" << "Formula" << "SMILES" << "Category";
     treeWidget->setHeaderLabels( header );
     treeWidget->setSortingEnabled(false);
 
@@ -218,36 +218,21 @@ void LigandWidget::showTable() {
         parent->setText(0, name); //Issue 246: capitalizing names is annoying for lipid libraries
         parent->setText(1, compound->adductString.c_str());
         parent->setText(2, QString::number(compound->getExactMass(), 'f', 4));
-        if(compound->expectedRt > 0) parent->setText(3,QString::number(compound->expectedRt));
-        if (compound->formula.length()) parent->setText(4,compound->formula.c_str());
-        if (compound->smileString.length()) parent->setText(5,compound->smileString.c_str());
+        if(compound->precursorMz > 0.0f) parent->setText(3, QString::number(compound->precursorMz, 'f', 4));
+
+        if(compound->expectedRt > 0) parent->setText(4,QString::number(compound->expectedRt));
+        if (compound->formula.length()) parent->setText(5,compound->formula.c_str());
+        if (compound->smileString.length()) parent->setText(6,compound->smileString.c_str());
         if (compound->hasGroup() ) parent->setIcon(0,QIcon(":/images/link.png"));
 
         if(compound->category.size() > 0) {
             QStringList catList;
             for(string c : compound->category) catList << c.c_str();
-            parent->setText(6, catList.join(";"));
+            parent->setText(7, catList.join(";"));
         }
 
         parent->setData(0, Qt::UserRole, QVariant::fromValue(compound));
         parent->setFlags(Qt::ItemIsSelectable|Qt::ItemIsDragEnabled|Qt::ItemIsEnabled);
-
-//        if (compound->charge) addItem(parent,"Charge", compound->charge);
-//        if (compound->precursorMz) addItem(parent,"Precursor Mz", compound->precursorMz);
-//        if (compound->productMz) addItem(parent,"Product Mz", compound->productMz);
-//        if (compound->collisionEnergy) addItem(parent,"Collision Energy", compound->collisionEnergy);
-//        if (!compound->smileString.empty()) addItem(parent,"Smile", compound->smileString);
-
-        /*
-        if (compound->fragment_mzs.size()) {
-            QStringList mzList;
-            for(unsigned int i=0; i<compound->fragment_mzs.size();i++) {
-                mzList << QString::number(compound->fragment_mzs[i],'f',2);
-            }
-            QTreeWidgetItem* child = addItem(parent,"Fragments",compound->fragment_mzs[0]);
-            child->setText(1,mzList.join(";"));
-        }
-        */
 
     }
     treeWidget->setSortingEnabled(true);
@@ -390,8 +375,8 @@ void LigandWidgetFilterer::run(void) {
                 ligandWidget->filterString.isEmpty() ||         // unfiltered tree
                 item->text(0).contains(regexp) || // name
                 item->text(1).contains(regexp) || // adduct string
-                item->text(4).contains(regexp) || // formula
-                item->text(6).contains(regexp)    // category
+                item->text(5).contains(regexp) || // formula
+                item->text(7).contains(regexp)    // category
                 ){
             matchCount++;
             //TODO: add item
