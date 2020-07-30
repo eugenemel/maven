@@ -306,16 +306,14 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     ligandWidget->updateDatabaseList();
     massCalcWidget->updateDatabaseList();
 
+    //Issue 246: setting a db as a part of start up can be very slow
+
     //Issue 246: This doesn't make much sense any more
     //ligandWidget->setDatabase("KNOWNS");
 
-    if(settings->contains("lastCompoundDatabase")){
-        ligandWidget->setDatabase(settings->value("lastCompoundDatabase").toString());
-    }
-
-    //Issue 246: avoid GUI bug during startup
-    QString dbname = ligandWidget->getDatabaseName();
-    ligandWidget->setDatabase(dbname);
+//    if(settings->contains("lastCompoundDatabase")){
+//        ligandWidget->setDatabase(settings->value("lastCompoundDatabase").toString());
+//    }
 
     setIonizationMode(0);
     if ( settings->contains("ionizationMode")) {
