@@ -22,9 +22,18 @@ LigandWidget::LigandWidget(MainWindow* mw) {
 
   connect(treeWidget,SIGNAL(itemSelectionChanged()), SLOT(showLigand()));
 
+  filteringProgressBar = new QProgressBar();
+  filteringProgressBar->setRange(0, 100);
+  filteringProgressBar->setValue(0);
+  filteringProgressBar->setMinimumWidth(500);
+
   QToolBar *toolBar = new QToolBar(this);
   toolBar->setFloatable(false);
   toolBar->setMovable(false);
+
+  QToolBar *toolBar2 = new QToolBar(this);
+  toolBar2->setFloatable(false);
+  toolBar2->setMovable(false);
 
   databaseSelect = new QComboBox(toolBar);
   databaseSelect->setObjectName(QString::fromUtf8("databaseSelect"));
@@ -55,8 +64,15 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   toolBar->addWidget(databaseSelect);
   toolBar->addWidget(galleryButton);
 
+  toolBar2->addWidget(filteringProgressBar);
+
+  QMainWindow *titleBarWidget = new QMainWindow();
+  titleBarWidget->addToolBar(toolBar);
+  titleBarWidget->addToolBarBreak();
+  titleBarWidget->addToolBar(toolBar2);
+
   setWidget(treeWidget);
-  setTitleBarWidget(toolBar);
+  setTitleBarWidget(titleBarWidget);
   setWindowTitle("Compounds");
 
 }
@@ -150,11 +166,8 @@ void LigandWidget::showMatches() {
         QTreeWidgetItem* item =(*itr);
 
         //Issue 246: limit number of matches shown
-        if (matchCount >= filterLimitMatches) {
-            item->setHidden(true);
-        } else if (filterString.isEmpty()) {
-            item->setHidden(false);
-        } else if (
+         if (
+                filterString.isEmpty() ||         // unfiltered tree
                 item->text(0).contains(regexp) || // name
                 item->text(1).contains(regexp) || // adduct string
                 item->text(4).contains(regexp) || // formula
@@ -170,13 +183,7 @@ void LigandWidget::showMatches() {
     }
 
     //Issue 246
-    if (matchCount == 0) {
-        qDebug() << "Ligandwidget::showMatches(): Showing unfiltered tree.";
-    } else if (matchCount >= filterLimitMatches) {
-        qDebug() << "Ligandwidget::showMatches(): Showing first" << matchCount << "matches.";
-    } else {
-        qDebug() << "Ligandwidget::showMatches(): Showing" << matchCount << "matches.";
-    }
+    qDebug() << "Ligandwidget::showMatches(): Showing" << matchCount << "matches.";
 }
 
 

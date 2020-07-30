@@ -83,6 +83,7 @@ private:
     QToolButton *saveButton;
     QToolButton *loadButton;
     QPoint dragStartPosition;
+    QProgressBar *filteringProgressBar;
 
     QHash<QString,bool>alteredDatabases;
 
@@ -92,9 +93,6 @@ private:
     QTreeWidgetItem* addItem(QTreeWidgetItem* parentItem, string key , string value);
 
     QTimer *typingTimer;
-
-    //Issue 246
-    unsigned int filterLimitMatches = 1000;
 
 };
 
