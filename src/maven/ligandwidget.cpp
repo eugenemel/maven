@@ -120,7 +120,9 @@ void LigandWidget::setDatabase(QString dbname) {
    if (index != -1 ) databaseSelect->setCurrentIndex(index);
 
     _mw->getSettings()->setValue("lastCompoundDatabase", getDatabaseName());
+
     emit databaseChanged(getDatabaseName());
+
     DB.loadCompoundsSQL(dbname,DB.getLigandDB());
     rebuildCompoundTree();
 }

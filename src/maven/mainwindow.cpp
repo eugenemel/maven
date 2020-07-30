@@ -305,8 +305,17 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
     ligandWidget->updateDatabaseList();
     massCalcWidget->updateDatabaseList();
-    ligandWidget->setDatabase("KNOWNS");
-    //if(settings->contains("lastDatabaseFile")) ligandWidget->setDatabase("lastDatabaseFile");
+
+    //Issue 246: This doesn't make much sense any more
+    //ligandWidget->setDatabase("KNOWNS");
+
+    if(settings->contains("lastCompoundDatabase")){
+        ligandWidget->setDatabase(settings->value("lastCompoundDatabase").toString());
+    }
+
+    //Issue 246: avoid GUI bug during startup
+    QString dbname = ligandWidget->getDatabaseName();
+    ligandWidget->setDatabase(dbname);
 
     setIonizationMode(0);
     if ( settings->contains("ionizationMode")) {
