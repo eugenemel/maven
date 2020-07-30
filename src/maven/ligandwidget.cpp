@@ -3,7 +3,7 @@
 
 using namespace std;
 
-class LigandWidgetFilterer;
+class LigandWidgetTreeBuilder;
 
 LigandWidget::LigandWidget(MainWindow* mw) {
   _mw = mw;
@@ -11,6 +11,12 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
   setFloating(false);
   setObjectName("Compounds");
+
+  ligandWidgetTreeBuilder = new LigandWidgetTreeBuilder(this);
+
+  connect(ligandWidgetTreeBuilder, SIGNAL(updateProgress(int, QString)), this, SLOT(updateProgressGUI(int, QString)));
+  connect(ligandWidgetTreeBuilder, SIGNAL(sendCompoundToTree(Compound*)), this, SLOT(addCompound(Compound*)));
+  connect(ligandWidgetTreeBuilder, SIGNAL(completed()), this, SLOT(showTable()));
 
   treeWidget=new QTreeWidget(this);
   treeWidget->setObjectName(QString::fromUtf8("treeWidget"));
@@ -58,7 +64,7 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   typingTimer = new QTimer(this);
   typingTimer->setSingleShot(true);
 
-  connect(typingTimer, SIGNAL(timeout()), this, SLOT(showMatches()));
+  connect(typingTimer, SIGNAL(timeout()), this, SLOT(rebuildCompoundTree()));
 
   connect(filterEditor, SIGNAL(textChanged(QString)), this, SLOT(setFilterString(QString)));
 
@@ -116,11 +122,7 @@ void LigandWidget::setDatabase(QString dbname) {
     _mw->getSettings()->setValue("lastCompoundDatabase", getDatabaseName());
     emit databaseChanged(getDatabaseName());
     DB.loadCompoundsSQL(dbname,DB.getLigandDB());
-    showTable();
-
-    if(!filterString.isEmpty()){
-        showMatches();
-    }
+    rebuildCompoundTree();
 }
 
 void LigandWidget::databaseChanged(int index) {
@@ -141,11 +143,7 @@ void LigandWidget::setCompoundFocus(Compound* c) {
         if (index != -1 ) databaseSelect->setCurrentIndex(index);
 
     filterString = QString(c->name.c_str());
-    showTable();
-
-    if(!filterString.isEmpty()){
-        showMatches();
-    }
+    rebuildCompoundTree();
 }
 
 
@@ -161,19 +159,22 @@ void LigandWidget::updateProgressGUI(int progress, QString label) {
     filteringProgressBarLbl->setText(label);
 }
 
-void LigandWidget::showMatches() {
+void LigandWidget::addCompound(Compound* compound) {
+    visibleCompounds.push_back(compound);
+}
+
+void LigandWidget::rebuildCompoundTree() {
 
     int maxSteps = DB.getLoadedDatabaseCount(getDatabaseName());
 
-    qDebug() << "LigandWidget::showMatches(): Currently loaded database has" << maxSteps << "compounds.";
-
-    ligandWidgetFilterer = new LigandWidgetFilterer(this);
+    qDebug() << "LigandWidget::rebuildCompoundTree(): Currently loaded database has a total of" << maxSteps << "compounds.";
 
     filteringProgressBar->setRange(0, maxSteps);
 
-    connect(ligandWidgetFilterer, SIGNAL(updateProgress(int, QString)), this, SLOT(updateProgressGUI(int, QString)));
+    treeWidget->clear();
+    visibleCompounds.clear();
 
-    ligandWidgetFilterer->start();
+    ligandWidgetTreeBuilder->start();
 }
 
 
@@ -199,8 +200,7 @@ void LigandWidget::updateCurrentItemData() {
 
 void LigandWidget::showTable() { 
 
-    treeWidget->clear();
-    treeWidget->setColumnCount(7);
+    treeWidget->setColumnCount(8);
     QStringList header; header << "Name" << "Adduct" << "Exact Mass" << "Precursor m/z" << "RT" << "Formula" << "SMILES" << "Category";
     treeWidget->setHeaderLabels( header );
     treeWidget->setSortingEnabled(false);
@@ -208,9 +208,8 @@ void LigandWidget::showTable() {
     string dbname = databaseSelect->currentText().toStdString();
     cerr << "ligandwidget::showTable() " << dbname << endl;
 
-    for(unsigned int i=0;  i < DB.compoundsDB.size(); i++ ) {
-        Compound* compound = DB.compoundsDB[i];
-        if(compound->db != dbname ) continue; //skip compounds from other databases
+    for (auto compound : visibleCompounds) {
+
         NumericTreeWidgetItem *parent  = new NumericTreeWidgetItem(treeWidget,CompoundType);
 
         QString name(compound->name.c_str() );
@@ -357,33 +356,38 @@ void LigandWidget::showLigand() {
     }
 }
 
-void LigandWidgetFilterer::run(void) {
+void LigandWidgetTreeBuilder::run(void) {
 
     int matchCount = 0;
     int progressCount = 0;
 
     QRegExp regexp(ligandWidget->filterString, Qt::CaseInsensitive, QRegExp::FixedString);
-    if(! regexp.isValid())return;
+    if(! regexp.isValid()) return;
 
-    QTreeWidgetItemIterator itr(ligandWidget->treeWidget);
-    while (*itr) {
+    string dbname = ligandWidget->databaseSelect->currentText().toStdString();
 
-        QTreeWidgetItem* item =(*itr);
+    for(unsigned int i=0;  i < DB.compoundsDB.size(); i++ ) {
 
-        //Issue 246: limit number of matches shown
-         if (
-                ligandWidget->filterString.isEmpty() ||         // unfiltered tree
-                item->text(0).contains(regexp) || // name
-                item->text(1).contains(regexp) || // adduct string
-                item->text(5).contains(regexp) || // formula
-                item->text(7).contains(regexp)    // category
-                ){
-            matchCount++;
-            //TODO: add item
-        }
+        Compound* compound = DB.compoundsDB[i];
+
+        if(compound->db != dbname ) continue;
 
         progressCount++;
-        ++itr;
+
+        QString categoryString;
+        for (string cat : compound->category) {
+         categoryString.append(cat.c_str());
+        }
+
+        if (   ligandWidget->filterString.isEmpty() ||                      // unfiltered tree
+               QString(compound->name.c_str()).contains(regexp) ||          // name
+               QString(compound->adductString.c_str()).contains(regexp) ||  // adduct string
+               QString(compound->formula.c_str()).contains(regexp) ||       // formula
+               categoryString.contains(regexp)                              // category
+               ){
+           matchCount++;
+           emit(sendCompoundToTree(compound));
+       }
 
         QString resultsString("");
         if (!ligandWidget->filterString.isEmpty()){
@@ -392,18 +396,56 @@ void LigandWidgetFilterer::run(void) {
             resultsString.append(" compounds...");
         }
         emit(updateProgress(progressCount, resultsString));
-
     }
 
-    QString resultsString("");
-    if (!ligandWidget->filterString.isEmpty()){
-        resultsString.append("Found ");
-        resultsString.append(QString::number(matchCount));
-        resultsString.append(" compounds.");
-    }
+    QString resultsString("Showing ");
+    resultsString.append(QString::number(matchCount));
+    resultsString.append(" compounds.");
 
     emit(updateProgress(0, resultsString));
+    emit(completed());
+
     quit();
+
+//    QTreeWidgetItemIterator itr(ligandWidget->treeWidget);
+//    while (*itr) {
+
+//        QTreeWidgetItem* item =(*itr);
+
+//        //Issue 246: limit number of matches shown
+//         if (
+//                ligandWidget->filterString.isEmpty() ||         // unfiltered tree
+//                item->text(0).contains(regexp) || // name
+//                item->text(1).contains(regexp) || // adduct string
+//                item->text(5).contains(regexp) || // formula
+//                item->text(7).contains(regexp)    // category
+//                ){
+//            matchCount++;
+//            //TODO: add item
+//        }
+
+//        progressCount++;
+//        ++itr;
+
+//        QString resultsString("");
+//        if (!ligandWidget->filterString.isEmpty()){
+//            resultsString.append("Found ");
+//            resultsString.append(QString::number(matchCount));
+//            resultsString.append(" compounds...");
+//        }
+//        emit(updateProgress(progressCount, resultsString));
+
+//    }
+
+//    QString resultsString("");
+//    if (!ligandWidget->filterString.isEmpty()){
+//        resultsString.append("Found ");
+//        resultsString.append(QString::number(matchCount));
+//        resultsString.append(" compounds.");
+//    }
+
+//    emit(updateProgress(0, resultsString));
+//    quit();
 }
 
 

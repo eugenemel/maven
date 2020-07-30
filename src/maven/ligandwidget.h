@@ -42,24 +42,25 @@ extern Database DB;
 
 class LigandWidget;
 
-class LigandWidgetFilterer : public QThread {
+class LigandWidgetTreeBuilder : public QThread {
     Q_OBJECT
 
     public:
-    LigandWidgetFilterer(LigandWidget* ligandWidget){
+    LigandWidgetTreeBuilder(LigandWidget* ligandWidget){
         this->ligandWidget = ligandWidget;
     }
-    ~LigandWidgetFilterer(){}
+    ~LigandWidgetTreeBuilder(){}
 
 protected:
     void run(void);
 
 public:
     LigandWidget *ligandWidget;
-    int numCompoundsInDB;
 
 signals:
     void updateProgress(int, QString);
+    void sendCompoundToTree(Compound*);
+    void completed();
 };
 
 class LigandWidget: public QDockWidget {
@@ -80,11 +81,12 @@ public slots:
     void setDatabase(QString dbname);
     void setFilterString(QString s);
     void showGallery();
-    void showMatches(); //relies on filterString
+    void rebuildCompoundTree(); //relies on filterString
     void saveCompoundList();
     void updateTable() { showTable(); }
     void updateCurrentItemData();
     void updateProgressGUI(int, QString);
+    void addCompound(Compound *c);
 
 signals:
     void urlChanged(QString url);
@@ -102,12 +104,12 @@ public:
 
       QString filterString;
       QTreeWidget *treeWidget;
+      QComboBox *databaseSelect;
 
 private:
 
-    LigandWidgetFilterer *ligandWidgetFilterer = nullptr;
+    LigandWidgetTreeBuilder *ligandWidgetTreeBuilder = nullptr;
 
-    QComboBox *databaseSelect;
     QToolButton *galleryButton;
     QToolButton *saveButton;
     QToolButton *loadButton;
