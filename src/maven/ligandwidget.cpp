@@ -198,7 +198,7 @@ void LigandWidget::updateCurrentItemData() {
 
 
 void LigandWidget::showTable() { 
-    //	treeWidget->clear();
+
     treeWidget->clear();
     treeWidget->setColumnCount(7);
     QStringList header; header << "Name" << "Adduct" << "Exact Mass" << "RT" << "Formula" << "SMILES" << "Category";
@@ -232,11 +232,11 @@ void LigandWidget::showTable() {
         parent->setData(0, Qt::UserRole, QVariant::fromValue(compound));
         parent->setFlags(Qt::ItemIsSelectable|Qt::ItemIsDragEnabled|Qt::ItemIsEnabled);
 
-        if (compound->charge) addItem(parent,"Charge", compound->charge);
-        if (compound->precursorMz) addItem(parent,"Precursor Mz", compound->precursorMz);
-        if (compound->productMz) addItem(parent,"Product Mz", compound->productMz);
-        if (compound->collisionEnergy) addItem(parent,"Collision Energy", compound->collisionEnergy);
-        if (!compound->smileString.empty()) addItem(parent,"Smile", compound->smileString);
+//        if (compound->charge) addItem(parent,"Charge", compound->charge);
+//        if (compound->precursorMz) addItem(parent,"Precursor Mz", compound->precursorMz);
+//        if (compound->productMz) addItem(parent,"Product Mz", compound->productMz);
+//        if (compound->collisionEnergy) addItem(parent,"Collision Energy", compound->collisionEnergy);
+//        if (!compound->smileString.empty()) addItem(parent,"Smile", compound->smileString);
 
         /*
         if (compound->fragment_mzs.size()) {
