@@ -111,7 +111,7 @@ multimap<string,Compound*> Database::keywordSearch(string needle) {
 }
 
 void Database::addCompound(Compound* c) { 
-    if(c == NULL) return;
+    if(!c) return;
     compoundIdMap[c->id + c->db]=c;
     compoundsDB.push_back(c);
 }
