@@ -147,29 +147,6 @@ void LigandWidget::showMatches() {
     QTreeWidgetItemIterator itr(treeWidget);
     while (*itr) {
 
-//        QTreeWidgetItem* item =(*itr);
-//        QVariant v = item->data(0,Qt::UserRole);
-//        Compound*  compound =  v.value<Compound*>();
-//        if (compound) {
-
-//            //Issue 246: limit number of matches shown
-//            if (matchCount >= filterLimitMatches) {
-//                item->setHidden(true);
-//            } else if (filterString.isEmpty()) {
-//                item->setHidden(false);
-//            } else if (
-//                    item->text(0).contains(regexp) || // name
-//                    item->text(1).contains(regexp) || // adduct string
-//                    item->text(4).contains(regexp) || // formula
-//                    item->text(6).contains(regexp)    // category
-//                    ){
-//                matchCount++;
-//                item->setHidden(false);
-//            } else {
-//                item->setHidden(true);
-//            }
-//        }
-
         QTreeWidgetItem* item =(*itr);
 
         //Issue 246: limit number of matches shown
@@ -194,7 +171,7 @@ void LigandWidget::showMatches() {
 
     //Issue 246
     if (matchCount == 0) {
-        qDebug() << "Ligandwidget::showMatches(): Showing unfiltered tree (" << treeWidget->size() << ") items";
+        qDebug() << "Ligandwidget::showMatches(): Showing unfiltered tree.";
     } else if (matchCount >= filterLimitMatches) {
         qDebug() << "Ligandwidget::showMatches(): Showing first" << matchCount << "matches.";
     } else {
