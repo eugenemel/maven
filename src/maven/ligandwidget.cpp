@@ -3,6 +3,8 @@
 
 using namespace std;
 
+class LigandWidgetFilterer;
+
 LigandWidget::LigandWidget(MainWindow* mw) {
   _mw = mw;
  
@@ -22,10 +24,11 @@ LigandWidget::LigandWidget(MainWindow* mw) {
 
   connect(treeWidget,SIGNAL(itemSelectionChanged()), SLOT(showLigand()));
 
+  filteringProgressBarLbl = new QLabel("");
+
   filteringProgressBar = new QProgressBar();
   filteringProgressBar->setRange(0, 100);
   filteringProgressBar->setValue(0);
-  filteringProgressBar->setMinimumWidth(500);
 
   QToolBar *toolBar = new QToolBar(this);
   toolBar->setFloatable(false);
@@ -64,6 +67,7 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   toolBar->addWidget(databaseSelect);
   toolBar->addWidget(galleryButton);
 
+  toolBar2->addWidget(filteringProgressBarLbl);
   toolBar2->addWidget(filteringProgressBar);
 
   QMainWindow *titleBarWidget = new QMainWindow();
@@ -74,7 +78,6 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   setWidget(treeWidget);
   setTitleBarWidget(titleBarWidget);
   setWindowTitle("Compounds");
-
 }
 
 QString LigandWidget::getDatabaseName() {
@@ -153,37 +156,54 @@ void LigandWidget::setFilterString(QString needle) {
 	} 
 }
 
+void LigandWidget::updateProgressGUI(int progress, QString label) {
+    filteringProgressBar->setValue(progress);
+    filteringProgressBarLbl->setText(label);
+}
+
 void LigandWidget::showMatches() {
 
-    unsigned int matchCount = 0;
+    int maxSteps = DB.getLoadedDatabaseCount(getDatabaseName());
 
-    QRegExp regexp(filterString, Qt::CaseInsensitive, QRegExp::FixedString);
-    if(! regexp.isValid())return;
+    qDebug() << "LigandWidget::showMatches(): Currently loaded database has" << maxSteps << "compounds.";
 
-    QTreeWidgetItemIterator itr(treeWidget);
-    while (*itr) {
+    ligandWidgetFilterer = new LigandWidgetFilterer(this, maxSteps);
 
-        QTreeWidgetItem* item =(*itr);
+    filteringProgressBar->setRange(0, maxSteps);
 
-        //Issue 246: limit number of matches shown
-         if (
-                filterString.isEmpty() ||         // unfiltered tree
-                item->text(0).contains(regexp) || // name
-                item->text(1).contains(regexp) || // adduct string
-                item->text(4).contains(regexp) || // formula
-                item->text(6).contains(regexp)    // category
-                ){
-            matchCount++;
-            item->setHidden(false);
-        } else {
-            item->setHidden(true);
-        }
+    connect(ligandWidgetFilterer, SIGNAL(updateProgress(int, QString)), this, SLOT(updateProgressGUI(int, QString)));
 
-        ++itr;
-    }
+    ligandWidgetFilterer->start();
+
+    //    unsigned int matchCount = 0;
+
+//    QRegExp regexp(filterString, Qt::CaseInsensitive, QRegExp::FixedString);
+//    if(! regexp.isValid())return;
+
+//    QTreeWidgetItemIterator itr(treeWidget);
+//    while (*itr) {
+
+//        QTreeWidgetItem* item =(*itr);
+
+//        //Issue 246: limit number of matches shown
+//         if (
+//                filterString.isEmpty() ||         // unfiltered tree
+//                item->text(0).contains(regexp) || // name
+//                item->text(1).contains(regexp) || // adduct string
+//                item->text(4).contains(regexp) || // formula
+//                item->text(6).contains(regexp)    // category
+//                ){
+//            matchCount++;
+//            item->setHidden(false);
+//        } else {
+//            item->setHidden(true);
+//        }
+
+//        ++itr;
+//    }
 
     //Issue 246
-    qDebug() << "Ligandwidget::showMatches(): Showing" << matchCount << "matches.";
+    // qDebug() << "Ligandwidget::showMatches(): Showing" << matchCount << "matches.";
 }
 
 
@@ -381,4 +401,56 @@ void LigandWidget::showLigand() {
 
     }
 }
+
+void LigandWidgetFilterer::run(void) {
+
+    unsigned int matchCount = 0;
+    unsigned int progressCount = 0;
+
+    QRegExp regexp(ligandWidget->filterString, Qt::CaseInsensitive, QRegExp::FixedString);
+    if(! regexp.isValid())return;
+
+    QTreeWidgetItemIterator itr(ligandWidget->treeWidget);
+    while (*itr) {
+
+        QTreeWidgetItem* item =(*itr);
+
+        //Issue 246: limit number of matches shown
+         if (
+                ligandWidget->filterString.isEmpty() ||         // unfiltered tree
+                item->text(0).contains(regexp) || // name
+                item->text(1).contains(regexp) || // adduct string
+                item->text(4).contains(regexp) || // formula
+                item->text(6).contains(regexp)    // category
+                ){
+            matchCount++;
+            //item->setHidden(false);
+        } else {
+            //item->setHidden(true);
+        }
+
+        progressCount++;
+        ++itr;
+
+        QString resultsString("");
+        if (!ligandWidget->filterString.isEmpty()){
+            resultsString.append("Found ");
+            resultsString.append(QString::number(matchCount));
+            resultsString.append(" compounds...");
+        }
+        emit(updateProgress(progressCount, resultsString));
+
+    }
+
+    QString resultsString("");
+    if (!ligandWidget->filterString.isEmpty()){
+        resultsString.append("Found ");
+        resultsString.append(QString::number(matchCount));
+        resultsString.append(" compounds.");
+    }
+
+    emit(updateProgress(0, resultsString));
+    quit();
+}
+
 

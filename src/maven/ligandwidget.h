@@ -40,6 +40,29 @@ using namespace std;
 
 extern Database DB; 
 
+class LigandWidget;
+
+class LigandWidgetFilterer : public QThread {
+    Q_OBJECT
+
+    public:
+    LigandWidgetFilterer(LigandWidget* ligandWidget, int numCompoundsInDB){
+        this->ligandWidget = ligandWidget;
+        this->numCompoundsInDB = numCompoundsInDB;
+    }
+    ~LigandWidgetFilterer(){}
+
+protected:
+    void run(void);
+
+public:
+    LigandWidget *ligandWidget;
+    int numCompoundsInDB;
+
+signals:
+    void updateProgress(int, QString);
+};
+
 class LigandWidget: public QDockWidget {
       Q_OBJECT
 
@@ -62,7 +85,7 @@ public slots:
     void saveCompoundList();
     void updateTable() { showTable(); }
     void updateCurrentItemData();
-
+    void updateProgressGUI(int, QString);
 
 signals:
     void urlChanged(QString url);
@@ -74,21 +97,26 @@ private slots:
       void showTable();
       void databaseChanged(int index);
 
+public:
+      QString filterString;
+      QTreeWidget *treeWidget;
 
 private:
 
-    QTreeWidget *treeWidget;
+    LigandWidgetFilterer *ligandWidgetFilterer = nullptr;
+
     QComboBox *databaseSelect;
     QToolButton *galleryButton;
     QToolButton *saveButton;
     QToolButton *loadButton;
     QPoint dragStartPosition;
+
+    QLabel *filteringProgressBarLbl;
     QProgressBar *filteringProgressBar;
 
     QHash<QString,bool>alteredDatabases;
 
     MainWindow* _mw;
-    QString filterString;
     QTreeWidgetItem* addItem(QTreeWidgetItem* parentItem, string key , float value);
     QTreeWidgetItem* addItem(QTreeWidgetItem* parentItem, string key , string value);
 
