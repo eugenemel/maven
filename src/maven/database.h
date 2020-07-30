@@ -63,6 +63,7 @@ class Database {
 
         QStringList getDatabaseNames();
         QStringList getLoadedDatabaseNames() { return loadedDatabase.keys(); }
+        int getLoadedDatabaseCount(QString databaseName){return loadedDatabase[databaseName];}
         map<string,int>   getChromotographyMethods();
 
         Compound* findSpeciesById(string id,string db);
