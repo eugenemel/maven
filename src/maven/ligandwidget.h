@@ -63,6 +63,9 @@ signals:
     void completed();
 };
 
+static const QString SELECT_DB = QString("-- Select Database --");
+static const QString INITIAL_PRG_MSG = QString("Select a database from the drop-down menu.");
+
 class LigandWidget: public QDockWidget {
       Q_OBJECT
 

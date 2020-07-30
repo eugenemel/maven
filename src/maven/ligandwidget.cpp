@@ -30,7 +30,7 @@ LigandWidget::LigandWidget(MainWindow* mw) {
 
   connect(treeWidget,SIGNAL(itemSelectionChanged()), SLOT(showLigand()));
 
-  filteringProgressBarLbl = new QLabel("");
+  filteringProgressBarLbl = new QLabel(INITIAL_PRG_MSG);
 
   filteringProgressBar = new QProgressBar();
   filteringProgressBar->setRange(0, 100);
@@ -95,6 +95,9 @@ void LigandWidget::updateDatabaseList() {
     databaseSelect->clear();
 
     QStringList dbnames = DB.getDatabaseNames();
+
+    databaseSelect->addItem(SELECT_DB);
+
     for(QString db: dbnames ) {
         databaseSelect->addItem(db);
     }
@@ -116,6 +119,14 @@ QTreeWidgetItem* LigandWidget::addItem(QTreeWidgetItem* parentItem, string key ,
 }
 
 void LigandWidget::setDatabase(QString dbname) {
+
+    if (SELECT_DB == dbname) {
+        visibleCompounds.clear();
+        treeWidget->clear();
+        filteringProgressBarLbl->setText(INITIAL_PRG_MSG);
+        return;
+    }
+
    int index = databaseSelect->findText(dbname,Qt::MatchExactly);
    if (index != -1 ) databaseSelect->setCurrentIndex(index);
 
@@ -140,6 +151,7 @@ void LigandWidget::setDatabaseAltered(QString name, bool altered) {
 
 void LigandWidget::setCompoundFocus(Compound* c) {
     if (!c) return;
+    if (SELECT_DB == getDatabaseName()) return;
 	QString dbname(c->db.c_str());
 	int index = databaseSelect->findText(dbname,Qt::MatchExactly);
         if (index != -1 ) databaseSelect->setCurrentIndex(index);
@@ -166,6 +178,8 @@ void LigandWidget::addCompound(Compound* compound) {
 }
 
 void LigandWidget::rebuildCompoundTree() {
+
+    if (SELECT_DB == getDatabaseName()) return;
 
     int maxSteps = DB.getLoadedDatabaseCount(getDatabaseName());
 
