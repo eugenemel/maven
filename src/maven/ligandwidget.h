@@ -93,6 +93,9 @@ private:
 
     QTimer *typingTimer;
 
+    //Issue 246
+    unsigned int filterLimitMatches = 1000;
+
 };
 
 #endif

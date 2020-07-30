@@ -139,41 +139,66 @@ void LigandWidget::setFilterString(QString needle) {
 
 void LigandWidget::showMatches() {
 
+    unsigned int matchCount = 0;
+
     QRegExp regexp(filterString, Qt::CaseInsensitive, QRegExp::FixedString);
     if(! regexp.isValid())return;
 
     QTreeWidgetItemIterator itr(treeWidget);
     while (*itr) {
+
+//        QTreeWidgetItem* item =(*itr);
+//        QVariant v = item->data(0,Qt::UserRole);
+//        Compound*  compound =  v.value<Compound*>();
+//        if (compound) {
+
+//            //Issue 246: limit number of matches shown
+//            if (matchCount >= filterLimitMatches) {
+//                item->setHidden(true);
+//            } else if (filterString.isEmpty()) {
+//                item->setHidden(false);
+//            } else if (
+//                    item->text(0).contains(regexp) || // name
+//                    item->text(1).contains(regexp) || // adduct string
+//                    item->text(4).contains(regexp) || // formula
+//                    item->text(6).contains(regexp)    // category
+//                    ){
+//                matchCount++;
+//                item->setHidden(false);
+//            } else {
+//                item->setHidden(true);
+//            }
+//        }
+
         QTreeWidgetItem* item =(*itr);
-        QVariant v = item->data(0,Qt::UserRole);
-        Compound*  compound =  v.value<Compound*>();
-        if (compound) {
-                item->setHidden(true);
-                if (filterString.isEmpty()) {
-                   item->setHidden(false);
-                } else if ( item->text(0).contains(regexp) ){
-                   item->setHidden(false);
-                } else {
-                    QStringList stack;
-                    stack << compound->name.c_str()
-                          << compound->id.c_str()
-                          << compound->formula.c_str()
-                          << compound->adductString.c_str();
 
-                    if( compound->category.size()) {
-                        for(int i=0; i < compound->category.size(); i++) {
-                            stack << compound->category[i].c_str();
-                        }
-                    }
-
-                    foreach( QString x, stack) {
-                        if (x.contains(regexp)) {
-                             item->setHidden(false); break;
-                        }
-                    }
-                }
+        //Issue 246: limit number of matches shown
+        if (matchCount >= filterLimitMatches) {
+            item->setHidden(true);
+        } else if (filterString.isEmpty()) {
+            item->setHidden(false);
+        } else if (
+                item->text(0).contains(regexp) || // name
+                item->text(1).contains(regexp) || // adduct string
+                item->text(4).contains(regexp) || // formula
+                item->text(6).contains(regexp)    // category
+                ){
+            matchCount++;
+            item->setHidden(false);
+        } else {
+            item->setHidden(true);
         }
+
         ++itr;
+    }
+
+    //Issue 246
+    if (matchCount == 0) {
+        qDebug() << "Ligandwidget::showMatches(): Showing unfiltered tree (" << treeWidget->size() << ") items";
+    } else if (matchCount >= filterLimitMatches) {
+        qDebug() << "Ligandwidget::showMatches(): Showing first" << matchCount << "matches.";
+    } else {
+        qDebug() << "Ligandwidget::showMatches(): Showing" << matchCount << "matches.";
     }
 }
 
