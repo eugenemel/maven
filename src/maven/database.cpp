@@ -368,7 +368,7 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
         }
 
         if (addedCompoundCounter > 0 && databaseName != "ALL") {
-            loadedDatabase[databaseName] = 1;
+            loadedDatabase[databaseName] = static_cast<int>(addedCompoundCounter);
         }
 
         //Issue 184: Duplicate entries in a single DB can lead to mismatch in counts (numCompoundsToAdd can be too high)
