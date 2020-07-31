@@ -48,7 +48,7 @@ public:
   bool pullIsotopesFlag;
   bool showProgressFlag;
   bool matchRtFlag;
-  bool checkConvergance;
+  bool checkConvergence;
   bool featureMatchRtFlag;
 
   int ionizationMode; //default ionization mode used by mass spec

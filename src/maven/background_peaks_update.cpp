@@ -11,7 +11,7 @@ BackgroundPeakUpdate::BackgroundPeakUpdate(QWidget*) {
     processMassSlicesFlag=false;
     pullIsotopesFlag=false;
     matchRtFlag=false;
-    checkConvergance=false;
+    checkConvergence=false;
 
     outputdir = "reports" + string(DIR_SEPARATOR_STR);
 
@@ -144,8 +144,6 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
     QSettings* settings = mainwindow->getSettings();
     amuQ1 = settings->value("amuQ1").toFloat();
     amuQ3 = settings->value("amuQ3").toFloat();
-    baseline_smoothingWindow = settings->value("baseline_smoothing").toInt();
-    baseline_dropTopX =  settings->value("baseline_quantile").toInt();
 
     unsigned int numPassingPeakGroups = 0;
     unsigned long numAllPeakGroups = 0;
@@ -427,10 +425,10 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
     int peakCount=0;
 
     QSettings* settings = mainwindow->getSettings();
+
+    //Issue 247: TODO: these should be phased out, keeping here for MS1-only peak detection
     amuQ1 = settings->value("amuQ1").toFloat();
     amuQ3 = settings->value("amuQ3").toFloat();
-    baseline_smoothingWindow = settings->value("baseline_smoothing").toInt();
-    baseline_dropTopX =  settings->value("baseline_quantile").toInt();
 
     for (unsigned int s=0; s < slices.size();  s++ ) {
         mzSlice* slice = slices[s];
@@ -441,7 +439,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         if (compound && compound->hasGroup())
             compound->unlinkGroup();
 
-        if (checkConvergance ) {
+        if (checkConvergence ) {
             allgroups.size()-foundGroups > 0 ? converged=0 : converged++;
             if ( converged > 1000 ){
                 cout << "Convergence condition reached. Exiting main loop." << endl;
@@ -621,7 +619,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
     }
 
     //write reports
-    CSVReports* csvreports = NULL;
+    CSVReports* csvreports = nullptr;
     if (writeCSVFlag) {
         string groupfilename = outputdir + setName + ".csv";
         csvreports = new CSVReports(samples);
@@ -634,7 +632,8 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         Compound* compound = group.compound;
 
         if(pullIsotopesFlag && !group.isIsotope()) pullIsotopes(&group);
-        if(csvreports!=NULL) csvreports->addGroup(&group);
+
+        if(csvreports) csvreports->addGroup(&group);
 
         if (compound) {
             if(!compound->hasGroup() || group.groupRank < compound->getPeakGroup()->groupRank )
@@ -653,7 +652,8 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         }
     }
 
-    if(csvreports!=NULL) { csvreports->closeFiles(); delete(csvreports); csvreports=NULL; }
+    if(csvreports) { csvreports->closeFiles(); delete(csvreports); csvreports=nullptr; }
+
     emit(updateProgressBar("Done" ,1, 1));
 
     qDebug() << "processSlices() Slices=" << slices.size();
@@ -1110,9 +1110,6 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
             N15Labeled   =  settings->value("N15Labeled").toBool();
             S34Labeled   =  settings->value("S34Labeled").toBool();
             D2Labeled   =   settings->value("D2Labeled").toBool();
-            QSettings* settings = mainwindow->getSettings();
-            eic_smoothingAlgorithm = settings->value("eic_smoothingAlgorithm").toInt();
-
             chkIgnoreNaturalAbundance = settings->value("chkIgnoreNaturalAbundance").toBool();
             chkExtractNIsotopes = settings->value("chkExtractNIsotopes").toBool();
             spnMaxIsotopesToExtract = settings->value("spnMaxIsotopesToExtract").toInt();
