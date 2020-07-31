@@ -117,9 +117,10 @@ void DirectInfusionDialog::analyze() {
     if (directInfusionUpdate->compoundDatabaseString == "ALL") {
 
         //Issue 238: Explicitly remove summarized compounds associated with other searches.
+        //Issue 258: Expilicity remove compounds from rumsdb before searching.
 
         vector<Compound*> allCompounds = DB.compoundsDB;
-        allCompounds.erase(std::remove_if(allCompounds.begin(), allCompounds.end(), [](Compound *compound){return compound->db == "summarized";}), allCompounds.end());
+        allCompounds.erase(std::remove_if(allCompounds.begin(), allCompounds.end(), [](Compound *compound){return (compound->db == "summarized" || compound->db == "rumsdb");}), allCompounds.end());
 
         qDebug() << "Removed" << (DB.compoundsDB.size() - allCompounds.size()) << "previously computed summarized compounds prior to DI search.";
 
