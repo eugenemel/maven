@@ -20,10 +20,80 @@
    <string>Peak Detection</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_8">
-   <item row="3" column="1" alignment="Qt::AlignLeft">
+   <item row="4" column="1">
+    <widget class="QGroupBox" name="grpOutput">
+     <property name="title">
+      <string>Output</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_7">
+      <item row="0" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Output Directory</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="outputDirName"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="setOutputDirButton">
+          <property name="text">
+           <string>Set Directory</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="0">
+       <widget class="QFrame" name="frameProgress">
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_4">
+         <item row="2" column="2">
+          <widget class="QPushButton" name="computeButton">
+           <property name="text">
+            <string>Find Peaks</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="3">
+          <widget class="QPushButton" name="cancelButton">
+           <property name="text">
+            <string>Cancel</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QProgressBar" name="progressBar">
+           <property name="value">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="statusText">
+           <property name="text">
+            <string>Not Started</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="1">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabPeakDetection">
       <attribute name="title">
@@ -271,7 +341,7 @@
              <number>100</number>
             </property>
             <property name="value">
-             <number>80</number>
+             <number>0</number>
             </property>
            </widget>
           </item>
@@ -336,7 +406,7 @@
              <number>1000000</number>
             </property>
             <property name="value">
-             <number>5</number>
+             <number>3</number>
             </property>
            </widget>
           </item>
@@ -438,7 +508,7 @@
              <number>1000000000</number>
             </property>
             <property name="value">
-             <number>7</number>
+             <number>5</number>
             </property>
            </widget>
           </item>
@@ -489,7 +559,7 @@
              <double>10000.000000000000000</double>
             </property>
             <property name="value">
-             <double>50000.000000000000000</double>
+             <double>10000.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -502,7 +572,7 @@
              <double>0.010000000000000</double>
             </property>
             <property name="value">
-             <double>5.000000000000000</double>
+             <double>1.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -515,7 +585,7 @@
              <number>100000000</number>
             </property>
             <property name="value">
-             <number>1</number>
+             <number>0</number>
             </property>
            </widget>
           </item>
@@ -529,6 +599,26 @@
             </property>
             <property name="value">
              <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="2">
+           <widget class="QLabel" name="lblMinPeakQuality">
+            <property name="text">
+             <string>Min. Peak Quality</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="3">
+           <widget class="QDoubleSpinBox" name="spnMinPeakQuality">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="maximum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.001000000000000</double>
             </property>
            </widget>
           </item>
@@ -600,7 +690,7 @@
           <item row="5" column="0">
            <widget class="QLabel" name="label_20">
             <property name="text">
-             <string>Minumum Score</string>
+             <string>Minimum Score</string>
             </property>
            </widget>
           </item>
@@ -664,6 +754,9 @@
             <property name="text">
              <string>Require compound's associated adduct and searched adduct match for compound matches</string>
             </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
           <item row="2" column="0">
@@ -678,76 +771,6 @@
        </item>
       </layout>
      </widget>
-    </widget>
-   </item>
-   <item row="4" column="1">
-    <widget class="QGroupBox" name="grpOutput">
-     <property name="title">
-      <string>Output</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_7">
-      <item row="0" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Output Directory</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="outputDirName"/>
-        </item>
-        <item>
-         <widget class="QPushButton" name="setOutputDirButton">
-          <property name="text">
-           <string>Set Directory</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="1" column="0">
-       <widget class="QFrame" name="frameProgress">
-        <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-        <layout class="QGridLayout" name="gridLayout_4">
-         <item row="2" column="2">
-          <widget class="QPushButton" name="computeButton">
-           <property name="text">
-            <string>Find Peaks</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="3">
-          <widget class="QPushButton" name="cancelButton">
-           <property name="text">
-            <string>Cancel</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QProgressBar" name="progressBar">
-           <property name="value">
-            <number>0</number>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="statusText">
-           <property name="text">
-            <string>Not Started</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-     </layout>
     </widget>
    </item>
   </layout>
