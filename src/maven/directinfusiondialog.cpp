@@ -122,7 +122,7 @@ void DirectInfusionDialog::analyze() {
         vector<Compound*> allCompounds = DB.compoundsDB;
         allCompounds.erase(std::remove_if(allCompounds.begin(), allCompounds.end(), [](Compound *compound){return (compound->db == "summarized" || compound->db == "rumsdb");}), allCompounds.end());
 
-        qDebug() << "Removed" << (DB.compoundsDB.size() - allCompounds.size()) << "previously computed summarized compounds prior to DI search.";
+        qDebug() << "DirectInfusionDialog::analyze(): Removed" << (DB.compoundsDB.size() - allCompounds.size()) << "rumsdb and summarized compounds prior to DI search.";
 
         directInfusionUpdate->setCompounds(allCompounds);
     } else {
