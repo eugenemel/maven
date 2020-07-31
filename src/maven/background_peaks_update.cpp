@@ -1308,67 +1308,48 @@ void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g, vector<tuple<float, 
     if(searchableDatabase.size() == 0) return;
     if(g->ms2EventCount == 0) return;
 
-    double searchMz = g->meanMz;
+    float minMz = g->meanMz - (g->meanMz*compoundPPMWindow/1000000);
+    float maxMz = g->meanMz + (g->meanMz*compoundPPMWindow/1000000);
 
-    /*Peak* peak = g->getHighestIntensityPeak();
-    if (!peak or !peak->getScan()) return;
-    vector<Isotope> isotopes = peak->getScan()->getIsotopicPattern(searchMz,compoundPPMWindow,6,10);
-    if(isotopes.size() > 0) searchMz = isotopes.front().mass;
-    */
+    auto lb = lower_bound(searchableDatabase.begin(), searchableDatabase.end(), minMz, [](const tuple<float, Compound*, Adduct*>& lhs, const float& rhs){
+        return get<0>(lhs) < rhs;
+    });
 
+    int bestMatchingId = -1;
+    FragmentationMatchScore bestScore;
+    for (unsigned int pos = lb - searchableDatabase.begin(); pos < searchableDatabase.size(); pos++){
 
+        float precMz = get<0>(searchableDatabase[pos]);
 
+        //stop searching when the maxMz has been exceeded.
+        if (precMz > maxMz) {
+            break;
+        }
 
-    vector<MassCalculator::Match>matchesX = DB.findMatchingCompounds(searchMz,compoundPPMWindow,ionizationMode);
-    //qDebug() << "findMatching" << searchMz << " " << matchesX.size();
+        Compound *cpd = get<1>(searchableDatabase[pos]);
+        Adduct *a = get<2>(searchableDatabase[pos]);
 
-  // g->fragmentationPattern.printFragment(productPpmTolr,10);
-    MassCalculator::Match bestMatch;
-    string scoringAlgorithm = scoringScheme.toStdString();
-
-    for(MassCalculator::Match match: matchesX ) {
-        Compound* cpd = match.compoundLink;
-        if(!compoundDatabase.isEmpty() and  cpd->db != compoundDatabase.toStdString()) continue;
-
-        if (isRequireMatchingAdduct && cpd->adductString != match.adductLink->name) {
+        if (isRequireMatchingAdduct && cpd->adductString != a->name) {
             continue;
         }
 
-        FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern,productPpmTolr,searchProton);
-        if (s.numMatches < minNumFragments ) continue;
+        //TODO: is searchProton flag necessary here? --> always false
+        FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern, productPpmTolr, searchProton);
+
+        if (s.numMatches < minNumFragments) continue;
         if (Fragment::getNumDiagnosticFragmentsMatched("*",cpd->fragment_labels, s.ranks) < minNumDiagnosticFragments) continue;
 
-        s.mergedScore = s.getScoreByName(scoringAlgorithm);
-        s.ppmError = match.diff;
-        //qDebug() << "scoring=" << scoringScheme << " " << s.mergedScore;
+        s.mergedScore = s.getScoreByName(scoringScheme.toStdString());
 
-        //cerr << "\t"; cerr << cpd->name << "\t" << cpd->precursorMz << "\tppmDiff=" << m.diff << "\t num=" << s.numMatches << "\t tic" << s.ticMatched <<  " s=" << s.spearmanRankCorrelation << endl;
-
-        match.fragScore = s;
-        if (match.fragScore.mergedScore > bestMatch.fragScore.mergedScore ) {
-            bestMatch = match;
-            bestMatch.adductLink = match.adductLink;
-            bestMatch.compoundLink = match.compoundLink;
+        if (s.mergedScore > bestScore.mergedScore ) {
+            bestMatchingId = pos;
+            bestScore = s;
         }
     }
 
-    if (bestMatch.fragScore.mergedScore > 0) {
-        g->compound = bestMatch.compoundLink;
-        g->adduct  =  bestMatch.adductLink;
-        g->fragMatchScore = bestMatch.fragScore;
-
-        if (g->adduct) g->tagString = g->adduct->name;
-        /*
-                cerr << "\t BESTHIT"
-                     << setprecision(6)
-                     << g->meanMz << "\t"
-                     << g->meanRt << "\t"
-                     << g->maxIntensity << "\t"
-                     << bestHit->name << "\t"
-                     << bestScore.numMatches << "\t"
-                     << bestScore.fractionMatched << "\t"
-                     << bestScore.ticMatched << endl;
-                */
-
+    if (bestMatchingId != -1){
+        g->compound = get<1>(searchableDatabase[bestMatchingId]);
+        g->adduct = get<2>(searchableDatabase[bestMatchingId]);
+        g->fragMatchScore = bestScore;
     }
 }
