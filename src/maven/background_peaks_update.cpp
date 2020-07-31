@@ -468,8 +468,6 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         //20191002: Too slow! Reverting to previous approach.
         //vector<PeakGroup> peakgroups = EIC::groupPeaksB(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow, minSmoothedPeakIntensity);
 
-        //cerr << "\tFound " << peakgroups.size() << "\n";
-
         //score quality of each group
         vector<PeakGroup*> groupsToAppend;
         for(unsigned int j=0; j < peakgroups.size(); j++ ) {
