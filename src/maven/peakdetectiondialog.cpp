@@ -3,10 +3,11 @@
 PeakDetectionDialog::PeakDetectionDialog(QWidget *parent) : 
     QDialog(parent) {
     setupUi(this);
-    settings = NULL;
-    mainwindow = NULL;
 
-    peakupdater = NULL;
+    settings = nullptr;
+    mainwindow = nullptr;
+    peakupdater = nullptr;
+
     connect(computeButton, SIGNAL(clicked(bool)), SLOT(findPeaks()));
     connect(cancelButton, SIGNAL(clicked(bool)), SLOT(cancel()));
     connect(loadModelButton, SIGNAL(clicked(bool)), SLOT(loadModel()));
@@ -116,7 +117,7 @@ void PeakDetectionDialog::setOutputDir() {
 
 void PeakDetectionDialog::show() {
 
-    if ( mainwindow != NULL ) {
+    if (mainwindow) {
         QSettings* settings = mainwindow->getSettings();
         if ( settings ) {
             eic_smoothingWindow->setValue(settings->value("eic_smoothingWindow").toDouble());
@@ -155,7 +156,7 @@ void PeakDetectionDialog::show() {
 }
 
 void PeakDetectionDialog::findPeaks() {
-        if (mainwindow == nullptr) return;
+        if (!mainwindow) return;
 
 		vector<mzSample*>samples = mainwindow->getSamples();
 		if ( samples.size() == 0 ) return;
@@ -275,7 +276,7 @@ void PeakDetectionDialog::findPeaks() {
 }
 
 void PeakDetectionDialog::runBackgroupJob(QString funcName) { 
-    if (peakupdater == nullptr ) return;
+    if (!peakupdater) return;
 
 	if ( peakupdater->isRunning() ) { 
 			cancel(); 
