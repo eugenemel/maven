@@ -188,6 +188,7 @@ void PeakDetectionDialog::findPeaks() {
 		peakupdater->matchRtFlag =  matchRt->isChecked();
         peakupdater->featureMatchRtFlag = this->featureMatchRts->isChecked();
 		peakupdater->minGoodPeakCount = minGoodGroupCount->value();
+        peakupdater->minQuality = static_cast<float>(spnMinPeakQuality->value());
 		peakupdater->minNoNoiseObs = minNoNoiseObs->value();
 		peakupdater->minSignalBaseLineRatio = sigBaselineRatio->value();
 		peakupdater->minSignalBlankRatio = sigBlankRatio->value();
