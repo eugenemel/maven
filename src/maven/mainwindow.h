@@ -156,6 +156,7 @@ public:
     bool isProjectFileType(QString filename);
 
     QColor getBackgroundAdjustedBlack(QWidget* widget);
+    QToolButton *btnLibrary = nullptr;
 
 protected:
     void closeEvent(QCloseEvent *event);

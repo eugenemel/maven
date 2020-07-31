@@ -16,6 +16,7 @@ LigandWidget::LigandWidget(MainWindow* mw) {
 
   connect(ligandWidgetTreeBuilder, SIGNAL(updateProgress(int, QString)), this, SLOT(updateProgressGUI(int, QString)));
   connect(ligandWidgetTreeBuilder, SIGNAL(sendCompoundToTree(Compound*)), this, SLOT(addCompound(Compound*)));
+  connect(ligandWidgetTreeBuilder, SIGNAL(toggleEnabling(bool)), this, SLOT(toggleEnabling(bool)));
   connect(ligandWidgetTreeBuilder, SIGNAL(completed()), this, SLOT(showTable()));
 
   treeWidget=new QTreeWidget(this);
@@ -57,7 +58,7 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   connect(this, SIGNAL(compoundFocused(Compound*)), mw, SLOT(setCompoundFocus(Compound*)));
   connect(this, SIGNAL(urlChanged(QString)), mw, SLOT(setUrl(QString)));
 
-  QLineEdit*  filterEditor = new QLineEdit(toolBar);
+  filterEditor = new QLineEdit(toolBar);
   filterEditor->setMinimumWidth(250);
   filterEditor->setPlaceholderText("Compound Name Filter");
 
@@ -177,6 +178,12 @@ void LigandWidget::addCompound(Compound* compound) {
     visibleCompounds.push_back(compound);
 }
 
+void LigandWidget::toggleEnabling(bool isEnabled){
+    databaseSelect->setEnabled(isEnabled);
+    filterEditor->setEnabled(isEnabled);
+    _mw->btnLibrary->setEnabled(isEnabled);
+}
+
 void LigandWidget::rebuildCompoundTree() {
 
     if (SELECT_DB == getDatabaseName()) return;
@@ -188,7 +195,6 @@ void LigandWidget::rebuildCompoundTree() {
     filteringProgressBar->setRange(0, maxSteps);
 
     treeWidget->clear();
-    visibleCompounds.clear();
 
     ligandWidgetTreeBuilder->start();
 }
@@ -382,6 +388,10 @@ void LigandWidgetTreeBuilder::run(void) {
 
     string dbname = ligandWidget->databaseSelect->currentText().toStdString();
 
+    emit(toggleEnabling(false));
+
+    ligandWidget->visibleCompounds.clear();
+
     for(unsigned int i=0;  i < DB.compoundsDB.size(); i++ ) {
 
         Compound* compound = DB.compoundsDB[i];
@@ -419,49 +429,10 @@ void LigandWidgetTreeBuilder::run(void) {
     resultsString.append(" compounds.");
 
     emit(updateProgress(0, resultsString));
+    emit(toggleEnabling(true));
     emit(completed());
 
     quit();
-
-//    QTreeWidgetItemIterator itr(ligandWidget->treeWidget);
-//    while (*itr) {
-
-//        QTreeWidgetItem* item =(*itr);
-
-//        //Issue 246: limit number of matches shown
-//         if (
-//                ligandWidget->filterString.isEmpty() ||         // unfiltered tree
-//                item->text(0).contains(regexp) || // name
-//                item->text(1).contains(regexp) || // adduct string
-//                item->text(5).contains(regexp) || // formula
-//                item->text(7).contains(regexp)    // category
-//                ){
-//            matchCount++;
-//            //TODO: add item
-//        }
-
-//        progressCount++;
-//        ++itr;
-
-//        QString resultsString("");
-//        if (!ligandWidget->filterString.isEmpty()){
-//            resultsString.append("Found ");
-//            resultsString.append(QString::number(matchCount));
-//            resultsString.append(" compounds...");
-//        }
-//        emit(updateProgress(progressCount, resultsString));
-
-//    }
-
-//    QString resultsString("");
-//    if (!ligandWidget->filterString.isEmpty()){
-//        resultsString.append("Found ");
-//        resultsString.append(QString::number(matchCount));
-//        resultsString.append(" compounds.");
-//    }
-
-//    emit(updateProgress(0, resultsString));
-//    quit();
 }
 
 

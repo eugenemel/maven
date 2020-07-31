@@ -1077,7 +1077,8 @@ void MainWindow::createToolBars() {
     btnOpen->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnOpen->setToolTip(tr("Read in Mass Spec. Files"));
 
-    QToolButton *btnLibrary = new QToolButton(toolBar);
+    //Issue 246: made public for enabling logic.
+    btnLibrary = new QToolButton(toolBar);
     btnLibrary->setText("Library");
     btnLibrary->setIcon(QIcon(rsrcPath + "/librarymanager.png"));
     btnLibrary->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);

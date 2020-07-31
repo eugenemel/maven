@@ -60,6 +60,7 @@ public:
 signals:
     void updateProgress(int, QString);
     void sendCompoundToTree(Compound*);
+    void toggleEnabling(bool);
     void completed();
 };
 
@@ -90,6 +91,7 @@ public slots:
     void updateCurrentItemData();
     void updateProgressGUI(int, QString);
     void addCompound(Compound *c);
+    void toggleEnabling(bool);
 
 signals:
     void urlChanged(QString url);
@@ -111,6 +113,7 @@ public:
 
 private:
 
+    QLineEdit*  filterEditor;
     LigandWidgetTreeBuilder *ligandWidgetTreeBuilder = nullptr;
 
     QToolButton *galleryButton;
