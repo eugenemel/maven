@@ -271,7 +271,7 @@ void PeakDetectionDialog::findPeaks() {
                 vector<Compound*> allCompounds = DB.compoundsDB;
                 allCompounds.erase(std::remove_if(allCompounds.begin(), allCompounds.end(), [](Compound *compound){return (compound->db == "summarized" || compound->db == "rumsdb");}), allCompounds.end());
 
-                qDebug() << "PeakDetectionDialog::findPeaks() Removed" << (DB.compoundsDB.size() - allCompounds.size()) << "rumsdb and summarized compounds prior to peaks search.";
+                qDebug() << "PeakDetectionDialog::findPeaks(): Removed" << (DB.compoundsDB.size() - allCompounds.size()) << "rumsdb and summarized compounds prior to peaks search.";
 
                 peakupdater->setCompounds(allCompounds);
 
