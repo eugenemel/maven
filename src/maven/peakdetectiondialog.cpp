@@ -175,11 +175,18 @@ void PeakDetectionDialog::findPeaks() {
 		peakupdater->setMainWindow(mainwindow);
 
 		connect(peakupdater, SIGNAL(updateProgressBar(QString,int,int)), SLOT(setProgressBar(QString, int,int)));
-	
-        if (settings) {
-             peakupdater->eic_ppmWindow = settings->value("eic_ppmWindow").toDouble();
-             peakupdater->eic_smoothingAlgorithm = settings->value("eic_smoothingAlgorithm").toInt();
-		}
+
+        QString currentText = cmbSmootherType->currentText();
+
+        if (cmbSmootherType->currentText() == "Savitzky-Golay") {
+            peakupdater->eic_smoothingAlgorithm = EIC::SmootherType::SAVGOL;
+        } else if (cmbSmootherType->currentText() == "Gaussian") {
+            peakupdater->eic_smoothingAlgorithm = EIC::SmootherType::GAUSSIAN;
+        } else if (cmbSmootherType->currentText() == "Moving Average") {
+            peakupdater->eic_smoothingAlgorithm = EIC::SmootherType::AVG;
+        } else { //fall back to Gaussian
+            peakupdater->eic_smoothingAlgorithm = EIC::SmootherType::GAUSSIAN;
+        }
 
         peakupdater->baseline_smoothingWindow = baseline_smoothing->value();
         peakupdater->baseline_dropTopX        = baseline_quantile->value();
