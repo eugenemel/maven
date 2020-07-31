@@ -150,6 +150,7 @@ private:
   void processSlice(mzSlice& slice);
   void processCompounds(vector<Compound*> set, string setName);
   void processCompoundSlices(vector<mzSlice*>&slices, string setName);
+  vector<tuple<float, Compound*, Adduct*>> prepareCompoundDatabase(vector<Compound*> set);
   void computePeaks();
   void processMassSlices();
   void findPeaksOrbi(void);
@@ -158,7 +159,7 @@ private:
   vector<PeakGroup>allgroups;
   void cleanup();
   void printSettings();
-  void matchFragmentation(PeakGroup* g);
+  void matchFragmentation(PeakGroup* g, vector<tuple<float, Compound*, Adduct*>>& searchableDatabase);
   bool sliceHasMS2Event(mzSlice* slice);
 
   private:

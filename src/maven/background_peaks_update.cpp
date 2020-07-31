@@ -407,6 +407,12 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
     allgroups.clear();
     sort(slices.begin(), slices.end(), mzSlice::compIntensity );
 
+    QTime timer2;
+    timer2.start();
+    qDebug() << "Building searchable database.";
+    vector<tuple<float, Compound*, Adduct*>> searchableDatabase = prepareCompoundDatabase(this->compounds);
+    qDebug() << "Built searchable database of " << searchableDatabase.size() << " entries in " << timer2.elapsed() << " sec.";
+
     //process KNOWNS
     QTime timer;
     timer.start();
@@ -526,7 +532,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             //TODO: restructuring, expect that compound is always nullptr
 
-            matchFragmentation(&group);
+            matchFragmentation(&group, searchableDatabase);
             //If this is successful, then group.compound will not be nullptr.
 
             if (!isRetainUnmatchedCompounds && !group.compound){
@@ -674,6 +680,52 @@ bool BackgroundPeakUpdate::addPeakGroup(PeakGroup& grp) {
 
 void BackgroundPeakUpdate::cleanup() { 
     allgroups.clear();
+}
+
+vector<tuple<float, Compound*, Adduct*>> BackgroundPeakUpdate::prepareCompoundDatabase(vector<Compound*> set) {
+
+    vector<Adduct*> validAdducts;
+    for (Adduct * a : DB.adductsDB) {
+        if (SIGN(a->charge) == SIGN(ionizationMode)) {
+            validAdducts.push_back(a);
+        }
+    }
+
+    if (validAdducts.size() == 0) {
+        qDebug() << "All adducts disagree with the ionizationMode of the experiment. No peaks can be matched.";
+        return vector<tuple<float, Compound*, Adduct*>>();
+    }
+
+    long numEntries = static_cast<long>(set.size()) * static_cast<long>(validAdducts.size());
+
+    vector<tuple<float, Compound*, Adduct*>> searchableDatabase = vector<tuple<float, Compound*, Adduct*>>(numEntries);
+
+    unsigned int entryCounter = 0;
+
+    for(Compound* c : set){
+        for (Adduct* a : validAdducts) {
+
+            float precMz = 0.0f;
+
+            if (c->precursorMz > 0) {
+                precMz = c->precursorMz;
+            } else if (!c->formula.empty()){
+                precMz = a->computeAdductMass(c->getExactMass());
+            } else {
+                precMz = c->getExactMass();
+            }
+
+            searchableDatabase[entryCounter] = tuple<float, Compound*, Adduct*>(precMz, c, a);
+
+            emit(updateProgressBar("Preparing Libraries for Peaks Search... ", entryCounter, numEntries));
+
+            entryCounter++;
+        }
+    }
+
+    sort(searchableDatabase.begin(), searchableDatabase.end());
+
+    return searchableDatabase;
 }
 
 void BackgroundPeakUpdate::processCompounds(vector<Compound*> set, string setName) { 
@@ -1252,8 +1304,8 @@ void BackgroundPeakUpdate::printSettings() {
     cerr << "#compoundRTWindow=" << compoundRTWindow << endl;
 }
 
-void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g) {
-    if(DB.compoundsDB.size() == 0) return;
+void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g, vector<tuple<float, Compound*, Adduct*>>& searchableDatabase) {
+    if(searchableDatabase.size() == 0) return;
     if(g->ms2EventCount == 0) return;
 
     double searchMz = g->meanMz;
@@ -1263,6 +1315,9 @@ void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g) {
     vector<Isotope> isotopes = peak->getScan()->getIsotopicPattern(searchMz,compoundPPMWindow,6,10);
     if(isotopes.size() > 0) searchMz = isotopes.front().mass;
     */
+
+
+
 
     vector<MassCalculator::Match>matchesX = DB.findMatchingCompounds(searchMz,compoundPPMWindow,ionizationMode);
     //qDebug() << "findMatching" << searchMz << " " << matchesX.size();
