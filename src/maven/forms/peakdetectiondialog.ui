@@ -440,11 +440,6 @@
             </item>
             <item>
              <property name="text">
-              <string>Savitzky-Golay</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
               <string>Moving Average</string>
              </property>
             </item>
