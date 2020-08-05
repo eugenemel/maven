@@ -21,6 +21,29 @@ TreeDockWidget::TreeDockWidget(MainWindow*, QString title, int numColms) {
 		setObjectName(title);
 }
 
+//Issue 259
+void TreeDockWidget::addMs3TitleBar() {
+
+    QToolBar *toolBar = new QToolBar(this);
+    toolBar->setFloatable(false);
+    toolBar->setMovable(false);
+
+    QLabel *lblMs1PrecMz = new QLabel("Ms1PreMz:");
+    QLabel *lblMs2PrecMz = new QLabel("Ms2PreMz:");
+
+    QDoubleSpinBox *ms1PrecMzSpn = new QDoubleSpinBox();
+    QDoubleSpinBox *ms2PrecMzSpn = new QDoubleSpinBox();
+
+    QPushButton *btnSubmit = new QPushButton("Find Scans");
+
+    toolBar->addWidget(lblMs1PrecMz);
+    toolBar->addWidget(ms1PrecMzSpn);
+    toolBar->addWidget(lblMs2PrecMz);
+    toolBar->addWidget(ms2PrecMzSpn);
+    toolBar->addWidget(btnSubmit);
+
+    setTitleBarWidget(toolBar);
+}
 
 QTreeWidgetItem* TreeDockWidget::addItem(QTreeWidgetItem* parentItem, string key , float value, int type=0) {
 	QTreeWidgetItem *item = new QTreeWidgetItem(parentItem,type);

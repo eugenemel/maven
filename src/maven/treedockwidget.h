@@ -44,6 +44,8 @@ public slots:
       void addMs1ScanItem(Scan *scan);
       void addMs3ScanItem(Scan *scan);
 
+      void addMs3TitleBar();
+
 	  void clearTree();
 	  void filterTree(QString needle);
       void copyToClipbard();
