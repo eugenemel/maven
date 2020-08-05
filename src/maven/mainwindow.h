@@ -100,7 +100,7 @@ public:
     LigandWidget     *ligandWidget;
     IsotopeWidget    *isotopeWidget;
     TreeDockWidget 	*covariantsPanel;
-    TreeDockWidget	 *fragmentationEventsWidget;
+    TreeDockWidget	 *ms2ScansListWidget;
     TreeDockWidget   *ms1ScansListWidget;
     TreeDockWidget   *ms3ScansListWidget;
     TreeDockWidget	 *srmDockWidget;

@@ -159,8 +159,8 @@ void SettingsForm::recomputeConsensusSpectrum() {
     if (mainwindow->ms1ScansListWidget->isVisible() && mainwindow->ms1ScansListWidget->treeWidget->selectedItems().size() > 1){
         mainwindow->ms1ScansListWidget->showInfo();
     }
-    if (mainwindow->fragmentationEventsWidget->isVisible() && mainwindow->fragmentationEventsWidget->treeWidget->selectedItems().size() > 1){
-        mainwindow->fragmentationEventsWidget->showInfo();
+    if (mainwindow->ms2ScansListWidget->isVisible() && mainwindow->ms2ScansListWidget->treeWidget->selectedItems().size() > 1){
+        mainwindow->ms2ScansListWidget->showInfo();
     }
 }
 

@@ -152,10 +152,10 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     ms1ScansListWidget->setExclusiveItemType(ScanType);
     ms1ScansListWidget->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-    fragmentationEventsWidget	= new TreeDockWidget(this,"MS2 List", 7);
-    fragmentationEventsWidget->setupScanListHeader();
-    fragmentationEventsWidget->setExclusiveItemType(ScanType); //Issue 189
-    fragmentationEventsWidget->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    ms2ScansListWidget	= new TreeDockWidget(this,"MS2 List", 7);
+    ms2ScansListWidget->setupScanListHeader();
+    ms2ScansListWidget->setExclusiveItemType(ScanType); //Issue 189
+    ms2ScansListWidget->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     ms3ScansListWidget = new TreeDockWidget(this, "MS3 List", 7);
     ms3ScansListWidget->setupMs1ScanHeader();   //TODO: should be MS3
@@ -189,7 +189,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     covariantsPanel->setVisible(false);
     isotopeWidget->setVisible(false);
     massCalcWidget->setVisible(false);
-    fragmentationEventsWidget->setVisible(false);
+    ms2ScansListWidget->setVisible(false);
     ms1ScansListWidget->setVisible(false);
     bookmarkedPeaks->setVisible(false);
     spectraDockWidget->setVisible(false);
@@ -263,7 +263,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     addDockWidget(Qt::BottomDockWidgetArea,fragmentationSpectraDockWidget,Qt::Horizontal);
 
     addDockWidget(Qt::BottomDockWidgetArea,ms1ScansListWidget, Qt::Horizontal);
-    addDockWidget(Qt::BottomDockWidgetArea,fragmentationEventsWidget,Qt::Horizontal);
+    addDockWidget(Qt::BottomDockWidgetArea,ms2ScansListWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,ms3SpectraDockWidget,Qt::Horizontal);
 
     //addDockWidget(Qt::BottomDockWidgetArea,peaksPanel,Qt::Horizontal);
@@ -278,7 +278,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     tabifyDockWidget(spectraDockWidget,galleryDockWidget);
     tabifyDockWidget(spectraDockWidget,rconsoleDockWidget);
 
-    tabifyDockWidget(ms1ScansListWidget, fragmentationEventsWidget);
+    tabifyDockWidget(ms1ScansListWidget, ms2ScansListWidget);
     tabifyDockWidget(ms1ScansListWidget, ms3ScansListWidget);
 
     setContextMenuPolicy(Qt::NoContextMenu);
@@ -295,7 +295,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     scatterDockWidget->hide();
 
     ms1ScansListWidget->hide();
-    fragmentationEventsWidget->hide();
+    ms2ScansListWidget->hide();
     ms3ScansListWidget->hide();
 
     setUserPPM(5);
@@ -660,7 +660,7 @@ void MainWindow::setMzValue() {
     if (isDouble) {
         if(eicWidget->isVisible() ) eicWidget->setMzSlice(mz);
         if(massCalcWidget->isVisible() ) massCalcWidget->setMass(mz);
-        if(fragmentationEventsWidget->isVisible()   ) showFragmentationScans(mz);
+        if(ms2ScansListWidget->isVisible()   ) showFragmentationScans(mz);
         if(ms1ScansListWidget->isVisible() ) showMs1Scans(mz);
     }
     suggestPopup->addToHistory(QString::number(mz,'f',5));
@@ -670,7 +670,7 @@ void MainWindow::setMzValue(float mz) {
     searchText->setText(QString::number(mz,'f',8));
     if (eicWidget->isVisible() ) eicWidget->setMzSlice(mz);
     if (massCalcWidget->isVisible() ) massCalcWidget->setMass(mz);
-    if (fragmentationEventsWidget->isVisible()   ) showFragmentationScans(mz);
+    if (ms2ScansListWidget->isVisible()   ) showFragmentationScans(mz);
     if (ms1ScansListWidget->isVisible() ) showMs1Scans(mz);
 }
 
@@ -1044,7 +1044,7 @@ void MainWindow::createMenus() {
     QAction* aj = widgetsMenu->addAction("MS2 Scans List");
     aj->setCheckable(true);
     aj->setChecked(false);
-    connect(aj,SIGNAL(toggled(bool)), fragmentationEventsWidget,SLOT(setVisible(bool)));
+    connect(aj,SIGNAL(toggled(bool)), ms2ScansListWidget,SLOT(setVisible(bool)));
 
     QAction *aMs3Events = widgetsMenu->addAction("MS3 Scans List");
     aMs3Events->setCheckable(true);
@@ -1552,7 +1552,7 @@ void MainWindow::showPeakInfo(Peak* _peak) {
 //        if (ms2s.size()) fragmentationSpectraWidget->setScan(ms2s[0]);
 //    }
 
-    if( fragmentationEventsWidget->isVisible() ) {
+    if( ms2ScansListWidget->isVisible() ) {
         float mz = _peak->peakMz;
         if (_peak->mzmax - _peak->mzmin > 0.5f) { //direct infusion peak
             mz = 0.5f* (_peak->mzmin + _peak->mzmax);
@@ -1672,16 +1672,16 @@ void MainWindow::setClipboardToGroup(PeakGroup* group) {
 
 void MainWindow::showFragmentationScans(float pmz) {
 
-    if (!fragmentationEventsWidget || fragmentationEventsWidget->isVisible() == false ) return;
+    if (!ms2ScansListWidget || ms2ScansListWidget->isVisible() == false ) return;
     float ppm = getUserPPM();
 
     if (samples.size() <= 0 ) return;
-    fragmentationEventsWidget->clearTree();
+    ms2ScansListWidget->clearTree();
     for ( unsigned int i=0; i < samples.size(); i++ ) {
         for (unsigned int j=0; j < samples[i]->scans.size(); j++ ) {
             Scan* s = samples[i]->scans[j];
             if ( s->mslevel > 1 && ppmDist(s->precursorMz,pmz) < ppm ) {
-                fragmentationEventsWidget->addScanItem(s);
+                ms2ScansListWidget->addScanItem(s);
             }
         }
     }

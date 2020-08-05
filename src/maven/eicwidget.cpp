@@ -1809,7 +1809,7 @@ void EicWidget::addMS2Events(float mzmin, float mzmax) {
     vector <mzSample*> samples = mw->getVisibleSamples();
 
     if (samples.size() <= 0 ) return;
-    mw->fragmentationEventsWidget->clearTree();
+    mw->ms2ScansListWidget->clearTree();
     int count=0;
     for ( unsigned int i=0; i < samples.size(); i++ ) {
         mzSample* sample = samples[i];
@@ -1819,7 +1819,7 @@ void EicWidget::addMS2Events(float mzmin, float mzmax) {
 
             if (scan->mslevel > 1 && scan->precursorMz >= mzmin && scan->precursorMz <= mzmax) {
 
-                mw->fragmentationEventsWidget->addScanItem(scan);
+                mw->ms2ScansListWidget->addScanItem(scan);
                 if (scan->rt < _slice.rtmin || scan->rt > _slice.rtmax) continue;
 
         		QColor color = QColor::fromRgbF( sample->color[0], sample->color[1], sample->color[2], 1 );
