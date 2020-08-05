@@ -192,6 +192,7 @@ public slots:
     void setCompoundFocus(Compound* c);
     void showFragmentationScans(float pmz);
     void showMs1Scans(float pmz);
+    void showMs3Scans(float preMs1Mz, float preMs2Mz);
     QString groupTextExport(PeakGroup* group);
     void bookmarkPeakGroup(PeakGroup* group);
     void setClipboardToGroup(PeakGroup* group);

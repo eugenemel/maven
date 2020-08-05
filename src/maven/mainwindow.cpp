@@ -1708,6 +1708,32 @@ void MainWindow::showMs1Scans(float pmz) {
 
 }
 
+void MainWindow::showMs3Scans(float preMs1Mz, float preMs2Mz){
+
+    if (!ms3ScansListWidget || !ms3ScansListWidget->isVisible() || samples.empty()) return;
+
+    float ppm = getUserPPM(); //TODO: more sophisticated ppm tolerances?
+
+    float minMs1Mz = preMs1Mz - ppm / 1e6f;
+    float maxMs1Mz = preMs1Mz + ppm / 1e6f;
+
+    float minMs2Mz = preMs2Mz - ppm / 1e6f;
+    float maxMs2Mz = preMs2Mz + ppm / 1e6f;
+
+    ms3ScansListWidget->clearTree();
+
+    for ( unsigned int i=0; i < samples.size(); i++ ) {
+        for (unsigned int j=0; j < samples[i]->scans.size(); j++ ) {
+            Scan* s = samples[i]->scans[j];
+            if (s->mslevel == 3 &&
+                    s->ms1PrecursorForMs3 >= minMs1Mz && s->ms1PrecursorForMs3 <= maxMs1Mz &&
+                    s->precursorMz >= minMs2Mz && s->precursorMz <= maxMs2Mz) {
+                ms3ScansListWidget->addMs3ScanItem(s);
+            }
+        }
+    }
+}
+
 QWidget* MainWindow::eicWidgetController() {
 
     QToolBar *toolBar = new QToolBar(this);
