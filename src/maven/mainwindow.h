@@ -92,8 +92,10 @@ public:
     QComboBox         *adductType;
     QLabel			  *statusText;
 
-    SpectraWidget     *spectraWidget;
-    SpectraWidget     *fragmentationSpectraWidget;
+    SpectraWidget     *spectraWidget;                   //ms1
+    SpectraWidget     *fragmentationSpectraWidget;      //ms2
+    SpectraWidget     *ms3SpectraWidget;                //ms3
+
     MassCalcWidget       *massCalcWidget;
     LigandWidget     *ligandWidget;
     IsotopeWidget    *isotopeWidget;
@@ -102,8 +104,11 @@ public:
     TreeDockWidget   *ms1ScansListWidget;
     TreeDockWidget	 *srmDockWidget;
     //TreeDockWidget   *peaksPanel;
-    QDockWidget         *spectraDockWidget;
-    QDockWidget         *fragmentationSpectraDockWidget;
+
+    QDockWidget         *spectraDockWidget;                 //ms1
+    QDockWidget         *fragmentationSpectraDockWidget;    //ms2
+    QDockWidget         *ms3SpectraDockWidget;              //ms3
+
     QDockWidget		 *heatMapDockWidget;
     QDockWidget		 *scatterDockWidget;
     QDockWidget		 *treeMapDockWidget;
