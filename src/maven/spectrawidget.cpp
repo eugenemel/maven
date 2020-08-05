@@ -169,9 +169,16 @@ void SpectraWidget::setTitle() {
 
     //parameters only apply to a single scan
     if (!_currentFragment) {
+
+        QString precString("<br>PreMz: ");
+        if (_currentScan && _currentScan->mslevel == 3 && _currentScan->ms1PrecursorForMs3) {
+            QString ms1PrecursorForMs3 = "<br>Ms1PreMz: <b>" + QString::number(_currentScan->ms1PrecursorForMs3,'f',4) + "</b>";
+            title += ms1PrecursorForMs3;
+            precString = QString(" Ms2PreMz: ");
+        }
+
         if (_currentScan && _currentScan->precursorMz) {
-            title += "<br>";
-            QString precursorMzLink= " PreMz: <b>" + QString::number(_currentScan->precursorMz,'f',4) + "</b>";
+            QString precursorMzLink = precString + "<b>" + QString::number(_currentScan->precursorMz,'f',4) + "</b>";
             title += precursorMzLink ;
         }
 
