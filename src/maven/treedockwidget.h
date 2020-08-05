@@ -45,6 +45,7 @@ public slots:
       void addMs3ScanItem(Scan *scan);
 
       void addMs3TitleBar();
+      void ms3SearchFromSpinBoxes();
 
 	  void clearTree();
 	  void filterTree(QString needle);
@@ -68,6 +69,10 @@ public slots:
     private:
       void itemToClipboard(QTreeWidgetItem* item, QString& clipboardtext);
       int exclusiveItemType = -1; //this->treeWidget should only contain items of this type. If -1, any type.
+
+      MainWindow* _mw = nullptr;
+      QDoubleSpinBox *ms1PrecMzSpn = nullptr;
+      QDoubleSpinBox *ms2PrecMzSpn = nullptr;
 };
 
 #endif

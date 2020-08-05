@@ -161,7 +161,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     ms3ScansListWidget->addMs3TitleBar();
     ms3ScansListWidget->setupMs3ScanHeader();
     ms3ScansListWidget->setExclusiveItemType(ScanType);
-    ms3ScansListWidget->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+    //Issue 259: Currently only support single scan selection
+//    ms3ScansListWidget->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     srmDockWidget 	= new TreeDockWidget(this,"SRM List", 1); //Issue 189
     ligandWidget = new LigandWidget(this);
@@ -1693,8 +1695,8 @@ void MainWindow::showMs1Scans(float pmz) {
     if (!ms1ScansListWidget || !ms1ScansListWidget->isVisible() || samples.empty()) return;
 
     float ppm = getUserPPM();
-    float minMz = pmz - ppm / 1e6;
-    float maxMz = pmz + ppm / 1e6;
+    float minMz = pmz - pmz * ppm / 1e6;
+    float maxMz = pmz + pmz * ppm / 1e6;
 
     ms1ScansListWidget->clearTree();
 
@@ -1715,11 +1717,11 @@ void MainWindow::showMs3Scans(float preMs1Mz, float preMs2Mz){
 
     float ppm = getUserPPM(); //TODO: more sophisticated ppm tolerances?
 
-    float minMs1Mz = preMs1Mz - ppm / 1e6f;
-    float maxMs1Mz = preMs1Mz + ppm / 1e6f;
+    float minMs1Mz = preMs1Mz - preMs1Mz * ppm / 1e6;
+    float maxMs1Mz = preMs1Mz + preMs1Mz * ppm / 1e6;
 
-    float minMs2Mz = preMs2Mz - ppm / 1e6f;
-    float maxMs2Mz = preMs2Mz + ppm / 1e6f;
+    float minMs2Mz = preMs2Mz - preMs2Mz * ppm / 1e6;
+    float maxMs2Mz = preMs2Mz + preMs2Mz* ppm / 1e6;
 
     ms3ScansListWidget->clearTree();
 

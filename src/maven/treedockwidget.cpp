@@ -3,7 +3,8 @@
 
 
 
-TreeDockWidget::TreeDockWidget(MainWindow*, QString title, int numColms) {
+TreeDockWidget::TreeDockWidget(MainWindow *mw, QString title, int numColms) {
+        _mw = mw;
 		treeWidget=new QTreeWidget(this);
 		treeWidget->setColumnCount(numColms);
 		treeWidget->setObjectName(title);
@@ -31,8 +32,19 @@ void TreeDockWidget::addMs3TitleBar() {
     QLabel *lblMs1PrecMz = new QLabel("Ms1PreMz:");
     QLabel *lblMs2PrecMz = new QLabel("Ms2PreMz:");
 
-    QDoubleSpinBox *ms1PrecMzSpn = new QDoubleSpinBox();
-    QDoubleSpinBox *ms2PrecMzSpn = new QDoubleSpinBox();
+    ms1PrecMzSpn = new QDoubleSpinBox();
+    ms1PrecMzSpn->setMinimum(0);
+    ms1PrecMzSpn->setMaximum(999999999);
+    ms1PrecMzSpn->setSingleStep(0.001);
+    ms1PrecMzSpn->setMinimumWidth(120);
+    ms1PrecMzSpn->setDecimals(3);
+
+    ms2PrecMzSpn = new QDoubleSpinBox();
+    ms2PrecMzSpn->setMinimum(0);
+    ms2PrecMzSpn->setMaximum(999999999);
+    ms2PrecMzSpn->setSingleStep(0.001);
+    ms2PrecMzSpn->setMinimumWidth(120);
+    ms2PrecMzSpn->setDecimals(3);
 
     QPushButton *btnSubmit = new QPushButton("Find Scans");
 
@@ -43,6 +55,15 @@ void TreeDockWidget::addMs3TitleBar() {
     toolBar->addWidget(btnSubmit);
 
     setTitleBarWidget(toolBar);
+
+    connect(btnSubmit, SIGNAL(clicked()), this, SLOT(ms3SearchFromSpinBoxes()));
+}
+
+void TreeDockWidget::ms3SearchFromSpinBoxes() {
+
+    if (!_mw || !ms1PrecMzSpn || !ms2PrecMzSpn) return;
+
+    _mw->showMs3Scans(static_cast<float>(ms1PrecMzSpn->value()), static_cast<float>(ms2PrecMzSpn->value()));
 }
 
 QTreeWidgetItem* TreeDockWidget::addItem(QTreeWidgetItem* parentItem, string key , float value, int type=0) {
@@ -218,7 +239,7 @@ void TreeDockWidget::showInfo() {
                                     if (group) mainwindow->setPeakGroup(group);
                             } else if ( itemType == ScanType ) {
                                     Scan*  scan =  v.value<Scan*>();
-                                    if (scan->mslevel > 1)  {
+                                    if (scan->mslevel == 2)  {
                                         mainwindow->fragmentationSpectraWidget->setScan(scan);
                                         mainwindow->massCalcWidget->setFragmentationScan(scan);
 
@@ -227,9 +248,11 @@ void TreeDockWidget::showInfo() {
                                             mainwindow->getSpectraWidget()->setScan(lastms1);
                                             mainwindow->getSpectraWidget()->zoomRegion(scan->precursorMz,2);
                                         }
+                                        mainwindow->getEicWidget()->setFocusLine(scan->rt);
+                                    } else if (scan->mslevel == 1) {
+                                        mainwindow->getSpectraWidget()->setScan(scan);
+                                        mainwindow->getEicWidget()->setFocusLine(scan->rt);
                                     }
-                                    else mainwindow->getSpectraWidget()->setScan(scan);
-                                    mainwindow->getEicWidget()->setFocusLine(scan->rt);
                             } else if (itemType == EICType ) {
                                     mainwindow->getEicWidget()->setSrmId(text.toStdString());
                             } else if (itemType == mzSliceType ) {
