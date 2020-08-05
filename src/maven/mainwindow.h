@@ -102,6 +102,7 @@ public:
     TreeDockWidget 	*covariantsPanel;
     TreeDockWidget	 *fragmentationEventsWidget;
     TreeDockWidget   *ms1ScansListWidget;
+    TreeDockWidget   *ms3ScansListWidget;
     TreeDockWidget	 *srmDockWidget;
     //TreeDockWidget   *peaksPanel;
 

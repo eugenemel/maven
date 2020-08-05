@@ -147,15 +147,20 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     massCalcWidget =  new MassCalcWidget(this);
     covariantsPanel= new TreeDockWidget(this,"Covariants",3);
 
+    ms1ScansListWidget = new TreeDockWidget(this, "MS1 List", 7);
+    ms1ScansListWidget->setupMs1ScanHeader();
+    ms1ScansListWidget->setExclusiveItemType(ScanType);
+    ms1ScansListWidget->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
     fragmentationEventsWidget	= new TreeDockWidget(this,"MS2 List", 7);
     fragmentationEventsWidget->setupScanListHeader();
     fragmentationEventsWidget->setExclusiveItemType(ScanType); //Issue 189
     fragmentationEventsWidget->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-    ms1ScansListWidget = new TreeDockWidget(this, "MS1 List", 7);
-    ms1ScansListWidget->setupMs1ScanHeader();
-    ms1ScansListWidget->setExclusiveItemType(ScanType);
-    ms1ScansListWidget->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    ms3ScansListWidget = new TreeDockWidget(this, "MS3 List", 7);
+    ms3ScansListWidget->setupMs1ScanHeader();   //TODO: should be MS3
+    ms3ScansListWidget->setExclusiveItemType(ScanType);
+    ms3ScansListWidget->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     srmDockWidget 	= new TreeDockWidget(this,"SRM List", 1); //Issue 189
     ligandWidget = new LigandWidget(this);
@@ -250,14 +255,15 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
     addDockWidget(Qt::BottomDockWidgetArea,spectraDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,covariantsPanel,Qt::Horizontal);
-    addDockWidget(Qt::BottomDockWidgetArea,fragmentationEventsWidget,Qt::Horizontal);
-    addDockWidget(Qt::BottomDockWidgetArea,ms1ScansListWidget, Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,scatterDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,bookmarkedPeaks,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,galleryDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,srmDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,rconsoleDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,fragmentationSpectraDockWidget,Qt::Horizontal);
+
+    addDockWidget(Qt::BottomDockWidgetArea,ms1ScansListWidget, Qt::Horizontal);
+    addDockWidget(Qt::BottomDockWidgetArea,fragmentationEventsWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,ms3SpectraDockWidget,Qt::Horizontal);
 
     //addDockWidget(Qt::BottomDockWidgetArea,peaksPanel,Qt::Horizontal);
@@ -268,12 +274,12 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
     tabifyDockWidget(spectraDockWidget,massCalcWidget);
     tabifyDockWidget(spectraDockWidget,isotopeWidget);
-    tabifyDockWidget(spectraDockWidget,massCalcWidget);
-    tabifyDockWidget(spectraDockWidget,fragmentationEventsWidget);
-    tabifyDockWidget(spectraDockWidget,ms1ScansListWidget);
     tabifyDockWidget(spectraDockWidget,covariantsPanel);
     tabifyDockWidget(spectraDockWidget,galleryDockWidget);
     tabifyDockWidget(spectraDockWidget,rconsoleDockWidget);
+
+    tabifyDockWidget(ms1ScansListWidget, fragmentationEventsWidget);
+    tabifyDockWidget(ms1ScansListWidget, ms3ScansListWidget);
 
     setContextMenuPolicy(Qt::NoContextMenu);
 
@@ -285,14 +291,12 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     	restoreGeometry(settings->value("geometry").toByteArray());
     }
 
-
-
     projectDockWidget->show();
     scatterDockWidget->hide();
-    fragmentationEventsWidget->hide();
+
     ms1ScansListWidget->hide();
-
-
+    fragmentationEventsWidget->hide();
+    ms3ScansListWidget->hide();
 
     setUserPPM(5);
     if ( settings->contains("ppmWindowBox")) {
@@ -1041,6 +1045,11 @@ void MainWindow::createMenus() {
     aj->setCheckable(true);
     aj->setChecked(false);
     connect(aj,SIGNAL(toggled(bool)), fragmentationEventsWidget,SLOT(setVisible(bool)));
+
+    QAction *aMs3Events = widgetsMenu->addAction("MS3 Scans List");
+    aMs3Events->setCheckable(true);
+    aMs3Events->setChecked(false);
+    connect(aMs3Events, SIGNAL(toggled(bool)), ms3ScansListWidget, SLOT(setVisible(bool)));
 
     widgetsMenu->addSeparator();
 
