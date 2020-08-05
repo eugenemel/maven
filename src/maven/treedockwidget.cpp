@@ -416,6 +416,34 @@ void TreeDockWidget::addMs1ScanItem(Scan* scan) {
     item->setText(6,QString::number(scan->nobs()));
 }
 
+void TreeDockWidget::setupMs3ScanHeader() {
+    QStringList colNames;
+    colNames << "sample" << "Ms1PreMz" << "Ms2PreMz" << "scannum" << "rt" << "z" << "TIC" << "#peaks";
+    treeWidget->setColumnCount(colNames.size());
+    treeWidget->setHeaderLabels(colNames);
+    treeWidget->setSortingEnabled(true);
+    treeWidget->setHeaderHidden(false);
+}
+
+void TreeDockWidget::addMs3ScanItem(Scan *scan) {
+    if (!scan) return;
+
+    MainWindow* mainwindow = (MainWindow*)parentWidget();
+    QIcon icon = mainwindow->projectDockWidget->getSampleIcon(scan->sample);
+
+    NumericTreeWidgetItem *item = new NumericTreeWidgetItem(treeWidget,ScanType);
+    item->setData(0,Qt::UserRole,QVariant::fromValue(scan));
+    item->setIcon(0,icon);
+
+    item->setText(0,QString(scan->sample->sampleName.c_str()));
+    item->setText(1, QString::number(scan->ms1PrecursorForMs3,'f',4));
+    item->setText(2, QString::number(scan->precursorMz, 'f', 4));
+    item->setText(3, QString::number(scan->scannum));
+    item->setText(4, QString::number(scan->rt, 'f', 2));
+    item->setText(5, QString::number(scan->precursorCharge));
+    item->setText(6, QString::number(scan->totalIntensity(), 'f', 2));
+    item->setText(7, QString::number(scan->nobs()));
+}
 
 void TreeDockWidget::setInfo(vector<Compound*>&compounds) {
     clearTree();

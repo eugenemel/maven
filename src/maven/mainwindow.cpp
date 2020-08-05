@@ -158,7 +158,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     ms2ScansListWidget->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     ms3ScansListWidget = new TreeDockWidget(this, "MS3 List", 7);
-    ms3ScansListWidget->setupMs1ScanHeader();   //TODO: should be MS3
+    ms3ScansListWidget->setupMs3ScanHeader();
     ms3ScansListWidget->setExclusiveItemType(ScanType);
     ms3ScansListWidget->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
