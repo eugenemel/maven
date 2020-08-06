@@ -50,34 +50,37 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
 
     //spectra widget display options
     //ms1 options
-    connect(chkAutoMzMax, SIGNAL(toggled(bool)), SLOT(getFormValues()));
-    connect(chkAutoMzMin, SIGNAL(toggled(bool)), SLOT(getFormValues()));
-    connect(spnMzMinOffset, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
-    connect(spnMzMinVal, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
-    connect(spnMzMaxOffset, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
-    connect(spnMzMaxVal, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+    connect(chkMs1Autoscale, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+    connect(spnMs1Offset, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+    connect(spnMs1MzMinVal, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+    connect(spnMs1MzMaxVal, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
 
-    connect(chkAutoMzMax, SIGNAL(toggled(bool)), SLOT(replotMS1Spectrum()));
-    connect(chkAutoMzMin, SIGNAL(toggled(bool)), SLOT(replotMS1Spectrum()));
-    connect(spnMzMinOffset, SIGNAL(valueChanged(double)), SLOT(replotMS1Spectrum()));
-    connect(spnMzMinVal, SIGNAL(valueChanged(double)), SLOT(replotMS1Spectrum()));
-    connect(spnMzMaxOffset, SIGNAL(valueChanged(double)), SLOT(replotMS1Spectrum()));
-    connect(spnMzMaxVal, SIGNAL(valueChanged(double)), SLOT(replotMS1Spectrum()));
+    connect(chkMs1Autoscale, SIGNAL(toggled(bool)), SLOT(replotMS1Spectrum()));
+    connect(spnMs1Offset, SIGNAL(valueChanged(double)), SLOT(replotMS1Spectrum()));
+    connect(spnMs1MzMinVal, SIGNAL(valueChanged(double)), SLOT(replotMS1Spectrum()));
+    connect(spnMs1MzMaxVal, SIGNAL(valueChanged(double)), SLOT(replotMS1Spectrum()));
 
     //ms2 options
-    connect(chkMs2AutoMzMax, SIGNAL(toggled(bool)), SLOT(getFormValues()));
-    connect(chkMs2AutoMzMin, SIGNAL(toggled(bool)), SLOT(getFormValues()));
-    connect(spnMs2MzMinOffset, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+    connect(chkMs2Autoscale, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+    connect(spnMs2Offset, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
     connect(spnMs2MzMin, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
-    connect(spnMs2MzMaxOffset, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
     connect(spnMs2MzMax, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
 
-    connect(chkMs2AutoMzMax, SIGNAL(toggled(bool)), SLOT(replotMS2Spectrum()));
-    connect(chkMs2AutoMzMin, SIGNAL(toggled(bool)), SLOT(replotMS2Spectrum()));
-    connect(spnMs2MzMinOffset, SIGNAL(valueChanged(double)), SLOT(replotMS2Spectrum()));
+    connect(chkMs2Autoscale, SIGNAL(toggled(bool)), SLOT(replotMS2Spectrum()));
+    connect(spnMs2Offset, SIGNAL(valueChanged(double)), SLOT(replotMS2Spectrum()));
     connect(spnMs2MzMin, SIGNAL(valueChanged(double)), SLOT(replotMS2Spectrum()));
-    connect(spnMs2MzMaxOffset, SIGNAL(valueChanged(double)), SLOT(replotMS2Spectrum()));
     connect(spnMs2MzMax, SIGNAL(valueChanged(double)), SLOT(replotMS2Spectrum()));
+
+    //ms3 options
+    connect(chkMs3Autoscale, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+    connect(spnMs3Offset, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+    connect(spnMs3MzMin, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+    connect(spnMs3MzMax, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+
+    connect(chkMs3Autoscale, SIGNAL(toggled(bool)), SLOT(replotMS3Spectrum()));
+    connect(spnMs3Offset, SIGNAL(valueChanged(double)), SLOT(replotMS3Spectrum()));
+    connect(spnMs3MzMin, SIGNAL(valueChanged(double)), SLOT(replotMS3Spectrum()));
+    connect(spnMs3MzMax, SIGNAL(valueChanged(double)), SLOT(replotMS3Spectrum()));
 
     //spectral agglomeration settings
     connect(spnScanFilterMinIntensity, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
@@ -154,6 +157,14 @@ void SettingsForm::replotMS2Spectrum(){
     }
 }
 
+void SettingsForm::replotMS3Spectrum() {
+    if (mainwindow && mainwindow->ms3SpectraWidget && mainwindow->ms3SpectraDockWidget && mainwindow->ms3SpectraDockWidget->isVisible()) {
+        mainwindow->ms3SpectraWidget->findBounds(true, true);
+        mainwindow->ms3SpectraWidget->replot();
+        mainwindow->ms3SpectraWidget->repaint();
+    }
+}
+
 void SettingsForm::recomputeConsensusSpectrum() {
     if (!mainwindow) return;
     if (mainwindow->ms1ScansListWidget->isVisible() && mainwindow->ms1ScansListWidget->treeWidget->selectedItems().size() > 1){
@@ -218,43 +229,81 @@ void SettingsForm::setFormValues() {
         scan_filter_min_quantile->setValue( settings->value("scan_filter_min_quantile").toInt());
 
     //spectra widget display options
+
     //ms1 settings
-    if (settings->contains("chkAutoMzMin"))
-        chkAutoMzMin->setCheckState((Qt::CheckState) settings->value("chkAutoMzMin").toInt());
+    if (settings->contains("chkAutoMzMin") && settings->contains("chkAutoMzMax")) {
+        int checkStateAutoMin = settings->value("chkAutoMzMin").toInt();
+        int checkStateAutoMax = settings->value("chkAutoMzMax").toInt();
+        if (checkStateAutoMin == Qt::Unchecked && checkStateAutoMax == Qt::Unchecked) {
+            chkMs1Autoscale->setCheckState(Qt::Unchecked);
+        } else {
+            chkMs1Autoscale->setCheckState(Qt::Checked);
+        }
+    }
 
-    if (settings->contains("chkAutoMzMax"))
-        chkAutoMzMax->setCheckState((Qt::CheckState) settings->value("chkAutoMzMax").toInt());
-
-    if (settings->contains("spnMzMinOffset"))
-        spnMzMinOffset->setValue(settings->value("spnMzMinOffset").toDouble());
-
-    if (settings->contains("spnMzMaxOffset"))
-        spnMzMaxOffset->setValue(settings->value("spnMzMaxOffset").toDouble());
+    if (settings->contains("spnMzMinOffset") && settings->contains("spnMzMaxOffset")) {
+        spnMs1Offset->setValue(0.5 * (settings->value("spnMzMinOffset").toDouble() + settings->value("spnMzMaxOffset").toDouble()));
+    } else if (settings->contains("spnMzMinOffset") && !settings->contains("spnMzMaxOffset")) {
+        spnMs1Offset->setValue(settings->value("spnMzMinOffset").toDouble());
+    } else if (!settings->contains("spnMzMinOffset") && settings->contains("spnMzMaxOffset")) {
+        spnMs1Offset->setValue(settings->value("spnMzMaxOffset").toDouble());
+    }
 
     if (settings->contains("spnMzMinVal"))
-        spnMzMinVal->setValue(settings->value("spnMzMinVal").toDouble());
+        spnMs1MzMinVal->setValue(settings->value("spnMzMinVal").toDouble());
 
     if (settings->contains("spnMzMaxVal"))
-        spnMzMaxVal->setValue(settings->value("spnMzMaxVal").toDouble());
+        spnMs1MzMaxVal->setValue(settings->value("spnMzMaxVal").toDouble());
 
     //ms2 settings
-    if (settings->contains("chkMs2AutoMzMin"))
-        chkMs2AutoMzMin->setCheckState((Qt::CheckState) settings->value("chkMs2AutoMzMin").toInt());
+    if (settings->contains("chkMs2AutoMzMin") && settings->contains("chkMs2AutoMzMax")) {
+        int checkStateAutoMin = settings->value("chkMs2AutoMzMin").toInt();
+        int checkStateAutoMax = settings->value("chkMs2AutoMzMax").toInt();
+        if (checkStateAutoMin == Qt::Unchecked && checkStateAutoMax == Qt::Unchecked) {
+            chkMs2Autoscale->setCheckState(Qt::Unchecked);
+        } else {
+            chkMs2Autoscale->setCheckState(Qt::Checked);
+        }
+    }
 
-    if (settings->contains("chkMs2AutoMzMax"))
-        chkMs2AutoMzMax->setCheckState((Qt::CheckState) settings->value("chkMs2AutoMzMax").toInt());
-
-    if (settings->contains("spnMs2MzMinOffset"))
-        spnMs2MzMinOffset->setValue(settings->value("spnMs2MzMinOffset").toDouble());
-
-    if (settings->contains("spnMs2MzMaxOffset"))
-        spnMs2MzMaxOffset->setValue(settings->value("spnMs2MzMaxOffset").toDouble());
+    if (settings->contains("spnMs2MzMinOffset") && settings->contains("spnMs2MzMaxOffset")) {
+        spnMs2Offset->setValue(0.5 * (settings->value("spnMs2MzMinOffset").toDouble() + settings->value("spnMs2MzMaxOffset").toDouble()));
+    } else if (settings->contains("spnMs2MzMinOffset") && !settings->contains("spnMs2MzMaxOffset")) {
+        spnMs2Offset->setValue(settings->value("spnMs2MzMinOffset").toDouble());
+    } else if (!settings->contains("spnMs2MzMinOffset") && settings->contains("spnMs2MzMaxOffset")) {
+        spnMs2Offset->setValue(settings->value("spnMs2MzMaxOffset").toDouble());
+    }
 
     if (settings->contains("spnMs2MzMin"))
         spnMs2MzMin->setValue(settings->value("spnMs2MzMin").toDouble());
 
     if (settings->contains("spnMs2MzMax"))
         spnMs2MzMax->setValue(settings->value("spnMs2MzMax").toDouble());
+
+    //ms3 settings
+    if (settings->contains("chkMs3AutoMzMin") && settings->contains("chkMs3AutoMzMax")) {
+        int checkStateAutoMin = settings->value("chkMs3AutoMzMin").toInt();
+        int checkStateAutoMax = settings->value("chkMs3AutoMzMax").toInt();
+        if (checkStateAutoMin == Qt::Unchecked && checkStateAutoMax == Qt::Unchecked) {
+            chkMs3Autoscale->setCheckState(Qt::Unchecked);
+        } else {
+            chkMs3Autoscale->setCheckState(Qt::Checked);
+        }
+    }
+
+    if (settings->contains("spnMs3MzMinOffset") && settings->contains("spnMs3MzMaxOffset")) {
+        spnMs3Offset->setValue(0.5 * (settings->value("spnMs3MzMinOffset").toDouble() + settings->value("spnMs3MzMaxOffset").toDouble()));
+    } else if (settings->contains("spnMs3MzMinOffset") && !settings->contains("spnMs3MzMaxOffset")) {
+        spnMs3Offset->setValue(settings->value("spnMs3MzMinOffset").toDouble());
+    } else if (!settings->contains("spnMs3MzMinOffset") && settings->contains("spnMs3MzMaxOffset")) {
+        spnMs3Offset->setValue(settings->value("spnMs3MzMaxOffset").toDouble());
+    }
+
+    if (settings->contains("spnMs3MzMin"))
+        spnMs3MzMin->setValue(settings->value("spnMs3MzMin").toDouble());
+
+    if (settings->contains("spnMs3MzMax"))
+        spnMs3MzMax->setValue(settings->value("spnMs3MzMax").toDouble());
 
     //bookmark warnings
     if (settings->contains("chkBkmkWarnMzRt"))
@@ -396,20 +445,28 @@ void SettingsForm::getFormValues() {
 
     //spectra widget display options
     //ms1 display settings
-    settings->setValue("chkAutoMzMin", chkAutoMzMin->checkState());
-    settings->setValue("chkAutoMzMax", chkAutoMzMax->checkState());
-    settings->setValue("spnMzMinOffset", spnMzMinOffset->value());
-    settings->setValue("spnMzMinVal", spnMzMinVal->value());
-    settings->setValue("spnMzMaxOffset", spnMzMaxOffset->value());
-    settings->setValue("spnMzMaxVal", spnMzMaxVal->value());
+    settings->setValue("chkAutoMzMin", chkMs1Autoscale->checkState());
+    settings->setValue("chkAutoMzMax", chkMs1Autoscale->checkState());
+    settings->setValue("spnMzMinOffset", spnMs1Offset->value());
+    settings->setValue("spnMzMinVal", spnMs1MzMinVal->value());
+    settings->setValue("spnMzMaxOffset", spnMs1Offset->value());
+    settings->setValue("spnMzMaxVal", spnMs1MzMaxVal->value());
 
     //ms2 display settings
-    settings->setValue("chkMs2AutoMzMin", chkMs2AutoMzMin->checkState());
-    settings->setValue("chkMs2AutoMzMax", chkMs2AutoMzMax->checkState());
-    settings->setValue("spnMs2MzMinOffset", spnMs2MzMinOffset->value());
+    settings->setValue("chkMs2AutoMzMin", chkMs2Autoscale->checkState());
+    settings->setValue("chkMs2AutoMzMax", chkMs2Autoscale->checkState());
+    settings->setValue("spnMs2MzMinOffset", spnMs2Offset->value());
     settings->setValue("spnMs2MzMin", spnMs2MzMin->value());
-    settings->setValue("spnMs2MzMaxOffset", spnMs2MzMaxOffset->value());
+    settings->setValue("spnMs2MzMaxOffset", spnMs2Offset->value());
     settings->setValue("spnMs2MzMax", spnMs2MzMax->value());
+
+    //ms3 display settings
+    settings->setValue("chkMs3AutoMzMin", chkMs3Autoscale->checkState());
+    settings->setValue("chkMs3AutoMzMax", chkMs3Autoscale->checkState());
+    settings->setValue("spnMs3MzMinOffset", spnMs3Offset->value());
+    settings->setValue("spnMs3MzMin", spnMs3MzMin->value());
+    settings->setValue("spnMs3MzMaxOffset", spnMs3Offset->value());
+    settings->setValue("spnMs3MzMax", spnMs3MzMax->value());
 
     //bookmark warn display options
     settings->setValue("chkBkmkWarnMzRt", chkBkmkWarnMzRt->checkState());
