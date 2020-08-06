@@ -180,7 +180,14 @@ void SettingsForm::setFormValues() {
 
     if (!settings) return;
 
-    eic_smoothingAlgorithm->setCurrentIndex(settings->value("eic_smoothingAlgorithm").toInt());
+    //Issue 255: disable Savitzky-Golay smoothing
+    int smoothingAlg = settings->value("eic_smoothingAlgorithm").toInt();
+    if(smoothingAlg == EIC::SmootherType::AVG){
+        eic_smoothingAlgorithm->setCurrentText("Moving Average");
+    } else {
+        eic_smoothingAlgorithm->setCurrentText("Gaussian");
+    }
+
     eic_smoothingWindow->setValue(settings->value("eic_smoothingWindow").toDouble());
     grouping_maxRtWindow->setValue(settings->value("grouping_maxRtWindow").toDouble());
     maxNaturalAbundanceErr->setValue(settings->value("maxNaturalAbundanceErr").toDouble());
@@ -377,6 +384,16 @@ void SettingsForm::getFormValues() {
 
 
     settings->setValue("eic_smoothingAlgorithm",eic_smoothingAlgorithm->currentIndex());
+
+    const QString currentText = eic_smoothingAlgorithm->currentText();
+
+    //Issue 255: disable Savitzky-Golay smoothing - fall back to Gaussian
+    if(currentText == "Moving Average"){
+        settings->setValue("eic_smoothingAlgorithm",EIC::SmootherType::AVG);
+    } else {
+        settings->setValue("eic_smoothingAlgorithm",EIC::SmootherType::GAUSSIAN);
+    }
+
     settings->setValue("eic_smoothingWindow",eic_smoothingWindow->value());
     settings->setValue("grouping_maxRtWindow",grouping_maxRtWindow->value());
     settings->setValue("maxNaturalAbundanceErr",maxNaturalAbundanceErr->value());

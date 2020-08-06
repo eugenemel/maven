@@ -323,11 +323,6 @@
            <widget class="QComboBox" name="eic_smoothingAlgorithm">
             <item>
              <property name="text">
-              <string>Savitzky-Golay</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
               <string>Gaussian</string>
              </property>
             </item>
