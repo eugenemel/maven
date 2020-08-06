@@ -1,9 +1,9 @@
 #include "spectrawidget.h"
 
-SpectraWidget::SpectraWidget(MainWindow* mw, bool isMs2Spectrum) {
+SpectraWidget::SpectraWidget(MainWindow* mw, int msLevel) {
 
     this->mainwindow = mw;
-    this->isMs2Spectrum = isMs2Spectrum;
+    this->_msLevel = msLevel;
 
    _currentScan = nullptr;
    _avgScan = nullptr;
@@ -691,7 +691,7 @@ void SpectraWidget::findBounds(bool checkX, bool checkY) {
     float minMZ;
     float maxMZ;
 
-    if (isMs2Spectrum) {
+    if (_msLevel == 2) {
 
         bool isAutoMzMin = mainwindow->getSettings()->value("chkMs2AutoMzMin", false).toBool();
         bool isAutoMzMax = mainwindow->getSettings()->value("chkMs2AutoMzMax", true).toBool();
@@ -705,7 +705,7 @@ void SpectraWidget::findBounds(bool checkX, bool checkY) {
         minMZ = isAutoMzMin ? _currentScan->mz[0] - mzMinOffset : mzMinVal;
         maxMZ = isAutoMzMax ? _currentScan->mz[_currentScan->mz.size()-1] + mzMaxOffset : mzMaxVal;
 
-    } else {
+    } else if (_msLevel == 1){
 
         bool isAutoMzMin = mainwindow->getSettings()->value("chkAutoMzMin", false).toBool();
         bool isAutoMzMax = mainwindow->getSettings()->value("chkAutoMzMax", true).toBool();
@@ -911,7 +911,7 @@ void SpectraWidget::setMzFocus(Peak* peak) {
 }
 
 void SpectraWidget::setMzFocus(float mz) {
-    if (_currentScan == NULL or _currentScan->mslevel>1 or isMs2Spectrum) return;
+    if (!_currentScan or _currentScan->mslevel>1 or _msLevel != 1) return;
     int bestMatch=-1; 
     float bestMatchDiff=FLT_MAX;
 

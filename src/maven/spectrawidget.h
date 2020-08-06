@@ -11,7 +11,7 @@ class SpectraWidget : public QGraphicsView
 {
     Q_OBJECT
 public:
-    SpectraWidget(MainWindow* mw, bool isMs2Spectrum=false);
+    SpectraWidget(MainWindow* mw, int msLevel=1);
     static vector<mzLink> findLinks(float centerMz, Scan* scan, float ppm, int ionizationMode);
 
 
@@ -57,7 +57,7 @@ public slots:
 
                     void findBounds(bool checkX, bool checkY);
         private:
-                    bool isMs2Spectrum;
+                    int _msLevel;
                     MainWindow* mainwindow;
                     Scan* _currentScan;
                     Scan* _avgScan;

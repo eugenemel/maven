@@ -142,7 +142,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     eicWidget = new EicWidget(this);
     setCentralWidget(eicWidgetController());
 
-    spectraWidget = new SpectraWidget(this);
+    spectraWidget = new SpectraWidget(this, 1);
     isotopeWidget =  new IsotopeWidget(this);
     massCalcWidget =  new MassCalcWidget(this);
     covariantsPanel= new TreeDockWidget(this,"Covariants",3);
@@ -182,10 +182,10 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     projectDockWidget =  new ProjectDockWidget(this);
     rconsoleDockWidget =  new RconsoleWidget(this);
 
-    fragmentationSpectraWidget = new SpectraWidget(this, true);
+    fragmentationSpectraWidget = new SpectraWidget(this, 2);
     fragmentationSpectraDockWidget =  createDockWidget("Fragmentation Spectra",fragmentationSpectraWidget);
 
-    ms3SpectraWidget = new SpectraWidget(this, false);
+    ms3SpectraWidget = new SpectraWidget(this, 2);
     ms3SpectraDockWidget = createDockWidget("MS3 Spectra", ms3SpectraWidget);
 
     ligandWidget->setVisible(false);
