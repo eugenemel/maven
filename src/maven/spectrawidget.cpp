@@ -686,7 +686,7 @@ void SpectraWidget::drawGraph() {
 void SpectraWidget::findBounds(bool checkX, bool checkY) {
 
     //bounds
-	if (_currentScan == NULL || _currentScan->mz.size() == 0) return;
+    if (!_currentScan || _currentScan->mz.size() == 0) return;
 
     float minMZ;
     float maxMZ;
@@ -718,6 +718,24 @@ void SpectraWidget::findBounds(bool checkX, bool checkY) {
 
         minMZ = isAutoMzMin ? _currentScan->mz[0] - mzMinOffset : mzMinVal;
         maxMZ = isAutoMzMax ? _currentScan->mz[_currentScan->mz.size()-1] + mzMaxOffset : mzMaxVal;
+
+    } else if (_msLevel == 3) {
+
+        bool isAutoMzMin = mainwindow->getSettings()->value("chkMs3AutoMzMin", false).toBool();
+        bool isAutoMzMax = mainwindow->getSettings()->value("chkMs3AutoMzMax", true).toBool();
+
+        double mzMinOffset = mainwindow->getSettings()->value("spnMs3MzMinOffset", 10.0).toDouble();
+        double mzMaxOffset = mainwindow->getSettings()->value("spnMs3MzMaxOffset", 10.0).toDouble();
+
+        double mzMinVal = mainwindow->getSettings()->value("spnMs3MzMin", 0.0).toDouble();
+        double mzMaxVal = mainwindow->getSettings()->value("spnMs3MzMax", 1200.0).toDouble();
+
+        minMZ = isAutoMzMin ? _currentScan->mz[0] - mzMinOffset : mzMinVal;
+        maxMZ = isAutoMzMax ? _currentScan->mz[_currentScan->mz.size()-1] + mzMaxOffset : mzMaxVal;
+
+    } else {
+        minMZ = 0;
+        maxMZ = 1200;
     }
 
     //No enforcement is done in the GUI options panel - prevent negative range
