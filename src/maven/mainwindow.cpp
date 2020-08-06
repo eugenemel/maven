@@ -1363,7 +1363,7 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
         isotopeWidget->setCompound(group->compound);
     }
 
-    if ( group->compound != NULL) {
+    if (group->compound) {
         setUrl(group->compound);
     }
 

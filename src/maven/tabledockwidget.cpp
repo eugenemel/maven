@@ -19,9 +19,8 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QS
     treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
     treeWidget->setAcceptDrops(false);    
     treeWidget->setObjectName("PeakGroupTable");
+    treeWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-    connect(treeWidget, SIGNAL(itemPressed(QTreeWidgetItem*,int)),SLOT(showSelectedGroup()));
-    connect(treeWidget, SIGNAL(itemClicked(QTreeWidgetItem*,int)),SLOT(showSelectedGroup()));
     connect(treeWidget, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),SLOT(showSelectedGroup()));
 
     setupPeakTable();
