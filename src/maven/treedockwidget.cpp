@@ -74,10 +74,8 @@ void TreeDockWidget::addMs3TitleBar() {
 
     setTitleBarWidget(titleBarWidget);
 
-    connect(ms1PrecMzSpn, SIGNAL(valueChanged()), this, SIGNAL(editingFinished(double)));
-    connect(ms2PrecMzSpn, SIGNAL(valueChanged()), this, SIGNAL(editingFinished(double)));
-    connect(ms1PrecMzSpn, SIGNAL(editingFinished(double)), this, SLOT(ms3SearchFromSpinBoxes()));
-    connect(ms2PrecMzSpn, SIGNAL(editingFinished(double)), this, SLOT(ms3SearchFromSpinBoxes()));
+    connect(ms1PrecMzSpn, SIGNAL(valueChanged(double)), this, SLOT(ms3SearchFromSpinBoxes()));
+    connect(ms2PrecMzSpn, SIGNAL(valueChanged(double)), this, SLOT(ms3SearchFromSpinBoxes()));
 
     connect(btnSubmit, SIGNAL(clicked()), this, SLOT(ms3SearchFromSpinBoxes()));
 }
