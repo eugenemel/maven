@@ -185,7 +185,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     fragmentationSpectraWidget = new SpectraWidget(this, 2);
     fragmentationSpectraDockWidget =  createDockWidget("Fragmentation Spectra",fragmentationSpectraWidget);
 
-    ms3SpectraWidget = new SpectraWidget(this, 2);
+    ms3SpectraWidget = new SpectraWidget(this, 3);
     ms3SpectraDockWidget = createDockWidget("MS3 Spectra", ms3SpectraWidget);
 
     ligandWidget->setVisible(false);
