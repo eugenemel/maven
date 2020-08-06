@@ -35,16 +35,16 @@ void TreeDockWidget::addMs3TitleBar() {
     ms1PrecMzSpn = new QDoubleSpinBox();
     ms1PrecMzSpn->setMinimum(0);
     ms1PrecMzSpn->setMaximum(999999999);
-    ms1PrecMzSpn->setSingleStep(0.001);
+    ms1PrecMzSpn->setSingleStep(1);
     ms1PrecMzSpn->setMinimumWidth(120);
-    ms1PrecMzSpn->setDecimals(3);
+    ms1PrecMzSpn->setDecimals(4);
 
     ms2PrecMzSpn = new QDoubleSpinBox();
     ms2PrecMzSpn->setMinimum(0);
     ms2PrecMzSpn->setMaximum(999999999);
-    ms2PrecMzSpn->setSingleStep(0.001);
+    ms2PrecMzSpn->setSingleStep(1);
     ms2PrecMzSpn->setMinimumWidth(120);
-    ms2PrecMzSpn->setDecimals(3);
+    ms2PrecMzSpn->setDecimals(4);
 
     QPushButton *btnSubmit = new QPushButton("Find Scans");
 
@@ -54,7 +54,30 @@ void TreeDockWidget::addMs3TitleBar() {
     toolBar->addWidget(ms2PrecMzSpn);
     toolBar->addWidget(btnSubmit);
 
-    setTitleBarWidget(toolBar);
+    QToolBar *labelToolBar = new QToolBar(this);
+    auto dummy1 = new QWidget(this);
+    dummy1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    auto dummy2 = new QWidget(this);
+    dummy2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    QLabel *lblTitle = new QLabel("MS3 List");
+
+    labelToolBar->addWidget(dummy1);
+    labelToolBar->addWidget(lblTitle);
+    labelToolBar->addWidget(dummy2);
+
+    QMainWindow *titleBarWidget = new QMainWindow();
+
+    titleBarWidget->addToolBar(labelToolBar);
+    titleBarWidget->addToolBarBreak();
+    titleBarWidget->addToolBar(toolBar);
+
+    setTitleBarWidget(titleBarWidget);
+
+    connect(ms1PrecMzSpn, SIGNAL(valueChanged()), this, SIGNAL(editingFinished(double)));
+    connect(ms2PrecMzSpn, SIGNAL(valueChanged()), this, SIGNAL(editingFinished(double)));
+    connect(ms1PrecMzSpn, SIGNAL(editingFinished(double)), this, SLOT(ms3SearchFromSpinBoxes()));
+    connect(ms2PrecMzSpn, SIGNAL(editingFinished(double)), this, SLOT(ms3SearchFromSpinBoxes()));
 
     connect(btnSubmit, SIGNAL(clicked()), this, SLOT(ms3SearchFromSpinBoxes()));
 }
@@ -127,10 +150,13 @@ void TreeDockWidget::showInfo() {
 
                 if (scan->mslevel == 1){
                     mainwindow->getSpectraWidget()->setScan(scan);
-                } else {
+                } else if (scan->mslevel == 2){
                     mainwindow->fragmentationSpectraWidget->setScan(scan);
                     mainwindow->massCalcWidget->setFragmentationScan(scan);
+                } else if (scan->mslevel == 3) {
+                    mainwindow->ms3SpectraWidget->setScan(scan);
                 }
+
                 mainwindow->getEicWidget()->clearEICLines();
                 mainwindow->getEicWidget()->setFocusLine(scan->rt);
 
