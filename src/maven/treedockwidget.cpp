@@ -178,8 +178,8 @@ void TreeDockWidget::showInfo() {
                 float productPpmTolr = mainwindow->getSettings()->value("spnConsensusPeakMatchTolerance", 10).toFloat();
                 bool isIntensityAvgByObserved = mainwindow->getSettings()->value("chkConsensusAvgOnlyObserved", true).toBool();
                 bool isNormalizeIntensityArray = mainwindow->getSettings()->value("chkConsensusNormalizeTo10K", false).toBool();
-                int minNumMs2ScansForConsensus = mainwindow->getSettings()->value("spnConsensusMinPeakPresence", 0).toInt();
-                float minFractionMs2ScansForConsensus = mainwindow->getSettings()->value("spnConsensusMinPeakPresenceFraction", 0).toFloat();
+                int minNumScansForConsensus = mainwindow->getSettings()->value("spnConsensusMinPeakPresence", 0).toInt();
+                float minFractionScansForConsensus = mainwindow->getSettings()->value("spnConsensusMinPeakPresenceFraction", 0).toFloat();
 
                 //Issue 217
                 Fragment::ConsensusIntensityAgglomerationType consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
@@ -232,8 +232,8 @@ void TreeDockWidget::showInfo() {
                                   consensusIntensityAgglomerationType,
                                   isIntensityAvgByObserved,
                                   isNormalizeIntensityArray,
-                                  minNumMs2ScansForConsensus,
-                                  minFractionMs2ScansForConsensus);
+                                  minNumScansForConsensus,
+                                  minFractionScansForConsensus);
 
                 if (mslevel == 1){
                     mainwindow->getSpectraWidget()->setCurrentFragment(f->consensus, mslevel);
