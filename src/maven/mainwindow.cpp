@@ -166,6 +166,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     ms3ScansListWidget->addMs3TitleBar();
     ms3ScansListWidget->setupMs3ScanHeader();
     ms3ScansListWidget->setExclusiveItemType(ScanType);
+    ms3ScansListWidget->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     //Issue 259: Currently only support single scan selection
 //    ms3ScansListWidget->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);

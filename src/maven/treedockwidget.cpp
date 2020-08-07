@@ -240,6 +240,8 @@ void TreeDockWidget::showInfo() {
                 } else if (mslevel == 2){
                     mainwindow->fragmentationSpectraWidget->setCurrentFragment(f->consensus, mslevel);
                     mainwindow->massCalcWidget->setFragment(f->consensus);
+                } else if (mslevel == 3) {
+                    mainwindow->ms3SpectraWidget->setCurrentFragment(f->consensus, mslevel);
                 }
 
                 vector<float> rtsVector;
