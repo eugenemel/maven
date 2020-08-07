@@ -91,6 +91,7 @@ public:
     QComboBox		  *quantType;
     QComboBox         *adductType;
     QLabel			  *statusText;
+    QLabel            *percentageText;
 
     SpectraWidget     *spectraWidget;                   //ms1
     SpectraWidget     *fragmentationSpectraWidget;      //ms2

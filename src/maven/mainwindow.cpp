@@ -127,6 +127,11 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     progressBar->hide();
     statusBar()->addPermanentWidget(progressBar);
 
+    //Issue 251
+    percentageText = new QLabel(this);
+    percentageText->hide();
+    statusBar()->addPermanentWidget(percentageText);
+
     QToolButton *btnBugs = new QToolButton(this);
     btnBugs->setIcon(QIcon(rsrcPath + "/bug.png"));
     btnBugs->setToolTip(tr("Bug!"));
@@ -857,10 +862,22 @@ void MainWindow::setStatusText(QString text){
 
 void MainWindow::setProgressBar(QString text, int progress, int totalSteps){
     setStatusText(text);
-    if (progressBar->isVisible() == false && progress != totalSteps ) { progressBar->show();}
+
+    if (progressBar->isVisible() == false && progress != totalSteps ) {
+        progressBar->show();
+        percentageText->show();
+    }
+
     progressBar->setRange(0,totalSteps);
     progressBar->setValue(progress);
-    if (progress == totalSteps ) { progressBar->hide();}
+
+    int pct = static_cast<int>((100.0f * static_cast<float>(progress)/static_cast<float>(totalSteps)));
+    percentageText->setText(QString::number(pct)+"%");
+
+    if (progress == totalSteps ) {
+        progressBar->hide();
+        percentageText->hide();
+    }
 }
 
 void MainWindow::readSettings() {
