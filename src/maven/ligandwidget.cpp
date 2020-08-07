@@ -62,15 +62,23 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   filterEditor->setMinimumWidth(250);
   filterEditor->setPlaceholderText("Compound Name Filter");
 
-  typingTimer = new QTimer(this);
-  typingTimer->setSingleShot(true);
-
-  connect(typingTimer, SIGNAL(timeout()), this, SLOT(rebuildCompoundTree()));
+  //Issue 250: TODO: button sizing may not look great on other systems
+  toolBar->setLayout(new QFormLayout());
+  QPushButton *btnSubmit = new QPushButton("go");
+  btnSubmit->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
+  QFontMetrics fm(btnSubmit->font());
+  int txtSize = fm.horizontalAdvance(btnSubmit->text());
+  int btnTextPadding = 25;
+  btnSubmit->setMaximumWidth(txtSize+btnTextPadding);
 
   connect(filterEditor, SIGNAL(textChanged(QString)), this, SLOT(setFilterString(QString)));
 
+  connect(filterEditor, SIGNAL(editingFinished()), this, SLOT(rebuildCompoundTree()));
+  connect(btnSubmit, SIGNAL(clicked()), this, SLOT(rebuildCompoundTree()));
+
   //toolBar->addWidget(new QLabel("Compounds: "));
   toolBar->addWidget(filterEditor);
+  toolBar->addWidget(btnSubmit);
   toolBar->addWidget(databaseSelect);
   toolBar->addWidget(galleryButton);
 
@@ -165,7 +173,6 @@ void LigandWidget::setCompoundFocus(Compound* c) {
 void LigandWidget::setFilterString(QString needle) {
     if(needle != filterString) {
         filterString = needle;
-        typingTimer->start(300);
 	} 
 }
 

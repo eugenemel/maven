@@ -130,8 +130,6 @@ private:
     QTreeWidgetItem* addItem(QTreeWidgetItem* parentItem, string key , float value);
     QTreeWidgetItem* addItem(QTreeWidgetItem* parentItem, string key , string value);
 
-    QTimer *typingTimer;
-
 };
 
 #endif
