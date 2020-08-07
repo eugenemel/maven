@@ -418,7 +418,7 @@ void TreeDockWidget::filterTree(QString needle) {
         int itemCount = treeWidget->topLevelItemCount();
         for(int i=0; i < itemCount; i++ ) {
                 QTreeWidgetItem *item = treeWidget->topLevelItem(i);
-                if ( item == NULL) continue;
+                if (!item) continue;
                 if ( needle.isEmpty() || item->text(0).contains(needle,Qt::CaseInsensitive) ) {
                         item->setHidden(false);
                 } else {
@@ -438,7 +438,7 @@ void TreeDockWidget::setupScanListHeader() {
 }
 
 void TreeDockWidget::addScanItem(Scan* scan) {
-        if (scan == NULL) return;
+        if (!scan) return;
 
         MainWindow* mainwindow = (MainWindow*)parentWidget();
         QIcon icon = mainwindow->projectDockWidget->getSampleIcon(scan->sample);
