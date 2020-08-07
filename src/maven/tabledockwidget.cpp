@@ -773,6 +773,9 @@ void TableDockWidget::showAllGroups() {
     treeWidget->expandAll();
 
     updateStatus();
+    if (windowTitle() != "Bookmarks") {
+        searchParamsDialog->txtSrchResults->setText("Total # groups: " + QString::number(allgroups.size()));
+    }
 
     /*
 	if (allgroups.size() > 0 ) { //select last item
