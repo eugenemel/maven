@@ -113,6 +113,7 @@ public:
 
 private:
 
+    QPushButton *btnSubmit;
     QLineEdit*  filterEditor;
     LigandWidgetTreeBuilder *ligandWidgetTreeBuilder = nullptr;
 

@@ -22,7 +22,11 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   treeWidget=new QTreeWidget(this);
   treeWidget->setObjectName(QString::fromUtf8("treeWidget"));
   treeWidget->setSortingEnabled(false);
-  treeWidget->setColumnCount(3);
+
+  treeWidget->setColumnCount(8);
+  QStringList header; header << "Name" << "Adduct" << "Exact Mass" << "Precursor m/z" << "RT" << "Formula" << "SMILES" << "Category";
+  treeWidget->setHeaderLabels( header );
+
   treeWidget->setRootIsDecorated(false);
   treeWidget->setUniformRowHeights(true);
   treeWidget->setHeaderHidden(false);
@@ -64,7 +68,7 @@ LigandWidget::LigandWidget(MainWindow* mw) {
 
   //Issue 250: TODO: button sizing may not look great on other systems
   toolBar->setLayout(new QFormLayout());
-  QPushButton *btnSubmit = new QPushButton("go");
+  btnSubmit = new QPushButton("go");
   btnSubmit->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
   QFontMetrics fm(btnSubmit->font());
   int txtSize = fm.horizontalAdvance(btnSubmit->text());
@@ -189,6 +193,7 @@ void LigandWidget::toggleEnabling(bool isEnabled){
     databaseSelect->setEnabled(isEnabled);
     filterEditor->setEnabled(isEnabled);
     _mw->btnLibrary->setEnabled(isEnabled);
+    btnSubmit->setEnabled(isEnabled);
 }
 
 void LigandWidget::rebuildCompoundTree() {
