@@ -7,22 +7,52 @@
     <x>0</x>
     <y>0</y>
     <width>598</width>
-    <height>319</height>
+    <height>345</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Cluster PeakGroups</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
+   <item row="5" column="0">
     <widget class="QLabel" name="lblSrchParams">
      <property name="text">
       <string>Search Parameters</string>
      </property>
     </widget>
    </item>
+   <item row="7" column="0">
+    <widget class="QTextBrowser" name="txtSrchParams">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="lblSrchResults">
+     <property name="text">
+      <string>Search Results</string>
+     </property>
+    </widget>
+   </item>
    <item row="1" column="0">
-    <widget class="QTextBrowser" name="txtSrchParams"/>
+    <widget class="QTextBrowser" name="txtSrchResults">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="baseSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

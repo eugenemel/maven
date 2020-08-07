@@ -45,6 +45,9 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QS
     searchParamsDialog->setWindowTitle(title);
     searchParamsDialog->setWindowFlags(searchParamsDialog->windowFlags() | Qt::WindowStaysOnTopHint);
     searchParamsDialog->txtSrchParams->setText(this->displayTableInfo);
+    if (title == "Bookmarks"){
+        searchParamsDialog->txtSrchResults->setText(this->displayTableInfo);
+    }
 
     filterTagsDialog = new FilterTagsDialog(this);
     connect(filterTagsDialog, SIGNAL(updateFilter()), this, SLOT(updateTagFilter()));
