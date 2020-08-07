@@ -21,7 +21,10 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QS
     treeWidget->setObjectName("PeakGroupTable");
     treeWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-    connect(treeWidget, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),SLOT(showSelectedGroup()));
+    //Issue 253: Need to use this signal instead of currentItemChanged() or itemClicked()
+    //because the current item is not the same as the selected item(s). The current item is
+    //determined before selected items, leading to strange GUI behavior
+    connect(treeWidget, SIGNAL(itemSelectionChanged()), SLOT(showSelectedGroup()));
 
     setupPeakTable();
 
