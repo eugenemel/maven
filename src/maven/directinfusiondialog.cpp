@@ -144,10 +144,16 @@ void DirectInfusionDialog::analyze() {
     directInfusionUpdate->params->consensusIsIntensityAvgByObserved = this->chkIsIntensityAvgByObserved->isChecked();
     directInfusionUpdate->params->consensusIsNormalizeTo10K = this->chkIsNormalizeIntensityArray->isChecked();
 
+    //Issue 268: In direct infusion runs, there may be many different kinds of SIM scans
+    // eg SIM [650-750], SIM [725-825]
+    // would not expect a precursor ms1 to be present in most of the different kinds of SIM scans.
+    // easiest course of action is to avoid these constraints.
+    // possible TODO: more specific, targeted MS1 filter strings for each individual compound
+
     //ms1 consensus spectrum params
     // directInfusionUpdate->params->consensusMs1PpmTolr = 10; //(default)
-    directInfusionUpdate->params->consensusMinNumMs1Scans = this->spnMinNumMs2ScansForConsensus->value();
-    directInfusionUpdate->params->consensusMinFractionMs1Scans = static_cast<float>(this->spnMinFractionMs2ScansForConsensus->value()/100.0); //displayed as a perentage
+    //directInfusionUpdate->params->consensusMinNumMs1Scans = this->spnMinNumMs2ScansForConsensus->value();
+    //directInfusionUpdate->params->consensusMinFractionMs1Scans = static_cast<float>(this->spnMinFractionMs2ScansForConsensus->value()/100.0); //displayed as a perentage
 
     //ms2 consensus spectrum params
     // directInfusionUpdate->params->consensusPpmTolr = 10; //(default)
