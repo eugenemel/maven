@@ -182,6 +182,7 @@ void DirectInfusionDialog::analyze() {
     directInfusionUpdate->params->ms1MinIntensity = this->spnParentMinIntensity->value();
     directInfusionUpdate->params->ms1ScanFilter = this->txtMs1ScanFilter->toPlainText().toStdString();
 
+    //spectral agglomeration
     if (cmbSpectralDeconvolutionAlgorithm->currentText() == "List All Candidates"){
         directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::ALL_CANDIDATES;
     } else if (cmbSpectralDeconvolutionAlgorithm->currentText() == "Summarize to Acyl Chains or Sum Composition") {
@@ -191,6 +192,7 @@ void DirectInfusionDialog::analyze() {
     } else if (cmbSpectralDeconvolutionAlgorithm->currentText() == "Summarize and Unique Fragments Intensity Ratio"){
         directInfusionUpdate->params->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE;
     }
+    directInfusionUpdate->params->isReduceBySimpleParsimony = chkReduceBySimpleParsimony->isChecked();
 
     QString title = QString("Direct Infusion Analysis");
 
