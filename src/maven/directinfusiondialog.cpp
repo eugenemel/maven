@@ -52,38 +52,18 @@ void DirectInfusionDialog::updateSpectralCompositionDescription() {
     switch(currentIndex){
     case 0:
         text = QString(
-                    "Return all compound matches, without any attempt to determine spectral composition.\n"
-                    "\nThe group rank for all matches is is 0.0\n"
+                    "Return all compound matches, without any attempt to determine spectral composition."
                     );
         break;
     case 1:
         text = QString(
-                    "Compounds are automatically summarized to a higher level if they all contain identical fragment matches.\n"
-                    "\nThe group rank for all matches is is 0.0\n"
+                    "Compounds are automatically summarized to a higher level if they all contain identical fragment matches."
                     );
         break;
     case 2:
         text = QString(
                     "Compounds are automatically summarized to a higher level if they all contain identical fragment matches\n"
-                    "and have identical acyl chain isomeric forms, or the same summed composition.\n"
-                    "\nThe group rank for all matches is is 0.0\n"
-                    );
-        break;
-    case 3:
-        text = QString(
-                    "Compounds are automatically summarized to a higher level if they all contain identical fragment matches\n"
-                    "and have identical acyl chain isomeric forms or the same summed composition.\n"
-                    "\nThis approach assumes that intensities in spectral libraries are normalized to a common max intensity for each spectrum.\n"
-                    "\nWhen a group of compounds are automatically summarized, the theoretical intensity of the summarized compound is"
-                    " the average of the intensity of the all compounds in the group.\n"
-                    "\nCompute:\n"
-                    "\ncompound_relative_abundance = observed_intensity / normalized_theoretical_intensity\n\n"
-                    "This is applied to all unique fragments in each summarized compound. In case there are more than one unique fragment per summarized compound,"
-                    " the highest theoretical intensity is used.\n"
-                    "\nThis is repeated for all summarized compounds.  The relative proportion of each summaried compound is recorded as the Rank.\n"
-                    "\nIf peak groups are agglomerated across samples, the average relative ratio is computed.\n"
-                    "\nIf a compound is missing from a sample, the relative proportion for that sample is 0.\n"
-                    "\nIf a sample contains no compounds, the sample is not included in the proportion computation."
+                    "and have identical acyl chain isomeric forms, or the same summed composition."
                     );
         break;
     }
