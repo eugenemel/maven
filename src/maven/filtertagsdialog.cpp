@@ -171,6 +171,7 @@ void FilterTagsDialog::selectAll() {
     }
 
     tblTags->update();
+    tblTags->repaint();
 }
 
 void FilterTagsDialog::deselectAll() {
@@ -185,6 +186,7 @@ void FilterTagsDialog::deselectAll() {
     }
 
     tblTags->update();
+    tblTags->repaint();
 }
 
 void FilterTagsDialog::clearFilter() {
