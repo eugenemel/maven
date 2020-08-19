@@ -696,12 +696,28 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation 
 //     if (directInfusionGroupAnnotation) delete(directInfusionGroupAnnotation);
 }
 
+//QList<PeakGroup*> TableDockWidget::getGroups() {
+//    QList<PeakGroup*> groups;
+//    for(int i=0; i < allgroups.size(); i++ ) {
+//        groups.push_back(&allgroups[i]);
+//    }
+//    return groups;
+//}
+
+//Issue 264: Only retrieve visible groups (not filtered out)
+//prior to this work, use commented out method above
 QList<PeakGroup*> TableDockWidget::getGroups() {
-    QList<PeakGroup*> groups;
-    for(int i=0; i < allgroups.size(); i++ ) {
-        groups.push_back(&allgroups[i]);
+
+    QList<PeakGroup*> visibleGroups;
+
+    int itemCount = treeWidget->topLevelItemCount();
+    for(int i=0; i < itemCount; i++ ) {
+         QTreeWidgetItem *item = treeWidget->topLevelItem(i);
+            if (!item) continue;
+            traverseAndCollectVisibleGroups(item, visibleGroups);
     }
-    return groups;
+
+    return visibleGroups;
 }
 
 void TableDockWidget::deleteAll() {
@@ -942,6 +958,23 @@ void TableDockWidget::traverseAndDeleteGroups(QTreeWidgetItem *item) {
         }
     }
 
+}
+
+void TableDockWidget::traverseAndCollectVisibleGroups(QTreeWidgetItem *item, QList<PeakGroup*>& groups) {
+
+    if (item && !item->isHidden()) {
+
+        QVariant v = item->data(0,PeakGroupType);
+        PeakGroup* group =  v.value<PeakGroup*>();
+
+        if (group) {
+            groups << group;
+        }
+
+        for (int i = 0; i < item->childCount(); ++i){
+            traverseAndCollectVisibleGroups(item->child(i), groups);
+        }
+    }
 }
 
 void TableDockWidget::deleteSelected() {
