@@ -100,7 +100,7 @@ void CompareSamplesDialog::showEvent(QShowEvent *) {
 		//filelist2->setCurrentIndex(1);
 	} else {
 		QMessageBox msgBox;
- 		msgBox.setText("Sets were not defined. Please map samples to sets in  the Samples Widget");
+        msgBox.setText("Sets were not defined, or no peak groups are visible.\nPlease map samples to sets in the samples widget, or adjust peak group filters.");
  		msgBox.exec(); return;
 	}
 }
