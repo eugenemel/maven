@@ -543,7 +543,7 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
         msg.append("\n\n");
 
         bool isFoundSimilarBookmark = false;
-        for (auto pg : bookmarkedPeaks->getGroups()){
+        for (auto pg : bookmarkedPeaks->getAllGroups()){
             if (pg->deletedFlag) continue;
             if (mzUtils::ppmDist(group->meanMz, pg->meanMz) <= mzTol
                     && (abs(group->meanRt - pg->meanRt) <= rtTol || isWarnMz)) {

@@ -696,16 +696,16 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation 
 //     if (directInfusionGroupAnnotation) delete(directInfusionGroupAnnotation);
 }
 
-//QList<PeakGroup*> TableDockWidget::getGroups() {
-//    QList<PeakGroup*> groups;
-//    for(int i=0; i < allgroups.size(); i++ ) {
-//        groups.push_back(&allgroups[i]);
-//    }
-//    return groups;
-//}
+QList<PeakGroup*> TableDockWidget::getAllGroups() {
+    QList<PeakGroup*> groups;
+    for(int i=0; i < allgroups.size(); i++ ) {
+        groups.push_back(&allgroups[i]);
+    }
+    return groups;
+}
 
 //Issue 264: Only retrieve visible groups (not filtered out)
-//prior to this work, use commented out method above
+//previously, TableDockWidget::getAllGroups()
 QList<PeakGroup*> TableDockWidget::getGroups() {
 
     QList<PeakGroup*> visibleGroups;

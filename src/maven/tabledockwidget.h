@@ -34,6 +34,7 @@ public:
 
 	int  groupCount() { return allgroups.size(); }
 	bool hasPeakGroup(PeakGroup* group);
+    QList<PeakGroup*> getAllGroups(); //even hidden and deleted groups
     QList<PeakGroup*> getGroups();
     static QString groupTagString(PeakGroup* group);
 

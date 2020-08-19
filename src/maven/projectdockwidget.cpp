@@ -723,7 +723,7 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
 
             unsigned int onePeakTableCount = 0;
 
-            for(PeakGroup* group : peakTable->getGroups()) {
+            for(PeakGroup* group : peakTable->getAllGroups()) {
 
                 unsigned int numGroupsAdded = 1 + group->childCount();
 
