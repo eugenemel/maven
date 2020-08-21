@@ -75,6 +75,7 @@ void LibraryMangerDialog::unloadLibrary() {
 
 void LibraryMangerDialog::unloadAllLibraries() {
     qDebug() << "LibraryMangerDialog::unloadAllLibraries()";
+    emit(unloadLibrarySignal("ALL"));
     DB.unloadAllCompounds();
     updateLibraryStats();
 }
