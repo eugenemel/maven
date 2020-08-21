@@ -111,6 +111,7 @@ public slots:
       void updateTagFilter();
       void exportAlignmentFile();
       void disconnectCompounds(QString);
+      void reconnectCompounds(QString);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event);

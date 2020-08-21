@@ -40,8 +40,12 @@ void LibraryMangerDialog::updateLibraryStats() {
 void LibraryMangerDialog::loadLibrary() {
     foreach(QTreeWidgetItem* item, treeWidget->selectedItems() ) {
         QString libraryName = item->text(0);
-        qDebug() << "Load Library" << libraryName;
+
+        qDebug() << "LibraryMangerDialog::loadLibrary(): Load Library" << libraryName;
+
         DB.loadCompoundsSQL(libraryName,DB.getLigandDB());
+
+        emit(loadLibrarySignal(libraryName));
 
         QStringList dataLocations = QStandardPaths::standardLocations(QStandardPaths::DataLocation);
 
@@ -55,8 +59,13 @@ void LibraryMangerDialog::loadLibrary() {
 void LibraryMangerDialog::deleteLibrary() {
 
     foreach(QTreeWidgetItem* item, treeWidget->selectedItems() ) {
+
         QString libraryName = item->text(0);
+
         qDebug() << "LibraryMangerDialog::deleteLibrary(): Delete Library" << libraryName;
+
+        emit(unloadLibrarySignal(libraryName));
+
         DB.deleteCompoundsSQL(libraryName,DB.getLigandDB());
     }
     updateLibraryStats();
@@ -65,18 +74,26 @@ void LibraryMangerDialog::deleteLibrary() {
 void LibraryMangerDialog::unloadLibrary() {
 
     foreach(QTreeWidgetItem* item, treeWidget->selectedItems() ) {
+
         QString libraryName = item->text(0);
+
         qDebug() << "LibraryMangerDialog::unloadLibrary(): Unload Library" << libraryName;
+
         emit(unloadLibrarySignal(libraryName));
+
         DB.unloadCompounds(libraryName);
     }
     updateLibraryStats();
 }
 
 void LibraryMangerDialog::unloadAllLibraries() {
+
     qDebug() << "LibraryMangerDialog::unloadAllLibraries()";
+
     emit(unloadLibrarySignal("ALL"));
+
     DB.unloadAllCompounds();
+
     updateLibraryStats();
 }
 

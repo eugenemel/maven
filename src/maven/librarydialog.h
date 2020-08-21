@@ -17,6 +17,7 @@ public:
     void setMainWindow(MainWindow* w) { this->mainwindow = w; }
 
 signals:
+    void loadLibrarySignal(QString);
     void unloadLibrarySignal(QString);
 
 public slots:

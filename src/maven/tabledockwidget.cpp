@@ -28,6 +28,8 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QS
 
     //Issue 271: once compounds have been deleted, remove any references to them in this peaks table
     connect(mw->libraryDialog, SIGNAL(unloadLibrarySignal(QString)), this, SLOT(disconnectCompounds(QString)));
+    connect(mw->libraryDialog, SIGNAL(loadLibrarySignal(QString)), this, SLOT(reconnectCompounds(QString)));
+
     setupPeakTable();
 
     traindialog = new TrainDialog(this);
@@ -2146,6 +2148,17 @@ void TableDockWidget::disconnectCompounds(QString dbName) {
     for (PeakGroup& pg : allgroups) {
         if (pg.compound && (dbName == "ALL" || pg.compound->db == dbName.toStdString())) {
             pg.compound = nullptr;
+        }
+    }
+}
+
+
+void TableDockWidget::reconnectCompounds(QString dbName) {
+    qDebug() << "TableDockWidget::reconnectCompounds():" << dbName;
+    for (PeakGroup& pg : allgroups) {
+        if (!pg.compound && !pg.compoundDb.empty() && !pg.compoundId.empty()) {
+            Compound *compound = DB.findSpeciesById(pg.compoundId, pg.compoundDb, false);
+            if (compound) pg.compound = compound;
         }
     }
 }

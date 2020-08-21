@@ -568,6 +568,11 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
             //Issue 92: fall back to rumsDB table if could not find compound the normal way.
             if (!compound && g.searchTableName == "rumsDB" && !rumsDBLibrary.isEmpty()) {
                 compound = DB.findSpeciesById(compoundId, rumsDBLibrary.toStdString(), isAttemptToLoadDB);
+
+                //Issue 271: to facillitate proper disconnect / reconnt from tabledockwidget
+                if (compound){
+                    g.compoundDb = rumsDBLibrary.toStdString();
+                }
             }
 
             //Issue 190: fall back to data stored within the file
