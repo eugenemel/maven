@@ -66,7 +66,7 @@ class Database {
         int getLoadedDatabaseCount(QString databaseName){return loadedDatabase[databaseName];}
         map<string,int>   getChromotographyMethods();
 
-        Compound* findSpeciesById(string id,string db);
+        Compound* findSpeciesById(string id, string db, bool attemptToLoadDB=true);
 		Compound* findSpeciesByPrecursor(float precursorMz, float productMz,int polarity,double amuQ1, double amuQ3);
         set<Compound*> findSpeciesByMass(float mz, float ppm);
         vector<Compound*> findSpeciesByName(string name, string dbname);

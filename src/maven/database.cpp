@@ -424,9 +424,9 @@ Adduct* Database::findAdductByName(string id) {
     return nullptr;
 }
 
-Compound* Database::findSpeciesById(string id,string db) {
+Compound* Database::findSpeciesById(string id, string db, bool attemptToLoadDB) {
 
-    if (!loadedDatabase.count(db.c_str()))  loadCompoundsSQL(db.c_str(),ligandDB);
+    if (attemptToLoadDB && !loadedDatabase.count(db.c_str())) loadCompoundsSQL(db.c_str(),ligandDB);
 
     //cerr << "searching for " << id << " " << compoundIdMap.size() << " " << db << endl;
     if ( compoundIdMap.contains(id + db) ) return compoundIdMap[id + db];
