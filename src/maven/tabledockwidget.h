@@ -110,6 +110,7 @@ public slots:
       void selectGroup(PeakGroup *group);
       void updateTagFilter();
       void exportAlignmentFile();
+      void disconnectCompounds(QString);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event);

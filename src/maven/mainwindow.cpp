@@ -116,7 +116,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
         qDebug() << "       Using build in neural network model";
     }
 
-
+    //Compound Library  Manager
+    libraryDialog = new LibraryMangerDialog(this);
+    libraryDialog->setMainWindow(this);
 
     //progress Bar on the bottom of the page
     statusText  = new QLabel(this);
@@ -237,10 +239,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
     //calibration dialog
     calibrateDialog	 =  new CalibrateDialog(this);
-
-    //Compound Library  Manager
-    libraryDialog = new LibraryMangerDialog(this);
-    libraryDialog->setMainWindow(this);
 
     //Set RumsDB dialog
     setRumsDBDialog  = nullptr; //Issue #121 Intialize to nullptr to avoid Segmentation Fault

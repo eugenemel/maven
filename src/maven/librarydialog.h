@@ -16,6 +16,9 @@ public:
     LibraryMangerDialog(QWidget *parent);
     void setMainWindow(MainWindow* w) { this->mainwindow = w; }
 
+signals:
+    void unloadLibrarySignal(QString);
+
 public slots:
     void show();
     void loadCompoundsFile();

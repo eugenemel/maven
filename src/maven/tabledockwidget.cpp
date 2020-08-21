@@ -26,6 +26,8 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QS
     //determined before selected items, leading to strange GUI behavior
     connect(treeWidget, SIGNAL(itemSelectionChanged()), SLOT(showSelectedGroup()));
 
+    //Issue 271: once compounds have been deleted, remove any references to them in this peaks table
+    connect(mw->libraryDialog, SIGNAL(unloadLibrarySignal(QString)), this, SLOT(disconnectCompounds(QString)));
     setupPeakTable();
 
     traindialog = new TrainDialog(this);
@@ -2135,3 +2137,12 @@ void TableDockWidget::exportAlignmentFile() {
     rtAligner.exportAlignmentFile(anchorPoints, _mainwindow->samples[0], fileName.toStdString());
 }
 
+//Issue 271: avoid nullptr issues
+void TableDockWidget::disconnectCompounds(QString dbName) {
+    qDebug() << "TableDockWidget::disconnectCompounds():" << dbName;
+    for (PeakGroup& pg : allgroups) {
+        if (pg.compound && (dbName == "ALL" || pg.compound->db == dbName.toStdString())) {
+            pg.compound = nullptr;
+        }
+    }
+}

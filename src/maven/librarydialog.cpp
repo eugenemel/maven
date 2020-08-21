@@ -67,6 +67,7 @@ void LibraryMangerDialog::unloadLibrary() {
     foreach(QTreeWidgetItem* item, treeWidget->selectedItems() ) {
         QString libraryName = item->text(0);
         qDebug() << "LibraryMangerDialog::unloadLibrary(): Unload Library" << libraryName;
+        emit(unloadLibrarySignal(libraryName));
         DB.unloadCompounds(libraryName);
     }
     updateLibraryStats();
