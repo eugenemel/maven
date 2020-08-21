@@ -42,7 +42,7 @@ class ProjectDB {
             void writeSearchResultsToDB();
             int writeGroupSqlite(PeakGroup* group, int parentGroupId, QString tableName);
 
-            void loadPeakGroups(QString tableName, QString rumsDBLibrary);
+            void loadPeakGroups(QString tableName, QString rumsDBLibrary, bool isAttemptToLoadDB=true);
             void loadGroupPeaks(PeakGroup* group);
             void loadMatchTable();
             void loadSearchParams();

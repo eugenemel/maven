@@ -85,6 +85,7 @@ public:
     static mzSample* loadSampleStatic(QString filename);
     vector<Adduct*> availableAdducts; //loaded from file, or fall back to default
     QString rumsDBDatabaseName;
+    bool isAttemptToLoadDB = true; // Issue 271
 
     QDoubleSpinBox 	  *ppmWindowBox;
     QLineEdit         *searchText;

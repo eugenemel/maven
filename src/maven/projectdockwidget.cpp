@@ -654,7 +654,7 @@ void ProjectDockWidget::loadAllPeakTables() {
     qDebug() << "Cleared loaded peak groups.";
 
     //load all peakgroups
-    currentProject->loadPeakGroups("peakgroups", _mainwindow->rumsDBDatabaseName);
+    currentProject->loadPeakGroups("peakgroups", _mainwindow->rumsDBDatabaseName, _mainwindow->isAttemptToLoadDB);
 
     //Issue 73 / mzkitchen 8: load match table
     currentProject->loadMatchTable();

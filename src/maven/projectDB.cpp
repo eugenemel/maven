@@ -464,7 +464,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
     return lastInsertGroupId;
 }
 
-void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary) {
+void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool isAttemptToLoadDB) {
 
         QSqlQuery queryCheckCols(sqlDB);
 
@@ -559,17 +559,17 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary) {
 
             Compound *compound = nullptr;
             if (databaseNames.contains(QString(compoundDB.c_str()))) {
-                compound = DB.findSpeciesById(compoundId, compoundDB);
+                compound = DB.findSpeciesById(compoundId, compoundDB, isAttemptToLoadDB);
             }
 
             //Issue 92: fall back to rumsDB table if could not find compound the normal way.
             if (!compound && g.searchTableName == "rumsDB" && !rumsDBLibrary.isEmpty()) {
-                compound = DB.findSpeciesById(compoundId, rumsDBLibrary.toStdString());
+                compound = DB.findSpeciesById(compoundId, rumsDBLibrary.toStdString(), isAttemptToLoadDB);
             }
 
             //Issue 190: fall back to data stored within the file
             if (!compound && projectFileDatabaseNames.contains(QString(compoundDB.c_str()))) {
-                compound = DB.findSpeciesById(compoundId, compoundDB);
+                compound = DB.findSpeciesById(compoundId, compoundDB, isAttemptToLoadDB);
             }
 
             if (compound)  {
@@ -581,7 +581,7 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary) {
 
 
         } else if (!compoundName.empty() && !compoundDB.empty()) {
-            vector<Compound*>matches = DB.findSpeciesByName(compoundName,compoundDB);
+            vector<Compound*>matches = DB.findSpeciesByName(compoundName, compoundDB); //TODO add isAttemptToLoadDB argument
             if (matches.size()>0) g.compound = matches[0];
         }
 
