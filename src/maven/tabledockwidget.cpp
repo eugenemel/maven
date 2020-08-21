@@ -670,6 +670,9 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation 
         }
 
         pg.compound = compound;
+        pg.compoundDb = compound->db;
+        pg.compoundId = compound->id;
+
         pg.adduct = adduct;
         pg.minMz = directInfusionGroupAnnotation->precMzMin;
         pg.maxMz = directInfusionGroupAnnotation->precMzMax;

@@ -265,6 +265,9 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
                  //delete(peakGroupPtr) is called in the slot that receives the emit(newPeakGroup()) call
 
                  peakGroupPtr->compound = compound;
+                 peakGroupPtr->compoundId = compound->id;
+                 peakGroupPtr->compoundDb = compound->db;
+
                  peakGroupPtr->adduct = slice->adduct;
                  peakGroupPtr->tagString = slice->adduct->name;
                  peakGroupPtr->fragMatchScore = s;
@@ -549,6 +552,8 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
                         if (isRetainUnmatchedCompounds) {
                             group.compound = nullptr;
+                            group.compoundDb = "";
+                            group.compoundId = "";
                         } else {
                             continue;
                         }
@@ -1346,6 +1351,8 @@ void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g, vector<tuple<float, 
 
     if (bestMatchingId != -1){
         g->compound = get<1>(searchableDatabase[bestMatchingId]);
+        g->compoundId = g->compound->id;
+        g->compoundDb = g->compound->db;
         g->adduct = get<2>(searchableDatabase[bestMatchingId]);
         g->fragMatchScore = bestScore;
     }

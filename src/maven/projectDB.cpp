@@ -544,6 +544,9 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
         string compoundName = query.value("compoundName").toString().toStdString();
         string adductName = query.value("adductName").toString().toStdString();
 
+        g.compoundId = compoundId;
+        g.compoundDb = compoundDB;
+
         g.importedCompoundName = compoundName;
 
         //if(!compoundName.empty()) g.tagString=compoundName;
