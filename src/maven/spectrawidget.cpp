@@ -18,6 +18,8 @@ SpectraWidget::SpectraWidget(MainWindow* mw, int msLevel) {
     _nearestCoord = QPointF(0,0);
     _focusCoord = QPointF(0,0);
     _showOverlay=false;
+
+    connect(mainwindow->libraryDialog, SIGNAL(unloadLibrarySignal(QString)), this, SLOT(clearOverlayAndReplot()));
 }
 
 void SpectraWidget::initPlot() {
@@ -308,6 +310,12 @@ void SpectraWidget::overlaySpectralHit(SpectralHit& hit) {
 void SpectraWidget::clearOverlay() {
     _spectralHit = SpectralHit();
     _showOverlay=false;
+}
+
+void SpectraWidget::clearOverlayAndReplot() {
+    clearOverlay();
+    replot();
+    repaint();
 }
 
 void SpectraWidget::overlayPeakGroup(PeakGroup* group) {

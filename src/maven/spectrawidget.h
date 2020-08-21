@@ -50,6 +50,7 @@ public slots:
                     void toggleOverlayLabels();
                     void toggleDisplayFullTitle();
                     void toggleDisplayCompoundId();
+                    void clearOverlayAndReplot();
 
                     Scan* getCurrentScan() { return _currentScan; }
 
