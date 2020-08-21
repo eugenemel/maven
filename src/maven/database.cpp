@@ -156,7 +156,7 @@ void Database::unloadCompounds(QString databaseName) {
     compoundsDB = updatedCompounds;
 
     //re-sort for matching
-    sort(compoundsDB.begin(),compoundsDB.end(), Compound::compMass);
+    sort(compoundsDB.begin(), compoundsDB.end(), Compound::compMass);
 
     delete_all(compoundsToRemove);
 }
