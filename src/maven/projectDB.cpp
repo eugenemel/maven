@@ -574,7 +574,7 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
 
             if (compound)  {
                 g.compound = compound;
-            	//cerr << "Found compound:"  << compound->cid << endl;  
+                //cerr << "Found compound:"  << compound->cid << endl;
             } else {
                 g.tagString = compoundName + "|" + adductName + " | id=" + compoundId;
             }
