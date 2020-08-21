@@ -500,7 +500,9 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
     ProjectDB* selectedProject = new ProjectDB(fileName);
 
     //load compounds stored in the project file
-    DB.loadCompoundsSQL("ALL",selectedProject->sqlDB);
+    if (_mainwindow->isLoadPGCompoundMatches) {
+         DB.loadCompoundsSQL("ALL",selectedProject->sqlDB);
+    }
 
     QStringList pathlist;
     pathlist << projectPath

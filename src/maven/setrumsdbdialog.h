@@ -23,6 +23,7 @@ class SetRumsDBDialog : public QDialog, public Ui_setrumsDBDialog {
         void cancelLoading();
         void updateComboBox();
         void setAttemptToLoadDBFlag();
+        void setLoadPGCompoundMatchesFlag();
 
     private:
         MainWindow* mainWindow;

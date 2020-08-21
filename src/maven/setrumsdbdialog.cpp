@@ -18,6 +18,7 @@ SetRumsDBDialog::SetRumsDBDialog(QWidget *parent) : QDialog(parent) {
         connect(btnCancel, SIGNAL(clicked()), this, SLOT(cancelLoading()));
         connect(btnSelectLibrary, SIGNAL(clicked()), mainWindow->libraryDialog, SLOT(show()));
         connect(chkmzrollDBLoadLibs, SIGNAL(clicked()), this, SLOT(setAttemptToLoadDBFlag()));
+        connect(chkmzrollDBLoadPGCompounds, SIGNAL(clicked()), this, SLOT(setLoadPGCompoundMatchesFlag()));
 
         btnUseSelected->setFocus();
 
@@ -57,4 +58,8 @@ bool SetRumsDBDialog::isCancelled(){
 
 void SetRumsDBDialog::setAttemptToLoadDBFlag(){
     mainWindow->isAttemptToLoadDB = chkmzrollDBLoadLibs->checkState() != Qt::Unchecked;
+}
+
+void SetRumsDBDialog::setLoadPGCompoundMatchesFlag(){
+    mainWindow->isLoadPGCompoundMatches = chkmzrollDBLoadPGCompounds->checkState() != Qt::Unchecked;
 }
