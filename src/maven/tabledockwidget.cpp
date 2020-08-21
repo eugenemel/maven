@@ -1558,10 +1558,10 @@ PeakGroup* TableDockWidget::readGroupXML(QXmlStreamReader& xml,PeakGroup* parent
     if (!srmId.empty()) g.setSrmId(srmId);
 
 	if (!compoundId.empty()){
-        Compound* c = DB.findSpeciesById(compoundId,compoundDB);
+        Compound* c = DB.findSpeciesById(compoundId, compoundDB, _mainwindow->isAttemptToLoadDB);
 		if (c) g.compound = c;
 	} else if (!compoundName.empty() && !compoundDB.empty()) {
-		vector<Compound*>matches = DB.findSpeciesByName(compoundName,compoundDB);
+        vector<Compound*>matches = DB.findSpeciesByName(compoundName, compoundDB, _mainwindow->isAttemptToLoadDB);
 		if (matches.size()>0) g.compound = matches[0];
 	}
 

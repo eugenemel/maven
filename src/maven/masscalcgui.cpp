@@ -346,7 +346,7 @@ void MassCalcWidget::showInfo() {
         QVariant compoundId = item->data(0, Qt::UserRole);
         QString adductName = item->data(1, Qt::UserRole).toString();
 
-        Compound *compound = DB.findSpeciesById(to_string(compoundId.toInt()), _mw->rumsDBDatabaseName.toStdString());
+        Compound *compound = DB.findSpeciesById(to_string(compoundId.toInt()), _mw->rumsDBDatabaseName.toStdString(), _mw->isAttemptToLoadDB);
 
         if (compound) {
             _mw->fragmentationSpectraWidget->overlayCompound(compound);
