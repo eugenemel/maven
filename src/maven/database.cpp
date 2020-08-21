@@ -443,8 +443,8 @@ Compound* Database::findSpeciesById(string id, string db, bool attemptToLoadDB) 
 }
 
 
-vector<Compound*> Database::findSpeciesByName(string name, string dbname) {
-        if (!loadedDatabase.count(dbname.c_str()))  loadCompoundsSQL(dbname.c_str(),ligandDB);
+vector<Compound*> Database::findSpeciesByName(string name, string dbname, bool attemptToLoadDB) {
+        if (attemptToLoadDB && !loadedDatabase.count(dbname.c_str()))  loadCompoundsSQL(dbname.c_str(),ligandDB);
 
         vector<Compound*> set;
         qDebug() << "Database::findSpeciesByName()" << name.c_str();

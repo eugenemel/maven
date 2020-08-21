@@ -581,7 +581,7 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
 
 
         } else if (!compoundName.empty() && !compoundDB.empty()) {
-            vector<Compound*>matches = DB.findSpeciesByName(compoundName, compoundDB); //TODO add isAttemptToLoadDB argument
+            vector<Compound*>matches = DB.findSpeciesByName(compoundName, compoundDB, isAttemptToLoadDB);
             if (matches.size()>0) g.compound = matches[0];
         }
 
