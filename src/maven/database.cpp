@@ -456,6 +456,16 @@ vector<Compound*> Database::findSpeciesByName(string name, string dbname, bool a
 		return set;
 }
 
+/**
+ * @brief Database::findSpeciesByNameAndAdduct
+ * @param compoundName
+ * @param adductName
+ * @param dbname
+ * @return
+ *
+ * @deprecated
+ * no usages
+ */
 Compound* Database::findSpeciesByNameAndAdduct(string compoundName, string adductName, string dbname){
 
     if (!loadedDatabase.count(dbname.c_str()))  loadCompoundsSQL(dbname.c_str(),ligandDB);
