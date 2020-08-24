@@ -572,26 +572,16 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
         isAddBookmark = true;
     }
 
+    //Issue 280: Always make a copy of the peak group.
     if (isAddBookmark) {
 
+        PeakGroup *groupCopy = new PeakGroup(*group);
+
         bool isAddChildren = settings->value("chkIncludeChildren", false).toBool();
+        if (!isAddChildren) groupCopy->children.clear();
 
-        if (isAddChildren) {
-
-            //does not copy/duplicate original group
-            PeakGroup *pg = bookmarkedPeaks->addPeakGroup(group,true);
-            bookmarkedPeaks->selectGroup(pg);
-
-        } else {
-
-            //duplicates original group, removes children from copy.
-            //TODO: memory leak
-            PeakGroup *groupCopy = new PeakGroup(*group);
-            groupCopy->children.clear();
-            groupCopy = bookmarkedPeaks->addPeakGroup(groupCopy, true);
-            bookmarkedPeaks->selectGroup(groupCopy);
-        }
-
+        groupCopy = bookmarkedPeaks->addPeakGroup(groupCopy, true);
+        bookmarkedPeaks->selectGroup(groupCopy);
     }
 }
 
