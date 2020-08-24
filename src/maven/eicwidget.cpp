@@ -1439,6 +1439,15 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
     if (!group->srmId.empty()) {
         setSrmId(group->srmId);
     }
+    //Issue 235 debugging
+    //Note: &(group) == &(group->parent), which should probably never be true
+    //
+    qDebug() << "_autoZoom: " <<_autoZoom;
+    qDebug() << "group->parent: " << &(group->parent);
+    qDebug() << "_slice: " << &(_slice);
+    qDebug() << "_slice.rtmin:" << _slice.rtmin;
+    qDebug() << "group->parent->minRt: " << group->parent->minRt; // TODO: program crashes here
+    qDebug() << "_zoomFactor: " << _zoomFactor;
 
     if ( _autoZoom && group->parent) {
         _slice.rtmin = group->parent->minRt- 2 * _zoomFactor;
