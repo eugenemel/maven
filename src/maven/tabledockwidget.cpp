@@ -573,7 +573,9 @@ void TableDockWidget::selectGroup(PeakGroup* group) {
     pair<rowIterator, rowIterator> tableRows = groupToItem.equal_range(group);
     for (rowIterator it = tableRows.first; it != tableRows.second; it++) {
          QTreeWidgetItem *item = it->second;
-         item->setSelected(true);
+         if (!item->isHidden()) {
+             item->setSelected(true);
+         }
     }
 
 }
