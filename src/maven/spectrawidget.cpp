@@ -396,7 +396,7 @@ void SpectraWidget::overlayCompound(Compound* c) {
    hit.scan = _currentScan;
    hit.precursorMz = c->precursorMz;
    hit.productPPM=  mainwindow->massCalcWidget->fragmentPPM->value();
-   cerr << "overlayCompound() " << c->name << " #theory=" << c->fragment_mzs.size() << "\t #obs=" << hit.scan->nobs() << "\t #matched=" << hit.matchCount << endl;
+   cerr << "SpectraWidget::overlayCompound() " << c->name << " #theory=" << c->fragment_mzs.size() << "\t #obs=" << hit.scan->nobs() << "\t #matched=" << hit.matchCount << endl;
 
    for(int i=0; i < c->fragment_mzs.size(); i++) 	   hit.mzList << c->fragment_mzs[i];
    for(int i=0; i < c->fragment_intensity.size(); i++) hit.intensityList << c->fragment_intensity[i];
