@@ -235,6 +235,7 @@ void EicWidget::mouseDoubleClickEvent(QMouseEvent* event){
 void EicWidget::selectionChangedAction() {}
 
 void EicWidget::clearEICLines() {
+    qDebug() <<" EicWidget::clearEICLines()";
 
     //delete, clear out old focus lines
     for (auto item : _focusLines){
@@ -1443,10 +1444,10 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
     //Note: &(group) == &(group->parent), which should probably never be true
     //
     qDebug() << "_autoZoom: " << _autoZoom;
-    qDebug() << "group->parent: " << &(group->parent);
+    if (group->parent) qDebug() << "group->parent: " << &(group->parent);
     qDebug() << "_slice: " << &(_slice);
     qDebug() << "_slice.rtmin:" << _slice.rtmin;
-    qDebug() << "group->parent->minRt: " << group->parent->minRt; // TODO: program crashes here
+    if (group->parent) qDebug() << "group->parent->minRt: " << group->parent->minRt;
     qDebug() << "_zoomFactor: " << _zoomFactor;
 
     if ( _autoZoom && group->parent) {
