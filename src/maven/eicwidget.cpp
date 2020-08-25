@@ -145,6 +145,12 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
     this->_integratedGroup.adduct = _slice.adduct;
     this->_integratedGroup.srmId = _slice.srmId;
 
+    //Issue 280
+    if (_alwaysDisplayGroup && _selectedGroup == *(_alwaysDisplayGroup)) {
+        _integratedGroup.labels = _alwaysDisplayGroup->labels;
+        _integratedGroup.fragMatchScore.mergedScore = _alwaysDisplayGroup->fragMatchScore.mergedScore;
+    }
+
     //Is it better to make a copy of an existing compound? or always treat captured content as mz@rt?
 //    _integratedGroup.compound = nullptr;
 //    _integratedGroup.adduct = nullptr;
@@ -1340,8 +1346,10 @@ void EicWidget::setSrmId(string srmId) {
 }
 
 void EicWidget::setCompound(Compound* c, Adduct* adduct) {
-    if ( c == NULL ) return;
+    if (!c) return;
     if ( getMainWindow()->sampleCount() == 0) return;
+
+    _alwaysDisplayGroup = nullptr; // Issue 280
 
     vector <mzSample*> samples = getMainWindow()->getVisibleSamples();
     if (samples.size() == 0 ) return;
