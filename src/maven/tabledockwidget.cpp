@@ -1039,22 +1039,18 @@ void TableDockWidget::setClipboard() {
 void TableDockWidget::tagGroup(const QString &tagLabel){
     char c = tagLabel.toLatin1().data()[0];
     setGroupLabel(c);
-    if (treeWidget->selectedItems().size() == 1) showNextGroup();
 }
 
 void TableDockWidget::markGroupGood() { 
     setGroupLabel('g');
-    if (treeWidget->selectedItems().size() == 1) showNextGroup();
 }
 
 void TableDockWidget::markGroupBad() { 
     setGroupLabel('b');
-    if (treeWidget->selectedItems().size() == 1) showNextGroup();
 }
 
 void TableDockWidget::unmarkSelectedGroups() {
     setGroupLabel('\0');
-    if (treeWidget->selectedItems().size() == 1) showNextGroup();
 }
 
 void TableDockWidget::showLastGroup() {
@@ -1157,7 +1153,6 @@ void TableDockWidget::keyPressEvent(QKeyEvent *e ) {
         if (tag->hotkey == keyString.toLatin1().data()[0]){
 
             setGroupLabel(tag->label);
-            if (treeWidget->selectedItems().size() == 1) showNextGroup();
 
             break; // found the key, no need to continue searching through tag list
         }
