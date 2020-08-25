@@ -1030,15 +1030,15 @@ void EicWidget::wheelEvent(QWheelEvent *event) {
     if (_slice.rtmin < bounds.rtmin) _slice.rtmin = bounds.rtmin;
     if (_slice.rtmax > bounds.rtmax) _slice.rtmax = bounds.rtmax;
     // qDebug() << "EicWidget::wheelEvent() " << _slice.rtmin << " " << _slice.rtmax << endl;
-    replot(NULL);
+    replot(nullptr);
 }
 
 void EicWidget::addFocusLine(PeakGroup* group) { 
  //qDebug <<" EicWidget::addFocusLine(PeakGroup* group)";
 	//focus line
-	if ( group == NULL ) return;
+    if (!group) return;
 
-    if ( group->compound != NULL and group->compound->expectedRt > 0 ) {
+    if (group->compound and group->compound->expectedRt > 0 ) {
 		_focusLineRt=group->compound->expectedRt;
     }
     
