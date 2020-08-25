@@ -1442,7 +1442,7 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
     //Issue 235 debugging
     //Note: &(group) == &(group->parent), which should probably never be true
     //
-    qDebug() << "_autoZoom: " <<_autoZoom;
+    qDebug() << "_autoZoom: " << _autoZoom;
     qDebug() << "group->parent: " << &(group->parent);
     qDebug() << "_slice: " << &(_slice);
     qDebug() << "_slice.rtmin:" << _slice.rtmin;
