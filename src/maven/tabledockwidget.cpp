@@ -1925,6 +1925,10 @@ void TableDockWidget::switchTableView() {
     updateTable();
 }
 
+void TableDockWidget::filterTree() {
+    filterTree(filterEditor->text());
+}
+
 void TableDockWidget::filterTree(QString needle) {
 
         int itemCount = treeWidget->topLevelItemCount();

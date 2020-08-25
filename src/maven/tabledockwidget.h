@@ -101,6 +101,7 @@ public slots:
           int loadCSVFile(QString filename, QString sep);
           void switchTableView();
           void clearClusters();
+          void filterTree();
           void filterTree(QString needle);
           void rescoreFragmentation();
       void changePeakGroupDisplay();
