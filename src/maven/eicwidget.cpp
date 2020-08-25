@@ -336,7 +336,7 @@ void EicWidget::mouseMoveEvent(QMouseEvent* event){
 }
 
 void EicWidget::cleanup() {
- //qDebug <<" EicWidget::cleanup()";
+     qDebug() <<" EicWidget::cleanup()";
 	//remove groups
 	delete_all(eics);
 	eics.clear();
