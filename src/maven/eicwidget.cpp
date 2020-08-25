@@ -188,6 +188,8 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
 
     _integratedGroup.groupStatistics();
 
+    _integratedGroup.groupRank = 0.0f;
+
     setSelectedGroup(&_integratedGroup);
 
     getMainWindow()->bookmarkPeakGroup(&_integratedGroup);
