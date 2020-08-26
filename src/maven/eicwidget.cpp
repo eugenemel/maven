@@ -20,6 +20,7 @@ EicWidget::EicWidget(QWidget *p) {
     _selectionLine = nullptr;
     _statusText=nullptr;
     _alwaysDisplayGroup = nullptr;
+    _integratedGroup = nullptr;
 
 	autoZoom(true);
 	showPeaks(true);
@@ -138,17 +139,23 @@ void EicWidget::mouseReleaseEvent(QMouseEvent *event) {
 void EicWidget::integrateRegion(float rtmin, float rtmax) {
  //qDebug <<" EicWidget::integrateRegion(float rtmin, float rtmax)";
 	//qDebug << "Integrating area from " << rtmin << " to " << rtmax;
-	this->_integratedGroup.clear();
+
+    if (_integratedGroup){
+        delete(_integratedGroup);
+        _integratedGroup = nullptr;
+    }
+
+    _integratedGroup = new PeakGroup();
 
     //may make a copy of an existing compound in bookmarks
-    this->_integratedGroup.compound = _slice.compound;
-    this->_integratedGroup.adduct = _slice.adduct;
-    this->_integratedGroup.srmId = _slice.srmId;
+    _integratedGroup->compound = _slice.compound;
+    _integratedGroup->adduct = _slice.adduct;
+    _integratedGroup->srmId = _slice.srmId;
 
     //Issue 280
     if (_alwaysDisplayGroup && _selectedGroup == *(_alwaysDisplayGroup)) {
-        _integratedGroup.labels = _alwaysDisplayGroup->labels;
-        _integratedGroup.fragMatchScore.mergedScore = _alwaysDisplayGroup->fragMatchScore.mergedScore;
+        _integratedGroup->labels = _alwaysDisplayGroup->labels;
+        _integratedGroup->fragMatchScore.mergedScore = _alwaysDisplayGroup->fragMatchScore.mergedScore;
     }
 
     //Is it better to make a copy of an existing compound? or always treat captured content as mz@rt?
@@ -182,7 +189,7 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
 		}
 		if (peak.pos > 0) {
 			eic->getPeakDetails(peak);
-			_integratedGroup.addPeak(peak);
+            _integratedGroup->addPeak(peak);
             qDebug() << "EicWidget::integrateRegion(): integrateRegion: " << eic->sampleName.c_str() << " " << peak.peakArea << " " << peak.peakAreaCorrected;
 			this->showPeakArea(&peak);
 		}
@@ -192,13 +199,13 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
 
 	}
 
-    _integratedGroup.groupStatistics();
+    _integratedGroup->groupStatistics();
 
-    _integratedGroup.groupRank = 0.0f;
+    _integratedGroup->groupRank = 0.0f;
 
-    setSelectedGroup(&_integratedGroup);
+    setSelectedGroup(_integratedGroup);
 
-    getMainWindow()->bookmarkPeakGroup(&_integratedGroup);
+    getMainWindow()->bookmarkPeakGroup(_integratedGroup);
     PeakGroup* lastBookmark = getMainWindow()->getBookmarkTable()->getLastBookmarkedGroup();
 
     if (lastBookmark and lastBookmark->compound) {
@@ -234,7 +241,7 @@ void EicWidget::mouseDoubleClickEvent(QMouseEvent* event){
 		}
 	}
 
-	if (selScan != NULL) { 
+    if (selScan) {
         setFocusLine(selScan->rt);
         emit(scanChanged(selScan));
 	}
@@ -518,7 +525,8 @@ void EicWidget::replot() {
 }
 
 void EicWidget::addEICLines(bool showSpline) {	
-    //qDebug() <<" EicWidget::addEICLines(bool showSpline)";
+    qDebug() <<"EicWidget::addEICLines()";
+
     QTime timerZ; timerZ.start();
     //sort eics by peak height of selected group
     vector<Peak> peaks;
@@ -536,7 +544,7 @@ void EicWidget::addEICLines(bool showSpline) {
         if (eic->size()==0) continue;
         if (eic->sample && eic->sample->isSelected == false) continue;
         if (eic->maxIntensity <= 0) continue;
-        EicLine* line = new EicLine(0,scene());
+        EicLine* line = new EicLine(nullptr, scene());
 
         //sample stacking..
         int zValue=0;
@@ -577,6 +585,7 @@ void EicWidget::addEICLines(bool showSpline) {
         //line->fixEnds();
     }
 
+        qDebug() <<"EicWidget::addEICLines() completed";
 }
 
 void EicWidget::addCubicSpline() {
@@ -801,7 +810,7 @@ void EicWidget::addBaseLine() {
 void EicWidget::addBaseline(PeakGroup* group) {
     if(_showBaseline == false) return;
 
-    qDebug() << " EicWidget::addBaseline(group)";
+    qDebug() << "EicWidget::addBaseline() group=" << group;
 
     for( unsigned int i=0; i< eics.size(); i++ ) {
         EIC* eic = eics[i];
@@ -895,10 +904,10 @@ void EicWidget::clearPlot() {
     scene()->setSceneRect(10,10,this->width()-10, this->height()-10);
 }
 
-void EicWidget::replot(PeakGroup* group ) {
+void EicWidget::replot(PeakGroup* group) {
 
     if (!group)  _selectedGroup = PeakGroup();
-    qDebug() <<" EicWidget::replot(PeakGroup* group ) group=" << group;
+    qDebug() <<"EicWidget::replot(PeakGroup* group) group=" << group;
 
     QTime timerX; timerX.start();
         if (_slice.rtmax-_slice.rtmin <= 0) return;
@@ -1082,9 +1091,10 @@ void EicWidget::addAxes() {
 }
 
 void EicWidget::addBarPlot(PeakGroup* group ) {
- //qDebug <<" EicWidget::addBarPlot(PeakGroup* group )";
-	if ( group == NULL ) return;
-	if (_barplot == NULL )  _barplot = new BarPlot(NULL,0);
+    qDebug() <<"EicWidget::addBarPlot() group=" << group;
+
+    if (!group) return;
+    if (!_barplot)  _barplot = new BarPlot(nullptr, nullptr);
 	if (_barplot->scene() != scene() ) scene()->addItem(_barplot);
 
 	_barplot->setMainWindow(getMainWindow());
@@ -1167,7 +1177,9 @@ void EicWidget::addBoxPlot(PeakGroup* group) {
 
 void EicWidget::addFitLine(PeakGroup* group) {
  //qDebug <<"EicWidget::addFitLine(PeakGroup* group) ";
-    if (group == NULL)  return;
+
+    if (!group)  return;
+
     vector <mzSample*> samples = getMainWindow()->getVisibleSamples();
 	int steps=50;
 	for(int i=0; i < group->peakCount(); i++ ) {
@@ -1230,7 +1242,7 @@ void EicWidget::addFitLine(PeakGroup* group) {
 }
 
 void EicWidget::showAllPeaks() { 
- //qDebug <<"EicWidget::showAllPeaks() ";
+    qDebug() <<"EicWidget::showAllPeaks()";
 
     if (_groupPeaks) {
         for(int i=0; i < peakgroups.size(); i++ ) {
@@ -1245,6 +1257,7 @@ void EicWidget::showAllPeaks() {
             _alwaysDisplayGroup->minRt >= _slice.rtmin && _alwaysDisplayGroup->maxRt <= _slice.rtmax) {
         addPeakPositions(_alwaysDisplayGroup);
     }
+    qDebug() <<"EicWidget::showAllPeaks() completed";
 }
 
 void EicWidget::addPeakPositions(PeakGroup* group) {
@@ -1436,7 +1449,7 @@ void EicWidget::setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax
 }
 
 void EicWidget::setPeakGroup(PeakGroup* group) {
-    qDebug() <<"EicWidget::setPeakGroup(PeakGroup* group) " << group;
+    qDebug() <<"EicWidget::setPeakGroup(PeakGroup* group) group=" << group;
 
     _alwaysDisplayGroup = group;
 
@@ -1450,15 +1463,6 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
     if (!group->srmId.empty()) {
         setSrmId(group->srmId);
     }
-    //Issue 235 debugging
-    //Note: &(group) == &(group->parent), which should probably never be true
-    //
-    qDebug() << "_autoZoom: " << _autoZoom;
-    if (group->parent) qDebug() << "group->parent: " << &(group->parent);
-    qDebug() << "_slice: " << &(_slice);
-    qDebug() << "_slice.rtmin:" << _slice.rtmin;
-    if (group->parent) qDebug() << "group->parent->minRt: " << group->parent->minRt;
-    qDebug() << "_zoomFactor: " << _zoomFactor;
 
     if ( _autoZoom && group->parent) {
         _slice.rtmin = group->parent->minRt- 2 * _zoomFactor;
@@ -1692,8 +1696,9 @@ void EicWidget::selectGroupNearRt(float rt) {
 	}
 }
 
-void EicWidget::setSelectedGroup(PeakGroup* group ) {
- //qDebug <<"EicWidget::setSelectedGroup(PeakGroup* group ) ";
+void EicWidget::setSelectedGroup(PeakGroup* group) {
+   qDebug() <<"EicWidget::setSelectedGroup(PeakGroup* group) group=" << group;
+
     if (_frozen || !group) return;
 
     if (_showBarPlot){
@@ -1711,6 +1716,8 @@ void EicWidget::setSelectedGroup(PeakGroup* group ) {
     //drawSelectionLine(group->minRt, group->maxRt);
 	//addFitLine(group);
     _selectedGroup = *group;
+
+    qDebug() <<"EicWidget::setSelectedGroup(PeakGroup* group) group=" << group << "completed";
 }
 
 void EicWidget::setGallaryToEics() {

@@ -183,8 +183,10 @@ private:
     int _xAxisPlotMargin = 20;
 
     vector<PeakGroup> peakgroups;	    //peaks grouped across samples
+
     PeakGroup  _selectedGroup;			//currently selected peak group
-	PeakGroup  _integratedGroup;		//manually integrated peak group
+
+    PeakGroup*  _integratedGroup;		 //manually integrated peak group
     PeakGroup*  _alwaysDisplayGroup;     //always display this group, whether or not grouping is enabled
     
     //gui related
