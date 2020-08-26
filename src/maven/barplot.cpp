@@ -63,6 +63,7 @@ void BarPlot::setPeakGroup(PeakGroup* group) {
     clear();
     if (group == NULL ) return;
     if (_mw == NULL   ) return;
+    qDebug() << "BarPlot::setPeakGroup() group=" << group;
 
     qtype = _mw->getUserQuantType();
     vector<mzSample*> vsamples = _mw->getVisibleSamples();
@@ -97,7 +98,7 @@ void BarPlot::setPeakGroup(PeakGroup* group) {
         _colors.push_back(color);
         _yvalues.push_back(yvalues[i]);
     }
-
+    qDebug() << "BarPlot::setPeakGroup() group=" << group << "completed";
 }
 
 void BarPlot::wheelEvent ( QGraphicsSceneWheelEvent * event ) {

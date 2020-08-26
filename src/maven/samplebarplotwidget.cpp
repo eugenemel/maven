@@ -49,6 +49,7 @@ void SampleBarPlotWidget::setPeakGroup(PeakGroup *peakGroup){
     this->horizontalScrollBar()->setSliderPosition(0);
 
     refresh();
+    qDebug() << "SampleBarPlotWidget::setPeakGroup() group=" << peakGroup << "completed";
 }
 
 void SampleBarPlotWidget::refresh() {
