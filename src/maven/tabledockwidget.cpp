@@ -610,6 +610,7 @@ PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, boo
 
     if (isDeletePeakGroupPtr){
        delete(group);
+       group = nullptr;
     }
 
     PeakGroup* g = &allgroups[allgroups.size()-1];
