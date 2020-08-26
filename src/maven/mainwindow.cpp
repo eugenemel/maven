@@ -580,10 +580,14 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
         bool isAddChildren = settings->value("chkIncludeChildren", false).toBool();
         if (!isAddChildren) groupCopy->children.clear();
 
+        groupCopy->searchTableName = "Bookmarks";
+
+        //Issue 277: tabledockwidget retrieves data from reference, copies it, and returns reference to copied data
+        PeakGroup *groupCopy2 = bookmarkedPeaks->addPeakGroup(groupCopy, true, true);
+
         //Issue 279: re-filter tree after adding bookmark
-        groupCopy = bookmarkedPeaks->addPeakGroup(groupCopy, true);
         bookmarkedPeaks->filterTree();
-        bookmarkedPeaks->selectGroup(groupCopy);
+        bookmarkedPeaks->selectGroup(groupCopy2);
     }
 }
 
