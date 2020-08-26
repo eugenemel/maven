@@ -26,7 +26,7 @@ SampleBarPlotWidget::~SampleBarPlotWidget(){
 }
 
 void SampleBarPlotWidget::setPeakGroup(PeakGroup *peakGroup){
-
+    qDebug() << "SampleBarPlotWidget::setPeakGroup() group=" << peakGroup;
     if(!peakGroup) return;
 
     _barPlot->setPeakGroup(peakGroup);
