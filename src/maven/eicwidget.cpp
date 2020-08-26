@@ -155,16 +155,12 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
     //debugging
     qDebug() << "EicWidget::integrateRegion() _alwaysDisplayGroup=" << _alwaysDisplayGroup << "_selectedGroup=" << &(_selectedGroup);
 
-    //Issue 280
-    if (_alwaysDisplayGroup && &(_selectedGroup) == _alwaysDisplayGroup) {
+    //Issue 280:
+    //This information is updated every time a new peak group is selected from a peaks list table (tabledockwidget).
+    if (_alwaysDisplayGroup) {
         _integratedGroup->labels = _alwaysDisplayGroup->labels;
         _integratedGroup->fragMatchScore.mergedScore = _alwaysDisplayGroup->fragMatchScore.mergedScore;
     }
-
-    //Is it better to make a copy of an existing compound? or always treat captured content as mz@rt?
-//    _integratedGroup.compound = nullptr;
-//    _integratedGroup.adduct = nullptr;
-//    _integratedGroup.groupRank = 0;
 
 	for(int i=0; i < eics.size(); i++ ) {
 		EIC* eic = eics[i];
