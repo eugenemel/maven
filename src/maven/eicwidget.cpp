@@ -152,8 +152,11 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
     _integratedGroup->adduct = _slice.adduct;
     _integratedGroup->srmId = _slice.srmId;
 
+    //debugging
+    qDebug() << "EicWidget::integrateRegion() _alwaysDisplayGroup=" << _alwaysDisplayGroup << "_selectedGroup=" << &(_selectedGroup);
+
     //Issue 280
-    if (_alwaysDisplayGroup && _selectedGroup == *(_alwaysDisplayGroup)) {
+    if (_alwaysDisplayGroup && &(_selectedGroup) == _alwaysDisplayGroup) {
         _integratedGroup->labels = _alwaysDisplayGroup->labels;
         _integratedGroup->fragMatchScore.mergedScore = _alwaysDisplayGroup->fragMatchScore.mergedScore;
     }
