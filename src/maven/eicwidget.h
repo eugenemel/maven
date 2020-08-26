@@ -212,7 +212,7 @@ private:
 
     MainWindow* getMainWindow();		//return parent 
     void zoomPeakGroup( PeakGroup* group );
-
+    void blockEicPointSignals(bool isBlockSignals);
 };
 
 

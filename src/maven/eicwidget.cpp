@@ -74,6 +74,8 @@ void EicWidget::mousePressEvent(QMouseEvent *event) {
 }
 
 void EicWidget::mouseReleaseEvent(QMouseEvent *event) {
+    blockEicPointSignals(true);
+
  //qDebug <<" EicWidget::mouseReleaseEvent(QMouseEvent *event)";
     QGraphicsView::mouseReleaseEvent(event);
 
@@ -218,6 +220,8 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
     }
 
     scene()->update();
+
+    blockEicPointSignals(false);
 }
 
 void EicWidget::mouseDoubleClickEvent(QMouseEvent* event){
@@ -1308,6 +1312,18 @@ void EicWidget::addPeakPositions(PeakGroup* group) {
 				p->setPeakGroup(group);
 				scene()->addItem(p);
 		} 
+}
+
+//Issue 235, 277: Block EIC signals while integrating to avoid type changing during integration
+void EicWidget::blockEicPointSignals(bool isBlockSignals) {
+    if (!scene()) return;
+
+    for (auto& item : scene()->items()) {
+        EicPoint *eicPoint = qgraphicsitem_cast<EicPoint*>(item);
+        if (eicPoint) {
+            eicPoint->blockSignals(isBlockSignals);
+        }
+    }
 }
 
 void EicWidget::resetZoom() { 
