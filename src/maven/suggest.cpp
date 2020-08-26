@@ -110,7 +110,10 @@ bool SuggestPopup::eventFilter(QObject *obj, QEvent *ev)
 void SuggestPopup::doSearchCompounds(QString needle, int maxHitCount, QString dbLimit) {
 
     //construct regular expression
-    QRegExp regexp("^" + needle, Qt::CaseInsensitive,QRegExp::RegExp);
+    QRegExp regexp("^" + needle, Qt::CaseInsensitive, QRegExp::RegExp);
+
+    //TODO: Issue 282
+    //QRegExp regexp("^" + needle, Qt::CaseInsensitive, QRegExp::FixedString);
 
     //bad regular expression
     if (!needle.isEmpty() && !regexp.isValid()) return;
