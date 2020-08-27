@@ -31,7 +31,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QS
     connect(mw->libraryDialog, SIGNAL(loadLibrarySignal(QString)), this, SLOT(reconnectCompounds(QString)));
 
     //Issue 285: dynamically update
-    connect(_mainwindow->quantType,SIGNAL(currentIndexChanged()), SLOT(refreshPeakGroupQuant()));
+    connect(_mainwindow->quantType,SIGNAL(currentIndexChanged(int)), SLOT(refreshPeakGroupQuant()));
 
     setupPeakTable();
 
