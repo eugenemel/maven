@@ -621,7 +621,14 @@ PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, boo
     if(g->compound) qDebug() << "TableDockWidget::addPeakGroup() group->compound=" << g->compound->name.c_str();
     if(!g->compound) qDebug() << "TableDockWidget::addPeakGroup() group->compound= nullptr";
 
-    if (updateTable)  showAllGroups();
+    if (updateTable) {
+        //Issue 277: this call involves rebuilding the table, which emits a signal that is ultimately received by MainWindow::setPeakGroup().
+        //However, the peak group retrieved by this signal appears to be erroneous.
+        treeWidget->blockSignals(true);
+        showAllGroups();
+        treeWidget->blockSignals(false);
+    }
+
     return g;
 }
 
