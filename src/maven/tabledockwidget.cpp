@@ -617,12 +617,14 @@ PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, boo
     }
 
     PeakGroup* g = &allgroups[allgroups.size()-1];
-    qDebug() << "TableDockWidget::addPeakGroup() group=" << g;
-    qDebug() << "TableDockWidget::addPeakGroup() group data:";
-    qDebug() << "TableDockWidget::addPeakGroup() group->meanMz=" << g->meanMz;
-    qDebug() << "TableDockWidget::addPeakGroup() group->meanRt=" << g->meanRt;
-    if(g->compound) qDebug() << "TableDockWidget::addPeakGroup() group->compound=" << g->compound->name.c_str();
-    if(!g->compound) qDebug() << "TableDockWidget::addPeakGroup() group->compound= nullptr";
+
+    //debugging for Issues 277, 235
+//    qDebug() << "TableDockWidget::addPeakGroup() group=" << g;
+//    qDebug() << "TableDockWidget::addPeakGroup() group data:";
+//    qDebug() << "TableDockWidget::addPeakGroup() group->meanMz=" << g->meanMz;
+//    qDebug() << "TableDockWidget::addPeakGroup() group->meanRt=" << g->meanRt;
+//    if(g->compound) qDebug() << "TableDockWidget::addPeakGroup() group->compound=" << g->compound->name.c_str();
+//    if(!g->compound) qDebug() << "TableDockWidget::addPeakGroup() group->compound= nullptr";
 
     if (updateTable) {
         showAllGroups();
