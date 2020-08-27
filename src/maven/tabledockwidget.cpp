@@ -614,7 +614,7 @@ PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, boo
     }
 
     PeakGroup* g = &allgroups[allgroups.size()-1];
-
+    qDebug() << "TableDockWidget::addPeakGroup() group=" << g;
     qDebug() << "TableDockWidget::addPeakGroup() group data:";
     qDebug() << "TableDockWidget::addPeakGroup() group->meanMz=" << g->meanMz;
     qDebug() << "TableDockWidget::addPeakGroup() group->meanRt=" << g->meanRt;

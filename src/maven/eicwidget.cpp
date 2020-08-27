@@ -909,7 +909,11 @@ void EicWidget::clearPlot() {
 
 void EicWidget::replot(PeakGroup* group) {
 
-    if (!group)  _selectedGroup = PeakGroup();
+    if (!group){
+        qDebug() << "EicWidget::replot(): group= nullptr --> _selectedGroup = PeakGroup()";
+        _selectedGroup = PeakGroup();
+    }
+
     qDebug() <<"EicWidget::replot(PeakGroup* group) group=" << group;
 
     QTime timerX; timerX.start();
@@ -935,12 +939,13 @@ void EicWidget::replot(PeakGroup* group) {
     }
     //qDebug() << "\tscoreQuality msec=" << timerX.elapsed();
 
-
-    qDebug() << "EicWidget::replot() group data:";
-    qDebug() << "EicWidget::replot() group->meanMz=" << group->meanMz;
-    qDebug() << "EicWidget::replot() group->meanRt=" << group->meanRt;
-    if(group->compound) qDebug() << "EicWidget::replot() group->compound=" << group->compound->name.c_str();
-    if(!group->compound) qDebug() << "EicWidget::replot() group->compound= nullptr";
+    if (group) {
+        qDebug() << "EicWidget::replot() group data:";
+        qDebug() << "EicWidget::replot() group->meanMz=" << group->meanMz;
+        qDebug() << "EicWidget::replot() group->meanRt=" << group->meanRt;
+        if(group->compound) qDebug() << "EicWidget::replot() group->compound=" << group->compound->name.c_str();
+        if(!group->compound) qDebug() << "EicWidget::replot() group->compound= nullptr";
+    }
 
     setSelectedGroup(group);
     setTitle();
@@ -1471,6 +1476,14 @@ void EicWidget::setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax
 
 void EicWidget::setPeakGroup(PeakGroup* group) {
     qDebug() <<"EicWidget::setPeakGroup(PeakGroup* group) group=" << group;
+
+    if (group) {
+        qDebug() << "EicWidget::setPeakGroup() group data:";
+        qDebug() << "EicWidget::setPeakGroup() group->meanMz=" << group->meanMz;
+        qDebug() << "EicWidget::setPeakGroup() group->meanRt=" << group->meanRt;
+        if(group->compound) qDebug() << "EicWidget::setPeakGroup() group->compound=" << group->compound->name.c_str();
+        if(!group->compound) qDebug() << "EicWidget::setPeakGroup() group->compound= nullptr";
+    }
 
     _alwaysDisplayGroup = group;
 

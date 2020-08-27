@@ -585,6 +585,7 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
         //Issue 277: tabledockwidget retrieves data from reference, copies it, and returns reference to copied data
         PeakGroup *groupCopy2 = bookmarkedPeaks->addPeakGroup(groupCopy, true, true);
 
+        qDebug() << "MainWindow::bookmarkPeakGroup() group=" << groupCopy2;
         qDebug() << "MainWindow::bookmarkPeakGroup() group data:";
         qDebug() << "MainWindow::bookmarkPeakGroup() group->meanMz=" << groupCopy2->meanMz;
         qDebug() << "MainWindow::bookmarkPeakGroup() group->meanRt=" << groupCopy2->meanRt;
