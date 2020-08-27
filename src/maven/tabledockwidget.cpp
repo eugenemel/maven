@@ -1934,6 +1934,7 @@ void TableDockWidget::switchTableView() {
     setupPeakTable();
     showAllGroups();
     updateTable();
+    filterTree(); //Issue 284
 }
 
 void TableDockWidget::filterTree() {
