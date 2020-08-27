@@ -622,11 +622,7 @@ PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, boo
     if(!g->compound) qDebug() << "TableDockWidget::addPeakGroup() group->compound= nullptr";
 
     if (updateTable) {
-        //Issue 277: this call involves rebuilding the table, which emits a signal that is ultimately received by MainWindow::setPeakGroup().
-        //However, the peak group retrieved by this signal appears to be erroneous.
-        treeWidget->blockSignals(true);
         showAllGroups();
-        treeWidget->blockSignals(false);
     }
 
     return g;
@@ -772,6 +768,11 @@ void TableDockWidget::deleteAll() {
 
 void TableDockWidget::showAllGroups() {
 
+    //Issue 277: treeWidget->clear() will emit a signal that the selection has changed
+    //that is ultimately received by MainWindow::setPeakGroup().
+    //the PeakGroup that is sent may be junk.
+    treeWidget->blockSignals(true);
+
     treeWidget->clear();
     groupToItem.clear();    //addRow() calls will refill the map
 
@@ -816,11 +817,7 @@ void TableDockWidget::showAllGroups() {
         searchParamsDialog->txtSrchResults->setText("Total # groups: " + QString::number(allgroups.size()));
     }
 
-    /*
-	if (allgroups.size() > 0 ) { //select last item
-		treeWidget->setCurrentItem(treeWidget->topLevelItem(allgroups.size()-1));
-	}
-	(*/
+    treeWidget->blockSignals(false);
 }
 
 void TableDockWidget::showAllGroupsThenSort() {
