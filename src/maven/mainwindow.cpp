@@ -585,6 +585,12 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
         //Issue 277: tabledockwidget retrieves data from reference, copies it, and returns reference to copied data
         PeakGroup *groupCopy2 = bookmarkedPeaks->addPeakGroup(groupCopy, true, true);
 
+        qDebug() << "MainWindow::bookmarkPeakGroup() group data:";
+        qDebug() << "MainWindow::bookmarkPeakGroup() group->meanMz=" << groupCopy2->meanMz;
+        qDebug() << "MainWindow::bookmarkPeakGroup() group->meanRt=" << groupCopy2->meanRt;
+        if(groupCopy2->compound) qDebug() << "MainWindow::bookmarkPeakGroup() group->compound=" << groupCopy2->compound->name.c_str();
+        if(!groupCopy2->compound) qDebug() << "MainWindow::bookmarkPeakGroup() group->compound= nullptr";
+
         //Issue 279: re-filter tree after adding bookmark
         bookmarkedPeaks->filterTree();
         bookmarkedPeaks->selectGroup(groupCopy2);

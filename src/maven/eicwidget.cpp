@@ -936,6 +936,12 @@ void EicWidget::replot(PeakGroup* group) {
     //qDebug() << "\tscoreQuality msec=" << timerX.elapsed();
 
 
+    qDebug() << "EicWidget::replot() group data:";
+    qDebug() << "EicWidget::replot() group->meanMz=" << group->meanMz;
+    qDebug() << "EicWidget::replot() group->meanRt=" << group->meanRt;
+    if(group->compound) qDebug() << "EicWidget::replot() group->compound=" << group->compound->name.c_str();
+    if(!group->compound) qDebug() << "EicWidget::replot() group->compound= nullptr";
+
     setSelectedGroup(group);
     setTitle();
     addEICLines(false);
@@ -1730,6 +1736,14 @@ void EicWidget::setSelectedGroup(PeakGroup* group) {
     addBaseline(group);
     //drawSelectionLine(group->minRt, group->maxRt);
 	//addFitLine(group);
+
+    //Issue 277 debugging
+    qDebug() << "EicWidget::setSelectedGroup() group data:";
+    qDebug() << "EicWidget::setSelectedGroup() group->meanMz=" << group->meanMz;
+    qDebug() << "EicWidget::setSelectedGroup() group->meanRt=" << group->meanRt;
+    if(group->compound) qDebug() << "EicWidget::setSelectedGroup() group->compound=" << group->compound->name.c_str();
+    if(!group->compound) qDebug() << "EicWidget::setSelectedGroup() group->compound= nullptr";
+
     _selectedGroup = *group;
 
     qDebug() <<"EicWidget::setSelectedGroup(PeakGroup* group) group=" << group << "completed";
