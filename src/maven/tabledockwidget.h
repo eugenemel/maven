@@ -113,6 +113,7 @@ public slots:
       void exportAlignmentFile();
       void disconnectCompounds(QString);
       void reconnectCompounds(QString);
+      void refreshPeakGroupQuant();
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event);

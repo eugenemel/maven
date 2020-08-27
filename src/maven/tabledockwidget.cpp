@@ -30,6 +30,9 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QS
     connect(mw->libraryDialog, SIGNAL(unloadLibrarySignal(QString)), this, SLOT(disconnectCompounds(QString)));
     connect(mw->libraryDialog, SIGNAL(loadLibrarySignal(QString)), this, SLOT(reconnectCompounds(QString)));
 
+    //Issue 285: dynamically update
+    connect(_mainwindow->quantType,SIGNAL(currentIndexChanged()), SLOT(refreshPeakGroupQuant()));
+
     setupPeakTable();
 
     traindialog = new TrainDialog(this);
@@ -1927,6 +1930,15 @@ int TableDockWidget::loadCSVFile(QString filename, QString sep="\t"){
 
     showAllGroups();
     return lineCount;
+}
+
+//Issue 285: performs a complete rebuild
+void TableDockWidget::refreshPeakGroupQuant() {
+    if (viewType == peakView) {
+        showAllGroups();
+        updateTable();
+        filterTree();
+    }
 }
 
 void TableDockWidget::switchTableView() {

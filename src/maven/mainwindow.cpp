@@ -1200,6 +1200,10 @@ void MainWindow::createToolBars() {
     layout->addSpacing(10);
 
     quantType = new QComboBox(hBox);
+
+    //Issue 285: TableDockWidgets are listening, if they have already been created, will receive signal
+    quantType->blockSignals(true);
+
     quantType->addItem("AreaTop");
     quantType->addItem("Area");
     quantType->addItem("Height");
@@ -1207,6 +1211,8 @@ void MainWindow::createToolBars() {
     quantType->addItem("Quality");
     quantType->setToolTip("Peak Quantitation Type");
     connect(quantType,SIGNAL(activated(int)),eicWidget,SLOT(replot()));
+
+    quantType->blockSignals(false);
 
     adductType = new QComboBox(hBox);
     adductType->setMinimumSize(250, 0);
