@@ -616,6 +616,8 @@ void ProjectDockWidget::loadAllPeakTables() {
 
     if(!currentProject) return;
 
+    QElapsedTimer *timer = nullptr;
+
     currentProject->setSamples(_mainwindow->getSamples());
 
     //create tables for search results
@@ -655,8 +657,19 @@ void ProjectDockWidget::loadAllPeakTables() {
 
     qDebug() << "Cleared loaded peak groups.";
 
+    timer = new QElapsedTimer();
+    timer->start();
+
+    //load all peaks
+    map<int, vector<Peak>> allPeaks = currentProject->getAllPeaks();
+
     //load all peakgroups
-    currentProject->loadPeakGroups("peakgroups", _mainwindow->rumsDBDatabaseName, _mainwindow->isAttemptToLoadDB);
+    currentProject->loadPeakGroups("peakgroups", _mainwindow->rumsDBDatabaseName, _mainwindow->isAttemptToLoadDB, allPeaks);
+
+    qDebug() << "Loaded peakgroups in" << timer->elapsed() << "msec.";
+
+    delete(timer);
+    timer = nullptr;
 
     //Issue 73 / mzkitchen 8: load match table
     currentProject->loadMatchTable();

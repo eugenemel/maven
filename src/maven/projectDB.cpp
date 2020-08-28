@@ -464,7 +464,74 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
     return lastInsertGroupId;
 }
 
-void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool isAttemptToLoadDB) {
+        //Issue 283: Read in all peaks to allow for faster retrieval later
+        map<int, vector<Peak>> ProjectDB::getAllPeaks() {
+
+                map<int, vector<Peak>> allPeaks{};
+                unsigned long peaksCounter = 0;
+
+                QSqlQuery query(sqlDB);
+                query.prepare("select * from peaks inner join samples on peaks.sampleid = samples.sampleId;");
+                query.exec();
+
+                while (query.next()) {
+                Peak p;
+                p.pos = query.value("pos").toString().toInt();
+                p.minpos = query.value("minpos").toString().toInt();
+                p.maxpos = query.value("maxpos").toString().toInt();
+                p.rt = query.value("rt").toString().toDouble();
+                p.rtmin = query.value("rtmin").toString().toDouble();
+                p.rtmax = query.value("rtmax").toString().toDouble();
+                p.mzmin = query.value("mzmin").toString().toDouble();
+                p.mzmax = query.value("mzmax").toString().toDouble();
+                p.scan = query.value("scan").toString().toInt();
+                p.minscan = query.value("minscan").toString().toInt();
+                p.maxscan = query.value("maxscan").toString().toInt();
+                p.peakArea = query.value("peakArea").toString().toDouble();
+                p.peakAreaCorrected = query.value("peakAreaCorrected").toString().toDouble();
+                p.peakAreaTop = query.value("peakAreaTop").toString().toDouble();
+                p.peakAreaFractional = query.value("peakAreaFractional").toString().toDouble();
+                p.peakRank = query.value("peakRank").toString().toDouble();
+                p.peakIntensity = query.value("peakIntensity").toString().toDouble();
+                p.peakBaseLineLevel = query.value("peakBaseLineLevel").toString().toDouble();
+                p.peakMz = query.value("peakMz").toString().toDouble();
+                p.medianMz = query.value("medianMz").toString().toDouble();
+                p.baseMz = query.value("baseMz").toString().toDouble();
+                p.quality = query.value("quality").toString().toDouble();
+                p.width = query.value("width").toString().toInt();
+                p.gaussFitSigma = query.value("gaussFitSigma").toString().toDouble();
+                p.gaussFitR2 = query.value("gaussFitR2").toString().toDouble();
+                p.groupNum= query.value("groupId").toString().toInt();
+                p.noNoiseObs = query.value("noNoiseObs").toString().toInt();
+                p.noNoiseFraction = query.value("noNoiseFraction").toString().toDouble();
+                p.symmetry = query.value("symmetry").toString().toDouble();
+                p.signalBaselineRatio = query.value("signalBaselineRatio").toString().toDouble();
+                p.groupOverlap = query.value("groupOverlap").toString().toDouble();
+                p.groupOverlapFrac = query.value("groupOverlapFrac").toString().toDouble();
+                p.localMaxFlag = query.value("localMaxFlag").toString().toInt();
+                p.fromBlankSample = query.value("fromBlankSample").toString().toInt();
+                p.label = query.value("label").toString().toInt();
+
+                string sampleName = query.value("name").toString().toStdString();
+
+                for(int i=0; i< samples.size(); i++ ) {
+                    if (samples[i]->sampleName == sampleName ) { p.setSample(samples[i]); break;}
+                }
+
+                if (allPeaks.find(p.groupNum) == allPeaks.end()) {
+                    allPeaks.insert(make_pair(p.groupNum, vector<Peak>()));
+                }
+                allPeaks[p.groupNum].push_back(p);
+                peaksCounter++;
+            }
+
+                cerr << "ProjectDB::getAllPeaks(): loaded " << peaksCounter << " peaks for " << allPeaks.size() << " groups." << endl;
+
+                return allPeaks;
+        }
+
+
+void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool isAttemptToLoadDB, const map<int, vector<Peak>>& peakGroupMap) {
 
         QSqlQuery queryCheckCols(sqlDB);
 
@@ -593,7 +660,12 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
             if (matches.size()>0) g.compound = matches[0];
         }
 
-        loadGroupPeaks(&g);
+        //Issue 283
+        if (peakGroupMap.find(g.groupId) == peakGroupMap.end()) {
+            loadGroupPeaks(&g);
+        } else {
+            g.peaks = peakGroupMap.at(g.groupId);
+        }
 
         if (parentGroupId == 0) {
             allgroups.push_back(g);
