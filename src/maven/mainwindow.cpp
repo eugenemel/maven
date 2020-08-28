@@ -178,10 +178,12 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     heatmap	 = 	  new HeatMap(this);
     galleryWidget = new GalleryWidget(this);
     barPlotWidget = new SampleBarPlotWidget(this);
+
     bookmarkedPeaks = addPeaksTable("Bookmarks",
                                     QString("This is a reserved table containing manually curated \"bookmarked\" peak groups."),
                                     QString("This is a reserved table containing manually curated \"bookmarked\" peak groups.")
                                     );
+
     spectraDockWidget =  createDockWidget("Spectra",spectraWidget);
     heatMapDockWidget =  createDockWidget("HeatMap",heatmap);
     galleryDockWidget =  createDockWidget("Gallery",galleryWidget);
@@ -316,7 +318,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     } else {
         eicWidget->setMzSlice(mzSlice(0,0,0,100));
     }
-
 
     createMenus();
     createToolBars();
@@ -1201,8 +1202,8 @@ void MainWindow::createToolBars() {
 
     quantType = new QComboBox(hBox);
 
-    //Issue 285: TableDockWidgets are listening, if they have already been created, will receive signal
-    quantType->blockSignals(true);
+    //Issue 285: bookmarkedPeaks is created before quantType is initialized, need to connect bookmarks table manually.
+    //All other peak groups tables will be connected in the TableDockWidget() constructor.
 
     quantType->addItem("AreaTop");
     quantType->addItem("Area");
@@ -1210,9 +1211,8 @@ void MainWindow::createToolBars() {
     quantType->addItem("Retention Time");
     quantType->addItem("Quality");
     quantType->setToolTip("Peak Quantitation Type");
-    connect(quantType,SIGNAL(activated(int)),eicWidget,SLOT(replot()));
-
-    quantType->blockSignals(false);
+    connect(quantType, SIGNAL(activated(int)), eicWidget, SLOT(replot()));
+    connect(quantType, SIGNAL(currentIndexChanged(int)), bookmarkedPeaks, SLOT(refreshPeakGroupQuant()));
 
     adductType = new QComboBox(hBox);
     adductType->setMinimumSize(250, 0);

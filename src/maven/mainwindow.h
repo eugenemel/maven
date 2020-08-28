@@ -92,7 +92,7 @@ public:
 
     QDoubleSpinBox 	  *ppmWindowBox;
     QLineEdit         *searchText;
-    QComboBox		  *quantType;
+    QComboBox		  *quantType = nullptr;
     QComboBox         *adductType;
     QLabel			  *statusText;
     QLabel            *percentageText;
