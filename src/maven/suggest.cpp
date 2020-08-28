@@ -109,11 +109,8 @@ bool SuggestPopup::eventFilter(QObject *obj, QEvent *ev)
 
 void SuggestPopup::doSearchCompounds(QString needle, int maxHitCount, QString dbLimit) {
 
-    //construct regular expression
-    QRegExp regexp("^" + needle, Qt::CaseInsensitive, QRegExp::RegExp);
-
-    //TODO: Issue 282
-    //QRegExp regexp("^" + needle, Qt::CaseInsensitive, QRegExp::FixedString);
+    //Issue 282: used fixed string to accomodate "(" characters
+    QRegExp regexp(needle, Qt::CaseInsensitive, QRegExp::FixedString);
 
     //bad regular expression
     if (!needle.isEmpty() && !regexp.isValid()) return;
@@ -181,12 +178,13 @@ void SuggestPopup::doSearchHistory(QString needle)  {
 
 void SuggestPopup::doSearch(QString needle) 
 {
-        //minum length of needle in order to start matching
+        //minimum length of needle in order to start matching
         if (needle.isEmpty() || needle.length() < 1 ) return;
         needle = needle.simplified();
-        needle.replace(' ',".*");
 
-		QRegExp regexp(needle,Qt::CaseInsensitive,QRegExp::RegExp);
+        //Issue 282: use fixed string to accomodate "(" characters
+        QRegExp regexp(needle, Qt::CaseInsensitive, QRegExp::FixedString);
+
 		if (!needle.isEmpty() && !regexp.isValid()) return;
 
 		QRegExp startsWithNumber("^\\d");
