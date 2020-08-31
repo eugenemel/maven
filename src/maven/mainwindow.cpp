@@ -613,6 +613,20 @@ void MainWindow::setFormulaFocus(QString formula) {
     isotopeWidget->setFormula(formula);
 }
 
+void MainWindow::setAdductFocus(Adduct *adduct) {
+
+    if (!adduct) return;
+
+    for (int i = 0; i < adductType->count(); i++) {
+        QVariant v = adductType->itemData(i);
+        Adduct*  itemAdduct =  v.value<Adduct*>();
+        if (itemAdduct && itemAdduct->name == adduct->name) {
+            this->adductType->setCurrentIndex(i);
+            break;
+        }
+    }
+}
+
 void MainWindow::setCompoundFocus(Compound*c) {
     if (!c) return;
 

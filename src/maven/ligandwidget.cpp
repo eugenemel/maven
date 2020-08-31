@@ -385,8 +385,16 @@ void LigandWidget::showLigand() {
     foreach(QTreeWidgetItem* item, treeWidget->selectedItems() ) {
             QVariant v = item->data(0,Qt::UserRole);
             Compound*  c =  v.value<Compound*>();
-            if (c)  _mw->setCompoundFocus(c);
+            if (c) {
+                if (!c->adductString.empty()) {
+                    Adduct *adduct = DB.findAdductByName(c->adductString);
+                    if (adduct) {
+                        _mw->setAdductFocus(adduct);
+                    }
 
+                }
+                _mw->setCompoundFocus(c);
+            }
     }
 }
 

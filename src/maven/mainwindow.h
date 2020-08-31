@@ -195,6 +195,7 @@ public slots:
     void doGuidedAligment(QString filename);
     void spectraFocused(Peak* _peak);
     void setCompoundFocus(Compound* c);
+    void setAdductFocus(Adduct *adduct);
     void showFragmentationScans(float pmz);
     void showMs1Scans(float pmz);
     void showMs3Scans(float preMs1Mz, float preMs2Mz);
