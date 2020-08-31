@@ -70,6 +70,9 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   toolBar->setLayout(new QFormLayout());
   btnSubmit = new QPushButton("go");
   btnSubmit->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
+
+  //Issue 286: Wrap this in conditional to avoid linux os, problem is that .horizontalAdvance() method not working
+
   QFontMetrics fm(btnSubmit->font());
   int txtSize = fm.horizontalAdvance(btnSubmit->text());
   int btnTextPadding = 25;
