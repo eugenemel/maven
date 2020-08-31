@@ -42,6 +42,9 @@ shift $((OPTIND-1))  #This tells getopts to move on to the next argument.
 GIT_VERSION=$(src/maven/get_version.sh)
 
 binpath=$1
+
+echo "binpath: "${binpath}
+
 bindir=${binpath%/*}
 binfn="${binpath##*/}"
 distpath="dist"
