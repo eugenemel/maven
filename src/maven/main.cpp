@@ -37,6 +37,7 @@ int main(int argc, char *argv[])
             filename.endsWith("cdf",Qt::CaseInsensitive) ||
             filename.endsWith("netcdf",Qt::CaseInsensitive) ||
             filename.endsWith("nc",Qt::CaseInsensitive) ||
+            filename.endsWith("mzML",Qt::CaseInsensitive) ||
             filename.endsWith("mzcsv",Qt::CaseInsensitive))  {
             filelist << filename;
             splash.showMessage("Loading " + filename, Qt::AlignLeft, Qt::white );
