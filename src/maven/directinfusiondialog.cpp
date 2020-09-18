@@ -114,8 +114,9 @@ void DirectInfusionDialog::analyze() {
     //ms3 search related
     directInfusionUpdate->params->ms3IsMs3Search = this->chkMs3IsMs3Search->isChecked();
     directInfusionUpdate->params->ms3MinNumMatches = this->spnMs3MinNumMatches->value();
+    directInfusionUpdate->params->ms3AnalysisMs1PrecursorPpmTolr = this->spnParTol->value();
     directInfusionUpdate->params->ms3PrecursorPpmTolr = this->spnMs3PrecursorPpmTolr->value();
-    directInfusionUpdate->params->ms3PpmTolr = this->spnMs3PpmTolr->value();
+    directInfusionUpdate->params->ms3MatchTolrInDa = static_cast<float>(this->spnMs3MatchTolrInDa->value());
 
     //scan filter (applies to all ms1, ms2, and ms3)
     directInfusionUpdate->params->scanFilterMinIntensity = static_cast<float>(this->spnMinIndividualMs2ScanIntensity->value());
@@ -139,11 +140,6 @@ void DirectInfusionDialog::analyze() {
     // directInfusionUpdate->params->consensusPpmTolr = 10; //(default)
     directInfusionUpdate->params->consensusMinNumMs2Scans = this->spnMinNumMs2ScansForConsensus->value();
     directInfusionUpdate->params->consensusMinFractionMs2Scans = static_cast<float>(this->spnMinFractionMs2ScansForConsensus->value()/100.0); //displayed as a perentage
-
-    //ms3 consensus spectrum params
-    // directInfusionUpdate->params->consensusMs3PpmTolr = 10; //(default)
-    directInfusionUpdate->params->consensusMinNumMs3Scans = this->spnMinNumMs2ScansForConsensus->value();
-    directInfusionUpdate->params->consensusMinFractionMs3Scans = static_cast<float>(this->spnMinFractionMs2ScansForConsensus->value()/100.0); //displayed as a perentage
 
     //general
     directInfusionUpdate->params->ms1IsRequireAdductPrecursorMatch = this->isRequireAdductMatch->isChecked();
