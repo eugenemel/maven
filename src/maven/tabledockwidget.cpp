@@ -723,7 +723,48 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation 
 }
 
 void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation){
-    qDebug() << "TableDockWidget::addMs3Annotation(): TODO Received ms3Annotation.";
+
+    if (!ms3Annotation) return;
+
+    PeakGroup pg;
+
+    int maxNumMs3Matches = 0;
+
+    for (auto it = ms3Annotation->matchesBySample.begin(); it != ms3Annotation->matchesBySample.end(); ++it) {
+
+        if (!pg.compound) pg.compound = it->second->ms3Compound->baseCompound;
+
+        Peak p;
+        p.setSample(it->first);
+
+        p.peakIntensity = it->second->sumMs3MzIntensity;
+        p.noNoiseObs = 0;
+        p.peakAreaTop = p.peakIntensity;
+        p.peakAreaCorrected = p.peakIntensity;
+        p.peakArea = p.peakIntensity;
+
+        p.peakMz = pg.compound->precursorMz;
+        p.rt = 0;
+
+        if (it->second->numMs3MzMatches > maxNumMs3Matches){
+            maxNumMs3Matches = it->second->numMs3MzMatches;
+        }
+
+        pg.addPeak(p);
+    }
+
+    //avoid writing random junk to table
+    pg.maxNoNoiseObs = 0;
+    pg.maxQuality = 0;
+    pg.groupRank = 0;
+
+    //
+    //pg.tagString =
+    pg.fragMatchScore.mergedScore = maxNumMs3Matches;
+
+    // qDebug() << "TableDockWidget::addMs3Annotation():" << groupTagString(&pg);
+
+    allgroups.push_back(pg);
 }
 
 QList<PeakGroup*> TableDockWidget::getAllGroups() {
