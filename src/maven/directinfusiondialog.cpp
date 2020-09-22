@@ -114,6 +114,7 @@ void DirectInfusionDialog::analyze() {
     //ms3 search related
     directInfusionUpdate->params->ms3IsMs3Search = this->chkMs3IsMs3Search->isChecked();
     directInfusionUpdate->params->ms3MinNumMatches = this->spnMs3MinNumMatches->value();
+    directInfusionUpdate->params->ms3MinNumMs3MzMatches = this->spnMs3MinNumMzMatches->value();
     directInfusionUpdate->params->ms3AnalysisMs1PrecursorPpmTolr = this->spnParTol->value();
     directInfusionUpdate->params->ms3PrecursorPpmTolr = this->spnMs3PrecursorPpmTolr->value();
     directInfusionUpdate->params->ms3MatchTolrInDa = static_cast<float>(this->spnMs3MatchTolrInDa->value());
