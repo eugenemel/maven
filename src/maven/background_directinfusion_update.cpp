@@ -72,7 +72,8 @@ void BackgroundDirectInfusionUpdate::run(void) {
                                                   false //debug
                                                   );
 
-    map<int, vector<DirectInfusionAnnotation*>> allDirectInfusionsAcrossSamples = {};
+    map<int, vector<DirectInfusionAnnotation*>> allDirectInfusionsAcrossSamples{};
+    vector<Ms3SingleSampleMatch*> ms3Annotations{};
 
     for (set<int>::iterator it = searchDb->mapKeys.begin(); it != searchDb->mapKeys.end(); ++it){
         vector<DirectInfusionAnnotation*> rangeAnnotations;
@@ -101,12 +102,15 @@ void BackgroundDirectInfusionUpdate::run(void) {
          emit(updateProgressBar(msgStart.c_str(), stepNum, numSteps));
 
          if (params->ms3IsMs3Search) {
-             vector<Ms3SingleSampleMatch*> ms3Annotations = DirectInfusionProcessor::processSingleMs3Sample(
+
+             vector<Ms3SingleSampleMatch*> ms3AnnotationsOneSample = DirectInfusionProcessor::processSingleMs3Sample(
                          sample,
                          ms3Compounds,
                          params,
-                         true // debug
+                         false // debug
                          );
+
+             ms3Annotations.insert(ms3Annotations.end(), ms3AnnotationsOneSample.begin(), ms3AnnotationsOneSample.end());
          } else {
              map<int, DirectInfusionAnnotation*> directInfusionAnnotations =
                      DirectInfusionProcessor::processSingleSample(
@@ -130,50 +134,64 @@ void BackgroundDirectInfusionUpdate::run(void) {
     stepNum++;
     updateProgressBar("Combining results across samples...", stepNum, numSteps);
 
-    int totalSteps = numSteps * allDirectInfusionsAcrossSamples.size();
-    int emitCounter = stepNum * allDirectInfusionsAcrossSamples.size();
+    int totalSteps = 0;
+    int emitCounter = 0;
+    if (params->ms3IsMs3Search) {
 
-    for (auto directInfusionAnnotation : allDirectInfusionsAcrossSamples) {
-        if (!directInfusionAnnotation.second.empty()){
+        totalSteps = numSteps * ms3Annotations.size();
+        emitCounter = stepNum * ms3Annotations.size();
 
-            int clusterNum = directInfusionAnnotation.first;
+        for (auto ms3Annotation : ms3Annotations) {
 
-            if (params->isAgglomerateAcrossSamples) {
-                emit(newDirectInfusionAnnotation(
-                            DirectInfusionGroupAnnotation::createByAverageProportions(
-                                directInfusionAnnotation.second,
-                                params,
-                                false //debug
-                                ),
-                            clusterNum)
-                        );
-            } else {
+            updateProgressBar("Populating results table...", emitCounter, totalSteps);
+            emitCounter++;
+        }
 
-                for (auto directInfusionAnnotationEntry : directInfusionAnnotation.second) {
+    } else {
+        totalSteps = numSteps * allDirectInfusionsAcrossSamples.size();
+        emitCounter = stepNum * allDirectInfusionsAcrossSamples.size();
 
-                    DirectInfusionGroupAnnotation *directInfusionGroupAnnotation = new DirectInfusionGroupAnnotation();
+        for (auto directInfusionAnnotation : allDirectInfusionsAcrossSamples) {
+            if (!directInfusionAnnotation.second.empty()){
 
-                    directInfusionGroupAnnotation->precMzMin = directInfusionAnnotationEntry->precMzMin;
-                    directInfusionGroupAnnotation->precMzMax = directInfusionAnnotationEntry->precMzMax;
+                int clusterNum = directInfusionAnnotation.first;
 
-                    directInfusionGroupAnnotation->sample = directInfusionAnnotationEntry->sample;
-                    directInfusionGroupAnnotation->scan = directInfusionAnnotationEntry->scan;
+                if (params->isAgglomerateAcrossSamples) {
+                    emit(newDirectInfusionAnnotation(
+                                DirectInfusionGroupAnnotation::createByAverageProportions(
+                                    directInfusionAnnotation.second,
+                                    params,
+                                    false //debug
+                                    ),
+                                clusterNum)
+                            );
+                } else {
 
-                    directInfusionGroupAnnotation->fragmentationPattern = directInfusionAnnotationEntry->fragmentationPattern;
-                    directInfusionGroupAnnotation->compounds = directInfusionAnnotationEntry->compounds;
+                    for (auto directInfusionAnnotationEntry : directInfusionAnnotation.second) {
 
-                    directInfusionGroupAnnotation->annotationBySample.insert(make_pair(directInfusionAnnotationEntry->sample, directInfusionAnnotationEntry));
+                        DirectInfusionGroupAnnotation *directInfusionGroupAnnotation = new DirectInfusionGroupAnnotation();
 
-                    emit(newDirectInfusionAnnotation(directInfusionGroupAnnotation, clusterNum));
+                        directInfusionGroupAnnotation->precMzMin = directInfusionAnnotationEntry->precMzMin;
+                        directInfusionGroupAnnotation->precMzMax = directInfusionAnnotationEntry->precMzMax;
+
+                        directInfusionGroupAnnotation->sample = directInfusionAnnotationEntry->sample;
+                        directInfusionGroupAnnotation->scan = directInfusionAnnotationEntry->scan;
+
+                        directInfusionGroupAnnotation->fragmentationPattern = directInfusionAnnotationEntry->fragmentationPattern;
+                        directInfusionGroupAnnotation->compounds = directInfusionAnnotationEntry->compounds;
+
+                        directInfusionGroupAnnotation->annotationBySample.insert(make_pair(directInfusionAnnotationEntry->sample, directInfusionAnnotationEntry));
+
+                        emit(newDirectInfusionAnnotation(directInfusionGroupAnnotation, clusterNum));
+                    }
+
                 }
 
             }
-
+            updateProgressBar("Populating results table...", emitCounter, totalSteps);
+            emitCounter++;
         }
-        updateProgressBar("Populating results table...", emitCounter, totalSteps);
-        emitCounter++;
     }
-
 
     qDebug() << "Direct infusion analysis completed in" << timer.elapsed() << "msec.";
     updateProgressBar("Direct infusion analysis not yet started", 0, 1);
