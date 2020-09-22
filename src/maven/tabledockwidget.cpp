@@ -722,6 +722,10 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation 
 //     if (directInfusionGroupAnnotation) delete(directInfusionGroupAnnotation);
 }
 
+void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation){
+    qDebug() << "TableDockWidget::addMs3Annotation(): TODO Received ms3Annotation.";
+}
+
 QList<PeakGroup*> TableDockWidget::getAllGroups() {
     QList<PeakGroup*> groups;
     for(int i=0; i < allgroups.size(); i++ ) {
