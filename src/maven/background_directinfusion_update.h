@@ -49,6 +49,7 @@ protected:
 signals:
     void updateProgressBar(QString, int, int);
     void newDirectInfusionAnnotation(DirectInfusionGroupAnnotation*, int);
+    void newMs3Annotation(Ms3Annotation*);
     void closeDialog();
 
 };

@@ -141,8 +141,17 @@ void BackgroundDirectInfusionUpdate::run(void) {
         totalSteps = numSteps * ms3Annotations.size();
         emitCounter = stepNum * ms3Annotations.size();
 
-        for (auto ms3Annotation : ms3Annotations) {
+        map<Ms3Compound*, Ms3Annotation*> compoundToAnnotations{};
 
+        for (auto ms3Annotation : ms3Annotations) {
+            if (compoundToAnnotations.find(ms3Annotation->ms3Compound) == compoundToAnnotations.end()) {
+                compoundToAnnotations.insert(make_pair(ms3Annotation->ms3Compound, new Ms3Annotation()));
+            }
+            compoundToAnnotations[ms3Annotation->ms3Compound]->matchesBySample.insert(make_pair(ms3Annotation->sample, ms3Annotation));
+        }
+
+        for (auto it = compoundToAnnotations.begin(); it != compoundToAnnotations.end(); ++it) {
+            emit(newMs3Annotation(it->second));
             updateProgressBar("Populating results table...", emitCounter, totalSteps);
             emitCounter++;
         }
