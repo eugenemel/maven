@@ -17,8 +17,9 @@ DirectInfusionDialog::DirectInfusionDialog(QWidget *parent) : QDialog(parent) {
 
       updateSpectralCompositionDescription();
 
-      this->chkMs3IsMs3Search->setEnabled(false);
-      this->chkMs3IsMs3Search->setToolTip("MS3 search within maven gui is currently not available.");
+      //Issue 226: Ms3 search GUI implemented
+//      this->chkMs3IsMs3Search->setEnabled(false);
+//      this->chkMs3IsMs3Search->setToolTip("MS3 search within maven gui is currently not available.");
 }
 
 DirectInfusionDialog::~DirectInfusionDialog(){
