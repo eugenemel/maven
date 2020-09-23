@@ -33,6 +33,7 @@ public slots:
 	  void setInfo(PeakGroup* group);
 	  void setInfo(Compound* c);
 	  void setInfo(vector<Compound*>&compounds);
+      void setInfo(double ms1PrecMz, double ms2PrecMz);
 
 	  void setInfo(vector<mzLink>&links);
       void setInfo(vector<mzSlice*>&slices);

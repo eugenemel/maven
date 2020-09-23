@@ -213,7 +213,7 @@ public slots:
     void exportPDF();
     void exportSVG();
     void setPeakGroup(PeakGroup* group);
-    void setMs3PeakGroup(PeakGroup* group);
+    void setMs3PeakGroup(PeakGroup* parentGroup, PeakGroup* childGroup);
     void showDockWidgets();
     void hideDockWidgets();
     //void terminateTheads();

@@ -522,6 +522,10 @@ void TreeDockWidget::setInfo(vector<Compound*>&compounds) {
         for(int i=0; i < compounds.size(); i++ ) addCompound(compounds[i],NULL);
 }
 
+void TreeDockWidget::setInfo(double ms1PrecMz, double ms2PrecMz){
+    ms1PrecMzSpn->setValue(ms1PrecMz);
+    ms2PrecMzSpn->setValue(ms2PrecMz);
+}
 
 void TreeDockWidget::setInfo(Compound* x)  {
         addCompound(x,NULL);

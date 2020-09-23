@@ -1049,7 +1049,22 @@ void TableDockWidget::showSelectedGroup() {
 
     //Issue 226: Handle ms3 searches differently
     if (isTargetedMs3Table()) {
-          _mainwindow->setMs3PeakGroup(group);
+
+        PeakGroup *parentGroup = nullptr;
+        PeakGroup *childGroup = nullptr;
+
+        //case: leaf group
+        if (group->childCount() == 0) {
+            parentGroup = group->parent;
+            childGroup = group;
+        } else {
+            parentGroup = group;
+
+            if (group->childCount() == 0) return; // should not happen, return to avoid null access
+
+            childGroup = &(group->children[0]);
+        }
+          _mainwindow->setMs3PeakGroup(parentGroup, childGroup);
     } else {
          _mainwindow->setPeakGroup(group);
     }

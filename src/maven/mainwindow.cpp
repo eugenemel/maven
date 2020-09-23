@@ -1364,15 +1364,15 @@ void MainWindow::showSRMList() {
     //peakDetectionDialog->show();
 }
 
-void MainWindow::setMs3PeakGroup(PeakGroup* group) {
-    if (!group) return;
-    if (_lastSelectedPeakGroup == group) return;
+void MainWindow::setMs3PeakGroup(PeakGroup* parentGroup, PeakGroup* childGroup) {
+    if (!parentGroup) return;
+    _lastSelectedPeakGroup = parentGroup;
 
-    _lastSelectedPeakGroup = group;
+    qDebug() << "MainWindow::setMs3PeakGroup() parent=" << parentGroup << "child=" << childGroup;
 
-    qDebug() << "MainWindow::setMs3PeakGroup(PeakGroup)" << group;
-
-    //TODO: processing
+    if (ms3ScansListWidget->isVisible()) {
+        ms3ScansListWidget->setInfo(static_cast<double>(parentGroup->meanMz), static_cast<double>(childGroup->meanMz));
+    }
 
 }
 
