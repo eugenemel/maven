@@ -1366,12 +1366,22 @@ void MainWindow::showSRMList() {
 
 void MainWindow::setMs3PeakGroup(PeakGroup* parentGroup, PeakGroup* childGroup) {
     if (!parentGroup) return;
+    if (!childGroup) return;
+
     _lastSelectedPeakGroup = parentGroup;
 
     qDebug() << "MainWindow::setMs3PeakGroup() parent=" << parentGroup << "child=" << childGroup;
 
     if (ms3ScansListWidget->isVisible()) {
         ms3ScansListWidget->setInfo(static_cast<double>(parentGroup->meanMz), static_cast<double>(childGroup->meanMz));
+    }
+
+    if ( eicWidget && eicWidget->isVisible() ) {
+        eicWidget->setPeakGroup(parentGroup);
+    }
+
+    if (parentGroup->compound) {
+        setUrl(parentGroup->compound);
     }
 
 }
