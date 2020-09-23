@@ -25,6 +25,9 @@ TreeDockWidget::TreeDockWidget(MainWindow *mw, QString title, int numColms) {
 //Issue 259
 void TreeDockWidget::addMs3TitleBar() {
 
+    //Issue 226
+    treeWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+
     QToolBar *toolBar = new QToolBar(this);
     toolBar->setFloatable(false);
     toolBar->setMovable(false);
@@ -523,8 +526,13 @@ void TreeDockWidget::setInfo(vector<Compound*>&compounds) {
 }
 
 void TreeDockWidget::setInfo(double ms1PrecMz, double ms2PrecMz){
+
     ms1PrecMzSpn->setValue(ms1PrecMz);
     ms2PrecMzSpn->setValue(ms2PrecMz);
+
+    if (treeWidget->topLevelItemCount() > 0) {
+       treeWidget->topLevelItem(0)->setSelected(true);
+    }
 }
 
 void TreeDockWidget::setInfo(Compound* x)  {
