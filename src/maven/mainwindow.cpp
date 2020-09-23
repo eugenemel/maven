@@ -1382,6 +1382,12 @@ void MainWindow::setMs3PeakGroup(PeakGroup* parentGroup, PeakGroup* childGroup) 
 
     if (parentGroup->compound) {
         setUrl(parentGroup->compound);
+
+        Ms3Compound ms3Compound(parentGroup->compound);
+
+        if (ms3SpectraWidget->isVisible()) {
+            //TODO: overlay ms3 spectral information
+        }
     }
 
 }

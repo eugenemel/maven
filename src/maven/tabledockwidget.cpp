@@ -844,6 +844,12 @@ void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation, int cluster
 
     // qDebug() << "TableDockWidget::addMs3Annotation():" << groupTagString(&pg);
 
+    //delete original Ms3Compound*
+    if (ms3Compound) {
+        delete(ms3Compound);
+        ms3Compound = nullptr;
+    }
+
     allgroups.push_back(pg);
 }
 
