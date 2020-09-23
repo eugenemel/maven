@@ -1364,6 +1364,17 @@ void MainWindow::showSRMList() {
     //peakDetectionDialog->show();
 }
 
+void MainWindow::setMs3PeakGroup(PeakGroup* group) {
+    if (!group) return;
+    if (_lastSelectedPeakGroup == group) return;
+
+    _lastSelectedPeakGroup = group;
+
+    qDebug() << "MainWindow::setMs3PeakGroup(PeakGroup)" << group;
+
+    //TODO: processing
+
+}
 
 void MainWindow::setPeakGroup(PeakGroup* group) {
     if (!group) return;

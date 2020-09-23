@@ -1046,7 +1046,12 @@ void TableDockWidget::showSelectedGroup() {
     QVariant v = item->data(0,PeakGroupType);
     PeakGroup*  group =  v.value<PeakGroup*>();
 
-    _mainwindow->setPeakGroup(group);
+    //Issue 226: Handle ms3 searches differently
+    if (this->windowTitle().startsWith("Targeted MS3 Search")) {
+          _mainwindow->setMs3PeakGroup(group);
+    } else {
+         _mainwindow->setPeakGroup(group);
+    }
 }
 
 QList<PeakGroup*> TableDockWidget::getSelectedGroups() {
