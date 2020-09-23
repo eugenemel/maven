@@ -284,8 +284,10 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
     //score peak quality
     Classifier* clsf = _mainwindow->getClassifier();
     if (clsf) {
-        clsf->classify(group);
-        group->updateQuality();
+        if (!isTargetedMs3Table() && !isDirectInfusionTable()) {
+            clsf->classify(group);
+            group->updateQuality();
+        }
         item->setText(0,groupTagString(group));
     }
 
@@ -758,7 +760,7 @@ void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation, int cluster
         p.setSample(it->first);
         p.pos = counter;
         p.noNoiseObs = 0;
-        p.quality = 0;
+        p.quality = static_cast<float>(it->second->numMs3MzMatches);
 
         p.peakIntensity = ms3SingleSampleMatch->sumMs3MzIntensity;
         p.peakAreaTop = p.peakIntensity;
@@ -790,7 +792,6 @@ void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation, int cluster
             p.setSample(it->first);
             p.pos = counter;
             p.noNoiseObs = 0;
-            p.quality = 0;
 
             p.peakIntensity = it2->second;
             p.peakAreaTop = p.peakIntensity;
@@ -809,7 +810,8 @@ void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation, int cluster
             childrenPeakGroupsByPrecMs2Mz[ms2PrecursorMzKey].addPeak(p);
 
             if (ms3SingleSampleMatch->ms3MatchesByMs2Mz.find(ms2PrecursorMzKey) != ms3SingleSampleMatch->ms3MatchesByMs2Mz.end()) {
-                int numMatches = ms3SingleSampleMatch->ms3MatchesByMs2Mz[ms2PrecursorMzKey];
+                float numMatches = static_cast<float>(ms3SingleSampleMatch->ms3MatchesByMs2Mz[ms2PrecursorMzKey]);
+                p.quality = numMatches;
                 if (childrenPeakGroupsByPrecMs2Mz[ms2PrecursorMzKey].fragmentationPattern.mergedScore < numMatches) {
                     childrenPeakGroupsByPrecMs2Mz[ms2PrecursorMzKey].fragmentationPattern.mergedScore = numMatches;
                 }
@@ -823,7 +825,6 @@ void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation, int cluster
     //avoid writing random junk to table
     pg.groupRank = 0;
     pg.fragMatchScore.mergedScore = maxNumMs3Matches;
-
 
     for (auto it = childrenPeakGroupsByPrecMs2Mz.begin(); it != childrenPeakGroupsByPrecMs2Mz.end(); ++it){
 
@@ -1047,7 +1048,7 @@ void TableDockWidget::showSelectedGroup() {
     PeakGroup*  group =  v.value<PeakGroup*>();
 
     //Issue 226: Handle ms3 searches differently
-    if (this->windowTitle().startsWith("Targeted MS3 Search")) {
+    if (isTargetedMs3Table()) {
           _mainwindow->setMs3PeakGroup(group);
     } else {
          _mainwindow->setPeakGroup(group);

@@ -41,6 +41,9 @@ public:
     inline QString getDisplayTableInfo(){return displayTableInfo;}
     inline QString getEncodedTableInfo(){return encodedTableInfo;}
 
+    bool isTargetedMs3Table(){return windowTitle().startsWith("Targeted MS3 Search");}
+    bool isDirectInfusionTable(){return windowTitle().startsWith("Direct Infusion Analysis");}
+
 public slots: 
 	  //void showInfo(PeakGroup* group);
       PeakGroup* addPeakGroup(PeakGroup* group, bool updateTable);
