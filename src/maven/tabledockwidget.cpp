@@ -766,8 +766,8 @@ void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation, int cluster
 
         p.peakMz = pg.compound->precursorMz;
         p.baseMz = pg.compound->precursorMz;
-        p.mzmin = 0;
-        p.mzmax = FLT_MAX;
+        p.mzmin = pg.compound->precursorMz - 0.5f; //TODO
+        p.mzmax = pg.compound->precursorMz + 0.5f; //TODO
 
         if (it->second->numMs3MzMatches > maxNumMs3Matches){
             maxNumMs3Matches = it->second->numMs3MzMatches;
