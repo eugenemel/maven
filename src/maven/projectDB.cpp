@@ -1225,6 +1225,7 @@ void ProjectDB::loadSearchParams(){
         queryMatches.exec("select * from search_params;");
 
         QRegExp DIexpr("^Direct Infusion Analysis");
+        QRegExp ms3Expr("^Targeted MS3 Search");
         QRegExp LCMSDDAexpr("^Detected Features");
 
         while (queryMatches.next()) {
@@ -1233,6 +1234,11 @@ void ProjectDB::loadSearchParams(){
             QString encodedSearchParams = queryMatches.value("parameters").toString();
 
             int pos = DIexpr.indexIn(searchTableName);
+
+            //Issue 226
+            if (pos == -1) {
+                pos = ms3Expr.indexIn(searchTableName);
+            }
 
             if (pos != -1) {
 
@@ -1245,7 +1251,7 @@ void ProjectDB::loadSearchParams(){
             pos = LCMSDDAexpr.indexIn(searchTableName);
 
             if (pos != -1){
-
+                //TODO
             }
         }
 }
