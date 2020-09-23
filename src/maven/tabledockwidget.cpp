@@ -734,28 +734,33 @@ void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation, int cluster
 
     Ms3Compound *ms3Compound = nullptr;
 
-    map<int, vector<Peak>> idDataByMs2Precursor{};
+    map<int, PeakGroup> childrenPeakGroupsByPrecMs2Mz{};
 
     unsigned int counter = 0;
     for (auto it = ms3Annotation->matchesBySample.begin(); it != ms3Annotation->matchesBySample.end(); ++it) {
 
+        Ms3SingleSampleMatch *ms3SingleSampleMatch = it->second;
+
         if (!pg.compound){
 
-            pg.compound = it->second->ms3Compound->baseCompound;
+            pg.compound = ms3SingleSampleMatch->ms3Compound->baseCompound;
 
-            ms3Compound = it->second->ms3Compound;
+            ms3Compound = ms3SingleSampleMatch->ms3Compound;
 
             for (auto it2 = ms3Compound->ms3_fragment_mzs.begin(); it2 != ms3Compound->ms3_fragment_mzs.end(); ++it2) {
-                idDataByMs2Precursor.insert(make_pair(it2->first, vector<Peak>()));
+                PeakGroup childPeakGroup;
+                childPeakGroup.groupRank = 0;
+                childrenPeakGroupsByPrecMs2Mz.insert(make_pair(it2->first, childPeakGroup));
             }
         }
 
         Peak p;
         p.setSample(it->first);
         p.pos = counter;
-
-        p.peakIntensity = it->second->sumMs3MzIntensity;
         p.noNoiseObs = 0;
+        p.quality = 0;
+
+        p.peakIntensity = ms3SingleSampleMatch->sumMs3MzIntensity;
         p.peakAreaTop = p.peakIntensity;
         p.peakAreaCorrected = p.peakIntensity;
         p.peakArea = p.peakIntensity;
@@ -775,34 +780,64 @@ void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation, int cluster
 
         pg.addPeak(p);
 
+        for (auto it2 = ms3SingleSampleMatch->sumMs3IntensityByMs2Mz.begin(); it2 != ms3SingleSampleMatch->sumMs3IntensityByMs2Mz.end(); ++it2) {
+
+            int ms2PrecursorMzKey = it2->first;
+
+            double ms2PrecursorMz = mzUtils::intKeyToMz(ms2PrecursorMzKey);
+
+            Peak p;
+            p.setSample(it->first);
+            p.pos = counter;
+            p.noNoiseObs = 0;
+            p.quality = 0;
+
+            p.peakIntensity = it2->second;
+            p.peakAreaTop = p.peakIntensity;
+            p.peakAreaCorrected = p.peakIntensity;
+            p.peakArea = p.peakIntensity;
+
+            p.rt = 0;
+            p.rtmin = 0;
+            p.rtmax = FLT_MAX;
+
+            p.peakMz = static_cast<float>(ms2PrecursorMz);
+            p.baseMz = static_cast<float>(ms2PrecursorMz);
+            p.mzmin = static_cast<float>(ms2PrecursorMz) - 0.5f; //TODO
+            p.mzmax = static_cast<float>(ms2PrecursorMz) + 0.5f; //TODO
+
+            childrenPeakGroupsByPrecMs2Mz[ms2PrecursorMzKey].addPeak(p);
+
+            if (ms3SingleSampleMatch->ms3MatchesByMs2Mz.find(ms2PrecursorMzKey) != ms3SingleSampleMatch->ms3MatchesByMs2Mz.end()) {
+                int numMatches = ms3SingleSampleMatch->ms3MatchesByMs2Mz[ms2PrecursorMzKey];
+                if (childrenPeakGroupsByPrecMs2Mz[ms2PrecursorMzKey].fragmentationPattern.mergedScore < numMatches) {
+                    childrenPeakGroupsByPrecMs2Mz[ms2PrecursorMzKey].fragmentationPattern.mergedScore = numMatches;
+                }
+            }
+
+        }
+
         counter++;
     }
 
     //avoid writing random junk to table
-    pg.maxNoNoiseObs = 0;
-    pg.maxQuality = 0;
     pg.groupRank = 0;
-    pg.meanMz = pg.compound->precursorMz;
-
     pg.fragMatchScore.mergedScore = maxNumMs3Matches;
 
-    // sub groups
-    for (auto it = idDataByMs2Precursor.begin(); it != idDataByMs2Precursor.end(); ++it) {
-        PeakGroup child;
 
-        int childPrecMz = it->first;
+    for (auto it = childrenPeakGroupsByPrecMs2Mz.begin(); it != childrenPeakGroupsByPrecMs2Mz.end(); ++it){
 
-        vector<Peak> childPeaks = it->second;
+        PeakGroup child = it->second;
 
-        for (auto p : childPeaks) {
-            child.addPeak(p);
-        }
+        stringstream s;
+        s << std::fixed << setprecision(0)
+          << "target: ("
+          << pg.compound->precursorMz
+          << ", "
+          << mzUtils::intKeyToMz(it->first)
+          << ")";
 
-        child.maxNoNoiseObs = 0;
-        child.maxQuality = 0;
-        child.groupRank = 0;
-        child.meanMz = pg.compound->precursorMz;
-
+        child.tagString = s.str();
         pg.addChild(child);
     }
 
