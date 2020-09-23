@@ -470,7 +470,13 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
             ppmMz = _currentScan->precursorMz;
         }
 
-        int pos = _currentScan->findHighestIntensityPos(hitMz, ppmMz, ppmWindow);
+        //Issue 226: targeted ms3 search
+        int pos = -1;
+        if (_msLevel == 3) {
+            pos = _currentScan->findHighestIntensityPosAMU(hitMz, _ms3MatchingTolr);
+        } else {
+            pos = _currentScan->findHighestIntensityPos(hitMz, static_cast<float>(ppmMz), ppmWindow);
+        }
 
         int x = toX(hitMz);
         int y = toY(hitIntensity/maxIntensity*_maxY,SCALE);

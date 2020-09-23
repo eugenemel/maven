@@ -52,6 +52,8 @@ public slots:
                     void toggleDisplayCompoundId();
                     void clearOverlayAndReplot();
 
+                    inline void setMs3MatchingTolerance(float tolr){_ms3MatchingTolr=tolr;}
+
                     Scan* getCurrentScan() { return _currentScan; }
 
                     void selectObservedPeak(int peakIndex);
@@ -62,6 +64,8 @@ public slots:
                     MainWindow* mainwindow;
                     Scan* _currentScan;
                     Scan* _avgScan;
+
+                    float _ms3MatchingTolr = 0.5f;
 
                     Fragment* _currentFragment = nullptr;
                     map<mzSample*,unordered_set<int>> _sampleScanMap = {};
