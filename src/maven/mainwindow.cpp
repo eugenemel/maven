@@ -1383,10 +1383,43 @@ void MainWindow::setMs3PeakGroup(PeakGroup* parentGroup, PeakGroup* childGroup) 
     if (parentGroup->compound) {
         setUrl(parentGroup->compound);
 
-        Ms3Compound ms3Compound(parentGroup->compound);
-
         if (ms3SpectraWidget->isVisible()) {
-            //TODO: overlay ms3 spectral information
+
+            Ms3Compound ms3Compound(parentGroup->compound);
+
+            int ms2MzKey = mzUtils::mzToIntKey(static_cast<double>(childGroup->meanMz));
+
+            //avoid possible rounding problems by identifying index from map based on closest value
+            int mzKeyFromMap = -1;
+            int smallestDiff = INT_MAX;
+
+            for (auto it = ms3Compound.ms3_fragment_mzs.begin(); it != ms3Compound.ms3_fragment_mzs.end(); ++it) {
+                int key = it->first;
+                int diff = abs(ms2MzKey-key);
+                if (diff < smallestDiff) {
+                    smallestDiff = diff;
+                    mzKeyFromMap = key;
+                }
+            }
+
+            vector<float> fragment_mzs = ms3Compound.ms3_fragment_mzs[mzKeyFromMap];
+            vector<string> fragment_labels = ms3Compound.ms3_fragment_labels[mzKeyFromMap];
+            vector<float> fragment_intensities = ms3Compound.ms3_fragment_intensity[mzKeyFromMap];
+
+            string compoundName = parentGroup->compound->name + " " + childGroup->tagString;
+
+            Compound *cpd = new Compound(compoundName, compoundName,parentGroup->compound->getFormula(), 0, parentGroup->compound->getExactMass());
+            cpd->db = parentGroup->compound->db;
+            cpd->precursorMz = parentGroup->compound->precursorMz;
+            cpd->adductString = parentGroup->compound->adductString;
+            cpd->fragment_mzs = fragment_mzs;
+            cpd->fragment_intensity = fragment_intensities;
+            cpd->fragment_labels = fragment_labels;
+
+            ms3SpectraWidget->overlayCompound(cpd);
+
+            delete(cpd);
+
         }
     }
 
