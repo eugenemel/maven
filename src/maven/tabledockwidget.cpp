@@ -1060,9 +1060,15 @@ void TableDockWidget::showSelectedGroup() {
         } else {
             parentGroup = group;
 
-            if (group->childCount() == 0) return; // should not happen, return to avoid null access
+            //choose any child that actually contains peaks, valid m/z
+            for (auto& child : parentGroup->getChildren()) {
+                if (child.meanMz > 0 && child.peakCount() > 0) {
+                    childGroup = &(child);
+                    break;
+                }
+            }
 
-            childGroup = &(group->children[0]);
+            if (!childGroup) return; // should never happen
         }
           _mainwindow->setMs3PeakGroup(parentGroup, childGroup);
     } else {
