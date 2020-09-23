@@ -726,16 +726,33 @@ void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation, int cluster
 
     if (!ms3Annotation) return;
 
+    //the main group
     PeakGroup pg;
+    //pg.metaGroupId = clusterNum;
 
     int maxNumMs3Matches = 0;
 
+    Ms3Compound *ms3Compound = nullptr;
+
+    map<int, vector<Peak>> idDataByMs2Precursor{};
+
+    unsigned int counter = 0;
     for (auto it = ms3Annotation->matchesBySample.begin(); it != ms3Annotation->matchesBySample.end(); ++it) {
 
-        if (!pg.compound) pg.compound = it->second->ms3Compound->baseCompound;
+        if (!pg.compound){
+
+            pg.compound = it->second->ms3Compound->baseCompound;
+
+            ms3Compound = it->second->ms3Compound;
+
+            for (auto it2 = ms3Compound->ms3_fragment_mzs.begin(); it2 != ms3Compound->ms3_fragment_mzs.end(); ++it2) {
+                idDataByMs2Precursor.insert(make_pair(it2->first, vector<Peak>()));
+            }
+        }
 
         Peak p;
         p.setSample(it->first);
+        p.pos = counter;
 
         p.peakIntensity = it->second->sumMs3MzIntensity;
         p.noNoiseObs = 0;
@@ -743,24 +760,51 @@ void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation, int cluster
         p.peakAreaCorrected = p.peakIntensity;
         p.peakArea = p.peakIntensity;
 
-        p.peakMz = pg.compound->precursorMz;
         p.rt = 0;
+        p.rtmin = 0;
+        p.rtmax = FLT_MAX;
+
+        p.peakMz = pg.compound->precursorMz;
+        p.baseMz = pg.compound->precursorMz;
+        p.mzmin = 0;
+        p.mzmax = FLT_MAX;
 
         if (it->second->numMs3MzMatches > maxNumMs3Matches){
             maxNumMs3Matches = it->second->numMs3MzMatches;
         }
 
         pg.addPeak(p);
+
+        counter++;
     }
 
     //avoid writing random junk to table
     pg.maxNoNoiseObs = 0;
     pg.maxQuality = 0;
     pg.groupRank = 0;
+    pg.meanMz = pg.compound->precursorMz;
 
-    //
-    //pg.tagString =
     pg.fragMatchScore.mergedScore = maxNumMs3Matches;
+
+    // sub groups
+    for (auto it = idDataByMs2Precursor.begin(); it != idDataByMs2Precursor.end(); ++it) {
+        PeakGroup child;
+
+        int childPrecMz = it->first;
+
+        vector<Peak> childPeaks = it->second;
+
+        for (auto p : childPeaks) {
+            child.addPeak(p);
+        }
+
+        child.maxNoNoiseObs = 0;
+        child.maxQuality = 0;
+        child.groupRank = 0;
+        child.meanMz = pg.compound->precursorMz;
+
+        pg.addChild(child);
+    }
 
     // qDebug() << "TableDockWidget::addMs3Annotation():" << groupTagString(&pg);
 
