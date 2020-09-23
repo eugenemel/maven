@@ -812,8 +812,8 @@ void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation, int cluster
             if (ms3SingleSampleMatch->ms3MatchesByMs2Mz.find(ms2PrecursorMzKey) != ms3SingleSampleMatch->ms3MatchesByMs2Mz.end()) {
                 float numMatches = static_cast<float>(ms3SingleSampleMatch->ms3MatchesByMs2Mz[ms2PrecursorMzKey]);
                 p.quality = numMatches;
-                if (childrenPeakGroupsByPrecMs2Mz[ms2PrecursorMzKey].fragmentationPattern.mergedScore < numMatches) {
-                    childrenPeakGroupsByPrecMs2Mz[ms2PrecursorMzKey].fragmentationPattern.mergedScore = numMatches;
+                if (childrenPeakGroupsByPrecMs2Mz[ms2PrecursorMzKey].fragMatchScore.mergedScore < numMatches) {
+                    childrenPeakGroupsByPrecMs2Mz[ms2PrecursorMzKey].fragMatchScore.mergedScore = numMatches;
                 }
             }
 
