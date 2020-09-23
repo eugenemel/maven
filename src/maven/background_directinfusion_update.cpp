@@ -151,7 +151,7 @@ void BackgroundDirectInfusionUpdate::run(void) {
         }
 
         for (auto it = compoundToAnnotations.begin(); it != compoundToAnnotations.end(); ++it) {
-            emit(newMs3Annotation(it->second));
+            emit(newMs3Annotation(it->second, emitCounter));
             updateProgressBar("Populating results table...", emitCounter, totalSteps);
             emitCounter++;
         }

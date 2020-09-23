@@ -174,6 +174,10 @@ void DirectInfusionDialog::analyze() {
 
     QString title = QString("Direct Infusion Analysis");
 
+    if (directInfusionUpdate->params->ms3IsMs3Search) {
+        title = QString("Targeted MS3 Search");
+    }
+
     title = mainwindow->getUniquePeakTableTitle(title);
 
     string encodedParams = directInfusionUpdate->params->encodeParams();
@@ -185,7 +189,7 @@ void DirectInfusionDialog::analyze() {
     resultsTable->setWindowTitle(title);
 
     connect(directInfusionUpdate, SIGNAL(newDirectInfusionAnnotation(DirectInfusionGroupAnnotation*, int)), resultsTable, SLOT(addDirectInfusionAnnotation(DirectInfusionGroupAnnotation*, int)));
-    connect(directInfusionUpdate, SIGNAL(newMs3Annotation(Ms3Annotation*)), resultsTable, SLOT(addMs3Annotation(Ms3Annotation*)));
+    connect(directInfusionUpdate, SIGNAL(newMs3Annotation(Ms3Annotation*, int)), resultsTable, SLOT(addMs3Annotation(Ms3Annotation*, int)));
     connect(directInfusionUpdate, SIGNAL(updateProgressBar(QString,int,int)), SLOT(setProgressBar(QString, int,int)));
     connect(directInfusionUpdate, SIGNAL(closeDialog()), SLOT(hide()));
     connect(directInfusionUpdate, SIGNAL(closeDialog()), resultsTable, SLOT(showAllGroups()));

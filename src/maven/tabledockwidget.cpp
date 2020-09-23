@@ -722,7 +722,7 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation 
 //     if (directInfusionGroupAnnotation) delete(directInfusionGroupAnnotation);
 }
 
-void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation){
+void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation, int clusterNum) {
 
     if (!ms3Annotation) return;
 
