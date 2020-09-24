@@ -66,6 +66,7 @@ void LibraryMangerDialog::deleteLibrary() {
 
         emit(unloadLibrarySignal(libraryName));
 
+        DB.unloadCompounds(libraryName);
         DB.deleteCompoundsSQL(libraryName,DB.getLigandDB());
     }
     updateLibraryStats();
