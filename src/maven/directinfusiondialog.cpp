@@ -117,7 +117,7 @@ void DirectInfusionDialog::analyze() {
     directInfusionUpdate->params->ms3MinNumMatches = this->spnMs3MinNumMatches->value();
     directInfusionUpdate->params->ms3MinNumMs3MzMatches = this->spnMs3MinNumMzMatches->value();
     directInfusionUpdate->params->ms3AnalysisMs1PrecursorPpmTolr = this->spnParTol->value();
-    directInfusionUpdate->params->ms3PrecursorPpmTolr = this->spnMs3PrecursorPpmTolr->value();
+    directInfusionUpdate->params->ms3PrecursorPpmTolr = this->spnFragTol->value();
     directInfusionUpdate->params->ms3MatchTolrInDa = static_cast<float>(this->spnMs3MatchTolrInDa->value());
 
     //scan filter (applies to all ms1, ms2, and ms3)
