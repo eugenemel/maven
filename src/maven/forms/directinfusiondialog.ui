@@ -36,7 +36,7 @@
       <item row="8" column="0">
        <widget class="QLabel" name="lblParTol">
         <property name="text">
-         <string>Parent PPM Tolr</string>
+         <string>MS1 m/z Tolerance</string>
         </property>
        </widget>
       </item>
@@ -56,7 +56,7 @@
       <item row="2" column="0">
        <widget class="QLabel" name="lblFragTol">
         <property name="text">
-         <string>Fragment Tolr</string>
+         <string>MS2 m/z Tolerance</string>
         </property>
        </widget>
       </item>
@@ -90,7 +90,7 @@
       <item row="5" column="2">
        <widget class="QLabel" name="lblMatchUnique">
         <property name="text">
-         <string>Match at Least X Unique Peaks</string>
+         <string>Match at Least X Unique MS2 Peaks</string>
         </property>
        </widget>
       </item>
@@ -164,7 +164,7 @@
       <item row="2" column="2">
        <widget class="QLabel" name="lblMatchXPeaks">
         <property name="text">
-         <string>Match at Least X Peaks</string>
+         <string>Match at Least X MS2 Peaks</string>
         </property>
        </widget>
       </item>
@@ -220,7 +220,7 @@
       <item row="3" column="0">
        <widget class="QLabel" name="lblFragMinIntensity">
         <property name="text">
-         <string>Frag Min Intensity</string>
+         <string>MS2 Minimum Peak Intensity</string>
         </property>
        </widget>
       </item>
@@ -254,7 +254,7 @@
       <item row="11" column="0">
        <widget class="QLabel" name="lblMs3PpmTolr">
         <property name="text">
-         <string>MS3 Fragment Tolr</string>
+         <string>MS3 m/z Tolerance</string>
         </property>
        </widget>
       </item>
@@ -293,7 +293,7 @@
       <item row="13" column="0">
        <widget class="QLabel" name="lblMs3FragMinIntensity">
         <property name="text">
-         <string>MS3 Fragment Min Intensity</string>
+         <string>MS3 Minimum Peak Intensity</string>
         </property>
        </widget>
       </item>
@@ -315,7 +315,7 @@
       </size>
      </property>
      <property name="title">
-      <string>Observed Data Comparison</string>
+      <string>Observed Data Comparison (MS1 + MS2 searches only)</string>
      </property>
      <layout class="QFormLayout" name="formLayout_2">
       <item row="0" column="0" colspan="2">
@@ -419,7 +419,7 @@
    <item row="3" column="0">
     <widget class="QGroupBox" name="spectralDeconvolutionGroup">
      <property name="title">
-      <string>Spectral Composition</string>
+      <string>Spectral Composition (MS1 + MS2 searches only)</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="4" column="0" colspan="2">
