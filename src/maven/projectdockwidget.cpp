@@ -641,8 +641,8 @@ void ProjectDockWidget::loadAllPeakTables() {
                 QString displayParams = QString(encodedParams);
 
                 displayParams.replace(QRegExp(";"), "\n");
-                displayParams.replace(QRegExp("="), " ");
                 displayParams.replace(QRegExp(DirectInfusionSearchParameters::INTERNAL_MAP_DELIMITER, Qt::CaseSensitive, QRegExp::FixedString), ",");
+                displayParams.replace(QRegExp(",}", Qt::CaseSensitive, QRegExp::FixedString), "}");
 
                 encodedTableInfo = encodedParams;
                 displayTableInfo = displayParams;
