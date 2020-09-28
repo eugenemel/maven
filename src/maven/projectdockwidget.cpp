@@ -637,16 +637,18 @@ void ProjectDockWidget::loadAllPeakTables() {
             if (currentProject->diSearchParameters.find(searchTableNameString) != currentProject->diSearchParameters.end()) {
                 shared_ptr<DirectInfusionSearchParameters> searchParams = currentProject->diSearchParameters[searchTableNameString];
 
-                string encodedParams = searchParams->encodeParams();
-                string displayParams = encodedParams;
-                replace(displayParams.begin(), displayParams.end(), ';', '\n');
-                replace(displayParams.begin(), displayParams.end(), '=', ' ');
+                QString encodedParams = QString(searchParams->encodeParams().c_str());
+                QString displayParams = QString(encodedParams);
 
-                encodedTableInfo = QString(encodedParams.c_str());
-                displayTableInfo = QString(displayParams.c_str());
+                displayParams.replace(QRegExp(";"), "\n");
+                displayParams.replace(QRegExp("="), " ");
+                displayParams.replace(QRegExp(DirectInfusionSearchParameters::INTERNAL_MAP_DELIMITER, Qt::CaseSensitive, QRegExp::FixedString), ",");
+
+                encodedTableInfo = encodedParams;
+                displayTableInfo = displayParams;
             }
 
-            _mainwindow->addPeaksTable(searchTableName, encodedTableInfo,displayTableInfo);
+            _mainwindow->addPeaksTable(searchTableName, encodedTableInfo, displayTableInfo);
         }
     }
 
