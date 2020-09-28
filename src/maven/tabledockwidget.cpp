@@ -807,8 +807,6 @@ void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation, int cluster
             p.mzmin = static_cast<float>(ms2PrecursorMz) - 0.5f; //TODO
             p.mzmax = static_cast<float>(ms2PrecursorMz) + 0.5f; //TODO
 
-            childrenPeakGroupsByPrecMs2Mz[ms2PrecursorMzKey].addPeak(p);
-
             if (ms3SingleSampleMatch->ms3MatchesByMs2Mz.find(ms2PrecursorMzKey) != ms3SingleSampleMatch->ms3MatchesByMs2Mz.end()) {
                 float numMatches = static_cast<float>(ms3SingleSampleMatch->ms3MatchesByMs2Mz[ms2PrecursorMzKey]);
                 p.quality = numMatches;
@@ -816,6 +814,8 @@ void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation, int cluster
                     childrenPeakGroupsByPrecMs2Mz[ms2PrecursorMzKey].fragMatchScore.mergedScore = numMatches;
                 }
             }
+
+            childrenPeakGroupsByPrecMs2Mz[ms2PrecursorMzKey].addPeak(p);
 
         }
 
