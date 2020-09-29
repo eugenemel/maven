@@ -964,7 +964,11 @@ void TableDockWidget::showAllGroups() {
 
 void TableDockWidget::showAllGroupsThenSort() {
     showAllGroups();
-    treeWidget->sortByColumn(4,Qt::DescendingOrder); //decreasing by score
+    if (isTargetedMs3Table()) {
+        treeWidget->sortByColumn(11, Qt::DescendingOrder); //decreasing by max intensity
+    } else {
+        treeWidget->sortByColumn(4, Qt::DescendingOrder); //decreasing by score
+    }
 }
 
 void TableDockWidget::exportGroupsToSpreadsheet() {

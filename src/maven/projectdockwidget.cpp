@@ -688,7 +688,7 @@ void ProjectDockWidget::loadAllPeakTables() {
 
     //updated display widgets
     for(TableDockWidget* t: _mainwindow->getAllPeakTables()) {
-        if (t->windowTitle() == "rumsDB") {
+        if (t->windowTitle() == "rumsDB" || t->isTargetedMs3Table()) {
             t->showAllGroupsThenSort();
         } else {
             t->showAllGroups();

@@ -198,7 +198,11 @@ void DirectInfusionDialog::analyze() {
     connect(directInfusionUpdate, SIGNAL(newMs3Annotation(Ms3Annotation*, int)), resultsTable, SLOT(addMs3Annotation(Ms3Annotation*, int)));
     connect(directInfusionUpdate, SIGNAL(updateProgressBar(QString,int,int)), SLOT(setProgressBar(QString, int,int)));
     connect(directInfusionUpdate, SIGNAL(closeDialog()), SLOT(hide()));
-    connect(directInfusionUpdate, SIGNAL(closeDialog()), resultsTable, SLOT(showAllGroups()));
+    if (directInfusionUpdate->params->ms3IsMs3Search) {
+         connect(directInfusionUpdate, SIGNAL(closeDialog()), resultsTable, SLOT(showAllGroupsThenSort()));
+    } else {
+         connect(directInfusionUpdate, SIGNAL(closeDialog()), resultsTable, SLOT(showAllGroups()));
+    }
 
     if ( ! directInfusionUpdate->isRunning() ) {
         directInfusionUpdate->start();	//start a background thread
