@@ -161,7 +161,7 @@ private:
           QString displayTableInfo;
           QString encodedTableInfo;
 
-          SearchParameters *searchParams = nullptr;
+          shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParams = nullptr;
 };
 
 typedef std::multimap<PeakGroup*, QTreeWidgetItem*>::iterator rowIterator;

@@ -10,7 +10,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QS
     setAcceptDrops(true);
 
     if (isTargetedMs3Table() || isDirectInfusionTable()) {
-        searchParams = DirectInfusionSearchParameters::decode(encodedTableInfo.toStdString()).get();
+        directInfusionSearchParams = DirectInfusionSearchParameters::decode(encodedTableInfo.toStdString());
     }
 
     numColms=11;
@@ -1079,6 +1079,10 @@ void TableDockWidget::showSelectedGroup() {
             }
 
             if (!childGroup) return; // should never happen
+        }
+
+        if (directInfusionSearchParams) {
+            _mainwindow->ms3SpectraWidget->setMs3MatchingTolerance(directInfusionSearchParams->ms3MatchTolrInDa);
         }
           _mainwindow->setMs3PeakGroup(parentGroup, childGroup);
     } else {
