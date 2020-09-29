@@ -9,6 +9,10 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QS
     setWindowTitle(title);
     setAcceptDrops(true);
 
+    if (isTargetedMs3Table() || isDirectInfusionTable()) {
+        searchParams = DirectInfusionSearchParameters::decode(encodedTableInfo.toStdString()).get();
+    }
+
     numColms=11;
     viewType = groupView;
 

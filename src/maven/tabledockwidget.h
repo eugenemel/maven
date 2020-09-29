@@ -41,8 +41,8 @@ public:
     inline QString getDisplayTableInfo(){return displayTableInfo;}
     inline QString getEncodedTableInfo(){return encodedTableInfo;}
 
-    bool isTargetedMs3Table(){return windowTitle().startsWith("Targeted MS3 Search");}
-    bool isDirectInfusionTable(){return windowTitle().startsWith("Direct Infusion Analysis");}
+    inline bool isTargetedMs3Table(){return windowTitle().startsWith("Targeted MS3 Search");}
+    inline bool isDirectInfusionTable(){return windowTitle().startsWith("Direct Infusion Analysis");}
 
 public slots: 
 	  //void showInfo(PeakGroup* group);
@@ -160,6 +160,8 @@ private:
 
           QString displayTableInfo;
           QString encodedTableInfo;
+
+          SearchParameters *searchParams = nullptr;
 };
 
 typedef std::multimap<PeakGroup*, QTreeWidgetItem*>::iterator rowIterator;
