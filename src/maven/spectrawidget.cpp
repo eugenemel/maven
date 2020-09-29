@@ -636,7 +636,12 @@ void SpectraWidget::drawGraph() {
 
         }
 
-        if( abs(scan->mz[j]-_focusedMz)<0.005 ) {
+        float tol = 0.005f;
+        if (_msLevel == 3) {
+            tol = _ms3MatchingTolr;
+        }
+
+        if( abs(scan->mz[j]-_focusedMz) < tol) {
             QPen redpen(Qt::red, 3);
             QGraphicsLineItem* line = new QGraphicsLineItem(x,y,x,toY(0,SCALE,OFFSET),0);
             scene()->addItem(line);
@@ -1022,17 +1027,23 @@ int SpectraWidget::findNearestMz(QPointF pos) {
     float ycoord  =invY(pos.y());
     int best=-1;
 
-	vector<int> matches = _currentScan->findMatchingMzs(mzmin,mzmax);
-    if (matches.size() > 0) {
-        float dist=FLT_MAX;
-        for(int i=0; i < matches.size(); i++ ) {
-            int p = matches[i];
-			float d = sqrt(POW2(_currentScan->intensity[p]-ycoord)+POW2(_currentScan->mz[p]-mz));
-            if ( d < dist ){ best=p; dist=d; }
+    if (_msLevel == 3) {
+
+        best = _currentScan->findHighestIntensityPosAMU(invX(pos.x()), _ms3MatchingTolr);
+
+    } else {
+        vector<int> matches = _currentScan->findMatchingMzs(mzmin,mzmax);
+        if (matches.size() > 0) {
+            float dist=FLT_MAX;
+            for(int i=0; i < matches.size(); i++ ) {
+                int p = matches[i];
+                float d = sqrt(POW2(_currentScan->intensity[p]-ycoord)+POW2(_currentScan->mz[p]-mz));
+                if ( d < dist ){ best=p; dist=d; }
+            }
         }
-
-
     }
+
+
     return best;
 }
 
