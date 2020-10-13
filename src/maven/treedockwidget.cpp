@@ -144,7 +144,6 @@ void TreeDockWidget::showInfo() {
 
         int mslevel = -1;
         unordered_set<float> rts{};
-        map<mzSample*, unordered_set<int>> sampleScanMap = {};
 
         //retrieve settings
         //scan filter
@@ -224,35 +223,33 @@ void TreeDockWidget::showInfo() {
                         mslevel = scan->mslevel;
                     }
 
-                    if (sampleScanMap.find(scan->sample) == sampleScanMap.end()) {
-                        sampleScanMap.insert(make_pair(scan->sample, unordered_set<int>()));
+                }
+
+                if (f) {
+                    f->buildConsensus(productPpmTolr,
+                                      consensusIntensityAgglomerationType,
+                                      isIntensityAvgByObserved,
+                                      isNormalizeIntensityArray,
+                                      minNumScansForConsensus,
+                                      minFractionScansForConsensus);
+
+                    if (mslevel == 1){
+                        mainwindow->getSpectraWidget()->setCurrentFragment(f->consensus, mslevel);
+                    } else if (mslevel == 2){
+                        mainwindow->fragmentationSpectraWidget->setCurrentFragment(f->consensus, mslevel);
+                        mainwindow->massCalcWidget->setFragment(f->consensus);
+                    } else if (mslevel == 3) {
+                        mainwindow->ms3SpectraWidget->setCurrentFragment(f->consensus, mslevel);
                     }
-                    sampleScanMap[scan->sample].insert(scan->scannum);
 
+                    vector<float> rtsVector;
+                    rtsVector.assign(rts.begin(), rts.end());
+                    mainwindow->getEicWidget()->clearEICLines();
+                    mainwindow->getEicWidget()->setFocusLines(rtsVector);
+
+                    delete(f);
                 }
 
-                f->buildConsensus(productPpmTolr,
-                                  consensusIntensityAgglomerationType,
-                                  isIntensityAvgByObserved,
-                                  isNormalizeIntensityArray,
-                                  minNumScansForConsensus,
-                                  minFractionScansForConsensus);
-
-                if (mslevel == 1){
-                    mainwindow->getSpectraWidget()->setCurrentFragment(f->consensus, mslevel);
-                } else if (mslevel == 2){
-                    mainwindow->fragmentationSpectraWidget->setCurrentFragment(f->consensus, mslevel);
-                    mainwindow->massCalcWidget->setFragment(f->consensus);
-                } else if (mslevel == 3) {
-                    mainwindow->ms3SpectraWidget->setCurrentFragment(f->consensus, mslevel);
-                }
-
-                vector<float> rtsVector;
-                rtsVector.assign(rts.begin(), rts.end());
-                mainwindow->getEicWidget()->clearEICLines();
-                mainwindow->getEicWidget()->setFocusLines(rtsVector);
-
-                if (f) delete(f);
             }
 
         } else if (this->exclusiveItemType == ScanVectorType) {
@@ -268,6 +265,8 @@ void TreeDockWidget::showInfo() {
 
             Fragment *f = nullptr;
             for (auto scan : allScans){
+
+                rts.insert(scan->rt);
 
                 if (f) {
                     Fragment *brother = new Fragment(scan,
@@ -291,11 +290,6 @@ void TreeDockWidget::showInfo() {
                     mslevel = scan->mslevel;
                 }
 
-                if (sampleScanMap.find(scan->sample) == sampleScanMap.end()) {
-                    sampleScanMap.insert(make_pair(scan->sample, unordered_set<int>()));
-                }
-                sampleScanMap[scan->sample].insert(scan->scannum);
-
             }
 
             if (f) {
@@ -310,6 +304,11 @@ void TreeDockWidget::showInfo() {
                     mainwindow->fragmentationSpectraWidget->setCurrentFragment(f->consensus, mslevel);
                     mainwindow->massCalcWidget->setFragment(f->consensus);
                 }
+
+                vector<float> rtsVector;
+                rtsVector.assign(rts.begin(), rts.end());
+                mainwindow->getEicWidget()->clearEICLines();
+                mainwindow->getEicWidget()->setFocusLines(rtsVector);
 
                 delete(f);
             }
