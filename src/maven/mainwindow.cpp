@@ -170,6 +170,11 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     ms3ScansListWidget->setExclusiveItemType(ScanType);
     ms3ScansListWidget->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
+    ms2ConsensusScansListWidget	= new TreeDockWidget(this,"Consensus MS2 List", 3);
+    ms2ConsensusScansListWidget->setupConsensusScanListHeader();
+    ms2ConsensusScansListWidget->setExclusiveItemType(ScanVectorType);
+    ms2ConsensusScansListWidget->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
     //Issue 259: Currently only support single scan selection
 //    ms3ScansListWidget->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
@@ -204,6 +209,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     massCalcWidget->setVisible(false);
     ms2ScansListWidget->setVisible(false);
     ms1ScansListWidget->setVisible(false);
+    ms3ScansListWidget->setVisible(false);
+    ms2ConsensusScansListWidget->setVisible(false);
     bookmarkedPeaks->setVisible(false);
     spectraDockWidget->setVisible(false);
     scatterDockWidget->setVisible(false);
@@ -270,10 +277,12 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     addDockWidget(Qt::BottomDockWidgetArea,srmDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,rconsoleDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,fragmentationSpectraDockWidget,Qt::Horizontal);
+    addDockWidget(Qt::BottomDockWidgetArea,ms3SpectraDockWidget,Qt::Horizontal);
 
     addDockWidget(Qt::BottomDockWidgetArea,ms1ScansListWidget, Qt::Horizontal);
-    addDockWidget(Qt::BottomDockWidgetArea,ms2ScansListWidget,Qt::Horizontal);
-    addDockWidget(Qt::BottomDockWidgetArea,ms3SpectraDockWidget,Qt::Horizontal);
+    addDockWidget(Qt::BottomDockWidgetArea,ms2ScansListWidget, Qt::Horizontal);
+    addDockWidget(Qt::BottomDockWidgetArea,ms3ScansListWidget, Qt::Horizontal);
+    addDockWidget(Qt::BottomDockWidgetArea,ms2ConsensusScansListWidget, Qt::Horizontal);
 
     //addDockWidget(Qt::BottomDockWidgetArea,peaksPanel,Qt::Horizontal);
     //addDockWidget(Qt::BottomDockWidgetArea,treeMapDockWidget,Qt::Horizontal);
@@ -289,6 +298,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
     tabifyDockWidget(ms1ScansListWidget, ms2ScansListWidget);
     tabifyDockWidget(ms1ScansListWidget, ms3ScansListWidget);
+    tabifyDockWidget(ms1ScansListWidget, ms2ConsensusScansListWidget);
 
     setContextMenuPolicy(Qt::NoContextMenu);
 
@@ -306,6 +316,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     ms1ScansListWidget->hide();
     ms2ScansListWidget->hide();
     ms3ScansListWidget->hide();
+    ms2ConsensusScansListWidget->hide();
 
     setUserPPM(5);
     if ( settings->contains("ppmWindowBox")) {
@@ -686,6 +697,7 @@ void MainWindow::setMzValue() {
         if(eicWidget->isVisible() ) eicWidget->setMzSlice(mz);
         if(massCalcWidget->isVisible() ) massCalcWidget->setMass(mz);
         if(ms2ScansListWidget->isVisible()   ) showFragmentationScans(mz);
+        if(ms2ConsensusScansListWidget->isVisible()) showConsensusFragmentationScans(mz);
         if(ms1ScansListWidget->isVisible() ) showMs1Scans(mz);
     }
     suggestPopup->addToHistory(QString::number(mz,'f',5));
@@ -696,6 +708,7 @@ void MainWindow::setMzValue(float mz) {
     if (eicWidget->isVisible() ) eicWidget->setMzSlice(mz);
     if (massCalcWidget->isVisible() ) massCalcWidget->setMass(mz);
     if (ms2ScansListWidget->isVisible()   ) showFragmentationScans(mz);
+    if (ms2ConsensusScansListWidget->isVisible()) showConsensusFragmentationScans(mz);
     if (ms1ScansListWidget->isVisible() ) showMs1Scans(mz);
 }
 
@@ -1087,6 +1100,13 @@ void MainWindow::createMenus() {
     aMs3Events->setCheckable(true);
     aMs3Events->setChecked(false);
     connect(aMs3Events, SIGNAL(toggled(bool)), ms3ScansListWidget, SLOT(setVisible(bool)));
+
+    widgetsMenu->addSeparator();
+
+    QAction *aConsensusMs2Events =widgetsMenu->addAction("Consensus MS2 Scans List");
+    aConsensusMs2Events->setCheckable(true);
+    aConsensusMs2Events->setChecked(false);
+    connect(aConsensusMs2Events, SIGNAL(toggled(bool)), ms2ConsensusScansListWidget,SLOT(setVisible(bool)));
 
     widgetsMenu->addSeparator();
 
@@ -1661,6 +1681,14 @@ void MainWindow::showPeakInfo(Peak* _peak) {
         }
         showFragmentationScans(mz);
     }
+
+    if (ms2ConsensusScansListWidget->isVisible()) {
+        float mz = _peak->peakMz;
+        if (_peak->mzmax - _peak->mzmin > 0.5f) { //direct infusion peak
+            mz = 0.5f* (_peak->mzmin + _peak->mzmax);
+        }
+        showConsensusFragmentationScans(mz);
+    }
 }
 
 void MainWindow::spectraFocused(Peak* _peak) {
@@ -1785,6 +1813,30 @@ void MainWindow::showFragmentationScans(float pmz) {
             if ( s->mslevel > 1 && ppmDist(s->precursorMz,pmz) < ppm ) {
                 ms2ScansListWidget->addScanItem(s);
             }
+        }
+    }
+}
+
+void MainWindow::showConsensusFragmentationScans(float pmz) {
+
+    if (!ms2ConsensusScansListWidget || ms2ConsensusScansListWidget->isVisible() == false ) return;
+    float ppm = getUserPPM();
+
+    if (samples.size() <= 0 ) return;
+    ms2ConsensusScansListWidget->clearTree();
+    for ( unsigned int i=0; i < samples.size(); i++ ) {
+
+        vector<Scan*> scanVector{};
+
+        for (unsigned int j=0; j < samples[i]->scans.size(); j++ ) {
+            Scan* s = samples[i]->scans[j];
+            if (s->mslevel == 2 && ppmDist(s->precursorMz, pmz) < ppm) {
+                scanVector.push_back(s);
+            }
+        }
+
+        if (!scanVector.empty()){
+            ms2ConsensusScansListWidget->addMs2ScanVectorItem(scanVector);
         }
     }
 }

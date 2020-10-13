@@ -45,7 +45,8 @@ enum itemType {
 		PeakType,
 		mzSliceType, 
         mzLinkType,
-        AdductType
+        AdductType,
+        ScanVectorType
 };
 
 extern Database DB; 

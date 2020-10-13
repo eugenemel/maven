@@ -142,6 +142,37 @@ void TreeDockWidget::showInfo() {
     MainWindow* mainwindow = (MainWindow*)parentWidget();
         if ( ! mainwindow ) return;
 
+        int mslevel = -1;
+        unordered_set<float> rts{};
+        map<mzSample*, unordered_set<int>> sampleScanMap = {};
+
+        //retrieve settings
+        //scan filter
+        float minFracIntensity = mainwindow->getSettings()->value("spnScanFilterMinIntensityFraction", 0).toFloat();
+        float minSNRatio = mainwindow->getSettings()->value("spnScanFilterMinSN", 0).toFloat();
+        int maxNumberOfFragments = mainwindow->getSettings()->value("spnScanFilterRetainTopX", -1).toInt();
+        int baseLinePercentile = static_cast<int>(mainwindow->getSettings()->value("spnScanFilterBaseline", 5).toDouble());
+        bool isRetainFragmentsAbovePrecursorMz = mainwindow->getSettings()->value("chkScanFilterRetainHighMzFragments", true).toBool();
+        float precursorPurityPpm = -1;
+        float minIntensity = mainwindow->getSettings()->value("spnScanFilterMinIntensity", 0).toFloat();
+
+        //consensus
+        float productPpmTolr = mainwindow->getSettings()->value("spnConsensusPeakMatchTolerance", 10).toFloat();
+        bool isIntensityAvgByObserved = mainwindow->getSettings()->value("chkConsensusAvgOnlyObserved", true).toBool();
+        bool isNormalizeIntensityArray = mainwindow->getSettings()->value("chkConsensusNormalizeTo10K", false).toBool();
+        int minNumScansForConsensus = mainwindow->getSettings()->value("spnConsensusMinPeakPresence", 0).toInt();
+        float minFractionScansForConsensus = mainwindow->getSettings()->value("spnConsensusMinPeakPresenceFraction", 0).toFloat();
+
+        //Issue 217
+        Fragment::ConsensusIntensityAgglomerationType consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
+        QString consensusIntensityAgglomerationTypeStr = mainwindow->getSettings()->value("cmbConsensusAgglomerationType").toString();
+
+        if (consensusIntensityAgglomerationTypeStr == "Mean") {
+            consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
+        } else if (consensusIntensityAgglomerationTypeStr == "Median") {
+            consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median;
+        }
+
         if (this->exclusiveItemType == ScanType) {
             if (treeWidget->selectedItems().size() == 1) {
 
@@ -162,37 +193,6 @@ void TreeDockWidget::showInfo() {
                 mainwindow->getEicWidget()->setFocusLine(scan->rt);
 
             } else if (treeWidget->selectedItems().size() > 1) {
-
-                int mslevel = -1;
-                unordered_set<float> rts{};
-                map<mzSample*, unordered_set<int>> sampleScanMap = {};
-
-                //retrieve settings
-                //scan filter
-                float minFracIntensity = mainwindow->getSettings()->value("spnScanFilterMinIntensityFraction", 0).toFloat();
-                float minSNRatio = mainwindow->getSettings()->value("spnScanFilterMinSN", 0).toFloat();
-                int maxNumberOfFragments = mainwindow->getSettings()->value("spnScanFilterRetainTopX", -1).toInt();
-                int baseLinePercentile = static_cast<int>(mainwindow->getSettings()->value("spnScanFilterBaseline", 5).toDouble());
-                bool isRetainFragmentsAbovePrecursorMz = mainwindow->getSettings()->value("chkScanFilterRetainHighMzFragments", true).toBool();
-                float precursorPurityPpm = -1;
-                float minIntensity = mainwindow->getSettings()->value("spnScanFilterMinIntensity", 0).toFloat();
-
-                //consensus
-                float productPpmTolr = mainwindow->getSettings()->value("spnConsensusPeakMatchTolerance", 10).toFloat();
-                bool isIntensityAvgByObserved = mainwindow->getSettings()->value("chkConsensusAvgOnlyObserved", true).toBool();
-                bool isNormalizeIntensityArray = mainwindow->getSettings()->value("chkConsensusNormalizeTo10K", false).toBool();
-                int minNumScansForConsensus = mainwindow->getSettings()->value("spnConsensusMinPeakPresence", 0).toInt();
-                float minFractionScansForConsensus = mainwindow->getSettings()->value("spnConsensusMinPeakPresenceFraction", 0).toFloat();
-
-                //Issue 217
-                Fragment::ConsensusIntensityAgglomerationType consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
-                QString consensusIntensityAgglomerationTypeStr = mainwindow->getSettings()->value("cmbConsensusAgglomerationType").toString();
-
-                if (consensusIntensityAgglomerationTypeStr == "Mean") {
-                    consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
-                } else if (consensusIntensityAgglomerationTypeStr == "Median") {
-                    consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median;
-                }
 
                 Fragment *f = nullptr;
                 for (QTreeWidgetItem *item : treeWidget->selectedItems()){
@@ -254,6 +254,66 @@ void TreeDockWidget::showInfo() {
 
                 if (f) delete(f);
             }
+
+        } else if (this->exclusiveItemType == ScanVectorType) {
+
+            vector<Scan*> allScans{};
+            for (QTreeWidgetItem *item : treeWidget->selectedItems()){
+
+                QVariant v =   item->data(0,Qt::UserRole);
+                vector<Scan*> scanVector = v.value<vector<Scan*>>();
+
+                allScans.insert(allScans.end(), scanVector.begin(), scanVector.end());
+            }
+
+            Fragment *f = nullptr;
+            for (auto scan : allScans){
+
+                if (f) {
+                    Fragment *brother = new Fragment(scan,
+                                                     minFracIntensity,
+                                                     minSNRatio,
+                                                     maxNumberOfFragments,
+                                                     baseLinePercentile,
+                                                     isRetainFragmentsAbovePrecursorMz,
+                                                     precursorPurityPpm,
+                                                     minIntensity);
+                    f->addFragment(brother);
+                } else {
+                    f = new Fragment(scan,
+                                     minFracIntensity,
+                                     minSNRatio,
+                                     maxNumberOfFragments,
+                                     baseLinePercentile,
+                                     isRetainFragmentsAbovePrecursorMz,
+                                     precursorPurityPpm,
+                                     minIntensity);
+                    mslevel = scan->mslevel;
+                }
+
+                if (sampleScanMap.find(scan->sample) == sampleScanMap.end()) {
+                    sampleScanMap.insert(make_pair(scan->sample, unordered_set<int>()));
+                }
+                sampleScanMap[scan->sample].insert(scan->scannum);
+
+            }
+
+            if (f) {
+                f->buildConsensus(productPpmTolr,
+                                  consensusIntensityAgglomerationType,
+                                  isIntensityAvgByObserved,
+                                  isNormalizeIntensityArray,
+                                  minNumScansForConsensus,
+                                  minFractionScansForConsensus);
+
+                if (mslevel == 2){
+                    mainwindow->fragmentationSpectraWidget->setCurrentFragment(f->consensus, mslevel);
+                    mainwindow->massCalcWidget->setFragment(f->consensus);
+                }
+
+                delete(f);
+            }
+
         } else {
             foreach(QTreeWidgetItem* item, treeWidget->selectedItems() ) {
                             QString text = item->text(0);
@@ -442,6 +502,15 @@ void TreeDockWidget::setupScanListHeader() {
 
 }
 
+void TreeDockWidget::setupConsensusScanListHeader() {
+    QStringList colNames;
+    colNames << "sample" << "pre m/z" << "# scans";
+    treeWidget->setColumnCount(colNames.size());
+    treeWidget->setHeaderLabels(colNames);
+    treeWidget->setSortingEnabled(true);
+    treeWidget->setHeaderHidden(false);
+}
+
 void TreeDockWidget::addScanItem(Scan* scan) {
         if (!scan) return;
 
@@ -461,6 +530,24 @@ void TreeDockWidget::addScanItem(Scan* scan) {
         item->setText(6,QString::number(scan->scannum));
         item->setText(7,QString(scan->sample->sampleName.c_str()));
         item->setText(8,QString(scan->filterLine.c_str()));
+}
+
+void TreeDockWidget::addMs2ScanVectorItem(vector<Scan*> scanVector) {
+
+    if (scanVector.empty()) return;
+
+    Scan *scan = scanVector[0];
+
+    MainWindow* mainwindow = (MainWindow*)parentWidget();
+    QIcon icon = mainwindow->projectDockWidget->getSampleIcon(scan->sample);
+
+    NumericTreeWidgetItem *item = new NumericTreeWidgetItem(treeWidget, ScanVectorType);
+    item->setData(0,Qt::UserRole,QVariant::fromValue(scanVector));
+    item->setIcon(0,icon);
+
+    item->setText(0,QString(scan->sample->sampleName.c_str()));
+    item->setText(1,QString::number(scan->precursorMz,'f',4));
+    item->setText(2,QString::number(scanVector.size()));
 }
 
 void TreeDockWidget::setupMs1ScanHeader() {

@@ -38,12 +38,14 @@ public slots:
 	  void setInfo(vector<mzLink>&links);
       void setInfo(vector<mzSlice*>&slices);
       void setupScanListHeader();
+      void setupConsensusScanListHeader();
       void setupMs1ScanHeader();
       void setupMs3ScanHeader();
 
 	  void addScanItem(Scan* scan);
       void addMs1ScanItem(Scan *scan);
       void addMs3ScanItem(Scan *scan);
+      void addMs2ScanVectorItem(vector<Scan*> scans);
 
       void addMs3TitleBar();
       void ms3SearchFromSpinBoxes();

@@ -104,10 +104,11 @@ public:
     MassCalcWidget       *massCalcWidget;
     LigandWidget     *ligandWidget;
     IsotopeWidget    *isotopeWidget;
-    TreeDockWidget 	*covariantsPanel;
+    TreeDockWidget 	 *covariantsPanel;
     TreeDockWidget	 *ms2ScansListWidget;
     TreeDockWidget   *ms1ScansListWidget;
     TreeDockWidget   *ms3ScansListWidget;
+    TreeDockWidget   *ms2ConsensusScansListWidget;
     TreeDockWidget	 *srmDockWidget;
     //TreeDockWidget   *peaksPanel;
 
@@ -197,6 +198,7 @@ public slots:
     void setCompoundFocus(Compound* c);
     void setAdductFocus(Adduct *adduct);
     void showFragmentationScans(float pmz);
+    void showConsensusFragmentationScans(float pmz);
     void showMs1Scans(float pmz);
     void showMs3Scans(float preMs1Mz, float preMs2Mz);
     QString groupTextExport(PeakGroup* group);

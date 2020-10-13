@@ -176,6 +176,9 @@ void SettingsForm::recomputeConsensusSpectrum() {
     if (mainwindow->ms3ScansListWidget->isVisible() && mainwindow->ms3ScansListWidget->treeWidget->selectedItems().size() > 1){
         mainwindow->ms3ScansListWidget->showInfo();
     }
+    if (mainwindow->ms2ConsensusScansListWidget->isVisible() && mainwindow->ms2ConsensusScansListWidget->treeWidget->selectedItems().size() > 0){
+        mainwindow->ms2ConsensusScansListWidget->showInfo();
+    }
 }
 
 void SettingsForm::setFormValues() {
