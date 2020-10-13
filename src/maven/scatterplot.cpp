@@ -139,8 +139,19 @@ void ScatterPlot::drawScatter(StatisticsVector<float>vecA,StatisticsVector<float
 	//reset zoom if no zoom history is present
     if (zoomHistory.isEmpty()) { scene()->resetZoom(); }
 
-    // plot is in log scale
-    scene()->setLogTransformed(true,true);
+    //Issue 308: support DIMS quant
+    //plot is in log scale, unless dealing with certain quant types
+    MainWindow* mw = (MainWindow*) parent();
+    PeakGroup::QType qtype = mw->getUserQuantType();
+
+    bool isLogScale = true;
+
+    //TODO: this does not handle bookmarks
+    if (!groups.empty() && QString(groups[0]->searchTableName.c_str()).startsWith("Direct Infusion Analysis") && (qtype == PeakGroup::AreaTop || qtype == PeakGroup::Area)) {
+        isLogScale = false;
+    }
+
+    scene()->setLogTransformed(isLogScale, isLogScale);
 
 	//draw x and y axes
 	drawAxes();
