@@ -941,7 +941,16 @@ void TableDockWidget::showAllGroups() {
             if (!parents.contains(metaGroupId)) {
                 if (windowTitle() != "Bookmarks") {
                     parents[metaGroupId]= new QTreeWidgetItem(treeWidget);
-                    parents[metaGroupId]->setText(0,QString("Cluster ") + QString::number(metaGroupId));
+
+                    //Issue 311: improve UI
+                    QString clusterString;
+                    if (metaGroupId == DirectInfusionSearchSet::getNoMs2ScansMapKey() && isDirectInfusionTable()){
+                        clusterString = QString("Compounds with no MS2 matches");
+                    } else {
+                        clusterString = QString("Cluster ").append(QString::number(metaGroupId));
+                    }
+                    parents[metaGroupId]->setText(0,clusterString);
+
                     parents[metaGroupId]->setText(3,QString::number(allgroups[i].meanRt,'f',2));
                     parents[metaGroupId]->setExpanded(true);
                     parent = parents[metaGroupId];
