@@ -666,7 +666,9 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation 
             DirectInfusionAnnotation *directInfusionAnnotation = pair.second;
 
             Peak p;
-            p.scan = directInfusionAnnotation->scan->scannum;
+            if (directInfusionAnnotation->scan) {
+                p.scan = directInfusionAnnotation->scan->scannum;
+            }
             p.setSample(sample);
 
             p.peakMz = theoMz;
