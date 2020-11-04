@@ -1470,7 +1470,8 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
     }
 
     //last resort
-    if (group->fragmentationPattern.nobs() == 0) {
+    //Issue 311: if the mz width is greater than or equal to half a Da, assume DI sample
+    if (group->fragmentationPattern.nobs() == 0 && (group->maxMz - group->minMz < 0.5f)) {
         group->computeFragPattern(massCalcWidget->fragmentPPM->value());
     }
 
