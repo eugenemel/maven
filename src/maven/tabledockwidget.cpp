@@ -682,7 +682,7 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation 
             //Used by PeakGroup::groupStatistics()
             p.pos = peakCounter;
             p.baseMz = theoMz;
-            p.peakIntensity = directInfusionMatchData->fragmentMaxObservedIntensity;
+            p.peakIntensity = directInfusionMatchData->observedMs1Intensity;
 
             //Issue 219: Avoid filling with junk
             p.noNoiseObs = 0;
@@ -708,6 +708,12 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation 
         pg.meanMz = theoMz;
         pg.minRt = 0;
         pg.maxRt = maxRt;
+
+        //Issue 311: Display sane results for MS2-free matches
+        if (directInfusionGroupAnnotation->precMzMax - directInfusionGroupAnnotation->precMzMin > 10) {
+            directInfusionGroupAnnotation->precMzMin = theoMz - 0.5f;
+            directInfusionGroupAnnotation->precMzMax = theoMz + 0.5f;
+        }
 
         if (directInfusionGroupAnnotation->fragmentationPattern && directInfusionGroupAnnotation->fragmentationPattern->consensus) {
             pg.fragmentationPattern = directInfusionGroupAnnotation->fragmentationPattern->consensus;
