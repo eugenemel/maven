@@ -709,7 +709,9 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation 
         pg.minRt = 0;
         pg.maxRt = maxRt;
 
-        pg.fragmentationPattern = directInfusionGroupAnnotation->fragmentationPattern->consensus;
+        if (directInfusionGroupAnnotation->fragmentationPattern && directInfusionGroupAnnotation->fragmentationPattern->consensus) {
+            pg.fragmentationPattern = directInfusionGroupAnnotation->fragmentationPattern->consensus;
+        }
 
         pg.fragMatchScore = directInfusionMatchData->fragmentationMatchScore;
         pg.fragMatchScore.mergedScore = pg.fragMatchScore.numMatches;
