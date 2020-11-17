@@ -2157,31 +2157,50 @@ void TableDockWidget::filterTree(QString needle) {
 
 bool TableDockWidget::traverseNode(QTreeWidgetItem *item, QString needle) {
 
-    bool isShowThisNode = false;
+    bool isThisNodePassesFilters = false;
+    bool isHasPassingChild = false;
+
+    //first check for passing children
     for (int i = 0; i < item->childCount(); ++i){
         if (traverseNode(item->child(i), needle)){
-            isShowThisNode = true;
+            isHasPassingChild = true;
         }
     }
 
-    if (isShowThisNode) { // this node has at least one passing child.
+    //check the node itself
+    //must pass both the string and tag filters.
+    if (item->text(0).contains(needle, Qt::CaseInsensitive)){
+
+       QVariant v = item->data(0,PeakGroupType);
+       PeakGroup* group =  v.value<PeakGroup*>();
+
+       isThisNodePassesFilters = tagFilterState.isPeakGroupPasses(group);
+    }
+
+    //Issue 313: toggle state of this node and all children
+    if (isThisNodePassesFilters) {
+        traverseAndSetVisibleState(item, true);
+    } else if (isHasPassingChild) {
         item->setHidden(false);
-    } else if (item->text(0).contains(needle, Qt::CaseInsensitive)){ //this node has no passing children, passes string filter.
-
-        QVariant v = item->data(0,PeakGroupType);
-        PeakGroup* group =  v.value<PeakGroup*>();
-
-        if (tagFilterState.isPeakGroupPasses(group)) {
-            item->setHidden(false); //this node has no passing children, string filter passed and tag filter passed.
-        } else {
-            item->setHidden(true); //this node has no passing children, string filter passed by tag filter failed.
-        }
-
-    } else { //this node has no passing children and the string filter failed.
+    } else {
         item->setHidden(true);
     }
 
+    //If either this node is visible,
+    //or this node has a child that is visible,
+    //this node will be visible.
     return !(item->isHidden());
+}
+
+//Issue 313
+void TableDockWidget::traverseAndSetVisibleState(QTreeWidgetItem *item, bool isVisible){
+
+    if (!item) return;
+
+    item->setHidden(!isVisible);
+    for (int i = 0; i < item->childCount(); ++i) {
+        traverseAndSetVisibleState(item->child(i), isVisible);
+    }
 }
 
 void TableDockWidget::rescoreFragmentation() {
