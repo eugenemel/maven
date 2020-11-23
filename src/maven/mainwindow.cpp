@@ -1451,28 +1451,34 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
 
     _lastSelectedPeakGroup = group;
 
+    bool isDisplayConsensusSpectrum = settings->value("chkDisplayConsensusSpectrum", false).toBool();
+
     qDebug() << "MainWindow::setPeakGroup(PeakGroup)" << group;
 
     rconsoleDockWidget->updateStatus();
 
     searchText->setText(QString::number(group->meanMz,'f',8));
 
-    if (group->fragmentationPattern.nobs() == 0) {
-        //if saving a loaded fragmentation file, this should all be stored from the file.
+    //no need to compute consensus spectrum if it won't be displayed.
+    if (isDisplayConsensusSpectrum) {
 
-        if (getProjectWidget()->currentProject) {
-            if (getProjectWidget()->currentProject->diSearchParameters.find(group->searchTableName) != getProjectWidget()->currentProject->diSearchParameters.end()) {
-                shared_ptr<DirectInfusionSearchParameters> params = getProjectWidget()->currentProject->diSearchParameters[group->searchTableName];
+        if (group->fragmentationPattern.nobs() == 0) {
+            //if saving a loaded fragmentation file, this should all be stored from the file.
 
-                group->computeDIFragPattern(params);
+            if (getProjectWidget()->currentProject) {
+                if (getProjectWidget()->currentProject->diSearchParameters.find(group->searchTableName) != getProjectWidget()->currentProject->diSearchParameters.end()) {
+                    shared_ptr<DirectInfusionSearchParameters> params = getProjectWidget()->currentProject->diSearchParameters[group->searchTableName];
+
+                    group->computeDIFragPattern(params);
+                }
             }
         }
-    }
 
-    //last resort
-    //Issue 311: if the mz width is greater than or equal to half a Da, assume DI sample
-    if (group->fragmentationPattern.nobs() == 0 && (group->maxMz - group->minMz < 0.5f)) {
-        group->computeFragPattern(massCalcWidget->fragmentPPM->value());
+        //last resort
+        //Issue 311: if the mz width is greater than or equal to half a Da, assume DI sample
+        if (group->fragmentationPattern.nobs() == 0 && (group->maxMz - group->minMz < 0.5f)) {
+            group->computeFragPattern(massCalcWidget->fragmentPPM->value());
+        }
     }
 
     if ( eicWidget && eicWidget->isVisible() ) {
@@ -1502,8 +1508,16 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
     }
     */
 
-    //note that this is the only caller of showPeakInfo()
-    if (group->peaks.size() > 0) showPeakInfo(&(group->peaks[0]));
+    //note that this method is the only caller of showPeakInfo()
+
+    Peak *_peak = &(group->peaks[0]);
+
+    if (group->peaks.size() > 0) showPeakInfo(_peak);
+
+    if (!isDisplayConsensusSpectrum && fragmentationSpectraWidget->isVisible()) {
+         vector<Scan*>ms2s = _peak->getFragmentationEvents(getUserPPM());
+         if (ms2s.size()) fragmentationSpectraWidget->setScan(ms2s[0]);
+     }
 }
 
 
@@ -1668,12 +1682,6 @@ void MainWindow::showPeakInfo(Peak* _peak) {
    if ( isotopeWidget->isVisible() ) {
         isotopeWidget->setPeak(_peak);
     }
-
-   //TODO: remove this
-//   if (fragmentationSpectraWidget->isVisible()) {
-//        vector<Scan*>ms2s = _peak->getFragmentationEvents(getUserPPM());
-//        if (ms2s.size()) fragmentationSpectraWidget->setScan(ms2s[0]);
-//    }
 
     if( ms2ScansListWidget->isVisible() ) {
         float mz = _peak->peakMz;
