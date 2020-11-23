@@ -16,7 +16,9 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
 
     connect(tabWidget, SIGNAL(currentChanged(int)), SLOT(getFormValues()));
 
+    //peak detection
     connect(recomputeEICButton, SIGNAL(clicked(bool)), SLOT(recomputeEIC()));
+    connect(chkDisplayConsensusSpectrum, SIGNAL(toggled(bool)), SLOT(getFormValues()));
 
     connect(ionizationMode, SIGNAL(currentIndexChanged(int)), SLOT(getFormValues()));
     connect(isotopeC13Correction, SIGNAL(toggled(bool)), SLOT(getFormValues()));
@@ -204,6 +206,9 @@ void SettingsForm::setFormValues() {
 
     if (settings->contains("txtEICScanFilter"))
         this->txtEICScanFilter->setPlainText(settings->value("txtEICScanFilter").toString());
+
+    if (settings->contains("chkDisplayConsensusSpectrum"))
+        this->chkDisplayConsensusSpectrum->setCheckState((Qt::CheckState) settings->value("chkDisplayConsensusSpectrum").toInt());
 
     C13Labeled->setCheckState( (Qt::CheckState) settings->value("C13Labeled").toInt() );
     N15Labeled->setCheckState( (Qt::CheckState) settings->value("N15Labeled").toInt()  );
@@ -420,10 +425,11 @@ void SettingsForm::getFormValues() {
     settings->setValue("baseline_quantile", baseline_quantile->value());
     settings->setValue("baseline_smoothing", baseline_smoothing->value());
 
-    settings->setValue("centroid_scan_flag", centroid_scan_flag->checkState() );
+    settings->setValue("centroid_scan_flag", centroid_scan_flag->checkState());
     settings->setValue("scan_filter_min_intensity", scan_filter_min_intensity->value());
     settings->setValue("scan_filter_min_quantile", scan_filter_min_quantile->value());
     settings->setValue("txtEICScanFilter", txtEICScanFilter->toPlainText());
+    settings->setValue("chkDisplayConsensusSpectrum", chkDisplayConsensusSpectrum->checkState());
 
     settings->setValue("data_server_url", data_server_url->text());
 

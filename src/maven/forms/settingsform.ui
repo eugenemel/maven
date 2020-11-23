@@ -306,7 +306,66 @@
        <string>Peak Detection</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_7">
-       <item row="0" column="0" rowspan="3">
+       <item row="0" column="1" rowspan="2">
+        <widget class="QGroupBox" name="groupBox_7">
+         <property name="title">
+          <string>Baseline Calculation</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_6">
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_20">
+            <property name="text">
+             <string>Baseline Smoothing </string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="baseline_smoothing">
+            <property name="suffix">
+             <string> scans</string>
+            </property>
+            <property name="maximum">
+             <number>1000000</number>
+            </property>
+            <property name="value">
+             <number>5</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="baseline_quantile">
+            <property name="suffix">
+             <string> %</string>
+            </property>
+            <property name="prefix">
+             <string/>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+            <property name="value">
+             <number>80</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_21">
+            <property name="text">
+             <string>Drop top x%  intensities from chromatogram</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QPushButton" name="recomputeEICButton">
+         <property name="text">
+          <string>Recompute EIC</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0" rowspan="4">
         <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
           <string>Peak Detection and Grouping Settings</string>
@@ -393,58 +452,15 @@
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QPushButton" name="recomputeEICButton">
-         <property name="text">
-          <string>Recompute EIC</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1" rowspan="2">
-        <widget class="QGroupBox" name="groupBox_7">
+        <widget class="QGroupBox" name="groupBox_8">
          <property name="title">
-          <string>Baseline Calculation</string>
+          <string>Display Options</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_6">
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_20">
-            <property name="text">
-             <string>Baseline Smoothing </string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QSpinBox" name="baseline_smoothing">
-            <property name="suffix">
-             <string> scans</string>
-            </property>
-            <property name="maximum">
-             <number>1000000</number>
-            </property>
-            <property name="value">
-             <number>5</number>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QSpinBox" name="baseline_quantile">
-            <property name="suffix">
-             <string> %</string>
-            </property>
-            <property name="prefix">
-             <string/>
-            </property>
-            <property name="maximum">
-             <number>100</number>
-            </property>
-            <property name="value">
-             <number>80</number>
-            </property>
-           </widget>
-          </item>
+         <layout class="QGridLayout" name="gridLayout_16">
           <item row="0" column="0">
-           <widget class="QLabel" name="label_21">
+           <widget class="QCheckBox" name="chkDisplayConsensusSpectrum">
             <property name="text">
-             <string>Drop top x%  intensities from chromatogram</string>
+             <string>Display consensus spectra when browsing peak groups</string>
             </property>
            </widget>
           </item>
