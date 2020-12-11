@@ -2274,12 +2274,17 @@ void TableDockWidget::showEditPeakGroupDialog() {
 
         string baseName = strippedCompoundName.toStdString();
 
+        string strucDefSummarized = LipidSummarizationUtils::getStrucDefSummary(baseName);
         string snChainSummarized = LipidSummarizationUtils::getSnPositionSummary(baseName);
         string acylChainLengthSummarized = LipidSummarizationUtils::getAcylChainLengthSummary(baseName);
         string acylChainCompositionSummarized = LipidSummarizationUtils::getAcylChainCompositionSummary(baseName);
         string lipidClassSummarized = LipidSummarizationUtils::getLipidClassSummary(baseName);
 
         suggestionSet.push_back(baseName);
+
+        if (std::find(suggestionSet.begin(), suggestionSet.end(), strucDefSummarized) == suggestionSet.end()) {
+            suggestionSet.push_back(strucDefSummarized);
+        }
 
         if (std::find(suggestionSet.begin(), suggestionSet.end(), snChainSummarized) == suggestionSet.end()) {
             suggestionSet.push_back(snChainSummarized);
