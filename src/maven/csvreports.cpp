@@ -197,19 +197,21 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
         acylChainCompositionSummarized = LipidSummarizationUtils::getAcylChainCompositionSummary(compoundName);
         lipidClassSummarized = LipidSummarizationUtils::getLipidClassSummary(compoundName);
 
-        if (idString == compoundName) {
+        string idStringFirstChunk = QString(idString.c_str()).section(' ', 0, 0).toStdString();
+
+        if (idStringFirstChunk == compoundName) {
             summarizationLevel = lipidNameComponents.initialLevel;
         }
 
-        if (idString == strucDefSummarized && strucDefSummarized != snChainSummarized) {
+        if (idStringFirstChunk == strucDefSummarized && strucDefSummarized != snChainSummarized) {
             summarizationLevel = 5;
-        } else if (idString == snChainSummarized && snChainSummarized != acylChainLengthSummarized) {
+        } else if (idStringFirstChunk == snChainSummarized && snChainSummarized != acylChainLengthSummarized) {
             summarizationLevel = 4;
-        } else if (idString == acylChainLengthSummarized && acylChainLengthSummarized != strucDefSummarized) {
+        } else if (idStringFirstChunk == acylChainLengthSummarized && acylChainLengthSummarized != strucDefSummarized) {
             summarizationLevel = 3;
-        } else if (idString == acylChainCompositionSummarized && acylChainCompositionSummarized != acylChainLengthSummarized) {
+        } else if (idStringFirstChunk == acylChainCompositionSummarized && acylChainCompositionSummarized != acylChainLengthSummarized) {
             summarizationLevel = 2;
-        } else if (idString == lipidClassSummarized && lipidClassSummarized != acylChainCompositionSummarized) {
+        } else if (idStringFirstChunk == lipidClassSummarized && lipidClassSummarized != acylChainCompositionSummarized) {
             summarizationLevel = 1;
         }
 
