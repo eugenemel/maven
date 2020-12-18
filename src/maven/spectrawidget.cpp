@@ -321,24 +321,26 @@ void SpectraWidget::clearOverlayAndReplot() {
 void SpectraWidget::overlayPeakGroup(PeakGroup* group) {
     if(!group) return;
 
-//    Scan* avgScan = group->getAverageFragmentationScan(20);
-//    setScan(avgScan);
-
-    //TODO: swap to this
     Scan* scan = nullptr;
 
-    if (!group->fragmentationPattern.mzs.empty()) {
+    bool isDisplayConsensusSpectrum = mainwindow->getSettings()->value("chkDisplayConsensusSpectrum", false).toBool();
+
+    if (!group->fragmentationPattern.mzs.empty() && isDisplayConsensusSpectrum) {
         this->setCurrentFragment(&(group->fragmentationPattern), 2);
     } else if (group->peakCount() > 0){
-        vector<Scan*>ms2s = group->peaks[0].getFragmentationEvents(mainwindow->massCalcWidget->fragmentPPM->value());
-        if (!ms2s.empty()){
-            setScan(ms2s[0]);
-        } else {
-            setScan(scan);
+
+        for (unsigned int i = 0; i < group->peaks.size(); i++) {
+            Peak *_peakI = &(group->peaks[i]);
+            float fragmentPpm = mainwindow->massCalcWidget->fragmentPPM->value();
+            vector<Scan*>ms2s = _peakI->getFragmentationEvents(fragmentPpm);
+            if (ms2s.size()){
+                scan = ms2s[0];
+                break;
+            }
         }
-    } else {
-        setScan(scan);
     }
+
+    setScan(scan);
 
     if (group->compound)  {
         if(group->compound->fragment_mzs.size()) overlayCompound(group->compound);
@@ -346,7 +348,6 @@ void SpectraWidget::overlayPeakGroup(PeakGroup* group) {
         else  overlayCompound(group->compound);
     }
 
-//    delete(avgScan);
 }
 
 void SpectraWidget::overlayTheoreticalSpectra(Compound* c) {

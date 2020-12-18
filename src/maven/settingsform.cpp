@@ -19,6 +19,7 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     //peak detection
     connect(recomputeEICButton, SIGNAL(clicked(bool)), SLOT(recomputeEIC()));
     connect(chkDisplayConsensusSpectrum, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+    connect(chkDisplayConsensusSpectrum, SIGNAL(toggled(bool)), mainwindow, SLOT(updateGUIWithLastSelectedPeakGroup()));
 
     connect(ionizationMode, SIGNAL(currentIndexChanged(int)), SLOT(getFormValues()));
     connect(isotopeC13Correction, SIGNAL(toggled(bool)), SLOT(getFormValues()));

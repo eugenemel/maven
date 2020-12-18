@@ -241,6 +241,7 @@ public slots:
     void setUserPPM( double x);
     double getUserPPM() { return _ppmWindow; }
 
+    void updateGUIWithLastSelectedPeakGroup();
 
     TableDockWidget* addPeaksTable(QString title, QString encodedTableInfo=QString(""), QString displayTableInfo=QString(""));
     TableDockWidget* findPeakTable(QString title);

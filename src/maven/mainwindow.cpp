@@ -1446,80 +1446,80 @@ void MainWindow::setMs3PeakGroup(PeakGroup* parentGroup, PeakGroup* childGroup) 
 }
 
 void MainWindow::setPeakGroup(PeakGroup* group) {
+    qDebug() << "MainWindow::setPeakGroup(PeakGroup)" << group;
+
     if (!group) return;
     if (_lastSelectedPeakGroup == group) return;
 
     _lastSelectedPeakGroup = group;
 
-    bool isDisplayConsensusSpectrum = settings->value("chkDisplayConsensusSpectrum", false).toBool();
+    updateGUIWithLastSelectedPeakGroup();
 
-    qDebug() << "MainWindow::setPeakGroup(PeakGroup)" << group;
+}
+
+void MainWindow::updateGUIWithLastSelectedPeakGroup(){
+    qDebug() << "MainWindow::updateGUIWithLastSelectedPeakGroup()";
+
+    if (!_lastSelectedPeakGroup) return;
+
+    bool isDisplayConsensusSpectrum = settings->value("chkDisplayConsensusSpectrum", false).toBool();
 
     rconsoleDockWidget->updateStatus();
 
-    searchText->setText(QString::number(group->meanMz,'f',8));
+    searchText->setText(QString::number(_lastSelectedPeakGroup->meanMz,'f',8));
 
     //no need to compute consensus spectrum if it won't be displayed.
     if (isDisplayConsensusSpectrum) {
 
-        if (group->fragmentationPattern.nobs() == 0) {
+        if (_lastSelectedPeakGroup->fragmentationPattern.nobs() == 0) {
             //if saving a loaded fragmentation file, this should all be stored from the file.
 
             if (getProjectWidget()->currentProject) {
-                if (getProjectWidget()->currentProject->diSearchParameters.find(group->searchTableName) != getProjectWidget()->currentProject->diSearchParameters.end()) {
-                    shared_ptr<DirectInfusionSearchParameters> params = getProjectWidget()->currentProject->diSearchParameters[group->searchTableName];
+                if (getProjectWidget()->currentProject->diSearchParameters.find(_lastSelectedPeakGroup->searchTableName) != getProjectWidget()->currentProject->diSearchParameters.end()) {
+                    shared_ptr<DirectInfusionSearchParameters> params = getProjectWidget()->currentProject->diSearchParameters[_lastSelectedPeakGroup->searchTableName];
 
-                    group->computeDIFragPattern(params);
+                    _lastSelectedPeakGroup->computeDIFragPattern(params);
                 }
             }
         }
 
         //last resort
         //Issue 311: if the mz width is greater than or equal to half a Da, assume DI sample
-        if (group->fragmentationPattern.nobs() == 0 && (group->maxMz - group->minMz < 0.5f)) {
-            group->computeFragPattern(massCalcWidget->fragmentPPM->value());
+        if (_lastSelectedPeakGroup->fragmentationPattern.nobs() == 0 && (_lastSelectedPeakGroup->maxMz - _lastSelectedPeakGroup->minMz < 0.5f)) {
+            _lastSelectedPeakGroup->computeFragPattern(massCalcWidget->fragmentPPM->value());
         }
     }
 
     if ( eicWidget && eicWidget->isVisible() ) {
-        eicWidget->setPeakGroup(group);
+        eicWidget->setPeakGroup(_lastSelectedPeakGroup);
     }
 
-    if ( isotopeWidget && isotopeWidget->isVisible() && group->compound ) {
-        isotopeWidget->setCompound(group->compound);
+    if ( isotopeWidget && isotopeWidget->isVisible() && _lastSelectedPeakGroup->compound ) {
+        isotopeWidget->setCompound(_lastSelectedPeakGroup->compound);
     }
 
-    if (group->compound) {
-        setUrl(group->compound);
+    if (_lastSelectedPeakGroup->compound) {
+        setUrl(_lastSelectedPeakGroup->compound);
     }
 
     if(fragmentationSpectraWidget->isVisible()) {
-        fragmentationSpectraWidget->overlayPeakGroup(group);
+        fragmentationSpectraWidget->overlayPeakGroup(_lastSelectedPeakGroup);
     }
 
     if (massCalcWidget->isVisible()) {
-        massCalcWidget->setPeakGroup(group);
-        massCalcWidget->lineEdit->setText(QString::number(group->meanMz,'f',5));
+        massCalcWidget->setPeakGroup(_lastSelectedPeakGroup);
+        massCalcWidget->lineEdit->setText(QString::number(_lastSelectedPeakGroup->meanMz,'f',5));
     }
-
-    /*
-    if ( scatterDockWidget->isVisible() ) {
-        ((ScatterPlot*)scatterDockWidget)->showSimilar(group);
-    }
-    */
 
     //note that this method is the only caller of showPeakInfo()
 
-    Peak *_peak = &(group->peaks[0]);
+    if (_lastSelectedPeakGroup->peaks.empty()) return;
 
-    if (group->peaks.size() > 0) showPeakInfo(_peak);
+    Peak *_peak = &(_lastSelectedPeakGroup->peaks[0]);
 
-    if (!isDisplayConsensusSpectrum && fragmentationSpectraWidget->isVisible()) {
-         vector<Scan*>ms2s = _peak->getFragmentationEvents(getUserPPM());
-         if (ms2s.size()) fragmentationSpectraWidget->setScan(ms2s[0]);
-     }
+    showPeakInfo(_peak);
+
 }
-
 
 void MainWindow::Align() {
     if (sampleCount() < 2 ) return;
@@ -1819,7 +1819,7 @@ void MainWindow::showFragmentationScans(float pmz) {
     for ( unsigned int i=0; i < samples.size(); i++ ) {
         for (unsigned int j=0; j < samples[i]->scans.size(); j++ ) {
             Scan* s = samples[i]->scans[j];
-            if ( s->mslevel > 1 && ppmDist(s->precursorMz,pmz) < ppm ) {
+            if ( s->mslevel == 2 && ppmDist(s->precursorMz,pmz) < ppm ) {
                 ms2ScansListWidget->addScanItem(s);
             }
         }
