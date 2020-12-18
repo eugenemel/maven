@@ -1,4 +1,5 @@
 #include "csvreports.h"
+#include "lipidsummarizationutils.h"
 
 CSVReports::CSVReports(vector<mzSample*>&insamples) {
     samples = insamples;
@@ -36,6 +37,17 @@ void CSVReports::openGroupReport(string outputfile) {
                         << "adductName"
                         << "category"
                         << "database"
+
+                           //START Issue 321
+                        << "summarizationLevel"
+                        << "summarizationDescription"
+                        << "compoundStrucDefSummary"
+                        << "compoundSnPositionSummary"
+                        << "compoundMolecularSpeciesSummary"
+                        << "compoundSpeciesSummary"
+                        << "compoundLipidClass"
+                           //END Issue 321
+
                         << "expectedRtDiff"
                         << "ppmDiff"
                         << "parent"
@@ -165,6 +177,52 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
     groupReport << SEP << doubleQuoteString(adductName);
     groupReport << SEP << compoundCategory;
     groupReport << SEP << database;
+
+    //Issue 321: summarization information, if appropriate
+    int summarizationLevel = 4; //default to level 4
+
+    string strucDefSummarized;
+    string snChainSummarized;
+    string acylChainLengthSummarized;
+    string acylChainCompositionSummarized;
+    string lipidClassSummarized;
+
+    if (!compoundName.empty()){
+
+        LipidNameComponents lipidNameComponents = LipidSummarizationUtils::getNameComponents(compoundName);
+
+        strucDefSummarized = LipidSummarizationUtils::getStrucDefSummary(compoundName);
+        snChainSummarized = LipidSummarizationUtils::getSnPositionSummary(compoundName);
+        acylChainLengthSummarized = LipidSummarizationUtils::getAcylChainLengthSummary(compoundName);
+        acylChainCompositionSummarized = LipidSummarizationUtils::getAcylChainCompositionSummary(compoundName);
+        lipidClassSummarized = LipidSummarizationUtils::getLipidClassSummary(compoundName);
+
+        if (idString == compoundName) {
+            summarizationLevel = lipidNameComponents.initialLevel;
+        }
+
+        if (idString == strucDefSummarized && strucDefSummarized != snChainSummarized) {
+            summarizationLevel = 5;
+        } else if (idString == snChainSummarized && snChainSummarized != acylChainLengthSummarized) {
+            summarizationLevel = 4;
+        } else if (idString == acylChainLengthSummarized && acylChainLengthSummarized != strucDefSummarized) {
+            summarizationLevel = 3;
+        } else if (idString == acylChainCompositionSummarized && acylChainCompositionSummarized != acylChainLengthSummarized) {
+            summarizationLevel = 2;
+        } else if (idString == lipidClassSummarized && lipidClassSummarized != acylChainCompositionSummarized) {
+            summarizationLevel = 1;
+        }
+
+    }
+
+    groupReport << SEP << to_string(summarizationLevel);
+    groupReport << SEP << LipidSummarizationUtils::getSummarizationLevelAttributeKey(summarizationLevel);
+    groupReport << SEP << doubleQuoteString(strucDefSummarized);
+    groupReport << SEP << doubleQuoteString(snChainSummarized);
+    groupReport << SEP << doubleQuoteString(acylChainLengthSummarized);
+    groupReport << SEP << doubleQuoteString(acylChainCompositionSummarized);
+    groupReport << SEP << doubleQuoteString(lipidClassSummarized);
+
     groupReport << SEP << expectedRtDiff;
     groupReport << SEP << ppmDist;
 
