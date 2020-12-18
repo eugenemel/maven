@@ -215,6 +215,9 @@ void BarPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
         if (maxYvalue < 100 ) { numType='f';   numPrec=2;}
         if (maxYvalue < 1 ) { numType='f';     numPrec=3;}
 
+        //Issue 324: handle normalized intensities using scientific notation
+        if (maxYvalue < 0.01) {numType ='g'; numPrec=2;}
+
         if (_yvalues[i] > 0 && _showIntensityText) {
             QString value = QString::number(_yvalues[i],numType,numPrec);
             painter->drawText(posX-legendShift+legendXPosAdj,posY+_barwidth-2,value);
