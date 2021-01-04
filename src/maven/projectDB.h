@@ -31,6 +31,7 @@ class ProjectDB {
             map<int, int> rumsDBOldToNewGroupIDs = {};
             map<int, int> bookmarksOldToNewGroupIDs = {};
             map<string, shared_ptr<DirectInfusionSearchParameters>> diSearchParameters = {};
+            map<string, shared_ptr<PeaksSearchParameters>> peaksSearchParameters = {};
 
             void clearLoadedPeakGroups() { allgroups.clear(); }
             void saveSamples(vector<mzSample *> &sampleSet);

@@ -1200,6 +1200,7 @@ void ProjectDB::savePeakGroupsTableData(map<QString, QString> searchTableData){
 
 void ProjectDB::loadSearchParams(){
         diSearchParameters.clear();
+        peaksSearchParameters.clear();
 
         qDebug() << "ProjectDB::loadSearchParams()... ";
 
@@ -1248,10 +1249,13 @@ void ProjectDB::loadSearchParams(){
 
             }
 
+            //Issue 197
             pos = LCMSDDAexpr.indexIn(searchTableName);
 
             if (pos != -1){
-                //TODO
+                string encodedSearchParamsString = encodedSearchParams.toStdString();
+                shared_ptr<PeaksSearchParameters> peaksSearchParametersTbl = PeaksSearchParameters::decode(encodedSearchParamsString);
+                peaksSearchParameters.insert(make_pair(searchTableName.toStdString(), peaksSearchParametersTbl));
             }
         }
 }
