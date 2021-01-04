@@ -39,6 +39,7 @@ class PeakDetectionDialog : public QDialog, public Ui_PeakDetectionDialog
 				MainWindow *mainwindow;
    				BackgroundPeakUpdate* peakupdater;
 				FeatureDetectionType _featureDetectionType;
+                shared_ptr<PeaksSearchParameters> getPeaksSearchParameters();
 };
 
 #endif

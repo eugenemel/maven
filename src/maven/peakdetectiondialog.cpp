@@ -252,7 +252,8 @@ void PeakDetectionDialog::findPeaks() {
         title = mainwindow->getUniquePeakTableTitle(title);
 
         //Issue 197
-        string encodedParams("test params");
+        shared_ptr<PeaksSearchParameters> peaksSearchParameters = getPeaksSearchParameters();
+        string encodedParams = peaksSearchParameters->encodeParams();
         string displayParams = encodedParams;
         replace(displayParams.begin(), displayParams.end(), ';', '\n');
         replace(displayParams.begin(), displayParams.end(), '=', ' ');
@@ -323,5 +324,14 @@ void PeakDetectionDialog::setProgressBar(QString text, int progress, int totalSt
 	showInfo(text);
 	progressBar->setRange(0,totalSteps);
     progressBar->setValue(progress);
+}
+
+shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(){
+
+        shared_ptr<PeaksSearchParameters> peaksSearchParameters = shared_ptr<PeaksSearchParameters>(new PeaksSearchParameters());
+
+        //TODO
+
+        return peaksSearchParameters;
 }
 
