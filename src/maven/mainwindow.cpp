@@ -1476,15 +1476,22 @@ void MainWindow::updateGUIWithLastSelectedPeakGroup(){
 
             if (getProjectWidget()->currentProject) {
                 if (getProjectWidget()->currentProject->diSearchParameters.find(_lastSelectedPeakGroup->searchTableName) != getProjectWidget()->currentProject->diSearchParameters.end()) {
+
                     shared_ptr<DirectInfusionSearchParameters> params = getProjectWidget()->currentProject->diSearchParameters[_lastSelectedPeakGroup->searchTableName];
 
                     _lastSelectedPeakGroup->computeDIFragPattern(params);
+
+                } else if (getProjectWidget()->currentProject->peaksSearchParameters.find(_lastSelectedPeakGroup->searchTableName) != getProjectWidget()->currentProject->peaksSearchParameters.end()) {
+
+                    shared_ptr<PeaksSearchParameters> params = getProjectWidget()->currentProject->peaksSearchParameters[_lastSelectedPeakGroup->searchTableName];
+
+                    _lastSelectedPeakGroup->computeFragPattern(params->ms2PpmTolr); //TODO
                 }
             }
         }
 
         //last resort
-        //Issue 311: if the mz width is greater than or equal to half a Da, assume DI sample
+        //Issue 311: if the mz width is greater than or equal to half a Da, assume DI sample (and do not compute frag pattern)
         if (_lastSelectedPeakGroup->fragmentationPattern.nobs() == 0 && (_lastSelectedPeakGroup->maxMz - _lastSelectedPeakGroup->minMz < 0.5f)) {
             _lastSelectedPeakGroup->computeFragPattern(massCalcWidget->fragmentPPM->value());
         }
