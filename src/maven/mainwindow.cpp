@@ -1485,7 +1485,7 @@ void MainWindow::updateGUIWithLastSelectedPeakGroup(){
 
                     shared_ptr<PeaksSearchParameters> params = getProjectWidget()->currentProject->peaksSearchParameters[_lastSelectedPeakGroup->searchTableName];
 
-                    _lastSelectedPeakGroup->computeFragPattern(params->ms2PpmTolr); //TODO
+                    _lastSelectedPeakGroup->computePeaksSearchFragPattern(params);
                 }
             }
         }
