@@ -634,10 +634,15 @@ void ProjectDockWidget::loadAllPeakTables() {
 
             string searchTableNameString = searchTableName.toLatin1().data();
 
-            if (currentProject->diSearchParameters.find(searchTableNameString) != currentProject->diSearchParameters.end()) {
-                shared_ptr<DirectInfusionSearchParameters> searchParams = currentProject->diSearchParameters[searchTableNameString];
+            QString encodedParams("");
 
-                QString encodedParams = QString(searchParams->encodeParams().c_str());
+            if (currentProject->diSearchParameters.find(searchTableNameString) != currentProject->diSearchParameters.end()) {
+                encodedParams = QString(currentProject->diSearchParameters[searchTableNameString]->encodeParams().c_str());
+            } else if (currentProject->peaksSearchParameters.find(searchTableNameString) != currentProject->peaksSearchParameters.end()) {
+                encodedParams = QString(currentProject->peaksSearchParameters[searchTableNameString]->encodeParams().c_str());
+            }
+
+            if (!encodedParams.isEmpty()){
                 QString displayParams = QString(encodedParams);
 
                 displayParams.replace(QRegExp(";"), "\n");
