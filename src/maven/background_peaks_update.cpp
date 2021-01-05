@@ -20,12 +20,13 @@ BackgroundPeakUpdate::BackgroundPeakUpdate(QWidget*) {
     keepFoundGroups=true;
     showProgressFlag=true;
 
-    mzBinStep=static_cast<float>(0.01);
     rtStepSize=20;
-    ppmMerge=30;
-    avgScanTime=static_cast<float>(0.2);
+    ppmMerge=20;
+    avgScanTime=static_cast<float>(0.2); //min
 
     limitGroupCount=INT_MAX;
+
+    isotopeMzTolr = 20.0f;
 
     peakGroupCompoundMatchingPolicy=ALL_MATCHES;
 
@@ -45,6 +46,10 @@ BackgroundPeakUpdate::BackgroundPeakUpdate(QWidget*) {
     minSignalBaseLineRatio=2;
     minGroupIntensity=500;
     minQuality=0.5;
+
+    //Peaks compound matching
+    featureCompoundMatchMzTolerance = 20.0f;
+    featureCompoundMatchRtTolerance = 2.0f;
 
     //compound detection setting
     mustHaveMS2=false;
@@ -96,7 +101,7 @@ void BackgroundPeakUpdate::run(void) {
     } else if  (runFunction == "pullIsotopes" ) {
         pullIsotopes(_group);
     } else if  ( runFunction == "computePeaks" ) { // database search, calibrated dialog
-		computePeaks();
+        computePeaks(); // DB Compound Search dialog
 	} else {
 		qDebug() << "Unknown Function " << runFunction.c_str();
 	}
@@ -198,19 +203,19 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
              if (group.maxIntensity < minGroupIntensity ) continue;
 
              group.chargeState = group.getChargeStateFromMS1(compoundPPMWindow);
-             vector<Isotope> isotopes = highestpeak->getScan()->getIsotopicPattern(highestpeak->peakMz,compoundPPMWindow,6,10);
+             vector<Isotope> isotopes = highestpeak->getScan()->getIsotopicPattern(highestpeak->peakMz,isotopeMzTolr,6,10);
 
              if(isotopes.size() > 0) {
                  //group.chargeState = isotopes.front().charge;
                  for(Isotope& isotope: isotopes) {
-                     if (mzUtils::ppmDist(static_cast<float>(isotope.mz), static_cast<float>(group.meanMz)) < compoundPPMWindow) {
+                     if (mzUtils::ppmDist(static_cast<float>(isotope.mz), static_cast<float>(group.meanMz)) < isotopeMzTolr) {
                          group.isotopicIndex=isotope.C13;
                      }
                  }
              }
 
              if (excludeIsotopicPeaks) {
-                  if (group.chargeState > 0 and not group.isMonoisotopic(compoundPPMWindow)) continue;
+                  if (group.chargeState > 0 and not group.isMonoisotopic(isotopeMzTolr)) continue;
              }
 
              group.computeFragPattern(productPpmTolr);
@@ -238,6 +243,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 //                 }
 //             }
 
+
              for (Compound *compound : slice->compoundVector){
 
                  //MS2 criteria
@@ -256,7 +262,6 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
                      float rtDiff =  abs(compound->expectedRt - (group.meanRt));
                      group.expectedRtDiff = rtDiff;
                      group.groupRank = rtDiff*rtDiff*(1.1-group.maxQuality)*(1/log(group.maxIntensity+1));
-                     if (rtDiff > compoundRTWindow ) continue;
                  } else {
                      group.groupRank = (1.1-group.maxQuality)*(1/log(group.maxIntensity+1));
                  }
@@ -511,19 +516,19 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             if (group.blankMax*minSignalBlankRatio > group.maxIntensity) continue;
 
             group.chargeState = group.getChargeStateFromMS1(ppmMerge);
-            vector<Isotope> isotopes = highestpeak->getScan()->getIsotopicPattern(highestpeak->peakMz,ppmMerge, 6, 10);
+            vector<Isotope> isotopes = highestpeak->getScan()->getIsotopicPattern(highestpeak->peakMz,isotopeMzTolr, 6, 10);
 
             if(isotopes.size() > 0) {
                 //group.chargeState = isotopes.front().charge;
                 for(Isotope& isotope: isotopes) {
-                    if (mzUtils::ppmDist((float) isotope.mz, (float) group.meanMz) < ppmMerge) {
+                    if (mzUtils::ppmDist((float) isotope.mz, (float) group.meanMz) < isotopeMzTolr) {
                         group.isotopicIndex=isotope.C13;
                     }
                 }
             }
 
            if (excludeIsotopicPeaks) {
-                if (group.chargeState > 0 and not group.isMonoisotopic(ppmMerge)) continue;
+                if (group.chargeState > 0 and not group.isMonoisotopic(isotopeMzTolr)) continue;
             }
 
             //if (getChargeStateFromMS1(&group) < minPrecursorCharge) continue;
@@ -570,7 +575,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
                 float rtDiff =  abs(group.compound->expectedRt - (group.meanRt));
                 group.expectedRtDiff = rtDiff;
                 group.groupRank = rtDiff*rtDiff*(1.1-group.maxQuality)*(1/log(group.maxIntensity+1));
-                if (group.expectedRtDiff > rtStepSize*avgScanTime) continue;
+                if (group.expectedRtDiff > featureCompoundMatchRtTolerance) continue;
             } else {
                 group.groupRank = (1.1-group.maxQuality)*(1/log(group.maxIntensity+1));
             }
@@ -1313,8 +1318,8 @@ void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g, vector<tuple<float, 
     if(searchableDatabase.size() == 0) return;
     if(g->ms2EventCount == 0) return;
 
-    float minMz = g->meanMz - (g->meanMz*compoundPPMWindow/1000000);
-    float maxMz = g->meanMz + (g->meanMz*compoundPPMWindow/1000000);
+    float minMz = g->meanMz - (g->meanMz*featureCompoundMatchMzTolerance/1000000);
+    float maxMz = g->meanMz + (g->meanMz*featureCompoundMatchMzTolerance/1000000);
 
     auto lb = lower_bound(searchableDatabase.begin(), searchableDatabase.end(), minMz, [](const tuple<float, Compound*, Adduct*>& lhs, const float& rhs){
         return get<0>(lhs) < rhs;

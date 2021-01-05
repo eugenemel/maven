@@ -47,11 +47,17 @@ public:
 
   int ionizationMode; //default ionization mode used by mass spec
 
+  //isotopes
+  float isotopeMzTolr;
+
   //mass slicing parameters
-  float mzBinStep;
   float rtStepSize;
   float avgScanTime;
-  float ppmMerge;
+  float ppmMerge;   //for Peaks search only
+
+  //peaks compound matching
+  float featureCompoundMatchMzTolerance;
+  float featureCompoundMatchRtTolerance;
 
   //peak detection
   float eic_smoothingWindow; //smoothing window

@@ -109,57 +109,14 @@
           <string>Compound Database</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="1">
-           <widget class="QComboBox" name="compoundDatabase"/>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>Compound Subset</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
+          <item row="2" column="0">
            <widget class="QLabel" name="label_11">
             <property name="text">
-             <string>EIC Extraction Window  +/- PPM </string>
+             <string>Compound m/z Match Tolerance</string>
             </property>
            </widget>
           </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Compound Retention Time Matching Window</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="1">
-           <widget class="QComboBox" name="peakGroupCompoundMatchPolicyBox">
-            <item>
-             <property name="text">
-              <string>All matches</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>All matches with highest MS2 score</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>One match with highest MS2 score (earliest alphabetically)</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="7" column="0">
-           <widget class="QLabel" name="label_16">
-            <property name="text">
-             <string>Peak Group &lt;--&gt; Compound Matching Policy</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1">
+          <item row="2" column="1">
            <widget class="QDoubleSpinBox" name="compoundPPMWindow">
             <property name="suffix">
              <string> ppm</string>
@@ -172,7 +129,31 @@
             </property>
            </widget>
           </item>
-          <item row="6" column="1">
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Compound RT Match Tolerance</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Compound Subset</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="compoundMustHaveMS2">
+            <property name="text">
+             <string>Must Have MS2</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="compoundDatabase"/>
+          </item>
+          <item row="3" column="1">
            <widget class="QDoubleSpinBox" name="compoundRTWindow">
             <property name="prefix">
              <string/>
@@ -191,7 +172,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="4" column="1">
            <widget class="QCheckBox" name="matchRt">
             <property name="text">
              <string>Match Retention Times</string>
@@ -202,10 +183,29 @@
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QCheckBox" name="compoundMustHaveMS2">
+           <widget class="QLabel" name="label_16">
             <property name="text">
-             <string>Must Have MS2</string>
+             <string>Peak Group &lt;--&gt; Compound Matching Policy</string>
             </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="peakGroupCompoundMatchPolicyBox">
+            <item>
+             <property name="text">
+              <string>All matches</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>All matches with highest MS2 score</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>One match with highest MS2 score (earliest alphabetically)</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>
@@ -232,30 +232,71 @@
           <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>Mass Domain Resolution (ppm)</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="ppmStep">
-            <property name="decimals">
-             <number>3</number>
+           <widget class="QDoubleSpinBox" name="spnMassSliceMzMergeTolr">
+            <property name="suffix">
+             <string> ppm</string>
             </property>
             <property name="maximum">
-             <double>1000000000.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>1.000000000000000</double>
+             <double>999999999.000000000000000</double>
             </property>
             <property name="value">
              <double>20.000000000000000</double>
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_21">
+            <property name="text">
+             <string>Mass Slice m/z Merge Tolerance</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="0">
+           <widget class="QCheckBox" name="featureMustHaveMs2">
+            <property name="text">
+             <string>Must Have MS2</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_22">
+            <property name="text">
+             <string>Compound m/z Match Tolerance</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QDoubleSpinBox" name="spnFeatureToCompoundMatchTolr">
+            <property name="suffix">
+             <string> ppm</string>
+            </property>
+            <property name="maximum">
+             <double>9999999.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>20.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Mass Slice RT Merge Tolerance</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="1">
+           <widget class="QCheckBox" name="featureMatchRts">
+            <property name="text">
+             <string>Match Retention Times</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
            <widget class="QDoubleSpinBox" name="rtStep">
             <property name="statusTip">
              <string>mz-rt matrix binning</string>
@@ -283,27 +324,23 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="1">
-           <widget class="QCheckBox" name="featureMatchRts">
+          <item row="7" column="0">
+           <widget class="QLabel" name="label_23">
             <property name="text">
-             <string>Match Retention Times</string>
+             <string>Compound RT Match Tolerance</string>
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Time Domain Resolution (scans)</string>
+          <item row="7" column="1">
+           <widget class="QDoubleSpinBox" name="spnFeatureToCompoundRtTolr">
+            <property name="suffix">
+             <string> min</string>
             </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QCheckBox" name="featureMustHaveMs2">
-            <property name="text">
-             <string>Must Have MS2</string>
+            <property name="maximum">
+             <double>9999999.000000000000000</double>
             </property>
-            <property name="checked">
-             <bool>true</bool>
+            <property name="value">
+             <double>2.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -450,10 +487,20 @@
           </sizepolicy>
          </property>
          <property name="title">
-          <string>Mass Slicing</string>
+          <string>Isotopes</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_6">
-          <item row="2" column="1">
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="reportIsotopes">
+            <property name="text">
+             <string>Extract Isotopic Peaks</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
            <widget class="QCheckBox" name="excludeIsotopicPeaks">
             <property name="text">
              <string>Require Monoisotopic</string>
@@ -464,39 +511,35 @@
            </widget>
           </item>
           <item row="2" column="0">
-           <widget class="QCheckBox" name="reportIsotopes">
+           <widget class="QLabel" name="label_7">
             <property name="text">
-             <string>Extract Isotopic Peaks</string>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
+             <string>Isotope Detection m/z Tolerance</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="0" colspan="2">
-           <widget class="QLabel" name="lblMassSlicingMethod">
-            <property name="text">
-             <string>Description of Mass Slicing Method.</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_21">
-            <property name="text">
-             <string>Mass Slice m/z Merge Tolerance (ppm)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QDoubleSpinBox" name="spnMassSliceMzMergeTolr">
+          <item row="2" column="1">
+           <widget class="QDoubleSpinBox" name="ppmStep">
             <property name="suffix">
              <string> ppm</string>
             </property>
+            <property name="decimals">
+             <number>2</number>
+            </property>
             <property name="maximum">
-             <double>999999999.000000000000000</double>
+             <double>1000000000.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>1.000000000000000</double>
             </property>
             <property name="value">
              <double>20.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QLabel" name="lblMassSlicingMethod">
+            <property name="text">
+             <string>Description of Mass Slicing Method.</string>
             </property>
            </widget>
           </item>

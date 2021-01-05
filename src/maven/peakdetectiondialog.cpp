@@ -188,6 +188,8 @@ void PeakDetectionDialog::findPeaks() {
             peakupdater->eic_smoothingAlgorithm = EIC::SmootherType::GAUSSIAN;
         }
 
+
+
         peakupdater->baseline_smoothingWindow = baseline_smoothing->value();
         peakupdater->baseline_dropTopX        = baseline_quantile->value();
 		peakupdater->eic_smoothingWindow= eic_smoothingWindow->value();
@@ -201,7 +203,14 @@ void PeakDetectionDialog::findPeaks() {
 		peakupdater->minSignalBlankRatio = sigBlankRatio->value();
 		peakupdater->minGroupIntensity = minGroupIntensity->value();
         peakupdater->pullIsotopesFlag = reportIsotopes->isChecked();
-        peakupdater->ppmMerge =  ppmStep->value();
+
+        peakupdater->isotopeMzTolr = static_cast<float>(ppmStep->value());
+
+        peakupdater->ppmMerge =  static_cast<float>(this->spnMassSliceMzMergeTolr->value());
+        peakupdater->rtStepSize = static_cast<float>(rtStep->value());
+        peakupdater->featureCompoundMatchMzTolerance = static_cast<float>(this->spnFeatureToCompoundMatchTolr->value());
+        peakupdater->featureCompoundMatchRtTolerance = static_cast<float>(this->spnFeatureToCompoundRtTolr->value());
+
         peakupdater->compoundPPMWindow = compoundPPMWindow->value();
 		peakupdater->compoundRTWindow = compoundRTWindow->value();
 
@@ -213,7 +222,7 @@ void PeakDetectionDialog::findPeaks() {
 
         peakupdater->avgScanTime = averageFullScanTime;
 
-        peakupdater->rtStepSize = rtStep->value();
+
         peakupdater->mustHaveMS2 = featureMustHaveMs2->isChecked();
         peakupdater->compoundMustHaveMs2 = compoundMustHaveMS2->isChecked();
         peakupdater->productPpmTolr = productPpmTolr->value();
@@ -330,17 +339,16 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
 
         shared_ptr<PeaksSearchParameters> peaksSearchParameters = shared_ptr<PeaksSearchParameters>(new PeaksSearchParameters());
 
-        //Mass Slicing Method
+        //Isotopes
+        peaksSearchParameters->isotopesMzTolerance = static_cast<float>(this->ppmStep->value());
         peaksSearchParameters->isotopesIsRequireMonoisotopicPeaks = this->excludeIsotopicPeaks->isChecked();
         peaksSearchParameters->isotopesExtractIsotopicPeaks = this->reportIsotopes->isChecked();
 
         //Feature Detection (Peaks Search) and Compound Database (Compound DB Search)
-        //TODO: Mass Domain Resolution {ppmStep} [Peaks]
-        //TODO: Time Domain Resolution {rtStep} [Peaks]
-
-        //peaksSearchParameters->ms1PpmTolr = static_cast<float>(this->productPpmTolr->value());
-
         if (this->windowTitle() == "Compound DB Search") {
+            peaksSearchParameters->ms1PpmTolr = static_cast<float>(this->compoundPPMWindow->value());
+            peaksSearchParameters->ms1RtTolr = static_cast<float>(this->compoundRTWindow->value());
+
             peaksSearchParameters->ms2IsMatchMs2 = this->compoundMustHaveMS2->isChecked();
             peaksSearchParameters->ms1IsMatchRtFlag = this->matchRt->isChecked();
 
@@ -359,13 +367,20 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
                 peaksSearchParameters->matchingPolicy = SINGLE_TOP_HIT;
             }
 
+
         } else {
+            peaksSearchParameters->ms1MassSliceMergePpm = static_cast<float>(this->spnMassSliceMzMergeTolr->value());
+            peaksSearchParameters->ms1MassSliceMergeNumScans = static_cast<float>(this->rtStep->value());
+
+            peaksSearchParameters->ms1PpmTolr = static_cast<float>(this->spnFeatureToCompoundMatchTolr->value());
+            peaksSearchParameters->ms1RtTolr = static_cast<float>(this->spnFeatureToCompoundRtTolr->value());
+
             peaksSearchParameters->ms2IsMatchMs2 = this->featureMustHaveMs2->isChecked();
             peaksSearchParameters->ms1IsMatchRtFlag = this->featureMatchRts->isChecked();
+
             peaksSearchParameters->matchingLibraries = DB.getLoadedDatabaseNames().join(", ").toStdString();
             peaksSearchParameters->matchingPolicy = PeakGroupCompoundMatchingPolicy::SINGLE_TOP_HIT;
         }
-        //TODO: EIC Extraction Window [Compound DB Search]
 
         //EIC Processing
         peaksSearchParameters->eicSmoothingWindow = this->eic_smoothingWindow->value();
@@ -377,7 +392,7 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
         } else if (currentSmoother == "Savitzky-Golay") {
             peaksSearchParameters->eicEicSmoothingAlgorithm = "SAVGOL";
         }
-        peaksSearchParameters->eicMaxPeakGroupRtDiff = static_cast<float>(this->rtStep->value());
+        peaksSearchParameters->eicMaxPeakGroupRtDiff = static_cast<float>(this->grouping_maxRtDiff->value());
         peaksSearchParameters->baselineDropTopX = this->baseline_quantile->value();
         peaksSearchParameters->baselineSmoothingWindow = static_cast<float>(this->baseline_smoothing->value());
 
