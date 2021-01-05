@@ -339,11 +339,6 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
 
         shared_ptr<PeaksSearchParameters> peaksSearchParameters = shared_ptr<PeaksSearchParameters>(new PeaksSearchParameters());
 
-        //Isotopes
-        peaksSearchParameters->isotopesMzTolerance = static_cast<float>(this->ppmStep->value());
-        peaksSearchParameters->isotopesIsRequireMonoisotopicPeaks = this->excludeIsotopicPeaks->isChecked();
-        peaksSearchParameters->isotopesExtractIsotopicPeaks = this->reportIsotopes->isChecked();
-
         //Feature Detection (Peaks Search) and Compound Database (Compound DB Search)
         if (this->windowTitle() == "Compound DB Search") {
             peaksSearchParameters->ms1PpmTolr = static_cast<float>(this->compoundPPMWindow->value());
@@ -352,8 +347,8 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
             peaksSearchParameters->ms2IsMatchMs2 = this->compoundMustHaveMS2->isChecked();
             peaksSearchParameters->ms1IsMatchRtFlag = this->matchRt->isChecked();
 
-            if (peakGroupCompoundMatchPolicyBox->currentText() != "ALL") {
-                peaksSearchParameters->matchingLibraries = peakGroupCompoundMatchPolicyBox->currentText().toStdString();
+            if (compoundDatabase->currentText() != "ALL") {
+                peaksSearchParameters->matchingLibraries = compoundDatabase->currentText().toStdString();
             } else {
                 peaksSearchParameters->matchingLibraries = DB.getLoadedDatabaseNames().join(", ").toStdString();
             }
@@ -369,8 +364,6 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
 
 
         } else {
-            peaksSearchParameters->ms1MassSliceMergePpm = static_cast<float>(this->spnMassSliceMzMergeTolr->value());
-            peaksSearchParameters->ms1MassSliceMergeNumScans = static_cast<float>(this->rtStep->value());
 
             peaksSearchParameters->ms1PpmTolr = static_cast<float>(this->spnFeatureToCompoundMatchTolr->value());
             peaksSearchParameters->ms1RtTolr = static_cast<float>(this->spnFeatureToCompoundRtTolr->value());
@@ -382,7 +375,11 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
             peaksSearchParameters->matchingPolicy = PeakGroupCompoundMatchingPolicy::SINGLE_TOP_HIT;
         }
 
-        //EIC Processing
+        //baseline
+        peaksSearchParameters->baselineDropTopX = this->baseline_quantile->value();
+        peaksSearchParameters->baselineSmoothingWindow = static_cast<float>(this->baseline_smoothing->value());
+
+        //eic
         peaksSearchParameters->eicSmoothingWindow = this->eic_smoothingWindow->value();
         QString currentSmoother = this->cmbSmootherType->currentText();
         if (currentSmoother == "Moving Average") {
@@ -393,10 +390,8 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
             peaksSearchParameters->eicEicSmoothingAlgorithm = "SAVGOL";
         }
         peaksSearchParameters->eicMaxPeakGroupRtDiff = static_cast<float>(this->grouping_maxRtDiff->value());
-        peaksSearchParameters->baselineDropTopX = this->baseline_quantile->value();
-        peaksSearchParameters->baselineSmoothingWindow = static_cast<float>(this->baseline_smoothing->value());
 
-        //Peak Scoring
+        //quality
         peaksSearchParameters->qualitySignalBaselineRatio = static_cast<float>(this->sigBaselineRatio->value());
         peaksSearchParameters->qualitySignalBlankRatio = static_cast<float>(this->sigBlankRatio->value());
         peaksSearchParameters->qualityMinPeakGroupIntensity = static_cast<float>(this->minGroupIntensity->value());
@@ -405,7 +400,20 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
         peaksSearchParameters->qualityMinPeakQuality = static_cast<float>(this->spnMinPeakQuality->value());
         peaksSearchParameters->qualityClassifierModelName = this->classificationModelFilename->text().toStdString();
 
-        //Fragmentation matching
+        //isotopes
+        peaksSearchParameters->isotopesMzTolerance = static_cast<float>(this->ppmStep->value());
+        peaksSearchParameters->isotopesIsRequireMonoisotopicPeaks = this->excludeIsotopicPeaks->isChecked();
+        peaksSearchParameters->isotopesExtractIsotopicPeaks = this->reportIsotopes->isChecked();
+
+        //ms1
+        //peaksSearchParameters->ms1PpmTolr = this->spnFeatureToCompoundMatchTolr->value() / this->compoundPPMWindow->value()
+        //peaksSearchParameters->ms1RtTolr = this->compoundRTWindow->value() / this->spnFeatureToCompoundRtTolr->value()
+        //peaksSearchParameters->ms1IsMatchRtFlag = this->matchRt->isChecked() / this->featureMatchRts->isChecked()
+        peaksSearchParameters->ms1MassSliceMergePpm = static_cast<float>(this->spnMassSliceMzMergeTolr->value());
+        peaksSearchParameters->ms1MassSliceMergeNumScans = static_cast<float>(this->rtStep->value());
+
+        //ms2 matching
+        //peaksSearchParameters->ms2IsMatchMs2 = this->compoundMustHaveMS2->isChecked() / this->featureMustHaveMs2->isChecked()
         peaksSearchParameters->ms2MinNumMatches = this->fragMinPeaks->value();
         peaksSearchParameters->ms2MinNumDiagnosticMatches = this->spnMinDiagnostic->value();
         peaksSearchParameters->ms2PpmTolr = static_cast<float>(this->productPpmTolr->value());
@@ -415,7 +423,10 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
         //Matching Options
         peaksSearchParameters->matchingIsRequireAdductPrecursorMatch = this->chkRequireAdductMatch->isChecked();
         peaksSearchParameters->matchingIsRetainUnknowns = this->chkRetainUnmatched->isChecked();
-        peaksSearchParameters->matchingIsClusterPeakGroups = this->chkClusterPeakgroups->isChecked();
+        //peaksSearchParameters->matchingLibraries = DB.getLoadedDatabaseNames().join(", ").toStdString() /  peakGroupCompoundMatchPolicyBox->currentText().toStdString()
+        //peaksSearchParameters->matchingPolicy = PeakGroupCompoundMatchingPolicy::SINGLE_TOP_HIT / peakGroupCompoundMatchPolicyBox->currentText()
+
+        //peak group clustering is not retained, as clusters can be easily added or removed with different parameters in the GUI
 
         return peaksSearchParameters;
 }
