@@ -246,8 +246,8 @@ void PeakDetectionDialog::findPeaks() {
 
 		QString title;
 		if (_featureDetectionType == FullSpectrum )  title = "Detected Features";
-                else if (_featureDetectionType == CompoundDB ) title = "DB Search " + compoundDatabase->currentText();
-                else if (_featureDetectionType == QQQ ) title = "QQQ DB Search " + compoundDatabase->currentText();
+                else if (_featureDetectionType == CompoundDB ) title = "Compound DB Search";
+                else if (_featureDetectionType == QQQ ) title = "QQQ Compound DB Search";
      
         title = mainwindow->getUniquePeakTableTitle(title);
 
@@ -330,7 +330,59 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
 
         shared_ptr<PeaksSearchParameters> peaksSearchParameters = shared_ptr<PeaksSearchParameters>(new PeaksSearchParameters());
 
-        //TODO
+        //Mass Slicing Method
+        peaksSearchParameters->isotopesIsExcludeIsotopicPeaks = this->excludeIsotopicPeaks->isChecked();
+
+        //Feature Detection (Peaks Search) and Compound Database (Compound DB Search)
+        peaksSearchParameters->ms1PpmTolr = static_cast<float>(this->productPpmTolr->value());
+        //TODO: Time Domain Resolution (scans) [Peaks]
+
+        if (this->windowTitle() == "Compound DB Search") {
+            peaksSearchParameters->ms2IsMatchMs2 = this->compoundMustHaveMS2->isChecked();
+            peaksSearchParameters->ms1IsMatchRtFlag = this->matchRt->isChecked();
+        } else {
+            peaksSearchParameters->ms2IsMatchMs2 = this->featureMustHaveMs2->isChecked();
+            peaksSearchParameters->ms1IsMatchRtFlag = this->featureMatchRts->isChecked();
+        }
+        //TODO: Compound Subset [Compound DB Search]
+        //TODO: Report Isotopic Peaks [Peaks]
+        //TODO: EIC Extraction Window [Compound DB Search]
+        //TODO: Peak Group <--> Compound Matching Policy [Compound DB Search]
+
+        //EIC Processing
+        peaksSearchParameters->eicSmoothingWindow = this->eic_smoothingWindow->value();
+        QString currentSmoother = this->cmbSmootherType->currentText();
+        if (currentSmoother == "Moving Average") {
+            peaksSearchParameters->eicEicSmoothingAlgorithm = "AVG";
+        } else if (currentSmoother == "Gaussian") {
+            peaksSearchParameters->eicEicSmoothingAlgorithm = "GAUSSIAN";
+        } else if (currentSmoother == "Savitzky-Golay") {
+            peaksSearchParameters->eicEicSmoothingAlgorithm = "SAVGOL";
+        }
+        peaksSearchParameters->eicMaxPeakGroupRtDiff = static_cast<float>(this->rtStep->value());
+        peaksSearchParameters->baselineDropTopX = this->baseline_quantile->value();
+        peaksSearchParameters->baselineSmoothingWindow = static_cast<float>(this->baseline_smoothing->value());
+
+        //Peak Scoring
+        peaksSearchParameters->qualitySignalBaselineRatio = static_cast<float>(this->sigBaselineRatio->value());
+        peaksSearchParameters->qualitySignalBlankRatio = static_cast<float>(this->sigBlankRatio->value());
+        peaksSearchParameters->qualityMinPeakGroupIntensity = static_cast<float>(this->minGroupIntensity->value());
+        peaksSearchParameters->qualityMinPeakWidth = this->minNoNoiseObs->value();
+        peaksSearchParameters->qualityMinGoodPeakPerGroup = this->minGoodGroupCount->value();
+        peaksSearchParameters->qualityMinPeakQuality = static_cast<float>(this->spnMinPeakQuality->value());
+        peaksSearchParameters->qualityClassifierModelName = this->classificationModelFilename->text().toStdString();
+
+        //Fragmentation matching
+        peaksSearchParameters->ms2MinNumMatches = this->fragMinPeaks->value();
+        peaksSearchParameters->ms2MinNumDiagnosticMatches = this->spnMinDiagnostic->value();
+        peaksSearchParameters->ms2PpmTolr = static_cast<float>(this->productPpmTolr->value());
+        peaksSearchParameters->ms2ScoringAlgorithm = this->fragScoringAlgorithm->currentText().toStdString();
+        peaksSearchParameters->ms2MinScore = static_cast<float>(this->fragMinScore->value());
+
+        //Matching Options
+        peaksSearchParameters->matchingIsRequireAdductPrecursorMatch = this->chkRequireAdductMatch->isChecked();
+        peaksSearchParameters->matchingIsRetainUnknowns = this->chkRetainUnmatched->isChecked();
+        peaksSearchParameters->matchingIsClusterPeakGroups = this->chkClusterPeakgroups->isChecked();
 
         return peaksSearchParameters;
 }
