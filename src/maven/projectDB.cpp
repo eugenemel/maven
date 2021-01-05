@@ -1228,6 +1228,8 @@ void ProjectDB::loadSearchParams(){
         QRegExp DIexpr("^Direct Infusion Analysis");
         QRegExp ms3Expr("^Targeted MS3 Search");
         QRegExp LCMSDDAexpr("^Detected Features");
+        QRegExp LibSearchExpr("^Compound DB Search");
+        QRegExp QQQLibSearchExpr("^QQQ Compound DB Search");
 
         while (queryMatches.next()) {
 
@@ -1246,16 +1248,25 @@ void ProjectDB::loadSearchParams(){
                 string encodedSearchParamsString = encodedSearchParams.toStdString();
                 shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters = DirectInfusionSearchParameters::decode(encodedSearchParamsString);
                 diSearchParameters.insert(make_pair(searchTableName.toStdString(), directInfusionSearchParameters));
-
+                continue;
             }
 
             //Issue 197
             pos = LCMSDDAexpr.indexIn(searchTableName);
 
+            if (pos == -1) {
+                pos = LibSearchExpr.indexIn(searchTableName);
+            }
+
+            if (pos == -1) {
+                pos = QQQLibSearchExpr.indexIn(searchTableName);
+            }
+
             if (pos != -1){
                 string encodedSearchParamsString = encodedSearchParams.toStdString();
                 shared_ptr<PeaksSearchParameters> peaksSearchParametersTbl = PeaksSearchParameters::decode(encodedSearchParamsString);
                 peaksSearchParameters.insert(make_pair(searchTableName.toStdString(), peaksSearchParametersTbl));
+                continue;
             }
         }
 }
