@@ -191,7 +191,7 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
+          <item row="1" column="1">
            <widget class="QCheckBox" name="matchRt">
             <property name="text">
              <string>Match Retention Times</string>
@@ -201,7 +201,7 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
+          <item row="1" column="0">
            <widget class="QCheckBox" name="compoundMustHaveMS2">
             <property name="text">
              <string>Must Have MS2</string>
@@ -294,16 +294,6 @@
            <widget class="QLabel" name="label">
             <property name="text">
              <string>Time Domain Resolution (scans)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="0">
-           <widget class="QCheckBox" name="reportIsotopes">
-            <property name="text">
-             <string>Report Isotopic Peaks</string>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -460,23 +450,53 @@
           </sizepolicy>
          </property>
          <property name="title">
-          <string>Mass Slicing Method</string>
+          <string>Mass Slicing</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_13">
-          <item row="0" column="0">
+         <layout class="QGridLayout" name="gridLayout_6">
+          <item row="2" column="1">
+           <widget class="QCheckBox" name="excludeIsotopicPeaks">
+            <property name="text">
+             <string>Require Monoisotopic</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="reportIsotopes">
+            <property name="text">
+             <string>Extract Isotopic Peaks</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" colspan="2">
            <widget class="QLabel" name="lblMassSlicingMethod">
             <property name="text">
              <string>Description of Mass Slicing Method.</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QCheckBox" name="excludeIsotopicPeaks">
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_21">
             <property name="text">
-             <string>Exclude Isotopic Peaks</string>
+             <string>Mass Slice m/z Merge Tolerance (ppm)</string>
             </property>
-            <property name="checked">
-             <bool>true</bool>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="spnMassSliceMzMergeTolr">
+            <property name="suffix">
+             <string> ppm</string>
+            </property>
+            <property name="maximum">
+             <double>999999999.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>20.000000000000000</double>
             </property>
            </widget>
           </item>

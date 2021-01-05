@@ -331,23 +331,41 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
         shared_ptr<PeaksSearchParameters> peaksSearchParameters = shared_ptr<PeaksSearchParameters>(new PeaksSearchParameters());
 
         //Mass Slicing Method
-        peaksSearchParameters->isotopesIsExcludeIsotopicPeaks = this->excludeIsotopicPeaks->isChecked();
+        peaksSearchParameters->isotopesIsRequireMonoisotopicPeaks = this->excludeIsotopicPeaks->isChecked();
+        peaksSearchParameters->isotopesExtractIsotopicPeaks = this->reportIsotopes->isChecked();
 
         //Feature Detection (Peaks Search) and Compound Database (Compound DB Search)
-        peaksSearchParameters->ms1PpmTolr = static_cast<float>(this->productPpmTolr->value());
-        //TODO: Time Domain Resolution (scans) [Peaks]
+        //TODO: Mass Domain Resolution {ppmStep} [Peaks]
+        //TODO: Time Domain Resolution {rtStep} [Peaks]
+
+        //peaksSearchParameters->ms1PpmTolr = static_cast<float>(this->productPpmTolr->value());
 
         if (this->windowTitle() == "Compound DB Search") {
             peaksSearchParameters->ms2IsMatchMs2 = this->compoundMustHaveMS2->isChecked();
             peaksSearchParameters->ms1IsMatchRtFlag = this->matchRt->isChecked();
+
+            if (peakGroupCompoundMatchPolicyBox->currentText() != "ALL") {
+                peaksSearchParameters->matchingLibraries = peakGroupCompoundMatchPolicyBox->currentText().toStdString();
+            } else {
+                peaksSearchParameters->matchingLibraries = DB.getLoadedDatabaseNames().join(", ").toStdString();
+            }
+
+            QString policyText = peakGroupCompoundMatchPolicyBox->currentText();
+            if (policyText == "All matches"){
+                peaksSearchParameters->matchingPolicy = ALL_MATCHES;
+            } else if (policyText == "All matches with highest MS2 score") {
+                peaksSearchParameters->matchingPolicy = TOP_SCORE_HITS;
+            } else if (policyText == "One match with highest MS2 score (earliest alphabetically)") {
+                peaksSearchParameters->matchingPolicy = SINGLE_TOP_HIT;
+            }
+
         } else {
             peaksSearchParameters->ms2IsMatchMs2 = this->featureMustHaveMs2->isChecked();
             peaksSearchParameters->ms1IsMatchRtFlag = this->featureMatchRts->isChecked();
+            peaksSearchParameters->matchingLibraries = DB.getLoadedDatabaseNames().join(", ").toStdString();
+            peaksSearchParameters->matchingPolicy = PeakGroupCompoundMatchingPolicy::SINGLE_TOP_HIT;
         }
-        //TODO: Compound Subset [Compound DB Search]
-        //TODO: Report Isotopic Peaks [Peaks]
         //TODO: EIC Extraction Window [Compound DB Search]
-        //TODO: Peak Group <--> Compound Matching Policy [Compound DB Search]
 
         //EIC Processing
         peaksSearchParameters->eicSmoothingWindow = this->eic_smoothingWindow->value();

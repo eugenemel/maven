@@ -16,12 +16,6 @@ class EIC;
 
 extern Database DB;
 
-enum PeakGroupCompoundMatchingPolicy {
-    ALL_MATCHES,
-    SINGLE_TOP_HIT,
-    TOP_SCORE_HITS
-};
-
 class BackgroundPeakUpdate : public QThread
 {
   Q_OBJECT

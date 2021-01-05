@@ -350,6 +350,9 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 //                      << peakGroupPtr->ms2EventCount
 //                      << endl;
 
+                 //Issue 197: Support isotopic extraction for compound db search.
+                 if(pullIsotopesFlag && !group.isIsotope()) pullIsotopes(&group);
+
                  emit(newPeakGroup(peakGroupPtr, false, true)); // note that 'isDeletePeakGroupPtr' flag is set to true
              }
 
