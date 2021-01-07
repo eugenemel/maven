@@ -603,6 +603,11 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
         qDebug() << "MainWindow::bookmarkPeakGroup() group->meanRt=" << groupCopy2->meanRt;
         if(groupCopy2->compound) qDebug() << "MainWindow::bookmarkPeakGroup() group->compound=" << groupCopy2->compound->name.c_str();
         if(!groupCopy2->compound) qDebug() << "MainWindow::bookmarkPeakGroup() group->compound= nullptr";
+        if (groupCopy2->adduct){
+            qDebug() << "MainWindow::bookmarkPeakGroup() group->adduct=" << group->adduct->name.c_str();
+        } else {
+            qDebug() << "MainWindow::bookmarkPeakGroup() group->adduct= nullptr";
+        }
 
         //Issue 279: re-filter tree after adding bookmark
         bookmarkedPeaks->filterTree();
