@@ -1,8 +1,10 @@
 #include "editpeakgroupingdialog.h"
 
-EditPeakGroupDialog::EditPeakGroupDialog(QWidget *parent) : QDialog(parent) {
+EditPeakGroupDialog::EditPeakGroupDialog(QWidget *parent, MainWindow *mainwindow) : QDialog(parent) {
     setupUi(this);
     setModal(true);
+
+    _mainwindow = mainwindow;
 
     //Issue 278: force window to top
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);

@@ -65,8 +65,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QS
     filterTagsDialog = new FilterTagsDialog(this);
     connect(filterTagsDialog, SIGNAL(updateFilter()), this, SLOT(updateTagFilter()));
 
-    editPeakGroupDialog = new EditPeakGroupDialog(this);
-    editPeakGroupDialog->setMainWindow(_mainwindow);
+    editPeakGroupDialog = new EditPeakGroupDialog(this, _mainwindow);
     connect(editPeakGroupDialog->okButton, SIGNAL(clicked(bool)), SLOT(updateSelectedPeakGroup()));
     connect(editPeakGroupDialog->cancelButton, SIGNAL(clicked(bool)), SLOT(hideEditPeakGroupDialog()));
 

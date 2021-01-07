@@ -12,8 +12,7 @@ class EditPeakGroupDialog : public QDialog, public Ui_editPeakGroupDialog {
     MainWindow *_mainwindow = nullptr;
 
     public:
-        EditPeakGroupDialog(QWidget *parent);
-        void setMainWindow(MainWindow *mainwindow){_mainwindow = mainwindow;}
+        EditPeakGroupDialog(QWidget *parent, MainWindow *mainwindow);
         ~EditPeakGroupDialog();
 
     public slots:
