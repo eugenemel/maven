@@ -1520,6 +1520,7 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
     }
 
     if (group->compound)  for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].compound = group->compound;
+    if (group->adduct) for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].adduct = group->adduct;
     if (_slice.srmId.length())  for(int i=0; i < peakgroups.size(); i++ )  peakgroups[i].srmId = _slice.srmId;
 
     replot(group);
@@ -1756,6 +1757,12 @@ void EicWidget::setSelectedGroup(PeakGroup* group) {
     qDebug() << "EicWidget::setSelectedGroup() group->meanRt=" << group->meanRt;
     if(group->compound) qDebug() << "EicWidget::setSelectedGroup() group->compound=" << group->compound->name.c_str();
     if(!group->compound) qDebug() << "EicWidget::setSelectedGroup() group->compound= nullptr";
+
+    if (group->adduct){
+        qDebug() << "EicWidget::setSelectedGroup() group->adduct=" << group->adduct->name.c_str();
+    } else {
+        qDebug() << "EicWidget::setSelectedGroup() group->adduct= nullptr";
+    }
 
     _selectedGroup = *group;
 
