@@ -18,6 +18,7 @@ class ClusterDialog;
 class SearchParamsDialog;
 class NumericTreeWidgetItem;
 class ProjectDB;
+class EditPeakGroupDialog;
 
 using namespace std;
 

@@ -66,6 +66,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QS
     connect(filterTagsDialog, SIGNAL(updateFilter()), this, SLOT(updateTagFilter()));
 
     editPeakGroupDialog = new EditPeakGroupDialog(this);
+    editPeakGroupDialog->setMainWindow(_mainwindow);
     connect(editPeakGroupDialog->okButton, SIGNAL(clicked(bool)), SLOT(updateSelectedPeakGroup()));
     connect(editPeakGroupDialog->cancelButton, SIGNAL(clicked(bool)), SLOT(hideEditPeakGroupDialog()));
 
@@ -2238,96 +2239,94 @@ void TableDockWidget::updateSelectedPeakGroup() {
 
 void TableDockWidget::showEditPeakGroupDialog() {
 
-    //TODO: may want to handle bulk renaming
-    //QList<PeakGroup*> selected = getSelectedGroups();
+//    PeakGroup *selectedPeakGroup = getSelectedGroup();
+//    if (!selectedPeakGroup) return; //Probably a cluster
 
-    PeakGroup *selectedPeakGroup = getSelectedGroup();
-    if (!selectedPeakGroup) return; //Probably a cluster
+//    vector<string> suggestionSet;
+//    QString suggestionString = QString();
 
-    vector<string> suggestionSet;
-    QString suggestionString = QString();
+//    QString compoundString = QString();
+//    if (selectedPeakGroup->compound){
+//        compoundString.append(selectedPeakGroup->compound->name.c_str());
+//    }
 
-    QString compoundString = QString();
-    if (selectedPeakGroup->compound){
-        compoundString.append(selectedPeakGroup->compound->name.c_str());
-    }
+//    if (compoundString.isEmpty() && _mainwindow->getProjectWidget()->currentProject){
+//        //try to get original compound string from matches (mzkitchen workflow)
 
-    if (compoundString.isEmpty() && _mainwindow->getProjectWidget()->currentProject){
-        //try to get original compound string from matches (mzkitchen workflow)
+//        if (_mainwindow->getProjectWidget()->currentProject->topMatch.find(selectedPeakGroup->groupId)
+//                != _mainwindow->getProjectWidget()->currentProject->topMatch.end()){
 
-        if (_mainwindow->getProjectWidget()->currentProject->topMatch.find(selectedPeakGroup->groupId)
-                != _mainwindow->getProjectWidget()->currentProject->topMatch.end()){
+//            shared_ptr<mzrollDBMatch> originalCompoundNameAndScore = _mainwindow->getProjectWidget()->currentProject->topMatch.at(selectedPeakGroup->groupId);
 
-            shared_ptr<mzrollDBMatch> originalCompoundNameAndScore = _mainwindow->getProjectWidget()->currentProject->topMatch.at(selectedPeakGroup->groupId);
+//            compoundString.append(originalCompoundNameAndScore->compoundName.c_str());
+//        }
 
-            compoundString.append(originalCompoundNameAndScore->compoundName.c_str());
-        }
+//    }
 
-    }
+//    editPeakGroupDialog->brsSuggestions->setText("");
 
-    editPeakGroupDialog->brsSuggestions->setText("");
+//    if (!compoundString.isEmpty()){
 
-    if (!compoundString.isEmpty()){
+//        //try to summarize lipids based on suggestions
+//        QString strippedCompoundName = compoundString.section(' ', 0, 0);
 
-        //try to summarize lipids based on suggestions
-        QString strippedCompoundName = compoundString.section(' ', 0, 0);
+//        string baseName = strippedCompoundName.toStdString();
 
-        string baseName = strippedCompoundName.toStdString();
+//        string strucDefSummarized = LipidSummarizationUtils::getStrucDefSummary(baseName);
+//        string snChainSummarized = LipidSummarizationUtils::getSnPositionSummary(baseName);
+//        string acylChainLengthSummarized = LipidSummarizationUtils::getAcylChainLengthSummary(baseName);
+//        string acylChainCompositionSummarized = LipidSummarizationUtils::getAcylChainCompositionSummary(baseName);
+//        string lipidClassSummarized = LipidSummarizationUtils::getLipidClassSummary(baseName);
 
-        string strucDefSummarized = LipidSummarizationUtils::getStrucDefSummary(baseName);
-        string snChainSummarized = LipidSummarizationUtils::getSnPositionSummary(baseName);
-        string acylChainLengthSummarized = LipidSummarizationUtils::getAcylChainLengthSummary(baseName);
-        string acylChainCompositionSummarized = LipidSummarizationUtils::getAcylChainCompositionSummary(baseName);
-        string lipidClassSummarized = LipidSummarizationUtils::getLipidClassSummary(baseName);
+//        suggestionSet.push_back(baseName);
 
-        suggestionSet.push_back(baseName);
+//        if (std::find(suggestionSet.begin(), suggestionSet.end(), strucDefSummarized) == suggestionSet.end()) {
+//            suggestionSet.push_back(strucDefSummarized);
+//        }
 
-        if (std::find(suggestionSet.begin(), suggestionSet.end(), strucDefSummarized) == suggestionSet.end()) {
-            suggestionSet.push_back(strucDefSummarized);
-        }
+//        if (std::find(suggestionSet.begin(), suggestionSet.end(), snChainSummarized) == suggestionSet.end()) {
+//            suggestionSet.push_back(snChainSummarized);
+//        }
 
-        if (std::find(suggestionSet.begin(), suggestionSet.end(), snChainSummarized) == suggestionSet.end()) {
-            suggestionSet.push_back(snChainSummarized);
-        }
+//        if (std::find(suggestionSet.begin(), suggestionSet.end(), acylChainLengthSummarized) == suggestionSet.end()) {
+//            suggestionSet.push_back(acylChainLengthSummarized);
+//        }
 
-        if (std::find(suggestionSet.begin(), suggestionSet.end(), acylChainLengthSummarized) == suggestionSet.end()) {
-            suggestionSet.push_back(acylChainLengthSummarized);
-        }
+//        if (std::find(suggestionSet.begin(), suggestionSet.end(), acylChainCompositionSummarized) == suggestionSet.end()) {
+//            suggestionSet.push_back(acylChainCompositionSummarized);
+//        }
 
-        if (std::find(suggestionSet.begin(), suggestionSet.end(), acylChainCompositionSummarized) == suggestionSet.end()) {
-            suggestionSet.push_back(acylChainCompositionSummarized);
-        }
+//        if (std::find(suggestionSet.begin(), suggestionSet.end(), lipidClassSummarized) == suggestionSet.end()) {
+//            suggestionSet.push_back(lipidClassSummarized);
+//        }
 
-        if (std::find(suggestionSet.begin(), suggestionSet.end(), lipidClassSummarized) == suggestionSet.end()) {
-            suggestionSet.push_back(lipidClassSummarized);
-        }
+//        for (unsigned int i = 0; i < suggestionSet.size(); i++) {
 
-        for (unsigned int i = 0; i < suggestionSet.size(); i++) {
+//            QString hyperLink =
+//                    QString::fromStdString("<a href = \"") +
+//                    QString::fromStdString(suggestionSet.at(i).c_str()) +
+//                    QString::fromStdString("\" >") +
+//                    QString::fromStdString(suggestionSet.at(i).c_str()) +
+//                    QString::fromStdString("</a>");
 
-            QString hyperLink =
-                    QString::fromStdString("<a href = \"") +
-                    QString::fromStdString(suggestionSet.at(i).c_str()) +
-                    QString::fromStdString("\" >") +
-                    QString::fromStdString(suggestionSet.at(i).c_str()) +
-                    QString::fromStdString("</a>");
+//            editPeakGroupDialog->brsSuggestions->append(hyperLink);
 
-            editPeakGroupDialog->brsSuggestions->append(hyperLink);
+//        }
+//    }
 
-        }
-    }
+//    QString adductString = QString();
+//    if (selectedPeakGroup->adduct){
+//        adductString.append(selectedPeakGroup->adduct->name.c_str());
+//    }
 
-    QString adductString = QString();
-    if (selectedPeakGroup->adduct){
-        adductString.append(selectedPeakGroup->adduct->name.c_str());
-    }
+//    editPeakGroupDialog->brsPreviousID->setText(groupTagString(selectedPeakGroup));
+//    editPeakGroupDialog->brsCompound->setText(compoundString);
+//    editPeakGroupDialog->brsAdduct->setText(adductString);
+//    editPeakGroupDialog->brsMz->setText(QString::number(selectedPeakGroup->meanMz, 'f', 4));
+//    editPeakGroupDialog->brsRT->setText(QString::number(selectedPeakGroup->meanRt, 'f', 2));
+//    editPeakGroupDialog->txtUpdateID->setText(QString());
 
-    editPeakGroupDialog->brsPreviousID->setText(groupTagString(selectedPeakGroup));
-    editPeakGroupDialog->brsCompound->setText(compoundString);
-    editPeakGroupDialog->brsAdduct->setText(adductString);
-    editPeakGroupDialog->brsMz->setText(QString::number(selectedPeakGroup->meanMz, 'f', 4));
-    editPeakGroupDialog->brsRT->setText(QString::number(selectedPeakGroup->meanRt, 'f', 2));
-    editPeakGroupDialog->txtUpdateID->setText(QString());
-
+    editPeakGroupDialog->setPeakGroup(getSelectedGroup());
     editPeakGroupDialog->show();
 }
 
