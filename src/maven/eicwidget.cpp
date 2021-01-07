@@ -1483,6 +1483,11 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
         qDebug() << "EicWidget::setPeakGroup() group->meanRt=" << group->meanRt;
         if(group->compound) qDebug() << "EicWidget::setPeakGroup() group->compound=" << group->compound->name.c_str();
         if(!group->compound) qDebug() << "EicWidget::setPeakGroup() group->compound= nullptr";
+        if (group->adduct){
+            qDebug() << "EicWidget::setPeakGroup() group->adduct=" << group->adduct->name.c_str();
+        } else {
+            qDebug() << "EicWidget::setPeakGroup() group->adduct= nullptr";
+        }
     }
 
     _alwaysDisplayGroup = group;
