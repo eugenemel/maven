@@ -603,7 +603,7 @@ void TableDockWidget::selectGroup(PeakGroup* group) {
     pair<rowIterator, rowIterator> tableRows = groupToItem.equal_range(group);
     for (rowIterator it = tableRows.first; it != tableRows.second; it++) {
          QTreeWidgetItem *item = it->second;
-         if (!item->isHidden()) {
+         if (item && !item->isHidden()) {
              item->setSelected(true);
          }
     }
@@ -1069,27 +1069,21 @@ void TableDockWidget::exportGroupsToSpreadsheet() {
     }
 
 
-    qDebug() << "Writing report to " << fileName;
-    for(int i=0; i<allgroups.size(); i++ ) {
-        PeakGroup& group = allgroups[i];
+    qDebug() << "Writing report to " << fileName << "...";
 
-        //check that group is currently selected
-        bool isSelected = false;
-        PeakGroup *peakGroupPtr = &(group);
-        pair<rowIterator, rowIterator> tableRows = groupToItem.equal_range(peakGroupPtr);
-        for (rowIterator it = tableRows.first; it != tableRows.second; it++) {
-            if (it->second && it->second->isSelected()) {
-                isSelected = true;
-                break;
-            }
+    //Issue 332
+    for (auto item : treeWidget->selectedItems()) {
+
+        QVariant v = item->data(0, Qt::UserRole);
+        PeakGroup *peakGroup = v.value<PeakGroup*>();
+
+        if (peakGroup) {
+            csvreports->addGroup(peakGroup);
         }
-
-        if (isSelected && !group.deletedFlag) { //don't add deleted groups
-            csvreports->addGroup(&group);
-        }
-
     }
+
     csvreports->closeFiles();
+    qDebug() << "Finished Writing report to " << fileName << ".";
 }
 
 
