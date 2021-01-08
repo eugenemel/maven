@@ -5,6 +5,8 @@
 #include "stable.h"
 #include "mainwindow.h"
 
+extern Database DB;
+
 class EditPeakGroupDialog : public QDialog, public Ui_editPeakGroupDialog {
 
     Q_OBJECT
@@ -19,6 +21,7 @@ class EditPeakGroupDialog : public QDialog, public Ui_editPeakGroupDialog {
         void show();
         void onAnchorClicked(const QUrl &link);
         void setPeakGroup(PeakGroup *peakGroup);
+        void updateAdductComboBox();
 };
 
 #endif // EDITPEAKGROUPINGDIALOG_H

@@ -6,12 +6,15 @@ EditPeakGroupDialog::EditPeakGroupDialog(QWidget *parent, MainWindow *mainwindow
 
     _mainwindow = mainwindow;
 
+    updateAdductComboBox();
+
     //Issue 278: force window to top
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
 
     brsSuggestions->setOpenLinks(false);
     brsSuggestions->setOpenExternalLinks(false);
     connect(brsSuggestions, SIGNAL(anchorClicked(QUrl)), this, SLOT(onAnchorClicked(QUrl)));
+    connect(_mainwindow, SIGNAL(updatedAvailableAdducts()), this, SLOT(updateAdductComboBox()));
 }
 
 EditPeakGroupDialog::~EditPeakGroupDialog(){}
@@ -122,4 +125,15 @@ void EditPeakGroupDialog::setPeakGroup(PeakGroup *selectedPeakGroup) {
 
 void EditPeakGroupDialog::onAnchorClicked(const QUrl &link){
     this->txtUpdateID->setText(link.path());
+}
+
+void EditPeakGroupDialog::updateAdductComboBox() {
+
+    this->cmbSelectAdduct->clear();
+
+    this->cmbSelectAdduct->addItem("", QVariant::fromValue(nullptr));
+
+    for (auto adduct : DB.adductsDB) {
+        cmbSelectAdduct->addItem(adduct->name.c_str(), QVariant::fromValue(adduct));
+    }
 }

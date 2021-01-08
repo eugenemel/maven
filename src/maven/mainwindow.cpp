@@ -2314,4 +2314,5 @@ void MainWindow::updateAdductComboBox(vector<Adduct*> enabledAdducts) {
         }
     }
 
+    emit(updatedAvailableAdducts());
 }

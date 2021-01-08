@@ -274,6 +274,8 @@ private:
     QToolBar* sideBar;
     QToolButton* addDockWidgetButton( QToolBar*, QDockWidget*, QIcon, QString);
 
+signals:
+    void updatedAvailableAdducts();
 };
 
 struct FileLoader {
