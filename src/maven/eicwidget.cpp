@@ -32,7 +32,7 @@ EicWidget::EicWidget(QWidget *p) {
     showIsotopePlot(false);
     showBarPlot(false); // Issue 94: Handled by EIC legend widget now
 	showBoxPlot(false);
-    automaticPeakGrouping(true);
+    automaticPeakGrouping(false); //Issue 331: switch from opt-out to opt-in peak grouping
     showMergedEIC(false);
     showEICLines(false);
     showMS2Events(true);
