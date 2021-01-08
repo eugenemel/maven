@@ -94,7 +94,21 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
             }
         }
     } else {
-        enabledAdducts = availableAdducts;
+
+        //Issue 230: default to only M+H and M-H adducts
+        vector<Adduct*> enabledAdductsCandidate{};
+        for (auto adduct : availableAdducts) {
+            if (adduct->name == "[M+H]+" || adduct->name == "[M-H]-") {
+                enabledAdductsCandidate.push_back(adduct);
+                if (enabledAdductsCandidate.size() == 2) break;
+            }
+        }
+
+        if (enabledAdductsCandidate.size() == 2) {
+            enabledAdducts = enabledAdductsCandidate;
+        } else {
+            enabledAdducts = availableAdducts;
+        }
     }
 
     DB.adductsDB = enabledAdducts;
