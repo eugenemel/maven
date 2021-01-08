@@ -121,6 +121,19 @@ void EditPeakGroupDialog::setPeakGroup(PeakGroup *selectedPeakGroup) {
     brsMz->setText(QString::number(selectedPeakGroup->meanMz, 'f', 4));
     brsRT->setText(QString::number(selectedPeakGroup->meanRt, 'f', 2));
     txtUpdateID->setText(QString());
+
+    if (selectedPeakGroup->adduct) {
+        for (int i = 0; i < this->cmbSelectAdduct->count(); i++) {
+            QVariant v = this->cmbSelectAdduct->itemData(i);
+            Adduct*  adduct =  v.value<Adduct*>();
+            if (adduct && adduct->name == selectedPeakGroup->adduct->name) {
+                this->cmbSelectAdduct->setCurrentIndex(i);
+                break;
+            }
+        }
+    } else {
+        cmbSelectAdduct->setCurrentIndex(0); //first item is always empty string, indicating no adduct
+    }
 }
 
 void EditPeakGroupDialog::onAnchorClicked(const QUrl &link){
