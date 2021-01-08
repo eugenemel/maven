@@ -235,6 +235,8 @@ void TableDockWidget::setupPeakTable() {
 
     QStringList colNames;
     colNames << "ID";
+    colNames << "Compound";
+    colNames << "Adduct";
     colNames << "m/z";
     colNames << "rt";
 
@@ -283,6 +285,13 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
 
     if (!group) return;
 
+    QString adductText;
+    if (group->adduct) {
+        adductText = QString(group->adduct->name.c_str());
+    }
+
+    item->setText(0, groupTagString(group));         // ID
+    item->setText(2, adductText);                    // Adduct
     heatmapBackground(item);
 
     //score peak quality
@@ -292,7 +301,6 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
             clsf->classify(group);
             group->updateQuality();
         }
-        item->setText(0,groupTagString(group));
     }
 
     int good=0; int bad=0;
@@ -519,26 +527,37 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
 
     item->setFlags(Qt::ItemIsSelectable |  Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
 
-    item->setData(0,PeakGroupType,QVariant::fromValue(group));
-    item->setText(0,groupTagString(group));
-    item->setText(1,QString::number(group->meanMz, 'f', 4));
-    item->setText(2,QString::number(group->meanRt, 'f', 2));
+    //Issue 329
+    QString compoundText, adductText;
+    if (group->compound) {
+        compoundText = QString(group->compound->name.c_str());
+    }
+    if (group->adduct) {
+        adductText = QString(group->adduct->name.c_str());
+    }
+
+    item->setData(0, PeakGroupType,QVariant::fromValue(group));
+    item->setText(0, groupTagString(group));                                         //ID
+    item->setText(1, compoundText);                                                  //Compound
+    item->setText(2, adductText);                                                    //Adduct
+    item->setText(3, QString::number(group->meanMz, 'f', 4));                        //m/z
+    item->setText(4, QString::number(group->meanRt, 'f', 2));                        //RT
 
     if (group->compound and group->compound->expectedRt) {
-        item->setText(3,QString::number(group->meanRt - group->compound->expectedRt, 'f', 2));
+        item->setText(5,QString::number(group->meanRt - group->compound->expectedRt, 'f', 2));
     }
 
     if (viewType == groupView) {
-        item->setText(4,QString::number(group->fragMatchScore.mergedScore));        //MS2 Score
-        item->setText(5,QString::number(group->groupRank,'f',3));                   //Rank
-        item->setText(6,QString::number(group->chargeState));                       //Charge
-        item->setText(7,QString::number(group->isotopicIndex));                     //Isotope#
-        item->setText(8,QString::number(group->peakCount()));                       //# Peaks
-        item->setText(9,QString::number(group->ms2EventCount));                     //# MS2s
-        item->setText(10,QString::number(group->maxNoNoiseObs));                    //Max Width
-        item->setText(11,QString::number(group->maxIntensity,'g',2));               //Max Intensity
-        item->setText(12,QString::number(group->maxSignalBaselineRatio,'f',0));     //Max S/N
-        item->setText(13,QString::number(group->maxQuality,'f',2));                 //Max Quality
+        item->setText(6,QString::number(group->fragMatchScore.mergedScore));        //MS2 Score
+        item->setText(7,QString::number(group->groupRank,'f',3));                   //Rank
+        item->setText(8,QString::number(group->chargeState));                       //Charge
+        item->setText(9,QString::number(group->isotopicIndex));                     //Isotope#
+        item->setText(10,QString::number(group->peakCount()));                      //# Peaks
+        item->setText(11,QString::number(group->ms2EventCount));                    //# MS2s
+        item->setText(12,QString::number(group->maxNoNoiseObs));                    //Max Width
+        item->setText(13,QString::number(group->maxIntensity,'g',2));               //Max Intensity
+        item->setText(14,QString::number(group->maxSignalBaselineRatio,'f',0));     //Max S/N
+        item->setText(15,QString::number(group->maxQuality,'f',2));                 //Max Quality
     } else if ( viewType == peakView) {
         vector<mzSample*> vsamples = _mainwindow->getVisibleSamples();
         sort(vsamples.begin(), vsamples.end(), mzSample::compSampleOrder);
