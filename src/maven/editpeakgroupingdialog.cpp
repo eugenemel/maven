@@ -15,6 +15,7 @@ EditPeakGroupDialog::EditPeakGroupDialog(QWidget *parent, MainWindow *mainwindow
     brsSuggestions->setOpenExternalLinks(false);
     connect(brsSuggestions, SIGNAL(anchorClicked(QUrl)), this, SLOT(onAnchorClicked(QUrl)));
     connect(_mainwindow, SIGNAL(updatedAvailableAdducts()), this, SLOT(updateAdductComboBox()));
+    connect(cmbSelectAdduct, SIGNAL(currentIndexChanged(int)), this, SLOT(updateAdductText()));
 }
 
 EditPeakGroupDialog::~EditPeakGroupDialog(){}
@@ -149,4 +150,8 @@ void EditPeakGroupDialog::updateAdductComboBox() {
     for (auto adduct : DB.adductsDB) {
         cmbSelectAdduct->addItem(adduct->name.c_str(), QVariant::fromValue(adduct));
     }
+}
+
+void EditPeakGroupDialog::updateAdductText() {
+    this->brsAdduct->setText(cmbSelectAdduct->currentText());
 }

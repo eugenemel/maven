@@ -22,6 +22,7 @@ class EditPeakGroupDialog : public QDialog, public Ui_editPeakGroupDialog {
         void onAnchorClicked(const QUrl &link);
         void setPeakGroup(PeakGroup *peakGroup);
         void updateAdductComboBox();
+        void updateAdductText();
 };
 
 #endif // EDITPEAKGROUPINGDIALOG_H
