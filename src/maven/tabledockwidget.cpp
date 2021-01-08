@@ -2221,16 +2221,40 @@ void TableDockWidget::rescoreFragmentation() {
 
 void TableDockWidget::updateSelectedPeakGroup() {
 
+    PeakGroup *selectedPeakGroup = getSelectedGroup();
+    if (!selectedPeakGroup) return; //Probably a cluster
+
     editPeakGroupDialog->hide();
     string updatedVal = editPeakGroupDialog->txtUpdateID->toPlainText().toStdString();
 
+    bool isUpdateItem = false;
     if (!updatedVal.empty()) {
-
-        PeakGroup *selectedPeakGroup = getSelectedGroup();
-        if (!selectedPeakGroup) return; //Probably a cluster
 
         selectedPeakGroup->displayName = updatedVal;
 
+        isUpdateItem = true;
+    }
+
+    //Issue 330: Check for updated adduct
+    QString adductText = editPeakGroupDialog->cmbSelectAdduct->currentText();
+
+    bool isChangeAdduct = (selectedPeakGroup->adduct && selectedPeakGroup->adduct->name != adductText.toStdString()) ||
+            (!selectedPeakGroup->adduct && !adductText.isEmpty());
+
+    if (isChangeAdduct) {
+        if (adductText.isEmpty()) {
+            selectedPeakGroup->adduct = nullptr;
+        } else {
+            QVariant v = editPeakGroupDialog->cmbSelectAdduct->currentData();
+            Adduct* adduct =  v.value<Adduct*>();
+            if (adduct) {
+                selectedPeakGroup->adduct = adduct;
+            }
+        }
+        isUpdateItem = true;
+    }
+
+    if (isUpdateItem) {
         updateItem(treeWidget->currentItem());
     }
 
