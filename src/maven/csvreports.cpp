@@ -266,6 +266,23 @@ string CSVReports::doubleQuoteString(std::string& in) {
 }
 
 void CSVReports::addGroup(PeakGroup* group) { 
+    qDebug() << "CSVReports::addGroup():";
+
+    qDebug() << "CSVReports::addGroup() group->meanMz=" << group->meanMz;
+    qDebug() << "CSVReports::addGroup() group->meanRt=" << group->meanRt;
+
+    if (group->compound){
+        qDebug() << "CSVReports::addGroup() group->compound= " << group->compound->name.c_str();
+    } else {
+        qDebug() << "CSVReports::addGroup() group->compound= nullptr";
+    }
+
+    if (group->adduct){
+        qDebug() << "CSVReports::addGroup() group->adduct=" << group->adduct->name.c_str();
+    } else {
+        qDebug() << "CSVReports::addGroup() group->adduct= nullptr";
+    }
+
     writeGroupInfo(group);
     writePeakInfo(group);
 }
