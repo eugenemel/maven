@@ -1074,7 +1074,7 @@ void TableDockWidget::exportGroupsToSpreadsheet() {
     //Issue 332
     for (auto item : treeWidget->selectedItems()) {
 
-        QVariant v = item->data(0, Qt::UserRole);
+        QVariant v = item->data(0, PeakGroupType);
         PeakGroup *peakGroup = v.value<PeakGroup*>();
 
         if (peakGroup) {
