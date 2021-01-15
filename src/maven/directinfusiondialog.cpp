@@ -112,6 +112,12 @@ void DirectInfusionDialog::analyze() {
 
     directInfusionUpdate->setAdducts(DB.adductsDB);
 
+    //maven version
+    //Issue 335
+    if(MAVEN_VERSION != "") {
+        directInfusionUpdate->params->searchVersion = MAVEN_VERSION;
+    }
+
     //ms3 search related
     directInfusionUpdate->params->ms3IsMs3Search = this->chkMs3IsMs3Search->isChecked();
     directInfusionUpdate->params->ms3MinNumMatches = this->spnMs3MinNumMatches->value();
