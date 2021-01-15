@@ -339,6 +339,11 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
 
         shared_ptr<PeaksSearchParameters> peaksSearchParameters = shared_ptr<PeaksSearchParameters>(new PeaksSearchParameters());
 
+        //Issue 335
+        if(MAVEN_VERSION != "") {
+            peaksSearchParameters->searchVersion = MAVEN_VERSION;
+        }
+
         //Feature Detection (Peaks Search) and Compound Database (Compound DB Search)
         if (this->windowTitle() == "Compound DB Search") {
             peaksSearchParameters->ms1PpmTolr = static_cast<float>(this->compoundPPMWindow->value());
