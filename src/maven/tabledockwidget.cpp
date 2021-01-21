@@ -1003,11 +1003,11 @@ void TableDockWidget::showAllGroups() {
 void TableDockWidget::showAllGroupsThenSort() {
     showAllGroups();
     if (isTargetedMs3Table()) {
-        treeWidget->sortByColumn(11, Qt::DescendingOrder); //decreasing by max intensity
+        treeWidget->sortByColumn(13, Qt::DescendingOrder); //decreasing by max intensity
     } else if (isDirectInfusionTable()) {
-        treeWidget->sortByColumn(1, Qt::AscendingOrder); // increasing by m/z
+        treeWidget->sortByColumn(3, Qt::AscendingOrder); // increasing by m/z
     } else {
-        treeWidget->sortByColumn(4, Qt::DescendingOrder); //decreasing by score
+        treeWidget->sortByColumn(6, Qt::DescendingOrder); //decreasing by score
     }
 }
 
