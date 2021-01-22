@@ -96,7 +96,6 @@ public slots:
 	  void showScatterPlot();
 	  void setClipboard();
       void deleteSelected();
-      void sortBy(int);
 	  void align();
 	  void deleteAll();
           void clusterGroups();
@@ -164,6 +163,8 @@ private:
           QString encodedTableInfo;
 
           shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParams = nullptr;
+
+          static map<string, int> groupViewColumnNameToNumber;
 };
 
 typedef std::multimap<PeakGroup*, QTreeWidgetItem*>::iterator rowIterator;

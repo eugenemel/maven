@@ -227,33 +227,29 @@ TableDockWidget::~TableDockWidget() {
     if(traindialog != NULL) delete traindialog;
 }
 
-void TableDockWidget::sortBy(int col) { 
-    treeWidget->sortByColumn(col,Qt::AscendingOrder);
-}
-
 void TableDockWidget::setupPeakTable() {
 
     QStringList colNames;
-    colNames << "ID";
-    colNames << "Compound";
-    colNames << "Adduct";
-    colNames << "m/z";
-    colNames << "rt";
 
     if (viewType == groupView) {
-        colNames << "rtDiff";
-        colNames << "MS2 Score";
-        colNames << "Rank";
-        colNames << "Charge";
-        colNames << "Isotope#";
-        colNames << "#Peaks";
-        colNames << "#MS2s";
-        colNames << "Max Width";
-        colNames << "Max Intensity";
-        colNames << "Max S/N";
-        colNames << "Max Quality";
+
+        vector<string> groupViewColNames(groupViewColumnNameToNumber.size());
+        for (auto it = groupViewColumnNameToNumber.begin(); it != groupViewColumnNameToNumber.end(); ++it){
+            groupViewColNames.at(static_cast<unsigned long>(it->second)) = it->first;
+        }
+
+        for (auto colName : groupViewColNames){
+            colNames << QString(colName.c_str());
+        }
 
     } else if (viewType == peakView) {
+
+        colNames << "ID";
+        colNames << "Compound";
+        colNames << "Adduct";
+        colNames << "m/z";
+        colNames << "RT";
+
         vector<mzSample*> vsamples = _mainwindow->getVisibleSamples();
         sort(vsamples.begin(), vsamples.end(), mzSample::compSampleOrder);
         for(unsigned int i=0; i<vsamples.size(); i++ ) {
@@ -537,27 +533,42 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     }
 
     item->setData(0, PeakGroupType,QVariant::fromValue(group));
-    item->setText(0, groupTagString(group));                                         //ID
-    item->setText(1, compoundText);                                                  //Compound
-    item->setText(2, adductText);                                                    //Adduct
-    item->setText(3, QString::number(group->meanMz, 'f', 4));                        //m/z
-    item->setText(4, QString::number(group->meanRt, 'f', 2));                        //RT
+
+    item->setText(groupViewColumnNameToNumber.at("ID"), groupTagString(group));     //ID
+    item->setText(groupViewColumnNameToNumber.at("Compound"), compoundText);        //Compound
+    item->setText(groupViewColumnNameToNumber.at("Adduct"), adductText);            //Adduct
+    item->setText(groupViewColumnNameToNumber.at("m/z"),
+                  QString::number(group->meanMz, 'f', 4));                          //m/z
+    item->setText(groupViewColumnNameToNumber.at("RT"),
+                  QString::number(group->meanRt, 'f', 2));                          //RT
 
     if (group->compound and group->compound->expectedRt) {
-        item->setText(5,QString::number(group->meanRt - group->compound->expectedRt, 'f', 2));
+        item->setText(groupViewColumnNameToNumber.at("RT Diff"),
+                QString::number(group->meanRt - group->compound->expectedRt, 'f', 2));//RT Diff
     }
 
     if (viewType == groupView) {
-        item->setText(6,QString::number(group->fragMatchScore.mergedScore));        //MS2 Score
-        item->setText(7,QString::number(group->groupRank,'f',3));                   //Rank
-        item->setText(8,QString::number(group->chargeState));                       //Charge
-        item->setText(9,QString::number(group->isotopicIndex));                     //Isotope#
-        item->setText(10,QString::number(group->peakCount()));                      //# Peaks
-        item->setText(11,QString::number(group->ms2EventCount));                    //# MS2s
-        item->setText(12,QString::number(group->maxNoNoiseObs));                    //Max Width
-        item->setText(13,QString::number(group->maxIntensity,'g',2));               //Max Intensity
-        item->setText(14,QString::number(group->maxSignalBaselineRatio,'f',0));     //Max S/N
-        item->setText(15,QString::number(group->maxQuality,'f',2));                 //Max Quality
+        item->setText(groupViewColumnNameToNumber.at("MS2 Score"),
+                QString::number(group->fragMatchScore.mergedScore));                //MS2 Score
+        item->setText(groupViewColumnNameToNumber.at("Rank"),
+                      QString::number(group->groupRank,'f',3));                     //Rank
+        item->setText(groupViewColumnNameToNumber.at("Charge"),
+                      QString::number(group->chargeState));                         //Charge
+        item->setText(groupViewColumnNameToNumber.at("Isotope #"),
+                      QString::number(group->isotopicIndex));                       //Isotope #
+        item->setText(groupViewColumnNameToNumber.at("# Peaks"),
+                      QString::number(group->peakCount()));                         //# Peaks
+        item->setText(groupViewColumnNameToNumber.at("# MS2s"),
+                QString::number(group->ms2EventCount));                             //# MS2s
+        item->setText(groupViewColumnNameToNumber.at("Max Width"),
+                      QString::number(group->maxNoNoiseObs));                       //Max Width
+        item->setText(groupViewColumnNameToNumber.at("Max Intensity"),
+                      QString::number(group->maxIntensity,'g',2));                  //Max Intensity
+        item->setText(groupViewColumnNameToNumber.at("Max S/N"),
+                      QString::number(group->maxSignalBaselineRatio,'f',0));        //Max S/N
+        item->setText(groupViewColumnNameToNumber.at("Max Quality"),
+                      QString::number(group->maxQuality,'f',2));                    //Max Quality
+
     } else if ( viewType == peakView) {
         vector<mzSample*> vsamples = _mainwindow->getVisibleSamples();
         sort(vsamples.begin(), vsamples.end(), mzSample::compSampleOrder);
@@ -1002,12 +1013,19 @@ void TableDockWidget::showAllGroups() {
 
 void TableDockWidget::showAllGroupsThenSort() {
     showAllGroups();
-    if (isTargetedMs3Table()) {
-        treeWidget->sortByColumn(13, Qt::DescendingOrder); //decreasing by max intensity
-    } else if (isDirectInfusionTable()) {
-        treeWidget->sortByColumn(3, Qt::AscendingOrder); // increasing by m/z
-    } else {
-        treeWidget->sortByColumn(6, Qt::DescendingOrder); //decreasing by score
+    if (viewType == groupView) {
+        if (isTargetedMs3Table()) {
+
+            treeWidget->sortByColumn(groupViewColumnNameToNumber.at("Max Intensity"),
+                                     Qt::DescendingOrder); //decreasing by max intensity
+
+        } else if (isDirectInfusionTable()) {
+            treeWidget->sortByColumn(groupViewColumnNameToNumber.at("m/z"),
+                                     Qt::AscendingOrder); // increasing by m/z
+        } else {
+            treeWidget->sortByColumn(groupViewColumnNameToNumber.at("MS2 Score"),
+                                     Qt::DescendingOrder); //decreasing by score
+        }
     }
 }
 
@@ -2358,3 +2376,22 @@ void TableDockWidget::reconnectCompounds(QString dbName) {
         }
     }
 }
+
+map<string, int> TableDockWidget::groupViewColumnNameToNumber{
+    {"ID", 0},
+    {"Compound", 1},
+    {"Adduct", 2},
+    {"m/z", 3},
+    {"RT", 4},
+    {"RT Diff", 5},
+    {"MS2 Score", 6},
+    {"Rank", 7},
+    {"Charge", 8},
+    {"Isotope #", 9},
+    {"# Peaks", 10},
+    {"# MS2s", 11},
+    {"Max Width", 12},
+    {"Max Intensity", 13},
+    {"Max S/N", 14},
+    {"Max Quality", 15}
+};
