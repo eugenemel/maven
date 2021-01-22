@@ -570,12 +570,15 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
                       QString::number(group->maxQuality,'f',2));                    //Max Quality
 
     } else if ( viewType == peakView) {
+
         vector<mzSample*> vsamples = _mainwindow->getVisibleSamples();
         sort(vsamples.begin(), vsamples.end(), mzSample::compSampleOrder);
         vector<float>yvalues = group->getOrderedIntensityVector(vsamples,_mainwindow->getUserQuantType());
+
         for(unsigned int i=0; i<yvalues.size(); i++ ) {
-         item->setText(3+i,QString::number(yvalues[i]));
+         item->setText(5+i,QString::number(yvalues[i]));
         }
+
         heatmapBackground(item);
     }
 
