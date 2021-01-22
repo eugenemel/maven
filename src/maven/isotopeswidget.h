@@ -46,7 +46,8 @@ private slots:
       void showTable();
 	  QString groupTextEport(PeakGroup* group);
 	  float getIsotopeIntensity(float mz);
-   
+      void exportTableToSpreadsheet();
+
 private:
 	  string _formula;
 

@@ -1104,6 +1104,9 @@ void TableDockWidget::exportGroupsToSpreadsheet() {
     }
 
     csvreports->closeFiles();
+
+    if (csvreports) delete(csvreports);
+
     qDebug() << "Finished Writing report to " << fileName << ".";
 }
 

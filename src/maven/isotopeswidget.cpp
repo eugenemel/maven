@@ -52,6 +52,8 @@ IsotopeWidget::IsotopeWidget(MainWindow* mw) {
   btnExport->setIconSize(QSize(btnSize, btnSize));
   btnExport->setFixedSize(btnSize, btnSize);
   btnExport->setFlat(true);
+
+  connect(btnExport, SIGNAL(clicked()), SLOT(exportTableToSpreadsheet()));
 }
 
 IsotopeWidget::~IsotopeWidget(){
@@ -388,15 +390,18 @@ void IsotopeWidget::showTable() {
 
 	for(unsigned int i=0;  i < links.size(); i++ ) {
 		float frac=0;
-		if ( isotopeIntensitySum>0) frac = links[i].value2/isotopeIntensitySum*100;
+        if ( isotopeIntensitySum>0) links[i].isotopeFrac = links[i].value2/isotopeIntensitySum*100;
+
+        links[i].percentExpected = links[i].value1*100;
+        links[i].percentRelative = links[i].value1/maxIntensity*100;
 
 		NumericTreeWidgetItem *item = new NumericTreeWidgetItem(treeWidget,mzSliceType);
 		QString item1 = QString( links[i].note.c_str() );
 		QString item2 = QString::number( links[i].mz2, 'f', 5 );
         QString item3 = QString::number( links[i].value2, 'f', 4 );
-        QString item4 = QString::number(frac, 'f',4 );
-        QString item5 = QString::number(links[i].value1*100, 'f', 4 );
-        QString item6 = QString::number(links[i].value1/maxIntensity*100, 'f', 4 );
+        QString item4 = QString::number(links[i].isotopeFrac, 'f',4 );
+        QString item5 = QString::number(links[i].percentExpected, 'f', 4 );
+        QString item6 = QString::number(links[i].percentRelative, 'f', 4 );
 
 		item->setText(0,item1);
 		item->setText(1,item2);
@@ -449,3 +454,65 @@ QString IsotopeWidget::groupTextEport(PeakGroup* group) {
 		return info.join("\t");
 }
 
+void IsotopeWidget::exportTableToSpreadsheet() {
+
+    qDebug() << "IsotopeWidget::exportTableToSpreadsheet()";
+
+    if (links.size() == 0 ) {
+        QString msg = "No isotopes information currently available";
+        QMessageBox::warning(this, tr("Error"), msg);
+        return;
+    }
+
+    QString dir = ".";
+    QSettings* settings = _mw->getSettings();
+
+    if ( settings->contains("lastDir") ) dir = settings->value("lastDir").value<QString>();
+
+    QString formatCSV = "Comma Separted Values (*.csv)";
+    QString formatMatrix =  "Summary Matrix Format (*.tab)";
+
+    QString sFilterSel;
+    QString fileName = QFileDialog::getSaveFileName(this,
+            tr("Export Isotopes Information"), dir,
+            formatCSV + ";;" + formatMatrix,
+            &sFilterSel);
+
+    if(fileName.isEmpty()) return;
+
+    if (sFilterSel == formatCSV) {
+        if(!fileName.endsWith(".csv",Qt::CaseInsensitive)) fileName = fileName + ".csv";
+    } else if ( sFilterSel == formatMatrix) {
+        if(!fileName.endsWith(".tab",Qt::CaseInsensitive)) fileName = fileName + ".tab";
+    }
+
+
+    vector<mzSample*> samples = _mw->getSamples();
+    if ( samples.size() == 0) return;
+
+    CSVReports* csvreports = new CSVReports(samples);
+    csvreports->setUserQuantType( _mw->getUserQuantType() );
+
+    if (sFilterSel == formatCSV) {
+        csvreports->setCommaDelimited();
+        csvreports->openMzLinkReport(fileName.toStdString());
+    } else if (sFilterSel == formatMatrix )  {
+        csvreports->setTabDelimited();
+        csvreports->openMzLinkReport(fileName.toStdString());
+    } else {
+        qDebug() << "exportGroupsToSpreadsheet: Unknown file type. " << sFilterSel;
+    }
+
+
+    qDebug() << "Writing report to " << fileName << "...";
+
+    //Issue 332
+    for (auto item : links) {
+        csvreports->writeIsotopeTableMzLink(&(item));
+    }
+
+    csvreports->closeFiles();
+    if(csvreports) delete(csvreports);
+
+    qDebug() << "Finished Writing IsotopesWidget mzLink report to " << fileName << ".";
+}

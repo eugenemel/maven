@@ -76,6 +76,24 @@ void CSVReports::openGroupReport(string outputfile) {
     groupReport << endl;
 }
 
+void CSVReports::openMzLinkReport(string outputfile){
+    if (samples.size()==0) return;
+
+    mzLinkReport.open(outputfile.c_str());
+    if(! mzLinkReport.is_open()) return;
+
+    QStringList Header;
+    Header << "Isotope Name"
+           << "m/z"
+           << "Intensity"
+           << "%Labeling"
+           << "%Expected"
+           << "%Relative";
+
+    foreach(QString h, Header)  mzLinkReport << h.toStdString() << SEP;
+    mzLinkReport << endl;
+}
+
 void CSVReports::openPeakReport(string outputfile) {
     if (samples.size()==0) return;
 
@@ -257,6 +275,20 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
     }
 }
 
+void CSVReports::writeIsotopeTableMzLink(mzLink* link){
+    if(!mzLinkReport.is_open()) {
+        cerr << "CSVReports::writeMzLink(): mzLink report is closed" << endl;
+        return;
+    }
+
+    mzLinkReport << doubleQuoteString(link->note) << SEP
+                 << setprecision(5) << link->mz2 << SEP
+                 << setprecision(4) << link->value2 << SEP
+                 << link->isotopeFrac << SEP
+                 << link->percentExpected << SEP
+                 << link->percentRelative << "\n";
+}
+
 string CSVReports::doubleQuoteString(std::string& in) {
     if(in.find('\"') != std::string::npos or in.find(",") != std::string::npos) {
         return "\"" + in + "\"";
@@ -290,6 +322,7 @@ void CSVReports::addGroup(PeakGroup* group) {
 void CSVReports::closeFiles() { 
     if(groupReport.is_open()) groupReport.close();
     if(peakReport.is_open() ) peakReport.close();
+    if(mzLinkReport.is_open() ) mzLinkReport.close();
 }
 
 void CSVReports::writePeakInfo(PeakGroup* group) {

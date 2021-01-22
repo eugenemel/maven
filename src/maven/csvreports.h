@@ -12,6 +12,7 @@ using namespace mzUtils;
 class mzSample;
 class EIC;
 class PeakGroup;
+class mzLink;
 
 class CSVReports {
 
@@ -19,14 +20,20 @@ class CSVReports {
 		CSVReports(){};
         CSVReports(vector<mzSample*>& insamples);
 		~CSVReports();
+
         void openGroupReport(string filename);
         void openPeakReport(string filename);
-		void addGroup(PeakGroup* group);
+        void openMzLinkReport(string filename);
+
+        void addGroup(PeakGroup* group);
+        void writeIsotopeTableMzLink(mzLink* link);
+
 		void closeFiles();
 		void setSamples(vector<mzSample*>& insamples) { samples = insamples; }
 		void setUserQuantType(PeakGroup::QType t) { qtype=t; }
         void setTabDelimited()   { SEP="\t"; }
         void setCommaDelimited() { SEP=","; }
+
 
 	private:
 		void writeGroupInfo(PeakGroup* group);
@@ -39,6 +46,7 @@ class CSVReports {
 		vector<mzSample*>samples;
 		ofstream groupReport;
 		ofstream peakReport;
+        ofstream mzLinkReport;
 		PeakGroup::QType qtype;
 		
 
