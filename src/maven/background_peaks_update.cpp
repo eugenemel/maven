@@ -560,8 +560,11 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
                         if (isRetainUnmatchedCompounds) {
                             group.compound = nullptr;
+                            group.adduct = nullptr;
                             group.compoundDb = "";
                             group.compoundId = "";
+                            FragmentationMatchScore emptyScore;
+                            group.fragMatchScore = emptyScore;
                         } else {
                             continue;
                         }
