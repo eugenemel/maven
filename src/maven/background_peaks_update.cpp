@@ -1276,6 +1276,7 @@ void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
         child.metaGroupId = parentgroup->metaGroupId;
         child.groupId = parentgroup->groupId;
         child.compound = parentgroup->compound;
+        child.adduct = parentgroup->adduct;
         child.parent = parentgroup;
         child.setType(PeakGroup::IsotopeType);
         child.groupStatistics();
