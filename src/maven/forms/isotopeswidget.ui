@@ -53,6 +53,13 @@
     <item row="1" column="3">
      <widget class="QComboBox" name="adductComboBox"/>
     </item>
+    <item row="1" column="4">
+     <widget class="QPushButton" name="btnExport">
+      <property name="text">
+       <string>export</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
  </widget>

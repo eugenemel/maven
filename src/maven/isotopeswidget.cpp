@@ -42,6 +42,16 @@ IsotopeWidget::IsotopeWidget(MainWindow* mw) {
   connect(workerThread, SIGNAL(finished()), this, SLOT(setClipboard()));
   connect(workerThread, SIGNAL(finished()), mw->getEicWidget()->scene(), SLOT(update()));
 
+  QIcon icon = QIcon(rsrcPath + "/exportcsv.png");
+  int btnHeight = btnExport->height();
+  int btnSize = static_cast<int>(1*btnHeight);
+
+  btnExport->setIcon(icon);
+  btnExport->setToolTip(tr("Export currently displayed isotopic envelope"));
+  btnExport->setText("");
+  btnExport->setIconSize(QSize(btnSize, btnSize));
+  btnExport->setFixedSize(btnSize, btnSize);
+  btnExport->setFlat(true);
 }
 
 IsotopeWidget::~IsotopeWidget(){
