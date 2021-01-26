@@ -670,7 +670,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
     if(csvreports) { csvreports->closeFiles(); delete(csvreports); csvreports=nullptr; }
 
-    emit(updateProgressBar("Done" ,1, 1));
+    emit(updateProgressBar("Not Started", 0, 1));
 
     qDebug() << "processSlices() Slices=" << slices.size();
     qDebug() << "processSlices() EICs="   << eicCount;
