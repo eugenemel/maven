@@ -658,7 +658,8 @@ void SpectraWidget::drawGraph() {
         if(pos < 0 || pos >= scan->mz.size()) continue;
 
         int prec=2;
-        if(abs(_maxX-_minX)>100) prec=3;
+        if(abs(_maxX-_minX)>300) prec=1;
+        else if(abs(_maxX-_minX)>100) prec=3;
         else if(abs(_maxX-_minX)>50) prec=4;
         else if(abs(_maxX-_minX)>10) prec=6;
 
