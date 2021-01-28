@@ -616,7 +616,7 @@ void SpectraWidget::drawGraph() {
     for(int j=0; j<scan->nobs(); j++ ) {
         if ( scan->mz[j] < _minX  || scan->mz[j] > _maxX ) continue;
 
-        if ( scan->intensity[j] / _maxY > 0.005 ) {
+        if ( scan->intensity[j] / _maxY > 0.001 ) { // do want this?
             shownPositions[ scan->intensity[j] ] = j;
         }
 
@@ -653,6 +653,8 @@ void SpectraWidget::drawGraph() {
 
     //show labels
     QMap<float,int>::iterator itr; int labelCount=0;
+    QVector<QGraphicsItem*> mzlabels;
+
     for(itr = shownPositions.end(); itr != shownPositions.begin(); itr--) {
         int pos = itr.value();
         if(pos < 0 || pos >= scan->mz.size()) continue;
@@ -663,19 +665,39 @@ void SpectraWidget::drawGraph() {
         else if(abs(_maxX-_minX)>50) prec=4;
         else if(abs(_maxX-_minX)>10) prec=6;
 
-        //create label
-        QGraphicsTextItem* text = new QGraphicsTextItem(QString::number(scan->mz[pos],'f',prec),0);
-        text->setFont(font);
-        scene()->addItem(text);
-        _items.push_back(text);
-
         //position label
         int x = toX(scan->mz[pos]);
         int y = toY(scan->intensity[pos],SCALE,OFFSET);
-        text->setPos(x-2,y-20);
+
+        //create new mzlabel
+        QGraphicsTextItem* mz_label = new QGraphicsTextItem(QString::number(scan->mz[pos],'f',prec),0);
+        mz_label->setFont(font);
+        scene()->addItem(mz_label);
+        mz_label->setPos(x,y-30);
+
+        //check for overallping labels
+         QList<QGraphicsItem *> overlapItems = mz_label->collidingItems();
+         bool doNotShowFlag=false;
+         foreach (QGraphicsItem *item, overlapItems) {
+             if (item->type() == mz_label->type()) doNotShowFlag=true;
+         }
+         if(doNotShowFlag) { delete(mz_label); continue; }
+
+        //keep track
+        _items.push_back(mz_label);
+        mzlabels.push_back(mz_label);
+
+        //add a nice line to point from label to the peak
+        float labelwidth=mz_label->boundingRect().width()/2;
+        float labelheight=mz_label->boundingRect().height()/2;
+        QGraphicsLineItem* mz_label_pointline = new QGraphicsLineItem(x,y, mz_label->x(), mz_label->y()+labelheight);
+        QPen graydashed(Qt::gray,1,Qt::DotLine);
+        mz_label_pointline->setPen(graydashed);
+        _items.push_back(mz_label_pointline);
+        scene()->addItem(mz_label_pointline);
 
         labelCount++;
-        if(labelCount >= 20 ) break;
+        if(labelCount >= 200) break;
     }
 
     //show annotations
