@@ -326,6 +326,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
     projectDockWidget->show();
     scatterDockWidget->hide();
+    rconsoleDockWidget->hide();
 
     ms1ScansListWidget->hide();
     ms2ScansListWidget->hide();
@@ -1103,6 +1104,12 @@ void MainWindow::createMenus() {
     actionDatabases->setToolTip("Database Search");
     connect(actionDatabases, SIGNAL(triggered()), SLOT(compoundDatabaseSearch()));
 
+    QAction *actionRconsole = widgetsMenu->addAction(QIcon(rsrcPath + "/R.png"), "R console");
+    actionRconsole->setCheckable(true);
+    actionRconsole->setChecked(false);
+    actionRconsole->setToolTip("R Console");
+    connect(actionRconsole, SIGNAL(triggered(bool)), rconsoleDockWidget, SLOT(setVisible(bool)));
+
     widgetsMenu->addSeparator();
 
     QAction *aMs1Events = widgetsMenu->addAction("MS1 Scans List");
@@ -1331,7 +1338,7 @@ void MainWindow::createToolBars() {
     sideBar->addWidget(btnSRM);
     sideBar->addWidget(btnGallery);
     sideBar->addWidget(btnScatter);
-    sideBar->addWidget(btnRconsole);
+    //sideBar->addWidget(btnRconsole);
     sideBar->addSeparator();
     sideBar->addWidget(btnBookmarks);
     // sideBar->addWidget(btnHeatmap);
