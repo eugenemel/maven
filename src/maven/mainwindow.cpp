@@ -1088,20 +1088,20 @@ void MainWindow::createMenus() {
     fileMenu->addAction(exitAct);
 
     //Issue 144: Reorganize menu contents
-    QAction *actionCalibrate = widgetsMenu->addAction(QIcon(rsrcPath + "/positive_ion.png"), "Calibrate");
+    QAction *actionCalibrate = widgetsMenu->addAction(QIcon(rsrcPath + "/positive_ion.png"), "PPM Calibrate");
     actionCalibrate->setToolTip("Calibrate");
     connect(actionCalibrate,SIGNAL(triggered()), calibrateDialog, SLOT(show()));
 
-    QAction *actionAlign = widgetsMenu->addAction(QIcon(rsrcPath + "/textcenter.png"), "Align");
+    QAction *actionAlign = widgetsMenu->addAction(QIcon(rsrcPath + "/textcenter.png"), "Sample Alignment");
     actionAlign->setToolTip("Align Samples");
     connect(actionAlign, SIGNAL(triggered()), alignmentDialog, SLOT(show()));
 
-    QAction *actionMatch = widgetsMenu->addAction(QIcon(rsrcPath + "/spectra_search.png"), "Match");
+    QAction *actionMatch = widgetsMenu->addAction(QIcon(rsrcPath + "/spectra_search.png"), "Nearest Spectra Search");
     actionMatch->setToolTip(tr("Search Spectra for Fragmentation Patterns"));
     connect(actionMatch, SIGNAL(triggered()), spectraMatchingForm, SLOT(show()));
 
-    QAction *actionDatabases = widgetsMenu->addAction(QIcon(rsrcPath + "/dbsearch.png"), "Databases");
-    actionDatabases->setToolTip("Database Search");
+    QAction *actionDatabases = widgetsMenu->addAction(QIcon(rsrcPath + "/dbsearch.png"), "Library Search");
+    actionDatabases->setToolTip("Library Search");
     connect(actionDatabases, SIGNAL(triggered()), SLOT(compoundDatabaseSearch()));
 
     QAction *actionRconsole = widgetsMenu->addAction(QIcon(rsrcPath + "/R.png"), "R console");

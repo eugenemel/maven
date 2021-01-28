@@ -33,6 +33,8 @@ class PeakDetectionDialog : public QDialog, public Ui_PeakDetectionDialog
 				 void cancel();
 				 void show();
                  void setFeatureDetection(FeatureDetectionType type);
+                 void updateLibraryList();
+                 void showLibraryDialog();
 
 		private:
 				QSettings *settings;

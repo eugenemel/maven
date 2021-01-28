@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1000</width>
-    <height>600</height>
+    <width>466</width>
+    <height>348</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,17 +20,17 @@
    <bool>false</bool>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0" colspan="2">
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Library Manager</string>
-     </property>
-    </widget>
-   </item>
    <item row="2" column="0">
     <widget class="QPushButton" name="loadButton">
      <property name="text">
       <string>Load</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QPushButton" name="btnUnload">
+     <property name="text">
+      <string>Unload</string>
      </property>
     </widget>
    </item>
@@ -57,38 +57,45 @@
      </column>
     </widget>
    </item>
-   <item row="4" column="0">
-    <widget class="QPushButton" name="btnUnload">
-     <property name="text">
-      <string>Unload</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="1">
-    <widget class="QPushButton" name="deleteButton">
-     <property name="text">
-      <string>Delete</string>
-     </property>
-    </widget>
-   </item>
    <item row="2" column="1">
-    <widget class="QPushButton" name="importButton">
-     <property name="text">
-      <string>Import</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="2">
     <widget class="QPushButton" name="reloadAllButton">
      <property name="text">
       <string>Reload All</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="2">
+   <item row="4" column="1">
     <widget class="QPushButton" name="btnUnloadAll">
      <property name="text">
       <string>Unload All</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QPushButton" name="importButton">
+     <property name="text">
+      <string>Import New Library</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="2">
+    <widget class="QPushButton" name="deleteButton">
+     <property name="text">
+      <string>Delete Library</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="QPushButton" name="searchButton">
+     <property name="text">
+      <string>Search</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="3">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Library Manager - Mangage Existing and New Databases / Spectra </string>
      </property>
     </widget>
    </item>

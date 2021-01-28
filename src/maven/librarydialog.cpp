@@ -9,6 +9,7 @@ LibraryMangerDialog::LibraryMangerDialog(QWidget *parent) : QDialog(parent) {
         connect(reloadAllButton,SIGNAL(clicked()),SLOT(reloadMethodsFolder()));
         connect(btnUnload, SIGNAL(clicked()), SLOT(unloadLibrary()));
         connect(btnUnloadAll, SIGNAL(clicked()), SLOT(unloadAllLibraries()));
+        connect(searchButton, SIGNAL(clicked()), SLOT(showPeakDetectionDialog()));
 }
 
 
@@ -147,3 +148,9 @@ void LibraryMangerDialog::reloadMethodsFolder() {
     }
     updateLibraryStats();
 }
+
+void LibraryMangerDialog::showPeakDetectionDialog() {
+    mainwindow->compoundDatabaseSearch();
+}
+
+

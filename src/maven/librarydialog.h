@@ -31,6 +31,7 @@ private slots:
     void loadLibrary();
     void unloadLibrary();
     void unloadAllLibraries();
+    void showPeakDetectionDialog();
 
 private:
     void updateLibraryStats();

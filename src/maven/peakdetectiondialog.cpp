@@ -12,6 +12,7 @@ PeakDetectionDialog::PeakDetectionDialog(QWidget *parent) :
     connect(cancelButton, SIGNAL(clicked(bool)), SLOT(cancel()));
     connect(loadModelButton, SIGNAL(clicked(bool)), SLOT(loadModel()));
     connect(setOutputDirButton, SIGNAL(clicked(bool)), SLOT(setOutputDir()));
+    connect(loadLibraryButton,SIGNAL(clicked(bool)), SLOT(showLibraryDialog()));
 
     setModal(true);
 
@@ -73,7 +74,7 @@ void PeakDetectionDialog::setFeatureDetection(FeatureDetectionType type) {
 
     } else if (_featureDetectionType == CompoundDB ) {
 
-            setWindowTitle("Compound DB Search");
+            setWindowTitle("Library Search");
             grpMassSlicingMethod->show();
             lblMassSlicingMethod->setText("Mass slices are derived from compound theoretical m/z.");
 
@@ -117,17 +118,30 @@ void PeakDetectionDialog::setOutputDir() {
 
 void PeakDetectionDialog::show() {
 
-    if (mainwindow) {
-        QSettings* settings = mainwindow->getSettings();
-        if ( settings ) {
+
+    QSettings* settings = mainwindow->getSettings();
+    if ( settings ) {
             eic_smoothingWindow->setValue(settings->value("eic_smoothingWindow").toDouble());
             grouping_maxRtDiff->setValue(settings->value("grouping_maxRtWindow").toDouble());
-        }
+   }
+
+    updateLibraryList();
+
+    fragScoringAlgorithm->clear();
+    for(string scoringAlgorithm: FragmentationMatchScore::getScoringAlgorithmNames()) {
+        fragScoringAlgorithm->addItem(scoringAlgorithm.c_str());
     }
 
-    QString text = compoundDatabase->currentText();
+    compoundPPMWindow->setValue( mainwindow->getUserPPM() );  //total ppm window, not half sized.
 
+    QDialog::show();
+}
+
+void PeakDetectionDialog::updateLibraryList(){
+
+    QString text = compoundDatabase->currentText();
     QStringList dbnames = DB.getLoadedDatabaseNames();
+
     dbnames.push_front("ALL");
     compoundDatabase->clear();
     for(QString db: dbnames ) {
@@ -145,14 +159,6 @@ void PeakDetectionDialog::show() {
         compoundDatabase->setCurrentIndex(compoundDatabase->findText(selectedDB));
     }
 
-    fragScoringAlgorithm->clear();
-    for(string scoringAlgorithm: FragmentationMatchScore::getScoringAlgorithmNames()) {
-        fragScoringAlgorithm->addItem(scoringAlgorithm.c_str());
-    }
-
-    compoundPPMWindow->setValue( mainwindow->getUserPPM() );  //total ppm window, not half sized.
-
-    QDialog::show();
 }
 
 void PeakDetectionDialog::findPeaks() {
@@ -255,7 +261,7 @@ void PeakDetectionDialog::findPeaks() {
 
 		QString title;
 		if (_featureDetectionType == FullSpectrum )  title = "Detected Features";
-                else if (_featureDetectionType == CompoundDB ) title = "Compound DB Search";
+                else if (_featureDetectionType == CompoundDB ) title = "Library Search";
                 else if (_featureDetectionType == QQQ ) title = "QQQ Compound DB Search";
      
         title = mainwindow->getUniquePeakTableTitle(title);
@@ -335,6 +341,14 @@ void PeakDetectionDialog::setProgressBar(QString text, int progress, int totalSt
     progressBar->setValue(progress);
 }
 
+void PeakDetectionDialog::showLibraryDialog() {
+    if(mainwindow) {
+                mainwindow->libraryDialog->show();
+                updateLibraryList();
+    }
+}
+
+
 shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(){
 
         shared_ptr<PeaksSearchParameters> peaksSearchParameters = shared_ptr<PeaksSearchParameters>(new PeaksSearchParameters());
@@ -345,7 +359,7 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
         }
 
         //Feature Detection (Peaks Search) and Compound Database (Compound DB Search)
-        if (this->windowTitle() == "Compound DB Search") {
+        if (this->windowTitle() == "Library Search") {
             peaksSearchParameters->ms1PpmTolr = static_cast<float>(this->compoundPPMWindow->value());
             peaksSearchParameters->ms1RtTolr = static_cast<float>(this->compoundRTWindow->value());
 
