@@ -352,6 +352,11 @@ void ProjectDockWidget::setInfo(vector<mzSample*>&samples) {
     connect(_treeWidget,SIGNAL(itemChanged(QTreeWidgetItem*, int)), SLOT(changeNormalizationConstant(QTreeWidgetItem*,int)));
     connect(_treeWidget,SIGNAL(itemChanged(QTreeWidgetItem*, int)), SLOT(showSample(QTreeWidgetItem*,int)));
 
+    //On let set spectraWidget to show first scan of of the first file
+    if(samples.size()>0 and samples[0]) {
+        _mainwindow->spectraWidget->setScan(samples[0],1);
+        _mainwindow->spectraWidget->resetZoom();
+    }
 }
 
 void ProjectDockWidget::showSample(QTreeWidgetItem* item, int col) {
