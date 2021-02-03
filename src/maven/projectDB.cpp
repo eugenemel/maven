@@ -575,7 +575,7 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
 
      QStringList databaseNames = DB.getDatabaseNames();
 
-     QStringList projectFileDatabaseNames = getCompoundDatabaseNames();
+     QStringList projectFileDatabaseNames = getProjectFileDatabaseNames();
 
      while (query.next()) {
 
@@ -636,7 +636,7 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
             if (!compound && g.searchTableName == "rumsDB" && !rumsDBLibrary.isEmpty()) {
                 compound = DB.findSpeciesById(compoundId, rumsDBLibrary.toStdString(), isAttemptToLoadDB);
 
-                //Issue 271: to facillitate proper disconnect / reconnt from tabledockwidget
+                //Issue 271: to facillitate proper disconnect / reconnect from tabledockwidget
                 if (compound){
                     g.compoundDb = rumsDBLibrary.toStdString();
                 }
@@ -1273,7 +1273,7 @@ void ProjectDB::loadSearchParams(){
 
 
 
-        QStringList ProjectDB::getCompoundDatabaseNames() {
+        QStringList ProjectDB::getProjectFileDatabaseNames() {
             QSqlQuery query(sqlDB);
             query.prepare("SELECT distinct dbName from compounds");
             if (!query.exec())  qDebug() << query.lastError();
