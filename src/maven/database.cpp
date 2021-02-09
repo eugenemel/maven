@@ -784,7 +784,7 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
             continue;
         }
 
-        string id, name, formula,smile;
+        string id, name, formula, smile, adductName;
         float rt=0;
         float mz=0;
         float charge=0;
@@ -815,6 +815,8 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
         if ( header.count("Q1") && header["Q1"]<N) precursormz=fields[ header["Q1"]].toDouble();
         if ( header.count("Q3") && header["Q3"]<N)  productmz = fields[header["Q3"]].toDouble();
         if ( header.count("CE") && header["CE"]<N) collisionenergy=fields[ header["CE"]].toDouble();
+
+        if ( header.count("adduct")) adductName = fields[ header["adduct"] ].toStdString();
 
         //cerr << lineCount << " " << endl;
         //for(int i=0; i<headers.size(); i++) cerr << headers[i] << ", ";
@@ -857,6 +859,7 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
             compound->collisionEnergy=collisionenergy;
             compound->smileString=smile;
             compound->logP=logP;
+            compound->adductString = adductName;
             for(int i=0; i < categorylist.size(); i++) compound->category.push_back(categorylist[i]);
             compoundSet.push_back(compound);
             //addCompound(compound);
