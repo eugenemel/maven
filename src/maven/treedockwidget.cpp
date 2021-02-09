@@ -374,8 +374,19 @@ void TreeDockWidget::showInfo() {
                             } else if (itemType == mzLinkType ) {
                                      if (text.toDouble()) { mainwindow->getEicWidget()->setMzSlice(text.toDouble());  }
                             } else if (this->exclusiveItemType == SRMTransitionType) { //Issue 347
-                                     //TODO
-                                     qDebug() << "TreeDockWidget::showInfo() srmTransition: " << "TODO" << endl;
+                                     SRMTransition srmTransition = v.value<SRMTransition>();
+
+                                     QString compoundName, adductName;
+
+                                     if (srmTransition.compound) compoundName = QString(srmTransition.compound->name.c_str());
+                                     if (srmTransition.adduct) adductName = QString(srmTransition.adduct->name.c_str());
+
+                                     qDebug() << "TreeDockWidget::showInfo() srmTransition: "
+                                              << "(" << srmTransition.precursorMz << ", " << srmTransition.productMz << ")"
+                                              << compoundName << " " << adductName
+                                              << endl;
+
+
                             } else {
                                     cerr << "UNKNOWN TYPE=" << v.type() << endl;
                             }
