@@ -1665,7 +1665,9 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> MainWindow::getSrmSlices() {
             slices.push_back(s);
 
             //match compounds
-            Compound* compound = NULL;
+            Compound* compound = nullptr;
+            Adduct* adduct = nullptr;
+
             float precursorMz = scan->precursorMz;
             float productMz   = scan->productMz;
             int   polarity= scan->getPolarity();
@@ -1705,6 +1707,15 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> MainWindow::getSrmSlices() {
                 s->compound=compound;
                 s->rt = compound->expectedRt;
                 countMatches++;
+
+                if (!compound->adductString.empty()) {
+                    for (auto availableAdduct : DB.adductsDB) {
+                        if (availableAdduct->name == compound->adductString) {
+                            adduct = availableAdduct;
+                            break;
+                        }
+                    }
+                }
             }
 
             //Issue 347
@@ -1718,6 +1729,9 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> MainWindow::getSrmSlices() {
             }
 
             srmTransition->mzSlices.push_back(make_pair(sample, s));
+
+            if (compound) srmTransition->compound = compound;
+            if (adduct) srmTransition->adduct = adduct;
 
             srmTransitions[srmKey] = srmTransition;
         }
