@@ -350,6 +350,9 @@ void TreeDockWidget::showInfo() {
                                      qDebug() << "TreeDockWidget::showInfo() mzSlice: " << slice.srmId.c_str();
                             } else if (itemType == mzLinkType ) {
                                      if (text.toDouble()) { mainwindow->getEicWidget()->setMzSlice(text.toDouble());  }
+                            } else if (this->exclusiveItemType == SRMTransitionType) { //Issue 347
+                                     //TODO
+                                     qDebug() << "TreeDockWidget::showInfo() srmTransition: " << "TODO" << endl;
                             } else {
                                     cerr << "UNKNOWN TYPE=" << v.type() << endl;
                             }

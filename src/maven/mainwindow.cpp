@@ -1147,6 +1147,8 @@ void MainWindow::createMenus() {
     QAction *SRMTransitionListWidget = widgetsMenu->addAction("SRM Transition List");
     SRMTransitionListWidget->setCheckable(true);
     SRMTransitionListWidget->setChecked(false);
+
+    connect(SRMTransitionListWidget, SIGNAL(clicked(bool)), SLOT(showSRMList()));
     connect(SRMTransitionListWidget, SIGNAL(toggled(bool)), srmTransitionDockWidget, SLOT(setVisible(bool)));
 
     widgetsMenu->addSeparator();
@@ -1334,7 +1336,6 @@ void MainWindow::createToolBars() {
     btnCovariants->setShortcut(Qt::Key_F7);
     btnBookmarks->setShortcut(Qt::Key_F10);
     btnSRM->setShortcut(Qt::Key_F12);
-
 
     connect(btnSRM,SIGNAL(clicked(bool)),SLOT(showSRMList()));
 
@@ -1622,6 +1623,7 @@ void MainWindow::UndoAlignment() {
     getEicWidget()->replotForced();
 }
 
+//Issue 347: TODO adjust this
 vector<mzSlice*> MainWindow::getSrmSlices() {
     QSet<QString>srms;
     //+118.001@cid34.00 [57.500-58.500]
@@ -1638,6 +1640,8 @@ vector<mzSlice*> MainWindow::getSrmSlices() {
     double amuQ3 = getSettings()->value("amuQ3").toDouble();
 
     vector<mzSlice*>slices;
+    map<pair<float, float>, SRMTransition> srmTransitions{}; //TODO: key should have RT values also?
+
     for(int i=0; i < samples.size(); i++ ) {
     	mzSample* sample = samples[i];
         for( int j=0; j < sample->scans.size(); j++ ) {
@@ -1697,6 +1701,20 @@ vector<mzSlice*> MainWindow::getSrmSlices() {
                 s->rt = compound->expectedRt;
                 countMatches++;
             }
+
+            //Issue 347
+            pair<float, float> srmKey = make_pair(precursorMz, productMz);
+            SRMTransition srmTransition;
+            if (srmTransitions.find(srmKey) != srmTransitions.end()) {
+                srmTransition = srmTransitions[srmKey];
+            } else {
+                srmTransition.precursorMz = precursorMz;
+                srmTransition.productMz = productMz;
+            }
+
+            srmTransition.mzSlices.push_back(make_pair(sample, s));
+
+            srmTransitions[srmKey] = srmTransition;
         }
         //qDebug() << "SRM mapping: " << countMatches << " compounds mapped out of " << srms.size();
     }
