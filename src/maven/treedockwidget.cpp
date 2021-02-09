@@ -347,7 +347,7 @@ void TreeDockWidget::showInfo() {
                                      mzSlice slice =  v.value<mzSlice>();
                                      mainwindow->getEicWidget()->setMzSlice(slice);
                                      mainwindow->getEicWidget()->resetZoom();
-                                     qDebug() << "showInfo() mzSlice: " << slice.srmId.c_str();
+                                     qDebug() << "TreeDockWidget::showInfo() mzSlice: " << slice.srmId.c_str();
                             } else if (itemType == mzLinkType ) {
                                      if (text.toDouble()) { mainwindow->getEicWidget()->setMzSlice(text.toDouble());  }
                             } else {
