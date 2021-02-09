@@ -1063,11 +1063,11 @@ vector<EIC*> BackgroundPeakUpdate::pullEICs(mzSlice* slice,
 
         EIC* e = nullptr;
 
-        if ( ! slice->srmId.empty() ) {
+        if (mzKey.first > 0 && mzKey.second > 0) { // SRM <precursor mz, product mz>
+           e = sample->getEIC(mzKey);
+        } else if ( ! slice->srmId.empty() ) {
             //cout << "computeEIC srm:" << slice->srmId << endl;
             e = sample->getEIC(slice->srmId);
-        } else if (mzKey.first > 0 && mzKey.second > 0) { // SRM <precursor mz, product mz>
-            e = sample->getEIC(mzKey);
         } else if ( c && c->precursorMz >0 && c->productMz >0 ) {
             //cout << "computeEIC qqq: " << c->precursorMz << "->" << c->productMz << endl;
             e = sample->getEIC(c->precursorMz, c->collisionEnergy, c->productMz, amuQ1, amuQ3);

@@ -386,7 +386,7 @@ void TreeDockWidget::showInfo() {
                                               << compoundName << " " << adductName;
 
                                     mainwindow->getEicWidget()->setSRMTransition(srmTransition);
-                                    mainwindow->getEicWidget()->resetZoom();
+                                    mainwindow->getEicWidget()->resetZoom(false);
 
                             } else {
                                     cerr << "UNKNOWN TYPE=" << v.type() << endl;

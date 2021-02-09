@@ -999,7 +999,7 @@ void EicWidget::setTitle() {
 
     QString tagString = _selectedGroup.getName().c_str();
 
-    if (_slice.compound != NULL ) {
+    if (_slice.compound) {
         tagString = QString(_slice.compound->name.c_str());
     } else if (!_slice.srmId.empty()) {
         tagString = QString(_slice.srmId.c_str());
@@ -1009,11 +1009,21 @@ void EicWidget::setTitle() {
         tagString += QString(_slice.adduct->name.c_str());
     }
 
-    QString titleText =  tr("<b>%1</b> m/z: %2-%3").arg(
-                tagString,
-                QString::number(_slice.mzmin, 'f', 4),
-                QString::number(_slice.mzmax, 'f', 4)
-                );
+    QString titleText;
+    if (_srmMzKey.first > 0.0f && _srmMzKey.second > 0.0f) {
+        titleText =  tr("<b>%1</b> precursor m/z: %2 product m/z: %3").arg(
+                    tagString,
+                    QString::number(_srmMzKey.first, 'f', 4),
+                    QString::number(_srmMzKey.second, 'f', 4)
+                    );
+    } else {
+        titleText =  tr("<b>%1</b> m/z: %2-%3").arg(
+                    tagString,
+                    QString::number(_slice.mzmin, 'f', 4),
+                    QString::number(_slice.mzmax, 'f', 4)
+                    );
+    }
+
 
     QGraphicsTextItem* title = scene()->addText(titleText, font);
     title->setHtml(titleText);
@@ -1339,7 +1349,7 @@ void EicWidget::blockEicPointSignals(bool isBlockSignals) {
     }
 }
 
-void EicWidget::resetZoom() { 
+void EicWidget::resetZoom(bool isReplot) {
  //qDebug <<"EicWidget::resetZoom() "; 
     mzSlice bounds(0,0,0,0);
 
@@ -1351,7 +1361,8 @@ void EicWidget::resetZoom() {
     _slice.rtmin=bounds.rtmin;
     _slice.rtmax=bounds.rtmax;
     //qDebug() << "EicWidget::resetZoom() " << _slice.rtmin << " " << _slice.rtmax << endl;
-    replot(nullptr);
+
+    if (isReplot) replot(nullptr);
 }
 
 void EicWidget::zoom(float factor) {
@@ -1475,11 +1486,19 @@ void EicWidget::setSRMTransition(const SRMTransition& transition){
 
     _srmMzKey = make_pair(transition.precursorMz, transition.productMz);
 
+    Compound *oldSliceCompound = _slice.compound;
+    Adduct *oldSliceAdduct = _slice.adduct;
+
+    _slice.compound = transition.compound;
+    _slice.adduct = transition.adduct;
+
     recompute();
 
-    _srmMzKey = make_pair(0.0f, 0.0f);
-
     replot(nullptr);
+
+    _srmMzKey = make_pair(0.0f, 0.0f);
+    _slice.compound = oldSliceCompound;
+    _slice.adduct = oldSliceAdduct;
 }
 
 void EicWidget::setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax ) {
