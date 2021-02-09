@@ -1017,12 +1017,13 @@ vector<EIC*> BackgroundPeakUpdate::pullEICs(mzSlice* slice,
                                             float amuQ3,
                                             int baseline_smoothingWindow,
                                             int baseline_dropTopX,
-                                            string scanFilterString) {
+                                            string scanFilterString,
+                                            pair<float, float> mzKey) {
 	vector<EIC*> eics; 
 	vector<mzSample*>vsamples;
 
 	for( unsigned int i=0; i< samples.size(); i++ ) {
-        if (samples[i] == NULL) continue;
+        if (!samples[i]) continue;
 		if (samples[i]->isSelected == false) continue;
 		vsamples.push_back(samples[i]);
 	}
@@ -1065,6 +1066,8 @@ vector<EIC*> BackgroundPeakUpdate::pullEICs(mzSlice* slice,
         if ( ! slice->srmId.empty() ) {
             //cout << "computeEIC srm:" << slice->srmId << endl;
             e = sample->getEIC(slice->srmId);
+        } else if (mzKey.first > 0 && mzKey.second > 0) { // SRM <precursor mz, product mz>
+            e = sample->getEIC(mzKey);
         } else if ( c && c->precursorMz >0 && c->productMz >0 ) {
             //cout << "computeEIC qqq: " << c->precursorMz << "->" << c->productMz << endl;
             e = sample->getEIC(c->precursorMz, c->collisionEnergy, c->productMz, amuQ1, amuQ3);

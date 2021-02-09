@@ -122,7 +122,8 @@ public:
                               float amuQ3,
                               int baselineSmoothingWindow,
                               int baselineDropTopX,
-                              string scanFilterString=""
+                              string scanFilterString="",
+                              pair<float, float> mzKey = make_pair(0.0f,0.0f)
                               );
 
 signals:

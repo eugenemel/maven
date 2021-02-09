@@ -395,7 +395,9 @@ void EicWidget::computeEICs() {
                                               amuQ3,
                                               baseline_smoothing,
                                               baseline_quantile,
-                                              scanFilterString);
+                                              scanFilterString,
+                                              _srmMzKey             //Issue 347
+                                           );
 
 	//find peaks
     for(int i=0; i < eics.size(); i++ )  eics[i]->getPeakPositions(eic_smoothingWindow);
@@ -1471,7 +1473,11 @@ void EicWidget::setMzSlice(const mzSlice& slice) {
 void EicWidget::setSRMTransition(const SRMTransition& transition){
     qDebug() << "EicWidget::setSRMTransition()";
 
-    //TODO
+    _srmMzKey = make_pair(transition.precursorMz, transition.productMz);
+
+    recompute();
+
+    _srmMzKey = make_pair(0.0f, 0.0f);
 
     replot(nullptr);
 }

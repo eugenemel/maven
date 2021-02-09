@@ -1629,7 +1629,6 @@ void MainWindow::UndoAlignment() {
     getEicWidget()->replotForced();
 }
 
-//Issue 347: TODO adjust this
 pair<vector<mzSlice*>, vector<SRMTransition*>> MainWindow::getSrmSlices() {
     QSet<QString>srms;
     //+118.001@cid34.00 [57.500-58.500]
