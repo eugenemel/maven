@@ -1417,11 +1417,17 @@ void MainWindow::compoundDatabaseSearch() {
 }
 
 void MainWindow::showSRMList() {
-    vector<mzSlice*>slices = getSrmSlices();
-    if (slices.size() ==  0 ) return;
-    srmDockWidget->setInfo(slices);
-    delete_all(slices);
+    pair<vector<mzSlice*>, vector<SRMTransition*>> slices = getSrmSlices();
+    if (slices.first.size() ==  0 ) return;
 
+    srmDockWidget->setInfo(slices.first);
+    srmTransitionDockWidget->setInfo(slices.second);
+
+    delete_all(slices.first);
+    delete_all(slices.second);
+
+    slices.first.clear();
+    slices.second.clear();
     //peakDetectionDialog->setFeatureDetection(PeakDetectionDialog::QQQ);
     //peakDetectionDialog->show();
 }
@@ -1624,7 +1630,7 @@ void MainWindow::UndoAlignment() {
 }
 
 //Issue 347: TODO adjust this
-vector<mzSlice*> MainWindow::getSrmSlices() {
+pair<vector<mzSlice*>, vector<SRMTransition*>> MainWindow::getSrmSlices() {
     QSet<QString>srms;
     //+118.001@cid34.00 [57.500-58.500]
     //+ c ESI SRM ms2 102.000@cid19.00 [57.500-58.500]
@@ -1640,7 +1646,7 @@ vector<mzSlice*> MainWindow::getSrmSlices() {
     double amuQ3 = getSettings()->value("amuQ3").toDouble();
 
     vector<mzSlice*>slices;
-    map<pair<float, float>, SRMTransition> srmTransitions{}; //TODO: key should have RT values also?
+    map<pair<float, float>, SRMTransition*> srmTransitions{}; //TODO: key should have RT values also?
 
     for(int i=0; i < samples.size(); i++ ) {
     	mzSample* sample = samples[i];
@@ -1704,21 +1710,30 @@ vector<mzSlice*> MainWindow::getSrmSlices() {
 
             //Issue 347
             pair<float, float> srmKey = make_pair(precursorMz, productMz);
-            SRMTransition srmTransition;
+            SRMTransition *srmTransition = new SRMTransition();
             if (srmTransitions.find(srmKey) != srmTransitions.end()) {
                 srmTransition = srmTransitions[srmKey];
             } else {
-                srmTransition.precursorMz = precursorMz;
-                srmTransition.productMz = productMz;
+                srmTransition->precursorMz = precursorMz;
+                srmTransition->productMz = productMz;
             }
 
-            srmTransition.mzSlices.push_back(make_pair(sample, s));
+            srmTransition->mzSlices.push_back(make_pair(sample, s));
 
             srmTransitions[srmKey] = srmTransition;
         }
         //qDebug() << "SRM mapping: " << countMatches << " compounds mapped out of " << srms.size();
     }
-    return slices;
+
+    vector<SRMTransition*> srmTransitionsAsVector(srmTransitions.size());
+
+    unsigned int counter = 0;
+    for (auto it = srmTransitions.begin(); it != srmTransitions.end(); ++it) {
+        srmTransitionsAsVector[counter] = it->second;
+        counter++;
+    }
+
+    return make_pair(slices, srmTransitionsAsVector);
 }
 
 

@@ -131,6 +131,21 @@ void TreeDockWidget::setInfo(vector<mzSlice*>& slices) {
 	}
 }
 
+void TreeDockWidget::setInfo(vector<SRMTransition*>& srmTransitions) {
+    treeWidget->clear();
+    treeWidget->setSortingEnabled(true);
+
+    for (unsigned int i = 0; i < srmTransitions.size(); i++) {
+        SRMTransition *srmTransition = srmTransitions[i];
+
+        QTreeWidgetItem *item = new QTreeWidgetItem(treeWidget, SRMTransitionType);
+        item->setData(0, Qt::UserRole, QVariant::fromValue(srmTransition));
+        item->setText(0, QString::number(srmTransition->precursorMz, 'f', 2));
+        item->setText(1, QString::number(srmTransition->productMz, 'f', 2));
+        item->setText(2, QString::number(srmTransition->mzSlices.size()));
+    }
+}
+
 
 void TreeDockWidget::setInfo(Peak* peak) {
 	treeWidget->clear();

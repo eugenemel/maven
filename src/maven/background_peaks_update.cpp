@@ -989,11 +989,18 @@ void BackgroundPeakUpdate::computePeaks() {
 }
 
 void BackgroundPeakUpdate::findPeaksQQQ() {
-	if(mainwindow == NULL) return;
-	vector<mzSlice*>slices = mainwindow->getSrmSlices();
+    if(!mainwindow) return;
+
+    pair<vector<mzSlice*>,vector<SRMTransition*>> transitions = mainwindow->getSrmSlices();
+    vector<mzSlice*> slices = transitions.first;
+
 	processSlices(slices,"QQQ Peaks");
-	delete_all(slices);
-	slices.clear();
+
+    delete_all(slices);
+    delete_all(transitions.second);
+
+    slices.clear();
+    transitions.second.clear();
 }
 
 void BackgroundPeakUpdate::setRunFunction(QString functionName) { 
