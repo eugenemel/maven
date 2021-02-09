@@ -1447,7 +1447,7 @@ void EicWidget::setCompound(Compound* c, Adduct* adduct) {
 }
 
 void EicWidget::setMzSlice(const mzSlice& slice) {
-    //qDebug << "EicWidget::setmzSlice()";
+    qDebug() << "EicWidget::setmzSlice()";
     if ( slice.mzmin != _slice.mzmin || slice.mzmax != _slice.mzmax  || slice.srmId != _slice.srmId || slice.compound != _slice.compound ) {
         _slice = slice;
 

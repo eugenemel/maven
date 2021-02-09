@@ -510,6 +510,15 @@ void TreeDockWidget::setupConsensusScanListHeader() {
     treeWidget->setHeaderHidden(false);
 }
 
+void TreeDockWidget::setupSRMTransitionListHeader() {
+    QStringList colNames;
+    colNames << "precursor m/z" << "transition m/z" << "# samples";
+    treeWidget->setColumnCount(colNames.size());
+    treeWidget->setHeaderLabels(colNames);
+    treeWidget->setSortingEnabled(true);
+    treeWidget->setHeaderHidden(false);
+}
+
 void TreeDockWidget::addScanItem(Scan* scan) {
         if (!scan) return;
 

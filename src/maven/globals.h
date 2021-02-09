@@ -46,7 +46,8 @@ enum itemType {
 		mzSliceType, 
         mzLinkType,
         AdductType,
-        ScanVectorType
+        ScanVectorType,
+        SRMTransitionType
 };
 
 extern Database DB; 

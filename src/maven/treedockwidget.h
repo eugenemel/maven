@@ -41,6 +41,7 @@ public slots:
       void setupConsensusScanListHeader();
       void setupMs1ScanHeader();
       void setupMs3ScanHeader();
+      void setupSRMTransitionListHeader();
 
 	  void addScanItem(Scan* scan);
       void addMs1ScanItem(Scan *scan);

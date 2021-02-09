@@ -110,6 +110,8 @@ public:
     TreeDockWidget   *ms3ScansListWidget;
     TreeDockWidget   *ms2ConsensusScansListWidget;
     TreeDockWidget	 *srmDockWidget;
+    TreeDockWidget *srmTransitionDockWidget; //Issue 347
+
     //TreeDockWidget   *peaksPanel;
 
     QDockWidget         *spectraDockWidget;                 //ms1

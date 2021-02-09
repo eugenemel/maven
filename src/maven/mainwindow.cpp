@@ -189,6 +189,11 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     ms2ConsensusScansListWidget->setExclusiveItemType(ScanVectorType);
     ms2ConsensusScansListWidget->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
+    //Issue 347
+    srmTransitionDockWidget = new TreeDockWidget(this, "SRM Transition List", 3);
+    srmTransitionDockWidget->setupSRMTransitionListHeader();
+    srmTransitionDockWidget->setExclusiveItemType(SRMTransitionType);
+
     //Issue 259: Currently only support single scan selection
 //    ms3ScansListWidget->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
@@ -297,12 +302,13 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     addDockWidget(Qt::BottomDockWidgetArea,ms2ScansListWidget, Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,ms3ScansListWidget, Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,ms2ConsensusScansListWidget, Qt::Horizontal);
+    addDockWidget(Qt::BottomDockWidgetArea,srmTransitionDockWidget, Qt::Horizontal);
 
     //addDockWidget(Qt::BottomDockWidgetArea,peaksPanel,Qt::Horizontal);
     //addDockWidget(Qt::BottomDockWidgetArea,treeMapDockWidget,Qt::Horizontal);
     //addDockWidget(Qt::BottomDockWidgetArea,heatMapDockWidget,Qt::Horizontal);
 
-    tabifyDockWidget(ligandWidget,projectDockWidget);
+    tabifyDockWidget(ligandWidget, projectDockWidget);
 
     tabifyDockWidget(spectraDockWidget,massCalcWidget);
     tabifyDockWidget(spectraDockWidget,isotopeWidget);
@@ -313,6 +319,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     tabifyDockWidget(ms1ScansListWidget, ms2ScansListWidget);
     tabifyDockWidget(ms1ScansListWidget, ms3ScansListWidget);
     tabifyDockWidget(ms1ScansListWidget, ms2ConsensusScansListWidget);
+
+    tabifyDockWidget(srmDockWidget, srmTransitionDockWidget);
 
     setContextMenuPolicy(Qt::NoContextMenu);
 
@@ -332,6 +340,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     ms2ScansListWidget->hide();
     ms3ScansListWidget->hide();
     ms2ConsensusScansListWidget->hide();
+
+    srmTransitionDockWidget->hide();
 
     setUserPPM(5);
     if ( settings->contains("ppmWindowBox")) {
@@ -1133,6 +1143,11 @@ void MainWindow::createMenus() {
     aConsensusMs2Events->setCheckable(true);
     aConsensusMs2Events->setChecked(false);
     connect(aConsensusMs2Events, SIGNAL(toggled(bool)), ms2ConsensusScansListWidget,SLOT(setVisible(bool)));
+
+    QAction *SRMTransitionListWidget = widgetsMenu->addAction("SRM Transition List");
+    SRMTransitionListWidget->setCheckable(true);
+    SRMTransitionListWidget->setChecked(false);
+    connect(SRMTransitionListWidget, SIGNAL(toggled(bool)), srmTransitionDockWidget, SLOT(setVisible(bool)));
 
     widgetsMenu->addSeparator();
 
