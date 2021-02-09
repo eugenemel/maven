@@ -41,7 +41,7 @@ public slots:
     void zoom(float factor);
     void setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax);
     void setMzSlice(const mzSlice& slice);
-
+    void setSRMTransition(const SRMTransition& transition);
     void setRtWindow(float rtmin, float rtmax );
     void setSrmId(string srmId);
     void setPeakGroup(PeakGroup* group);

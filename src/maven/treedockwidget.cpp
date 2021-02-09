@@ -145,7 +145,7 @@ void TreeDockWidget::setInfo(vector<SRMTransition*>& srmTransitions) {
         if (srmTransition->adduct) adductName = QString(srmTransition->adduct->name.c_str());
 
         QTreeWidgetItem *item = new QTreeWidgetItem(treeWidget, SRMTransitionType);
-        item->setData(0, Qt::UserRole, QVariant::fromValue(srmTransition));
+        item->setData(0, Qt::UserRole, QVariant::fromValue(*srmTransition));
         item->setText(0, QString::number(srmTransition->precursorMz, 'f', 2));
         item->setText(1, QString::number(srmTransition->productMz, 'f', 2));
         item->setText(2, compoundName);
@@ -382,10 +382,11 @@ void TreeDockWidget::showInfo() {
                                      if (srmTransition.adduct) adductName = QString(srmTransition.adduct->name.c_str());
 
                                      qDebug() << "TreeDockWidget::showInfo() srmTransition: "
-                                              << "(" << srmTransition.precursorMz << ", " << srmTransition.productMz << ")"
-                                              << compoundName << " " << adductName
-                                              << endl;
+                                              << "(" << srmTransition.precursorMz << ", " << srmTransition.productMz << ") "
+                                              << compoundName << " " << adductName;
 
+                                    mainwindow->getEicWidget()->setSRMTransition(srmTransition);
+                                    mainwindow->getEicWidget()->resetZoom();
 
                             } else {
                                     cerr << "UNKNOWN TYPE=" << v.type() << endl;

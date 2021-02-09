@@ -1468,6 +1468,14 @@ void EicWidget::setMzSlice(const mzSlice& slice) {
     replot(nullptr);
 }
 
+void EicWidget::setSRMTransition(const SRMTransition& transition){
+    qDebug() << "EicWidget::setSRMTransition()";
+
+    //TODO
+
+    replot(nullptr);
+}
+
 void EicWidget::setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax ) {
     //qDebug << "EicWidget::setMzRtWindow()";
     mzSlice slice(mzmin,mzmax,rtmin,rtmax);

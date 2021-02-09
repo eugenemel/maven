@@ -36,6 +36,7 @@ Q_DECLARE_METATYPE(mzSlice*)
 Q_DECLARE_METATYPE(mzSlice)
 Q_DECLARE_METATYPE(DirectInfusionGroupAnnotation*)
 Q_DECLARE_METATYPE(SRMTransition*)
+Q_DECLARE_METATYPE(SRMTransition)
 
 enum itemType {
 		SampleType=4999,
