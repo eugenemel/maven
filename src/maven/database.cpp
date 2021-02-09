@@ -481,20 +481,29 @@ Compound* Database::findSpeciesByNameAndAdduct(string compoundName, string adduc
 }
 
 Compound* Database::findSpeciesByPrecursor(float precursorMz, float productMz, int polarity,double amuQ1, double amuQ3) {
-		Compound* x=NULL;
-		float dist=FLT_MAX;
 
-		for(unsigned int i=0; i < compoundsDB.size(); i++ ) {
-				if (compoundsDB[i]->precursorMz == 0 ) continue;
-				//cerr << polarity << " " << compoundsDB[i]->charge << endl;
-				if ((int) compoundsDB[i]->charge != polarity ) continue;
-				float a = abs(compoundsDB[i]->precursorMz - precursorMz);
-				if ( a > amuQ1 ) continue; // q1 tollorance
-				float b = abs(compoundsDB[i]->productMz - productMz);
-				if ( b > amuQ3 ) continue; // q2 tollarance
-				float d = sqrt(a*a+b*b);
-				if ( d < dist) { x = compoundsDB[i]; dist=d; }
-		}
+        Compound* x= nullptr;
+        float dist=FLT_MAX;
+
+        for( unsigned int i=0; i < compoundsDB.size(); i++ ) {
+
+                if (compoundsDB[i]->precursorMz <= 0 ) continue;
+                if (static_cast<int>(compoundsDB[i]->charge) != polarity) continue;
+
+                float a = abs(compoundsDB[i]->precursorMz - precursorMz);
+                if ( a > static_cast<float>(amuQ1)) continue; // Q1 tolerance (precursor ion)
+
+                float b = abs(compoundsDB[i]->productMz - productMz);
+                if ( b > static_cast<float>(amuQ3) ) continue; // Q3 tolerance (product ion)
+
+                float d = sqrt(a*a+b*b);
+
+                if ( d < dist) {
+                    x = compoundsDB[i];
+                    dist=d;
+                }
+        }
+
 		return x;
 }
 
