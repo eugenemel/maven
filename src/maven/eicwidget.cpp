@@ -1011,6 +1011,18 @@ void EicWidget::setTitle() {
 
     QString titleText;
     if (_srmMzKey.first > 0.0f && _srmMzKey.second > 0.0f) {
+
+        if (_slice.compound) {
+            tagString = QString(_slice.compound->name.c_str());
+
+            if (_slice.adduct) {
+                tagString.append(" ");
+                tagString.append(_slice.adduct->name.c_str());
+            }
+        } else {
+            tagString.clear();
+        }
+
         titleText =  tr("<b>%1</b> precursor m/z: %2 product m/z: %3").arg(
                     tagString,
                     QString::number(_srmMzKey.first, 'f', 4),
