@@ -437,7 +437,6 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
     QSettings* settings = mainwindow->getSettings();
 
-    //Issue 247: TODO: these should be phased out, keeping here for MS1-only peak detection
     amuQ1 = settings->value("amuQ1").toFloat();
     amuQ3 = settings->value("amuQ3").toFloat();
 
