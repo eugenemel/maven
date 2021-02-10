@@ -13,11 +13,20 @@ LibraryMangerDialog::LibraryMangerDialog(QWidget *parent) : QDialog(parent) {
 }
 
 
-
 void LibraryMangerDialog::show() {
     updateLibraryStats();
     this->treeWidget->resizeColumnToContents(0);
+    if (mainwindow->getSettings()->contains("LibraryDialogGeometry")) {
+        restoreGeometry(mainwindow->getSettings()->value("LibraryDialogGeometry").toByteArray());
+    }
     QDialog::show();
+}
+
+void LibraryMangerDialog::closeEvent(QCloseEvent *event){
+
+    mainwindow->getSettings()->setValue("LibraryDialogGeometry", saveGeometry());
+
+    QDialog::closeEvent(event);
 }
 
 void LibraryMangerDialog::updateLibraryStats() {

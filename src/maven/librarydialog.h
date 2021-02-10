@@ -16,6 +16,9 @@ public:
     LibraryMangerDialog(QWidget *parent);
     void setMainWindow(MainWindow* w) { this->mainwindow = w; }
 
+protected:
+    void closeEvent(QCloseEvent *event);
+
 signals:
     void loadLibrarySignal(QString);
     void unloadLibrarySignal(QString);
