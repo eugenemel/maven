@@ -681,8 +681,32 @@ void MainWindow::setCompoundFocus(Compound*c) {
     searchText->setText(c->name.c_str());
 
     float mz = adduct->computeAdductMass(c->getExactMass());
-    cerr << "setCompoundFocus:" << c->name.c_str() << " " << adduct->name << " " << c->expectedRt << " mass=" << c->getExactMass() << " mz=" << mz << endl;
-    if (eicWidget->isVisible() && samples.size() > 0 )  eicWidget->setCompound(c,adduct);
+
+    qDebug() << "MainWindow::setCompoundFocus():" << c->name.c_str() << " " << adduct->name.c_str()
+             << " " << c->expectedRt << " mass="
+             << c->getExactMass() << " mz="
+             << mz;
+
+    if (eicWidget->isVisible() && samples.size() > 0 ){
+
+        //Issue 347
+        if (c->productMz > 0.0f) {
+
+            SRMTransition srmTransition;
+            srmTransition.compound = c;
+            srmTransition.adduct = adduct;
+            srmTransition.precursorMz = c->precursorMz;
+            srmTransition.productMz = c->productMz;
+            eicWidget->setSelectedGroup(nullptr);
+            eicWidget->setSRMTransition(srmTransition);
+            eicWidget->resetZoom(false);
+
+        } else {
+            eicWidget->setCompound(c,adduct);
+        }
+
+    }
+
     if (isotopeWidget && isotopeWidget->isVisible() ) isotopeWidget->setCompound(c);
     if (massCalcWidget && massCalcWidget->isVisible() )  massCalcWidget->setMass(mz);
 

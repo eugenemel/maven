@@ -415,7 +415,8 @@ void EicWidget::computeEICs() {
     qDebug() << "\tgroupPeaks() msec="<< timerX.elapsed();
     qDebug() << "\tcomputeEICs() Done.";
 
-	if (_slice.compound)  for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].compound = _slice.compound; 
+    if (_slice.compound)  for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].compound = _slice.compound;
+    if (_slice.adduct) for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].adduct = _slice.adduct;
 	if (!_slice.srmId.empty()) for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].srmId = _slice.srmId;
 }
 
@@ -1484,6 +1485,8 @@ void EicWidget::setMzSlice(const mzSlice& slice) {
                 _slice.mz    =   slice.compound->precursorMz;
                 _slice.compound= slice.compound;
                 _slice.srmId  =  slice.srmId;
+
+                if (slice.adduct) _slice.adduct = slice.adduct;
             }
         }
         recompute();
@@ -1498,19 +1501,19 @@ void EicWidget::setSRMTransition(const SRMTransition& transition){
 
     _srmMzKey = make_pair(transition.precursorMz, transition.productMz);
 
-    Compound *oldSliceCompound = _slice.compound;
-    Adduct *oldSliceAdduct = _slice.adduct;
-
+    //update slice data
     _slice.compound = transition.compound;
     _slice.adduct = transition.adduct;
+    _slice.mzmin = transition.precursorMz;
+    _slice.mzmax = transition.productMz;
+    _slice.mz = transition.precursorMz;
 
     recompute();
 
     replot(nullptr);
 
+    //reset this key to avoid any collisions when using EIC widget to plot other data types
     _srmMzKey = make_pair(0.0f, 0.0f);
-    _slice.compound = oldSliceCompound;
-    _slice.adduct = oldSliceAdduct;
 }
 
 void EicWidget::setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax ) {
