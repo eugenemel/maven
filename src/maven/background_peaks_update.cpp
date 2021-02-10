@@ -993,13 +993,169 @@ void BackgroundPeakUpdate::findPeaksQQQ() {
     pair<vector<mzSlice*>,vector<SRMTransition*>> transitions = mainwindow->getSrmSlices();
     vector<mzSlice*> slices = transitions.first;
 
-	processSlices(slices,"QQQ Peaks");
+    //processSlices(slices,"QQQ Peaks");
+    //Issue 347
+    processSRMTransitions(transitions.second);
 
     delete_all(slices);
     delete_all(transitions.second);
 
     slices.clear();
     transitions.second.clear();
+}
+
+void BackgroundPeakUpdate::processSRMTransitions(vector<SRMTransition*>& transitions){
+
+    if (transitions.size() == 0) return;
+    allgroups.clear();
+
+    QSettings* settings = mainwindow->getSettings();
+
+    amuQ1 = settings->value("amuQ1").toFloat();
+    amuQ3 = settings->value("amuQ3").toFloat();
+
+    QTime timer;
+    timer.start();
+    qDebug() << "BackgroundPeakUpdate::processSRMTransitions(): " << transitions.size() << " transitions.";
+
+    int eicCount=0;
+    int groupCount=0;
+    int peakCount=0;
+
+    for (unsigned int s = 0; s < transitions.size(); s++) {
+
+        SRMTransition *transition = transitions[s];
+
+        //Issue 347: SRM transitions that do not match to a compound or adduct are not retained.
+        if (!transition->compound || !transition->adduct) continue;
+
+        vector<EIC*>eics = pullEICs(nullptr,
+                                    samples,
+                                    EicLoader::PeakDetection,
+                                    static_cast<int>(eic_smoothingWindow),
+                                    eic_smoothingAlgorithm,
+                                    amuQ1,
+                                    amuQ3,
+                                    baseline_smoothingWindow,
+                                    baseline_dropTopX,
+                                    "",
+                                    make_pair(transition->precursorMz, transition->productMz));
+
+        float eicMaxIntensity=0;
+
+        for ( unsigned int j=0; j < eics.size(); j++ ) {
+            eicCount++;
+            if (eics[j]->maxIntensity > eicMaxIntensity) eicMaxIntensity=eics[j]->maxIntensity;
+        }
+
+        if (eicMaxIntensity < minGroupIntensity) {
+            delete_all(eics);
+            continue;
+        }
+
+        //find peaks
+        for(unsigned int i=0; i < eics.size(); i++ ) {
+            eics[i]->getPeakPositions(static_cast<int>(eic_smoothingWindow));
+        }
+
+        vector<PeakGroup> peakgroups = EIC::groupPeaks(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow);
+
+        vector<PeakGroup*> groupsToAppend;
+
+        for(unsigned int j=0; j < peakgroups.size(); j++ ) {
+
+            PeakGroup& group = peakgroups[j];
+
+            Peak* highestpeak = group.getHighestIntensityPeak();
+            if(!highestpeak)  continue;
+
+            if (clsf->hasModel()) {
+                clsf->classify(&group);
+            }
+
+            group.computeAvgBlankArea(eics);
+            group.groupStatistics();
+
+            if (clsf->hasModel()&& group.goodPeakCount < minGoodPeakCount) continue;
+            if (clsf->hasModel() && group.maxQuality < minQuality) continue;
+            if (group.maxNoNoiseObs < minNoNoiseObs) continue;
+            if (group.maxSignalBaselineRatio < minSignalBaseLineRatio) continue;
+            if (group.maxIntensity < minGroupIntensity ) continue;
+            if (group.blankMax*minSignalBlankRatio > group.maxIntensity) continue;
+
+            groupCount++;
+            peakCount += group.peakCount();
+
+            if (featureMatchRtFlag && group.compound && group.compound->expectedRt>0) {
+                float rtDiff =  static_cast<float>(abs(group.compound->expectedRt - (group.meanRt)));
+                group.expectedRtDiff = rtDiff;
+                group.groupRank = rtDiff*rtDiff*(1.1f-group.maxQuality)*(1.0f/log(group.maxIntensity+1.0f));
+                if (group.expectedRtDiff > featureCompoundMatchRtTolerance) continue;
+            }
+
+            group.compound = transition->compound;
+            group.adduct = transition->adduct;
+
+            groupsToAppend.push_back(&group);
+        }
+
+        std::sort(groupsToAppend.begin(), groupsToAppend.end(),PeakGroup::compRankPtr);
+
+        for(unsigned int j=0; j<groupsToAppend.size(); j++) {
+
+            //check for duplicates  and append group
+            if(static_cast<int>(j) >= eicMaxGroups) break;
+
+            PeakGroup* group = groupsToAppend[j];
+            addPeakGroup(*group);
+        }
+
+        delete_all(eics);
+
+        if (static_cast<int>(allgroups.size()) > limitGroupCount ) break;
+
+        if ( stopped() ) break;
+
+        if (showProgressFlag && s % 10 == 0) {
+            QString progressText = "Found " + QString::number(allgroups.size()) + " groups";
+            emit(updateProgressBar( progressText , (static_cast<int>(s)+1), std::min(static_cast<int>(transitions.size()),limitGroupCount)));
+        }
+
+    }
+
+    //write reports
+    CSVReports* csvreports = nullptr;
+    if (writeCSVFlag) {
+        string groupfilename = outputdir + "SRM_PeakGroups.csv";
+        csvreports = new CSVReports(samples);
+        csvreports->setUserQuantType(mainwindow->getUserQuantType());
+        csvreports->openGroupReport(groupfilename);
+    }
+
+    //write groups to peakgroups table
+    for(unsigned int j=0; j < allgroups.size(); j++ ) {
+
+        PeakGroup& group = allgroups[j];
+
+        if(csvreports) csvreports->addGroup(&group);
+
+        if(keepFoundGroups) {
+            emit(newPeakGroup(&group,false, false));
+            QCoreApplication::processEvents();
+        }
+    }
+
+    if(csvreports) {
+        csvreports->closeFiles();
+        delete(csvreports);
+        csvreports=nullptr;
+    }
+
+    qDebug() << "processSlices() EICs="   << eicCount;
+    qDebug() << "processSlices() Groups="   << groupCount;
+    qDebug() << "processSlices() Peaks="   << peakCount;
+    qDebug() << "BackgroundPeakUpdate:processSRMTransitions() done. " << timer.elapsed() << " sec.";
+
 }
 
 void BackgroundPeakUpdate::setRunFunction(QString functionName) { 
@@ -1058,7 +1214,9 @@ vector<EIC*> BackgroundPeakUpdate::pullEICs(mzSlice* slice,
 
 	for( unsigned int i=0; i< vsamples.size(); i++ ) {
 		mzSample* sample = vsamples[i];
-		Compound* c =  slice->compound;
+
+        Compound *c = nullptr;
+        if (slice) c =  slice->compound;
 
         EIC* e = nullptr;
 

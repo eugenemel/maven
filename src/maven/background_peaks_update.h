@@ -151,6 +151,7 @@ private:
   void processSlice(mzSlice& slice);
   void processCompounds(vector<Compound*> set, string setName);
   void processCompoundSlices(vector<mzSlice*>&slices, string setName);
+  void processSRMTransitions(vector<SRMTransition*>& transitions);
   vector<tuple<float, Compound*, Adduct*>> prepareCompoundDatabase(vector<Compound*> set);
   void computePeaks();
   void processMassSlices();
