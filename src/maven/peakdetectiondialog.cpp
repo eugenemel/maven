@@ -259,6 +259,11 @@ void PeakDetectionDialog::findPeaks() {
         peakupdater->isRetainUnmatchedCompounds = chkRetainUnmatched->isChecked();
         peakupdater->isClusterPeakGroups = chkClusterPeakgroups->isChecked();
 
+        //Issue 347
+        if (chkSRMSearch->isChecked()) {
+            _featureDetectionType = QQQ;
+        }
+
 		QString title;
 		if (_featureDetectionType == FullSpectrum )  title = "Detected Features";
                 else if (_featureDetectionType == CompoundDB ) title = "Library Search";
@@ -285,6 +290,15 @@ void PeakDetectionDialog::findPeaks() {
 		
 		//RUN THREAD
 		if ( _featureDetectionType == QQQ ) {
+
+            //Issue 247, 248: alternative compound search approach
+            vector<Compound*> allCompounds = DB.compoundsDB;
+            allCompounds.erase(std::remove_if(allCompounds.begin(), allCompounds.end(), [](Compound *compound){return (compound->db == "summarized" || compound->db == "rumsdb");}), allCompounds.end());
+
+            qDebug() << "PeakDetectionDialog::findPeaks(): Removed" << (DB.compoundsDB.size() - allCompounds.size()) << "rumsdb and summarized compounds prior to peaks search.";
+
+            peakupdater->setCompounds(allCompounds);
+
 			runBackgroupJob("findPeaksQQQ");
 		} else if ( _featureDetectionType == FullSpectrum ) {
 

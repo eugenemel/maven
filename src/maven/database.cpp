@@ -481,20 +481,29 @@ Compound* Database::findSpeciesByNameAndAdduct(string compoundName, string adduc
 }
 
 Compound* Database::findSpeciesByPrecursor(float precursorMz, float productMz, int polarity,double amuQ1, double amuQ3) {
-		Compound* x=NULL;
-		float dist=FLT_MAX;
 
-		for(unsigned int i=0; i < compoundsDB.size(); i++ ) {
-				if (compoundsDB[i]->precursorMz == 0 ) continue;
-				//cerr << polarity << " " << compoundsDB[i]->charge << endl;
-				if ((int) compoundsDB[i]->charge != polarity ) continue;
-				float a = abs(compoundsDB[i]->precursorMz - precursorMz);
-				if ( a > amuQ1 ) continue; // q1 tollorance
-				float b = abs(compoundsDB[i]->productMz - productMz);
-				if ( b > amuQ3 ) continue; // q2 tollarance
-				float d = sqrt(a*a+b*b);
-				if ( d < dist) { x = compoundsDB[i]; dist=d; }
-		}
+        Compound* x= nullptr;
+        float dist=FLT_MAX;
+
+        for( unsigned int i=0; i < compoundsDB.size(); i++ ) {
+
+                if (compoundsDB[i]->precursorMz <= 0 ) continue;
+                if (static_cast<int>(compoundsDB[i]->charge) != polarity) continue;
+
+                float a = abs(compoundsDB[i]->precursorMz - precursorMz);
+                if ( a > static_cast<float>(amuQ1)) continue; // Q1 tolerance (precursor ion)
+
+                float b = abs(compoundsDB[i]->productMz - productMz);
+                if ( b > static_cast<float>(amuQ3) ) continue; // Q3 tolerance (product ion)
+
+                float d = sqrt(a*a+b*b);
+
+                if ( d < dist) {
+                    x = compoundsDB[i];
+                    dist=d;
+                }
+        }
+
 		return x;
 }
 
@@ -784,7 +793,7 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
             continue;
         }
 
-        string id, name, formula,smile;
+        string id, name, formula, smile, adductName;
         float rt=0;
         float mz=0;
         float charge=0;
@@ -815,6 +824,8 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
         if ( header.count("Q1") && header["Q1"]<N) precursormz=fields[ header["Q1"]].toDouble();
         if ( header.count("Q3") && header["Q3"]<N)  productmz = fields[header["Q3"]].toDouble();
         if ( header.count("CE") && header["CE"]<N) collisionenergy=fields[ header["CE"]].toDouble();
+
+        if ( header.count("adduct")) adductName = fields[ header["adduct"] ].toStdString();
 
         //cerr << lineCount << " " << endl;
         //for(int i=0; i<headers.size(); i++) cerr << headers[i] << ", ";
@@ -857,6 +868,7 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
             compound->collisionEnergy=collisionenergy;
             compound->smileString=smile;
             compound->logP=logP;
+            compound->adductString = adductName;
             for(int i=0; i < categorylist.size(); i++) compound->category.push_back(categorylist[i]);
             compoundSet.push_back(compound);
             //addCompound(compound);

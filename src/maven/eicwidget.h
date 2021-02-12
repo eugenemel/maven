@@ -37,11 +37,11 @@ public:
 public slots:
     void setMzSlice(float mz);
     void setPPM(double ppm);
-    void resetZoom();
+    void resetZoom(bool isReplot=true);
     void zoom(float factor);
     void setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax);
     void setMzSlice(const mzSlice& slice);
-
+    void setSRMTransition(const SRMTransition& transition);
     void setRtWindow(float rtmin, float rtmax );
     void setSrmId(string srmId);
     void setPeakGroup(PeakGroup* group);
@@ -189,6 +189,8 @@ private:
     PeakGroup*  _integratedGroup;		 //manually integrated peak group
     PeakGroup*  _alwaysDisplayGroup;     //always display this group, whether or not grouping is enabled
     
+    pair<float, float> _srmMzKey = make_pair(0.0f, 0.0f);       //Issue 347
+
     //gui related
     QWidget *parent;
     QGraphicsLineItem* _focusLine;

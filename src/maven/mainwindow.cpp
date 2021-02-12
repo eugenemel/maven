@@ -189,6 +189,11 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     ms2ConsensusScansListWidget->setExclusiveItemType(ScanVectorType);
     ms2ConsensusScansListWidget->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
+    //Issue 347
+    srmTransitionDockWidget = new TreeDockWidget(this, "SRM Transition List", 3);
+    srmTransitionDockWidget->setupSRMTransitionListHeader();
+    srmTransitionDockWidget->setExclusiveItemType(SRMTransitionType);
+
     //Issue 259: Currently only support single scan selection
 //    ms3ScansListWidget->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
@@ -297,12 +302,13 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     addDockWidget(Qt::BottomDockWidgetArea,ms2ScansListWidget, Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,ms3ScansListWidget, Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,ms2ConsensusScansListWidget, Qt::Horizontal);
+    addDockWidget(Qt::BottomDockWidgetArea,srmTransitionDockWidget, Qt::Horizontal);
 
     //addDockWidget(Qt::BottomDockWidgetArea,peaksPanel,Qt::Horizontal);
     //addDockWidget(Qt::BottomDockWidgetArea,treeMapDockWidget,Qt::Horizontal);
     //addDockWidget(Qt::BottomDockWidgetArea,heatMapDockWidget,Qt::Horizontal);
 
-    tabifyDockWidget(ligandWidget,projectDockWidget);
+    tabifyDockWidget(ligandWidget, projectDockWidget);
 
     tabifyDockWidget(spectraDockWidget,massCalcWidget);
     tabifyDockWidget(spectraDockWidget,isotopeWidget);
@@ -313,6 +319,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     tabifyDockWidget(ms1ScansListWidget, ms2ScansListWidget);
     tabifyDockWidget(ms1ScansListWidget, ms3ScansListWidget);
     tabifyDockWidget(ms1ScansListWidget, ms2ConsensusScansListWidget);
+
+    tabifyDockWidget(srmDockWidget, srmTransitionDockWidget);
 
     setContextMenuPolicy(Qt::NoContextMenu);
 
@@ -332,6 +340,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     ms2ScansListWidget->hide();
     ms3ScansListWidget->hide();
     ms2ConsensusScansListWidget->hide();
+
+    srmTransitionDockWidget->hide();
 
     setUserPPM(5);
     if ( settings->contains("ppmWindowBox")) {
@@ -671,8 +681,32 @@ void MainWindow::setCompoundFocus(Compound*c) {
     searchText->setText(c->name.c_str());
 
     float mz = adduct->computeAdductMass(c->getExactMass());
-    cerr << "setCompoundFocus:" << c->name.c_str() << " " << adduct->name << " " << c->expectedRt << " mass=" << c->getExactMass() << " mz=" << mz << endl;
-    if (eicWidget->isVisible() && samples.size() > 0 )  eicWidget->setCompound(c,adduct);
+
+    qDebug() << "MainWindow::setCompoundFocus():" << c->name.c_str() << " " << adduct->name.c_str()
+             << " " << c->expectedRt << " mass="
+             << c->getExactMass() << " mz="
+             << mz;
+
+    if (eicWidget->isVisible() && samples.size() > 0 ){
+
+        //Issue 347
+        if (c->productMz > 0.0f) {
+
+            SRMTransition srmTransition;
+            srmTransition.compound = c;
+            srmTransition.adduct = adduct;
+            srmTransition.precursorMz = c->precursorMz;
+            srmTransition.productMz = c->productMz;
+            eicWidget->setSelectedGroup(nullptr);
+            eicWidget->setSRMTransition(srmTransition);
+            eicWidget->resetZoom(false);
+
+        } else {
+            eicWidget->setCompound(c,adduct);
+        }
+
+    }
+
     if (isotopeWidget && isotopeWidget->isVisible() ) isotopeWidget->setCompound(c);
     if (massCalcWidget && massCalcWidget->isVisible() )  massCalcWidget->setMass(mz);
 
@@ -1134,6 +1168,13 @@ void MainWindow::createMenus() {
     aConsensusMs2Events->setChecked(false);
     connect(aConsensusMs2Events, SIGNAL(toggled(bool)), ms2ConsensusScansListWidget,SLOT(setVisible(bool)));
 
+    QAction *SRMTransitionListWidget = widgetsMenu->addAction("SRM Transition List");
+    SRMTransitionListWidget->setCheckable(true);
+    SRMTransitionListWidget->setChecked(false);
+
+    connect(SRMTransitionListWidget, SIGNAL(clicked(bool)), SLOT(showSRMList()));
+    connect(SRMTransitionListWidget, SIGNAL(toggled(bool)), srmTransitionDockWidget, SLOT(setVisible(bool)));
+
     widgetsMenu->addSeparator();
 
     QAction* hideWidgets = new QAction(tr("Hide Widgets"), this);
@@ -1320,7 +1361,6 @@ void MainWindow::createToolBars() {
     btnBookmarks->setShortcut(Qt::Key_F10);
     btnSRM->setShortcut(Qt::Key_F12);
 
-
     connect(btnSRM,SIGNAL(clicked(bool)),SLOT(showSRMList()));
 
     sideBar->setOrientation(Qt::Vertical);
@@ -1401,11 +1441,17 @@ void MainWindow::compoundDatabaseSearch() {
 }
 
 void MainWindow::showSRMList() {
-    vector<mzSlice*>slices = getSrmSlices();
-    if (slices.size() ==  0 ) return;
-    srmDockWidget->setInfo(slices);
-    delete_all(slices);
+    pair<vector<mzSlice*>, vector<SRMTransition*>> slices = getSrmSlices();
+    if (slices.first.size() ==  0 ) return;
 
+    srmDockWidget->setInfo(slices.first);
+    srmTransitionDockWidget->setInfo(slices.second);
+
+    delete_all(slices.first);
+    delete_all(slices.second);
+
+    slices.first.clear();
+    slices.second.clear();
     //peakDetectionDialog->setFeatureDetection(PeakDetectionDialog::QQQ);
     //peakDetectionDialog->show();
 }
@@ -1607,7 +1653,7 @@ void MainWindow::UndoAlignment() {
     getEicWidget()->replotForced();
 }
 
-vector<mzSlice*> MainWindow::getSrmSlices() {
+pair<vector<mzSlice*>, vector<SRMTransition*>> MainWindow::getSrmSlices() {
     QSet<QString>srms;
     //+118.001@cid34.00 [57.500-58.500]
     //+ c ESI SRM ms2 102.000@cid19.00 [57.500-58.500]
@@ -1623,6 +1669,8 @@ vector<mzSlice*> MainWindow::getSrmSlices() {
     double amuQ3 = getSettings()->value("amuQ3").toDouble();
 
     vector<mzSlice*>slices;
+    map<pair<float, float>, SRMTransition*> srmTransitions{}; //TODO: key should have RT values also?
+
     for(int i=0; i < samples.size(); i++ ) {
     	mzSample* sample = samples[i];
         for( int j=0; j < sample->scans.size(); j++ ) {
@@ -1641,7 +1689,9 @@ vector<mzSlice*> MainWindow::getSrmSlices() {
             slices.push_back(s);
 
             //match compounds
-            Compound* compound = NULL;
+            Compound* compound = nullptr;
+            Adduct* adduct = nullptr;
+
             float precursorMz = scan->precursorMz;
             float productMz   = scan->productMz;
             int   polarity= scan->getPolarity();
@@ -1681,11 +1731,46 @@ vector<mzSlice*> MainWindow::getSrmSlices() {
                 s->compound=compound;
                 s->rt = compound->expectedRt;
                 countMatches++;
+
+                if (!compound->adductString.empty()) {
+                    for (auto availableAdduct : DB.adductsDB) {
+                        if (availableAdduct->name == compound->adductString) {
+                            adduct = availableAdduct;
+                            break;
+                        }
+                    }
+                }
             }
+
+            //Issue 347
+            pair<float, float> srmKey = make_pair(precursorMz, productMz);
+            SRMTransition *srmTransition = new SRMTransition();
+            if (srmTransitions.find(srmKey) != srmTransitions.end()) {
+                srmTransition = srmTransitions[srmKey];
+            } else {
+                srmTransition->precursorMz = precursorMz;
+                srmTransition->productMz = productMz;
+            }
+
+            srmTransition->mzSlices.push_back(make_pair(sample, s));
+
+            if (compound) srmTransition->compound = compound;
+            if (adduct) srmTransition->adduct = adduct;
+
+            srmTransitions[srmKey] = srmTransition;
         }
         //qDebug() << "SRM mapping: " << countMatches << " compounds mapped out of " << srms.size();
     }
-    return slices;
+
+    vector<SRMTransition*> srmTransitionsAsVector(srmTransitions.size());
+
+    unsigned int counter = 0;
+    for (auto it = srmTransitions.begin(); it != srmTransitions.end(); ++it) {
+        srmTransitionsAsVector[counter] = it->second;
+        counter++;
+    }
+
+    return make_pair(slices, srmTransitionsAsVector);
 }
 
 

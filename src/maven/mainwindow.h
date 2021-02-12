@@ -70,6 +70,7 @@ class SpectralHit;
 class LibraryMangerDialog;
 class SampleBarPlotWidget;
 class SetRumsDBDialog;
+class SRMTransition;
 
 extern Database DB; 
 
@@ -110,6 +111,8 @@ public:
     TreeDockWidget   *ms3ScansListWidget;
     TreeDockWidget   *ms2ConsensusScansListWidget;
     TreeDockWidget	 *srmDockWidget;
+    TreeDockWidget *srmTransitionDockWidget; //Issue 347
+
     //TreeDockWidget   *peaksPanel;
 
     QDockWidget         *spectraDockWidget;                 //ms1
@@ -208,7 +211,7 @@ public slots:
     void findCovariants(Peak* _peak);
     void reportBugs();
     void updateEicSmoothingWindow(int value);
-    vector<mzSlice*> getSrmSlices();
+    pair<vector<mzSlice*>, vector<SRMTransition*>> getSrmSlices();
 
     void open();
     void print();

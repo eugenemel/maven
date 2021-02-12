@@ -131,6 +131,32 @@ void TreeDockWidget::setInfo(vector<mzSlice*>& slices) {
 	}
 }
 
+void TreeDockWidget::setInfo(vector<SRMTransition*>& srmTransitions) {
+    treeWidget->clear();
+    treeWidget->setSortingEnabled(true);
+
+    for (unsigned int i = 0; i < srmTransitions.size(); i++) {
+        SRMTransition *srmTransition = srmTransitions[i];
+
+        QString compoundName;
+        QString adductName;
+        QString retentionTime;
+
+        if (srmTransition->compound) compoundName = QString(srmTransition->compound->name.c_str());
+        if (srmTransition->adduct) adductName = QString(srmTransition->adduct->name.c_str());
+        if (srmTransition->rt > 0) retentionTime = QString::number(srmTransition->rt, 'f', 2);
+
+        QTreeWidgetItem *item = new QTreeWidgetItem(treeWidget, SRMTransitionType);
+        item->setData(0, Qt::UserRole, QVariant::fromValue(*srmTransition));
+        item->setText(0, QString::number(srmTransition->precursorMz, 'f', 2));
+        item->setText(1, QString::number(srmTransition->productMz, 'f', 2));
+        item->setText(2, retentionTime);
+        item->setText(3, compoundName);
+        item->setText(4, adductName);
+        item->setText(5, QString::number(srmTransition->mzSlices.size()));
+    }
+}
+
 
 void TreeDockWidget::setInfo(Peak* peak) {
 	treeWidget->clear();
@@ -347,9 +373,24 @@ void TreeDockWidget::showInfo() {
                                      mzSlice slice =  v.value<mzSlice>();
                                      mainwindow->getEicWidget()->setMzSlice(slice);
                                      mainwindow->getEicWidget()->resetZoom();
-                                     qDebug() << "showInfo() mzSlice: " << slice.srmId.c_str();
+                                     qDebug() << "TreeDockWidget::showInfo() mzSlice: " << slice.srmId.c_str();
                             } else if (itemType == mzLinkType ) {
                                      if (text.toDouble()) { mainwindow->getEicWidget()->setMzSlice(text.toDouble());  }
+                            } else if (this->exclusiveItemType == SRMTransitionType) { //Issue 347
+                                     SRMTransition srmTransition = v.value<SRMTransition>();
+
+                                     QString compoundName, adductName;
+
+                                     if (srmTransition.compound) compoundName = QString(srmTransition.compound->name.c_str());
+                                     if (srmTransition.adduct) adductName = QString(srmTransition.adduct->name.c_str());
+
+                                     qDebug() << "TreeDockWidget::showInfo() srmTransition: "
+                                              << "(" << srmTransition.precursorMz << ", " << srmTransition.productMz << ") "
+                                              << compoundName << " " << adductName;
+
+                                    mainwindow->getEicWidget()->setSRMTransition(srmTransition);
+                                    mainwindow->getEicWidget()->resetZoom(false);
+
                             } else {
                                     cerr << "UNKNOWN TYPE=" << v.type() << endl;
                             }
@@ -504,6 +545,15 @@ void TreeDockWidget::setupScanListHeader() {
 void TreeDockWidget::setupConsensusScanListHeader() {
     QStringList colNames;
     colNames << "sample" << "pre m/z" << "# scans";
+    treeWidget->setColumnCount(colNames.size());
+    treeWidget->setHeaderLabels(colNames);
+    treeWidget->setSortingEnabled(true);
+    treeWidget->setHeaderHidden(false);
+}
+
+void TreeDockWidget::setupSRMTransitionListHeader() {
+    QStringList colNames;
+    colNames << "Precursor m/z" << "Product m/z" << "RT" << "Compound" << "Adduct" << "# samples";
     treeWidget->setColumnCount(colNames.size());
     treeWidget->setHeaderLabels(colNames);
     treeWidget->setSortingEnabled(true);

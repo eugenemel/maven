@@ -395,7 +395,9 @@ void EicWidget::computeEICs() {
                                               amuQ3,
                                               baseline_smoothing,
                                               baseline_quantile,
-                                              scanFilterString);
+                                              scanFilterString,
+                                              _srmMzKey             //Issue 347
+                                           );
 
 	//find peaks
     for(int i=0; i < eics.size(); i++ )  eics[i]->getPeakPositions(eic_smoothingWindow);
@@ -413,7 +415,8 @@ void EicWidget::computeEICs() {
     qDebug() << "\tgroupPeaks() msec="<< timerX.elapsed();
     qDebug() << "\tcomputeEICs() Done.";
 
-	if (_slice.compound)  for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].compound = _slice.compound; 
+    if (_slice.compound)  for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].compound = _slice.compound;
+    if (_slice.adduct) for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].adduct = _slice.adduct;
 	if (!_slice.srmId.empty()) for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].srmId = _slice.srmId;
 }
 
@@ -997,7 +1000,7 @@ void EicWidget::setTitle() {
 
     QString tagString = _selectedGroup.getName().c_str();
 
-    if (_slice.compound != NULL ) {
+    if (_slice.compound) {
         tagString = QString(_slice.compound->name.c_str());
     } else if (!_slice.srmId.empty()) {
         tagString = QString(_slice.srmId.c_str());
@@ -1007,11 +1010,33 @@ void EicWidget::setTitle() {
         tagString += QString(_slice.adduct->name.c_str());
     }
 
-    QString titleText =  tr("<b>%1</b> m/z: %2-%3").arg(
-                tagString,
-                QString::number(_slice.mzmin, 'f', 4),
-                QString::number(_slice.mzmax, 'f', 4)
-                );
+    QString titleText;
+    if (_srmMzKey.first > 0.0f && _srmMzKey.second > 0.0f) {
+
+        if (_slice.compound) {
+            tagString = QString(_slice.compound->name.c_str());
+
+            if (_slice.adduct) {
+                tagString.append(" ");
+                tagString.append(_slice.adduct->name.c_str());
+            }
+        } else {
+            tagString.clear();
+        }
+
+        titleText =  tr("<b>%1</b> precursor m/z: %2 product m/z: %3").arg(
+                    tagString,
+                    QString::number(_srmMzKey.first, 'f', 4),
+                    QString::number(_srmMzKey.second, 'f', 4)
+                    );
+    } else {
+        titleText =  tr("<b>%1</b> m/z: %2-%3").arg(
+                    tagString,
+                    QString::number(_slice.mzmin, 'f', 4),
+                    QString::number(_slice.mzmax, 'f', 4)
+                    );
+    }
+
 
     QGraphicsTextItem* title = scene()->addText(titleText, font);
     title->setHtml(titleText);
@@ -1337,7 +1362,7 @@ void EicWidget::blockEicPointSignals(bool isBlockSignals) {
     }
 }
 
-void EicWidget::resetZoom() { 
+void EicWidget::resetZoom(bool isReplot) {
  //qDebug <<"EicWidget::resetZoom() "; 
     mzSlice bounds(0,0,0,0);
 
@@ -1349,7 +1374,8 @@ void EicWidget::resetZoom() {
     _slice.rtmin=bounds.rtmin;
     _slice.rtmax=bounds.rtmax;
     //qDebug() << "EicWidget::resetZoom() " << _slice.rtmin << " " << _slice.rtmax << endl;
-    replot(nullptr);
+
+    if (isReplot) replot(nullptr);
 }
 
 void EicWidget::zoom(float factor) {
@@ -1447,7 +1473,7 @@ void EicWidget::setCompound(Compound* c, Adduct* adduct) {
 }
 
 void EicWidget::setMzSlice(const mzSlice& slice) {
-    //qDebug << "EicWidget::setmzSlice()";
+    qDebug() << "EicWidget::setmzSlice()";
     if ( slice.mzmin != _slice.mzmin || slice.mzmax != _slice.mzmax  || slice.srmId != _slice.srmId || slice.compound != _slice.compound ) {
         _slice = slice;
 
@@ -1459,6 +1485,8 @@ void EicWidget::setMzSlice(const mzSlice& slice) {
                 _slice.mz    =   slice.compound->precursorMz;
                 _slice.compound= slice.compound;
                 _slice.srmId  =  slice.srmId;
+
+                if (slice.adduct) _slice.adduct = slice.adduct;
             }
         }
         recompute();
@@ -1466,6 +1494,26 @@ void EicWidget::setMzSlice(const mzSlice& slice) {
         _slice = slice;
     }
     replot(nullptr);
+}
+
+void EicWidget::setSRMTransition(const SRMTransition& transition){
+    qDebug() << "EicWidget::setSRMTransition()";
+
+    _srmMzKey = make_pair(transition.precursorMz, transition.productMz);
+
+    //update slice data
+    _slice.compound = transition.compound;
+    _slice.adduct = transition.adduct;
+    _slice.mzmin = transition.precursorMz;
+    _slice.mzmax = transition.productMz;
+    _slice.mz = transition.precursorMz;
+
+    recompute();
+
+    replot(nullptr);
+
+    //reset this key to avoid any collisions when using EIC widget to plot other data types
+    _srmMzKey = make_pair(0.0f, 0.0f);
 }
 
 void EicWidget::setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax ) {

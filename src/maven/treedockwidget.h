@@ -34,6 +34,7 @@ public slots:
 	  void setInfo(Compound* c);
 	  void setInfo(vector<Compound*>&compounds);
       void setInfo(double ms1PrecMz, double ms2PrecMz);
+      void setInfo(vector<SRMTransition*>& srmTransitions);
 
 	  void setInfo(vector<mzLink>&links);
       void setInfo(vector<mzSlice*>&slices);
@@ -41,6 +42,7 @@ public slots:
       void setupConsensusScanListHeader();
       void setupMs1ScanHeader();
       void setupMs3ScanHeader();
+      void setupSRMTransitionListHeader();
 
 	  void addScanItem(Scan* scan);
       void addMs1ScanItem(Scan *scan);

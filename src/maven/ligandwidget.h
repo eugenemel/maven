@@ -79,6 +79,7 @@ public:
     void showNext();
     void showLast();
     void setDatabaseAltered(QString dbame,bool altered);
+    void setupHeader();
 
 public slots: 
     void setCompoundFocus(Compound* c);

@@ -23,9 +23,7 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   treeWidget->setObjectName(QString::fromUtf8("treeWidget"));
   treeWidget->setSortingEnabled(false);
 
-  treeWidget->setColumnCount(8);
-  QStringList header; header << "Name" << "Adduct" << "Exact Mass" << "Precursor m/z" << "RT" << "Formula" << "SMILES" << "Category";
-  treeWidget->setHeaderLabels( header );
+  setupHeader();
 
   treeWidget->setRootIsDecorated(false);
   treeWidget->setUniformRowHeights(true);
@@ -242,11 +240,26 @@ void LigandWidget::updateCurrentItemData() {
 }
 
 
+void LigandWidget::setupHeader() {
+
+    QStringList header;
+    header << "Name"
+           << "Adduct"
+           << "Exact Mass"
+           << "Precursor m/z"
+           << "Product m/z"
+           << "RT"
+           << "Formula"
+           << "SMILES"
+           << "Category";
+
+    treeWidget->setColumnCount(header.size());
+    treeWidget->setHeaderLabels(header);
+}
+
 void LigandWidget::showTable() { 
 
-    treeWidget->setColumnCount(8);
-    QStringList header; header << "Name" << "Adduct" << "Exact Mass" << "Precursor m/z" << "RT" << "Formula" << "SMILES" << "Category";
-    treeWidget->setHeaderLabels( header );
+    setupHeader();
     treeWidget->setSortingEnabled(false);
 
     string dbname = databaseSelect->currentText().toStdString();
@@ -258,20 +271,21 @@ void LigandWidget::showTable() {
 
         QString name(compound->name.c_str() );
 
-        parent->setText(0, name); //Issue 246: capitalizing names is annoying for lipid libraries
+        if (compound->hasGroup() ) parent->setIcon(0,QIcon(":/images/link.png"));
+        parent->setText(0, name); //Issue 246: capitalizing names is annoying for lipid libraries, do not mutate name
+
         parent->setText(1, compound->adductString.c_str());
         parent->setText(2, QString::number(compound->getExactMass(), 'f', 4));
         if(compound->precursorMz > 0.0f) parent->setText(3, QString::number(compound->precursorMz, 'f', 4));
-
-        if(compound->expectedRt > 0) parent->setText(4,QString::number(compound->expectedRt));
-        if (compound->formula.length()) parent->setText(5,compound->formula.c_str());
-        if (compound->smileString.length()) parent->setText(6,compound->smileString.c_str());
-        if (compound->hasGroup() ) parent->setIcon(0,QIcon(":/images/link.png"));
+        if (compound->productMz > 0.0f) parent->setText(4,QString::number(compound->productMz, 'f', 4));
+        if(compound->expectedRt > 0) parent->setText(5,QString::number(compound->expectedRt));
+        if (compound->formula.length()) parent->setText(6,compound->formula.c_str());
+        if (compound->smileString.length()) parent->setText(7,compound->smileString.c_str());
 
         if(compound->category.size() > 0) {
             QStringList catList;
             for(string c : compound->category) catList << c.c_str();
-            parent->setText(7, catList.join(";"));
+            parent->setText(8, catList.join(";"));
         }
 
         parent->setData(0, Qt::UserRole, QVariant::fromValue(compound));

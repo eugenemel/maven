@@ -56,7 +56,7 @@ class ProjectDB {
             void assignSampleIds();
             void saveAlignment();
             QStringList getSearchTableNames();
-            QStringList getCompoundDatabaseNames();
+            QStringList getProjectFileDatabaseNames();
 
             void setSamples(vector<mzSample*>set) { samples = set; }
             bool isOpen() { return sqlDB.isOpen(); }
