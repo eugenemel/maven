@@ -660,11 +660,47 @@ void MainWindow::setPeptideFocus(QString peptideSequence){
     double monoisotopicMass = 0.0;
 
     bool isFoundFirstDot = false;
+    bool isFoundSecondDot = false;
 
-    for (QChar c : peptideSequence) {
+    for (int i = 0; i < peptideSequence.size(); i++){
+
+        QChar c = peptideSequence[i];
+
+        if (c == '[') {
+
+            int numDeuteria = 0;
+            if (i < peptideSequence.size()-2 && peptideSequence[i+1] == 'd') {
+                int startPos = i+2;
+                int endPos = -1;
+
+                for (int pos = startPos; pos < peptideSequence.size(); pos++) {
+                    if (peptideSequence[pos] == ']') {
+                        endPos = pos;
+                        break;
+                    }
+                }
+
+                if (endPos > startPos) {
+                    try {
+                        numDeuteria = stoi(peptideSequence.toStdString().substr(
+                                               static_cast<unsigned long>(startPos), static_cast<unsigned long>(endPos-startPos)));
+                    } catch (const::std::exception e) {
+                        qDebug() << "Could not parse number of deuteria from peptide sequence:" << peptideSequence;
+                    }
+                }
+
+            }
+            monoisotopicMass += numDeuteria * D2O_MASS_SHIFT;
+
+            continue;
+        }
+
+        if (isFoundSecondDot) continue;
+
         if (isFoundFirstDot) {
             if (c == '.') { //second dot
-                break;
+                isFoundSecondDot = true;
+                continue;
             } else {
                 if (!Peptide::AAMonoisotopicMassTable) {
                     Peptide::defaultTables();
