@@ -676,11 +676,19 @@ void MainWindow::setPeptideFocus(QString peptideSequence){
         }
     }
 
+    //This is necessary based on how AAMonoisotopicMassTable is computed
+    monoisotopicMass += WATER_MONO;
+
     QVariant v = adductType->currentData();
     Adduct* currentAdduct = v.value<Adduct*>();
 
-    float precursorMz = currentAdduct->computeAdductMass(static_cast<float>(monoisotopicMass));
-    setMzValue(precursorMz);
+    float mz = currentAdduct->computeAdductMass(static_cast<float>(monoisotopicMass));
+
+    if (eicWidget->isVisible() ) eicWidget->setMzSlice(mz);
+    if (massCalcWidget->isVisible() ) massCalcWidget->setMass(mz);
+    if (ms2ScansListWidget->isVisible()   ) showFragmentationScans(mz);
+    if (ms2ConsensusScansListWidget->isVisible()) showConsensusFragmentationScans(mz);
+    if (ms1ScansListWidget->isVisible() ) showMs1Scans(mz);
 
 }
 
