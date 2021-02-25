@@ -194,6 +194,7 @@ public slots:
     void setUrl(QString url,QString link=QString::null);
     void setUrl(Compound*);
     void setFormulaFocus(QString formula);
+    void setPeptideFocus(QString peptideSequence);
     void Align();
     void UndoAlignment();
     void doGuidedAligment(QString filename);

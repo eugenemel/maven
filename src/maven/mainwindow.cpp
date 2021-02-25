@@ -654,6 +654,11 @@ void MainWindow::setFormulaFocus(QString formula) {
     isotopeWidget->setFormula(formula);
 }
 
+void MainWindow::setPeptideFocus(QString peptideSequence){
+    qDebug() << "MainWindow::setPeptideFocus() sequence=" << peptideSequence;
+    //TODO
+}
+
 void MainWindow::setAdductFocus(Adduct *adduct) {
 
     if (!adduct) return;
@@ -739,8 +744,18 @@ void MainWindow::showDockWidgets() {
 }
 
 void MainWindow::doSearch(QString needle) {
+
+    //TODO: relocate these
     QRegExp formula("(C?/d+)?(H?/d+)?(O?/d+)?(N?/d+)?(P?/d+)?(S?/d+)?",Qt::CaseInsensitive, QRegExp::RegExp);
-    if (!needle.isEmpty() && needle.contains(formula) ){ setFormulaFocus(needle);}
+    QRegExp peptideSequence("\\..*\\.",Qt::CaseInsensitive, QRegExp::RegExp);
+
+    if (!needle.isEmpty()) {
+        if (needle.contains(peptideSequence)) {
+            setPeptideFocus(needle);
+        }else if (needle.contains(formula)) {
+            setFormulaFocus(needle);
+        }
+    }
 }
 
 void MainWindow::setMzValue() {
