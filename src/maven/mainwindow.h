@@ -33,6 +33,7 @@
 #include "librarydialog.h"
 #include "setrumsdbdialog.h"
 #include "samplebarplotwidget.h"
+#include "Peptide.h"
 
 class SettingsForm;
 class EicWidget;

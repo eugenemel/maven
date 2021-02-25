@@ -656,7 +656,32 @@ void MainWindow::setFormulaFocus(QString formula) {
 
 void MainWindow::setPeptideFocus(QString peptideSequence){
     qDebug() << "MainWindow::setPeptideFocus() sequence=" << peptideSequence;
-    //TODO
+
+    double monoisotopicMass = 0.0;
+
+    bool isFoundFirstDot = false;
+
+    for (QChar c : peptideSequence) {
+        if (isFoundFirstDot) {
+            if (c == '.') { //second dot
+                break;
+            } else {
+                if (!Peptide::AAMonoisotopicMassTable) {
+                    Peptide::defaultTables();
+                }
+                monoisotopicMass += Peptide::getAAMonoisotopicMass(c.toLatin1());
+            }
+        } else if (c == '.') {
+            isFoundFirstDot = true;
+        }
+    }
+
+    QVariant v = adductType->currentData();
+    Adduct* currentAdduct = v.value<Adduct*>();
+
+    float precursorMz = currentAdduct->computeAdductMass(static_cast<float>(monoisotopicMass));
+    setMzValue(precursorMz);
+
 }
 
 void MainWindow::setAdductFocus(Adduct *adduct) {
