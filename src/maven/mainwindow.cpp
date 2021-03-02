@@ -2455,6 +2455,9 @@ void MainWindow::changeUserAdduct() {
         mzSlice& currentSlice = eicWidget->getMzSlice();
         if(currentSlice.compound) {
             setCompoundFocus(currentSlice.compound);
+        } else if (!searchText->text().isEmpty()){
+            //Issue 361
+            doSearch(searchText->text());
         }
     }
 }
