@@ -602,6 +602,8 @@ QStringList Database::getDatabaseNames() {
  * @deprecated in favor of Adduct::loadAdducts().
  */
 vector<Adduct*> Database::loadAdducts(string filename) {
+    qDebug() << "ADDUCTS FILE=" << QString(filename.c_str());
+
     vector<Adduct*> adducts;
     ifstream myfile(filename.c_str());
 

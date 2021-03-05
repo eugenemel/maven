@@ -654,6 +654,80 @@ void MainWindow::setFormulaFocus(QString formula) {
     isotopeWidget->setFormula(formula);
 }
 
+void MainWindow::setPeptideFocus(QString peptideSequence){
+    qDebug() << "MainWindow::setPeptideFocus() sequence=" << peptideSequence;
+
+    double monoisotopicMass = 0.0;
+
+    bool isFoundFirstDot = false;
+    bool isFoundSecondDot = false;
+
+    for (int i = 0; i < peptideSequence.size(); i++){
+
+        QChar c = peptideSequence[i];
+
+        if (c == '[') {
+
+            int numDeuteria = 0;
+            if (i < peptideSequence.size()-2 && peptideSequence[i+1] == 'd') {
+                int startPos = i+2;
+                int endPos = -1;
+
+                for (int pos = startPos; pos < peptideSequence.size(); pos++) {
+                    if (peptideSequence[pos] == ']') {
+                        endPos = pos;
+                        break;
+                    }
+                }
+
+                if (endPos > startPos) {
+                    try {
+                        numDeuteria = stoi(peptideSequence.toStdString().substr(
+                                               static_cast<unsigned long>(startPos), static_cast<unsigned long>(endPos-startPos)));
+                    } catch (const::std::exception e) {
+                        qDebug() << "Could not parse number of deuteria from peptide sequence:" << peptideSequence;
+                    }
+                }
+
+            }
+            monoisotopicMass += numDeuteria * D2O_MASS_SHIFT;
+
+            continue;
+        }
+
+        if (isFoundSecondDot) continue;
+
+        if (isFoundFirstDot) {
+            if (c == '.') { //second dot
+                isFoundSecondDot = true;
+                continue;
+            } else {
+                if (!Peptide::AAMonoisotopicMassTable) {
+                    Peptide::defaultTables();
+                }
+                monoisotopicMass += Peptide::getAAMonoisotopicMass(c.toLatin1());
+            }
+        } else if (c == '.') {
+            isFoundFirstDot = true;
+        }
+    }
+
+    //This is necessary based on how AAMonoisotopicMassTable is computed
+    monoisotopicMass += WATER_MONO;
+
+    QVariant v = adductType->currentData();
+    Adduct* currentAdduct = v.value<Adduct*>();
+
+    float mz = currentAdduct->computeAdductMass(static_cast<float>(monoisotopicMass));
+
+    if (eicWidget->isVisible() ) eicWidget->setMzSlice(mz);
+    if (massCalcWidget->isVisible() ) massCalcWidget->setMass(mz);
+    if (ms2ScansListWidget->isVisible()   ) showFragmentationScans(mz);
+    if (ms2ConsensusScansListWidget->isVisible()) showConsensusFragmentationScans(mz);
+    if (ms1ScansListWidget->isVisible() ) showMs1Scans(mz);
+
+}
+
 void MainWindow::setAdductFocus(Adduct *adduct) {
 
     if (!adduct) return;
@@ -739,8 +813,18 @@ void MainWindow::showDockWidgets() {
 }
 
 void MainWindow::doSearch(QString needle) {
+
+    //TODO: relocate these
     QRegExp formula("(C?/d+)?(H?/d+)?(O?/d+)?(N?/d+)?(P?/d+)?(S?/d+)?",Qt::CaseInsensitive, QRegExp::RegExp);
-    if (!needle.isEmpty() && needle.contains(formula) ){ setFormulaFocus(needle);}
+    QRegExp peptideSequence("\\..*\\.",Qt::CaseInsensitive, QRegExp::RegExp);
+
+    if (!needle.isEmpty()) {
+        if (needle.contains(peptideSequence)) {
+            setPeptideFocus(needle);
+        }else if (needle.contains(formula)) {
+            setFormulaFocus(needle);
+        }
+    }
 }
 
 void MainWindow::setMzValue() {
@@ -2371,6 +2455,9 @@ void MainWindow::changeUserAdduct() {
         mzSlice& currentSlice = eicWidget->getMzSlice();
         if(currentSlice.compound) {
             setCompoundFocus(currentSlice.compound);
+        } else if (!searchText->text().isEmpty()){
+            //Issue 361
+            doSearch(searchText->text());
         }
     }
 }

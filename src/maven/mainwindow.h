@@ -33,6 +33,7 @@
 #include "librarydialog.h"
 #include "setrumsdbdialog.h"
 #include "samplebarplotwidget.h"
+#include "Peptide.h"
 
 class SettingsForm;
 class EicWidget;
@@ -194,6 +195,7 @@ public slots:
     void setUrl(QString url,QString link=QString::null);
     void setUrl(Compound*);
     void setFormulaFocus(QString formula);
+    void setPeptideFocus(QString peptideSequence);
     void Align();
     void UndoAlignment();
     void doGuidedAligment(QString filename);
