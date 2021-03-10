@@ -68,7 +68,7 @@
       <item row="5" column="0">
        <widget class="QLabel" name="lblSelectLibrary">
         <property name="text">
-         <string>rumsDB library:</string>
+         <string>clamDB / rumsDB library:</string>
         </property>
        </widget>
       </item>
@@ -92,7 +92,7 @@
       <item row="2" column="0">
        <widget class="QLabel" name="lblAddLibrary">
         <property name="text">
-         <string>Add rumsDB library:</string>
+         <string>Add clamDB / rumsDB library:</string>
         </property>
        </widget>
       </item>
