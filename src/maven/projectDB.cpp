@@ -342,7 +342,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
      }
      int lastInsertGroupId = query1.lastInsertId().toString().toInt();
 
-     if (tableName == "rumsDB") {
+     if (tableName == "rumsDB" || tableName== "clamDB") {
          rumsDBOldToNewGroupIDs.insert(make_pair(g->groupId, lastInsertGroupId));
      } else if (tableName == "Bookmarks") {
          bookmarksOldToNewGroupIDs.insert(make_pair(g->groupId, lastInsertGroupId));
@@ -633,7 +633,8 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
             }
 
             //Issue 92: fall back to rumsDB table if could not find compound the normal way.
-            if (!compound && g.searchTableName == "rumsDB" && !rumsDBLibrary.isEmpty()) {
+            //Issue 363: Support clamDB table name as well as rumsDB
+            if (!compound && (g.searchTableName == "rumsDB" || g.searchTableName == "clamDB") && !rumsDBLibrary.isEmpty()) {
                 compound = DB.findSpeciesById(compoundId, rumsDBLibrary.toStdString(), isAttemptToLoadDB);
 
                 //Issue 271: to facillitate proper disconnect / reconnect from tabledockwidget
