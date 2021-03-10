@@ -242,7 +242,7 @@ void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
 
     }
 
-    if (scoringSchema->currentText().toStdString() == "rumsDB") {
+    if (scoringSchema->currentText().toStdString() == "rumsDB/clamDB") {
         showTablerumsDBMatches(grp);
     } else {
         showTable();
