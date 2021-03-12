@@ -8,10 +8,10 @@ matrix:
     osx_image: xcode11.2
 addons:
   apt:
-    sources:
-    - sourceline: ppa:beineri/opt-qt591-trusty
+#    sources:
+#    - sourceline: ppa:beineri/opt-qt591-trusty
     packages:
-    - qt59-meta-minimal
+#    - qt59-meta-minimal
     - mesa-common-dev
     - libgl1-mesa-dev
     - libsqlite3-dev
@@ -19,6 +19,7 @@ addons:
     #- libssl1.0.0
     - libssl-dev
     - desktop-file-utils
+    - qt5-default
 before_install:
 - "./ci/travis/before_install_${TRAVIS_OS_NAME}.sh"
 script:
