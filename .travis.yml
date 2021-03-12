@@ -1,8 +1,9 @@
 matrix:
   include:
   - os: linux
-    dist: focal
+    #dist: focal
     #dist: trusty
+    dist: xenial
     sudo: required
   - os: osx
     osx_image: xcode11.2
