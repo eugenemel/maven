@@ -16,7 +16,7 @@ addons:
     - libgl1-mesa-dev
     - libsqlite3-dev
     - libmysqlclient-dev
-    - libssl1.0.0
+    #- libssl1.0.0
     - libssl-dev
     - desktop-file-utils
 before_install:
