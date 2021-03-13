@@ -10,6 +10,7 @@ LibraryMangerDialog::LibraryMangerDialog(QWidget *parent) : QDialog(parent) {
         connect(btnUnload, SIGNAL(clicked()), SLOT(unloadLibrary()));
         connect(btnUnloadAll, SIGNAL(clicked()), SLOT(unloadAllLibraries()));
         connect(searchButton, SIGNAL(clicked()), SLOT(showPeakDetectionDialog()));
+        connect(btnClose, SIGNAL(clicked()), SLOT(close()));
 }
 
 
