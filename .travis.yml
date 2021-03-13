@@ -12,7 +12,7 @@ addons:
 #    - sourceline: ppa:beineri/opt-qt591-trusty
     - sourceline: ppa:beineri/opt-qt59-xenial
     packages:
-#    - qt59-meta-minimal
+    - qt59-meta-minimal
     - mesa-common-dev
     - libgl1-mesa-dev
     - libsqlite3-dev
@@ -20,9 +20,9 @@ addons:
     #- libssl1.0.0
     - libssl-dev
     - desktop-file-utils
-    - qt5-default
-    - qt5-qmake
-    - qtbase5-dev
+    #- qt5-default
+    #- qt5-qmake
+    #- qtbase5-dev
 before_install:
 - "./ci/travis/before_install_${TRAVIS_OS_NAME}.sh"
 script:
