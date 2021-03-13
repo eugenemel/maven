@@ -9,8 +9,9 @@ matrix:
     osx_image: xcode11.2
 addons:
   apt:
-#    sources:
+    sources:
 #    - sourceline: ppa:beineri/opt-qt591-trusty
+    - sourceline: ppa:beineri/opt-qt59-xenial
     packages:
 #    - qt59-meta-minimal
     - mesa-common-dev
