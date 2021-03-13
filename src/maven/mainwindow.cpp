@@ -106,6 +106,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
         if (enabledAdductsCandidate.size() == 2) {
             enabledAdducts = enabledAdductsCandidate;
+            settings->setValue("enabledAdducts", "[M+H]+;[M-H]-;");
         } else {
             enabledAdducts = availableAdducts;
         }
