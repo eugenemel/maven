@@ -21,6 +21,8 @@ addons:
     - libssl-dev
     - desktop-file-utils
     - qt5-default
+    - qt5-qmake
+    - qtbase5-dev
 before_install:
 - "./ci/travis/before_install_${TRAVIS_OS_NAME}.sh"
 script:
