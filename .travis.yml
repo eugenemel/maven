@@ -1,7 +1,6 @@
 matrix:
   include:
   - os: linux
-    #dist: focal
     #dist: trusty
     dist: xenial
     sudo: required
