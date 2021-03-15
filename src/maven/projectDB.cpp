@@ -1063,12 +1063,12 @@ QString  ProjectDB::projectName() {
     
 bool ProjectDB::openDatabaseConnection(QString dbname) {
     if (sqlDB.isOpen() and  sqlDB.databaseName() == dbname) {
-        qDebug() << "Already oppened.. ";
+        qDebug() << "Already opened. ";
         return true;
     }
 
     if (!sqlDB.isOpen()) {
-        qDebug() << "opening.. " << dbname;
+        qDebug() << "opening... " << dbname;
         sqlDB = QSqlDatabase::addDatabase("QSQLITE", dbname);
         sqlDB.setDatabaseName(dbname);
         sqlDB.open();

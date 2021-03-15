@@ -930,13 +930,25 @@ void MainWindow::open(){
                     setRumsDBDialog = nullptr;
                 }
 
-                setRumsDBDialog  = new SetRumsDBDialog(this);
-                setRumsDBDialog->exec();
+                //Case 344: only show dialog for mzkitchen files
+                ProjectDB *projectDB = new ProjectDB(filename);
+                QStringList tableNames = projectDB->getSearchTableNames();
+                bool isMzkitchenFile = tableNames.contains(QString("rumsDB")) || tableNames.contains(QString("clamDB"));
+                projectDB->closeDatabaseConnection();
+                delete(projectDB);
 
-                if (!setRumsDBDialog->isCancelled()) {
-                    qDebug() << "rumsDB spectral library: " << rumsDBDatabaseName;
+                if (isMzkitchenFile) {
+                    setRumsDBDialog  = new SetRumsDBDialog(this);
+                    setRumsDBDialog->exec();
+
+                    if (!setRumsDBDialog->isCancelled()) {
+                        qDebug() << "rumsDB spectral library: " << rumsDBDatabaseName;
+                        projectDockWidget->loadProjectSQLITE(filename);
+                    }
+                } else {
                     projectDockWidget->loadProjectSQLITE(filename);
                 }
+
             }
         }
         return;
