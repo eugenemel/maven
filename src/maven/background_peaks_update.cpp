@@ -1086,15 +1086,15 @@ void BackgroundPeakUpdate::processSRMTransitions(vector<SRMTransition*>& transit
             groupCount++;
             peakCount += group.peakCount();
 
+            group.compound = transition->compound;
+            group.adduct = transition->adduct;
+
             if (featureMatchRtFlag && group.compound && group.compound->expectedRt>0) {
                 float rtDiff =  static_cast<float>(abs(group.compound->expectedRt - (group.meanRt)));
                 group.expectedRtDiff = rtDiff;
                 group.groupRank = rtDiff*rtDiff*(1.1f-group.maxQuality)*(1.0f/log(group.maxIntensity+1.0f));
                 if (group.expectedRtDiff > featureCompoundMatchRtTolerance) continue;
             }
-
-            group.compound = transition->compound;
-            group.adduct = transition->adduct;
 
             groupsToAppend.push_back(&group);
         }
