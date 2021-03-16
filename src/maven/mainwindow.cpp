@@ -1851,7 +1851,12 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> MainWindow::getSrmSlices() {
 
             srmTransition->mzSlices.push_back(make_pair(sample, s));
 
-            if (compound) srmTransition->compound = compound;
+            if (compound){
+                srmTransition->compound = compound;
+                if (compound->expectedRt > 0) {
+                    srmTransition->rt = compound->expectedRt;
+                }
+            }
             if (adduct) srmTransition->adduct = adduct;
 
             srmTransitions[srmKey] = srmTransition;
