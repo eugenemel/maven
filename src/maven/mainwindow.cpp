@@ -1576,7 +1576,7 @@ void MainWindow::setMs3PeakGroup(PeakGroup* parentGroup, PeakGroup* childGroup) 
 
             Ms3Compound ms3Compound(parentGroup->compound);
 
-            int ms2MzKey = mzUtils::mzToIntKey(static_cast<double>(childGroup->meanMz));
+            int ms2MzKey = static_cast<int>(mzUtils::mzToIntKey(static_cast<double>(childGroup->meanMz)));
 
             //avoid possible rounding problems by identifying index from map based on closest value
             int mzKeyFromMap = -1;
