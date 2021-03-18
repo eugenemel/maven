@@ -55,6 +55,8 @@ EicWidget::EicWidget(QWidget *p) {
 
 	connect(scene(), SIGNAL(selectionChanged()), SLOT(selectionChangedAction()));
 
+    connect(getMainWindow()->libraryDialog, SIGNAL(unloadLibrarySignal(QString)), SLOT(disconnectCompounds(QString)));
+
 }
 
 EicWidget::~EicWidget() {
@@ -1968,4 +1970,34 @@ void EicWidget::addMS2Events(float mzmin, float mzmax) {
 
     qDebug() << "addMS2Events()  found=" << count;
 
+}
+
+void EicWidget::disconnectCompounds(QString libraryName){
+    qDebug() << "EicWidget::disconnectCompounds():" << libraryName;
+
+    for (auto peakGroup : getPeakGroups()) {
+        if (peakGroup.compound && (libraryName == "ALL" || peakGroup.compound->db == libraryName.toStdString())) {
+            peakGroup.compound = nullptr;
+            peakGroup.adduct = nullptr;
+        }
+    }
+
+    if (getSelectedGroup() && getSelectedGroup()->compound &&
+            (libraryName == "ALL" || getSelectedGroup()->compound->db == libraryName.toStdString())) {
+           _selectedGroup.compound = nullptr;
+           _selectedGroup.adduct = nullptr;
+    }
+
+    if (_alwaysDisplayGroup && _alwaysDisplayGroup->compound &&
+            (libraryName == "ALL" || _alwaysDisplayGroup->compound->db == libraryName.toStdString())) {
+            _alwaysDisplayGroup->compound = nullptr;
+            _alwaysDisplayGroup->adduct = nullptr;
+    }
+
+    if (_slice.compound && (libraryName == "ALL" || _slice.compound->db == libraryName.toStdString())) {
+        _slice.compound = nullptr;
+        _slice.adduct = nullptr;
+    }
+
+    replot();
 }

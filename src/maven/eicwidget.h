@@ -85,6 +85,7 @@ public slots:
     void showEICLines(bool f) { _showEICLines=f; }
     void automaticPeakGrouping(bool f) { _groupPeaks=f; }
     void showMS2Events(bool f) { _showMS2Events=f; }
+    void disconnectCompounds(QString libraryName);
 
 
     void startAreaIntegration() { toggleAreaIntegration(true); }

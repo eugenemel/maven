@@ -79,6 +79,8 @@ void LibraryMangerDialog::deleteLibrary() {
 
         DB.unloadCompounds(libraryName);
         DB.deleteCompoundsSQL(libraryName,DB.getLigandDB());
+
+        emit(afterUnloadedLibrarySignal(libraryName));
     }
     updateLibraryStats();
 }
@@ -94,6 +96,8 @@ void LibraryMangerDialog::unloadLibrary() {
         emit(unloadLibrarySignal(libraryName));
 
         DB.unloadCompounds(libraryName);
+
+        emit(afterUnloadedLibrarySignal(libraryName));
     }
     updateLibraryStats();
 }
@@ -105,6 +109,8 @@ void LibraryMangerDialog::unloadAllLibraries() {
     emit(unloadLibrarySignal("ALL"));
 
     DB.unloadAllCompounds();
+
+    emit(afterUnloadedLibrarySignal("ALL"));
 
     updateLibraryStats();
 }

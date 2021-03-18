@@ -1272,6 +1272,9 @@ void MainWindow::createMenus() {
     connect(SRMTransitionListWidget, SIGNAL(clicked(bool)), SLOT(showSRMList()));
     connect(SRMTransitionListWidget, SIGNAL(toggled(bool)), srmTransitionDockWidget, SLOT(setVisible(bool)));
 
+    connect(libraryDialog, SIGNAL(loadLibrarySignal(QString)), SLOT(showSRMList()));
+    connect(libraryDialog, SIGNAL(afterUnloadedLibrarySignal(QString)), SLOT(showSRMList()));
+
     widgetsMenu->addSeparator();
 
     QAction* hideWidgets = new QAction(tr("Hide Widgets"), this);
