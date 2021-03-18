@@ -153,7 +153,8 @@ void LigandWidget::setDatabase(QString dbname) {
 
     _mw->getSettings()->setValue("lastCompoundDatabase", getDatabaseName());
 
-    emit databaseChanged(getDatabaseName());
+    emit(databaseChanged(getDatabaseName()));
+    emit(_mw->libraryDialog->loadLibrarySignal(getDatabaseName()));
 
     DB.loadCompoundsSQL(dbname,DB.getLigandDB());
     rebuildCompoundTree();
