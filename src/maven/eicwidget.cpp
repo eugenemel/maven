@@ -164,13 +164,14 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
     if (_alwaysDisplayGroup) {
         _integratedGroup->labels = _alwaysDisplayGroup->labels;
         _integratedGroup->fragMatchScore.mergedScore = _alwaysDisplayGroup->fragMatchScore.mergedScore;
+        qDebug() << "EicWidget::integrateRegion(): _integratedGroup assigned _alwaysDisplayGroup->labels and ->fragMatchScore.mergedScore.";
     }
 
 	for(int i=0; i < eics.size(); i++ ) {
 		EIC* eic = eics[i];
 		Peak peak(eic,0);
 
-//        qDebug() << "EicWidget::integrateRegion()   [eic bounds]: mzmin=" << QString::number(eics[i]->mzmin, 'f', 10) << ", mzmax=" << QString::number(eics[i]->mzmax, 'f', 10);
+        qDebug() << "EicWidget::integrateRegion()   [eic bounds]: mzmin=" << QString::number(eics[i]->mzmin, 'f', 10) << ", mzmax=" << QString::number(eics[i]->mzmax, 'f', 10);
 
 		for( int j=0; j < eic->size(); j++) {
 
