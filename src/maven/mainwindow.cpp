@@ -1783,7 +1783,6 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> MainWindow::getSrmSlices() {
             if (srms.contains(filterLine))  continue;
             srms.insert(filterLine);
 
-
             mzSlice* s = new mzSlice(0,0,0,0);
             s->srmId = scan->filterLine.c_str();
             slices.push_back(s);

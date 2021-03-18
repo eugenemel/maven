@@ -153,7 +153,8 @@ void TreeDockWidget::setInfo(vector<SRMTransition*>& srmTransitions) {
         item->setText(2, retentionTime);
         item->setText(3, compoundName);
         item->setText(4, adductName);
-        item->setText(5, QString::number(srmTransition->mzSlices.size()));
+        item->setText(5, QString::number(srmTransition->mzSlices.size())); //# scans
+        item->setText(6, QString::number(srmTransition->getSamples().size())); // # samples
     }
 }
 
@@ -553,7 +554,7 @@ void TreeDockWidget::setupConsensusScanListHeader() {
 
 void TreeDockWidget::setupSRMTransitionListHeader() {
     QStringList colNames;
-    colNames << "Precursor m/z" << "Product m/z" << "RT" << "Compound" << "Adduct" << "# samples";
+    colNames << "Precursor m/z" << "Product m/z" << "RT" << "Compound" << "Adduct" << "# scans" << "# samples";
     treeWidget->setColumnCount(colNames.size());
     treeWidget->setHeaderLabels(colNames);
     treeWidget->setSortingEnabled(true);
