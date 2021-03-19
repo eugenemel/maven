@@ -1096,6 +1096,10 @@ void BackgroundPeakUpdate::processSRMTransitions(vector<SRMTransition*>& transit
                 if (group.expectedRtDiff > featureCompoundMatchRtTolerance) continue;
             }
 
+            group._type = PeakGroup::GroupType::SRMTransitionType;
+            group.setSrmPrecursorMz(transition->precursorMz);
+            group.setSrmProductMz(transition->productMz);
+
             groupsToAppend.push_back(&group);
         }
 
