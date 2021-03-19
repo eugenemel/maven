@@ -1097,8 +1097,8 @@ void BackgroundPeakUpdate::processSRMTransitions(vector<SRMTransition*>& transit
             }
 
             group._type = PeakGroup::GroupType::SRMTransitionType;
-            group.setSrmPrecursorMz(transition->precursorMz);
-            group.setSrmProductMz(transition->productMz);
+            group.srmPrecursorMz = transition->precursorMz;
+            group.srmProductMz = transition->productMz;
 
             groupsToAppend.push_back(&group);
         }
