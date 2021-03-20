@@ -207,6 +207,13 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
 
     _integratedGroup->groupRank = 0.0f;
 
+    //Issue 368: record fact that this group created with SRMTransition
+    if (_slice.isSrmTransitionSlice()){
+        _integratedGroup->_type = PeakGroup::GroupType::SRMTransitionType;
+        _integratedGroup->srmPrecursorMz = _slice.srmPrecursorMz;
+        _integratedGroup->srmProductMz = _slice.srmProductMz;
+    }
+
     setSelectedGroup(_integratedGroup);
 
     getMainWindow()->bookmarkPeakGroup(_integratedGroup);
@@ -376,20 +383,22 @@ void EicWidget::computeEICs() {
 
    //qDebug << "eic_smoothingAlgorithm=" << eic_smoothingAlgorithm;
 
-	mzSlice slice = _slice;
+    //Issue 368: Recomputation always uses whole sample range, store value in _slice
+    //TODO: selecting a peakgroup from a table should not use the full sample bounds
 	mzSlice bounds  = visibleSamplesBounds();
-	slice.rtmin=bounds.rtmin;
-	slice.rtmax=bounds.rtmax;
+
+    _slice.rtmin=bounds.rtmin;
+    _slice.rtmax=bounds.rtmax;
 
     //Issue 22: TODO: this is a bandaid, does not address fundamental problem!
     //fix suggested by Eugene (2019-06-12)
-    if(slice.mzmin > slice.mzmax){
-        std::swap(slice.mzmin,slice.mzmax);
+    if(_slice.mzmin > _slice.mzmax){
+        std::swap(_slice.mzmin,_slice.mzmax);
         qDebug() << "swapping slice.mzmin and slice.mzmax.";
     } // why????
 
     //get eics
-     eics = BackgroundPeakUpdate::pullEICs(&slice,
+     eics = BackgroundPeakUpdate::pullEICs(&_slice,
                                               samples,
                                               EicLoader::PeakDetection,
                                               eic_smoothingWindow,
@@ -399,7 +408,7 @@ void EicWidget::computeEICs() {
                                               baseline_smoothing,
                                               baseline_quantile,
                                               scanFilterString,
-                                              _srmMzKey             //Issue 347
+                                              _slice.getSrmMzKey() //Issue 368
                                            );
 
 	//find peaks
@@ -410,17 +419,14 @@ void EicWidget::computeEICs() {
     //interpolate EIC
     //for(int i=0; i < eics.size(); i++ ) eics[i]->interpolate();
 
-        qDebug() << "\tcomputeEICs() pullEics().. msec=" << timerX.elapsed();
+    qDebug() << "\tcomputeEICs() pullEics().. msec=" << timerX.elapsed();
 
     //group peaks
-        groupPeaks();
+    groupPeaks();
 
-    qDebug() << "\tgroupPeaks() msec="<< timerX.elapsed();
+    qDebug() << "\tgroupPeaks().. msec="<< timerX.elapsed();
     qDebug() << "\tcomputeEICs() Done.";
 
-    if (_slice.compound)  for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].compound = _slice.compound;
-    if (_slice.adduct) for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].adduct = _slice.adduct;
-	if (!_slice.srmId.empty()) for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].srmId = _slice.srmId;
 }
 
 mzSlice EicWidget::visibleEICBounds() {
@@ -994,6 +1000,7 @@ void EicWidget::replot(PeakGroup* group) {
 }	
 
 void EicWidget::setTitle() {
+
     QFont font = QApplication::font();
 
     int pxSize = scene()->height()*0.03;
@@ -1014,7 +1021,7 @@ void EicWidget::setTitle() {
     }
 
     QString titleText;
-    if (_srmMzKey.first > 0.0f && _srmMzKey.second > 0.0f) {
+    if (_slice.isSrmTransitionSlice()) {
 
         if (_slice.compound) {
             tagString = QString(_slice.compound->name.c_str());
@@ -1029,8 +1036,8 @@ void EicWidget::setTitle() {
 
         titleText =  tr("<b>%1</b> precursor m/z: %2 product m/z: %3").arg(
                     tagString,
-                    QString::number(_srmMzKey.first, 'f', 4),
-                    QString::number(_srmMzKey.second, 'f', 4)
+                    QString::number(static_cast<double>(_slice.srmPrecursorMz), 'f', 4),
+                    QString::number(static_cast<double>(_slice.srmProductMz), 'f', 4)
                     );
     } else {
         titleText =  tr("<b>%1</b> m/z: %2-%3").arg(
@@ -1477,52 +1484,27 @@ void EicWidget::setCompound(Compound* c, Adduct* adduct) {
 
 void EicWidget::setMzSlice(const mzSlice& slice) {
     qDebug() << "EicWidget::setmzSlice()";
-    if ( slice.mzmin != _slice.mzmin || slice.mzmax != _slice.mzmax  || slice.srmId != _slice.srmId || slice.compound != _slice.compound ) {
-        _slice = slice;
+    _slice = mzSlice(slice);
 
-        if ( slice.compound ) {
-            //SRM DATA
-            if (slice.compound->precursorMz !=0 && slice.compound->productMz>0) {
-                _slice.mzmin =   slice.compound->precursorMz;
-                _slice.mzmax =   slice.compound->productMz;
-                _slice.mz    =   slice.compound->precursorMz;
-                _slice.compound= slice.compound;
-                _slice.srmId  =  slice.srmId;
+    recompute();
+    //TODO: don't recompute if not necessary.
 
-                if (slice.adduct) _slice.adduct = slice.adduct;
-            }
-        }
-        recompute();
-    } else {
-        _slice = slice;
-    }
     replot(nullptr);
 }
 
 void EicWidget::setSRMTransition(const SRMTransition& transition){
     qDebug() << "EicWidget::setSRMTransition()";
 
-    _srmMzKey = make_pair(transition.precursorMz, transition.productMz);
-
     //update slice data
-    _slice.compound = transition.compound;
-    _slice.adduct = transition.adduct;
-    _slice.mzmin = transition.precursorMz;
-    _slice.mzmax = transition.productMz;
-    _slice.mz = transition.precursorMz;
-
-    recompute();
+    setMzSlice(mzSlice(transition));
 
     replot(nullptr);
-
-    //reset this key to avoid any collisions when using EIC widget to plot other data types
-    _srmMzKey = make_pair(0.0f, 0.0f);
 }
 
 void EicWidget::setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax ) {
-    //qDebug << "EicWidget::setMzRtWindow()";
-    mzSlice slice(mzmin,mzmax,rtmin,rtmax);
-	setMzSlice(slice);
+    qDebug() << "EicWidget::setMzRtWindow()";
+
+    setMzSlice(mzSlice(mzmin,mzmax,rtmin,rtmax));
 }
 
 void EicWidget::setPeakGroup(PeakGroup* group) {
@@ -1552,6 +1534,11 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
 
     if (!group->srmId.empty()) {
         setSrmId(group->srmId);
+    }
+
+    if (group->_type == PeakGroup::GroupType::SRMTransitionType) {
+        _slice.srmPrecursorMz = group->srmPrecursorMz;
+        _slice.srmProductMz = group->srmProductMz;
     }
 
     if ( _autoZoom && group->parent) {
@@ -1618,6 +1605,17 @@ void EicWidget::groupPeaks() {
     //peakgroups = EIC::groupPeaksB(eics, eic_smoothingWindow, grouping_maxRtWindow, minSmoothedPeakIntensity);
 
     EIC::removeLowRankGroups(peakgroups,50);
+
+    for (auto& pg : peakgroups) {
+        if (_slice.compound) {pg.compound = _slice.compound;}
+        if (_slice.adduct) { pg.adduct= _slice.adduct;}
+        if (!_slice.srmId.empty()) {pg.srmId = _slice.srmId;}
+        if (!_slice.isSrmTransitionSlice()) {
+            pg.srmPrecursorMz = _slice.srmPrecursorMz;
+            pg.srmProductMz = _slice.srmProductMz;
+            pg.setType(PeakGroup::GroupType::SRMTransitionType);
+        }
+    }
 }
 
 void EicWidget::print(QPaintDevice* printer) {

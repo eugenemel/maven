@@ -189,8 +189,6 @@ private:
 
     PeakGroup*  _integratedGroup;		 //manually integrated peak group
     PeakGroup*  _alwaysDisplayGroup;     //always display this group, whether or not grouping is enabled
-    
-    pair<float, float> _srmMzKey = make_pair(0.0f, 0.0f);       //Issue 347
 
     //gui related
     QWidget *parent;
