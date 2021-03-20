@@ -63,7 +63,7 @@ public slots:
     void addFitLine(PeakGroup*);
     void addMS2Events(float mzmin, float mzmax);
     void integrateRegion(float rtmin, float rtmax);
-    void recompute();
+    void recompute(bool isUseSampleBoundsRT=true);
     void replot(PeakGroup*);
     void replot();
     void replotForced();
@@ -198,7 +198,7 @@ private:
     QVector<QGraphicsLineItem*> _focusLines;
 
     void showPeak(float freq, float amplitude);
-    void computeEICs();
+    void computeEICs(bool isUseSampleBoundsRT=true);
     void cleanup();		//deallocate eics, fragments, peaks, peakgroups
     void clearPlot();	//removes non permenent graphics objects
     void findPlotBounds(); //find _minX, _maxX...etc

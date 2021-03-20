@@ -365,13 +365,14 @@ void EicWidget::cleanup() {
 	clearPlot();
 }
 
-void EicWidget::computeEICs() {
+void EicWidget::computeEICs(bool isUseSampleBoundsRT) {
  	qDebug() << " EicWidget::computeEICs()";
     QTime timerX; timerX.start();
     vector <mzSample*> samples = getMainWindow()->getVisibleSamples();
     if (samples.size() == 0) return;
 
-    QSettings *settings 		= getMainWindow()->getSettings();
+    //EIC Parameters
+    QSettings *settings = getMainWindow()->getSettings();
 
     float eic_smoothingWindow = settings->value("eic_smoothingWindow").toDouble();
     int   eic_smoothingAlgorithm = settings->value("eic_smoothingAlgorithm").toInt();
@@ -381,14 +382,12 @@ void EicWidget::computeEICs() {
     int baseline_quantile =  settings->value("baseline_quantile").toInt();
     string scanFilterString = settings->value("txtEICScanFilter", "").toString().toStdString();
 
-   //qDebug << "eic_smoothingAlgorithm=" << eic_smoothingAlgorithm;
-
-    //Issue 368: Recomputation always uses whole sample range, store value in _slice
-    //TODO: selecting a peakgroup from a table should not use the full sample bounds
-	mzSlice bounds  = visibleSamplesBounds();
-
-    _slice.rtmin=bounds.rtmin;
-    _slice.rtmax=bounds.rtmax;
+    //Slice adjustments
+    if (isUseSampleBoundsRT) {
+        mzSlice bounds  = visibleSamplesBounds();
+        _slice.rtmin=bounds.rtmin;
+        _slice.rtmax=bounds.rtmax;
+    }
 
     //Issue 22: TODO: this is a bandaid, does not address fundamental problem!
     //fix suggested by Eugene (2019-06-12)
@@ -1066,10 +1065,10 @@ void EicWidget::setTitle() {
     }
 }
 
-void EicWidget::recompute(){
+void EicWidget::recompute(bool isUseSampleBoundsRT){
     qDebug() <<" EicWidget::recompute()";
     cleanup(); //more clean up
-    computeEICs();	//retrieve eics
+    computeEICs(isUseSampleBoundsRT);	//retrieve eics
 }
 
 void EicWidget::wheelEvent(QWheelEvent *event) {
@@ -1413,7 +1412,7 @@ void EicWidget::setRtWindow(float rtmin, float rtmax ) {
 void EicWidget::setSrmId(string srmId) { 
  //qDebug <<"EicWidget::setSrmId(string srmId) "; 
          //qDebug << "EicWidget::setSrmId" <<  srmId.c_str();
-	_slice.compound = NULL;
+    _slice.compound = nullptr;
 	_slice.srmId = srmId;
    	recompute();
 	resetZoom();
@@ -1514,6 +1513,11 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
         qDebug() << "EicWidget::setPeakGroup() group data:";
         qDebug() << "EicWidget::setPeakGroup() group->meanMz=" << group->meanMz;
         qDebug() << "EicWidget::setPeakGroup() group->meanRt=" << group->meanRt;
+        qDebug() << "EicWidget::setPeakGroup() (m/z, RT) = ["
+                 << group->minMz << "-" << group->maxMz
+                 << "], ["
+                 << group->minRt << "-" << group->maxRt
+                 << "]";
         if(group->compound) qDebug() << "EicWidget::setPeakGroup() group->compound=" << group->compound->name.c_str();
         if(!group->compound) qDebug() << "EicWidget::setPeakGroup() group->compound= nullptr";
         if (group->adduct){
@@ -1541,26 +1545,33 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
         _slice.srmProductMz = group->srmProductMz;
     }
 
-    if ( _autoZoom && group->parent) {
-        _slice.rtmin = group->parent->minRt- 2 * _zoomFactor;
-        _slice.rtmax = group->parent->maxRt+ 2 * _zoomFactor;
-    } else if (_autoZoom) {
-        _slice.rtmin = group->minRt- 2 * _zoomFactor;
-        _slice.rtmax = group->maxRt+ 2 * _zoomFactor;
-    }
+    //TODO: how is _autoZoom used? switching to 5x peak width approach (Issue 368)
+//    if ( _autoZoom && group->parent) {
+//        _slice.rtmin = group->parent->minRt- 2 * _zoomFactor;
+//        _slice.rtmax = group->parent->maxRt+ 2 * _zoomFactor;
+//    } else if (_autoZoom) {
+//        _slice.rtmin = group->minRt- 2 * _zoomFactor;
+//        _slice.rtmax = group->maxRt+ 2 * _zoomFactor;
+//    }
 
-    //make sure that plot region is within visible sample bounds
-    mzSlice bounds = visibleEICBounds();
-    if (_slice.rtmin < bounds.rtmin ) _slice.rtmin = bounds.rtmin;
-    if (_slice.rtmax > bounds.rtmax ) _slice.rtmax = bounds.rtmax;
+    //use 5x peak width for display, or at least 6 seconds, or no more than 3 minutes
+    float peakWidth = group->maxRt - group->minRt;
+    if (peakWidth < 0.1f) peakWidth = 0.1f;
+    if (peakWidth > 3.0f) peakWidth = 3.0f;
 
+    _slice.rtmin = max(group->minRt - 2 * peakWidth, 0.0f);
+    _slice.rtmax = group->maxRt + 2 * peakWidth;
+
+    //TODO: Delete me?
+//    //make sure that plot region is within visible sample bounds
+//    mzSlice bounds = visibleEICBounds();
+//    if (_slice.rtmin < bounds.rtmin ) _slice.rtmin = bounds.rtmin;
+//    if (_slice.rtmax > bounds.rtmax ) _slice.rtmax = bounds.rtmax;
 
     _slice.mz = group->meanMz;
-    if ( group->minMz != _slice.mzmin || group->maxMz != _slice.mzmax ) {
-        _slice.mzmin = group->minMz;
-        _slice.mzmax = group->maxMz;
-        recompute();
-    }
+    _slice.mzmin = group->minMz;
+    _slice.mzmax = group->maxMz;
+    recompute(false); // use peak group RT bounds
 
     if (group->compound)  for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].compound = group->compound;
     if (group->adduct) for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].adduct = group->adduct;
