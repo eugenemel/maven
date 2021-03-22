@@ -1108,11 +1108,12 @@ void MainWindow::readSettings() {
     if( ! settings->contains("ionizationMode") )
         settings->setValue("ionizationMode",-1);
 
-    if( ! settings->contains("C13Labeled") )
-        settings->setValue("C13Labeled",2);
+    //Issue 372: Do not check any isotopes by default
+//    if( ! settings->contains("C13Labeled") )
+//        settings->setValue("C13Labeled",2);
 
-    if( ! settings->contains("N15Labeled") )
-        settings->setValue("N15Labeled",2);
+//    if( ! settings->contains("N15Labeled") )
+//        settings->setValue("N15Labeled",2);
 
     if( ! settings->contains("isotopeC13Correction") )
         settings->setValue("isotopeC13Correction",2);
