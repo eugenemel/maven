@@ -669,6 +669,7 @@ PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, boo
     allgroups.push_back(*group);
 
     if (isDeletePeakGroupPtr){
+       //qDebug() << "TableDockWidget::addPeakGroup() Deleting group: " << group;
        delete(group);
        group = nullptr;
     }
