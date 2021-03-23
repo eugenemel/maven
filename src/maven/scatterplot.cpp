@@ -512,7 +512,7 @@ void ScatterPlot::showSimilar(PeakGroup* group) {
 			if (QGraphicsEllipseItem *circle = qgraphicsitem_cast<QGraphicsEllipseItem *>(item)) {
 					QVariant v = circle->data(0);
 					PeakGroup*  groupX =  v.value<PeakGroup*>();
-					if ( groupX == group ) {
+                    if ( groupX && group && *groupX == *group ) {
 							circle->setPen(QPen(Qt::yellow,3));
 							circle->setZValue(100);
 					} else if (similar.size() > 0 && similar.contains(groupX)) {

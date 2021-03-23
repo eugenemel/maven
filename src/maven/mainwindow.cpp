@@ -1622,7 +1622,11 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
     qDebug() << "MainWindow::setPeakGroup(PeakGroup)" << group;
 
     if (!group) return;
-    if (_lastSelectedPeakGroup == group) return;
+
+    //Issue 373: Compare values pointed to, not the pointers themselves (implementation-defined behavior)
+    if (_lastSelectedPeakGroup && *_lastSelectedPeakGroup == *group){
+        return;
+    }
 
     _lastSelectedPeakGroup = group;
 

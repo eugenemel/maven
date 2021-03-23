@@ -685,20 +685,22 @@ void TreeDockWidget::setInfo(PeakGroup* group) {
 
 
 bool TreeDockWidget::hasPeakGroup(PeakGroup* group) {
-    if (treeWidget == NULL) return true;
+    if (treeWidget == nullptr) return true;
     for(int i=0; i < treeWidget->topLevelItemCount();i++ ) {
+
         QTreeWidgetItem* item = treeWidget->topLevelItem(i);
         if ( item->type() != PeakGroupType ) continue;
         QVariant v = item->data(0,Qt::UserRole);
         PeakGroup*  g = v.value<PeakGroup*>();
-        if (g && g == group ) return true;
+
+        if (g && group && *g == *group ) return true;
 
         for(int j=0; j < item->childCount();j++ ) {
             QTreeWidgetItem* item2 = item->child(j);
             if ( item2->type() != PeakGroupType ) continue;
             QVariant v = item2->data(0,Qt::UserRole);
             PeakGroup*  g = v.value<PeakGroup*>();
-            if (g && g == group ) return true;
+            if (g && group && *g == *group ) return true;
         }
     }
     return false;

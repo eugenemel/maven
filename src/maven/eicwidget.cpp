@@ -145,6 +145,12 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
 	//qDebug << "Integrating area from " << rtmin << " to " << rtmax;
 
     if (_integratedGroup){
+
+        //Issue 373: before calling delete, avoid possible dangling pointer bad access
+        if (_alwaysDisplayGroup && *_integratedGroup == *_alwaysDisplayGroup){
+            _alwaysDisplayGroup = nullptr;
+        }
+
         delete(_integratedGroup);
         _integratedGroup = nullptr;
     }
