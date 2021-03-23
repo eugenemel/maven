@@ -162,6 +162,27 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
     //Issue 280:
     //This information is updated every time a new peak group is selected from a peaks list table (tabledockwidget).
     if (_alwaysDisplayGroup) {
+
+        //Issue 369 debugging START
+
+        qDebug() << "EicWidget::integrateRegion() _alwaysDisplayGroup data:";
+        qDebug() << "EicWidget::integrateRegion() _alwaysDisplayGroup->meanMz=" << _alwaysDisplayGroup->meanMz;
+        qDebug() << "EicWidget::integrateRegion() _alwaysDisplayGroup->meanRt=" << _alwaysDisplayGroup->meanRt;
+        qDebug() << "EicWidget::integrateRegion() (m/z, RT) = ["
+                 << _alwaysDisplayGroup->minMz << "-" << _alwaysDisplayGroup->maxMz
+                 << "], ["
+                 << _alwaysDisplayGroup->minRt << "-" << _alwaysDisplayGroup->maxRt
+                 << "]";
+        if(_alwaysDisplayGroup->compound) qDebug() << "EicWidget::integrateRegion() _alwaysDisplayGroup->compound=" << _alwaysDisplayGroup->compound->name.c_str();
+        if(!_alwaysDisplayGroup->compound) qDebug() << "EicWidget::integrateRegion() _alwaysDisplayGroup->compound= nullptr";
+        if (_alwaysDisplayGroup->adduct){
+            qDebug() << "EicWidget::integrateRegion() _alwaysDisplayGroup->adduct=" << _alwaysDisplayGroup->adduct->name.c_str();
+        } else {
+            qDebug() << "EicWidget::integrateRegion() _alwaysDisplayGroup->adduct= nullptr";
+        }
+
+        //Issue 369 debugging END
+
         _integratedGroup->labels = _alwaysDisplayGroup->labels;
         _integratedGroup->fragMatchScore.mergedScore = _alwaysDisplayGroup->fragMatchScore.mergedScore;
         qDebug() << "EicWidget::integrateRegion(): _integratedGroup assigned _alwaysDisplayGroup->labels and ->fragMatchScore.mergedScore.";
@@ -220,6 +241,7 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
     PeakGroup* lastBookmark = getMainWindow()->getBookmarkTable()->getLastBookmarkedGroup();
 
     if (lastBookmark and lastBookmark->compound) {
+            qDebug() << "getMainWindow()->isotopeWidget->setPeakGroup(): " << lastBookmark;
            getMainWindow()->isotopeWidget->setPeakGroup(lastBookmark);
            setSelectedGroup(lastBookmark);
 
@@ -1300,9 +1322,8 @@ void EicWidget::showAllPeaks() {
     }
 
     //Issue 177: Always show this group if any peaks are shown, and the window allows for it
-    if (_alwaysDisplayGroup &&
-            _alwaysDisplayGroup->minMz >= _slice.mzmin && _alwaysDisplayGroup->maxMz <= _slice.mzmax &&
-            _alwaysDisplayGroup->minRt >= _slice.rtmin && _alwaysDisplayGroup->maxRt <= _slice.rtmax) {
+    //Issue 367: Even if the window doesn't show all of the peaks for the group (as in zooming in)
+    if (_alwaysDisplayGroup) {
         addPeakPositions(_alwaysDisplayGroup);
     }
     qDebug() <<"EicWidget::showAllPeaks() completed";
@@ -1420,10 +1441,18 @@ void EicWidget::setSrmId(string srmId) {
 }
 
 void EicWidget::setCompound(Compound* c, Adduct* adduct) {
+    qDebug() << "EicWidget::setCompound() compound=" << c << ", adduct=" << adduct;
     if (!c) return;
     if ( getMainWindow()->sampleCount() == 0) return;
 
-    _alwaysDisplayGroup = nullptr; // Issue 280
+    // Issue 280
+    _alwaysDisplayGroup = nullptr;
+
+    //Issue 367: Copying approach may cause other problems
+//    if (_alwaysDisplayGroup) {
+//        delete(_alwaysDisplayGroup);
+//        _alwaysDisplayGroup = nullptr;
+//    }
 
     vector <mzSample*> samples = getMainWindow()->getVisibleSamples();
     if (samples.size() == 0 ) return;
@@ -1494,10 +1523,21 @@ void EicWidget::setMzSlice(const mzSlice& slice) {
 void EicWidget::setSRMTransition(const SRMTransition& transition){
     qDebug() << "EicWidget::setSRMTransition()";
 
+    //Issue 367: Changing SRM transition should remove any memory of any previous displayed peak.
+    _alwaysDisplayGroup = nullptr;
+
+    //Issue 367: making a copy of the peak group to always display may fix the crashing issue,
+    //but potentially causes other problems
+    //
+//    if (_alwaysDisplayGroup) {
+//        delete(_alwaysDisplayGroup);
+//        _alwaysDisplayGroup = nullptr;
+//    }
+
     //update slice data
     setMzSlice(mzSlice(transition));
+    //note: this calls replot()
 
-    replot(nullptr);
 }
 
 void EicWidget::setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax ) {
@@ -1528,6 +1568,16 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
     }
 
     _alwaysDisplayGroup = group;
+
+    //Issue 367: copying approach may cause other problems
+//    if (_alwaysDisplayGroup) {
+//        delete(_alwaysDisplayGroup);
+//        _alwaysDisplayGroup = nullptr;
+//    }
+
+//    if (group) {
+//        _alwaysDisplayGroup = new PeakGroup(*group);
+//    }
 
     if (!group) return;
 
@@ -1971,7 +2021,7 @@ void EicWidget::addMS2Events(float mzmin, float mzmax) {
                 p->setSize(30);
                 p->setColor(color);
                 p->setZValue(1000);
-                p->setPeakGroup(NULL);
+                p->setPeakGroup(nullptr);
                 scene()->addItem(p);
                 count++;
             }
