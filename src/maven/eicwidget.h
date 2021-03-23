@@ -37,8 +37,10 @@ public:
 public slots:
     void setMzSlice(float mz);
     void setPPM(double ppm);
+
     void resetZoom(bool isReplot=true);
     void zoom(float factor);
+
     void setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax);
     void setMzSlice(const mzSlice& slice);
     void setSRMTransition(const SRMTransition& transition);
@@ -47,6 +49,7 @@ public slots:
     void setPeakGroup(PeakGroup* group);
     void setCompound(Compound* c, Adduct* a);
     void setSelectedGroup(PeakGroup* group);
+
     void addEICLines(bool showSpline);
     void addCubicSpline();
     void addBaseLine();
