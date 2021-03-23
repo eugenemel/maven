@@ -1321,7 +1321,7 @@ void EicWidget::showAllPeaks() {
     qDebug() <<"EicWidget::showAllPeaks()";
 
     if (_groupPeaks) {
-        for(int i=0; i < peakgroups.size(); i++ ) {
+        for(unsigned int i=0; i < peakgroups.size(); i++ ) {
             PeakGroup& group = peakgroups[i];
             addPeakPositions(&group);
         }
@@ -1339,6 +1339,12 @@ void EicWidget::addPeakPositions(PeakGroup* group) {
 
         if (!_showPeaks) return;
         if (!group) return;
+
+        if (_slice.isSrmTransitionSlice()) {
+            group->_type = PeakGroup::GroupType::SRMTransitionType;
+            group->srmPrecursorMz = _slice.srmPrecursorMz;
+            group->srmProductMz = _slice.srmProductMz;
+        }
 
         //Issue 177: ensure that each group is not added more than once
         bool isFoundGroup = false;

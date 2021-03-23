@@ -10,8 +10,8 @@ EicPoint::EicPoint(float x, float y, Peak* peak, MainWindow* mw)
     _y = y;
     _mw = mw;
     _peak = peak;
-    _group = NULL;
-    _scan = NULL;
+    _group = nullptr;
+    _scan = nullptr;
     _cSize = 10;
     _color=QColor(Qt::black);
     _pen=QPen(_color);
@@ -161,7 +161,11 @@ void EicPoint::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
 
 void EicPoint::setClipboardToGroup() { if(_group) _mw->setClipboardToGroup(_group); }
 
-void EicPoint::bookmark() { if(_group) _mw->bookmarkPeakGroup(_group); }
+void EicPoint::bookmark() {
+    if(_group) {
+        _mw->bookmarkPeakGroup(_group);
+    }
+}
 
 void EicPoint::setClipboardToIsotopes() {
     if (_group &&_group->compound != NULL && ! _group->compound->formula.empty() )  {
