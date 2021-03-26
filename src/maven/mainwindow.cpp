@@ -550,6 +550,20 @@ vector<mzSample*> MainWindow::getVisibleSamples() {
     return vsamples;
 }
 
+float MainWindow::getVisibleSamplesMaxRt(){
+
+    float maxRt = 0.0f;
+
+    for(unsigned int i=0; i < samples.size(); i++ ) {
+        if (samples[i] && samples[i]->isSelected ) {
+            if (samples[i]->maxRt > maxRt) {
+                maxRt = samples[i]->maxRt;
+            }
+        }
+    }
+
+    return maxRt;
+}
 
 void MainWindow::bookmarkSelectedPeakGroup() {
    bookmarkPeakGroup(eicWidget->getSelectedGroup());
@@ -1625,7 +1639,19 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
 
     //Issue 373: Compare values pointed to, not the pointers themselves (implementation-defined behavior)
     if (_lastSelectedPeakGroup && *_lastSelectedPeakGroup == *group){
-        return;
+
+        bool isEqual = true;
+
+        //Also need to check the compounds and adducts
+        if (_lastSelectedPeakGroup->compound && group->compound && _lastSelectedPeakGroup->compound->id != group->compound->id) {
+            isEqual = false;
+        }
+
+        if (_lastSelectedPeakGroup->adduct && group->adduct && _lastSelectedPeakGroup->adduct->name != group->adduct->name) {
+            isEqual = false;
+        }
+
+        if (isEqual) return;
     }
 
     _lastSelectedPeakGroup = group;

@@ -1622,7 +1622,7 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
     if (peakWidth > 3.0f) peakWidth = 3.0f;
 
     _slice.rtmin = max(group->minRt - 2 * peakWidth, 0.0f);
-    _slice.rtmax = group->maxRt + 2 * peakWidth;
+    _slice.rtmax = min(getMainWindow()->getVisibleSamplesMaxRt(), group->maxRt + 2 * peakWidth);
 
     //TODO: Delete me?
 //    //make sure that plot region is within visible sample bounds

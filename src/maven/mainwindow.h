@@ -165,6 +165,7 @@ public:
     mzSample* getSample(int i) { assert(i < samples.size()); return(samples[i]);  }
     inline vector<mzSample*> getSamples() { return samples; }
     vector<mzSample*> getVisibleSamples();
+    float getVisibleSamplesMaxRt();
 
     PeakGroup::QType getUserQuantType();
 
