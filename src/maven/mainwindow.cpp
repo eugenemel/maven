@@ -534,9 +534,33 @@ void MainWindow::setIonizationMode( int x ) {
     _ionizationMode=x;
      massCalcWidget->setCharge(_ionizationMode);
 
-     if(x>0) adductType->setCurrentText("[M+H]+");
-     else if(x<0) adductType->setCurrentText("[M-H]-");
-     else adductType->setCurrentText("[M]");
+     //Issue 376: Update to respect loaded adducts.
+
+     for (int i = 0; i < adductType->count(); i++) {
+
+         QVariant v = adductType->itemData(i);
+         Adduct*  itemAdduct =  v.value<Adduct*>();
+
+         if ((itemAdduct->charge > 0 && itemAdduct->name == "[M+H]+") ||
+                 (itemAdduct->charge < 0 && itemAdduct->name == "[M-H]-")) {
+             this->adductType->setCurrentIndex(i);
+             break;
+         }
+     }
+
+     //Issue 376: adducts combo box in isotopeWidget should sync with main window adducts combo box
+     if (isotopeWidget) {
+         for (int i = 0; i < isotopeWidget->adductComboBox->count(); i++) {
+
+             QVariant v = isotopeWidget->adductComboBox->itemData(i);
+             Adduct*  itemAdduct =  v.value<Adduct*>();
+             if ((itemAdduct->charge > 0 && itemAdduct->name == "[M+H]+") ||
+                     (itemAdduct->charge < 0 && itemAdduct->name == "[M-H]-")) {
+                 isotopeWidget->adductComboBox->setCurrentIndex(i);
+                 break;
+             }
+         }
+     }
 }
 
 vector<mzSample*> MainWindow::getVisibleSamples() {
