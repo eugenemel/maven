@@ -76,12 +76,14 @@ Adduct* IsotopeWidget::getCurrentAdduct() {
 }
 
 void IsotopeWidget::setPeakGroup(PeakGroup* grp) {
+    qDebug() << "IsotopeWidget::setPeakGroup():" << grp;
     if (!grp) return;
 	_group = grp;
     if (grp && grp->type() != PeakGroup::IsotopeType ) pullIsotopes(grp);
 }
 
 void IsotopeWidget::setPeak(Peak* peak) {
+    qDebug() << "IsotopeWidget::setPeak():" << peak;
     if (peak == nullptr ) return;
 
 	mzSample* sample = peak->getSample();
@@ -97,16 +99,19 @@ void IsotopeWidget::setPeak(Peak* peak) {
 }
 
 void IsotopeWidget::setCompound(Compound* cpd ) {
-        if (!cpd) return;
 
-        //Issue 376: set this first, to ensure that compound name is passed through.
-		QString f = QString(cpd->formula.c_str());
-        setFormula(f);
+    qDebug() << "IsotopeWidget::setCompound():" << cpd->name.c_str();
 
-        _group = nullptr;
-		_compound = cpd;
+    if (!cpd) return;
 
-		setWindowTitle("Isotopes:" + QString(cpd->name.c_str()));
+    //Issue 376: set this first, to ensure that compound name is passed through.
+    QString f = QString(cpd->formula.c_str());
+    setFormula(f);
+
+    _group = nullptr;
+    _compound = cpd;
+
+    setWindowTitle("Isotopes:" + QString(cpd->name.c_str()));
 }
 
 //Issue 376: Ensure that removed compounds do not lead to dangling pointers
