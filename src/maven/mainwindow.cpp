@@ -2514,7 +2514,7 @@ void MainWindow::changeUserAdduct() {
     Adduct*  adduct =  v.value<Adduct*>();
     if(adduct) {
         _ionizationMode = SIGN(adduct->charge);
-        cerr << "MainWindow::changeUserAdduct():" << adduct->name << endl;
+        qDebug() << "MainWindow::changeUserAdduct():" << QString(adduct->name.c_str());
         massCalcWidget->ionization->setValue(_ionizationMode);
 
         mzSlice& currentSlice = eicWidget->getMzSlice();
@@ -2531,7 +2531,7 @@ Adduct* MainWindow::getUserAdduct() {
     QVariant v = adductType->currentData();
     Adduct*  adduct =  v.value<Adduct*>();
     if(adduct) {
-        cerr << "getUserAdduct::" << adduct->name << endl;
+        qDebug() << "MainWindow::getUserAdduct()" << QString(adduct->name.c_str());
         return adduct;
     } else if (_ionizationMode > 0 ) {
         return MassCalculator::PlusHAdduct;
