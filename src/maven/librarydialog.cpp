@@ -10,6 +10,7 @@ LibraryMangerDialog::LibraryMangerDialog(QWidget *parent) : QDialog(parent) {
         connect(btnUnload, SIGNAL(clicked()), SLOT(unloadLibrary()));
         connect(btnUnloadAll, SIGNAL(clicked()), SLOT(unloadAllLibraries()));
         connect(searchButton, SIGNAL(clicked()), SLOT(showPeakDetectionDialog()));
+        connect(btnClose, SIGNAL(clicked()), SLOT(close()));
 }
 
 
@@ -78,6 +79,8 @@ void LibraryMangerDialog::deleteLibrary() {
 
         DB.unloadCompounds(libraryName);
         DB.deleteCompoundsSQL(libraryName,DB.getLigandDB());
+
+        emit(afterUnloadedLibrarySignal(libraryName));
     }
     updateLibraryStats();
 }
@@ -93,6 +96,8 @@ void LibraryMangerDialog::unloadLibrary() {
         emit(unloadLibrarySignal(libraryName));
 
         DB.unloadCompounds(libraryName);
+
+        emit(afterUnloadedLibrarySignal(libraryName));
     }
     updateLibraryStats();
 }
@@ -104,6 +109,8 @@ void LibraryMangerDialog::unloadAllLibraries() {
     emit(unloadLibrarySignal("ALL"));
 
     DB.unloadAllCompounds();
+
+    emit(afterUnloadedLibrarySignal("ALL"));
 
     updateLibraryStats();
 }

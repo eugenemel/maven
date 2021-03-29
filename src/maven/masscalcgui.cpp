@@ -24,7 +24,7 @@ MassCalcWidget::MassCalcWidget(MainWindow* mw) {
         scoringSchema->addItem(scoringAlgorithm.c_str());
    }
 
-   scoringSchema->addItem(QString("rumsDB"));
+   scoringSchema->addItem(QString("rumsDB/clamDB"));
 
 }
 
@@ -116,7 +116,7 @@ void MassCalcWidget::showTablerumsDBMatches(PeakGroup *grp) {
             item->setText(0, compoundName.c_str());
             item->setText(1, adductName.c_str());
             item->setText(2, QString::number(score, 'f', 3));
-            item->setText(3, "rumsDB matches");
+            item->setText(3, "rumsDB/clamDB matches");
         }
     }
 
@@ -133,7 +133,7 @@ void MassCalcWidget::showTableCheckRumsDB() {
 
     PeakGroup *grp = nullptr;
 
-    if (scoringSchema->currentText().toStdString() == "rumsDB") {
+    if (scoringSchema->currentText().toStdString() == "rumsDB/clamDB") {
 
         if (_mw->projectDockWidget->currentProject) {
 
@@ -141,6 +141,11 @@ void MassCalcWidget::showTableCheckRumsDB() {
 
             if (table) {
                 grp = table->getSelectedGroup();
+            } else {
+                TableDockWidget *table2 = _mw->findPeakTable("clamDB");
+                if (table2) {
+                    grp = table2->getSelectedGroup();
+                }
             }
         }
     }
@@ -237,7 +242,7 @@ void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
 
     }
 
-    if (scoringSchema->currentText().toStdString() == "rumsDB") {
+    if (scoringSchema->currentText().toStdString() == "rumsDB/clamDB") {
         showTablerumsDBMatches(grp);
     } else {
         showTable();

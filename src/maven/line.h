@@ -42,6 +42,7 @@ private:
     bool _endsFixed;
     bool _closePath;
     bool _fillPath;
+    bool _emphasizePoints;
 
 };
 

@@ -68,6 +68,7 @@ SelectAdductsDialog::SelectAdductsDialog(QWidget *parent, MainWindow *mw, QSetti
     connect(btnUpdate, SIGNAL(clicked()), this, SLOT(updateSelectedAdducts()));
     connect(btnCancel, SIGNAL(clicked()), this, SLOT(hide()));
 
+    tblAdducts->repaint();
 }
 
 SelectAdductsDialog::~SelectAdductsDialog(){}

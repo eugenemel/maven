@@ -106,6 +106,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
         if (enabledAdductsCandidate.size() == 2) {
             enabledAdducts = enabledAdductsCandidate;
+            settings->setValue("enabledAdducts", "[M+H]+;[M-H]-;");
         } else {
             enabledAdducts = availableAdducts;
         }
@@ -549,6 +550,20 @@ vector<mzSample*> MainWindow::getVisibleSamples() {
     return vsamples;
 }
 
+float MainWindow::getVisibleSamplesMaxRt(){
+
+    float maxRt = 0.0f;
+
+    for(unsigned int i=0; i < samples.size(); i++ ) {
+        if (samples[i] && samples[i]->isSelected ) {
+            if (samples[i]->maxRt > maxRt) {
+                maxRt = samples[i]->maxRt;
+            }
+        }
+    }
+
+    return maxRt;
+}
 
 void MainWindow::bookmarkSelectedPeakGroup() {
    bookmarkPeakGroup(eicWidget->getSelectedGroup());
@@ -929,13 +944,25 @@ void MainWindow::open(){
                     setRumsDBDialog = nullptr;
                 }
 
-                setRumsDBDialog  = new SetRumsDBDialog(this);
-                setRumsDBDialog->exec();
+                //Case 344: only show dialog for mzkitchen files
+                ProjectDB *projectDB = new ProjectDB(filename);
+                QStringList tableNames = projectDB->getSearchTableNames();
+                bool isMzkitchenFile = tableNames.contains(QString("rumsDB")) || tableNames.contains(QString("clamDB"));
+                projectDB->closeDatabaseConnection();
+                delete(projectDB);
 
-                if (!setRumsDBDialog->isCancelled()) {
-                    qDebug() << "rumsDB spectral library: " << rumsDBDatabaseName;
+                if (isMzkitchenFile) {
+                    setRumsDBDialog  = new SetRumsDBDialog(this);
+                    setRumsDBDialog->exec();
+
+                    if (!setRumsDBDialog->isCancelled()) {
+                        qDebug() << "rumsDB spectral library: " << rumsDBDatabaseName;
+                        projectDockWidget->loadProjectSQLITE(filename);
+                    }
+                } else {
                     projectDockWidget->loadProjectSQLITE(filename);
                 }
+
             }
         }
         return;
@@ -1095,11 +1122,12 @@ void MainWindow::readSettings() {
     if( ! settings->contains("ionizationMode") )
         settings->setValue("ionizationMode",-1);
 
-    if( ! settings->contains("C13Labeled") )
-        settings->setValue("C13Labeled",2);
+    //Issue 372: Do not check any isotopes by default
+//    if( ! settings->contains("C13Labeled") )
+//        settings->setValue("C13Labeled",2);
 
-    if( ! settings->contains("N15Labeled") )
-        settings->setValue("N15Labeled",2);
+//    if( ! settings->contains("N15Labeled") )
+//        settings->setValue("N15Labeled",2);
 
     if( ! settings->contains("isotopeC13Correction") )
         settings->setValue("isotopeC13Correction",2);
@@ -1258,6 +1286,9 @@ void MainWindow::createMenus() {
 
     connect(SRMTransitionListWidget, SIGNAL(clicked(bool)), SLOT(showSRMList()));
     connect(SRMTransitionListWidget, SIGNAL(toggled(bool)), srmTransitionDockWidget, SLOT(setVisible(bool)));
+
+    connect(libraryDialog, SIGNAL(loadLibrarySignal(QString)), SLOT(showSRMList()));
+    connect(libraryDialog, SIGNAL(afterUnloadedLibrarySignal(QString)), SLOT(showSRMList()));
 
     widgetsMenu->addSeparator();
 
@@ -1563,7 +1594,7 @@ void MainWindow::setMs3PeakGroup(PeakGroup* parentGroup, PeakGroup* childGroup) 
 
             Ms3Compound ms3Compound(parentGroup->compound);
 
-            int ms2MzKey = mzUtils::mzToIntKey(static_cast<double>(childGroup->meanMz));
+            int ms2MzKey = static_cast<int>(mzUtils::mzToIntKey(static_cast<double>(childGroup->meanMz)));
 
             //avoid possible rounding problems by identifying index from map based on closest value
             int mzKeyFromMap = -1;
@@ -1605,7 +1636,23 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
     qDebug() << "MainWindow::setPeakGroup(PeakGroup)" << group;
 
     if (!group) return;
-    if (_lastSelectedPeakGroup == group) return;
+
+    //Issue 373: Compare values pointed to, not the pointers themselves (implementation-defined behavior)
+    if (_lastSelectedPeakGroup && *_lastSelectedPeakGroup == *group){
+
+        bool isEqual = true;
+
+        //Also need to check the compounds and adducts
+        if (_lastSelectedPeakGroup->compound && group->compound && _lastSelectedPeakGroup->compound->id != group->compound->id) {
+            isEqual = false;
+        }
+
+        if (_lastSelectedPeakGroup->adduct && group->adduct && _lastSelectedPeakGroup->adduct->name != group->adduct->name) {
+            isEqual = false;
+        }
+
+        if (isEqual) return;
+    }
 
     _lastSelectedPeakGroup = group;
 
@@ -1767,7 +1814,6 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> MainWindow::getSrmSlices() {
             if (srms.contains(filterLine))  continue;
             srms.insert(filterLine);
 
-
             mzSlice* s = new mzSlice(0,0,0,0);
             s->srmId = scan->filterLine.c_str();
             slices.push_back(s);
@@ -1838,7 +1884,12 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> MainWindow::getSrmSlices() {
 
             srmTransition->mzSlices.push_back(make_pair(sample, s));
 
-            if (compound) srmTransition->compound = compound;
+            if (compound){
+                srmTransition->compound = compound;
+                if (compound->expectedRt > 0) {
+                    srmTransition->rt = compound->expectedRt;
+                }
+            }
             if (adduct) srmTransition->adduct = adduct;
 
             srmTransitions[srmKey] = srmTransition;

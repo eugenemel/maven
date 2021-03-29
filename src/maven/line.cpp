@@ -8,7 +8,11 @@ EicLine::EicLine(QGraphicsItem* parent, QGraphicsScene *scene):QGraphicsItem(par
     _endsFixed=false;
     _fillPath=false;
     _closePath=true;
-    _eic=NULL;
+    _eic=nullptr;
+
+    //Issue 374
+    _emphasizePoints = false;
+
     if(scene) scene->addItem(this);
 }
 
@@ -35,6 +39,23 @@ void EicLine::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
     if (_fillPath) painter->drawPolygon(_line);
     //else painter->drawPolyline(_line);
     else painter->drawLines(_line);
+
+    if (_emphasizePoints) {
+
+        painter->setPen(QPen(Qt::black));//TODO: dark mode
+        painter->setBrush(QBrush(Qt::black));//TODO: dark mode
+
+        int paintDiameter = 5;
+
+        //blackPen.setWidth(blackPen.width() + 5) ;
+
+        for (auto& point : _line) {
+            painter->drawEllipse(static_cast<int>(point.x()-paintDiameter/2),
+                                 static_cast<int>(point.y()-paintDiameter/2),
+                                 paintDiameter,
+                                 paintDiameter);
+        }
+    }
 
 }
 

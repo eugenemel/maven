@@ -1086,6 +1086,9 @@ void BackgroundPeakUpdate::processSRMTransitions(vector<SRMTransition*>& transit
             groupCount++;
             peakCount += group.peakCount();
 
+            group.compound = transition->compound;
+            group.adduct = transition->adduct;
+
             if (featureMatchRtFlag && group.compound && group.compound->expectedRt>0) {
                 float rtDiff =  static_cast<float>(abs(group.compound->expectedRt - (group.meanRt)));
                 group.expectedRtDiff = rtDiff;
@@ -1093,8 +1096,9 @@ void BackgroundPeakUpdate::processSRMTransitions(vector<SRMTransition*>& transit
                 if (group.expectedRtDiff > featureCompoundMatchRtTolerance) continue;
             }
 
-            group.compound = transition->compound;
-            group.adduct = transition->adduct;
+            group._type = PeakGroup::GroupType::SRMTransitionType;
+            group.srmPrecursorMz = transition->precursorMz;
+            group.srmProductMz = transition->productMz;
 
             groupsToAppend.push_back(&group);
         }

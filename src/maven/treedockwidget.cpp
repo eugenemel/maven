@@ -153,7 +153,8 @@ void TreeDockWidget::setInfo(vector<SRMTransition*>& srmTransitions) {
         item->setText(2, retentionTime);
         item->setText(3, compoundName);
         item->setText(4, adductName);
-        item->setText(5, QString::number(srmTransition->mzSlices.size()));
+        item->setText(5, QString::number(srmTransition->mzSlices.size())); //# scans
+        item->setText(6, QString::number(srmTransition->getSamples().size())); // # samples
     }
 }
 
@@ -553,7 +554,7 @@ void TreeDockWidget::setupConsensusScanListHeader() {
 
 void TreeDockWidget::setupSRMTransitionListHeader() {
     QStringList colNames;
-    colNames << "Precursor m/z" << "Product m/z" << "RT" << "Compound" << "Adduct" << "# samples";
+    colNames << "Precursor m/z" << "Product m/z" << "RT" << "Compound" << "Adduct" << "# scans" << "# samples";
     treeWidget->setColumnCount(colNames.size());
     treeWidget->setHeaderLabels(colNames);
     treeWidget->setSortingEnabled(true);
@@ -684,20 +685,22 @@ void TreeDockWidget::setInfo(PeakGroup* group) {
 
 
 bool TreeDockWidget::hasPeakGroup(PeakGroup* group) {
-    if (treeWidget == NULL) return true;
+    if (treeWidget == nullptr) return true;
     for(int i=0; i < treeWidget->topLevelItemCount();i++ ) {
+
         QTreeWidgetItem* item = treeWidget->topLevelItem(i);
         if ( item->type() != PeakGroupType ) continue;
         QVariant v = item->data(0,Qt::UserRole);
         PeakGroup*  g = v.value<PeakGroup*>();
-        if (g && g == group ) return true;
+
+        if (g && group && *g == *group ) return true;
 
         for(int j=0; j < item->childCount();j++ ) {
             QTreeWidgetItem* item2 = item->child(j);
             if ( item2->type() != PeakGroupType ) continue;
             QVariant v = item2->data(0,Qt::UserRole);
             PeakGroup*  g = v.value<PeakGroup*>();
-            if (g && g == group ) return true;
+            if (g && group && *g == *group ) return true;
         }
     }
     return false;

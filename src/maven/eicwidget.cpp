@@ -55,6 +55,8 @@ EicWidget::EicWidget(QWidget *p) {
 
 	connect(scene(), SIGNAL(selectionChanged()), SLOT(selectionChangedAction()));
 
+    connect(getMainWindow()->libraryDialog, SIGNAL(unloadLibrarySignal(QString)), SLOT(disconnectCompounds(QString)));
+
 }
 
 EicWidget::~EicWidget() {
@@ -143,6 +145,12 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
 	//qDebug << "Integrating area from " << rtmin << " to " << rtmax;
 
     if (_integratedGroup){
+
+        //Issue 373: before calling delete, avoid possible dangling pointer bad access
+        if (_alwaysDisplayGroup && *_integratedGroup == *_alwaysDisplayGroup){
+            _alwaysDisplayGroup = nullptr;
+        }
+
         delete(_integratedGroup);
         _integratedGroup = nullptr;
     }
@@ -160,8 +168,30 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
     //Issue 280:
     //This information is updated every time a new peak group is selected from a peaks list table (tabledockwidget).
     if (_alwaysDisplayGroup) {
+
+        //Issue 369 debugging START
+
+        qDebug() << "EicWidget::integrateRegion() _alwaysDisplayGroup data:";
+        qDebug() << "EicWidget::integrateRegion() _alwaysDisplayGroup->meanMz=" << _alwaysDisplayGroup->meanMz;
+        qDebug() << "EicWidget::integrateRegion() _alwaysDisplayGroup->meanRt=" << _alwaysDisplayGroup->meanRt;
+        qDebug() << "EicWidget::integrateRegion() (m/z, RT) = ["
+                 << _alwaysDisplayGroup->minMz << "-" << _alwaysDisplayGroup->maxMz
+                 << "], ["
+                 << _alwaysDisplayGroup->minRt << "-" << _alwaysDisplayGroup->maxRt
+                 << "]";
+        if(_alwaysDisplayGroup->compound) qDebug() << "EicWidget::integrateRegion() _alwaysDisplayGroup->compound=" << _alwaysDisplayGroup->compound->name.c_str();
+        if(!_alwaysDisplayGroup->compound) qDebug() << "EicWidget::integrateRegion() _alwaysDisplayGroup->compound= nullptr";
+        if (_alwaysDisplayGroup->adduct){
+            qDebug() << "EicWidget::integrateRegion() _alwaysDisplayGroup->adduct=" << _alwaysDisplayGroup->adduct->name.c_str();
+        } else {
+            qDebug() << "EicWidget::integrateRegion() _alwaysDisplayGroup->adduct= nullptr";
+        }
+
+        //Issue 369 debugging END
+
         _integratedGroup->labels = _alwaysDisplayGroup->labels;
         _integratedGroup->fragMatchScore.mergedScore = _alwaysDisplayGroup->fragMatchScore.mergedScore;
+        qDebug() << "EicWidget::integrateRegion(): _integratedGroup assigned _alwaysDisplayGroup->labels and ->fragMatchScore.mergedScore.";
     }
 
 	for(int i=0; i < eics.size(); i++ ) {
@@ -204,12 +234,20 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
 
     _integratedGroup->groupRank = 0.0f;
 
+    //Issue 368: record fact that this group created with SRMTransition
+    if (_slice.isSrmTransitionSlice()){
+        _integratedGroup->_type = PeakGroup::GroupType::SRMTransitionType;
+        _integratedGroup->srmPrecursorMz = _slice.srmPrecursorMz;
+        _integratedGroup->srmProductMz = _slice.srmProductMz;
+    }
+
     setSelectedGroup(_integratedGroup);
 
     getMainWindow()->bookmarkPeakGroup(_integratedGroup);
     PeakGroup* lastBookmark = getMainWindow()->getBookmarkTable()->getLastBookmarkedGroup();
 
     if (lastBookmark and lastBookmark->compound) {
+            qDebug() << "getMainWindow()->isotopeWidget->setPeakGroup(): " << lastBookmark;
            getMainWindow()->isotopeWidget->setPeakGroup(lastBookmark);
            setSelectedGroup(lastBookmark);
 
@@ -355,13 +393,14 @@ void EicWidget::cleanup() {
 	clearPlot();
 }
 
-void EicWidget::computeEICs() {
+void EicWidget::computeEICs(bool isUseSampleBoundsRT) {
  	qDebug() << " EicWidget::computeEICs()";
     QTime timerX; timerX.start();
     vector <mzSample*> samples = getMainWindow()->getVisibleSamples();
     if (samples.size() == 0) return;
 
-    QSettings *settings 		= getMainWindow()->getSettings();
+    //EIC Parameters
+    QSettings *settings = getMainWindow()->getSettings();
 
     float eic_smoothingWindow = settings->value("eic_smoothingWindow").toDouble();
     int   eic_smoothingAlgorithm = settings->value("eic_smoothingAlgorithm").toInt();
@@ -371,22 +410,22 @@ void EicWidget::computeEICs() {
     int baseline_quantile =  settings->value("baseline_quantile").toInt();
     string scanFilterString = settings->value("txtEICScanFilter", "").toString().toStdString();
 
-   //qDebug << "eic_smoothingAlgorithm=" << eic_smoothingAlgorithm;
-
-	mzSlice slice = _slice;
-	mzSlice bounds  = visibleSamplesBounds();
-	slice.rtmin=bounds.rtmin;
-	slice.rtmax=bounds.rtmax;
+    //Slice adjustments
+    if (isUseSampleBoundsRT) {
+        mzSlice bounds  = visibleSamplesBounds();
+        _slice.rtmin=bounds.rtmin;
+        _slice.rtmax=bounds.rtmax;
+    }
 
     //Issue 22: TODO: this is a bandaid, does not address fundamental problem!
     //fix suggested by Eugene (2019-06-12)
-    if(slice.mzmin > slice.mzmax){
-        std::swap(slice.mzmin,slice.mzmax);
+    if(_slice.mzmin > _slice.mzmax){
+        std::swap(_slice.mzmin,_slice.mzmax);
         qDebug() << "swapping slice.mzmin and slice.mzmax.";
     } // why????
 
     //get eics
-     eics = BackgroundPeakUpdate::pullEICs(&slice,
+     eics = BackgroundPeakUpdate::pullEICs(&_slice,
                                               samples,
                                               EicLoader::PeakDetection,
                                               eic_smoothingWindow,
@@ -396,7 +435,7 @@ void EicWidget::computeEICs() {
                                               baseline_smoothing,
                                               baseline_quantile,
                                               scanFilterString,
-                                              _srmMzKey             //Issue 347
+                                              _slice.getSrmMzKey() //Issue 368
                                            );
 
 	//find peaks
@@ -407,17 +446,14 @@ void EicWidget::computeEICs() {
     //interpolate EIC
     //for(int i=0; i < eics.size(); i++ ) eics[i]->interpolate();
 
-        qDebug() << "\tcomputeEICs() pullEics().. msec=" << timerX.elapsed();
+    qDebug() << "\tcomputeEICs() pullEics().. msec=" << timerX.elapsed();
 
     //group peaks
-        groupPeaks();
+    groupPeaks();
 
-    qDebug() << "\tgroupPeaks() msec="<< timerX.elapsed();
+    qDebug() << "\tgroupPeaks().. msec="<< timerX.elapsed();
     qDebug() << "\tcomputeEICs() Done.";
 
-    if (_slice.compound)  for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].compound = _slice.compound;
-    if (_slice.adduct) for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].adduct = _slice.adduct;
-	if (!_slice.srmId.empty()) for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].srmId = _slice.srmId;
 }
 
 mzSlice EicWidget::visibleEICBounds() {
@@ -991,6 +1027,7 @@ void EicWidget::replot(PeakGroup* group) {
 }	
 
 void EicWidget::setTitle() {
+
     QFont font = QApplication::font();
 
     int pxSize = scene()->height()*0.03;
@@ -1011,7 +1048,7 @@ void EicWidget::setTitle() {
     }
 
     QString titleText;
-    if (_srmMzKey.first > 0.0f && _srmMzKey.second > 0.0f) {
+    if (_slice.isSrmTransitionSlice()) {
 
         if (_slice.compound) {
             tagString = QString(_slice.compound->name.c_str());
@@ -1026,8 +1063,8 @@ void EicWidget::setTitle() {
 
         titleText =  tr("<b>%1</b> precursor m/z: %2 product m/z: %3").arg(
                     tagString,
-                    QString::number(_srmMzKey.first, 'f', 4),
-                    QString::number(_srmMzKey.second, 'f', 4)
+                    QString::number(static_cast<double>(_slice.srmPrecursorMz), 'f', 4),
+                    QString::number(static_cast<double>(_slice.srmProductMz), 'f', 4)
                     );
     } else {
         titleText =  tr("<b>%1</b> m/z: %2-%3").arg(
@@ -1056,10 +1093,10 @@ void EicWidget::setTitle() {
     }
 }
 
-void EicWidget::recompute(){
+void EicWidget::recompute(bool isUseSampleBoundsRT){
     qDebug() <<" EicWidget::recompute()";
     cleanup(); //more clean up
-    computeEICs();	//retrieve eics
+    computeEICs(isUseSampleBoundsRT);	//retrieve eics
 }
 
 void EicWidget::wheelEvent(QWheelEvent *event) {
@@ -1284,16 +1321,15 @@ void EicWidget::showAllPeaks() {
     qDebug() <<"EicWidget::showAllPeaks()";
 
     if (_groupPeaks) {
-        for(int i=0; i < peakgroups.size(); i++ ) {
+        for(unsigned int i=0; i < peakgroups.size(); i++ ) {
             PeakGroup& group = peakgroups[i];
             addPeakPositions(&group);
         }
     }
 
     //Issue 177: Always show this group if any peaks are shown, and the window allows for it
-    if (_alwaysDisplayGroup &&
-            _alwaysDisplayGroup->minMz >= _slice.mzmin && _alwaysDisplayGroup->maxMz <= _slice.mzmax &&
-            _alwaysDisplayGroup->minRt >= _slice.rtmin && _alwaysDisplayGroup->maxRt <= _slice.rtmax) {
+    //Issue 367: Even if the window doesn't show all of the peaks for the group (as in zooming in)
+    if (_alwaysDisplayGroup) {
         addPeakPositions(_alwaysDisplayGroup);
     }
     qDebug() <<"EicWidget::showAllPeaks() completed";
@@ -1303,6 +1339,12 @@ void EicWidget::addPeakPositions(PeakGroup* group) {
 
         if (!_showPeaks) return;
         if (!group) return;
+
+        if (_slice.isSrmTransitionSlice()) {
+            group->_type = PeakGroup::GroupType::SRMTransitionType;
+            group->srmPrecursorMz = _slice.srmPrecursorMz;
+            group->srmProductMz = _slice.srmProductMz;
+        }
 
         //Issue 177: ensure that each group is not added more than once
         bool isFoundGroup = false;
@@ -1403,7 +1445,7 @@ void EicWidget::setRtWindow(float rtmin, float rtmax ) {
 void EicWidget::setSrmId(string srmId) { 
  //qDebug <<"EicWidget::setSrmId(string srmId) "; 
          //qDebug << "EicWidget::setSrmId" <<  srmId.c_str();
-	_slice.compound = NULL;
+    _slice.compound = nullptr;
 	_slice.srmId = srmId;
    	recompute();
 	resetZoom();
@@ -1411,10 +1453,18 @@ void EicWidget::setSrmId(string srmId) {
 }
 
 void EicWidget::setCompound(Compound* c, Adduct* adduct) {
+    qDebug() << "EicWidget::setCompound() compound=" << c << ", adduct=" << adduct;
     if (!c) return;
     if ( getMainWindow()->sampleCount() == 0) return;
 
-    _alwaysDisplayGroup = nullptr; // Issue 280
+    // Issue 280
+    _alwaysDisplayGroup = nullptr;
+
+    //Issue 367: Copying approach may cause other problems
+//    if (_alwaysDisplayGroup) {
+//        delete(_alwaysDisplayGroup);
+//        _alwaysDisplayGroup = nullptr;
+//    }
 
     vector <mzSample*> samples = getMainWindow()->getVisibleSamples();
     if (samples.size() == 0 ) return;
@@ -1474,52 +1524,38 @@ void EicWidget::setCompound(Compound* c, Adduct* adduct) {
 
 void EicWidget::setMzSlice(const mzSlice& slice) {
     qDebug() << "EicWidget::setmzSlice()";
-    if ( slice.mzmin != _slice.mzmin || slice.mzmax != _slice.mzmax  || slice.srmId != _slice.srmId || slice.compound != _slice.compound ) {
-        _slice = slice;
+    _slice = mzSlice(slice);
 
-        if ( slice.compound ) {
-            //SRM DATA
-            if (slice.compound->precursorMz !=0 && slice.compound->productMz>0) {
-                _slice.mzmin =   slice.compound->precursorMz;
-                _slice.mzmax =   slice.compound->productMz;
-                _slice.mz    =   slice.compound->precursorMz;
-                _slice.compound= slice.compound;
-                _slice.srmId  =  slice.srmId;
+    recompute();
+    //TODO: don't recompute if not necessary.
 
-                if (slice.adduct) _slice.adduct = slice.adduct;
-            }
-        }
-        recompute();
-    } else {
-        _slice = slice;
-    }
     replot(nullptr);
 }
 
 void EicWidget::setSRMTransition(const SRMTransition& transition){
     qDebug() << "EicWidget::setSRMTransition()";
 
-    _srmMzKey = make_pair(transition.precursorMz, transition.productMz);
+    //Issue 367: Changing SRM transition should remove any memory of any previous displayed peak.
+    _alwaysDisplayGroup = nullptr;
+
+    //Issue 367: making a copy of the peak group to always display may fix the crashing issue,
+    //but potentially causes other problems
+    //
+//    if (_alwaysDisplayGroup) {
+//        delete(_alwaysDisplayGroup);
+//        _alwaysDisplayGroup = nullptr;
+//    }
 
     //update slice data
-    _slice.compound = transition.compound;
-    _slice.adduct = transition.adduct;
-    _slice.mzmin = transition.precursorMz;
-    _slice.mzmax = transition.productMz;
-    _slice.mz = transition.precursorMz;
+    setMzSlice(mzSlice(transition));
+    //note: this calls replot()
 
-    recompute();
-
-    replot(nullptr);
-
-    //reset this key to avoid any collisions when using EIC widget to plot other data types
-    _srmMzKey = make_pair(0.0f, 0.0f);
 }
 
 void EicWidget::setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax ) {
-    //qDebug << "EicWidget::setMzRtWindow()";
-    mzSlice slice(mzmin,mzmax,rtmin,rtmax);
-	setMzSlice(slice);
+    qDebug() << "EicWidget::setMzRtWindow()";
+
+    setMzSlice(mzSlice(mzmin,mzmax,rtmin,rtmax));
 }
 
 void EicWidget::setPeakGroup(PeakGroup* group) {
@@ -1529,6 +1565,11 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
         qDebug() << "EicWidget::setPeakGroup() group data:";
         qDebug() << "EicWidget::setPeakGroup() group->meanMz=" << group->meanMz;
         qDebug() << "EicWidget::setPeakGroup() group->meanRt=" << group->meanRt;
+        qDebug() << "EicWidget::setPeakGroup() (m/z, RT) = ["
+                 << group->minMz << "-" << group->maxMz
+                 << "], ["
+                 << group->minRt << "-" << group->maxRt
+                 << "]";
         if(group->compound) qDebug() << "EicWidget::setPeakGroup() group->compound=" << group->compound->name.c_str();
         if(!group->compound) qDebug() << "EicWidget::setPeakGroup() group->compound= nullptr";
         if (group->adduct){
@@ -1539,6 +1580,16 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
     }
 
     _alwaysDisplayGroup = group;
+
+    //Issue 367: copying approach may cause other problems
+//    if (_alwaysDisplayGroup) {
+//        delete(_alwaysDisplayGroup);
+//        _alwaysDisplayGroup = nullptr;
+//    }
+
+//    if (group) {
+//        _alwaysDisplayGroup = new PeakGroup(*group);
+//    }
 
     if (!group) return;
 
@@ -1551,26 +1602,38 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
         setSrmId(group->srmId);
     }
 
-    if ( _autoZoom && group->parent) {
-        _slice.rtmin = group->parent->minRt- 2 * _zoomFactor;
-        _slice.rtmax = group->parent->maxRt+ 2 * _zoomFactor;
-    } else if (_autoZoom) {
-        _slice.rtmin = group->minRt- 2 * _zoomFactor;
-        _slice.rtmax = group->maxRt+ 2 * _zoomFactor;
+    if (group->_type == PeakGroup::GroupType::SRMTransitionType) {
+        _slice.srmPrecursorMz = group->srmPrecursorMz;
+        _slice.srmProductMz = group->srmProductMz;
     }
 
-    //make sure that plot region is within visible sample bounds
-    mzSlice bounds = visibleEICBounds();
-    if (_slice.rtmin < bounds.rtmin ) _slice.rtmin = bounds.rtmin;
-    if (_slice.rtmax > bounds.rtmax ) _slice.rtmax = bounds.rtmax;
+    //TODO: how is _autoZoom used? switching to 5x peak width approach (Issue 368)
+//    if ( _autoZoom && group->parent) {
+//        _slice.rtmin = group->parent->minRt- 2 * _zoomFactor;
+//        _slice.rtmax = group->parent->maxRt+ 2 * _zoomFactor;
+//    } else if (_autoZoom) {
+//        _slice.rtmin = group->minRt- 2 * _zoomFactor;
+//        _slice.rtmax = group->maxRt+ 2 * _zoomFactor;
+//    }
 
+    //use 5x peak width for display, or at least 6 seconds, or no more than 3 minutes
+    float peakWidth = group->maxRt - group->minRt;
+    if (peakWidth < 0.1f) peakWidth = 0.1f;
+    if (peakWidth > 3.0f) peakWidth = 3.0f;
+
+    _slice.rtmin = max(group->minRt - 2 * peakWidth, 0.0f);
+    _slice.rtmax = min(getMainWindow()->getVisibleSamplesMaxRt(), group->maxRt + 2 * peakWidth);
+
+    //TODO: Delete me?
+//    //make sure that plot region is within visible sample bounds
+//    mzSlice bounds = visibleEICBounds();
+//    if (_slice.rtmin < bounds.rtmin ) _slice.rtmin = bounds.rtmin;
+//    if (_slice.rtmax > bounds.rtmax ) _slice.rtmax = bounds.rtmax;
 
     _slice.mz = group->meanMz;
-    if ( group->minMz != _slice.mzmin || group->maxMz != _slice.mzmax ) {
-        _slice.mzmin = group->minMz;
-        _slice.mzmax = group->maxMz;
-        recompute();
-    }
+    _slice.mzmin = group->minMz;
+    _slice.mzmax = group->maxMz;
+    recompute(false); // use peak group RT bounds
 
     if (group->compound)  for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].compound = group->compound;
     if (group->adduct) for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].adduct = group->adduct;
@@ -1615,6 +1678,17 @@ void EicWidget::groupPeaks() {
     //peakgroups = EIC::groupPeaksB(eics, eic_smoothingWindow, grouping_maxRtWindow, minSmoothedPeakIntensity);
 
     EIC::removeLowRankGroups(peakgroups,50);
+
+    for (auto& pg : peakgroups) {
+        if (_slice.compound) {pg.compound = _slice.compound;}
+        if (_slice.adduct) { pg.adduct= _slice.adduct;}
+        if (!_slice.srmId.empty()) {pg.srmId = _slice.srmId;}
+        if (!_slice.isSrmTransitionSlice()) {
+            pg.srmPrecursorMz = _slice.srmPrecursorMz;
+            pg.srmProductMz = _slice.srmProductMz;
+            pg.setType(PeakGroup::GroupType::SRMTransitionType);
+        }
+    }
 }
 
 void EicWidget::print(QPaintDevice* printer) {
@@ -1959,7 +2033,7 @@ void EicWidget::addMS2Events(float mzmin, float mzmax) {
                 p->setSize(30);
                 p->setColor(color);
                 p->setZValue(1000);
-                p->setPeakGroup(NULL);
+                p->setPeakGroup(nullptr);
                 scene()->addItem(p);
                 count++;
             }
@@ -1968,4 +2042,34 @@ void EicWidget::addMS2Events(float mzmin, float mzmax) {
 
     qDebug() << "addMS2Events()  found=" << count;
 
+}
+
+void EicWidget::disconnectCompounds(QString libraryName){
+    qDebug() << "EicWidget::disconnectCompounds():" << libraryName;
+
+    for (auto peakGroup : getPeakGroups()) {
+        if (peakGroup.compound && (libraryName == "ALL" || peakGroup.compound->db == libraryName.toStdString())) {
+            peakGroup.compound = nullptr;
+            peakGroup.adduct = nullptr;
+        }
+    }
+
+    if (getSelectedGroup() && getSelectedGroup()->compound &&
+            (libraryName == "ALL" || getSelectedGroup()->compound->db == libraryName.toStdString())) {
+           _selectedGroup.compound = nullptr;
+           _selectedGroup.adduct = nullptr;
+    }
+
+    if (_alwaysDisplayGroup && _alwaysDisplayGroup->compound &&
+            (libraryName == "ALL" || _alwaysDisplayGroup->compound->db == libraryName.toStdString())) {
+            _alwaysDisplayGroup->compound = nullptr;
+            _alwaysDisplayGroup->adduct = nullptr;
+    }
+
+    if (_slice.compound && (libraryName == "ALL" || _slice.compound->db == libraryName.toStdString())) {
+        _slice.compound = nullptr;
+        _slice.adduct = nullptr;
+    }
+
+    replot();
 }

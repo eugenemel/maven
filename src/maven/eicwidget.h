@@ -37,8 +37,10 @@ public:
 public slots:
     void setMzSlice(float mz);
     void setPPM(double ppm);
+
     void resetZoom(bool isReplot=true);
     void zoom(float factor);
+
     void setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax);
     void setMzSlice(const mzSlice& slice);
     void setSRMTransition(const SRMTransition& transition);
@@ -47,6 +49,7 @@ public slots:
     void setPeakGroup(PeakGroup* group);
     void setCompound(Compound* c, Adduct* a);
     void setSelectedGroup(PeakGroup* group);
+
     void addEICLines(bool showSpline);
     void addCubicSpline();
     void addBaseLine();
@@ -63,7 +66,7 @@ public slots:
     void addFitLine(PeakGroup*);
     void addMS2Events(float mzmin, float mzmax);
     void integrateRegion(float rtmin, float rtmax);
-    void recompute();
+    void recompute(bool isUseSampleBoundsRT=true);
     void replot(PeakGroup*);
     void replot();
     void replotForced();
@@ -85,6 +88,7 @@ public slots:
     void showEICLines(bool f) { _showEICLines=f; }
     void automaticPeakGrouping(bool f) { _groupPeaks=f; }
     void showMS2Events(bool f) { _showMS2Events=f; }
+    void disconnectCompounds(QString libraryName);
 
 
     void startAreaIntegration() { toggleAreaIntegration(true); }
@@ -188,8 +192,6 @@ private:
 
     PeakGroup*  _integratedGroup;		 //manually integrated peak group
     PeakGroup*  _alwaysDisplayGroup;     //always display this group, whether or not grouping is enabled
-    
-    pair<float, float> _srmMzKey = make_pair(0.0f, 0.0f);       //Issue 347
 
     //gui related
     QWidget *parent;
@@ -199,7 +201,7 @@ private:
     QVector<QGraphicsLineItem*> _focusLines;
 
     void showPeak(float freq, float amplitude);
-    void computeEICs();
+    void computeEICs(bool isUseSampleBoundsRT=true);
     void cleanup();		//deallocate eics, fragments, peaks, peakgroups
     void clearPlot();	//removes non permenent graphics objects
     void findPlotBounds(); //find _minX, _maxX...etc

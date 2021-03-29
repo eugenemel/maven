@@ -1,21 +1,21 @@
 matrix:
   include:
   - os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
   - os: osx
     osx_image: xcode11.2
 addons:
   apt:
     sources:
-    - sourceline: ppa:beineri/opt-qt591-trusty
+    - sourceline: ppa:beineri/opt-qt59-xenial
     packages:
     - qt59-meta-minimal
     - mesa-common-dev
     - libgl1-mesa-dev
     - libsqlite3-dev
     - libmysqlclient-dev
-    - libssl1.0.0
+    #- libssl1.0.0
     - libssl-dev
     - desktop-file-utils
 before_install:

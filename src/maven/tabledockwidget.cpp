@@ -537,8 +537,17 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     item->setText(groupViewColumnNameToNumber.at("ID"), groupTagString(group));     //ID
     item->setText(groupViewColumnNameToNumber.at("Compound"), compoundText);        //Compound
     item->setText(groupViewColumnNameToNumber.at("Adduct"), adductText);            //Adduct
-    item->setText(groupViewColumnNameToNumber.at("m/z"),
-                  QString::number(group->meanMz, 'f', 4));                          //m/z
+
+    if (group->_type == PeakGroup::GroupType::SRMTransitionType) {
+        item->setText(groupViewColumnNameToNumber.at("m/z"),
+                      QString::number(group->srmPrecursorMz, 'f', 4));              //SRM precursor m/z
+    } else {
+        item->setText(groupViewColumnNameToNumber.at("m/z"),
+                      QString::number(group->meanMz, 'f', 4));                      //m/z
+    }
+
+
+
     item->setText(groupViewColumnNameToNumber.at("RT"),
                   QString::number(group->meanRt, 'f', 2));                          //RT
 
@@ -548,8 +557,15 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     }
 
     if (viewType == groupView) {
-        item->setText(groupViewColumnNameToNumber.at("MS2 Score"),
-                QString::number(group->fragMatchScore.mergedScore));                //MS2 Score
+
+        if (group->_type == PeakGroup::GroupType::SRMTransitionType) {
+            item->setText(groupViewColumnNameToNumber.at("MS2 Score"),
+                          QString::number(group->srmProductMz, 'f', 4));           //SRM product m/z
+        }  else {
+            item->setText(groupViewColumnNameToNumber.at("MS2 Score"),
+                    QString::number(group->fragMatchScore.mergedScore));           //MS2 Score
+        }
+
         item->setText(groupViewColumnNameToNumber.at("Rank"),
                       QString::number(group->groupRank,'f',3));                     //Rank
         item->setText(groupViewColumnNameToNumber.at("Charge"),
@@ -597,10 +613,11 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
 }
 
 bool TableDockWidget::hasPeakGroup(PeakGroup* group) {
-    for(int i=0; i < allgroups.size(); i++ ) {
-        if ( &allgroups[i] == group ) return true;
-        if ((double) std::abs(group->meanMz - allgroups[i].meanMz) < 1e-5 && (double)
-            std::abs(group->meanRt-allgroups[i].meanRt) < 1e-5) {
+    for(unsigned int i=0; i < allgroups.size(); i++ ) {
+        if ( allgroups[i] == *group ) return true;
+        if (static_cast<double>(std::abs(group->meanMz - allgroups[i].meanMz)) < 1e-5 &&
+                static_cast<double>(std::abs(group->meanRt-allgroups[i].meanRt)) < 1e-5
+            ) {
             return true;
         }
     }
@@ -653,6 +670,7 @@ PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, boo
     allgroups.push_back(*group);
 
     if (isDeletePeakGroupPtr){
+       //qDebug() << "TableDockWidget::addPeakGroup() Deleting group: " << group;
        delete(group);
        group = nullptr;
     }

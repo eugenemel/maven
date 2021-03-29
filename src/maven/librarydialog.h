@@ -22,6 +22,7 @@ protected:
 signals:
     void loadLibrarySignal(QString);
     void unloadLibrarySignal(QString);
+    void afterUnloadedLibrarySignal(QString);
 
 public slots:
     void show();

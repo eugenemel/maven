@@ -265,18 +265,24 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                         tagString varchar(254),\
                         metaGroupId integer,\
                         expectedRtDiff real,\
+                        \
                         groupRank int,\
                         label varchar(10),\
                         type integer,\
                         srmId varchar(254),\
                         ms2EventCount int,\
+                        \
                         ms2Score real,\
                         adductName varchar(32),\
                         compoundId varchar(254),\
                         compoundName varchar(254),\
                         compoundDB varchar(254),\
+                        \
                         searchTableName varchar(254),\
-                        displayName varchar(254)\
+                        displayName varchar(254),\
+                        \
+                        srmPrecursorMz real,\
+                        srmProductMz real\
                         )");
 
      if(!query0.exec(TABLESQL)) qDebug() << query0.lastError();
@@ -285,12 +291,18 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                                  (groupId,parentGroupId,tagString,metaGroupId,expectedRtDiff, \
                                     groupRank,label,type,srmId,ms2EventCount, \
                                     ms2Score,adductName,compoundId,compoundName,compoundDB,\
-                                    searchTableName,displayName)\
+                                    searchTableName,displayName,\
+                                    srmPrecursorMz,srmProductMz\
+                                  )\
                                     \
-                                 values(NULL,?,?,?,?,\
+                                 values\
+                                 (NULL,?,?,?,?,\
                                     ?,?,?,?,?,\
                                     ?,?,?,?,?,\
-                                    ?,?)");
+                                    ?,?,\
+                                    ?,?\
+                                  )\
+                                 ");
 
      //cerr << "inserting .. " << g->groupId << endl;
 	 QSqlQuery query1(sqlDB);
@@ -337,12 +349,15 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
             query1.addBindValue(QString());
         }
 
+        query1.addBindValue(g->srmPrecursorMz);
+        query1.addBindValue(g->srmProductMz);
+
      if(! query1.exec() ) {
         qDebug() << query1.lastError();
      }
      int lastInsertGroupId = query1.lastInsertId().toString().toInt();
 
-     if (tableName == "rumsDB") {
+     if (tableName == "rumsDB" || tableName== "clamDB") {
          rumsDBOldToNewGroupIDs.insert(make_pair(g->groupId, lastInsertGroupId));
      } else if (tableName == "Bookmarks") {
          bookmarksOldToNewGroupIDs.insert(make_pair(g->groupId, lastInsertGroupId));
@@ -545,11 +560,22 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
         }
 
         bool isHasDisplayName = false;
+        bool isHasSrmPrecursorMz = false;
+        bool isHasSrmProductMz = false;
         while (queryCheckCols.next()) {
-        if ("displayName" == queryCheckCols.value(1).toString()) {
+            if ("displayName" == queryCheckCols.value(1).toString()) {
                 isHasDisplayName = true;
+            } else if ("srmPrecursorMz" == queryCheckCols.value(1).toString()) {
+                isHasSrmPrecursorMz = true;
+            } else if ("srmProductMz" == queryCheckCols.value(1).toString()) {
+                isHasSrmProductMz = true;
             }
         }
+
+        qDebug() << "ProjectDB::loadPeakGroups(): "
+                 << "isHasDisplayName? " << isHasDisplayName
+                 << "isHasSrmPrecursorMz? " << isHasSrmPrecursorMz
+                 << "isHasSrmProductMz? " << isHasSrmProductMz;
 
         if (!isHasDisplayName) {
             QSqlQuery queryAdjustPeakGroupsTable(sqlDB);
@@ -559,12 +585,32 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
             strAdjustPeakGroupsTable.append(tableName);
             strAdjustPeakGroupsTable.append(" ADD displayName VARCHAR(254) ");
 
-        if (!queryAdjustPeakGroupsTable.exec(strAdjustPeakGroupsTable)){
+            if (!queryAdjustPeakGroupsTable.exec(strAdjustPeakGroupsTable)){
                 qDebug() << "Ho..." <<queryCheckCols.lastError();
             }
         }
 
-        qDebug() << "ProjectDB::loadPeakGroups(): isHasDisplayName? " << isHasDisplayName;
+        if (!isHasSrmPrecursorMz) {
+            QSqlQuery queryAddSrmPrecursor(sqlDB);
+
+            QString strAddSrmPrecursor = QString("ALTER TABLE ");
+            strAddSrmPrecursor.append(tableName);
+            strAddSrmPrecursor.append(" ADD srmPrecursorMz REAL DEFAULT 0");
+            if (!queryAddSrmPrecursor.exec(strAddSrmPrecursor)) {
+                qDebug() << "Ho..." << queryAddSrmPrecursor.lastError();
+            }
+        }
+
+        if (!isHasSrmProductMz) {
+            QSqlQuery queryAddSrmProduct(sqlDB);
+
+            QString strAddSrmProduct = QString("ALTER TABLE ");
+            strAddSrmProduct.append(tableName);
+            strAddSrmProduct.append(" ADD srmProductMz REAL DEFAULT 0");
+            if (!queryAddSrmProduct.exec(strAddSrmProduct)) {
+                qDebug() << "Ho..." << queryAddSrmProduct.lastError();
+            }
+        }
 
      QSqlQuery query(sqlDB);
      query.exec("create index if not exists peak_group_ids on peaks(groupId)");
@@ -583,9 +629,11 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
         g.groupId = query.value("groupId").toInt();
         int parentGroupId = query.value("parentGroupId").toInt();
         g.tagString = query.value("tagString").toString().toStdString();
-        g.metaGroupId = query.value("metaGroupId").toString().toInt();
-        g.expectedRtDiff = query.value("expectedRtDiff").toString().toDouble();
-        g.groupRank = query.value("groupRank").toString().toInt();
+        g.metaGroupId = query.value("metaGroupId").toInt();
+        g.expectedRtDiff = query.value("expectedRtDiff").toDouble();
+        g.groupRank = query.value("groupRank").toInt();
+        g.srmPrecursorMz = static_cast<float>(query.value("srmPrecursorMz").toDouble());
+        g.srmProductMz = static_cast<float>(query.value("srmProductMz").toDouble());
 
         QVariant label = query.value("label");
         if (label.toString().size() > 0) {
@@ -633,7 +681,8 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
             }
 
             //Issue 92: fall back to rumsDB table if could not find compound the normal way.
-            if (!compound && g.searchTableName == "rumsDB" && !rumsDBLibrary.isEmpty()) {
+            //Issue 363: Support clamDB table name as well as rumsDB
+            if (!compound && (g.searchTableName == "rumsDB" || g.searchTableName == "clamDB") && !rumsDBLibrary.isEmpty()) {
                 compound = DB.findSpeciesById(compoundId, rumsDBLibrary.toStdString(), isAttemptToLoadDB);
 
                 //Issue 271: to facillitate proper disconnect / reconnect from tabledockwidget
@@ -1062,12 +1111,12 @@ QString  ProjectDB::projectName() {
     
 bool ProjectDB::openDatabaseConnection(QString dbname) {
     if (sqlDB.isOpen() and  sqlDB.databaseName() == dbname) {
-        qDebug() << "Already oppened.. ";
+        qDebug() << "Already opened. ";
         return true;
     }
 
     if (!sqlDB.isOpen()) {
-        qDebug() << "opening.. " << dbname;
+        qDebug() << "opening... " << dbname;
         sqlDB = QSqlDatabase::addDatabase("QSQLITE", dbname);
         sqlDB.setDatabaseName(dbname);
         sqlDB.open();

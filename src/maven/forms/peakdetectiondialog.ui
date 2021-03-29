@@ -863,7 +863,7 @@
              <string>Require compound's associated adduct and searched adduct match for compound matches</string>
             </property>
             <property name="checked">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
            </widget>
           </item>
