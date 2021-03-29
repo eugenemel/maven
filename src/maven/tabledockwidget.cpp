@@ -984,7 +984,7 @@ void TableDockWidget::showAllGroups() {
     treeWidget->setSortingEnabled(false);
 
     QMap<int,QTreeWidgetItem*> parents;
-    for(int i=0; i < allgroups.size(); i++ ) { 
+    for(unsigned int i=0; i < allgroups.size(); i++ ) {
         int metaGroupId  = allgroups[i].metaGroupId;
         if (metaGroupId && allgroups[i].meanMz > 0 && allgroups[i].peakCount()>0) {
 
