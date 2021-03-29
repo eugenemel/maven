@@ -755,6 +755,20 @@ void MainWindow::setAdductFocus(Adduct *adduct) {
             break;
         }
     }
+
+    //Issue 376: adducts combo box in isotopeWidget should sync with main window adducts combo box
+    if (isotopeWidget) {
+        for (int i = 0; i < isotopeWidget->adductComboBox->count(); i++) {
+
+            QVariant v = isotopeWidget->adductComboBox->itemData(i);
+            Adduct*  itemAdduct =  v.value<Adduct*>();
+
+            if (itemAdduct && itemAdduct->name == adduct->name) {
+                isotopeWidget->adductComboBox->setCurrentIndex(i);
+                break;
+            }
+        }
+    }
 }
 
 void MainWindow::setCompoundFocus(Compound*c) {
@@ -2500,7 +2514,7 @@ void MainWindow::changeUserAdduct() {
     Adduct*  adduct =  v.value<Adduct*>();
     if(adduct) {
         _ionizationMode = SIGN(adduct->charge);
-        cerr << "changeUserAdduct::" << adduct->name << endl;
+        cerr << "MainWindow::changeUserAdduct():" << adduct->name << endl;
         massCalcWidget->ionization->setValue(_ionizationMode);
 
         mzSlice& currentSlice = eicWidget->getMzSlice();
