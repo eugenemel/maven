@@ -100,9 +100,9 @@ void IsotopeWidget::setPeak(Peak* peak) {
 
 void IsotopeWidget::setCompound(Compound* cpd ) {
 
-    qDebug() << "IsotopeWidget::setCompound():" << cpd->name.c_str();
-
     if (!cpd) return;
+
+    qDebug() << "IsotopeWidget::setCompound():" << cpd->name.c_str();
 
     //Issue 376: set this first, to ensure that compound name is passed through.
     QString f = QString(cpd->formula.c_str());
