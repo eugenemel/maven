@@ -80,6 +80,9 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   txtSize = fm.width(btnSubmit->text());
 #endif
 
+  //Issue 376: Fix dangling pointer issue
+  connect(_mw->libraryDialog, SIGNAL(unloadLibrarySignal(QString)), this, SLOT(unloadLibrary(QString)));
+
   int btnTextPadding = 25;
   btnSubmit->setMaximumWidth(txtSize+btnTextPadding);
 
@@ -123,6 +126,20 @@ void LigandWidget::updateDatabaseList() {
         databaseSelect->addItem(db);
     }
 	connect(databaseSelect, SIGNAL(currentIndexChanged(QString)), this, SLOT(setDatabase(QString)));
+}
+
+void LigandWidget::unloadLibrary(QString db){
+    if (db == "ALL" || databaseSelect->currentText() == db) {
+        for (int i = 0; i < databaseSelect->count(); i++) {
+            if (databaseSelect->itemText(i) == SELECT_DB) {
+                databaseSelect->setCurrentIndex(i);
+                break;
+            }
+        }
+        setDatabase(SELECT_DB);
+        filterEditor->setText("");
+        repaint();
+    }
 }
 
 QTreeWidgetItem* LigandWidget::addItem(QTreeWidgetItem* parentItem, string key , float value) {

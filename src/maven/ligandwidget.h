@@ -93,6 +93,7 @@ public slots:
     void updateProgressGUI(int, QString);
     void addCompound(Compound *c);
     void toggleEnabling(bool);
+    void unloadLibrary(QString);
 
 signals:
     void urlChanged(QString url);
