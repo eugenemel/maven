@@ -33,6 +33,7 @@ public slots:
 	  void computeIsotopes(string f);
 	  void setPeakGroup(PeakGroup* group);
 	  void setCompound(Compound* compound);
+      void unloadCompound(QString db);
 	  void setPeak(Peak* peak);
 	  void setClipboard();
 	  void setClipboard(PeakGroup* group);

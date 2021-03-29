@@ -54,6 +54,7 @@ IsotopeWidget::IsotopeWidget(MainWindow* mw) {
   btnExport->setFlat(true);
 
   connect(btnExport, SIGNAL(clicked()), SLOT(exportTableToSpreadsheet()));
+  connect(_mw->libraryDialog, SIGNAL(unloadLibrarySignal(QString)), SLOT(unloadCompound(QString)));
 }
 
 IsotopeWidget::~IsotopeWidget(){
@@ -98,13 +99,22 @@ void IsotopeWidget::setPeak(Peak* peak) {
 void IsotopeWidget::setCompound(Compound* cpd ) {
         if (!cpd) return;
 
+        //Issue 376: set this first, to ensure that compound name is passed through.
 		QString f = QString(cpd->formula.c_str());
+        setFormula(f);
 
         _group = nullptr;
 		_compound = cpd;
 
 		setWindowTitle("Isotopes:" + QString(cpd->name.c_str()));
-		setFormula(f);
+}
+
+//Issue 376: Ensure that removed compounds do not lead to dangling pointers
+void IsotopeWidget::unloadCompound(QString db){
+    if (_compound && (db == "ALL" || db.toStdString() == _compound->db)) {
+        _compound = tempCompound;
+        setWindowTitle("Isotopes:" + QString(_compound->name.c_str()));
+    }
 }
 
 void IsotopeWidget::userChangedFormula(QString f) {
