@@ -424,6 +424,9 @@ void LigandWidget::showLast() {
 void LigandWidget::showLigand() {
 	if (!_mw) return;
 
+    //Issue 376
+    _mw->unsetLastSelectedPeakGroup();
+
     qDebug() << "LigandWidget::showLigand()";
     foreach(QTreeWidgetItem* item, treeWidget->selectedItems() ) {
             QVariant v = item->data(0,Qt::UserRole);

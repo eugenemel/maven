@@ -260,6 +260,9 @@ public slots:
     BackgroundPeakUpdate* newWorkerThread(QString funcName);
     QWidget* eicWidgetController();
 
+    //Issue 376
+    void unsetLastSelectedPeakGroup(){_lastSelectedPeakGroup = nullptr;}
+
 private slots:
     void createMenus();
     void createToolBars();
