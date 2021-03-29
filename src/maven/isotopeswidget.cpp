@@ -111,7 +111,8 @@ void IsotopeWidget::setCompound(Compound* cpd ) {
     _group = nullptr;
     _compound = cpd;
 
-    setWindowTitle("Isotopes:" + QString(cpd->name.c_str()));
+    setWindowTitle("Isotopes: " + QString(cpd->name.c_str()));
+    repaint();
 }
 
 //Issue 376: Ensure that removed compounds do not lead to dangling pointers
