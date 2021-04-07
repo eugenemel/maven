@@ -51,6 +51,11 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(scan_filter_min_intensity, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
     connect(ionizationType,SIGNAL(currentIndexChanged(int)),SLOT(getFormValues()));
 
+    //bookmark options
+    connect(chkBkmkWarnMz, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+    connect(chkBkmkWarnMzRt, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+    connect(chkIncludeChildren, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+
     //spectra widget display options
     //ms1 options
     connect(chkMs1Autoscale, SIGNAL(toggled(bool)), SLOT(getFormValues()));
