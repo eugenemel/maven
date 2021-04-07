@@ -653,8 +653,14 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
 
         PeakGroup *groupCopy = new PeakGroup(*group);
 
+        //TODO: separate children peak from isotopic peaks
+
         bool isAddChildren = settings->value("chkIncludeChildren", false).toBool();
-        if (!isAddChildren) groupCopy->children.clear();
+        if (!isAddChildren) {
+            groupCopy->children.clear();
+        } else if (groupCopy->children.empty()){
+            groupCopy->pullIsotopes(getIsotopeParameters());
+        }
 
         groupCopy->searchTableName = "Bookmarks";
 
@@ -1675,22 +1681,25 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
 
     if (!group) return;
 
-    //Issue 373: Compare values pointed to, not the pointers themselves (implementation-defined behavior)
-    if (_lastSelectedPeakGroup && *_lastSelectedPeakGroup == *group){
+    //Issue 371: More complex case for equality: isotopic quant versions
+    //for now, try always updating the peak group to avoid tricky equality cases
 
-        bool isEqual = true;
+//    //Issue 373: Compare values pointed to, not the pointers themselves (implementation-defined behavior)
+//    if (_lastSelectedPeakGroup && *_lastSelectedPeakGroup == *group){
 
-        //Also need to check the compounds and adducts
-        if (_lastSelectedPeakGroup->compound && group->compound && _lastSelectedPeakGroup->compound->id != group->compound->id) {
-            isEqual = false;
-        }
+//        bool isEqual = true;
 
-        if (_lastSelectedPeakGroup->adduct && group->adduct && _lastSelectedPeakGroup->adduct->name != group->adduct->name) {
-            isEqual = false;
-        }
+//        //Also need to check the compounds and adducts
+//        if (_lastSelectedPeakGroup->compound && group->compound && _lastSelectedPeakGroup->compound->id != group->compound->id) {
+//            isEqual = false;
+//        }
 
-        if (isEqual) return;
-    }
+//        if (_lastSelectedPeakGroup->adduct && group->adduct && _lastSelectedPeakGroup->adduct->name != group->adduct->name) {
+//            isEqual = false;
+//        }
+
+//        if (isEqual) return;
+//    }
 
     _lastSelectedPeakGroup = group;
 
