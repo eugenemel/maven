@@ -66,7 +66,6 @@ HEADERS +=  stable.h \
             plotdock.h \
             settingsform.h \
             database.h \
-            classifier.h \
             classifierNeuralNet.h \
             csvreports.h \
             background_peaks_update.h \
