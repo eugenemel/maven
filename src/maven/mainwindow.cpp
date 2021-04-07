@@ -2598,3 +2598,36 @@ void MainWindow::updateAdductComboBox(vector<Adduct*> enabledAdducts) {
 
     emit(updatedAvailableAdducts());
 }
+
+IsotopeParameters MainWindow::getIsotopeParameters(){
+
+    IsotopeParameters isotopeParameters;
+
+    isotopeParameters.ppm = static_cast<float>(_ppmWindow);
+    isotopeParameters.clsf = clsf;
+    isotopeParameters.adduct = getUserAdduct();
+
+    vector<mzSample*> visibleSamples = getVisibleSamples();
+    if (!visibleSamples.empty()){
+        isotopeParameters.avgScanTime = visibleSamples[0]->getAverageFullScanTime();
+    }
+
+    if (settings) {
+        isotopeParameters.maxIsotopeScanDiff  = settings->value("maxIsotopeScanDiff", 10).toDouble();
+        isotopeParameters.minIsotopicCorrelation  = settings->value("minIsotopicCorrelation", 0).toDouble();
+        isotopeParameters.maxNaturalAbundanceErr  = settings->value("maxNaturalAbundanceErr", 100).toDouble();
+        isotopeParameters.isC13Labeled   =  settings->value("C13Labeled", false).toBool();
+        isotopeParameters.isN15Labeled   =  settings->value("N15Labeled", false).toBool();
+        isotopeParameters.isS34Labeled   =  settings->value("S34Labeled", false).toBool();
+        isotopeParameters.isD2Labeled   =   settings->value("D2Labeled", false).toBool();
+        isotopeParameters.isIgnoreNaturalAbundance = settings->value("chkIgnoreNaturalAbundance", false).toBool();
+        isotopeParameters.isExtractNIsotopes = settings->value("chkExtractNIsotopes", false).toBool();
+        isotopeParameters.maxIsotopesToExtract = settings->value("spnMaxIsotopesToExtract", 5).toInt();
+        isotopeParameters.eic_smoothingWindow = static_cast<float>(settings->value("eic_smoothingWindow", 1).toDouble());
+        isotopeParameters.eic_smoothingAlgorithm = static_cast<EIC::SmootherType>(settings->value("eic_smoothingAlgorithm", 0).toInt());
+    } else {
+        qDebug() << "MainWindow::getIsotopeParameters(): Could not find saved program settings! using defaults.";
+    }
+
+    return isotopeParameters;
+}

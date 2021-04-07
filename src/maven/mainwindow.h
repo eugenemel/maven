@@ -174,6 +174,7 @@ public:
 
     QColor getBackgroundAdjustedBlack(QWidget* widget);
     QToolButton *btnLibrary = nullptr;
+    IsotopeParameters getIsotopeParameters();
 
 protected:
     void closeEvent(QCloseEvent *event);
