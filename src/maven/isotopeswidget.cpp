@@ -91,37 +91,43 @@ void IsotopeWidget::setPeakGroup(PeakGroup* grp) {
     _group = new PeakGroup(*grp);
     _group->pullIsotopes(_mw->getIsotopeParameters());
 
-    if (_group->children.empty()) return; //no isotopes
+    rebuildTableFromPeakGroup(_group);
+}
+
+void IsotopeWidget::rebuildTableFromPeakGroup(PeakGroup* group) {
+
+    if (!group) return;
+    if (group->children.empty()) return; //no isotopes
 
     vector<mzSample*> vSamples = _mw->getVisibleSamples();
     links.clear();
-    links = vector<mzLink>(_group->childCount());
+    links = vector<mzLink>(group->childCount());
 
     float isotopeIntensitySum = 0.0f;
     float maxExpectedAbundance = 0.0f;
-    vector<float> childIntensityVector(_group->childCount());
+    vector<float> childIntensityVector(group->childCount());
 
-    for (unsigned int i = 0; i < _group->childCount(); i++) {
+    for (unsigned int i = 0; i < group->childCount(); i++) {
 
-        vector<float> yvalues = _group->children[i].getOrderedIntensityVector(vSamples, _mw->getUserQuantType());
+        vector<float> yvalues = group->children[i].getOrderedIntensityVector(vSamples, _mw->getUserQuantType());
         float childIntensity = mzUtils::median(yvalues);
 
         childIntensityVector[i] = childIntensity;
         isotopeIntensitySum += childIntensity;
-        if (_group->children[i].expectedAbundance > maxExpectedAbundance){
-            maxExpectedAbundance = _group->children[i].expectedAbundance;
+        if (group->children[i].expectedAbundance > maxExpectedAbundance){
+            maxExpectedAbundance = group->children[i].expectedAbundance;
         }
     }
 
-    for (unsigned int i = 0; i < _group->childCount(); i++) {
+    for (unsigned int i = 0; i < group->childCount(); i++) {
         mzLink link;
 
-        link.note= _group->children[i].tagString;
-        link.mz2 = _group->children[i].meanMz;
+        link.note= group->children[i].tagString;
+        link.mz2 = group->children[i].meanMz;
         link.value2 = childIntensityVector[i];
         link.isotopeFrac = isotopeIntensitySum > 0 ? 100.0f * childIntensityVector[i]/isotopeIntensitySum : 0;
-        link.percentExpected = _group->children[i].expectedAbundance * 100.0f;
-        link.percentRelative = maxExpectedAbundance > 0 ? _group->children[i].expectedAbundance / maxExpectedAbundance * 100.0f : 0;
+        link.percentExpected = group->children[i].expectedAbundance * 100.0f;
+        link.percentRelative = maxExpectedAbundance > 0 ? group->children[i].expectedAbundance / maxExpectedAbundance * 100.0f : 0;
 
         links[i] = link;
     }

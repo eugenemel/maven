@@ -64,6 +64,8 @@ private:
 
      QString groupIsotopeMatrixExport(PeakGroup* group, bool includeSampleHeader);
      Adduct* getCurrentAdduct();
+
+     void rebuildTableFromPeakGroup(PeakGroup* group);
       
 };
 
