@@ -76,10 +76,57 @@ Adduct* IsotopeWidget::getCurrentAdduct() {
 }
 
 void IsotopeWidget::setPeakGroup(PeakGroup* grp) {
+
     qDebug() << "IsotopeWidget::setPeakGroup():" << grp;
+
     if (!grp) return;
-	_group = grp;
-    if (grp && grp->type() != PeakGroup::IsotopeType ) pullIsotopes(grp);
+
+    if (_group) {
+        delete(_group);
+        _group = nullptr;
+    }
+
+    if (grp->compound) setCompound(grp->compound);
+
+    _group = new PeakGroup(*grp);
+    _group->pullIsotopes(_mw->getIsotopeParameters());
+
+    if (_group->children.empty()) return; //no isotopes
+
+    vector<mzSample*> vSamples = _mw->getVisibleSamples();
+    links.clear();
+    links = vector<mzLink>(_group->childCount());
+
+    float isotopeIntensitySum = 0.0f;
+    float maxIntensity = 0.0f;
+    vector<float> childIntensityVector(_group->childCount());
+
+    for (unsigned int i = 0; i < _group->childCount(); i++) {
+
+        vector<float> yvalues = _group->children[i].getOrderedIntensityVector(vSamples, _mw->getUserQuantType());
+        float childIntensity = mzUtils::median(yvalues);
+
+        childIntensityVector[i] = childIntensity;
+        isotopeIntensitySum += childIntensity;
+        if (childIntensity > maxIntensity) maxIntensity = childIntensity;
+
+    }
+
+    for (unsigned int i = 0; i < _group->childCount(); i++) {
+        mzLink link;
+
+        link.note= _group->children[i].tagString;
+        link.mz2 = _group->children[i].meanMz;
+        link.value2 = childIntensityVector[i];
+        link.isotopeFrac = isotopeIntensitySum > 0 ? 100.0f * childIntensityVector[i]/isotopeIntensitySum : 0;
+        link.percentExpected = _group->children[i].expectedAbundance * 100.0f;
+        link.percentRelative = maxIntensity > 0 ? _group->children[i].expectedAbundance / maxIntensity * 100.0f : 0;
+
+        links[i] = link;
+    }
+
+    sort(links.begin(),links.end(),mzLink::compMz);
+    showTable();
 }
 
 void IsotopeWidget::setPeak(Peak* peak) {
@@ -108,7 +155,6 @@ void IsotopeWidget::setCompound(Compound* cpd ) {
     QString f = QString(cpd->formula.c_str());
     setFormula(f);
 
-    _group = nullptr;
     _compound = cpd;
 
     setWindowTitle("Isotopes: " + QString(cpd->name.c_str()));
@@ -390,6 +436,7 @@ QString IsotopeWidget::groupIsotopeMatrixExport(PeakGroup* group, bool includeSa
 }
 
 void IsotopeWidget::showTable() {
+
 	QTreeWidget *p = treeWidget;
 	p->clear();
     p->setColumnCount( 6);
@@ -397,24 +444,26 @@ void IsotopeWidget::showTable() {
 	p->setUpdatesEnabled(true);
 	p->setSortingEnabled(true);
 
-    double isotopeIntensitySum=0;
-    double maxIntensity=0;
-    for(unsigned int i=0;  i < links.size(); i++ )  {
-        isotopeIntensitySum += links[i].value2;
-        if( links[i].value1 > maxIntensity) maxIntensity=links[i].value1;
-    }
+    //TODO: this should be relocated outside of the showTable() method
+//    double isotopeIntensitySum=0;
+//    double maxIntensity=0;
+//    for(unsigned int i=0;  i < links.size(); i++ )  {
+//        isotopeIntensitySum += links[i].value2;
+//        if( links[i].value1 > maxIntensity) maxIntensity=links[i].value1;
+//    }
 
 	for(unsigned int i=0;  i < links.size(); i++ ) {
-		float frac=0;
-        if ( isotopeIntensitySum>0) links[i].isotopeFrac = links[i].value2/isotopeIntensitySum*100;
 
-        links[i].percentExpected = links[i].value1*100;
-        links[i].percentRelative = links[i].value1/maxIntensity*100;
+        //TODO: this should be relocated outside of the showTable() method
+//        if ( isotopeIntensitySum>0) links[i].isotopeFrac = links[i].value2/isotopeIntensitySum*100;
+
+//        links[i].percentExpected = links[i].value1*100;
+//        links[i].percentRelative = links[i].value1/maxIntensity*100;
 
 		NumericTreeWidgetItem *item = new NumericTreeWidgetItem(treeWidget,mzSliceType);
 		QString item1 = QString( links[i].note.c_str() );
-		QString item2 = QString::number( links[i].mz2, 'f', 5 );
-        QString item3 = QString::number( links[i].value2, 'f', 4 );
+        QString item2 = QString::number(links[i].mz2, 'f', 5 );
+        QString item3 = QString::number(links[i].value2, 'f', 4 );
         QString item4 = QString::number(links[i].isotopeFrac, 'f',4 );
         QString item5 = QString::number(links[i].percentExpected, 'f', 4 );
         QString item6 = QString::number(links[i].percentRelative, 'f', 4 );
@@ -431,6 +480,8 @@ void IsotopeWidget::showTable() {
 	p->setSortingEnabled(true);
     p->sortByColumn(1,Qt::AscendingOrder);
 	p->setUpdatesEnabled(true);
+
+    repaint();
 }
 
 void IsotopeWidget::showInfo() {
