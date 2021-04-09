@@ -129,22 +129,6 @@ void IsotopeWidget::setPeakGroup(PeakGroup* grp) {
     showTable();
 }
 
-void IsotopeWidget::setPeak(Peak* peak) {
-    qDebug() << "IsotopeWidget::setPeak():" << peak;
-    if (peak == nullptr ) return;
-
-	mzSample* sample = peak->getSample();
-    if (sample == nullptr) return;
-
-	Scan* scan = sample->getScan(peak->scan);
-    if (scan == nullptr) return;
-	_scan = scan;
-
-    if (! _formula.empty() ){
-        computeIsotopes(_formula);
-    }
-}
-
 void IsotopeWidget::setCompound(Compound* cpd ) {
 
     if (!cpd) return;

@@ -34,7 +34,6 @@ public slots:
 	  void setPeakGroup(PeakGroup* group);
 	  void setCompound(Compound* compound);
       void unloadCompound(QString db);
-	  void setPeak(Peak* peak);
 	  void setClipboard();
 	  void setClipboard(PeakGroup* group);
       void setClipboard(QList<PeakGroup*>& groups);
