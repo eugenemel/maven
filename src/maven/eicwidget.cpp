@@ -241,19 +241,14 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
         _integratedGroup->srmProductMz = _slice.srmProductMz;
     }
 
+    //select here and after bookmarking, b/c bookmarking might be canceled.
     setSelectedGroup(_integratedGroup);
 
     getMainWindow()->bookmarkPeakGroup(_integratedGroup);
     PeakGroup* lastBookmark = getMainWindow()->getBookmarkTable()->getLastBookmarkedGroup();
 
-    if (lastBookmark and lastBookmark->compound) {
-            qDebug() << "getMainWindow()->isotopeWidget->setPeakGroup(): " << lastBookmark;
-           getMainWindow()->isotopeWidget->setPeakGroup(lastBookmark);
-           setSelectedGroup(lastBookmark);
-
-    }
-
     if (lastBookmark) {
+        setSelectedGroup(lastBookmark);
         getMainWindow()->setClipboardToGroup(lastBookmark);
     }
 
@@ -1210,22 +1205,26 @@ void EicWidget::addBarPlot(PeakGroup* group ) {
 }
 
 void EicWidget::addIsotopicPlot(PeakGroup* group) {
- //qDebug <<" EicWidget::addIsotopicPlot(PeakGroup* group)";
-    if (group == NULL)  return;
-    if (_isotopeplot == NULL) _isotopeplot = new IsotopePlot(0,scene());
+    qDebug() << "EicWidget::addIsotopicPlot(PeakGroup* group): group=" << group;
+
+    if (!group)  return;
+    if (!_isotopeplot){
+        _isotopeplot = new IsotopePlot(nullptr, scene());
+    }
+
     if (_isotopeplot->scene() != scene() ) scene()->addItem(_isotopeplot);
+
     _isotopeplot->hide();
 
-    if (group->childCount() == 0) return;
-
     vector <mzSample*> samples = getMainWindow()->getVisibleSamples();
-    if (samples.size() == 0 ) return;
+    if (samples.empty()) return;
 
     _isotopeplot->setPos(scene()->width()*0.10,scene()->height()*0.10);
     _isotopeplot->setZValue(1000);
     _isotopeplot->setMainWindow(getMainWindow());
     _isotopeplot->setPeakGroup(group);
     _isotopeplot->show();
+
     return;
 }
 
@@ -1680,10 +1679,12 @@ void EicWidget::groupPeaks() {
     EIC::removeLowRankGroups(peakgroups,50);
 
     for (auto& pg : peakgroups) {
+
         if (_slice.compound) {pg.compound = _slice.compound;}
         if (_slice.adduct) { pg.adduct= _slice.adduct;}
         if (!_slice.srmId.empty()) {pg.srmId = _slice.srmId;}
-        if (!_slice.isSrmTransitionSlice()) {
+
+        if (_slice.isSrmTransitionSlice()) {
             pg.srmPrecursorMz = _slice.srmPrecursorMz;
             pg.srmProductMz = _slice.srmProductMz;
             pg.setType(PeakGroup::GroupType::SRMTransitionType);
@@ -1859,9 +1860,12 @@ void EicWidget::selectGroupNearRt(float rt) {
 }
 
 void EicWidget::setSelectedGroup(PeakGroup* group) {
-   qDebug() <<"EicWidget::setSelectedGroup(PeakGroup* group) group=" << group;
+
+    qDebug() << "EicWidget::setSelectedGroup(PeakGroup* group) group=" << group;
 
     if (_frozen || !group) return;
+
+    qDebug() << "EicWidget::setSelectedGroup(PeakGroup* group) group type=" << group->type();
 
     if (_showBarPlot){
         addBarPlot(group);
@@ -1889,6 +1893,10 @@ void EicWidget::setSelectedGroup(PeakGroup* group) {
         qDebug() << "EicWidget::setSelectedGroup() group->adduct=" << group->adduct->name.c_str();
     } else {
         qDebug() << "EicWidget::setSelectedGroup() group->adduct= nullptr";
+    }
+
+    if (getMainWindow()->isotopeWidget->isVisible()) {
+        getMainWindow()->isotopeWidget->setPeakGroup(group);
     }
 
     _selectedGroup = *group;
