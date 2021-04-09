@@ -37,7 +37,6 @@ public slots:
 	  void setClipboard();
 	  void setClipboard(PeakGroup* group);
       void setClipboard(QList<PeakGroup*>& groups);
-	  void pullIsotopes(PeakGroup* group);
 	  Peak* getSamplePeak(PeakGroup* group, mzSample* sample);
 
 

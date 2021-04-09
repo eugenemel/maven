@@ -277,41 +277,6 @@ Peak* IsotopeWidget::getSamplePeak(PeakGroup* group, mzSample* sample) {
 		}
         return nullptr;
 }
-void IsotopeWidget::pullIsotopes(PeakGroup* group) {
-		if(!group) return;
-
-		//clear clipboard
-		QClipboard *clipboard = QApplication::clipboard();
-		clipboard->clear(QClipboard::Clipboard);
-
-        setClipboard(group);
-
-        //check if isotope search is on
-        QSettings* settings = _mw->getSettings();
-        bool C13Labeled   =  settings->value("C13Labeled").toBool();
-        bool N15Labeled   =  settings->value("N15Labeled").toBool();
-        bool S34Labeled   =  settings->value("S34Labeled").toBool();
-        bool D2Labeled   =   settings->value("D2Labeled").toBool();
-        if (C13Labeled == false and N15Labeled == false and S34Labeled == false and D2Labeled == false) return;
-
-        if (group->compound == nullptr) {
-			_mw->setStatusText(tr("Unknown compound. Clipboard set to %1").arg(group->tagString.c_str()));
-			return;
-		}
-
-		int isotopeCount=0;
-		for (int i=0; i < group->children.size(); i++ ) {
-			if ( group->children[i].isIsotope() ) isotopeCount++;
-		}
-
-        vector <mzSample*> vsamples = _mw->getVisibleSamples();
-		workerThread->stop();
-		workerThread->setPeakGroup(group);
-		workerThread->setSamples(vsamples);
-		workerThread->compoundPPMWindow = _mw->getUserPPM();
-        workerThread->start();
-        _mw->setStatusText("IsotopeWidget:: pullIsotopes(() started");
-}
 
 void IsotopeWidget::setClipboard() {
 	if ( _group ) {
