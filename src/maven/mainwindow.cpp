@@ -1979,10 +1979,6 @@ void MainWindow::showPeakInfo(Peak* _peak) {
         massCalcWidget->setCharge(ionizationMode);
     }
 
-   if ( isotopeWidget->isVisible() ) {
-        isotopeWidget->setPeak(_peak);
-    }
-
     if( ms2ScansListWidget->isVisible() ) {
         float mz = _peak->peakMz;
         if (_peak->mzmax - _peak->mzmin > 0.5f) { //direct infusion peak
