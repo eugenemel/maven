@@ -98,7 +98,7 @@ void IsotopeWidget::setPeakGroup(PeakGroup* grp) {
     links = vector<mzLink>(_group->childCount());
 
     float isotopeIntensitySum = 0.0f;
-    float maxIntensity = 0.0f;
+    float maxExpectedAbundance = 0.0f;
     vector<float> childIntensityVector(_group->childCount());
 
     for (unsigned int i = 0; i < _group->childCount(); i++) {
@@ -108,8 +108,9 @@ void IsotopeWidget::setPeakGroup(PeakGroup* grp) {
 
         childIntensityVector[i] = childIntensity;
         isotopeIntensitySum += childIntensity;
-        if (childIntensity > maxIntensity) maxIntensity = childIntensity;
-
+        if (_group->children[i].expectedAbundance > maxExpectedAbundance){
+            maxExpectedAbundance = _group->children[i].expectedAbundance;
+        }
     }
 
     for (unsigned int i = 0; i < _group->childCount(); i++) {
@@ -120,7 +121,7 @@ void IsotopeWidget::setPeakGroup(PeakGroup* grp) {
         link.value2 = childIntensityVector[i];
         link.isotopeFrac = isotopeIntensitySum > 0 ? 100.0f * childIntensityVector[i]/isotopeIntensitySum : 0;
         link.percentExpected = _group->children[i].expectedAbundance * 100.0f;
-        link.percentRelative = maxIntensity > 0 ? _group->children[i].expectedAbundance / maxIntensity * 100.0f : 0;
+        link.percentRelative = maxExpectedAbundance > 0 ? _group->children[i].expectedAbundance / maxExpectedAbundance * 100.0f : 0;
 
         links[i] = link;
     }
@@ -423,8 +424,8 @@ void IsotopeWidget::showTable() {
 
 	QTreeWidget *p = treeWidget;
 	p->clear();
-    p->setColumnCount( 6);
-    p->setHeaderLabels(  QStringList() << "Isotope Name" << "m/z" << "Intensity" << "%Labeling" << "%Expected" << "%Relative");
+    p->setColumnCount(6);
+    p->setHeaderLabels(QStringList() << "Isotope Name" << "m/z" << "Intensity" << "% Observed" << "% Theoretical" << "% Theoretical Max");
 	p->setUpdatesEnabled(true);
 	p->setSortingEnabled(true);
 
