@@ -2111,14 +2111,18 @@ void MainWindow::setClipboardToGroup(PeakGroup* group) {
 
 void MainWindow::showFragmentationScans(float pmz) {
 
-    if (!ms2ScansListWidget || ms2ScansListWidget->isVisible() == false ) return;
-    float ppm = getUserPPM();
+    if (!ms2ScansListWidget || ms2ScansListWidget->isVisible() == false || samples.empty()) return;
 
-    if (samples.size() <= 0 ) return;
+    float ppm = static_cast<float>(getUserPPM());
+
     ms2ScansListWidget->clearTree();
-    for ( unsigned int i=0; i < samples.size(); i++ ) {
-        for (unsigned int j=0; j < samples[i]->scans.size(); j++ ) {
-            Scan* s = samples[i]->scans[j];
+
+    //Issue 392: Only display scans from visible samples
+    vector<mzSample*> visibleSamples = getVisibleSamples();
+
+    for ( unsigned int i=0; i < visibleSamples.size(); i++ ) {
+        for (unsigned int j=0; j < visibleSamples[i]->scans.size(); j++ ) {
+            Scan* s = visibleSamples[i]->scans[j];
             if ( s->mslevel == 2 && ppmDist(s->precursorMz,pmz) < ppm ) {
                 ms2ScansListWidget->addScanItem(s);
             }
@@ -2128,17 +2132,21 @@ void MainWindow::showFragmentationScans(float pmz) {
 
 void MainWindow::showConsensusFragmentationScans(float pmz) {
 
-    if (!ms2ConsensusScansListWidget || ms2ConsensusScansListWidget->isVisible() == false ) return;
-    float ppm = getUserPPM();
+    if (!ms2ConsensusScansListWidget || ms2ConsensusScansListWidget->isVisible() == false || samples.empty()) return;
 
-    if (samples.size() <= 0 ) return;
+    float ppm = static_cast<float>(getUserPPM());
+
     ms2ConsensusScansListWidget->clearTree();
-    for ( unsigned int i=0; i < samples.size(); i++ ) {
+
+    //Issue 392: Only display scans from visible samples
+    vector<mzSample*> visibleSamples = getVisibleSamples();
+
+    for ( unsigned int i=0; i < visibleSamples.size(); i++ ) {
 
         vector<Scan*> scanVector{};
 
-        for (unsigned int j=0; j < samples[i]->scans.size(); j++ ) {
-            Scan* s = samples[i]->scans[j];
+        for (unsigned int j=0; j < visibleSamples[i]->scans.size(); j++ ) {
+            Scan* s = visibleSamples[i]->scans[j];
             if (s->mslevel == 2 && ppmDist(s->precursorMz, pmz) < ppm) {
                 scanVector.push_back(s);
             }
@@ -2154,15 +2162,19 @@ void MainWindow::showMs1Scans(float pmz) {
 
     if (!ms1ScansListWidget || !ms1ScansListWidget->isVisible() || samples.empty()) return;
 
-    float ppm = getUserPPM();
-    float minMz = pmz - pmz * ppm / 1e6;
-    float maxMz = pmz + pmz * ppm / 1e6;
+    float ppm = static_cast<float>(getUserPPM());
+
+    float minMz = pmz - pmz * ppm / 1e6f;
+    float maxMz = pmz + pmz * ppm / 1e6f;
 
     ms1ScansListWidget->clearTree();
 
-    for ( unsigned int i=0; i < samples.size(); i++ ) {
-        for (unsigned int j=0; j < samples[i]->scans.size(); j++ ) {
-            Scan* s = samples[i]->scans[j];
+    //Issue 392: Only display scans from visible samples
+    vector<mzSample*> visibleSamples = getVisibleSamples();
+
+    for ( unsigned int i=0; i < visibleSamples.size(); i++ ) {
+        for (unsigned int j=0; j < visibleSamples[i]->scans.size(); j++ ) {
+            Scan* s = visibleSamples[i]->scans[j];
             if (s->mslevel == 1 && minMz >= s->minMz() && maxMz <= s->maxMz()) {
                 ms1ScansListWidget->addMs1ScanItem(s);
             }
@@ -2175,19 +2187,22 @@ void MainWindow::showMs3Scans(float preMs1Mz, float preMs2Mz){
 
     if (!ms3ScansListWidget || !ms3ScansListWidget->isVisible() || samples.empty()) return;
 
-    float ppm = getUserPPM(); //TODO: more sophisticated ppm tolerances?
+    float ppm = static_cast<float>(getUserPPM()); //TODO: more sophisticated ppm tolerances?
 
-    float minMs1Mz = preMs1Mz - preMs1Mz * ppm / 1e6;
-    float maxMs1Mz = preMs1Mz + preMs1Mz * ppm / 1e6;
+    float minMs1Mz = preMs1Mz - preMs1Mz * ppm / 1e6f;
+    float maxMs1Mz = preMs1Mz + preMs1Mz * ppm / 1e6f;
 
-    float minMs2Mz = preMs2Mz - preMs2Mz * ppm / 1e6;
-    float maxMs2Mz = preMs2Mz + preMs2Mz* ppm / 1e6;
+    float minMs2Mz = preMs2Mz - preMs2Mz * ppm / 1e6f;
+    float maxMs2Mz = preMs2Mz + preMs2Mz* ppm / 1e6f;
 
     ms3ScansListWidget->clearTree();
 
-    for ( unsigned int i=0; i < samples.size(); i++ ) {
-        for (unsigned int j=0; j < samples[i]->scans.size(); j++ ) {
-            Scan* s = samples[i]->scans[j];
+    //Issue 392: Only display scans from visible samples
+    vector<mzSample*> visibleSamples = getVisibleSamples();
+
+    for ( unsigned int i=0; i < visibleSamples.size(); i++ ) {
+        for (unsigned int j=0; j < visibleSamples[i]->scans.size(); j++ ) {
+            Scan* s = visibleSamples[i]->scans[j];
             if (s->mslevel == 3 &&
                     s->ms1PrecursorForMs3 >= minMs1Mz && s->ms1PrecursorForMs3 <= maxMs1Mz &&
                     s->precursorMz >= minMs2Mz && s->precursorMz <= maxMs2Mz) {
