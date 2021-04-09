@@ -8,9 +8,9 @@ using namespace Eigen;
 IsotopePlot::IsotopePlot(QGraphicsItem* parent, QGraphicsScene *scene)
     :QGraphicsItem(parent) {
 	_barwidth=10;
-	_mw=NULL;
-	_group=NULL;
-	if ( scene != NULL ) { _width = scene->width()*0.25; }
+    _mw=nullptr;
+    _group=nullptr;
+    if (scene) { _width = scene->width()*0.25; }
 	_height = 10;
 }
 
@@ -29,32 +29,33 @@ void IsotopePlot::clear() {
 void IsotopePlot::setPeakGroup(PeakGroup* group) {
     //cerr << "IsotopePlot::setPeakGroup()" << group << endl;
 
-    if ( group == NULL ) return;
+    if (!_mw) return;
+    if (!group) return;
+    if (group->isIsotope()) return;
 
-    if (group->isIsotope() && group->getParent() ) {
-        setPeakGroup(group->getParent());
+    if (_group) {
+        delete(_group);
+        _group = nullptr;
     }
 
-    if ( isVisible() == true && group == _group) return;
-    _group = group;
+    _group = new PeakGroup(*group);
+    _group->pullIsotopes(_mw->getIsotopeParameters());
+    if (_group->childCount() == 0) return; // Did not detect any isotopes
 
 	_samples.clear();
 	_samples = _mw->getVisibleSamples();
-	 sort(_samples.begin(), _samples.end(), mzSample::compSampleOrder);
+    if (_samples.empty()) return; // No visible samples
+
+     sort(_samples.begin(), _samples.end(), mzSample::compSampleOrder);
 
     _isotopes.clear();
-    for(int i=0; i < group->childCount(); i++ ) {
-        if (group->children[i].isIsotope() ) {
-            PeakGroup* isotope = &(group->children[i]);
+    for(unsigned int i=0; i < _group->childCount(); i++ ) {
+        if (_group->children[i].isIsotope() ) {
+            PeakGroup* isotope = &(_group->children[i]);
             _isotopes.push_back(isotope);
         }
     }
     std::sort(_isotopes.begin(), _isotopes.end(), PeakGroup::compC13);
-	/*
-	for(int i=0; i < _isotopes.size(); i++ )  {
-		cerr << _isotopes[i]->tagString <<  " " << _isotopes[i]->isotopeC13count << endl; 
-	}
-	*/
 
     showBars();
 }
