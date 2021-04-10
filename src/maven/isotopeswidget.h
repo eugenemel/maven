@@ -37,14 +37,12 @@ public slots:
 	  void setClipboard();
 	  void setClipboard(PeakGroup* group);
       void setClipboard(QList<PeakGroup*>& groups);
-	  Peak* getSamplePeak(PeakGroup* group, mzSample* sample);
 
 
 private slots:
       void showInfo();
       void showTable();
 	  QString groupTextEport(PeakGroup* group);
-	  float getIsotopeIntensity(float mz);
       void exportTableToSpreadsheet();
 
 private:
@@ -58,7 +56,6 @@ private:
 	  Compound*  _compound;
       Adduct* _adduct;
 
-	  BackgroundPeakUpdate* workerThread;
 	  MassCalculator mcalc;
 	  Compound* tempCompound;
 

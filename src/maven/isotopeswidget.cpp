@@ -25,23 +25,6 @@ IsotopeWidget::IsotopeWidget(MainWindow* mw) {
   connect(formula, SIGNAL(textEdited(QString)), this, SLOT(userChangedFormula(QString)));
   connect(adductComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(updateAdduct()));
 
-  workerThread = new BackgroundPeakUpdate(mw);
-  workerThread->setRunFunction("pullIsotopes");
-  workerThread->setMainWindow(mw);
-  workerThread->minGoodPeakCount=1;
-  workerThread->minSignalBlankRatio=2;
-  workerThread->minSignalBaseLineRatio=2;
-  workerThread->minNoNoiseObs=2;
-  workerThread->minGroupIntensity=0;
-  workerThread->writeCSVFlag=false;
-  workerThread->matchRtFlag=false;
-  workerThread->showProgressFlag=true;
-  workerThread->pullIsotopesFlag=true;
-  workerThread->keepFoundGroups=true;
-
-  connect(workerThread, SIGNAL(finished()), this, SLOT(setClipboard()));
-  connect(workerThread, SIGNAL(finished()), mw->getEicWidget()->scene(), SLOT(update()));
-
   QIcon icon = QIcon(rsrcPath + "/exportcsv.png");
   int btnHeight = btnExport->height();
   int btnSize = static_cast<int>(1*btnHeight);
@@ -235,98 +218,6 @@ void IsotopeWidget::computeIsotopes(string f) {
 
     sort(links.begin(),links.end(),mzLink::compMz);
     showTable();
-
-//    //use selected adduct to compute theoretical mass.
-//    double neutralMass = mcalc.computeNeutralMass(f);
-//    double parentMass = getCurrentAdduct()->computeAdductMass(neutralMass);
-
-//    float parentPeakIntensity = getIsotopeIntensity(parentMass);
-
-//    QSettings* settings = _mw->getSettings();
-
-//    double maxNaturalAbundanceErr  = settings->value("maxNaturalAbundanceErr").toDouble();
-//    bool C13Labeled   =  settings->value("C13Labeled").toBool();
-//    bool N15Labeled   =  settings->value("N15Labeled").toBool();
-//    bool S34Labeled   =  settings->value("S34Labeled").toBool();
-//    bool D2Labeled   =   settings->value("D2Labeled").toBool();
-
-//    bool chkIgnoreNaturalAbundance = settings->value("chkIgnoreNaturalAbundance").toBool();
-//    bool chkExtractNIsotopes = settings->value("chkExtractNIsotopes").toBool();
-//    int spnMaxIsotopesToExtract = settings->value("spnMaxIsotopesToExtract").toInt();
-
-//    //NO ISOTOPES SELECTED..
-//    if (C13Labeled == false and N15Labeled == false and S34Labeled == false and D2Labeled == false) {
-//        showTable();
-//        return;
-//    }
-//    qDebug() << "Isotope Calculation: " << C13Labeled << N15Labeled << S34Labeled << D2Labeled;
-
-
-//    int maxNumProtons = INT_MAX;
-//    if (chkExtractNIsotopes) {
-//        maxNumProtons = spnMaxIsotopesToExtract;
-//    }
-
-//    vector<Isotope> isotopes = mcalc.computeIsotopes(f, getCurrentAdduct(), maxNumProtons, C13Labeled, N15Labeled, S34Labeled, D2Labeled);
-
-//    for (int i=0; i < isotopes.size(); i++ ) {
-//        Isotope& x = isotopes[i];
-
-//        float expectedAbundance    =  x.abundance;
-
-//        mzLink link;
-//        if ( ((x.C13 > 0 && C13Labeled==true) || x.C13 == 0) &&
-//             ((x.N15 > 0 && N15Labeled==true) || x.N15 == 0) &&
-//             ((x.S34 > 0 && S34Labeled==true) || x.S34 == 0) &&
-//             ((x.H2 > 0 && D2Labeled==true ) || x.H2 == 0)) {
-
-//            if (chkIgnoreNaturalAbundance) {
-//                if (expectedAbundance < 1e-8) continue;
-//                // if (expectedAbundance * parentPeakIntensity < 500) continue;
-//                float isotopePeakIntensity = getIsotopeIntensity(x.mz);
-//                float observedAbundance = isotopePeakIntensity/(parentPeakIntensity+isotopePeakIntensity);
-//                float naturalAbundanceError = abs(observedAbundance-expectedAbundance)/expectedAbundance*100;
-//                if (naturalAbundanceError > maxNaturalAbundanceErr )  continue;
-//            }
-
-//            link.mz1 = parentMass;
-//            link.mz2 = x.mz;
-//            link.note= x.name;
-//            link.value1 = x.abundance;
-//            link.value2 = getIsotopeIntensity(x.mz);
-//            links.push_back(link);
-//        }
-//    }
-//    sort(links.begin(),links.end(),mzLink::compMz);
-//    showTable();
-}
-
-float IsotopeWidget::getIsotopeIntensity(float mz)  {
-    float highestIntensity=0;
-	double ppm = _mw->getUserPPM();
-
-    if (_scan == nullptr ) return 0;
-	mzSample* sample = _scan->getSample();
-    if ( sample == nullptr) return 0;
-
-	for(int i=_scan->scannum-2; i < _scan->scannum+2; i++ ) {
-		Scan* s = sample->getScan(i);
-		vector<int> matches = s->findMatchingMzs(mz-mz/1e6*ppm, mz+mz/1e6*ppm);
-		for(int i=0; i < matches.size(); i++ ) {
-			int pos = matches[i];
-			if ( s->intensity[pos] > highestIntensity ) highestIntensity = s->intensity[pos];
-		}
-	}
-    return highestIntensity;
-}
-
-Peak* IsotopeWidget::getSamplePeak(PeakGroup* group, mzSample* sample) {
-		for (int i=0; i< group->peaks.size(); i++ ) {
-				if ( group->peaks[i].getSample() == sample ) {
-					return &(group->peaks[i]);
-				}
-		}
-        return nullptr;
 }
 
 void IsotopeWidget::setClipboard() {
