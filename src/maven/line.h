@@ -27,6 +27,8 @@ public:
     QPainterPath shape() const;
     void setClosePath(bool value ) {_closePath=value;}
     void setMainWindow(MainWindow* mainwindow){_mainwindow=mainwindow;}
+    void setEmphasizePoints(bool value) {_emphasizePoints = value;}
+    bool isEmphasizePoints(){return _emphasizePoints;}
 
 protected:
     QRectF boundingRect() const;
