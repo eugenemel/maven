@@ -523,7 +523,7 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
        item = new NumericTreeWidgetItem(root,PeakGroupType);
     }
 
-    item->setFlags(Qt::ItemIsSelectable |  Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
+    item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
 
     //Issue 329
     QString compoundText, adductText;
