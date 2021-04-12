@@ -594,7 +594,7 @@ void SpectraWidget::drawGraph() {
     float _focusedMz = _focusCoord.x();
 
     QPen slineColor(sampleColor, 2);
-    EicLine* sline = new EicLine(nullptr, scene());
+    EicLine* sline = new EicLine(nullptr, scene(), mainwindow);
     sline->setColor(sampleColor);
     sline->setPen(slineColor);
    _items.push_back(sline);

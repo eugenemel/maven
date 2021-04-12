@@ -581,7 +581,7 @@ void EicWidget::addEICLines(bool showSpline) {
         if (eic->size()==0) continue;
         if (eic->sample && eic->sample->isSelected == false) continue;
         if (eic->maxIntensity <= 0) continue;
-        EicLine* line = new EicLine(nullptr, scene());
+        EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
 
         //sample stacking..
         int zValue=0;
@@ -644,7 +644,7 @@ void EicWidget::addCubicSpline() {
         if (eic->size()==0) continue;
         if (eic->sample != NULL && eic->sample->isSelected == false) continue;
         if (eic->maxIntensity <= 0) continue;
-        EicLine* line = new EicLine(0,scene());
+        EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
 
         //sample stacking..
         int zValue=0;
@@ -740,7 +740,7 @@ void EicWidget::addTicLine() {
 		EIC* tic = tics[i];
 		if (tic->size()==0) continue;
         if (tic->sample != NULL && tic->sample->isSelected == false) continue;
-                EicLine* line = new EicLine(0,scene());
+                EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
 		line->setEIC(tic);
 
 		_maxY = tic->maxIntensity;
@@ -781,7 +781,7 @@ void EicWidget::addMergedEIC() {
     int baseline_quantile =  settings->value("baseline_quantile").toInt();
 
 
-    EicLine* line = new EicLine(0,scene());
+    EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
 
     EIC* eic = EIC::eicMerge(eics);
     eic->setSmootherType((EIC::SmootherType) eic_smoothingAlgorithm);
@@ -816,7 +816,7 @@ void EicWidget::addBaseLine() {
         EIC* eic = eics[i];
         eic->computeBaseLine(baseline_smoothing,baseline_quantile);
         if (eic->size()==0) continue;
-        EicLine* line = new EicLine(0,scene());
+        EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
         line->setEIC(eic);
 
         float baselineSum=0;
@@ -852,7 +852,7 @@ void EicWidget::addBaseline(PeakGroup* group) {
     for( unsigned int i=0; i< eics.size(); i++ ) {
         EIC* eic = eics[i];
         if (eic->size()==0 or eic->baseline.size()==0) continue;
-        EicLine* line = new EicLine(0,scene());
+        EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
         line->setEIC(eic);
 
         float baselineSum=0;
@@ -894,7 +894,7 @@ void EicWidget::showPeakArea(Peak* peak) {
     vector<mzPoint>observed = eic->getIntensityVector(*peak);
     if(observed.size() == 0 ) return;
 
-    EicLine* line = new EicLine(0,scene());
+    EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
     line->setClosePath(true);
     for(int i=0; i < observed.size(); i++ ) {
         line->addPoint(QPointF( toX(observed[i].x), toY(observed[i].y)));
@@ -1302,7 +1302,7 @@ void EicWidget::addFitLine(PeakGroup* group) {
 		}
 
 		//for(int i=0; i < x.size(); i++ ) x[i]=p.rtmin+(i*rtStep);
-                EicLine* line = new EicLine(0,scene());
+                EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
 		for(int i=0; i < y.size(); i++ ) {
 			line->addPoint(QPointF( toX(x[i]), toY(y[i])));
 		}
@@ -1431,8 +1431,7 @@ void EicWidget::zoom(float factor) {
 }
 
 MainWindow* EicWidget::getMainWindow() {  
-// //qDebug <<"EicWidget::getMainWindow() ";  
-	return (MainWindow*) parent; 
+    return static_cast<MainWindow*>(parent);
 }
 
 void EicWidget::setRtWindow(float rtmin, float rtmax ) {

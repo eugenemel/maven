@@ -1,6 +1,6 @@
 #include "line.h"
 
-EicLine::EicLine(QGraphicsItem* parent, QGraphicsScene *scene):QGraphicsItem(parent)
+EicLine::EicLine(QGraphicsItem* parent, QGraphicsScene *scene, MainWindow* mainwindow): QGraphicsItem(parent)
 {
     setHighlighted(false);
     setAcceptHoverEvents(false);
@@ -14,6 +14,8 @@ EicLine::EicLine(QGraphicsItem* parent, QGraphicsScene *scene):QGraphicsItem(par
     _emphasizePoints = false;
 
     if(scene) scene->addItem(this);
+
+    _mainwindow = mainwindow;
 }
 
 QRectF EicLine::boundingRect() const
@@ -42,8 +44,13 @@ void EicLine::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
 
     if (_emphasizePoints) {
 
-        painter->setPen(QPen(Qt::black));//TODO: dark mode
-        painter->setBrush(QBrush(Qt::black));//TODO: dark mode
+        if (_mainwindow) {
+            painter->setPen(QPen(_mainwindow->getBackgroundAdjustedBlack(_mainwindow->spectraWidget)));
+            painter->setBrush(QBrush(_mainwindow->getBackgroundAdjustedBlack(_mainwindow->spectraWidget)));
+        } else {
+            painter->setPen(QPen(Qt::black));
+            painter->setBrush(QBrush(Qt::black));
+        }
 
         int paintDiameter = 5;
 
