@@ -506,7 +506,9 @@ QString TableDockWidget::groupTagString(PeakGroup* group){
 void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     if(!group) return;
 
-    group->groupStatistics();
+    //Issue 380: Avoid recomputing group data if already computed.
+    group->groupStatistics(false);
+
     //cerr << "addRow" << group->groupId << " "  << group->meanMz << " " << group->meanRt << " " << group->children.size() << " " << group->tagString << endl;
 
     if (!group) return;
