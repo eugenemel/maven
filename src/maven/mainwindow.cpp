@@ -1716,7 +1716,7 @@ void MainWindow::updateGUIWithLastSelectedPeakGroup(){
 
     rconsoleDockWidget->updateStatus();
 
-    searchText->setText(QString::number(_lastSelectedPeakGroup->meanMz,'f',8));
+    searchText->setText(QString::number(static_cast<double>(_lastSelectedPeakGroup->meanMz),'f',8));
 
     //no need to compute consensus spectrum if it won't be displayed.
     if (isDisplayConsensusSpectrum) {
@@ -1743,7 +1743,7 @@ void MainWindow::updateGUIWithLastSelectedPeakGroup(){
         //last resort
         //Issue 311: if the mz width is greater than or equal to half a Da, assume DI sample (and do not compute frag pattern)
         if (_lastSelectedPeakGroup->fragmentationPattern.nobs() == 0 && (_lastSelectedPeakGroup->maxMz - _lastSelectedPeakGroup->minMz < 0.5f)) {
-            _lastSelectedPeakGroup->computeFragPattern(massCalcWidget->fragmentPPM->value());
+            _lastSelectedPeakGroup->computeFragPattern(static_cast<float>(massCalcWidget->fragmentPPM->value()));
         }
     }
 
@@ -1765,7 +1765,7 @@ void MainWindow::updateGUIWithLastSelectedPeakGroup(){
 
     if (massCalcWidget->isVisible()) {
         massCalcWidget->setPeakGroup(_lastSelectedPeakGroup);
-        massCalcWidget->lineEdit->setText(QString::number(_lastSelectedPeakGroup->meanMz,'f',5));
+        massCalcWidget->lineEdit->setText(QString::number(static_cast<double>(_lastSelectedPeakGroup->meanMz),'f',5));
     }
 
     //note that this method is the only caller of showPeakInfo()
