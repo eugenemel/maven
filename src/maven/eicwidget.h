@@ -120,7 +120,7 @@ protected:
     void mousePressEvent(QMouseEvent * mouseEvent);
     void mouseMoveEvent(QMouseEvent * mouseEvent);
     void mouseDoubleClickEvent ( QMouseEvent * event );
-    void resizeEvent( QResizeEvent * ) { replot(NULL); }
+    void resizeEvent( QResizeEvent * ) { replot(nullptr); }
     void contextMenuEvent(QContextMenuEvent * event);
     void keyPressEvent( QKeyEvent *e );
     void timerEvent ( QTimerEvent * event );
