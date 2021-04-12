@@ -605,12 +605,6 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
 
     if ( group->childCount() > 0 ) {
 
-        //TODO: this has no effect
-//        //Issue 380: sort isotopes in order of increasing m/z
-//        sort(group->children.begin(), group->children.end(), [](PeakGroup& lhs, PeakGroup& rhs){
-//                return lhs.meanMz > rhs.meanMz;
-//             });
-
         //cerr << "Add children!" << endl;
         QTreeWidgetItem *childRoot = clusterDialog->chkPGDisplay->isChecked() ? root : item;
 
