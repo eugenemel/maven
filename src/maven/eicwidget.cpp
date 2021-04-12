@@ -36,6 +36,7 @@ EicWidget::EicWidget(QWidget *p) {
     showMergedEIC(false);
     showEICLines(false);
     showMS2Events(true);
+    emphasizeEICPoints(false); //Issue 374
 
     //scene()->setItemIndexMethod(QGraphicsScene::NoIndex);
     scene()->setItemIndexMethod(QGraphicsScene::BspTreeIndex);
@@ -614,6 +615,7 @@ void EicWidget::addEICLines(bool showSpline) {
              line->setFillPath(true);
         }
 
+        line->setEmphasizePoints(_emphasizeEICPoints);
         line->setZValue(zValue);
         line->setEIC(eic);
         line->setBrush(brush);
@@ -1766,6 +1768,11 @@ void EicWidget::contextMenuEvent(QContextMenuEvent * event) {
     connect(o34, SIGNAL(toggled(bool)), SLOT(showEICLines(bool)));
     connect(o34, SIGNAL(toggled(bool)), SLOT(replot()));
 
+    QAction* oEmphasizePoints = menu.addAction("Emphasize EIC Scans");
+    oEmphasizePoints->setCheckable(true);
+    oEmphasizePoints->setChecked(_emphasizeEICPoints);
+    connect(oEmphasizePoints, SIGNAL(toggled(bool)), SLOT(emphasizeEICPoints(bool)));
+    connect(oEmphasizePoints, SIGNAL(toggled(bool)), SLOT(replot()));
 
     QAction* o5 = menu.addAction("Show Bar Plot");
     o5->setCheckable(true);
