@@ -2254,10 +2254,10 @@ QWidget* MainWindow::eicWidgetController() {
     btnAutoZoom->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnAutoZoom->setToolTip(tr("Auto Zoom. Always center chromatogram on expected retention time!"));
 
-    QToolButton *btnGallary= new QToolButton(toolBar);
-    btnGallary->setIcon(QIcon(rsrcPath + "/gallery.png"));
-    btnGallary->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnGallary->setToolTip(tr("Show In Gallary"));
+    QToolButton *btnGallery= new QToolButton(toolBar);
+    btnGallery->setIcon(QIcon(rsrcPath + "/gallery.png"));
+    btnGallery->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnGallery->setToolTip(tr("Show In Gallary"));
 
     QToolButton *btnMarkGood = new QToolButton(toolBar);
     btnMarkGood->setIcon(QIcon(rsrcPath + "/markgood.png"));
@@ -2316,30 +2316,37 @@ QWidget* MainWindow::eicWidgetController() {
 
     toolBar->addWidget(btnZoom);
     toolBar->addWidget(btnBookmark);
-    toolBar->addWidget(btnCopyCSV);
-    toolBar->addWidget(btnMarkGood);
-    toolBar->addWidget(btnMarkBad);
-    toolBar->addWidget(btnGallary);
-    toolBar->addSeparator();
     toolBar->addWidget(btnIntegrateArea);
-    toolBar->addWidget(btnAverageSpectra);
+    toolBar->addWidget(btnGallery);
 
-    toolBar->addWidget(btnLast);
-    toolBar->addWidget(btnNext);
     toolBar->addSeparator();
 
     toolBar->addWidget(btnPDF);
     toolBar->addWidget(btnPNG);
-    toolBar->addWidget(btnPrint);
-    toolBar->addSeparator();
-
-    toolBar->addWidget(btnAutoZoom);
 
     //Issue 222
     toolBar->addSeparator();
+
     toolBar->addWidget(btnGroupPeaks);
     toolBar->addWidget(btnIsotopePlot);
 
+    //Issue 222:
+    //disabled buttons
+
+    //toolBar->addWidget(btnAverageSpectra); // Issue 222: Not clear what this does at this point
+
+    //toolBar->addWidget(btnCopyCSV);
+    //toolBar->addWidget(btnMarkGood);
+    //toolBar->addWidget(btnMarkBad);
+
+    //toolBar->addWidget(btnLast);
+    //toolBar->addWidget(btnNext);
+   // toolBar->addSeparator();
+
+    //toolBar->addWidget(btnPrint);
+    //toolBar->addSeparator();
+
+    //toolBar->addWidget(btnAutoZoom);          // Issue 222: This no longer works
 //    toolBar->addWidget(smoothingWindowBox);
 
     connect(btnLast,SIGNAL(clicked()), SLOT(historyLast()));
@@ -2353,7 +2360,7 @@ QWidget* MainWindow::eicWidgetController() {
     connect(btnCopyCSV,SIGNAL(clicked()),  eicWidget, SLOT(copyToClipboard()));
     connect(btnMarkGood,SIGNAL(clicked()), eicWidget, SLOT(markGroupGood()));
     connect(btnMarkBad,SIGNAL(clicked()),  eicWidget, SLOT(markGroupBad()));
-    connect(btnGallary,SIGNAL(clicked()),  eicWidget, SLOT(setGallaryToEics()));
+    connect(btnGallery,SIGNAL(clicked()),  eicWidget, SLOT(setGallaryToEics()));
     connect(btnIntegrateArea,SIGNAL(clicked()),  eicWidget, SLOT(startAreaIntegration()));
     connect(btnAverageSpectra,SIGNAL(clicked()),  eicWidget, SLOT(startSpectralAveraging()));
 
