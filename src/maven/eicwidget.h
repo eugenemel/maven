@@ -89,7 +89,7 @@ public slots:
     void automaticPeakGrouping(bool f) { _groupPeaks=f; }
     void showMS2Events(bool f) { _showMS2Events=f; }
     void disconnectCompounds(QString libraryName);
-
+    void emphasizeEICPoints(bool f) { _emphasizeEICPoints=f;}
 
     void startAreaIntegration() { toggleAreaIntegration(true); }
     void startSpectralAveraging() { toggleSpectraAveraging(true); }
@@ -178,6 +178,9 @@ private:
     bool _showIsotopePlot;
     bool _showBarPlot;
     bool _showBoxPlot;
+
+    //Issue 374
+    bool _emphasizeEICPoints;
 
     bool _frozen;
     int _freezeTime;
