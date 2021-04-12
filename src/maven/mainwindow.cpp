@@ -2301,7 +2301,7 @@ QWidget* MainWindow::eicWidgetController() {
 
     QToolButton *btnIsotopePlot = new QToolButton(toolBar);
     btnIsotopePlot->setCheckable(true);
-    btnIsotopePlot->setChecked(true);
+    btnIsotopePlot->setChecked(false);
     btnIsotopePlot->setIcon(QIcon(rsrcPath + "/isotope.png"));
     btnIsotopePlot->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnIsotopePlot->setToolTip(tr("Show Isotope Plot"));
