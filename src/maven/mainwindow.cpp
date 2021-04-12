@@ -2290,9 +2290,21 @@ QWidget* MainWindow::eicWidgetController() {
     QToolButton *btnAverageSpectra = new QToolButton(toolBar);
     btnAverageSpectra->setIcon(QIcon(rsrcPath + "/averageSpectra.png"));
     btnAverageSpectra->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnAverageSpectra->setToolTip(tr("Average Specta (Ctrl+MouseDrag)"));
+    btnAverageSpectra->setToolTip(tr("Average Spectra (Ctrl+MouseDrag)"));
 
+    QToolButton *btnGroupPeaks = new QToolButton(toolBar);
+    btnGroupPeaks->setCheckable(true);
+    btnGroupPeaks->setChecked(true);
+    btnGroupPeaks->setIcon(QIcon(rsrcPath + "/cluster.png"));
+    btnGroupPeaks->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnGroupPeaks->setToolTip(tr("Automatic Peak Grouping"));
 
+    QToolButton *btnIsotopePlot = new QToolButton(toolBar);
+    btnIsotopePlot->setCheckable(true);
+    btnIsotopePlot->setChecked(true);
+    btnIsotopePlot->setIcon(QIcon(rsrcPath + "/isotope.png"));
+    btnIsotopePlot->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnIsotopePlot->setToolTip(tr("Show Isotope Plot"));
 /*
     QSpinBox* smoothingWindowBox = new QSpinBox(toolBar);
     smoothingWindowBox->setRange(1, 2000);
@@ -2323,6 +2335,11 @@ QWidget* MainWindow::eicWidgetController() {
 
     toolBar->addWidget(btnAutoZoom);
 
+    //Issue 222
+    toolBar->addSeparator();
+    toolBar->addWidget(btnGroupPeaks);
+    toolBar->addWidget(btnIsotopePlot);
+
 //    toolBar->addWidget(smoothingWindowBox);
 
     connect(btnLast,SIGNAL(clicked()), SLOT(historyLast()));
@@ -2339,6 +2356,11 @@ QWidget* MainWindow::eicWidgetController() {
     connect(btnGallary,SIGNAL(clicked()),  eicWidget, SLOT(setGallaryToEics()));
     connect(btnIntegrateArea,SIGNAL(clicked()),  eicWidget, SLOT(startAreaIntegration()));
     connect(btnAverageSpectra,SIGNAL(clicked()),  eicWidget, SLOT(startSpectralAveraging()));
+
+    connect(btnGroupPeaks, SIGNAL(toggled(bool)), eicWidget, SLOT(automaticPeakGrouping(bool)));
+    connect(btnGroupPeaks, SIGNAL(toggled(bool)), eicWidget, SLOT(replot()));
+    connect(btnIsotopePlot, SIGNAL(toggled(bool)), eicWidget, SLOT(showIsotopePlot(bool)));
+    connect(btnIsotopePlot, SIGNAL(toggled(bool)), eicWidget, SLOT(replot()));
 
     QWidget *window = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout;
