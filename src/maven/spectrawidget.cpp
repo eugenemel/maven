@@ -275,11 +275,18 @@ void SpectraWidget::setScan(Peak* peak) {
 
     _focusCoord = QPointF(peak->peakMz,peak->peakIntensity);
 
+    //Issue 394: Respect settings form when displaying peaks
     //These affect the MS1 plot
-    _minX = peak->peakMz-2;
-    _maxX = peak->peakMz+6;
+    if (mainwindow->getSettings()->contains("chkAutoMzMin") &&
+            mainwindow->getSettings()->value("chkAutoMzMin").toInt()) {
+        _minX = peak->peakMz-2;
+        _maxX = peak->peakMz+6;
+    } else {
+        _minX = mainwindow->getSettings()->value("spnMzMinVal", 0.0).toFloat();
+        _maxX = mainwindow->getSettings()->value("spnMzMaxVal", 1200.0).toFloat();
+    }
 
-    _maxY = peak->peakIntensity*1.3;
+    _maxY = peak->peakIntensity*1.3f;
     _minY = 0;
 
     annotateScan();
