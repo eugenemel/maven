@@ -282,7 +282,9 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                         displayName varchar(254),\
                         \
                         srmPrecursorMz real,\
-                        srmProductMz real\
+                        srmProductMz real,\
+                        \
+                        isotopicIndex integer\
                         )");
 
      if(!query0.exec(TABLESQL)) qDebug() << query0.lastError();
@@ -292,7 +294,8 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                                     groupRank,label,type,srmId,ms2EventCount, \
                                     ms2Score,adductName,compoundId,compoundName,compoundDB,\
                                     searchTableName,displayName,\
-                                    srmPrecursorMz,srmProductMz\
+                                    srmPrecursorMz,srmProductMz,\
+                                    isotopicIndex\
                                   )\
                                     \
                                  values\
@@ -300,7 +303,8 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                                     ?,?,?,?,?,\
                                     ?,?,?,?,?,\
                                     ?,?,\
-                                    ?,?\
+                                    ?,?,\
+                                    ?\
                                   )\
                                  ");
 
@@ -351,6 +355,9 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 
         query1.addBindValue(g->srmPrecursorMz);
         query1.addBindValue(g->srmProductMz);
+
+        //Issue 380
+        query1.addBindValue(g->isotopicIndex);
 
      if(! query1.exec() ) {
         qDebug() << query1.lastError();
@@ -562,6 +569,7 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
         bool isHasDisplayName = false;
         bool isHasSrmPrecursorMz = false;
         bool isHasSrmProductMz = false;
+        bool isHasIsotopicIndex = false;
         while (queryCheckCols.next()) {
             if ("displayName" == queryCheckCols.value(1).toString()) {
                 isHasDisplayName = true;
@@ -569,13 +577,16 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
                 isHasSrmPrecursorMz = true;
             } else if ("srmProductMz" == queryCheckCols.value(1).toString()) {
                 isHasSrmProductMz = true;
+            } else if ("isotopicIndex" == queryCheckCols.value(1).toString()) {
+                isHasIsotopicIndex = true;
             }
         }
 
         qDebug() << "ProjectDB::loadPeakGroups(): "
                  << "isHasDisplayName? " << isHasDisplayName
                  << "isHasSrmPrecursorMz? " << isHasSrmPrecursorMz
-                 << "isHasSrmProductMz? " << isHasSrmProductMz;
+                 << "isHasSrmProductMz? " << isHasSrmProductMz
+                 << "isHasIsotopicIndex? " << isHasIsotopicIndex;
 
         if (!isHasDisplayName) {
             QSqlQuery queryAdjustPeakGroupsTable(sqlDB);
@@ -612,6 +623,17 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
             }
         }
 
+        if (!isHasIsotopicIndex) {
+            QSqlQuery queryAddIsotopicIndex(sqlDB);
+
+            QString strAddIsotopicIndex = QString("ALTER TABLE ");
+            strAddIsotopicIndex.append(tableName);
+            strAddIsotopicIndex.append(" ADD isotopicIndex INTEGER DEFAULT 0");
+            if (!queryAddIsotopicIndex.exec(strAddIsotopicIndex)) {
+                qDebug() << "Ho..." << queryAddIsotopicIndex.lastError();
+            }
+        }
+
      QSqlQuery query(sqlDB);
      query.exec("create index if not exists peak_group_ids on peaks(groupId)");
      query.exec("select * from " + tableName );
@@ -634,6 +656,7 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
         g.groupRank = query.value("groupRank").toInt();
         g.srmPrecursorMz = static_cast<float>(query.value("srmPrecursorMz").toDouble());
         g.srmProductMz = static_cast<float>(query.value("srmProductMz").toDouble());
+        g.isotopicIndex = query.value("isotopicIndex").toInt();
 
         QVariant label = query.value("label");
         if (label.toString().size() > 0) {
@@ -663,8 +686,6 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
         g.compoundDb = compoundDB;
 
         g.importedCompoundName = compoundName;
-
-        //if(!compoundName.empty()) g.tagString=compoundName;
 
         string srmId = query.value("srmId").toString().toStdString();
         if (!srmId.empty()) g.setSrmId(srmId);
