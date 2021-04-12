@@ -681,9 +681,10 @@ void ProjectDockWidget::loadAllPeakTables() {
     //Issue 73 / mzkitchen 8: load match table
     currentProject->loadMatchTable();
 
-    for(int i=0; i < currentProject->allgroups.size(); i++ ) {
+    for(unsigned int i=0; i < currentProject->allgroups.size(); i++ ) {
         PeakGroup* g = &(currentProject->allgroups[i]);
-        currentProject->allgroups[i].groupStatistics();
+        //currentProject->allgroups[i].groupStatistics();
+        computeGroupStatistics(currentProject->allgroups[i]);
 
         //put them in right place
         if(g->searchTableName.empty()) g->searchTableName="Bookmarks";
@@ -699,6 +700,16 @@ void ProjectDockWidget::loadAllPeakTables() {
             t->showAllGroups();
         }
     }
+}
+
+//Issue 380: Need to perform this for children also
+void ProjectDockWidget::computeGroupStatistics(PeakGroup& peakGroup){
+    if (peakGroup.childCount() > 0) {
+        for (auto& childGroup : peakGroup.children) {
+            computeGroupStatistics(childGroup);
+        }
+    }
+    peakGroup.groupStatistics();
 }
 
 void ProjectDockWidget::saveProjectSQLITE(QString filename) {
