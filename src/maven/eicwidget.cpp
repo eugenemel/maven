@@ -1768,7 +1768,7 @@ void EicWidget::contextMenuEvent(QContextMenuEvent * event) {
     connect(o34, SIGNAL(toggled(bool)), SLOT(showEICLines(bool)));
     connect(o34, SIGNAL(toggled(bool)), SLOT(replot()));
 
-    QAction* oEmphasizePoints = menu.addAction("Emphasize EIC Scans");
+    QAction* oEmphasizePoints = menu.addAction("Show Scans as Dots");
     oEmphasizePoints->setCheckable(true);
     oEmphasizePoints->setChecked(_emphasizeEICPoints);
     connect(oEmphasizePoints, SIGNAL(toggled(bool)), SLOT(emphasizeEICPoints(bool)));
