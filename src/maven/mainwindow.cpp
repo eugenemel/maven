@@ -2365,7 +2365,9 @@ QWidget* MainWindow::eicWidgetController() {
     connect(btnAverageSpectra,SIGNAL(clicked()),  eicWidget, SLOT(startSpectralAveraging()));
 
     connect(btnGroupPeaks, SIGNAL(toggled(bool)), eicWidget, SLOT(automaticPeakGrouping(bool)));
+    connect(btnGroupPeaks, SIGNAL(toggled(bool)), eicWidget, SLOT(groupPeaks()));
     connect(btnGroupPeaks, SIGNAL(toggled(bool)), eicWidget, SLOT(replot()));
+
     connect(btnIsotopePlot, SIGNAL(toggled(bool)), eicWidget, SLOT(showIsotopePlot(bool)));
     connect(btnIsotopePlot, SIGNAL(toggled(bool)), eicWidget, SLOT(replot()));
 
