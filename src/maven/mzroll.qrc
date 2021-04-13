@@ -100,5 +100,9 @@
         <file>images/icon_filter.png</file>
         <file>images/spectra_with_2.png</file>
         <file>images/spectra_with_3.png</file>
+        <file>images/dotted_gaussian.png</file>
+        <file>images/filled_gaussian.png</file>
+        <file>images/gaussian_groups.png</file>
+        <file>images/plain_gaussian.png</file>
     </qresource>
 </RCC>
