@@ -86,6 +86,7 @@ public slots:
     void showNotes(bool f) { _showNotes=f; }
     void showMergedEIC(bool f) { _showMergedEIC=f; }
     void showEICLines(bool f) { _showEICLines=f; }
+    void showEICFill(bool f) { _showEICLines=!f; }
     void automaticPeakGrouping(bool f) { _groupPeaks=f; }
     void showMS2Events(bool f) { _showMS2Events=f; }
     void disconnectCompounds(QString libraryName);

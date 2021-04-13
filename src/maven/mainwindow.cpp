@@ -2390,9 +2390,18 @@ QWidget* MainWindow::eicWidgetController() {
     connect(btnIntegrateArea,SIGNAL(clicked()),  eicWidget, SLOT(startAreaIntegration()));
 //    connect(btnAverageSpectra,SIGNAL(clicked()),  eicWidget, SLOT(startSpectralAveraging()));
 
+    connect(btnEICFill, SIGNAL(toggled(bool)), eicWidget, SLOT(showEICFill(bool)));
+    connect(btnEICFill, SIGNAL(toggled(bool)), eicWidget, SLOT(replot()));
+
+    connect(btnEICDots, SIGNAL(toggled(bool)), eicWidget, SLOT(emphasizeEICPoints(bool)));
+    connect(btnEICDots, SIGNAL(toggled(bool)), eicWidget, SLOT(replot()));
+
     connect(btnGroupPeaks, SIGNAL(toggled(bool)), eicWidget, SLOT(automaticPeakGrouping(bool)));
     connect(btnGroupPeaks, SIGNAL(toggled(bool)), eicWidget, SLOT(groupPeaks()));
     connect(btnGroupPeaks, SIGNAL(toggled(bool)), eicWidget, SLOT(replot()));
+
+    connect(btnBarPlot, SIGNAL(toggled(bool)), eicWidget, SLOT(showBarPlot(bool)));
+    connect(btnBarPlot, SIGNAL(toggled(bool)), eicWidget, SLOT(replot()));
 
     connect(btnIsotopePlot, SIGNAL(toggled(bool)), eicWidget, SLOT(showIsotopePlot(bool)));
     connect(btnIsotopePlot, SIGNAL(toggled(bool)), eicWidget, SLOT(replot()));
