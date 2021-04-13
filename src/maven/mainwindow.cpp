@@ -2299,6 +2299,27 @@ QWidget* MainWindow::eicWidgetController() {
     btnGroupPeaks->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnGroupPeaks->setToolTip(tr("Automatic Peak Grouping"));
 
+    QToolButton *btnEICFill = new QToolButton(toolBar);
+    btnEICFill->setCheckable(true);
+    btnEICFill->setChecked(true);
+    btnEICFill->setIcon(QIcon(rsrcPath + "/colorfill.png"));
+    btnEICFill->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnEICFill->setToolTip(tr("Show Filled EIC"));
+
+    QToolButton *btnEICDots = new QToolButton(toolBar);
+    btnEICDots->setCheckable(true);
+    btnEICDots->setChecked(false);
+    btnEICDots->setIcon(QIcon(rsrcPath + "/black_circle.png"));
+    btnEICDots->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnEICDots->setToolTip(tr("Show Scans as Dots"));
+
+    QToolButton *btnBarPlot = new QToolButton(toolBar);
+    btnBarPlot->setCheckable(true);
+    btnBarPlot->setChecked(false);
+    btnBarPlot->setIcon(QIcon(rsrcPath + "/bar_plot_samples.png"));
+    btnBarPlot->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnBarPlot->setToolTip(tr("Show Bar Plot"));
+
     QToolButton *btnIsotopePlot = new QToolButton(toolBar);
     btnIsotopePlot->setCheckable(true);
     btnIsotopePlot->setChecked(false);
@@ -2326,9 +2347,14 @@ QWidget* MainWindow::eicWidgetController() {
 
     //Issue 222
     toolBar->addSeparator();
-
+    toolBar->addWidget(btnEICFill);
+    toolBar->addWidget(btnEICDots);
     toolBar->addWidget(btnGroupPeaks);
+
+    toolBar->addSeparator();
+    toolBar->addWidget(btnBarPlot);
     toolBar->addWidget(btnIsotopePlot);
+    //toolBar->addWidget(btn)
 
     //Issue 222:
     //disabled buttons
