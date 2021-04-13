@@ -2219,11 +2219,11 @@ QWidget* MainWindow::eicWidgetController() {
     btnZoom->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnZoom->setToolTip(tr("Zoom out (0)"));
 
-    QToolButton *btnPrint = new QToolButton(toolBar);
-    btnPrint->setIcon(QIcon(rsrcPath + "/fileprint.png"));
-    btnPrint->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnPrint->setToolTip(tr("Print EIC (Ctr+P)"));
-    btnPrint->setShortcut(tr("Ctrl+P"));
+//    QToolButton *btnPrint = new QToolButton(toolBar);
+//    btnPrint->setIcon(QIcon(rsrcPath + "/fileprint.png"));
+//    btnPrint->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+//    btnPrint->setToolTip(tr("Print EIC (Ctr+P)"));
+//    btnPrint->setShortcut(tr("Ctrl+P"));
 
     QToolButton *btnPDF = new QToolButton(toolBar);
     btnPDF->setIcon(QIcon(rsrcPath + "/exportpdf.png"));
@@ -2235,45 +2235,45 @@ QWidget* MainWindow::eicWidgetController() {
     btnPNG->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnPNG->setToolTip(tr("Copy EIC Image to Clipboard"));
 
-    QToolButton *btnLast = new QToolButton(toolBar);
-    btnLast->setIcon(QIcon(rsrcPath + "/last.png"));
-    btnLast->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnLast->setToolTip(tr("History Back (Ctrl+Left)"));
-    btnLast->setShortcut(tr("Ctrl+Left"));
+//    QToolButton *btnLast = new QToolButton(toolBar);
+//    btnLast->setIcon(QIcon(rsrcPath + "/last.png"));
+//    btnLast->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+//    btnLast->setToolTip(tr("History Back (Ctrl+Left)"));
+//    btnLast->setShortcut(tr("Ctrl+Left"));
 
-    QToolButton *btnNext = new QToolButton(toolBar);
-    btnNext->setIcon(QIcon(rsrcPath + "/next.png"));
-    btnNext->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnNext->setToolTip(tr("History Forward (Ctrl+Right)"));
-    btnNext->setShortcut(tr("Ctrl+Right"));
+//    QToolButton *btnNext = new QToolButton(toolBar);
+//    btnNext->setIcon(QIcon(rsrcPath + "/next.png"));
+//    btnNext->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+//    btnNext->setToolTip(tr("History Forward (Ctrl+Right)"));
+//    btnNext->setShortcut(tr("Ctrl+Right"));
 
-    QToolButton *btnAutoZoom= new QToolButton(toolBar);
-    btnAutoZoom->setCheckable(true);
-    btnAutoZoom->setChecked(true);
-    btnAutoZoom->setIcon(QIcon(rsrcPath + "/autofocus.png"));
-    btnAutoZoom->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnAutoZoom->setToolTip(tr("Auto Zoom. Always center chromatogram on expected retention time!"));
+//    QToolButton *btnAutoZoom= new QToolButton(toolBar);
+//    btnAutoZoom->setCheckable(true);
+//    btnAutoZoom->setChecked(true);
+//    btnAutoZoom->setIcon(QIcon(rsrcPath + "/autofocus.png"));
+//    btnAutoZoom->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+//    btnAutoZoom->setToolTip(tr("Auto Zoom. Always center chromatogram on expected retention time!"));
 
     QToolButton *btnGallery= new QToolButton(toolBar);
     btnGallery->setIcon(QIcon(rsrcPath + "/gallery.png"));
     btnGallery->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnGallery->setToolTip(tr("Show In Gallary"));
+    btnGallery->setToolTip(tr("Show In Gallery"));
 
-    QToolButton *btnMarkGood = new QToolButton(toolBar);
-    btnMarkGood->setIcon(QIcon(rsrcPath + "/markgood.png"));
-    btnMarkGood->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnMarkGood->setToolTip(tr("Bookmark as Good Group (G)"));
+//    QToolButton *btnMarkGood = new QToolButton(toolBar);
+//    btnMarkGood->setIcon(QIcon(rsrcPath + "/markgood.png"));
+//    btnMarkGood->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+//    btnMarkGood->setToolTip(tr("Bookmark as Good Group (G)"));
 
-    QToolButton *btnMarkBad = new QToolButton(toolBar);
-    btnMarkBad->setIcon(QIcon(rsrcPath + "/markbad.png"));
-    btnMarkBad->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnMarkBad->setToolTip(tr("Bookmark as Bad Group (B)"));
+//    QToolButton *btnMarkBad = new QToolButton(toolBar);
+//    btnMarkBad->setIcon(QIcon(rsrcPath + "/markbad.png"));
+//    btnMarkBad->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+//    btnMarkBad->setToolTip(tr("Bookmark as Bad Group (B)"));
 
-    QToolButton *btnCopyCSV = new QToolButton(toolBar);
-    btnCopyCSV->setIcon(QIcon(rsrcPath + "/copyCSV.png"));
-    btnCopyCSV->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnCopyCSV->setToolTip(tr("Copy Group Information to Clipboard (Ctrl+C)"));
-    btnCopyCSV->setShortcut(tr("Ctrl+C"));
+//    QToolButton *btnCopyCSV = new QToolButton(toolBar);
+//    btnCopyCSV->setIcon(QIcon(rsrcPath + "/copyCSV.png"));
+//    btnCopyCSV->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+//    btnCopyCSV->setToolTip(tr("Copy Group Information to Clipboard (Ctrl+C)"));
+//    btnCopyCSV->setShortcut(tr("Ctrl+C"));
 
     QToolButton *btnBookmark = new QToolButton(toolBar);
     btnBookmark->setIcon(QIcon(rsrcPath + "/bookmark.png"));
@@ -2287,10 +2287,10 @@ QWidget* MainWindow::eicWidgetController() {
     btnIntegrateArea->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnIntegrateArea->setToolTip(tr("Manual Integration (Shift+MouseDrag)"));
 
-    QToolButton *btnAverageSpectra = new QToolButton(toolBar);
-    btnAverageSpectra->setIcon(QIcon(rsrcPath + "/averageSpectra.png"));
-    btnAverageSpectra->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnAverageSpectra->setToolTip(tr("Average Spectra (Ctrl+MouseDrag)"));
+//    QToolButton *btnAverageSpectra = new QToolButton(toolBar);
+//    btnAverageSpectra->setIcon(QIcon(rsrcPath + "/averageSpectra.png"));
+//    btnAverageSpectra->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+//    btnAverageSpectra->setToolTip(tr("Average Spectra (Ctrl+MouseDrag)"));
 
     QToolButton *btnGroupPeaks = new QToolButton(toolBar);
     btnGroupPeaks->setCheckable(true);
@@ -2349,20 +2349,20 @@ QWidget* MainWindow::eicWidgetController() {
     //toolBar->addWidget(btnAutoZoom);          // Issue 222: This no longer works
 //    toolBar->addWidget(smoothingWindowBox);
 
-    connect(btnLast,SIGNAL(clicked()), SLOT(historyLast()));
-    connect(btnNext,SIGNAL(clicked()), SLOT(historyNext()));
-    connect(btnPrint, SIGNAL(clicked()), SLOT(print()));
+//    connect(btnLast,SIGNAL(clicked()), SLOT(historyLast()));
+//    connect(btnNext,SIGNAL(clicked()), SLOT(historyNext()));
+//    connect(btnPrint, SIGNAL(clicked()), SLOT(print()));
     connect(btnZoom, SIGNAL(clicked()), eicWidget, SLOT(resetZoom()));
     connect(btnPDF, SIGNAL(clicked()), SLOT(exportPDF()));
     connect(btnPNG, SIGNAL(clicked()), SLOT(exportSVG()));
-    connect(btnAutoZoom,SIGNAL(toggled(bool)), eicWidget,SLOT(autoZoom(bool)));
+//    connect(btnAutoZoom,SIGNAL(toggled(bool)), eicWidget,SLOT(autoZoom(bool)));
     connect(btnBookmark,SIGNAL(clicked()),  this,  SLOT(bookmarkSelectedPeakGroup()));
-    connect(btnCopyCSV,SIGNAL(clicked()),  eicWidget, SLOT(copyToClipboard()));
-    connect(btnMarkGood,SIGNAL(clicked()), eicWidget, SLOT(markGroupGood()));
-    connect(btnMarkBad,SIGNAL(clicked()),  eicWidget, SLOT(markGroupBad()));
+//    connect(btnCopyCSV,SIGNAL(clicked()),  eicWidget, SLOT(copyToClipboard()));
+//    connect(btnMarkGood,SIGNAL(clicked()), eicWidget, SLOT(markGroupGood()));
+//    connect(btnMarkBad,SIGNAL(clicked()),  eicWidget, SLOT(markGroupBad()));
     connect(btnGallery,SIGNAL(clicked()),  eicWidget, SLOT(setGallaryToEics()));
     connect(btnIntegrateArea,SIGNAL(clicked()),  eicWidget, SLOT(startAreaIntegration()));
-    connect(btnAverageSpectra,SIGNAL(clicked()),  eicWidget, SLOT(startSpectralAveraging()));
+//    connect(btnAverageSpectra,SIGNAL(clicked()),  eicWidget, SLOT(startSpectralAveraging()));
 
     connect(btnGroupPeaks, SIGNAL(toggled(bool)), eicWidget, SLOT(automaticPeakGrouping(bool)));
     connect(btnGroupPeaks, SIGNAL(toggled(bool)), eicWidget, SLOT(groupPeaks()));
