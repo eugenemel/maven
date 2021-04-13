@@ -609,7 +609,7 @@ void EicWidget::addEICLines(bool showSpline) {
 
         if(_showEICLines) {
              brush.setStyle(Qt::NoBrush);
-            line->setFillPath(false);
+             line->setFillPath(false);
         } else {
              brush.setStyle(Qt::SolidPattern);
              line->setFillPath(true);

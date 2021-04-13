@@ -38,9 +38,12 @@ void EicLine::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
     	painter->setPen(pen);
     }
 
-    if (_fillPath) painter->drawPolygon(_line);
-    //else painter->drawPolyline(_line);
-    else painter->drawLines(_line);
+    //Issue 374: User intuition is to always show polygon
+    painter->drawPolygon(_line);
+
+//    if (_fillPath) painter->drawPolygon(_line);
+//    //else painter->drawPolyline(_line);
+//    else painter->drawLines(_line);
 
     if (_emphasizePoints) {
 
