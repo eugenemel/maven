@@ -1910,7 +1910,7 @@ void EicWidget::setSelectedGroup(PeakGroup* group) {
     qDebug() <<"EicWidget::setSelectedGroup(PeakGroup* group) group=" << group << "completed";
 }
 
-void EicWidget::setGallaryToEics() {
+void EicWidget::setGalleryToEics() {
 
     if(getMainWindow()->galleryDockWidget->isVisible()) {
         getMainWindow()->galleryWidget->addIdividualEicPlots(eics,getSelectedGroup());

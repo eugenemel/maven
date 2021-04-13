@@ -73,7 +73,7 @@ public slots:
     void print(QPaintDevice* printer);
     void showPeakArea(Peak*);
     void saveRetentionTime();
-    void setGallaryToEics();
+    void setGalleryToEics();
 
     void selectGroupNearRt(float rt);
     void eicToClipboard();
