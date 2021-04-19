@@ -184,6 +184,7 @@ protected:
 public slots:
     QDockWidget* createDockWidget(QString title, QWidget* w);
     void showPeakInfo(Peak*);
+    void showScanInfo(Scan*);
     void setProgressBar(QString, int step, int totalSteps);
     void setStatusText(QString text = QString::null);
     void setMzValue();

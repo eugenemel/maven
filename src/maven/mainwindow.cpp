@@ -1996,6 +1996,27 @@ void MainWindow::showPeakInfo(Peak* _peak) {
     }
 }
 
+//caller is EICPoint::scanSelected signal
+void MainWindow::showScanInfo(Scan* _scan){
+    if (!_scan) return;
+
+    fragmentationSpectraDockWidget->setVisible(true);
+    fragmentationSpectraWidget->setScan(_scan);
+
+    if (massCalcWidget->isVisible()) {
+        massCalcWidget->setFragmentationScan(_scan);
+    }
+
+    if (_scan->mslevel >= 2 && _scan->sample && spectraWidget->isVisible()) {
+        int scanHistory=50;
+        Scan* lastfullscan = _scan->getLastFullScan(scanHistory);
+        if(lastfullscan) {
+            spectraWidget->setScan(lastfullscan);
+            spectraWidget->zoomRegion(_scan->precursorMz,0.5);
+        }
+    }
+}
+
 void MainWindow::spectraFocused(Peak* _peak) {
     if (_peak == NULL) return;
 
