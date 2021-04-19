@@ -1994,6 +1994,10 @@ void MainWindow::showPeakInfo(Peak* _peak) {
         }
         showConsensusFragmentationScans(mz);
     }
+
+    if (covariantsPanel->isVisible()) {
+        getCovariants(_peak);
+    }
 }
 
 //caller is EICPoint::scanSelected signal
