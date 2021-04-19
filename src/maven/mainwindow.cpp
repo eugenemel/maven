@@ -2317,35 +2317,35 @@ QWidget* MainWindow::eicWidgetController() {
 //    btnAverageSpectra->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 //    btnAverageSpectra->setToolTip(tr("Average Spectra (Ctrl+MouseDrag)"));
 
-    QToolButton *btnGroupPeaks = new QToolButton(toolBar);
+    btnGroupPeaks = new QToolButton(toolBar);
     btnGroupPeaks->setCheckable(true);
     btnGroupPeaks->setChecked(true);
     btnGroupPeaks->setIcon(QIcon(rsrcPath + "/gaussian_groups.png"));
     btnGroupPeaks->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnGroupPeaks->setToolTip(tr("Automatic Peak Grouping"));
 
-    QToolButton *btnEICFill = new QToolButton(toolBar);
+    btnEICFill = new QToolButton(toolBar);
     btnEICFill->setCheckable(true);
     btnEICFill->setChecked(true);
     btnEICFill->setIcon(QIcon(rsrcPath + "/filled_gaussian.png"));
     btnEICFill->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnEICFill->setToolTip(tr("Show Filled EIC"));
 
-    QToolButton *btnEICDots = new QToolButton(toolBar);
+    btnEICDots = new QToolButton(toolBar);
     btnEICDots->setCheckable(true);
     btnEICDots->setChecked(false);
     btnEICDots->setIcon(QIcon(rsrcPath + "/dotted_gaussian.png"));
     btnEICDots->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnEICDots->setToolTip(tr("Show Scans as Dots"));
 
-    QToolButton *btnBarPlot = new QToolButton(toolBar);
+    btnBarPlot = new QToolButton(toolBar);
     btnBarPlot->setCheckable(true);
     btnBarPlot->setChecked(false);
     btnBarPlot->setIcon(QIcon(rsrcPath + "/bar_plot_samples.png"));
     btnBarPlot->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnBarPlot->setToolTip(tr("Show Bar Plot"));
 
-    QToolButton *btnIsotopePlot = new QToolButton(toolBar);
+    btnIsotopePlot = new QToolButton(toolBar);
     btnIsotopePlot->setCheckable(true);
     btnIsotopePlot->setChecked(false);
     btnIsotopePlot->setIcon(QIcon(rsrcPath + "/isotope.png"));

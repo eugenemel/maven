@@ -1784,24 +1784,28 @@ void EicWidget::contextMenuEvent(QContextMenuEvent * event) {
     QAction* o34 = menu.addAction("Show EICs as Lines");
     o34->setCheckable(true);
     o34->setChecked(_showEICLines);
+    connect(o34, SIGNAL(toggled(bool)), getMainWindow(), SLOT(toggleFilledEICs(bool)));
     connect(o34, SIGNAL(toggled(bool)), SLOT(showEICLines(bool)));
     connect(o34, SIGNAL(toggled(bool)), SLOT(replot()));
 
     QAction* oEmphasizePoints = menu.addAction("Show Scans as Dots");
     oEmphasizePoints->setCheckable(true);
     oEmphasizePoints->setChecked(_emphasizeEICPoints);
+    connect(oEmphasizePoints, SIGNAL(toggled(bool)), getMainWindow()->btnEICDots, SLOT(setChecked(bool)));
     connect(oEmphasizePoints, SIGNAL(toggled(bool)), SLOT(emphasizeEICPoints(bool)));
     connect(oEmphasizePoints, SIGNAL(toggled(bool)), SLOT(replot()));
 
     QAction* o5 = menu.addAction("Show Bar Plot");
     o5->setCheckable(true);
     o5->setChecked(_showBarPlot);
+    connect(o5, SIGNAL(toggled(bool)), getMainWindow()->btnBarPlot, SLOT(setChecked(bool)));
     connect(o5, SIGNAL(toggled(bool)), SLOT(showBarPlot(bool)));
     connect(o5, SIGNAL(toggled(bool)), SLOT(replot()));
 
     QAction* o6 = menu.addAction("Show Isotope Plot");
     o6->setCheckable(true);
     o6->setChecked(_showIsotopePlot);
+    connect(o6, SIGNAL(toggled(bool)), getMainWindow()->btnIsotopePlot, SLOT(setChecked(bool)));
     connect(o6, SIGNAL(toggled(bool)), SLOT(showIsotopePlot(bool)));
     connect(o6, SIGNAL(toggled(bool)), SLOT(replot()));
 
@@ -1821,6 +1825,7 @@ void EicWidget::contextMenuEvent(QContextMenuEvent * event) {
     o9->setCheckable(true);
     o9->setChecked(_groupPeaks);
     connect(o9, SIGNAL(toggled(bool)), SLOT(automaticPeakGrouping(bool)));
+    connect(o9, SIGNAL(toggled(bool)), getMainWindow()->btnGroupPeaks, SLOT(setChecked(bool)));
     connect(o9, SIGNAL(toggled(bool)), SLOT(groupPeaks()));
     connect(o9, SIGNAL(toggled(bool)), SLOT(replot()));
 

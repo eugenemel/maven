@@ -174,6 +174,11 @@ public:
 
     QColor getBackgroundAdjustedBlack(QWidget* widget);
     QToolButton *btnLibrary = nullptr;
+    QToolButton *btnGroupPeaks = nullptr;
+    QToolButton *btnEICFill = nullptr;
+    QToolButton *btnEICDots = nullptr;
+    QToolButton *btnBarPlot = nullptr;
+    QToolButton *btnIsotopePlot = nullptr;
     IsotopeParameters getIsotopeParameters();
 
 protected:
@@ -264,6 +269,9 @@ public slots:
 
     //Issue 376
     void unsetLastSelectedPeakGroup(){_lastSelectedPeakGroup = nullptr;}
+
+    //Issue 400
+    void toggleFilledEICs(bool isShowEICLines){if (btnEICFill) btnEICFill->setChecked(!isShowEICLines);}
 
 private slots:
     void createMenus();
