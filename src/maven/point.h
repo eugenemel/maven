@@ -70,6 +70,7 @@ signals:
     void peakGroupSelected(PeakGroup*);
     void spectaFocused(Peak*);
     void peakGroupFocus(PeakGroup*);
+    void scanSelected(Scan*);
 
 
 };

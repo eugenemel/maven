@@ -77,7 +77,6 @@ void EicWidget::mousePressEvent(QMouseEvent *event) {
 }
 
 void EicWidget::mouseReleaseEvent(QMouseEvent *event) {
-    blockEicPointSignals(true);
 
  //qDebug <<" EicWidget::mouseReleaseEvent(QMouseEvent *event)";
     QGraphicsView::mouseReleaseEvent(event);
@@ -108,7 +107,9 @@ void EicWidget::mouseReleaseEvent(QMouseEvent *event) {
 
         //minimum size for region to integrate is 0.01 seconds
         if(rtmax-rtmin> 0.01){
+            blockEicPointSignals(true);
             integrateRegion(rtmin, rtmax);
+            blockEicPointSignals(false);
         }
 
     } else if (_spectraAveraging || ( event->button() == Qt::LeftButton && event->modifiers() == Qt::ControlModifier) ) {
@@ -254,8 +255,6 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
     }
 
     scene()->update();
-
-    blockEicPointSignals(false);
 }
 
 void EicWidget::mouseDoubleClickEvent(QMouseEvent* event){
@@ -901,7 +900,8 @@ void EicWidget::showPeakArea(Peak* peak) {
     for(int i=0; i < observed.size(); i++ ) {
         line->addPoint(QPointF( toX(observed[i].x), toY(observed[i].y)));
     }
-    QColor color = Qt::black;
+
+    QColor color = getMainWindow()->getBackgroundAdjustedBlack(getMainWindow()->getSpectraWidget());
     line->setColor(color);
     QBrush brush(color,Qt::CrossPattern);
     line->setBrush(brush);
