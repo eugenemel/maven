@@ -882,13 +882,13 @@ void EicWidget::addBaseline(PeakGroup* group) {
 void EicWidget::showPeakArea(Peak* peak) {
  //qDebug <<" EicWidget::showPeakArea(Peak* peak)";
 
-    if (peak == NULL ) return;
-    if( peak->hasEIC()==false) return;
+    if (!peak) return;
+    if (!peak->hasEIC()) return;
 
     //make sure that this is not a dead pointer to lost eic
     bool matched=false;
     EIC* eic= peak->getEIC();
-    for(int i=0; i < eics.size(); i++) if (eics[i]== eic) {matched=true; break; }
+    for(unsigned int i=0; i < eics.size(); i++) if (eics[i]== eic) {matched=true; break; }
     if(!matched) return;
 
     //get points around the peak.
