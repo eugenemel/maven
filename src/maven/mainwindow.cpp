@@ -1956,7 +1956,7 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> MainWindow::getSrmSlices() {
 }
 
 
-//only caller is setPeakGroup().
+//callers are setPeakGroup() and EICPoint::peakSelected signal
 void MainWindow::showPeakInfo(Peak* _peak) {
     qDebug() << "MainWindow::showPeakInfo(peak)";
 
