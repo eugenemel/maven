@@ -309,6 +309,22 @@ void EicWidget::clearEICLines() {
     }
 }
 
+void EicWidget::clearPeakAreas() {
+    qDebug() << "EicWidget::clearPeakAreas()";
+
+    for (auto& item : _peakAreas) {
+        if (item) {
+            if (item->scene()) {
+                scene()->removeItem(item);
+            }
+        }
+        delete(item);
+        item = nullptr;
+    }
+    _peakAreas.clear();
+
+}
+
 void EicWidget::setFocusLine(float rt) {
 
     //new single focus line
@@ -906,6 +922,8 @@ void EicWidget::showPeakArea(Peak* peak) {
     QBrush brush(color,Qt::CrossPattern);
     line->setBrush(brush);
 
+    _peakAreas.push_back(line);
+
     //QPen pen(Qt::black,Qt::SolidLine);
     //pen.setWidth(3);
     //line->setPen(pen);
@@ -938,6 +956,7 @@ void EicWidget::clearPlot() {
 	if(_boxplot && _boxplot->scene()) { _boxplot->clear(); scene()->removeItem(_boxplot);  }
 	if(_selectionLine && _selectionLine->scene()) {scene()->removeItem(_selectionLine); }
 	if(_statusText && _statusText->scene()) { scene()->removeItem(_statusText); }
+    clearPeakAreas();
     clearEICLines();
 	scene()->clear();
     scene()->setSceneRect(10,10,this->width()-10, this->height()-10);

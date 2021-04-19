@@ -18,6 +18,7 @@ class BarPlot;
 class BoxPlot;
 class IsotopePlot;
 class Note;
+class EicLine;
 
 class EicWidget : public QGraphicsView
 {
@@ -112,6 +113,8 @@ public slots:
     void freezeView(bool freeze);
     void groupPeaks();
     void clearEICLines();
+    void clearPeakAreas();
+
 protected:
     void moved(QMouseEvent *event);
     void selected(const QRect&);
@@ -203,6 +206,7 @@ private:
     QGraphicsLineItem* _selectionLine;
 
     QVector<QGraphicsLineItem*> _focusLines;
+    vector<EicLine*> _peakAreas{};
 
     void showPeak(float freq, float amplitude);
     void computeEICs(bool isUseSampleBoundsRT=true);

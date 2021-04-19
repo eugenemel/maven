@@ -24,6 +24,10 @@ EicPoint::EicPoint(float x, float y, Peak* peak, MainWindow* mw)
         _cSize += 20*(_peak->quality);
         //mouse press events
          connect(this, SIGNAL(peakSelected(Peak*)), mw, SLOT(showPeakInfo(Peak*)));
+
+         //If shift modifier is not down, clear out old selection
+         connect(this, SIGNAL(peakSelectedNoShiftModifier(Peak*)), mw->getEicWidget(), SLOT(clearPeakAreas()));
+
          connect(this, SIGNAL(peakSelected(Peak*)), mw->getEicWidget(), SLOT(showPeakArea(Peak*)));
 
          //mouse hover events
@@ -100,7 +104,12 @@ void EicPoint::mousePressEvent (QGraphicsSceneMouseEvent* event) {
              << "peak=" << _peak << ","
              << "scan=" << _scan;
 
-    if (_peak) emit peakSelected(_peak);
+    if (_peak){
+        if (event->modifiers() != Qt::ShiftModifier) {
+            emit peakSelectedNoShiftModifier(_peak);
+        }
+        emit peakSelected(_peak);
+    }
 
     //e.g. MS/MS event triangles
     if (_scan) emit scanSelected(_scan);

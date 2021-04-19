@@ -67,6 +67,7 @@ private slots:
 
 signals:
     void peakSelected(Peak*);
+    void peakSelectedNoShiftModifier(Peak*);
     void peakGroupSelected(PeakGroup*);
     void spectaFocused(Peak*);
     void peakGroupFocus(PeakGroup*);
