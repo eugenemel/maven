@@ -152,7 +152,7 @@ void IsotopeBar::mousePressEvent (QGraphicsSceneMouseEvent*event) {}
 */
 
 
-void IsotopeBar::hoverEnterEvent (QGraphicsSceneHoverEvent*event) {
+void IsotopeBar::hoverEnterEvent (QGraphicsSceneHoverEvent *event) {
     QVariant v = data(0);
     QString note = v.value<QString>();
     if (note.length() == 0 ) return;
@@ -173,3 +173,6 @@ void IsotopeBar::keyPressEvent(QKeyEvent *e) {
     }
 }
 
+void IsotopeBar::mousePressEvent(QGraphicsSceneMouseEvent *event){
+    qDebug() << "TODO: IsotopeBar::mousePressEvent()";
+}

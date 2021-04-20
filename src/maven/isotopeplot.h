@@ -41,7 +41,7 @@ class IsotopeBar : public QObject, public QGraphicsRectItem
 
 	void hoverEnterEvent (QGraphicsSceneHoverEvent*event);
 //	void mouseDoubleClickEvent (QGraphicsSceneMouseEvent*event);
-//	void mousePressEvent (QGraphicsSceneMouseEvent*event);
+    void mousePressEvent (QGraphicsSceneMouseEvent*event);
 	void keyPressEvent(QKeyEvent *e);
 };
 
