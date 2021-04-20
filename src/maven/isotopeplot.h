@@ -32,7 +32,8 @@ class IsotopeBar : public QObject, public QGraphicsRectItem
 		void groupSelected(PeakGroup* g);
 		void groupUpdated(PeakGroup*  g);
 		void showInfo(QString,int xpos=0, int ypos=0);
-		void showMiniEICPlot(PeakGroup*g);
+        void showMiniEICPlot(PeakGroup*g);
+        void peakSelected(Peak*);
 
 	protected:        
                 void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {

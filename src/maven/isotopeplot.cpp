@@ -116,9 +116,11 @@ void IsotopePlot::showBars() {
 
             rect->setData(0,QVariant::fromValue(name));
             rect->setData(1,QVariant::fromValue(_isotopes[j]));
+            rect->setData(2,QVariant::fromValue(_samples[i]));
 
             if(_mw) {
-                connect(rect,SIGNAL(groupSelected(PeakGroup*)),_mw, SLOT(setPeakGroup(PeakGroup*)));
+//                connect(rect,SIGNAL(groupSelected(PeakGroup*)),_mw, SLOT(setPeakGroup(PeakGroup*)));
+                connect(rect, SIGNAL(peakSelected(Peak*)), _mw, SLOT(showPeakInfo(Peak*)));
             }
             xcoord += length;
         }
@@ -174,5 +176,15 @@ void IsotopeBar::keyPressEvent(QKeyEvent *e) {
 }
 
 void IsotopeBar::mousePressEvent(QGraphicsSceneMouseEvent *event){
-    qDebug() << "TODO: IsotopeBar::mousePressEvent()";
+
+    QVariant v = this->data(1);
+    PeakGroup *peakGroup = v.value<PeakGroup*>();
+
+    QVariant v2 = this->data(2);
+    mzSample *sample = v2.value<mzSample*>();
+
+    if (peakGroup && sample) {
+        Peak *peak = peakGroup->getPeak(sample);
+        if (peak) emit(peakSelected(peak));
+    }
 }
