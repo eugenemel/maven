@@ -7,7 +7,7 @@ using namespace Eigen;
 
 IsotopePlot::IsotopePlot(QGraphicsItem* parent, QGraphicsScene *scene)
     :QGraphicsItem(parent) {
-	_barwidth=10;
+    _barheight=10;
     _mw=nullptr;
     _group=nullptr;
     if (scene) { _width = scene->width()*0.25; }
@@ -90,10 +90,10 @@ void IsotopePlot::showBars() {
 
     if (scene()) {
         _width =   scene()->width()*0.20;
-        _barwidth = scene()->height()*0.75/visibleSamplesCount;
-        if (_barwidth<3)  _barwidth=3;
-        if (_barwidth>15) _barwidth=15;
-        _height = visibleSamplesCount*_barwidth;
+        _barheight = scene()->height()*0.75/visibleSamplesCount;
+        if (_barheight<3)  _barheight=3;
+        if (_barheight>15) _barheight=15;
+        _height = visibleSamplesCount*_barheight;
     }
 
     //qDebug() << "showBars: " << _width << " " << _height;
@@ -104,7 +104,7 @@ void IsotopePlot::showBars() {
         if (sum == 0) continue;
         MM.row(i) /= sum;
 
-        double ycoord = _barwidth*i; 
+        double ycoord = _barheight*i;
         double xcoord = 0;
 
         for(int j=0; j < MM.cols(); j++ ) {	//isotopes
@@ -115,7 +115,7 @@ void IsotopePlot::showBars() {
             QBrush brush(QColor::fromHsvF(h/20.0,1.0,1.0,1.0));
             IsotopeBar* rect = new IsotopeBar(this,scene());
             rect->setBrush(brush);
-            rect->setRect(xcoord,ycoord,length,_barwidth);
+            rect->setRect(xcoord,ycoord,length,_barheight);
 
             QString name = tr("%1 <br> %2 <b>%3\%</b>").arg(_samples[i]->sampleName.c_str(),
                                                             _isotopes[j]->tagString.c_str(),

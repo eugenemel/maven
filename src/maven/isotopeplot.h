@@ -72,7 +72,7 @@ protected:
 private:
     float _width;
     float _height;
-    float _barwidth;
+    float _barheight;
     vector<mzSample*> _samples;
     MainWindow* _mw;
 
