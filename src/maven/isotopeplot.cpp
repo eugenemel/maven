@@ -147,7 +147,7 @@ void IsotopePlot::showBars() {
         if (_group->isotopeParameters.isIgnoreNaturalAbundance) {
             parameters.append("<br>Ignore if >= ");
             parameters.append(QString::number(_group->isotopeParameters.maxNaturalAbundanceErr, 'f', 1));
-            parameters.append("% nat. abund. error<br>");
+            parameters.append("% nat. abund. error");
         }
 
         //TODO:
