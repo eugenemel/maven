@@ -22,7 +22,7 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(chkDisplayConsensusSpectrum, SIGNAL(toggled(bool)), mainwindow, SLOT(updateGUIWithLastSelectedPeakGroup()));
 
     connect(ionizationMode, SIGNAL(currentIndexChanged(int)), SLOT(getFormValues()));
-    connect(isotopeC13Correction, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+//    connect(isotopeC13Correction, SIGNAL(toggled(bool)), SLOT(getFormValues()));
     connect(amuQ1, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
     connect(amuQ3, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
 
@@ -31,7 +31,7 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(N15Labeled,SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
     connect(S34Labeled,SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
     connect(D2Labeled, SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
-    connect(isotopeC13Correction, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
+//    connect(isotopeC13Correction, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
     connect(chkIgnoreNaturalAbundance, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
     connect(chkExtractNIsotopes, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
     connect(spnMaxIsotopesToExtract, SIGNAL(valueChanged(int)), SLOT(recomputeIsotopes()));
@@ -220,7 +220,7 @@ void SettingsForm::setFormValues() {
     N15Labeled->setCheckState( (Qt::CheckState) settings->value("N15Labeled").toInt()  );
     S34Labeled->setCheckState( (Qt::CheckState) settings->value("S34Labeled").toInt() );
     D2Labeled->setCheckState(  (Qt::CheckState) settings->value("D2Labeled").toInt()  );
-    isotopeC13Correction->setCheckState(  (Qt::CheckState) settings->value("isotopeC13Correction").toInt()  );
+//    isotopeC13Correction->setCheckState(  (Qt::CheckState) settings->value("isotopeC13Correction").toInt()  );
     chkIgnoreNaturalAbundance->setCheckState(  (Qt::CheckState) settings->value("chkIgnoreNaturalAbundance").toInt()  );
     chkExtractNIsotopes->setCheckState( (Qt::CheckState) settings->value("chkExtractNIsotopes").toInt() );
 
@@ -421,7 +421,7 @@ void SettingsForm::getFormValues() {
     settings->setValue("N15Labeled",N15Labeled->checkState() );
     settings->setValue("S34Labeled",S34Labeled->checkState() );
     settings->setValue("D2Labeled", D2Labeled->checkState()  );
-    settings->setValue("isotopeC13Correction", isotopeC13Correction->checkState()  );
+//    settings->setValue("isotopeC13Correction", isotopeC13Correction->checkState()  );
     settings->setValue("chkIgnoreNaturalAbundance", chkIgnoreNaturalAbundance->checkState() );
     settings->setValue("chkExtractNIsotopes", chkExtractNIsotopes->checkState() );
     settings->setValue("spnMaxIsotopesToExtract", spnMaxIsotopesToExtract->value());
