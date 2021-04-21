@@ -25,6 +25,11 @@ void IsotopePlot::clear() {
             delete(child);
         }
     }
+    scene()->removeItem(_parameters);
+    if (_parameters) {
+        delete(_parameters);
+        _parameters = nullptr;
+    }
 }
 
 void IsotopePlot::setPeakGroup(PeakGroup* group) {
@@ -91,9 +96,62 @@ void IsotopePlot::showBars() {
     MatrixXf MM = _mw->getIsotopicMatrix(_group);
 
     if (scene()) {
-        QString parameters;
+        QString parameters("Isotope Parameters: ");
 
-        parameters.append("TODO: isotope parameters");
+        if (_group->isotopeParameters.isotopeParametersType == IsotopeParametersType::SAVED) {
+          parameters.append("SAVED<br>");
+        } else if (_group->isotopeParameters.isotopeParametersType == IsotopeParametersType::FROM_GUI) {
+          parameters.append("FROM GUI<br>");
+        }
+
+        parameters.append("Isotopes:");
+        bool isHasIsotopes = false;
+        if (_group->isotopeParameters.isC13Labeled){
+            if (isHasIsotopes) parameters.append(",");
+            parameters.append(" 13C");
+            isHasIsotopes = true;
+        }
+        if (_group->isotopeParameters.isD2Labeled) {
+            if (isHasIsotopes) parameters.append(",");
+            parameters.append(" D");
+            isHasIsotopes = true;
+        }
+        if (_group->isotopeParameters.isN15Labeled) {
+            if (isHasIsotopes) parameters.append(",");
+            parameters.append(" 15N");
+            isHasIsotopes = true;
+        }
+        if (_group->isotopeParameters.isS34Labeled) {
+            if (isHasIsotopes) parameters.append(",");
+            parameters.append(" 34S");
+            isHasIsotopes = true;
+        }
+
+        parameters.append("<br>M/z tol: ");
+        parameters.append(QString::number(static_cast<double>(_group->isotopeParameters.ppm), 'f', 0));
+        parameters.append(" ppm, RT tol: ");
+        parameters.append(QString::number(static_cast<int>(_group->isotopeParameters.maxIsotopeScanDiff)));
+        parameters.append(" scans");
+
+        parameters.append("<br>Min corr: ");
+        parameters.append(QString::number(_group->isotopeParameters.minIsotopicCorrelation, 'f', 2));
+        parameters.append(", extract");
+        if (_group->isotopeParameters.isExtractNIsotopes) {
+            parameters.append(" up to ");
+            parameters.append(QString::number(_group->isotopeParameters.maxIsotopesToExtract));
+        } else {
+            parameters.append(" unlimited");
+        }
+        parameters.append(" isotopes");
+
+        if (_group->isotopeParameters.isIgnoreNaturalAbundance) {
+            parameters.append("<br>Ignore if >= ");
+            parameters.append(QString::number(_group->isotopeParameters.maxNaturalAbundanceErr, 'f', 1));
+            parameters.append("% nat. abund. error<br>");
+        }
+
+        //TODO:
+        //isotopeC13Correction
 
         //if previous value of _parameter is not null, clear() call above will delete and free memory
         _parameters = new QGraphicsTextItem();
@@ -110,7 +168,7 @@ void IsotopePlot::showBars() {
     }
 
     _parameters->setPos(static_cast<double>(_width)-_parameters->boundingRect().width()/2.0,
-                        static_cast<double>(_height)+_parameters->boundingRect().height()/2.0-1);
+                        static_cast<double>(_height));
 
     //qDebug() << "showBars: " << _width << " " << _height;
 
