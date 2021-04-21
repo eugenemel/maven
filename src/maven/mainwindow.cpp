@@ -127,7 +127,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
         clsf->loadModel(clsfModelFilename.toStdString());
     } else {
        clsf->loadDefaultModel();
-        qDebug() << "ERROR: Can't find defult.model in method folder="  << methodsFolder;
+        qDebug() << "ERROR: Can't find default.model in method folder="  << methodsFolder;
         qDebug() << "       Using build in neural network model";
     }
 
