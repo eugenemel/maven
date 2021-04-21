@@ -39,7 +39,14 @@ void IsotopePlot::setPeakGroup(PeakGroup* group) {
     }
 
     _group = new PeakGroup(*group);
-    _group->pullIsotopes(_mw->getIsotopeParameters());
+
+    //Issue 402: try to use saved parameters, fall back to current GUI settings
+    IsotopeParameters isotopeParameters = group->isotopeParameters;
+    if (isotopeParameters.isotopeParametersType == IsotopeParametersType::INVALID) {
+        isotopeParameters = _mw->getIsotopeParameters();
+    }
+    _group->pullIsotopes(isotopeParameters);
+
     if (_group->childCount() == 0) return; // Did not detect any isotopes
 
 	_samples.clear();

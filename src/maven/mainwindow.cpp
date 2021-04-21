@@ -659,7 +659,16 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
         if (!isAddChildren) {
             groupCopy->children.clear();
         } else if (groupCopy->children.empty()){
-            groupCopy->pullIsotopes(getIsotopeParameters());
+
+            IsotopeParameters isotopeParameters = groupCopy->isotopeParameters;
+            if (isotopeParameters.isotopeParametersType == IsotopeParametersType::INVALID) {
+                isotopeParameters = getIsotopeParameters();
+            }
+
+            groupCopy->pullIsotopes(isotopeParameters);
+
+            isotopeParameters.isotopeParametersType = IsotopeParametersType::SAVED;
+            groupCopy->isotopeParameters = isotopeParameters;
         }
 
         groupCopy->searchTableName = "Bookmarks";
