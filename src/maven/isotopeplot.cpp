@@ -12,6 +12,7 @@ IsotopePlot::IsotopePlot(QGraphicsItem* parent, QGraphicsScene *scene)
     _group=nullptr;
     if (scene) { _width = scene->width()*0.25; }
 	_height = 10;
+    _parameters = nullptr;
 }
 
 void IsotopePlot::setMainWindow(MainWindow* mw) { _mw = mw; }
@@ -46,6 +47,7 @@ void IsotopePlot::setPeakGroup(PeakGroup* group) {
         isotopeParameters = _mw->getIsotopeParameters();
     }
     _group->pullIsotopes(isotopeParameters);
+    _group->isotopeParameters = isotopeParameters;
 
     if (_group->childCount() == 0) return; // Did not detect any isotopes
 
@@ -89,12 +91,26 @@ void IsotopePlot::showBars() {
     MatrixXf MM = _mw->getIsotopicMatrix(_group);
 
     if (scene()) {
+        QString parameters;
+
+        parameters.append("TODO: isotope parameters");
+
+        //if previous value of _parameter is not null, clear() call above will delete and free memory
+        _parameters = new QGraphicsTextItem();
+
+        _parameters->setHtml(parameters);
+        scene()->addItem(_parameters);
+
         _width =   scene()->width()*0.20;
         _barheight = scene()->height()*0.75/visibleSamplesCount;
         if (_barheight<3)  _barheight=3;
         if (_barheight>15) _barheight=15;
         _height = visibleSamplesCount*_barheight;
+
     }
+
+    _parameters->setPos(static_cast<double>(_width)-_parameters->boundingRect().width()/2.0,
+                        static_cast<double>(_height)+_parameters->boundingRect().height()/2.0-1);
 
     //qDebug() << "showBars: " << _width << " " << _height;
 
@@ -104,7 +120,7 @@ void IsotopePlot::showBars() {
         if (sum == 0) continue;
         MM.row(i) /= sum;
 
-        double ycoord = _barheight*i;
+        double ycoord = _barheight*i + _parameters->boundingRect().height();
         double xcoord = 0;
 
         for(int j=0; j < MM.cols(); j++ ) {	//isotopes

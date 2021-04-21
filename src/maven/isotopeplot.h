@@ -73,6 +73,9 @@ private:
     float _width;
     float _height;
     float _barheight;
+
+    QGraphicsTextItem* _parameters;
+
     vector<mzSample*> _samples;
     MainWindow* _mw;
 
