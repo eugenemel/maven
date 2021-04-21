@@ -2740,5 +2740,7 @@ IsotopeParameters MainWindow::getIsotopeParameters(){
         qDebug() << "MainWindow::getIsotopeParameters(): Could not find saved program settings! using defaults.";
     }
 
+    isotopeParameters.isotopeParametersType = IsotopeParametersType::FROM_GUI;
+
     return isotopeParameters;
 }
