@@ -284,7 +284,8 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                         srmPrecursorMz real,\
                         srmProductMz real,\
                         \
-                        isotopicIndex integer\
+                        isotopicIndex integer,\
+                        isotopeParameters TEXT\
                         )");
 
      if(!query0.exec(TABLESQL)) qDebug() << query0.lastError();
@@ -295,7 +296,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                                     ms2Score,adductName,compoundId,compoundName,compoundDB,\
                                     searchTableName,displayName,\
                                     srmPrecursorMz,srmProductMz,\
-                                    isotopicIndex\
+                                    isotopicIndex,isotopeParameters\
                                   )\
                                     \
                                  values\
@@ -304,7 +305,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                                     ?,?,?,?,?,\
                                     ?,?,\
                                     ?,?,\
-                                    ?\
+                                    ?,?\
                                   )\
                                  ");
 
@@ -358,6 +359,13 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 
         //Issue 380
         query1.addBindValue(g->isotopicIndex);
+
+        //Issue 402
+        if (g->isotopeParameters.isotopeParametersType != IsotopeParametersType::INVALID) {
+            query1.addBindValue(QString(g->isotopeParameters.encodeParams().c_str()));
+        } else {
+            query1.addBindValue(QString(""));
+        }
 
      if(! query1.exec() ) {
         qDebug() << query1.lastError();
@@ -553,7 +561,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
         }
 
 
-void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool isAttemptToLoadDB, const map<int, vector<Peak>>& peakGroupMap) {
+void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool isAttemptToLoadDB, const map<int, vector<Peak>>& peakGroupMap, Classifier *classifier) {
 
         QSqlQuery queryCheckCols(sqlDB);
 
@@ -570,6 +578,8 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
         bool isHasSrmPrecursorMz = false;
         bool isHasSrmProductMz = false;
         bool isHasIsotopicIndex = false;
+        bool isHasIsotopeParameters = false;
+
         while (queryCheckCols.next()) {
             if ("displayName" == queryCheckCols.value(1).toString()) {
                 isHasDisplayName = true;
@@ -579,6 +589,8 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
                 isHasSrmProductMz = true;
             } else if ("isotopicIndex" == queryCheckCols.value(1).toString()) {
                 isHasIsotopicIndex = true;
+            } else if ("isotopeParameters" == queryCheckCols.value(1).toString()) {
+                isHasIsotopeParameters = true;
             }
         }
 
@@ -586,7 +598,8 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
                  << "isHasDisplayName? " << isHasDisplayName
                  << "isHasSrmPrecursorMz? " << isHasSrmPrecursorMz
                  << "isHasSrmProductMz? " << isHasSrmProductMz
-                 << "isHasIsotopicIndex? " << isHasIsotopicIndex;
+                 << "isHasIsotopicIndex? " << isHasIsotopicIndex
+                 << "isHasIsotopeParameters? " << isHasIsotopeParameters;
 
         if (!isHasDisplayName) {
             QSqlQuery queryAdjustPeakGroupsTable(sqlDB);
@@ -631,6 +644,19 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
             strAddIsotopicIndex.append(" ADD isotopicIndex INTEGER DEFAULT 0");
             if (!queryAddIsotopicIndex.exec(strAddIsotopicIndex)) {
                 qDebug() << "Ho..." << queryAddIsotopicIndex.lastError();
+            }
+        }
+
+        if (!isHasIsotopeParameters) {
+            QSqlQuery queryAddIsotopeParameters(sqlDB);
+
+            QString strAddIsotopeParameters = QString();
+            strAddIsotopeParameters.append("ALTER TABLE ");
+            strAddIsotopeParameters.append(tableName);
+            strAddIsotopeParameters.append(" ADD isotopeParameters TEXT DEFAULT ''");
+
+            if (!queryAddIsotopeParameters.exec(strAddIsotopeParameters)){
+                qDebug() << "Ho..." <<queryCheckCols.lastError();
             }
         }
 
@@ -692,6 +718,22 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
 
         if (!adductName.empty()) {
               g.adduct = DB.findAdductByName(adductName);
+        }
+
+        //Issue 402: inflate saved IsotopeParameters, if applicable
+        string encodedIsotopeParameters = query.value("isotopeParameters").toString().toStdString();
+        if (!encodedIsotopeParameters.empty()){
+
+            IsotopeParameters decodedIsotopeParameters = IsotopeParameters::decode(encodedIsotopeParameters);
+
+            if (!decodedIsotopeParameters.adductName.empty()) {
+                decodedIsotopeParameters.adduct = DB.findAdductByName(decodedIsotopeParameters.adductName);
+            }
+
+            //TODO: no validation checking around encoded Classifier information
+            decodedIsotopeParameters.clsf = classifier;
+
+            g.isotopeParameters = decodedIsotopeParameters;
         }
 
         if (!compoundId.empty()){

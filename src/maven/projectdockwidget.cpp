@@ -671,7 +671,7 @@ void ProjectDockWidget::loadAllPeakTables() {
     map<int, vector<Peak>> allPeaks = currentProject->getAllPeaks();
 
     //load all peakgroups
-    currentProject->loadPeakGroups("peakgroups", _mainwindow->rumsDBDatabaseName, _mainwindow->isAttemptToLoadDB, allPeaks);
+    currentProject->loadPeakGroups("peakgroups", _mainwindow->rumsDBDatabaseName, _mainwindow->isAttemptToLoadDB, allPeaks, _mainwindow->getClassifier());
 
     qDebug() << "Loaded peakgroups in" << timer->elapsed() << "msec.";
 
