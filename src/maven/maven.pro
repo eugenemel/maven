@@ -60,6 +60,7 @@ FORMS = forms/settingsform.ui  \
 HEADERS +=  stable.h \
             filtertagsdialog.h \
             globals.h \
+            isotopelegendwidget.h \
             mainwindow.h \
             searchparamsdialog.h \
             tinyplot.h \
@@ -115,6 +116,7 @@ SOURCES +=  mainwindow.cpp  \
             database.cpp \
             csvreports.cpp \
             filtertagsdialog.cpp \
+            isotopelegendwidget.cpp \
             plotdock.cpp \
             searchparamsdialog.cpp \
             treedockwidget.cpp \

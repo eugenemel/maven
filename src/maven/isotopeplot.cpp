@@ -157,7 +157,8 @@ void IsotopePlot::showBars() {
         _parameters = new QGraphicsTextItem();
 
         _parameters->setHtml(parameters);
-        scene()->addItem(_parameters);
+
+        //scene()->addItem(_parameters);
 
         _width =   scene()->width()*0.20;
         _barheight = scene()->height()*0.75/visibleSamplesCount;
@@ -167,9 +168,6 @@ void IsotopePlot::showBars() {
 
     }
 
-    _parameters->setPos(static_cast<double>(_width)-_parameters->boundingRect().width()/2.0,
-                        static_cast<double>(_height));
-
     //qDebug() << "showBars: " << _width << " " << _height;
 
 
@@ -178,7 +176,7 @@ void IsotopePlot::showBars() {
         if (sum == 0) continue;
         MM.row(i) /= sum;
 
-        double ycoord = _barheight*i + _parameters->boundingRect().height();
+        double ycoord = _barheight*i;
         double xcoord = 0;
 
         for(int j=0; j < MM.cols(); j++ ) {	//isotopes
