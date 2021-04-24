@@ -203,6 +203,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     heatmap	 = 	  new HeatMap(this);
     galleryWidget = new GalleryWidget(this);
     barPlotWidget = new SampleBarPlotWidget(this);
+    isotopeLegendWidget = new IsotopeLegendWidget(this);
 
     bookmarkedPeaks = addPeaksTable("Bookmarks",
                                     QString("This is a reserved table containing manually curated \"bookmarked\" peak groups."),
@@ -213,6 +214,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     heatMapDockWidget =  createDockWidget("HeatMap",heatmap);
     galleryDockWidget =  createDockWidget("Gallery",galleryWidget);
     barPlotDockWidget = createDockWidget("EIC Legend",barPlotWidget);
+    isotopeLegendDockWidget = createDockWidget("Isotope Bar Plot", isotopeLegendWidget);
     scatterDockWidget =  new ScatterPlot(this);
     projectDockWidget =  new ProjectDockWidget(this);
     rconsoleDockWidget =  new RconsoleWidget(this);
@@ -244,6 +246,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     //treeMapDockWidget =  createDockWidget("TreeMap",treemap);
 
     addDockWidget(Qt::RightDockWidgetArea, barPlotDockWidget, Qt::Horizontal);
+    addDockWidget(Qt::RightDockWidgetArea, isotopeLegendDockWidget, Qt::Horizontal);
 
     //
     //DIALOGS
@@ -1519,6 +1522,7 @@ void MainWindow::createToolBars() {
     QToolButton* btnSRM = addDockWidgetButton(sideBar,srmDockWidget,QIcon(rsrcPath + "/qqq.png"), "Show SRM List (F12)");
     QToolButton* btnRconsole = addDockWidgetButton(sideBar,rconsoleDockWidget,QIcon(rsrcPath + "/R.png"), "Show R Console");
     QToolButton* btnBarPlot = addDockWidgetButton(sideBar,barPlotDockWidget, QIcon(rsrcPath + "/bar_plot_samples.png"), "Show EIC Legend");
+    QToolButton* btnIsotopeLegend = addDockWidgetButton(sideBar, isotopeLegendDockWidget, QIcon(rsrcPath +"/isotope_legend.png"), "Show Isotope Bar Plot");
 
     //btnSamples->setShortcut(Qt::Key_F2);
     btnLigands->setShortcut(Qt::Key_F3);
@@ -1536,6 +1540,7 @@ void MainWindow::createToolBars() {
 
     sideBar->addWidget(btnSamples);
     sideBar->addWidget(btnBarPlot);
+    sideBar->addWidget(btnIsotopeLegend);
     sideBar->addWidget(btnLigands);
     sideBar->addWidget(btnSpectra);
     sideBar->addWidget(btnFragSpectra);

@@ -34,6 +34,7 @@
 #include "setrumsdbdialog.h"
 #include "samplebarplotwidget.h"
 #include "Peptide.h"
+#include "isotopelegendwidget.h"
 
 class SettingsForm;
 class EicWidget;
@@ -72,6 +73,7 @@ class LibraryMangerDialog;
 class SampleBarPlotWidget;
 class SetRumsDBDialog;
 class SRMTransition;
+class IsotopeLegendWidget;
 
 extern Database DB; 
 
@@ -125,6 +127,7 @@ public:
     QDockWidget		 *treeMapDockWidget;
     QDockWidget	 	 *galleryDockWidget;
     QDockWidget      *barPlotDockWidget;
+    QDockWidget      *isotopeLegendDockWidget;
     LogWidget            *logWidget;
     NotesWidget		 *notesDockWidget;
     ProjectDockWidget    *projectDockWidget;
@@ -137,6 +140,7 @@ public:
     ScatterPlot		 *scatterplot;
     TreeMap		 *treemap;
     SampleBarPlotWidget     *barPlotWidget;
+    IsotopeLegendWidget *isotopeLegendWidget;
 
     SettingsForm   *settingsForm;
     PeakDetectionDialog *peakDetectionDialog;

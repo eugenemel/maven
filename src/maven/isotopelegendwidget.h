@@ -3,7 +3,7 @@
 
 #include "stable.h"
 #include "mainwindow.h"
-#include "barplot.h"
+#include "isotopeplot.h"
 
 class IsotopeLegendWidget : public QGraphicsView {
 

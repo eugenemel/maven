@@ -104,5 +104,6 @@
         <file>images/filled_gaussian.png</file>
         <file>images/gaussian_groups.png</file>
         <file>images/plain_gaussian.png</file>
+        <file>images/isotope_legend.png</file>
     </qresource>
 </RCC>
