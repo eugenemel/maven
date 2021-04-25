@@ -54,6 +54,8 @@ void IsotopePlot::setPeakGroup(PeakGroup* group) {
     _group->pullIsotopes(isotopeParameters);
     _group->isotopeParameters = isotopeParameters;
 
+    clear(); //Issue 408: Ensure that plot is cleared before returning to prevent dangling pointers
+
     if (_group->childCount() == 0) return; // Did not detect any isotopes
 
 	_samples.clear();
@@ -83,7 +85,6 @@ QRectF IsotopePlot::boundingRect() const
 }
 
 void IsotopePlot::showBars() {
-    clear();
     if (_isotopes.size() == 0 ) return;
     if (_samples.size() == 0 ) return;
 
