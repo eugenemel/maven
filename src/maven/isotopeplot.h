@@ -65,6 +65,7 @@ public:
     void clear();
     void showBars();
     inline void setIsInLegendWidget(bool isInLegendWidget){_isInLegendWidget = isInLegendWidget;}
+    inline void setWidth(float width){_width = width;}
 
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

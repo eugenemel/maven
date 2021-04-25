@@ -12,8 +12,11 @@ class IsotopeLegendWidget : public QGraphicsView {
     public:
         IsotopeLegendWidget(MainWindow *mw);
         ~IsotopeLegendWidget();
+        inline IsotopePlot* getIsotopePlot(){return _isotopePlot;}
+        void setPeakGroup(PeakGroup *peakGroup);
 
     private:
+        QGraphicsScene *_scene;
         MainWindow *_mw;
         IsotopePlot *_isotopePlot;
 

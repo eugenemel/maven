@@ -1229,24 +1229,38 @@ void EicWidget::addIsotopicPlot(PeakGroup* group) {
     qDebug() << "EicWidget::addIsotopicPlot(PeakGroup* group): group=" << group;
 
     if (!group)  return;
-    if (!_isotopeplot){
-        _isotopeplot = new IsotopePlot(nullptr, scene());
+
+    //right-click plot in view
+    if (_showIsotopePlot) {
+
+        if (!_isotopeplot){
+            _isotopeplot = new IsotopePlot(nullptr, scene());
+        }
+
+        if (_isotopeplot->scene() != scene() ) scene()->addItem(_isotopeplot);
+
+        _isotopeplot->hide();
+
+        vector <mzSample*> samples = getMainWindow()->getVisibleSamples();
+        if (samples.empty()) return;
+
+        _isotopeplot->setPos(scene()->width()*0.10,scene()->height()*0.10);
+        _isotopeplot->setZValue(1000);
+        _isotopeplot->setMainWindow(getMainWindow());
+        _isotopeplot->setPeakGroup(group);
+        _isotopeplot->show();
     }
 
-    if (_isotopeplot->scene() != scene() ) scene()->addItem(_isotopeplot);
+    //dedicated legend widget
+    if (getMainWindow()->isotopeLegendWidget && getMainWindow()->isotopeLegendDockWidget->isVisible()) {
 
-    _isotopeplot->hide();
+       getMainWindow()->isotopeLegendWidget->hide();
 
-    vector <mzSample*> samples = getMainWindow()->getVisibleSamples();
-    if (samples.empty()) return;
+       getMainWindow()->isotopeLegendWidget->setPeakGroup(group);
 
-    _isotopeplot->setPos(scene()->width()*0.10,scene()->height()*0.10);
-    _isotopeplot->setZValue(1000);
-    _isotopeplot->setMainWindow(getMainWindow());
-    _isotopeplot->setPeakGroup(group);
-    _isotopeplot->show();
+       getMainWindow()->isotopeLegendWidget->show();
 
-    return;
+    }
 }
 
 void EicWidget::addBoxPlot(PeakGroup* group) {
@@ -1905,7 +1919,7 @@ void EicWidget::setSelectedGroup(PeakGroup* group) {
         getMainWindow()->barPlotWidget->setPeakGroup(group);
     }
 
-	if (_showIsotopePlot) addIsotopicPlot(group);
+    addIsotopicPlot(group);
     if (_showBoxPlot)     addBoxPlot(group);
 
     addBaseline(group);

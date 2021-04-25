@@ -95,12 +95,18 @@ void IsotopePlot::showBars() {
 
     MatrixXf MM = _mw->getIsotopicMatrix(_group);
 
+    int parametersOffset = 0;
+
     if (scene()) {
 
         if (_isInLegendWidget) {
             computeParameters();
-            _barheight = 15;
-            _width = scene()->width();
+            parametersOffset = _parameters->boundingRect().height();
+
+            _barheight = 30; // TODO: configurable?
+            _height = visibleSamplesCount*_barheight + parametersOffset;
+            _width = 1.2*_parameters->boundingRect().width();
+
         } else {
             _width =   scene()->width()*0.20;
             _barheight = scene()->height()*0.75/visibleSamplesCount;
@@ -116,7 +122,7 @@ void IsotopePlot::showBars() {
         if (sum == 0) continue;
         MM.row(i) /= sum;
 
-        double ycoord = _barheight*i;
+        double ycoord = _barheight*i + parametersOffset;
         double xcoord = 0;
 
         for(int j=0; j < MM.cols(); j++ ) {	//isotopes
@@ -264,13 +270,10 @@ void IsotopePlot::computeParameters() {
         parameters.append("% nat. abund. error");
     }
 
-    //TODO:
-    //isotopeC13Correction
-
     //if previous value of _parameter is not null, clear() call above will delete and free memory
     _parameters = new QGraphicsTextItem();
 
     _parameters->setHtml(parameters);
 
-    //scene()->addItem(_parameters);
+    scene()->addItem(_parameters);
 }
