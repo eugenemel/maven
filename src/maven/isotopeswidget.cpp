@@ -72,7 +72,13 @@ void IsotopeWidget::setPeakGroup(PeakGroup* grp) {
     if (grp->compound) setCompound(grp->compound);
 
     _group = new PeakGroup(*grp);
-    _group->pullIsotopes(_mw->getIsotopeParameters());
+
+    //Issue 402, 406: try to use saved parameters, fall back to current GUI settings
+    IsotopeParameters isotopeParameters = _group->isotopeParameters;
+    if (isotopeParameters.isotopeParametersType == IsotopeParametersType::INVALID) {
+        isotopeParameters = _mw->getIsotopeParameters();
+    }
+    _group->pullIsotopes(isotopeParameters);
 
     rebuildTableFromPeakGroup(_group);
 }
