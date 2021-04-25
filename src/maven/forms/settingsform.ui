@@ -798,19 +798,6 @@
            <double>0.500000000000000</double>
           </property>
          </widget>
-         <widget class="QCheckBox" name="chkIncludeChildren">
-          <property name="geometry">
-           <rect>
-            <x>570</x>
-            <y>30</y>
-            <width>301</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Include children peak groups with bookmark</string>
-          </property>
-         </widget>
         </widget>
        </item>
       </layout>

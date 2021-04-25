@@ -658,10 +658,13 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
 
         //TODO: separate children peak from isotopic peaks
 
-        bool isAddChildren = settings->value("chkIncludeChildren", false).toBool();
-        if (!isAddChildren) {
-            groupCopy->children.clear();
-        } else if (groupCopy->children.empty()){
+        //Issue 408: Always add children peaks
+//        bool isAddChildren = settings->value("chkIncludeChildren", false).toBool();
+//        if (!isAddChildren) {
+//            groupCopy->children.clear();
+//        } else
+
+        if (groupCopy->children.empty()){
 
             IsotopeParameters isotopeParameters = groupCopy->isotopeParameters;
             if (isotopeParameters.isotopeParametersType == IsotopeParametersType::INVALID) {

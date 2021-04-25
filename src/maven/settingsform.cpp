@@ -54,7 +54,7 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     //bookmark options
     connect(chkBkmkWarnMz, SIGNAL(toggled(bool)), SLOT(getFormValues()));
     connect(chkBkmkWarnMzRt, SIGNAL(toggled(bool)), SLOT(getFormValues()));
-    connect(chkIncludeChildren, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+//    connect(chkIncludeChildren, SIGNAL(toggled(bool)), SLOT(getFormValues()));
 
     //spectra widget display options
     //ms1 options
@@ -342,8 +342,8 @@ void SettingsForm::setFormValues() {
     if (settings->contains("spnBkmkRtTol"))
         spnBkmkRtTol->setValue(settings->value("spnBkmkRtTol").toDouble());
 
-    if (settings->contains("chkIncludeChildren"))
-        chkIncludeChildren->setCheckState( (Qt::CheckState) settings->value("chkIncludeChildren").toInt());
+//    if (settings->contains("chkIncludeChildren"))
+//        chkIncludeChildren->setCheckState( (Qt::CheckState) settings->value("chkIncludeChildren").toInt());
 
     //spectral agglomeration
     if (settings->contains("spnScanFilterMinIntensity"))
@@ -508,7 +508,7 @@ void SettingsForm::getFormValues() {
     settings->setValue("chkBkmkWarnMz", chkBkmkWarnMz->checkState());
     settings->setValue("spnBkmkmzTol", spnBkmkmzTol->value());
     settings->setValue("spnBkmkRtTol", spnBkmkRtTol->value());
-    settings->setValue("chkIncludeChildren", chkIncludeChildren->checkState());
+//    settings->setValue("chkIncludeChildren", chkIncludeChildren->checkState());
 
     //spectral agglomeration settings
     settings->setValue("spnScanFilterMinIntensity", spnScanFilterMinIntensity->value());
