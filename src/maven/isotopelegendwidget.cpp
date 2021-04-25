@@ -8,6 +8,8 @@ IsotopeLegendWidget::IsotopeLegendWidget(MainWindow *mw){
     _isotopePlot = new IsotopePlot(nullptr, scene());
 
     setDragMode(NoDrag);
+    _isotopePlot->setIsInLegendWidget(true);
+
     scene()->addItem(_isotopePlot);
 }
 

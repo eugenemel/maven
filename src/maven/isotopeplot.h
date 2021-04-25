@@ -64,7 +64,8 @@ public:
     QRectF boundingRect() const;
     void clear();
     void showBars();
-	
+    inline void setIsInLegendWidget(bool isInLegendWidget){_isInLegendWidget = isInLegendWidget;}
+
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event);
@@ -73,6 +74,7 @@ private:
     float _width;
     float _height;
     float _barheight;
+    bool _isInLegendWidget = false;
 
     QGraphicsTextItem* _parameters;
 
@@ -80,7 +82,9 @@ private:
     MainWindow* _mw;
 
     PeakGroup* _group;
-    vector<PeakGroup*> _isotopes;   
+    vector<PeakGroup*> _isotopes;
+
+    void computeParameters();
 };
 
 #endif

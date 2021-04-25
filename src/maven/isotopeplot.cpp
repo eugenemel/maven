@@ -96,80 +96,20 @@ void IsotopePlot::showBars() {
     MatrixXf MM = _mw->getIsotopicMatrix(_group);
 
     if (scene()) {
-        QString parameters("Isotope Parameters: ");
 
-        if (_group->isotopeParameters.isotopeParametersType == IsotopeParametersType::SAVED) {
-          parameters.append("SAVED<br>");
-        } else if (_group->isotopeParameters.isotopeParametersType == IsotopeParametersType::FROM_GUI) {
-          parameters.append("FROM GUI<br>");
-        }
-
-        parameters.append("Isotopes:");
-        bool isHasIsotopes = false;
-        if (_group->isotopeParameters.isC13Labeled){
-            if (isHasIsotopes) parameters.append(",");
-            parameters.append(" 13C");
-            isHasIsotopes = true;
-        }
-        if (_group->isotopeParameters.isD2Labeled) {
-            if (isHasIsotopes) parameters.append(",");
-            parameters.append(" D");
-            isHasIsotopes = true;
-        }
-        if (_group->isotopeParameters.isN15Labeled) {
-            if (isHasIsotopes) parameters.append(",");
-            parameters.append(" 15N");
-            isHasIsotopes = true;
-        }
-        if (_group->isotopeParameters.isS34Labeled) {
-            if (isHasIsotopes) parameters.append(",");
-            parameters.append(" 34S");
-            isHasIsotopes = true;
-        }
-
-        parameters.append("<br>M/z tol: ");
-        parameters.append(QString::number(static_cast<double>(_group->isotopeParameters.ppm), 'f', 0));
-        parameters.append(" ppm, RT tol: ");
-        parameters.append(QString::number(static_cast<int>(_group->isotopeParameters.maxIsotopeScanDiff)));
-        parameters.append(" scans");
-
-        parameters.append("<br>Min corr: ");
-        parameters.append(QString::number(_group->isotopeParameters.minIsotopicCorrelation, 'f', 2));
-        parameters.append(", extract");
-        if (_group->isotopeParameters.isExtractNIsotopes) {
-            parameters.append(" up to ");
-            parameters.append(QString::number(_group->isotopeParameters.maxIsotopesToExtract));
+        if (_isInLegendWidget) {
+            computeParameters();
+            _barheight = 15;
+            _width = scene()->width();
         } else {
-            parameters.append(" unlimited");
+            _width =   scene()->width()*0.20;
+            _barheight = scene()->height()*0.75/visibleSamplesCount;
+            if (_barheight<3)  _barheight=3;
+            if (_barheight>15) _barheight=15;
+            _height = visibleSamplesCount*_barheight;
         }
-        parameters.append(" isotopes");
-
-        if (_group->isotopeParameters.isIgnoreNaturalAbundance) {
-            parameters.append("<br>Ignore if >= ");
-            parameters.append(QString::number(_group->isotopeParameters.maxNaturalAbundanceErr, 'f', 1));
-            parameters.append("% nat. abund. error");
-        }
-
-        //TODO:
-        //isotopeC13Correction
-
-        //if previous value of _parameter is not null, clear() call above will delete and free memory
-        _parameters = new QGraphicsTextItem();
-
-        _parameters->setHtml(parameters);
-
-        //scene()->addItem(_parameters);
-
-        _width =   scene()->width()*0.20;
-        _barheight = scene()->height()*0.75/visibleSamplesCount;
-        if (_barheight<3)  _barheight=3;
-        if (_barheight>15) _barheight=15;
-        _height = visibleSamplesCount*_barheight;
 
     }
-
-    //qDebug() << "showBars: " << _width << " " << _height;
-
 
     for(int i=0; i<MM.rows(); i++ ) {		//samples
         float sum= MM.row(i).sum();
@@ -266,4 +206,71 @@ void IsotopeBar::mousePressEvent(QGraphicsSceneMouseEvent *event){
         Peak *peak = peakGroup->getPeak(sample);
         if (peak) emit(peakSelected(peak));
     }
+}
+
+void IsotopePlot::computeParameters() {
+
+    QString parameters("Isotope Parameters: ");
+
+    if (_group->isotopeParameters.isotopeParametersType == IsotopeParametersType::SAVED) {
+      parameters.append("SAVED<br>");
+    } else if (_group->isotopeParameters.isotopeParametersType == IsotopeParametersType::FROM_GUI) {
+      parameters.append("FROM GUI<br>");
+    }
+
+    parameters.append("Isotopes:");
+    bool isHasIsotopes = false;
+    if (_group->isotopeParameters.isC13Labeled){
+        if (isHasIsotopes) parameters.append(",");
+        parameters.append(" 13C");
+        isHasIsotopes = true;
+    }
+    if (_group->isotopeParameters.isD2Labeled) {
+        if (isHasIsotopes) parameters.append(",");
+        parameters.append(" D");
+        isHasIsotopes = true;
+    }
+    if (_group->isotopeParameters.isN15Labeled) {
+        if (isHasIsotopes) parameters.append(",");
+        parameters.append(" 15N");
+        isHasIsotopes = true;
+    }
+    if (_group->isotopeParameters.isS34Labeled) {
+        if (isHasIsotopes) parameters.append(",");
+        parameters.append(" 34S");
+        isHasIsotopes = true;
+    }
+
+    parameters.append("<br>M/z tol: ");
+    parameters.append(QString::number(static_cast<double>(_group->isotopeParameters.ppm), 'f', 0));
+    parameters.append(" ppm, RT tol: ");
+    parameters.append(QString::number(static_cast<int>(_group->isotopeParameters.maxIsotopeScanDiff)));
+    parameters.append(" scans");
+
+    parameters.append("<br>Min corr: ");
+    parameters.append(QString::number(_group->isotopeParameters.minIsotopicCorrelation, 'f', 2));
+    parameters.append(", extract");
+    if (_group->isotopeParameters.isExtractNIsotopes) {
+        parameters.append(" up to ");
+        parameters.append(QString::number(_group->isotopeParameters.maxIsotopesToExtract));
+    } else {
+        parameters.append(" unlimited");
+    }
+    parameters.append(" isotopes");
+
+    if (_group->isotopeParameters.isIgnoreNaturalAbundance) {
+        parameters.append("<br>Ignore if >= ");
+        parameters.append(QString::number(_group->isotopeParameters.maxNaturalAbundanceErr, 'f', 1));
+        parameters.append("% nat. abund. error");
+    }
+
+    //TODO:
+    //isotopeC13Correction
+
+    //if previous value of _parameter is not null, clear() call above will delete and free memory
+    _parameters = new QGraphicsTextItem();
+
+    _parameters->setHtml(parameters);
+
+    //scene()->addItem(_parameters);
 }
