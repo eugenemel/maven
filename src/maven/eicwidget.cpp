@@ -1940,7 +1940,11 @@ void EicWidget::setSelectedGroup(PeakGroup* group) {
     }
 
     if (getMainWindow()->isotopeWidget->isVisible()) {
-        getMainWindow()->isotopeWidget->setPeakGroup(group);
+        if (group->type() == PeakGroup::IsotopeType && group->parent != nullptr){
+            getMainWindow()->isotopeWidget->setPeakGroup(group->parent);
+        } else {
+            getMainWindow()->isotopeWidget->setPeakGroup(group);
+        }
     }
 
     _selectedGroup = *group;
