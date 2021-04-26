@@ -780,7 +780,15 @@ void MainWindow::setPeptideFocus(QString peptideSequence){
 
     float mz = currentAdduct->computeAdductMass(static_cast<float>(monoisotopicMass));
 
-    if (eicWidget->isVisible() ) eicWidget->setMzSlice(mz);
+    if (eicWidget->isVisible() ){
+
+        mzSlice updatedSlice(mz - mz/1e6f*static_cast<float>(getUserPPM()),
+                             mz + mz/1e6f*static_cast<float>(getUserPPM()),
+                             getEicWidget()->getMzSlice().rtmin,
+                             getEicWidget()->getMzSlice().rtmax);
+
+        eicWidget->setMzSlice(updatedSlice, false);
+    }
     if (massCalcWidget->isVisible() ) massCalcWidget->setMass(mz);
     if (ms2ScansListWidget->isVisible()   ) showFragmentationScans(mz);
     if (ms2ConsensusScansListWidget->isVisible()) showConsensusFragmentationScans(mz);

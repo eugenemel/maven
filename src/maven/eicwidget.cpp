@@ -1555,11 +1555,11 @@ void EicWidget::setCompound(Compound* c, Adduct* adduct) {
 
 }
 
-void EicWidget::setMzSlice(const mzSlice& slice) {
+void EicWidget::setMzSlice(const mzSlice& slice, bool isUseSampleBoundsRT) {
     qDebug() << "EicWidget::setmzSlice()";
     _slice = mzSlice(slice);
 
-    recompute();
+    recompute(isUseSampleBoundsRT);
     //TODO: don't recompute if not necessary.
 
     replot(nullptr);
@@ -1688,8 +1688,8 @@ void EicWidget::setMzSlice(float mz){
      //qDebug() << "EicWidget::setMzSlice()" << setprecision(8) << mz << endl;
 	mzSlice x (_slice.mzmin,_slice.mzmax,_slice.rtmin,_slice.rtmax);
 	x.mz = mz;
-	x.mzmin = mz - mz/1e6*getMainWindow()->getUserPPM();
-    x.mzmax = mz + mz/1e6*getMainWindow()->getUserPPM();
+    x.mzmin = mz - mz/1e6f*static_cast<float>(getMainWindow()->getUserPPM());
+    x.mzmax = mz + mz/1e6f*static_cast<float>(getMainWindow()->getUserPPM());
     x.compound = nullptr;
 	setMzSlice(x);
 }
