@@ -689,7 +689,7 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
         if(groupCopy2->compound) qDebug() << "MainWindow::bookmarkPeakGroup() group->compound=" << groupCopy2->compound->name.c_str();
         if(!groupCopy2->compound) qDebug() << "MainWindow::bookmarkPeakGroup() group->compound= nullptr";
         if (groupCopy2->adduct){
-            qDebug() << "MainWindow::bookmarkPeakGroup() group->adduct=" << group->adduct->name.c_str();
+            qDebug() << "MainWindow::bookmarkPeakGroup() group->adduct=" << groupCopy2->adduct->name.c_str();
         } else {
             qDebug() << "MainWindow::bookmarkPeakGroup() group->adduct= nullptr";
         }
