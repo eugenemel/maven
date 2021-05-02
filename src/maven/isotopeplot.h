@@ -32,7 +32,8 @@ class IsotopeBar : public QObject, public QGraphicsRectItem
 		void groupSelected(PeakGroup* g);
 		void groupUpdated(PeakGroup*  g);
 		void showInfo(QString,int xpos=0, int ypos=0);
-		void showMiniEICPlot(PeakGroup*g);
+        void showMiniEICPlot(PeakGroup*g);
+        void peakSelected(Peak*);
 
 	protected:        
                 void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
@@ -41,7 +42,7 @@ class IsotopeBar : public QObject, public QGraphicsRectItem
 
 	void hoverEnterEvent (QGraphicsSceneHoverEvent*event);
 //	void mouseDoubleClickEvent (QGraphicsSceneMouseEvent*event);
-//	void mousePressEvent (QGraphicsSceneMouseEvent*event);
+    void mousePressEvent (QGraphicsSceneMouseEvent*event);
 	void keyPressEvent(QKeyEvent *e);
 };
 
@@ -63,7 +64,9 @@ public:
     QRectF boundingRect() const;
     void clear();
     void showBars();
-	
+    inline void setIsInLegendWidget(bool isInLegendWidget){_isInLegendWidget = isInLegendWidget;}
+    inline void setWidth(float width){_width = width;}
+
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event);
@@ -71,12 +74,18 @@ protected:
 private:
     float _width;
     float _height;
-    float _barwidth;
+    float _barheight;
+    bool _isInLegendWidget = false;
+
+    QGraphicsTextItem* _parameters;
+
     vector<mzSample*> _samples;
     MainWindow* _mw;
 
     PeakGroup* _group;
-    vector<PeakGroup*> _isotopes;   
+    vector<PeakGroup*> _isotopes;
+
+    void computeParameters();
 };
 
 #endif

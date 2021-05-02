@@ -4,13 +4,15 @@
 
 #include "stable.h"
 #include "mzSample.h"
+#include "mainwindow.h"
 
 class EIC;
+class MainWindow;
 
 class EicLine : public QGraphicsItem
 {
 public:
-    EicLine(QGraphicsItem* parent, QGraphicsScene *scene);
+    EicLine(QGraphicsItem* parent, QGraphicsScene *scene, MainWindow* mainwindow=nullptr);
     void addPoint(float x, float y)  { _line << QPointF(x,y); }
     void addPoint(QPointF p)  { _line << p; }
     void setColor(QColor &c)  { _color = c; }
@@ -24,6 +26,9 @@ public:
     void setFillPath(bool value) { _fillPath=value; }
     QPainterPath shape() const;
     void setClosePath(bool value ) {_closePath=value;}
+    void setMainWindow(MainWindow* mainwindow){_mainwindow=mainwindow;}
+    void setEmphasizePoints(bool value) {_emphasizePoints = value;}
+    bool isEmphasizePoints(){return _emphasizePoints;}
 
 protected:
     QRectF boundingRect() const;
@@ -43,6 +48,7 @@ private:
     bool _closePath;
     bool _fillPath;
     bool _emphasizePoints;
+    MainWindow* _mainwindow;
 
 };
 

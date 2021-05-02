@@ -8,7 +8,6 @@
 #include <fstream>
 #include <math.h>
 #include <vector>
-#include "classifier.h"
 
 
 using namespace std;

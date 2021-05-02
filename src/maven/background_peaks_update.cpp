@@ -99,7 +99,10 @@ void BackgroundPeakUpdate::run(void) {
 	} else if ( runFunction == "processMassSlices" ) { 
 		processMassSlices();
     } else if  (runFunction == "pullIsotopes" ) {
-        pullIsotopes(_group);
+        IsotopeParameters isotopeParameters = mainwindow->getIsotopeParameters();
+        isotopeParameters.ppm = compoundPPMWindow;
+        _group->pullIsotopes(isotopeParameters);
+        //pullIsotopes(_group);
     } else if  ( runFunction == "computePeaks" ) { // database search, calibrated dialog
         computePeaks(); // DB Compound Search dialog
 	} else {
@@ -149,6 +152,9 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
     QSettings* settings = mainwindow->getSettings();
     amuQ1 = settings->value("amuQ1").toFloat();
     amuQ3 = settings->value("amuQ3").toFloat();
+
+    IsotopeParameters isotopeParameters = mainwindow->getIsotopeParameters();
+    isotopeParameters.ppm = compoundPPMWindow;
 
     unsigned int numPassingPeakGroups = 0;
     unsigned long numAllPeakGroups = 0;
@@ -356,8 +362,9 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 //                      << endl;
 
                  //Issue 197: Support isotopic extraction for compound db search.
-                 if(pullIsotopesFlag && !group.isIsotope()) pullIsotopes(&group);
-
+                 if(pullIsotopesFlag && !group.isIsotope()){
+                     group.pullIsotopes(isotopeParameters);
+                 }
                  emit(newPeakGroup(peakGroupPtr, false, true)); // note that 'isDeletePeakGroupPtr' flag is set to true
              }
 
@@ -439,6 +446,9 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
     amuQ1 = settings->value("amuQ1").toFloat();
     amuQ3 = settings->value("amuQ3").toFloat();
+
+    IsotopeParameters isotopeParameters = mainwindow->getIsotopeParameters();
+    isotopeParameters.ppm = compoundPPMWindow;
 
     for (unsigned int s=0; s < slices.size();  s++ ) {
         mzSlice* slice = slices[s];
@@ -646,7 +656,9 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         PeakGroup& group = allgroups[j];
         Compound* compound = group.compound;
 
-        if(pullIsotopesFlag && !group.isIsotope()) pullIsotopes(&group);
+        if(pullIsotopesFlag && !group.isIsotope()){
+            group.pullIsotopes(isotopeParameters);
+        }
 
         if(csvreports) csvreports->addGroup(&group);
 
@@ -1249,6 +1261,12 @@ vector<EIC*> BackgroundPeakUpdate::pullEICs(mzSlice* slice,
 	return eics;
 }
 
+/**
+ * @brief BackgroundPeakUpdate::pullIsotopes
+ * @param parentgroup
+ *
+ * @deprecated in favor of PeakGroup::pullIsotopes()
+ */
 void BackgroundPeakUpdate::pullIsotopes(PeakGroup* parentgroup) {
 
     if (!parentgroup) return;

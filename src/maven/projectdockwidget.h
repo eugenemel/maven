@@ -60,6 +60,7 @@ private slots:
     void warnUserEmptySampleFiles();
     void importSampleMetadata();
     void exportSampleMetadata();
+    void computeGroupStatistics(PeakGroup& peakGroup);
 
 private:
     QTreeWidgetItem* getParentFolder(QString filename);

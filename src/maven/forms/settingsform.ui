@@ -574,29 +574,6 @@
           <string>Filter Isotopic Peaks based on these criteria</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
-          <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="minIsotopicCorrelation">
-            <property name="minimum">
-             <double>-1.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>1.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-            <property name="value">
-             <double>0.200000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_11">
-            <property name="text">
-             <string>Isotope is within [X] scans of parent:</string>
-            </property>
-           </widget>
-          </item>
           <item row="4" column="1">
            <widget class="QSpinBox" name="spnMaxIsotopesToExtract">
             <property name="suffix">
@@ -610,6 +587,13 @@
             </property>
             <property name="value">
              <number>5</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_11">
+            <property name="text">
+             <string>Isotope is within [X] scans of parent:</string>
             </property>
            </widget>
           </item>
@@ -636,6 +620,13 @@
             </property>
            </widget>
           </item>
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="chkExtractNIsotopes">
+            <property name="text">
+             <string>Extract only first [X] isotopes after monoisotopic:</string>
+            </property>
+           </widget>
+          </item>
           <item row="3" column="1">
            <widget class="QDoubleSpinBox" name="maxNaturalAbundanceErr">
             <property name="prefix">
@@ -658,13 +649,6 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
-           <widget class="QCheckBox" name="chkExtractNIsotopes">
-            <property name="text">
-             <string>Extract only first [X] isotopes after monoisotopic:</string>
-            </property>
-           </widget>
-          </item>
           <item row="3" column="0">
            <widget class="QCheckBox" name="chkIgnoreNaturalAbundance">
             <property name="text">
@@ -672,10 +656,19 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
-           <widget class="QCheckBox" name="isotopeC13Correction">
-            <property name="text">
-             <string>Correct for Natural C13 Isotope Abundance</string>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="minIsotopicCorrelation">
+            <property name="minimum">
+             <double>-1.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.200000000000000</double>
             </property>
            </widget>
           </item>
@@ -803,19 +796,6 @@
           </property>
           <property name="value">
            <double>0.500000000000000</double>
-          </property>
-         </widget>
-         <widget class="QCheckBox" name="chkIncludeChildren">
-          <property name="geometry">
-           <rect>
-            <x>570</x>
-            <y>30</y>
-            <width>301</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Include children peak groups with bookmark</string>
           </property>
          </widget>
         </widget>

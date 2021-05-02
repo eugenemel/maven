@@ -22,7 +22,7 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(chkDisplayConsensusSpectrum, SIGNAL(toggled(bool)), mainwindow, SLOT(updateGUIWithLastSelectedPeakGroup()));
 
     connect(ionizationMode, SIGNAL(currentIndexChanged(int)), SLOT(getFormValues()));
-    connect(isotopeC13Correction, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+//    connect(isotopeC13Correction, SIGNAL(toggled(bool)), SLOT(getFormValues()));
     connect(amuQ1, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
     connect(amuQ3, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
 
@@ -31,7 +31,7 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(N15Labeled,SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
     connect(S34Labeled,SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
     connect(D2Labeled, SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
-    connect(isotopeC13Correction, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
+//    connect(isotopeC13Correction, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
     connect(chkIgnoreNaturalAbundance, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
     connect(chkExtractNIsotopes, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
     connect(spnMaxIsotopesToExtract, SIGNAL(valueChanged(int)), SLOT(recomputeIsotopes()));
@@ -50,6 +50,11 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(scan_filter_min_quantile, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
     connect(scan_filter_min_intensity, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
     connect(ionizationType,SIGNAL(currentIndexChanged(int)),SLOT(getFormValues()));
+
+    //bookmark options
+    connect(chkBkmkWarnMz, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+    connect(chkBkmkWarnMzRt, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+//    connect(chkIncludeChildren, SIGNAL(toggled(bool)), SLOT(getFormValues()));
 
     //spectra widget display options
     //ms1 options
@@ -215,7 +220,7 @@ void SettingsForm::setFormValues() {
     N15Labeled->setCheckState( (Qt::CheckState) settings->value("N15Labeled").toInt()  );
     S34Labeled->setCheckState( (Qt::CheckState) settings->value("S34Labeled").toInt() );
     D2Labeled->setCheckState(  (Qt::CheckState) settings->value("D2Labeled").toInt()  );
-    isotopeC13Correction->setCheckState(  (Qt::CheckState) settings->value("isotopeC13Correction").toInt()  );
+//    isotopeC13Correction->setCheckState(  (Qt::CheckState) settings->value("isotopeC13Correction").toInt()  );
     chkIgnoreNaturalAbundance->setCheckState(  (Qt::CheckState) settings->value("chkIgnoreNaturalAbundance").toInt()  );
     chkExtractNIsotopes->setCheckState( (Qt::CheckState) settings->value("chkExtractNIsotopes").toInt() );
 
@@ -337,8 +342,8 @@ void SettingsForm::setFormValues() {
     if (settings->contains("spnBkmkRtTol"))
         spnBkmkRtTol->setValue(settings->value("spnBkmkRtTol").toDouble());
 
-    if (settings->contains("chkIncludeChildren"))
-        chkIncludeChildren->setCheckState( (Qt::CheckState) settings->value("chkIncludeChildren").toInt());
+//    if (settings->contains("chkIncludeChildren"))
+//        chkIncludeChildren->setCheckState( (Qt::CheckState) settings->value("chkIncludeChildren").toInt());
 
     //spectral agglomeration
     if (settings->contains("spnScanFilterMinIntensity"))
@@ -416,7 +421,7 @@ void SettingsForm::getFormValues() {
     settings->setValue("N15Labeled",N15Labeled->checkState() );
     settings->setValue("S34Labeled",S34Labeled->checkState() );
     settings->setValue("D2Labeled", D2Labeled->checkState()  );
-    settings->setValue("isotopeC13Correction", isotopeC13Correction->checkState()  );
+//    settings->setValue("isotopeC13Correction", isotopeC13Correction->checkState()  );
     settings->setValue("chkIgnoreNaturalAbundance", chkIgnoreNaturalAbundance->checkState() );
     settings->setValue("chkExtractNIsotopes", chkExtractNIsotopes->checkState() );
     settings->setValue("spnMaxIsotopesToExtract", spnMaxIsotopesToExtract->value());
@@ -503,7 +508,7 @@ void SettingsForm::getFormValues() {
     settings->setValue("chkBkmkWarnMz", chkBkmkWarnMz->checkState());
     settings->setValue("spnBkmkmzTol", spnBkmkmzTol->value());
     settings->setValue("spnBkmkRtTol", spnBkmkRtTol->value());
-    settings->setValue("chkIncludeChildren", chkIncludeChildren->checkState());
+//    settings->setValue("chkIncludeChildren", chkIncludeChildren->checkState());
 
     //spectral agglomeration settings
     settings->setValue("spnScanFilterMinIntensity", spnScanFilterMinIntensity->value());

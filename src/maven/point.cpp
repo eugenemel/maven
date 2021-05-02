@@ -24,6 +24,10 @@ EicPoint::EicPoint(float x, float y, Peak* peak, MainWindow* mw)
         _cSize += 20*(_peak->quality);
         //mouse press events
          connect(this, SIGNAL(peakSelected(Peak*)), mw, SLOT(showPeakInfo(Peak*)));
+
+         //If shift modifier is not down, clear out old selection
+         connect(this, SIGNAL(peakSelectedNoShiftModifier(Peak*)), mw->getEicWidget(), SLOT(clearPeakAreas()));
+
          connect(this, SIGNAL(peakSelected(Peak*)), mw->getEicWidget(), SLOT(showPeakArea(Peak*)));
 
          //mouse hover events
@@ -32,6 +36,9 @@ EicPoint::EicPoint(float x, float y, Peak* peak, MainWindow* mw)
          connect(this, SIGNAL(peakGroupSelected(PeakGroup*)), mw->massCalcWidget, SLOT(setPeakGroup(PeakGroup*)));
          connect(this, SIGNAL(peakGroupSelected(PeakGroup*)), mw->fragmentationSpectraWidget, SLOT(overlayPeakGroup(PeakGroup*)));
     }
+
+    //mouse press events
+    connect(this, SIGNAL(scanSelected(Scan*)), mw, SLOT(showScanInfo(Scan*)));
 
 }
 
@@ -92,34 +99,20 @@ void EicPoint::mousePressEvent (QGraphicsSceneMouseEvent* event) {
 
     setZValue(10);
 
-    if (_group) emit peakGroupSelected(_group);
-    if (_peak)  emit peakSelected(_peak);
+    qDebug() << "EicPoint::mousePressEvent() with"
+             << "group=" << _group << ","
+             << "peak=" << _peak << ","
+             << "scan=" << _scan;
 
-    if ( _group && _group->isIsotope() == false ) {
-        _mw->isotopeWidget->setPeakGroup(_group);
+    if (_peak){
+        if (event->modifiers() != Qt::ShiftModifier) {
+            emit peakSelectedNoShiftModifier(_peak);
+        }
+        emit peakSelected(_peak);
     }
 
-    if(_scan) {
-        _mw->fragmentationSpectraDockWidget->setVisible(true);
-        _mw->fragmentationSpectraWidget->setScan(_scan);
-        _mw->massCalcWidget->setFragmentationScan(_scan);
-
-		//show last full scan
-        if(_scan->mslevel >= 2 && _scan->sample) {
-			int scanHistory=50;
-			Scan* lastfullscan = _scan->getLastFullScan(scanHistory);
-			if(lastfullscan) {
-				_mw->spectraWidget->setScan(lastfullscan);
-				_mw->spectraWidget->zoomRegion(_scan->precursorMz,0.5);
-			}
-		}
-    }
-
-    if (_peak && _mw->covariantsPanel->isVisible()) {
-        _mw->getCovariants(_peak);
-    }
-
-    //scene()->update();
+    //e.g. MS/MS event triangles
+    if (_scan) emit scanSelected(_scan);
 }
 
 void EicPoint::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)

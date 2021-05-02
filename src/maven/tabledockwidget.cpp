@@ -506,7 +506,9 @@ QString TableDockWidget::groupTagString(PeakGroup* group){
 void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     if(!group) return;
 
-    group->groupStatistics();
+    //Issue 380: Avoid recomputing group data if already computed.
+    group->groupStatistics(false);
+
     //cerr << "addRow" << group->groupId << " "  << group->meanMz << " " << group->meanRt << " " << group->children.size() << " " << group->tagString << endl;
 
     if (!group) return;
@@ -521,7 +523,7 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
        item = new NumericTreeWidgetItem(root,PeakGroupType);
     }
 
-    item->setFlags(Qt::ItemIsSelectable |  Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
+    item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
 
     //Issue 329
     QString compoundText, adductText;
@@ -598,9 +600,11 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
         heatmapBackground(item);
     }
 
+
     updateItem(item);
 
     if ( group->childCount() > 0 ) {
+
         //cerr << "Add children!" << endl;
         QTreeWidgetItem *childRoot = clusterDialog->chkPGDisplay->isChecked() ? root : item;
 
@@ -984,7 +988,7 @@ void TableDockWidget::showAllGroups() {
     treeWidget->setSortingEnabled(false);
 
     QMap<int,QTreeWidgetItem*> parents;
-    for(int i=0; i < allgroups.size(); i++ ) { 
+    for(unsigned int i=0; i < allgroups.size(); i++ ) {
         int metaGroupId  = allgroups[i].metaGroupId;
         if (metaGroupId && allgroups[i].meanMz > 0 && allgroups[i].peakCount()>0) {
 

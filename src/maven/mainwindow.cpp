@@ -127,7 +127,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
         clsf->loadModel(clsfModelFilename.toStdString());
     } else {
        clsf->loadDefaultModel();
-        qDebug() << "ERROR: Can't find defult.model in method folder="  << methodsFolder;
+        qDebug() << "ERROR: Can't find default.model in method folder="  << methodsFolder;
         qDebug() << "       Using build in neural network model";
     }
 
@@ -203,6 +203,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     heatmap	 = 	  new HeatMap(this);
     galleryWidget = new GalleryWidget(this);
     barPlotWidget = new SampleBarPlotWidget(this);
+    isotopeLegendWidget = new IsotopeLegendWidget(this);
 
     bookmarkedPeaks = addPeaksTable("Bookmarks",
                                     QString("This is a reserved table containing manually curated \"bookmarked\" peak groups."),
@@ -213,6 +214,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     heatMapDockWidget =  createDockWidget("HeatMap",heatmap);
     galleryDockWidget =  createDockWidget("Gallery",galleryWidget);
     barPlotDockWidget = createDockWidget("EIC Legend",barPlotWidget);
+    isotopeLegendDockWidget = createDockWidget("Isotope Bar Plot", isotopeLegendWidget);
     scatterDockWidget =  new ScatterPlot(this);
     projectDockWidget =  new ProjectDockWidget(this);
     rconsoleDockWidget =  new RconsoleWidget(this);
@@ -244,6 +246,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     //treeMapDockWidget =  createDockWidget("TreeMap",treemap);
 
     addDockWidget(Qt::RightDockWidgetArea, barPlotDockWidget, Qt::Horizontal);
+    addDockWidget(Qt::RightDockWidgetArea, isotopeLegendDockWidget, Qt::Horizontal);
 
     //
     //DIALOGS
@@ -534,9 +537,33 @@ void MainWindow::setIonizationMode( int x ) {
     _ionizationMode=x;
      massCalcWidget->setCharge(_ionizationMode);
 
-     if(x>0) adductType->setCurrentText("[M+H]+");
-     else if(x<0) adductType->setCurrentText("[M-H]-");
-     else adductType->setCurrentText("[M]");
+     //Issue 376: Update to respect loaded adducts.
+
+     for (int i = 0; i < adductType->count(); i++) {
+
+         QVariant v = adductType->itemData(i);
+         Adduct*  itemAdduct =  v.value<Adduct*>();
+
+         if ((itemAdduct->charge > 0 && itemAdduct->name == "[M+H]+") ||
+                 (itemAdduct->charge < 0 && itemAdduct->name == "[M-H]-")) {
+             this->adductType->setCurrentIndex(i);
+             break;
+         }
+     }
+
+     //Issue 376: adducts combo box in isotopeWidget should sync with main window adducts combo box
+     if (isotopeWidget) {
+         for (int i = 0; i < isotopeWidget->adductComboBox->count(); i++) {
+
+             QVariant v = isotopeWidget->adductComboBox->itemData(i);
+             Adduct*  itemAdduct =  v.value<Adduct*>();
+             if ((itemAdduct->charge > 0 && itemAdduct->name == "[M+H]+") ||
+                     (itemAdduct->charge < 0 && itemAdduct->name == "[M-H]-")) {
+                 isotopeWidget->adductComboBox->setCurrentIndex(i);
+                 break;
+             }
+         }
+     }
 }
 
 vector<mzSample*> MainWindow::getVisibleSamples() {
@@ -629,8 +656,26 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
 
         PeakGroup *groupCopy = new PeakGroup(*group);
 
-        bool isAddChildren = settings->value("chkIncludeChildren", false).toBool();
-        if (!isAddChildren) groupCopy->children.clear();
+        //TODO: separate children peak from isotopic peaks
+
+        //Issue 408: Always add children peaks
+//        bool isAddChildren = settings->value("chkIncludeChildren", false).toBool();
+//        if (!isAddChildren) {
+//            groupCopy->children.clear();
+//        } else
+
+        if (groupCopy->children.empty()){
+
+            IsotopeParameters isotopeParameters = groupCopy->isotopeParameters;
+            if (isotopeParameters.isotopeParametersType == IsotopeParametersType::INVALID) {
+                isotopeParameters = getIsotopeParameters();
+            }
+
+            groupCopy->pullIsotopes(isotopeParameters);
+
+            isotopeParameters.isotopeParametersType = IsotopeParametersType::SAVED;
+            groupCopy->isotopeParameters = isotopeParameters;
+        }
 
         groupCopy->searchTableName = "Bookmarks";
 
@@ -644,7 +689,7 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
         if(groupCopy2->compound) qDebug() << "MainWindow::bookmarkPeakGroup() group->compound=" << groupCopy2->compound->name.c_str();
         if(!groupCopy2->compound) qDebug() << "MainWindow::bookmarkPeakGroup() group->compound= nullptr";
         if (groupCopy2->adduct){
-            qDebug() << "MainWindow::bookmarkPeakGroup() group->adduct=" << group->adduct->name.c_str();
+            qDebug() << "MainWindow::bookmarkPeakGroup() group->adduct=" << groupCopy2->adduct->name.c_str();
         } else {
             qDebug() << "MainWindow::bookmarkPeakGroup() group->adduct= nullptr";
         }
@@ -735,7 +780,15 @@ void MainWindow::setPeptideFocus(QString peptideSequence){
 
     float mz = currentAdduct->computeAdductMass(static_cast<float>(monoisotopicMass));
 
-    if (eicWidget->isVisible() ) eicWidget->setMzSlice(mz);
+    if (eicWidget->isVisible() ){
+
+        mzSlice updatedSlice(mz - mz/1e6f*static_cast<float>(getUserPPM()),
+                             mz + mz/1e6f*static_cast<float>(getUserPPM()),
+                             getEicWidget()->getMzSlice().rtmin,
+                             getEicWidget()->getMzSlice().rtmax);
+
+        eicWidget->setMzSlice(updatedSlice, false);
+    }
     if (massCalcWidget->isVisible() ) massCalcWidget->setMass(mz);
     if (ms2ScansListWidget->isVisible()   ) showFragmentationScans(mz);
     if (ms2ConsensusScansListWidget->isVisible()) showConsensusFragmentationScans(mz);
@@ -753,6 +806,20 @@ void MainWindow::setAdductFocus(Adduct *adduct) {
         if (itemAdduct && itemAdduct->name == adduct->name) {
             this->adductType->setCurrentIndex(i);
             break;
+        }
+    }
+
+    //Issue 376: adducts combo box in isotopeWidget should sync with main window adducts combo box
+    if (isotopeWidget) {
+        for (int i = 0; i < isotopeWidget->adductComboBox->count(); i++) {
+
+            QVariant v = isotopeWidget->adductComboBox->itemData(i);
+            Adduct*  itemAdduct =  v.value<Adduct*>();
+
+            if (itemAdduct && itemAdduct->name == adduct->name) {
+                isotopeWidget->adductComboBox->setCurrentIndex(i);
+                break;
+            }
         }
     }
 }
@@ -1464,8 +1531,9 @@ void MainWindow::createToolBars() {
     QToolButton* btnGallery = addDockWidgetButton(sideBar,galleryDockWidget,QIcon(rsrcPath + "/gallery.png"), "Show Gallery Widget");
     QToolButton* btnScatter = addDockWidgetButton(sideBar,scatterDockWidget,QIcon(rsrcPath + "/scatterplot.png"), "Show Scatter Plot Widget");
     QToolButton* btnSRM = addDockWidgetButton(sideBar,srmDockWidget,QIcon(rsrcPath + "/qqq.png"), "Show SRM List (F12)");
-    QToolButton* btnRconsole = addDockWidgetButton(sideBar,rconsoleDockWidget,QIcon(rsrcPath + "/R.png"), "Show R Console");
+    //QToolButton* btnRconsole = addDockWidgetButton(sideBar,rconsoleDockWidget,QIcon(rsrcPath + "/R.png"), "Show R Console");
     QToolButton* btnBarPlot = addDockWidgetButton(sideBar,barPlotDockWidget, QIcon(rsrcPath + "/bar_plot_samples.png"), "Show EIC Legend");
+    QToolButton* btnIsotopeLegend = addDockWidgetButton(sideBar, isotopeLegendDockWidget, QIcon(rsrcPath +"/isotope_legend.png"), "Show Isotope Bar Plot");
 
     //btnSamples->setShortcut(Qt::Key_F2);
     btnLigands->setShortcut(Qt::Key_F3);
@@ -1483,6 +1551,7 @@ void MainWindow::createToolBars() {
 
     sideBar->addWidget(btnSamples);
     sideBar->addWidget(btnBarPlot);
+    sideBar->addWidget(btnIsotopeLegend);
     sideBar->addWidget(btnLigands);
     sideBar->addWidget(btnSpectra);
     sideBar->addWidget(btnFragSpectra);
@@ -1637,22 +1706,25 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
 
     if (!group) return;
 
-    //Issue 373: Compare values pointed to, not the pointers themselves (implementation-defined behavior)
-    if (_lastSelectedPeakGroup && *_lastSelectedPeakGroup == *group){
+    //Issue 371: More complex case for equality: isotopic quant versions
+    //for now, try always updating the peak group to avoid tricky equality cases
 
-        bool isEqual = true;
+//    //Issue 373: Compare values pointed to, not the pointers themselves (implementation-defined behavior)
+//    if (_lastSelectedPeakGroup && *_lastSelectedPeakGroup == *group){
 
-        //Also need to check the compounds and adducts
-        if (_lastSelectedPeakGroup->compound && group->compound && _lastSelectedPeakGroup->compound->id != group->compound->id) {
-            isEqual = false;
-        }
+//        bool isEqual = true;
 
-        if (_lastSelectedPeakGroup->adduct && group->adduct && _lastSelectedPeakGroup->adduct->name != group->adduct->name) {
-            isEqual = false;
-        }
+//        //Also need to check the compounds and adducts
+//        if (_lastSelectedPeakGroup->compound && group->compound && _lastSelectedPeakGroup->compound->id != group->compound->id) {
+//            isEqual = false;
+//        }
 
-        if (isEqual) return;
-    }
+//        if (_lastSelectedPeakGroup->adduct && group->adduct && _lastSelectedPeakGroup->adduct->name != group->adduct->name) {
+//            isEqual = false;
+//        }
+
+//        if (isEqual) return;
+//    }
 
     _lastSelectedPeakGroup = group;
 
@@ -1669,7 +1741,7 @@ void MainWindow::updateGUIWithLastSelectedPeakGroup(){
 
     rconsoleDockWidget->updateStatus();
 
-    searchText->setText(QString::number(_lastSelectedPeakGroup->meanMz,'f',8));
+    searchText->setText(QString::number(static_cast<double>(_lastSelectedPeakGroup->meanMz),'f',8));
 
     //no need to compute consensus spectrum if it won't be displayed.
     if (isDisplayConsensusSpectrum) {
@@ -1696,7 +1768,7 @@ void MainWindow::updateGUIWithLastSelectedPeakGroup(){
         //last resort
         //Issue 311: if the mz width is greater than or equal to half a Da, assume DI sample (and do not compute frag pattern)
         if (_lastSelectedPeakGroup->fragmentationPattern.nobs() == 0 && (_lastSelectedPeakGroup->maxMz - _lastSelectedPeakGroup->minMz < 0.5f)) {
-            _lastSelectedPeakGroup->computeFragPattern(massCalcWidget->fragmentPPM->value());
+            _lastSelectedPeakGroup->computeFragPattern(static_cast<float>(massCalcWidget->fragmentPPM->value()));
         }
     }
 
@@ -1718,7 +1790,7 @@ void MainWindow::updateGUIWithLastSelectedPeakGroup(){
 
     if (massCalcWidget->isVisible()) {
         massCalcWidget->setPeakGroup(_lastSelectedPeakGroup);
-        massCalcWidget->lineEdit->setText(QString::number(_lastSelectedPeakGroup->meanMz,'f',5));
+        massCalcWidget->lineEdit->setText(QString::number(static_cast<double>(_lastSelectedPeakGroup->meanMz),'f',5));
     }
 
     //note that this method is the only caller of showPeakInfo()
@@ -1909,7 +1981,7 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> MainWindow::getSrmSlices() {
 }
 
 
-//only caller is setPeakGroup().
+//callers are setPeakGroup() and EICPoint::peakSelected signal
 void MainWindow::showPeakInfo(Peak* _peak) {
     qDebug() << "MainWindow::showPeakInfo(peak)";
 
@@ -1932,10 +2004,6 @@ void MainWindow::showPeakInfo(Peak* _peak) {
         massCalcWidget->setCharge(ionizationMode);
     }
 
-   if ( isotopeWidget->isVisible() ) {
-        isotopeWidget->setPeak(_peak);
-    }
-
     if( ms2ScansListWidget->isVisible() ) {
         float mz = _peak->peakMz;
         if (_peak->mzmax - _peak->mzmin > 0.5f) { //direct infusion peak
@@ -1950,6 +2018,31 @@ void MainWindow::showPeakInfo(Peak* _peak) {
             mz = 0.5f* (_peak->mzmin + _peak->mzmax);
         }
         showConsensusFragmentationScans(mz);
+    }
+
+    if (covariantsPanel->isVisible()) {
+        getCovariants(_peak);
+    }
+}
+
+//caller is EICPoint::scanSelected signal
+void MainWindow::showScanInfo(Scan* _scan){
+    if (!_scan) return;
+
+    fragmentationSpectraDockWidget->setVisible(true);
+    fragmentationSpectraWidget->setScan(_scan);
+
+    if (massCalcWidget->isVisible()) {
+        massCalcWidget->setFragmentationScan(_scan);
+    }
+
+    if (_scan->mslevel >= 2 && _scan->sample && spectraWidget->isVisible()) {
+        int scanHistory=50;
+        Scan* lastfullscan = _scan->getLastFullScan(scanHistory);
+        if(lastfullscan) {
+            spectraWidget->setScan(lastfullscan);
+            spectraWidget->zoomRegion(_scan->precursorMz,0.5);
+        }
     }
 }
 
@@ -2064,14 +2157,18 @@ void MainWindow::setClipboardToGroup(PeakGroup* group) {
 
 void MainWindow::showFragmentationScans(float pmz) {
 
-    if (!ms2ScansListWidget || ms2ScansListWidget->isVisible() == false ) return;
-    float ppm = getUserPPM();
+    if (!ms2ScansListWidget || ms2ScansListWidget->isVisible() == false || samples.empty()) return;
 
-    if (samples.size() <= 0 ) return;
+    float ppm = static_cast<float>(getUserPPM());
+
     ms2ScansListWidget->clearTree();
-    for ( unsigned int i=0; i < samples.size(); i++ ) {
-        for (unsigned int j=0; j < samples[i]->scans.size(); j++ ) {
-            Scan* s = samples[i]->scans[j];
+
+    //Issue 392: Only display scans from visible samples
+    vector<mzSample*> visibleSamples = getVisibleSamples();
+
+    for ( unsigned int i=0; i < visibleSamples.size(); i++ ) {
+        for (unsigned int j=0; j < visibleSamples[i]->scans.size(); j++ ) {
+            Scan* s = visibleSamples[i]->scans[j];
             if ( s->mslevel == 2 && ppmDist(s->precursorMz,pmz) < ppm ) {
                 ms2ScansListWidget->addScanItem(s);
             }
@@ -2081,17 +2178,21 @@ void MainWindow::showFragmentationScans(float pmz) {
 
 void MainWindow::showConsensusFragmentationScans(float pmz) {
 
-    if (!ms2ConsensusScansListWidget || ms2ConsensusScansListWidget->isVisible() == false ) return;
-    float ppm = getUserPPM();
+    if (!ms2ConsensusScansListWidget || ms2ConsensusScansListWidget->isVisible() == false || samples.empty()) return;
 
-    if (samples.size() <= 0 ) return;
+    float ppm = static_cast<float>(getUserPPM());
+
     ms2ConsensusScansListWidget->clearTree();
-    for ( unsigned int i=0; i < samples.size(); i++ ) {
+
+    //Issue 392: Only display scans from visible samples
+    vector<mzSample*> visibleSamples = getVisibleSamples();
+
+    for ( unsigned int i=0; i < visibleSamples.size(); i++ ) {
 
         vector<Scan*> scanVector{};
 
-        for (unsigned int j=0; j < samples[i]->scans.size(); j++ ) {
-            Scan* s = samples[i]->scans[j];
+        for (unsigned int j=0; j < visibleSamples[i]->scans.size(); j++ ) {
+            Scan* s = visibleSamples[i]->scans[j];
             if (s->mslevel == 2 && ppmDist(s->precursorMz, pmz) < ppm) {
                 scanVector.push_back(s);
             }
@@ -2107,15 +2208,19 @@ void MainWindow::showMs1Scans(float pmz) {
 
     if (!ms1ScansListWidget || !ms1ScansListWidget->isVisible() || samples.empty()) return;
 
-    float ppm = getUserPPM();
-    float minMz = pmz - pmz * ppm / 1e6;
-    float maxMz = pmz + pmz * ppm / 1e6;
+    float ppm = static_cast<float>(getUserPPM());
+
+    float minMz = pmz - pmz * ppm / 1e6f;
+    float maxMz = pmz + pmz * ppm / 1e6f;
 
     ms1ScansListWidget->clearTree();
 
-    for ( unsigned int i=0; i < samples.size(); i++ ) {
-        for (unsigned int j=0; j < samples[i]->scans.size(); j++ ) {
-            Scan* s = samples[i]->scans[j];
+    //Issue 392: Only display scans from visible samples
+    vector<mzSample*> visibleSamples = getVisibleSamples();
+
+    for ( unsigned int i=0; i < visibleSamples.size(); i++ ) {
+        for (unsigned int j=0; j < visibleSamples[i]->scans.size(); j++ ) {
+            Scan* s = visibleSamples[i]->scans[j];
             if (s->mslevel == 1 && minMz >= s->minMz() && maxMz <= s->maxMz()) {
                 ms1ScansListWidget->addMs1ScanItem(s);
             }
@@ -2128,19 +2233,22 @@ void MainWindow::showMs3Scans(float preMs1Mz, float preMs2Mz){
 
     if (!ms3ScansListWidget || !ms3ScansListWidget->isVisible() || samples.empty()) return;
 
-    float ppm = getUserPPM(); //TODO: more sophisticated ppm tolerances?
+    float ppm = static_cast<float>(getUserPPM()); //TODO: more sophisticated ppm tolerances?
 
-    float minMs1Mz = preMs1Mz - preMs1Mz * ppm / 1e6;
-    float maxMs1Mz = preMs1Mz + preMs1Mz * ppm / 1e6;
+    float minMs1Mz = preMs1Mz - preMs1Mz * ppm / 1e6f;
+    float maxMs1Mz = preMs1Mz + preMs1Mz * ppm / 1e6f;
 
-    float minMs2Mz = preMs2Mz - preMs2Mz * ppm / 1e6;
-    float maxMs2Mz = preMs2Mz + preMs2Mz* ppm / 1e6;
+    float minMs2Mz = preMs2Mz - preMs2Mz * ppm / 1e6f;
+    float maxMs2Mz = preMs2Mz + preMs2Mz* ppm / 1e6f;
 
     ms3ScansListWidget->clearTree();
 
-    for ( unsigned int i=0; i < samples.size(); i++ ) {
-        for (unsigned int j=0; j < samples[i]->scans.size(); j++ ) {
-            Scan* s = samples[i]->scans[j];
+    //Issue 392: Only display scans from visible samples
+    vector<mzSample*> visibleSamples = getVisibleSamples();
+
+    for ( unsigned int i=0; i < visibleSamples.size(); i++ ) {
+        for (unsigned int j=0; j < visibleSamples[i]->scans.size(); j++ ) {
+            Scan* s = visibleSamples[i]->scans[j];
             if (s->mslevel == 3 &&
                     s->ms1PrecursorForMs3 >= minMs1Mz && s->ms1PrecursorForMs3 <= maxMs1Mz &&
                     s->precursorMz >= minMs2Mz && s->precursorMz <= maxMs2Mz) {
@@ -2161,11 +2269,11 @@ QWidget* MainWindow::eicWidgetController() {
     btnZoom->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnZoom->setToolTip(tr("Zoom out (0)"));
 
-    QToolButton *btnPrint = new QToolButton(toolBar);
-    btnPrint->setIcon(QIcon(rsrcPath + "/fileprint.png"));
-    btnPrint->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnPrint->setToolTip(tr("Print EIC (Ctr+P)"));
-    btnPrint->setShortcut(tr("Ctrl+P"));
+//    QToolButton *btnPrint = new QToolButton(toolBar);
+//    btnPrint->setIcon(QIcon(rsrcPath + "/fileprint.png"));
+//    btnPrint->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+//    btnPrint->setToolTip(tr("Print EIC (Ctr+P)"));
+//    btnPrint->setShortcut(tr("Ctrl+P"));
 
     QToolButton *btnPDF = new QToolButton(toolBar);
     btnPDF->setIcon(QIcon(rsrcPath + "/exportpdf.png"));
@@ -2177,45 +2285,45 @@ QWidget* MainWindow::eicWidgetController() {
     btnPNG->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnPNG->setToolTip(tr("Copy EIC Image to Clipboard"));
 
-    QToolButton *btnLast = new QToolButton(toolBar);
-    btnLast->setIcon(QIcon(rsrcPath + "/last.png"));
-    btnLast->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnLast->setToolTip(tr("History Back (Ctrl+Left)"));
-    btnLast->setShortcut(tr("Ctrl+Left"));
+//    QToolButton *btnLast = new QToolButton(toolBar);
+//    btnLast->setIcon(QIcon(rsrcPath + "/last.png"));
+//    btnLast->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+//    btnLast->setToolTip(tr("History Back (Ctrl+Left)"));
+//    btnLast->setShortcut(tr("Ctrl+Left"));
 
-    QToolButton *btnNext = new QToolButton(toolBar);
-    btnNext->setIcon(QIcon(rsrcPath + "/next.png"));
-    btnNext->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnNext->setToolTip(tr("History Forward (Ctrl+Right)"));
-    btnNext->setShortcut(tr("Ctrl+Right"));
+//    QToolButton *btnNext = new QToolButton(toolBar);
+//    btnNext->setIcon(QIcon(rsrcPath + "/next.png"));
+//    btnNext->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+//    btnNext->setToolTip(tr("History Forward (Ctrl+Right)"));
+//    btnNext->setShortcut(tr("Ctrl+Right"));
 
-    QToolButton *btnAutoZoom= new QToolButton(toolBar);
-    btnAutoZoom->setCheckable(true);
-    btnAutoZoom->setChecked(true);
-    btnAutoZoom->setIcon(QIcon(rsrcPath + "/autofocus.png"));
-    btnAutoZoom->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnAutoZoom->setToolTip(tr("Auto Zoom. Always center chromatogram on expected retention time!"));
+//    QToolButton *btnAutoZoom= new QToolButton(toolBar);
+//    btnAutoZoom->setCheckable(true);
+//    btnAutoZoom->setChecked(true);
+//    btnAutoZoom->setIcon(QIcon(rsrcPath + "/autofocus.png"));
+//    btnAutoZoom->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+//    btnAutoZoom->setToolTip(tr("Auto Zoom. Always center chromatogram on expected retention time!"));
 
-    QToolButton *btnGallary= new QToolButton(toolBar);
-    btnGallary->setIcon(QIcon(rsrcPath + "/gallery.png"));
-    btnGallary->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnGallary->setToolTip(tr("Show In Gallary"));
+    QToolButton *btnGallery= new QToolButton(toolBar);
+    btnGallery->setIcon(QIcon(rsrcPath + "/gallery.png"));
+    btnGallery->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnGallery->setToolTip(tr("Show In Gallery"));
 
-    QToolButton *btnMarkGood = new QToolButton(toolBar);
-    btnMarkGood->setIcon(QIcon(rsrcPath + "/markgood.png"));
-    btnMarkGood->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnMarkGood->setToolTip(tr("Bookmark as Good Group (G)"));
+//    QToolButton *btnMarkGood = new QToolButton(toolBar);
+//    btnMarkGood->setIcon(QIcon(rsrcPath + "/markgood.png"));
+//    btnMarkGood->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+//    btnMarkGood->setToolTip(tr("Bookmark as Good Group (G)"));
 
-    QToolButton *btnMarkBad = new QToolButton(toolBar);
-    btnMarkBad->setIcon(QIcon(rsrcPath + "/markbad.png"));
-    btnMarkBad->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnMarkBad->setToolTip(tr("Bookmark as Bad Group (B)"));
+//    QToolButton *btnMarkBad = new QToolButton(toolBar);
+//    btnMarkBad->setIcon(QIcon(rsrcPath + "/markbad.png"));
+//    btnMarkBad->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+//    btnMarkBad->setToolTip(tr("Bookmark as Bad Group (B)"));
 
-    QToolButton *btnCopyCSV = new QToolButton(toolBar);
-    btnCopyCSV->setIcon(QIcon(rsrcPath + "/copyCSV.png"));
-    btnCopyCSV->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnCopyCSV->setToolTip(tr("Copy Group Information to Clipboard (Ctrl+C)"));
-    btnCopyCSV->setShortcut(tr("Ctrl+C"));
+//    QToolButton *btnCopyCSV = new QToolButton(toolBar);
+//    btnCopyCSV->setIcon(QIcon(rsrcPath + "/copyCSV.png"));
+//    btnCopyCSV->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+//    btnCopyCSV->setToolTip(tr("Copy Group Information to Clipboard (Ctrl+C)"));
+//    btnCopyCSV->setShortcut(tr("Ctrl+C"));
 
     QToolButton *btnBookmark = new QToolButton(toolBar);
     btnBookmark->setIcon(QIcon(rsrcPath + "/bookmark.png"));
@@ -2229,12 +2337,45 @@ QWidget* MainWindow::eicWidgetController() {
     btnIntegrateArea->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnIntegrateArea->setToolTip(tr("Manual Integration (Shift+MouseDrag)"));
 
-    QToolButton *btnAverageSpectra = new QToolButton(toolBar);
-    btnAverageSpectra->setIcon(QIcon(rsrcPath + "/averageSpectra.png"));
-    btnAverageSpectra->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnAverageSpectra->setToolTip(tr("Average Specta (Ctrl+MouseDrag)"));
+//    QToolButton *btnAverageSpectra = new QToolButton(toolBar);
+//    btnAverageSpectra->setIcon(QIcon(rsrcPath + "/averageSpectra.png"));
+//    btnAverageSpectra->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+//    btnAverageSpectra->setToolTip(tr("Average Spectra (Ctrl+MouseDrag)"));
 
+    btnGroupPeaks = new QToolButton(toolBar);
+    btnGroupPeaks->setCheckable(true);
+    btnGroupPeaks->setChecked(true);
+    btnGroupPeaks->setIcon(QIcon(rsrcPath + "/gaussian_groups.png"));
+    btnGroupPeaks->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnGroupPeaks->setToolTip(tr("Automatic Peak Grouping"));
 
+    btnEICFill = new QToolButton(toolBar);
+    btnEICFill->setCheckable(true);
+    btnEICFill->setChecked(true);
+    btnEICFill->setIcon(QIcon(rsrcPath + "/filled_gaussian.png"));
+    btnEICFill->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnEICFill->setToolTip(tr("Show Filled EIC"));
+
+    btnEICDots = new QToolButton(toolBar);
+    btnEICDots->setCheckable(true);
+    btnEICDots->setChecked(false);
+    btnEICDots->setIcon(QIcon(rsrcPath + "/dotted_gaussian.png"));
+    btnEICDots->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnEICDots->setToolTip(tr("Show Scans as Dots"));
+
+    btnBarPlot = new QToolButton(toolBar);
+    btnBarPlot->setCheckable(true);
+    btnBarPlot->setChecked(false);
+    btnBarPlot->setIcon(QIcon(rsrcPath + "/bar_plot_samples.png"));
+    btnBarPlot->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnBarPlot->setToolTip(tr("Show Bar Plot"));
+
+    btnIsotopePlot = new QToolButton(toolBar);
+    btnIsotopePlot->setCheckable(true);
+    btnIsotopePlot->setChecked(false);
+    btnIsotopePlot->setIcon(QIcon(rsrcPath + "/isotope.png"));
+    btnIsotopePlot->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnIsotopePlot->setToolTip(tr("Show Isotope Plot"));
 /*
     QSpinBox* smoothingWindowBox = new QSpinBox(toolBar);
     smoothingWindowBox->setRange(1, 2000);
@@ -2246,41 +2387,74 @@ QWidget* MainWindow::eicWidgetController() {
 
     toolBar->addWidget(btnZoom);
     toolBar->addWidget(btnBookmark);
-    toolBar->addWidget(btnCopyCSV);
-    toolBar->addWidget(btnMarkGood);
-    toolBar->addWidget(btnMarkBad);
-    toolBar->addWidget(btnGallary);
-    toolBar->addSeparator();
     toolBar->addWidget(btnIntegrateArea);
-    toolBar->addWidget(btnAverageSpectra);
+    toolBar->addWidget(btnGallery);
 
-    toolBar->addWidget(btnLast);
-    toolBar->addWidget(btnNext);
     toolBar->addSeparator();
 
     toolBar->addWidget(btnPDF);
     toolBar->addWidget(btnPNG);
-    toolBar->addWidget(btnPrint);
+
+    //Issue 222
     toolBar->addSeparator();
+    toolBar->addWidget(btnEICFill);
+    toolBar->addWidget(btnEICDots);
+    toolBar->addWidget(btnGroupPeaks);
 
-    toolBar->addWidget(btnAutoZoom);
+    toolBar->addSeparator();
+    toolBar->addWidget(btnBarPlot);
+    toolBar->addWidget(btnIsotopePlot);
+    //toolBar->addWidget(btn)
 
+    //Issue 222:
+    //disabled buttons
+
+    //toolBar->addWidget(btnAverageSpectra); // Issue 222: Not clear what this does at this point
+
+    //toolBar->addWidget(btnCopyCSV);
+    //toolBar->addWidget(btnMarkGood);
+    //toolBar->addWidget(btnMarkBad);
+
+    //toolBar->addWidget(btnLast);
+    //toolBar->addWidget(btnNext);
+   // toolBar->addSeparator();
+
+    //toolBar->addWidget(btnPrint);
+    //toolBar->addSeparator();
+
+    //toolBar->addWidget(btnAutoZoom);          // Issue 222: This no longer works
 //    toolBar->addWidget(smoothingWindowBox);
 
-    connect(btnLast,SIGNAL(clicked()), SLOT(historyLast()));
-    connect(btnNext,SIGNAL(clicked()), SLOT(historyNext()));
-    connect(btnPrint, SIGNAL(clicked()), SLOT(print()));
+//    connect(btnLast,SIGNAL(clicked()), SLOT(historyLast()));
+//    connect(btnNext,SIGNAL(clicked()), SLOT(historyNext()));
+//    connect(btnPrint, SIGNAL(clicked()), SLOT(print()));
     connect(btnZoom, SIGNAL(clicked()), eicWidget, SLOT(resetZoom()));
     connect(btnPDF, SIGNAL(clicked()), SLOT(exportPDF()));
     connect(btnPNG, SIGNAL(clicked()), SLOT(exportSVG()));
-    connect(btnAutoZoom,SIGNAL(toggled(bool)), eicWidget,SLOT(autoZoom(bool)));
+//    connect(btnAutoZoom,SIGNAL(toggled(bool)), eicWidget,SLOT(autoZoom(bool)));
     connect(btnBookmark,SIGNAL(clicked()),  this,  SLOT(bookmarkSelectedPeakGroup()));
-    connect(btnCopyCSV,SIGNAL(clicked()),  eicWidget, SLOT(copyToClipboard()));
-    connect(btnMarkGood,SIGNAL(clicked()), eicWidget, SLOT(markGroupGood()));
-    connect(btnMarkBad,SIGNAL(clicked()),  eicWidget, SLOT(markGroupBad()));
-    connect(btnGallary,SIGNAL(clicked()),  eicWidget, SLOT(setGallaryToEics()));
+//    connect(btnCopyCSV,SIGNAL(clicked()),  eicWidget, SLOT(copyToClipboard()));
+//    connect(btnMarkGood,SIGNAL(clicked()), eicWidget, SLOT(markGroupGood()));
+//    connect(btnMarkBad,SIGNAL(clicked()),  eicWidget, SLOT(markGroupBad()));
+    connect(btnGallery,SIGNAL(clicked()),  eicWidget, SLOT(setGallaryToEics()));
     connect(btnIntegrateArea,SIGNAL(clicked()),  eicWidget, SLOT(startAreaIntegration()));
-    connect(btnAverageSpectra,SIGNAL(clicked()),  eicWidget, SLOT(startSpectralAveraging()));
+//    connect(btnAverageSpectra,SIGNAL(clicked()),  eicWidget, SLOT(startSpectralAveraging()));
+
+    connect(btnEICFill, SIGNAL(toggled(bool)), eicWidget, SLOT(showEICFill(bool)));
+    connect(btnEICFill, SIGNAL(toggled(bool)), eicWidget, SLOT(replot()));
+
+    connect(btnEICDots, SIGNAL(toggled(bool)), eicWidget, SLOT(emphasizeEICPoints(bool)));
+    connect(btnEICDots, SIGNAL(toggled(bool)), eicWidget, SLOT(replot()));
+
+    connect(btnGroupPeaks, SIGNAL(toggled(bool)), eicWidget, SLOT(automaticPeakGrouping(bool)));
+    connect(btnGroupPeaks, SIGNAL(toggled(bool)), eicWidget, SLOT(groupPeaks()));
+    connect(btnGroupPeaks, SIGNAL(toggled(bool)), eicWidget, SLOT(replot()));
+
+    connect(btnBarPlot, SIGNAL(toggled(bool)), eicWidget, SLOT(showBarPlot(bool)));
+    connect(btnBarPlot, SIGNAL(toggled(bool)), eicWidget, SLOT(replot()));
+
+    connect(btnIsotopePlot, SIGNAL(toggled(bool)), eicWidget, SLOT(showIsotopePlot(bool)));
+    connect(btnIsotopePlot, SIGNAL(toggled(bool)), eicWidget, SLOT(replot()));
 
     QWidget *window = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout;
@@ -2500,7 +2674,7 @@ void MainWindow::changeUserAdduct() {
     Adduct*  adduct =  v.value<Adduct*>();
     if(adduct) {
         _ionizationMode = SIGN(adduct->charge);
-        cerr << "changeUserAdduct::" << adduct->name << endl;
+        qDebug() << "MainWindow::changeUserAdduct():" << QString(adduct->name.c_str());
         massCalcWidget->ionization->setValue(_ionizationMode);
 
         mzSlice& currentSlice = eicWidget->getMzSlice();
@@ -2517,7 +2691,7 @@ Adduct* MainWindow::getUserAdduct() {
     QVariant v = adductType->currentData();
     Adduct*  adduct =  v.value<Adduct*>();
     if(adduct) {
-        cerr << "getUserAdduct::" << adduct->name << endl;
+        qDebug() << "MainWindow::getUserAdduct()" << QString(adduct->name.c_str());
         return adduct;
     } else if (_ionizationMode > 0 ) {
         return MassCalculator::PlusHAdduct;
@@ -2559,4 +2733,39 @@ void MainWindow::updateAdductComboBox(vector<Adduct*> enabledAdducts) {
     }
 
     emit(updatedAvailableAdducts());
+}
+
+IsotopeParameters MainWindow::getIsotopeParameters(){
+
+    IsotopeParameters isotopeParameters;
+
+    isotopeParameters.ppm = static_cast<float>(_ppmWindow);
+    isotopeParameters.clsf = clsf;
+    isotopeParameters.adduct = getUserAdduct();
+
+    vector<mzSample*> visibleSamples = getVisibleSamples();
+    if (!visibleSamples.empty()){
+        isotopeParameters.avgScanTime = visibleSamples[0]->getAverageFullScanTime();
+    }
+
+    if (settings) {
+        isotopeParameters.maxIsotopeScanDiff  = settings->value("maxIsotopeScanDiff", 10).toDouble();
+        isotopeParameters.minIsotopicCorrelation  = settings->value("minIsotopicCorrelation", 0).toDouble();
+        isotopeParameters.maxNaturalAbundanceErr  = settings->value("maxNaturalAbundanceErr", 100).toDouble();
+        isotopeParameters.isC13Labeled   =  settings->value("C13Labeled", false).toBool();
+        isotopeParameters.isN15Labeled   =  settings->value("N15Labeled", false).toBool();
+        isotopeParameters.isS34Labeled   =  settings->value("S34Labeled", false).toBool();
+        isotopeParameters.isD2Labeled   =   settings->value("D2Labeled", false).toBool();
+        isotopeParameters.isIgnoreNaturalAbundance = settings->value("chkIgnoreNaturalAbundance", false).toBool();
+        isotopeParameters.isExtractNIsotopes = settings->value("chkExtractNIsotopes", false).toBool();
+        isotopeParameters.maxIsotopesToExtract = settings->value("spnMaxIsotopesToExtract", 5).toInt();
+        isotopeParameters.eic_smoothingWindow = static_cast<float>(settings->value("eic_smoothingWindow", 1).toDouble());
+        isotopeParameters.eic_smoothingAlgorithm = static_cast<EIC::SmootherType>(settings->value("eic_smoothingAlgorithm", 0).toInt());
+    } else {
+        qDebug() << "MainWindow::getIsotopeParameters(): Could not find saved program settings! using defaults.";
+    }
+
+    isotopeParameters.isotopeParametersType = IsotopeParametersType::FROM_GUI;
+
+    return isotopeParameters;
 }

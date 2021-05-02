@@ -18,6 +18,7 @@ class BarPlot;
 class BoxPlot;
 class IsotopePlot;
 class Note;
+class EicLine;
 
 class EicWidget : public QGraphicsView
 {
@@ -42,7 +43,7 @@ public slots:
     void zoom(float factor);
 
     void setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax);
-    void setMzSlice(const mzSlice& slice);
+    void setMzSlice(const mzSlice& slice, bool isUseSampleBoundsRT=true);
     void setSRMTransition(const SRMTransition& transition);
     void setRtWindow(float rtmin, float rtmax );
     void setSrmId(string srmId);
@@ -73,7 +74,7 @@ public slots:
     void print(QPaintDevice* printer);
     void showPeakArea(Peak*);
     void saveRetentionTime();
-    void setGallaryToEics();
+    void setGalleryToEics();
 
     void selectGroupNearRt(float rt);
     void eicToClipboard();
@@ -86,10 +87,11 @@ public slots:
     void showNotes(bool f) { _showNotes=f; }
     void showMergedEIC(bool f) { _showMergedEIC=f; }
     void showEICLines(bool f) { _showEICLines=f; }
+    void showEICFill(bool f) { _showEICLines=!f; }
     void automaticPeakGrouping(bool f) { _groupPeaks=f; }
     void showMS2Events(bool f) { _showMS2Events=f; }
     void disconnectCompounds(QString libraryName);
-
+    void emphasizeEICPoints(bool f) { _emphasizeEICPoints=f;}
 
     void startAreaIntegration() { toggleAreaIntegration(true); }
     void startSpectralAveraging() { toggleSpectraAveraging(true); }
@@ -111,6 +113,8 @@ public slots:
     void freezeView(bool freeze);
     void groupPeaks();
     void clearEICLines();
+    void clearPeakAreas();
+
 protected:
     void moved(QMouseEvent *event);
     void selected(const QRect&);
@@ -120,7 +124,7 @@ protected:
     void mousePressEvent(QMouseEvent * mouseEvent);
     void mouseMoveEvent(QMouseEvent * mouseEvent);
     void mouseDoubleClickEvent ( QMouseEvent * event );
-    void resizeEvent( QResizeEvent * ) { replot(NULL); }
+    void resizeEvent( QResizeEvent * ) { replot(nullptr); }
     void contextMenuEvent(QContextMenuEvent * event);
     void keyPressEvent( QKeyEvent *e );
     void timerEvent ( QTimerEvent * event );
@@ -179,6 +183,9 @@ private:
     bool _showBarPlot;
     bool _showBoxPlot;
 
+    //Issue 374
+    bool _emphasizeEICPoints;
+
     bool _frozen;
     int _freezeTime;
     int _timerId;
@@ -199,6 +206,7 @@ private:
     QGraphicsLineItem* _selectionLine;
 
     QVector<QGraphicsLineItem*> _focusLines;
+    vector<EicLine*> _peakAreas{};
 
     void showPeak(float freq, float amplitude);
     void computeEICs(bool isUseSampleBoundsRT=true);

@@ -7,11 +7,12 @@ using namespace Eigen;
 
 IsotopePlot::IsotopePlot(QGraphicsItem* parent, QGraphicsScene *scene)
     :QGraphicsItem(parent) {
-	_barwidth=10;
-	_mw=NULL;
-	_group=NULL;
-	if ( scene != NULL ) { _width = scene->width()*0.25; }
+    _barheight=10;
+    _mw=nullptr;
+    _group=nullptr;
+    if (scene) { _width = scene->width()*0.25; }
 	_height = 10;
+    _parameters = nullptr;
 }
 
 void IsotopePlot::setMainWindow(MainWindow* mw) { _mw = mw; }
@@ -24,37 +25,53 @@ void IsotopePlot::clear() {
             delete(child);
         }
     }
+    scene()->removeItem(_parameters);
+    if (_parameters) {
+        delete(_parameters);
+        _parameters = nullptr;
+    }
 }
 
 void IsotopePlot::setPeakGroup(PeakGroup* group) {
     //cerr << "IsotopePlot::setPeakGroup()" << group << endl;
 
-    if ( group == NULL ) return;
+    if (!_mw) return;
+    if (!group) return;
+    if (group->isIsotope()) return;
 
-    if (group->isIsotope() && group->getParent() ) {
-        setPeakGroup(group->getParent());
+    if (_group) {
+        delete(_group);
+        _group = nullptr;
     }
 
-    if ( isVisible() == true && group == _group) return;
-    _group = group;
+    _group = new PeakGroup(*group);
+
+    //Issue 402: try to use saved parameters, fall back to current GUI settings
+    IsotopeParameters isotopeParameters = group->isotopeParameters;
+    if (isotopeParameters.isotopeParametersType == IsotopeParametersType::INVALID) {
+        isotopeParameters = _mw->getIsotopeParameters();
+    }
+    _group->pullIsotopes(isotopeParameters);
+    _group->isotopeParameters = isotopeParameters;
+
+    clear(); //Issue 408: Ensure that plot is cleared before returning to prevent dangling pointers
+
+    if (_group->childCount() == 0) return; // Did not detect any isotopes
 
 	_samples.clear();
 	_samples = _mw->getVisibleSamples();
-	 sort(_samples.begin(), _samples.end(), mzSample::compSampleOrder);
+    if (_samples.empty()) return; // No visible samples
+
+     sort(_samples.begin(), _samples.end(), mzSample::compSampleOrder);
 
     _isotopes.clear();
-    for(int i=0; i < group->childCount(); i++ ) {
-        if (group->children[i].isIsotope() ) {
-            PeakGroup* isotope = &(group->children[i]);
+    for(unsigned int i=0; i < _group->childCount(); i++ ) {
+        if (_group->children[i].isIsotope() ) {
+            PeakGroup* isotope = &(_group->children[i]);
             _isotopes.push_back(isotope);
         }
     }
     std::sort(_isotopes.begin(), _isotopes.end(), PeakGroup::compC13);
-	/*
-	for(int i=0; i < _isotopes.size(); i++ )  {
-		cerr << _isotopes[i]->tagString <<  " " << _isotopes[i]->isotopeC13count << endl; 
-	}
-	*/
 
     showBars();
 }
@@ -68,7 +85,6 @@ QRectF IsotopePlot::boundingRect() const
 }
 
 void IsotopePlot::showBars() {
-    clear();
     if (_isotopes.size() == 0 ) return;
     if (_samples.size() == 0 ) return;
 
@@ -80,23 +96,34 @@ void IsotopePlot::showBars() {
 
     MatrixXf MM = _mw->getIsotopicMatrix(_group);
 
+    int parametersOffset = 0;
+
     if (scene()) {
-        _width =   scene()->width()*0.20;
-        _barwidth = scene()->height()*0.75/visibleSamplesCount;
-        if (_barwidth<3)  _barwidth=3;
-        if (_barwidth>15) _barwidth=15;
-        _height = visibleSamplesCount*_barwidth;
+
+        if (_isInLegendWidget) {
+            computeParameters();
+            parametersOffset = _parameters->boundingRect().height();
+
+            _barheight = 30; // TODO: configurable?
+            _height = visibleSamplesCount*_barheight + parametersOffset;
+            _width = 1.2*_parameters->boundingRect().width();
+
+        } else {
+            _width =   scene()->width()*0.20;
+            _barheight = scene()->height()*0.75/visibleSamplesCount;
+            if (_barheight<3)  _barheight=3;
+            if (_barheight>15) _barheight=15;
+            _height = visibleSamplesCount*_barheight;
+        }
+
     }
-
-    //qDebug() << "showBars: " << _width << " " << _height;
-
 
     for(int i=0; i<MM.rows(); i++ ) {		//samples
         float sum= MM.row(i).sum();
         if (sum == 0) continue;
         MM.row(i) /= sum;
 
-        double ycoord = _barwidth*i; 
+        double ycoord = _barheight*i + parametersOffset;
         double xcoord = 0;
 
         for(int j=0; j < MM.cols(); j++ ) {	//isotopes
@@ -107,7 +134,7 @@ void IsotopePlot::showBars() {
             QBrush brush(QColor::fromHsvF(h/20.0,1.0,1.0,1.0));
             IsotopeBar* rect = new IsotopeBar(this,scene());
             rect->setBrush(brush);
-            rect->setRect(xcoord,ycoord,length,_barwidth);
+            rect->setRect(xcoord,ycoord,length,_barheight);
 
             QString name = tr("%1 <br> %2 <b>%3\%</b>").arg(_samples[i]->sampleName.c_str(),
                                                             _isotopes[j]->tagString.c_str(),
@@ -115,9 +142,11 @@ void IsotopePlot::showBars() {
 
             rect->setData(0,QVariant::fromValue(name));
             rect->setData(1,QVariant::fromValue(_isotopes[j]));
+            rect->setData(2,QVariant::fromValue(_samples[i]));
 
             if(_mw) {
-                connect(rect,SIGNAL(groupSelected(PeakGroup*)),_mw, SLOT(setPeakGroup(PeakGroup*)));
+//                connect(rect,SIGNAL(groupSelected(PeakGroup*)),_mw, SLOT(setPeakGroup(PeakGroup*)));
+                connect(rect, SIGNAL(peakSelected(Peak*)), _mw, SLOT(showPeakInfo(Peak*)));
             }
             xcoord += length;
         }
@@ -151,7 +180,7 @@ void IsotopeBar::mousePressEvent (QGraphicsSceneMouseEvent*event) {}
 */
 
 
-void IsotopeBar::hoverEnterEvent (QGraphicsSceneHoverEvent*event) {
+void IsotopeBar::hoverEnterEvent (QGraphicsSceneHoverEvent *event) {
     QVariant v = data(0);
     QString note = v.value<QString>();
     if (note.length() == 0 ) return;
@@ -172,3 +201,80 @@ void IsotopeBar::keyPressEvent(QKeyEvent *e) {
     }
 }
 
+void IsotopeBar::mousePressEvent(QGraphicsSceneMouseEvent *event){
+
+    QVariant v = this->data(1);
+    PeakGroup *peakGroup = v.value<PeakGroup*>();
+
+    QVariant v2 = this->data(2);
+    mzSample *sample = v2.value<mzSample*>();
+
+    if (peakGroup && sample) {
+        Peak *peak = peakGroup->getPeak(sample);
+        if (peak) emit(peakSelected(peak));
+    }
+}
+
+void IsotopePlot::computeParameters() {
+
+    QString parameters("Isotope Parameters: ");
+
+    if (_group->isotopeParameters.isotopeParametersType == IsotopeParametersType::SAVED) {
+      parameters.append("SAVED<br>");
+    } else if (_group->isotopeParameters.isotopeParametersType == IsotopeParametersType::FROM_GUI) {
+      parameters.append("FROM GUI<br>");
+    }
+
+    parameters.append("Isotopes:");
+    bool isHasIsotopes = false;
+    if (_group->isotopeParameters.isC13Labeled){
+        if (isHasIsotopes) parameters.append(",");
+        parameters.append(" 13C");
+        isHasIsotopes = true;
+    }
+    if (_group->isotopeParameters.isD2Labeled) {
+        if (isHasIsotopes) parameters.append(",");
+        parameters.append(" D");
+        isHasIsotopes = true;
+    }
+    if (_group->isotopeParameters.isN15Labeled) {
+        if (isHasIsotopes) parameters.append(",");
+        parameters.append(" 15N");
+        isHasIsotopes = true;
+    }
+    if (_group->isotopeParameters.isS34Labeled) {
+        if (isHasIsotopes) parameters.append(",");
+        parameters.append(" 34S");
+        isHasIsotopes = true;
+    }
+
+    parameters.append("<br>M/z tol: ");
+    parameters.append(QString::number(static_cast<double>(_group->isotopeParameters.ppm), 'f', 0));
+    parameters.append(" ppm, RT tol: ");
+    parameters.append(QString::number(static_cast<int>(_group->isotopeParameters.maxIsotopeScanDiff)));
+    parameters.append(" scans");
+
+    parameters.append("<br>Min corr: ");
+    parameters.append(QString::number(_group->isotopeParameters.minIsotopicCorrelation, 'f', 2));
+    parameters.append(", extract");
+    if (_group->isotopeParameters.isExtractNIsotopes) {
+        parameters.append(" up to ");
+        parameters.append(QString::number(_group->isotopeParameters.maxIsotopesToExtract));
+    } else {
+        parameters.append(" unlimited");
+    }
+    parameters.append(" isotopes");
+
+    if (_group->isotopeParameters.isIgnoreNaturalAbundance) {
+        parameters.append("<br>Ignore if >= ");
+        parameters.append(QString::number(_group->isotopeParameters.maxNaturalAbundanceErr, 'f', 1));
+        parameters.append("% nat. abund. error");
+    }
+
+    //if previous value of _parameter is not null, clear() call above will delete and free memory
+    _parameters = new QGraphicsTextItem();
+
+    _parameters->setHtml(parameters);
+
+    scene()->addItem(_parameters);
+}

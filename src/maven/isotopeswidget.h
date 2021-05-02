@@ -33,19 +33,16 @@ public slots:
 	  void computeIsotopes(string f);
 	  void setPeakGroup(PeakGroup* group);
 	  void setCompound(Compound* compound);
-	  void setPeak(Peak* peak);
+      void unloadCompound(QString db);
 	  void setClipboard();
 	  void setClipboard(PeakGroup* group);
       void setClipboard(QList<PeakGroup*>& groups);
-	  void pullIsotopes(PeakGroup* group);
-	  Peak* getSamplePeak(PeakGroup* group, mzSample* sample);
 
 
 private slots:
       void showInfo();
       void showTable();
 	  QString groupTextEport(PeakGroup* group);
-	  float getIsotopeIntensity(float mz);
       void exportTableToSpreadsheet();
 
 private:
@@ -59,12 +56,13 @@ private:
 	  Compound*  _compound;
       Adduct* _adduct;
 
-	  BackgroundPeakUpdate* workerThread;
 	  MassCalculator mcalc;
 	  Compound* tempCompound;
 
      QString groupIsotopeMatrixExport(PeakGroup* group, bool includeSampleHeader);
      Adduct* getCurrentAdduct();
+
+     void rebuildTableFromPeakGroup(PeakGroup* group);
       
 };
 

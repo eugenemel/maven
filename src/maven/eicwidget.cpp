@@ -32,10 +32,11 @@ EicWidget::EicWidget(QWidget *p) {
     showIsotopePlot(false);
     showBarPlot(false); // Issue 94: Handled by EIC legend widget now
 	showBoxPlot(false);
-    automaticPeakGrouping(false); //Issue 331: switch from opt-out to opt-in peak grouping
+    automaticPeakGrouping(true);
     showMergedEIC(false);
     showEICLines(false);
     showMS2Events(true);
+    emphasizeEICPoints(false); //Issue 374
 
     //scene()->setItemIndexMethod(QGraphicsScene::NoIndex);
     scene()->setItemIndexMethod(QGraphicsScene::BspTreeIndex);
@@ -76,7 +77,6 @@ void EicWidget::mousePressEvent(QMouseEvent *event) {
 }
 
 void EicWidget::mouseReleaseEvent(QMouseEvent *event) {
-    blockEicPointSignals(true);
 
  //qDebug <<" EicWidget::mouseReleaseEvent(QMouseEvent *event)";
     QGraphicsView::mouseReleaseEvent(event);
@@ -107,7 +107,9 @@ void EicWidget::mouseReleaseEvent(QMouseEvent *event) {
 
         //minimum size for region to integrate is 0.01 seconds
         if(rtmax-rtmin> 0.01){
+            blockEicPointSignals(true);
             integrateRegion(rtmin, rtmax);
+            blockEicPointSignals(false);
         }
 
     } else if (_spectraAveraging || ( event->button() == Qt::LeftButton && event->modifiers() == Qt::ControlModifier) ) {
@@ -241,25 +243,18 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
         _integratedGroup->srmProductMz = _slice.srmProductMz;
     }
 
+    //select here and after bookmarking, b/c bookmarking might be canceled.
     setSelectedGroup(_integratedGroup);
 
     getMainWindow()->bookmarkPeakGroup(_integratedGroup);
     PeakGroup* lastBookmark = getMainWindow()->getBookmarkTable()->getLastBookmarkedGroup();
 
-    if (lastBookmark and lastBookmark->compound) {
-            qDebug() << "getMainWindow()->isotopeWidget->setPeakGroup(): " << lastBookmark;
-           getMainWindow()->isotopeWidget->setPeakGroup(lastBookmark);
-           setSelectedGroup(lastBookmark);
-
-    }
-
     if (lastBookmark) {
+        setSelectedGroup(lastBookmark);
         getMainWindow()->setClipboardToGroup(lastBookmark);
     }
 
     scene()->update();
-
-    blockEicPointSignals(false);
 }
 
 void EicWidget::mouseDoubleClickEvent(QMouseEvent* event){
@@ -312,6 +307,22 @@ void EicWidget::clearEICLines() {
         delete(_focusLine);
         _focusLine = nullptr;
     }
+}
+
+void EicWidget::clearPeakAreas() {
+    qDebug() << "EicWidget::clearPeakAreas()";
+
+    for (auto& item : _peakAreas) {
+        if (item) {
+            if (item->scene()) {
+                scene()->removeItem(item);
+            }
+        }
+        delete(item);
+        item = nullptr;
+    }
+    _peakAreas.clear();
+
 }
 
 void EicWidget::setFocusLine(float rt) {
@@ -586,7 +597,7 @@ void EicWidget::addEICLines(bool showSpline) {
         if (eic->size()==0) continue;
         if (eic->sample && eic->sample->isSelected == false) continue;
         if (eic->maxIntensity <= 0) continue;
-        EicLine* line = new EicLine(nullptr, scene());
+        EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
 
         //sample stacking..
         int zValue=0;
@@ -613,12 +624,13 @@ void EicWidget::addEICLines(bool showSpline) {
 
         if(_showEICLines) {
              brush.setStyle(Qt::NoBrush);
-            line->setFillPath(false);
+             line->setFillPath(false);
         } else {
              brush.setStyle(Qt::SolidPattern);
              line->setFillPath(true);
         }
 
+        line->setEmphasizePoints(_emphasizeEICPoints);
         line->setZValue(zValue);
         line->setEIC(eic);
         line->setBrush(brush);
@@ -649,7 +661,7 @@ void EicWidget::addCubicSpline() {
         if (eic->size()==0) continue;
         if (eic->sample != NULL && eic->sample->isSelected == false) continue;
         if (eic->maxIntensity <= 0) continue;
-        EicLine* line = new EicLine(0,scene());
+        EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
 
         //sample stacking..
         int zValue=0;
@@ -745,7 +757,7 @@ void EicWidget::addTicLine() {
 		EIC* tic = tics[i];
 		if (tic->size()==0) continue;
         if (tic->sample != NULL && tic->sample->isSelected == false) continue;
-                EicLine* line = new EicLine(0,scene());
+                EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
 		line->setEIC(tic);
 
 		_maxY = tic->maxIntensity;
@@ -786,7 +798,7 @@ void EicWidget::addMergedEIC() {
     int baseline_quantile =  settings->value("baseline_quantile").toInt();
 
 
-    EicLine* line = new EicLine(0,scene());
+    EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
 
     EIC* eic = EIC::eicMerge(eics);
     eic->setSmootherType((EIC::SmootherType) eic_smoothingAlgorithm);
@@ -821,7 +833,7 @@ void EicWidget::addBaseLine() {
         EIC* eic = eics[i];
         eic->computeBaseLine(baseline_smoothing,baseline_quantile);
         if (eic->size()==0) continue;
-        EicLine* line = new EicLine(0,scene());
+        EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
         line->setEIC(eic);
 
         float baselineSum=0;
@@ -857,7 +869,7 @@ void EicWidget::addBaseline(PeakGroup* group) {
     for( unsigned int i=0; i< eics.size(); i++ ) {
         EIC* eic = eics[i];
         if (eic->size()==0 or eic->baseline.size()==0) continue;
-        EicLine* line = new EicLine(0,scene());
+        EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
         line->setEIC(eic);
 
         float baselineSum=0;
@@ -886,28 +898,31 @@ void EicWidget::addBaseline(PeakGroup* group) {
 void EicWidget::showPeakArea(Peak* peak) {
  //qDebug <<" EicWidget::showPeakArea(Peak* peak)";
 
-    if (peak == NULL ) return;
-    if( peak->hasEIC()==false) return;
+    if (!peak) return;
+    if (!peak->hasEIC()) return;
 
     //make sure that this is not a dead pointer to lost eic
     bool matched=false;
     EIC* eic= peak->getEIC();
-    for(int i=0; i < eics.size(); i++) if (eics[i]== eic) {matched=true; break; }
+    for(unsigned int i=0; i < eics.size(); i++) if (eics[i]== eic) {matched=true; break; }
     if(!matched) return;
 
     //get points around the peak.
     vector<mzPoint>observed = eic->getIntensityVector(*peak);
     if(observed.size() == 0 ) return;
 
-    EicLine* line = new EicLine(0,scene());
+    EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
     line->setClosePath(true);
     for(int i=0; i < observed.size(); i++ ) {
         line->addPoint(QPointF( toX(observed[i].x), toY(observed[i].y)));
     }
-    QColor color = Qt::black;
+
+    QColor color = getMainWindow()->getBackgroundAdjustedBlack(getMainWindow()->getSpectraWidget());
     line->setColor(color);
     QBrush brush(color,Qt::CrossPattern);
     line->setBrush(brush);
+
+    _peakAreas.push_back(line);
 
     //QPen pen(Qt::black,Qt::SolidLine);
     //pen.setWidth(3);
@@ -941,6 +956,7 @@ void EicWidget::clearPlot() {
 	if(_boxplot && _boxplot->scene()) { _boxplot->clear(); scene()->removeItem(_boxplot);  }
 	if(_selectionLine && _selectionLine->scene()) {scene()->removeItem(_selectionLine); }
 	if(_statusText && _statusText->scene()) { scene()->removeItem(_statusText); }
+    clearPeakAreas();
     clearEICLines();
 	scene()->clear();
     scene()->setSceneRect(10,10,this->width()-10, this->height()-10);
@@ -1210,23 +1226,41 @@ void EicWidget::addBarPlot(PeakGroup* group ) {
 }
 
 void EicWidget::addIsotopicPlot(PeakGroup* group) {
- //qDebug <<" EicWidget::addIsotopicPlot(PeakGroup* group)";
-    if (group == NULL)  return;
-    if (_isotopeplot == NULL) _isotopeplot = new IsotopePlot(0,scene());
-    if (_isotopeplot->scene() != scene() ) scene()->addItem(_isotopeplot);
-    _isotopeplot->hide();
+    qDebug() << "EicWidget::addIsotopicPlot(PeakGroup* group): group=" << group;
 
-    if (group->childCount() == 0) return;
+    if (!group)  return;
 
-    vector <mzSample*> samples = getMainWindow()->getVisibleSamples();
-    if (samples.size() == 0 ) return;
+    //right-click plot in view
+    if (_showIsotopePlot) {
 
-    _isotopeplot->setPos(scene()->width()*0.10,scene()->height()*0.10);
-    _isotopeplot->setZValue(1000);
-    _isotopeplot->setMainWindow(getMainWindow());
-    _isotopeplot->setPeakGroup(group);
-    _isotopeplot->show();
-    return;
+        if (!_isotopeplot){
+            _isotopeplot = new IsotopePlot(nullptr, scene());
+        }
+
+        if (_isotopeplot->scene() != scene() ) scene()->addItem(_isotopeplot);
+
+        _isotopeplot->hide();
+
+        vector <mzSample*> samples = getMainWindow()->getVisibleSamples();
+        if (samples.empty()) return;
+
+        _isotopeplot->setPos(scene()->width()*0.10,scene()->height()*0.10);
+        _isotopeplot->setZValue(1000);
+        _isotopeplot->setMainWindow(getMainWindow());
+        _isotopeplot->setPeakGroup(group);
+        _isotopeplot->show();
+    }
+
+    //dedicated legend widget
+    if (getMainWindow()->isotopeLegendWidget && getMainWindow()->isotopeLegendDockWidget->isVisible()) {
+
+       getMainWindow()->isotopeLegendWidget->hide();
+
+       getMainWindow()->isotopeLegendWidget->setPeakGroup(group);
+
+       getMainWindow()->isotopeLegendWidget->show();
+
+    }
 }
 
 void EicWidget::addBoxPlot(PeakGroup* group) {
@@ -1303,7 +1337,7 @@ void EicWidget::addFitLine(PeakGroup* group) {
 		}
 
 		//for(int i=0; i < x.size(); i++ ) x[i]=p.rtmin+(i*rtStep);
-                EicLine* line = new EicLine(0,scene());
+                EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
 		for(int i=0; i < y.size(); i++ ) {
 			line->addPoint(QPointF( toX(x[i]), toY(y[i])));
 		}
@@ -1432,8 +1466,7 @@ void EicWidget::zoom(float factor) {
 }
 
 MainWindow* EicWidget::getMainWindow() {  
-// //qDebug <<"EicWidget::getMainWindow() ";  
-	return (MainWindow*) parent; 
+    return static_cast<MainWindow*>(parent);
 }
 
 void EicWidget::setRtWindow(float rtmin, float rtmax ) {
@@ -1522,11 +1555,11 @@ void EicWidget::setCompound(Compound* c, Adduct* adduct) {
 
 }
 
-void EicWidget::setMzSlice(const mzSlice& slice) {
+void EicWidget::setMzSlice(const mzSlice& slice, bool isUseSampleBoundsRT) {
     qDebug() << "EicWidget::setmzSlice()";
     _slice = mzSlice(slice);
 
-    recompute();
+    recompute(isUseSampleBoundsRT);
     //TODO: don't recompute if not necessary.
 
     replot(nullptr);
@@ -1655,8 +1688,8 @@ void EicWidget::setMzSlice(float mz){
      //qDebug() << "EicWidget::setMzSlice()" << setprecision(8) << mz << endl;
 	mzSlice x (_slice.mzmin,_slice.mzmax,_slice.rtmin,_slice.rtmax);
 	x.mz = mz;
-	x.mzmin = mz - mz/1e6*getMainWindow()->getUserPPM();
-    x.mzmax = mz + mz/1e6*getMainWindow()->getUserPPM();
+    x.mzmin = mz - mz/1e6f*static_cast<float>(getMainWindow()->getUserPPM());
+    x.mzmax = mz + mz/1e6f*static_cast<float>(getMainWindow()->getUserPPM());
     x.compound = nullptr;
 	setMzSlice(x);
 }
@@ -1680,10 +1713,12 @@ void EicWidget::groupPeaks() {
     EIC::removeLowRankGroups(peakgroups,50);
 
     for (auto& pg : peakgroups) {
+
         if (_slice.compound) {pg.compound = _slice.compound;}
         if (_slice.adduct) { pg.adduct= _slice.adduct;}
         if (!_slice.srmId.empty()) {pg.srmId = _slice.srmId;}
-        if (!_slice.isSrmTransitionSlice()) {
+
+        if (_slice.isSrmTransitionSlice()) {
             pg.srmPrecursorMz = _slice.srmPrecursorMz;
             pg.srmProductMz = _slice.srmProductMz;
             pg.setType(PeakGroup::GroupType::SRMTransitionType);
@@ -1763,19 +1798,28 @@ void EicWidget::contextMenuEvent(QContextMenuEvent * event) {
     QAction* o34 = menu.addAction("Show EICs as Lines");
     o34->setCheckable(true);
     o34->setChecked(_showEICLines);
+    connect(o34, SIGNAL(toggled(bool)), getMainWindow(), SLOT(toggleFilledEICs(bool)));
     connect(o34, SIGNAL(toggled(bool)), SLOT(showEICLines(bool)));
     connect(o34, SIGNAL(toggled(bool)), SLOT(replot()));
 
+    QAction* oEmphasizePoints = menu.addAction("Show Scans as Dots");
+    oEmphasizePoints->setCheckable(true);
+    oEmphasizePoints->setChecked(_emphasizeEICPoints);
+    connect(oEmphasizePoints, SIGNAL(toggled(bool)), getMainWindow()->btnEICDots, SLOT(setChecked(bool)));
+    connect(oEmphasizePoints, SIGNAL(toggled(bool)), SLOT(emphasizeEICPoints(bool)));
+    connect(oEmphasizePoints, SIGNAL(toggled(bool)), SLOT(replot()));
 
     QAction* o5 = menu.addAction("Show Bar Plot");
     o5->setCheckable(true);
     o5->setChecked(_showBarPlot);
+    connect(o5, SIGNAL(toggled(bool)), getMainWindow()->btnBarPlot, SLOT(setChecked(bool)));
     connect(o5, SIGNAL(toggled(bool)), SLOT(showBarPlot(bool)));
     connect(o5, SIGNAL(toggled(bool)), SLOT(replot()));
 
     QAction* o6 = menu.addAction("Show Isotope Plot");
     o6->setCheckable(true);
     o6->setChecked(_showIsotopePlot);
+    connect(o6, SIGNAL(toggled(bool)), getMainWindow()->btnIsotopePlot, SLOT(setChecked(bool)));
     connect(o6, SIGNAL(toggled(bool)), SLOT(showIsotopePlot(bool)));
     connect(o6, SIGNAL(toggled(bool)), SLOT(replot()));
 
@@ -1795,6 +1839,7 @@ void EicWidget::contextMenuEvent(QContextMenuEvent * event) {
     o9->setCheckable(true);
     o9->setChecked(_groupPeaks);
     connect(o9, SIGNAL(toggled(bool)), SLOT(automaticPeakGrouping(bool)));
+    connect(o9, SIGNAL(toggled(bool)), getMainWindow()->btnGroupPeaks, SLOT(setChecked(bool)));
     connect(o9, SIGNAL(toggled(bool)), SLOT(groupPeaks()));
     connect(o9, SIGNAL(toggled(bool)), SLOT(replot()));
 
@@ -1859,9 +1904,12 @@ void EicWidget::selectGroupNearRt(float rt) {
 }
 
 void EicWidget::setSelectedGroup(PeakGroup* group) {
-   qDebug() <<"EicWidget::setSelectedGroup(PeakGroup* group) group=" << group;
+
+    qDebug() << "EicWidget::setSelectedGroup(PeakGroup* group) group=" << group;
 
     if (_frozen || !group) return;
+
+    qDebug() << "EicWidget::setSelectedGroup(PeakGroup* group) group type=" << group->type();
 
     if (_showBarPlot){
         addBarPlot(group);
@@ -1871,7 +1919,7 @@ void EicWidget::setSelectedGroup(PeakGroup* group) {
         getMainWindow()->barPlotWidget->setPeakGroup(group);
     }
 
-	if (_showIsotopePlot) addIsotopicPlot(group);
+    addIsotopicPlot(group);
     if (_showBoxPlot)     addBoxPlot(group);
 
     addBaseline(group);
@@ -1891,12 +1939,20 @@ void EicWidget::setSelectedGroup(PeakGroup* group) {
         qDebug() << "EicWidget::setSelectedGroup() group->adduct= nullptr";
     }
 
+    if (getMainWindow()->isotopeWidget->isVisible()) {
+        if (group->type() == PeakGroup::IsotopeType && group->parent != nullptr){
+            getMainWindow()->isotopeWidget->setPeakGroup(group->parent);
+        } else {
+            getMainWindow()->isotopeWidget->setPeakGroup(group);
+        }
+    }
+
     _selectedGroup = *group;
 
     qDebug() <<"EicWidget::setSelectedGroup(PeakGroup* group) group=" << group << "completed";
 }
 
-void EicWidget::setGallaryToEics() {
+void EicWidget::setGalleryToEics() {
 
     if(getMainWindow()->galleryDockWidget->isVisible()) {
         getMainWindow()->galleryWidget->addIdividualEicPlots(eics,getSelectedGroup());

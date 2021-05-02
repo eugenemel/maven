@@ -13,7 +13,6 @@
 #include "mzSample.h"
 #include "parallelMassSlicer.h"
 #include "database.h"
-#include "classifier.h"
 #include "classifierNeuralNet.h"
 #include "directinfusionprocessor.h"
 

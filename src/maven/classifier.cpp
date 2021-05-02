@@ -1,4 +1,5 @@
-#include "classifier.h"
+#include "mzSample.h"
+#include <nnwork.h>
 
 Classifier::Classifier() {}
 Classifier::~Classifier() {} 

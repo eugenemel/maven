@@ -34,6 +34,7 @@
 #include "setrumsdbdialog.h"
 #include "samplebarplotwidget.h"
 #include "Peptide.h"
+#include "isotopelegendwidget.h"
 
 class SettingsForm;
 class EicWidget;
@@ -72,6 +73,7 @@ class LibraryMangerDialog;
 class SampleBarPlotWidget;
 class SetRumsDBDialog;
 class SRMTransition;
+class IsotopeLegendWidget;
 
 extern Database DB; 
 
@@ -125,6 +127,7 @@ public:
     QDockWidget		 *treeMapDockWidget;
     QDockWidget	 	 *galleryDockWidget;
     QDockWidget      *barPlotDockWidget;
+    QDockWidget      *isotopeLegendDockWidget;
     LogWidget            *logWidget;
     NotesWidget		 *notesDockWidget;
     ProjectDockWidget    *projectDockWidget;
@@ -137,6 +140,7 @@ public:
     ScatterPlot		 *scatterplot;
     TreeMap		 *treemap;
     SampleBarPlotWidget     *barPlotWidget;
+    IsotopeLegendWidget *isotopeLegendWidget;
 
     SettingsForm   *settingsForm;
     PeakDetectionDialog *peakDetectionDialog;
@@ -174,6 +178,12 @@ public:
 
     QColor getBackgroundAdjustedBlack(QWidget* widget);
     QToolButton *btnLibrary = nullptr;
+    QToolButton *btnGroupPeaks = nullptr;
+    QToolButton *btnEICFill = nullptr;
+    QToolButton *btnEICDots = nullptr;
+    QToolButton *btnBarPlot = nullptr;
+    QToolButton *btnIsotopePlot = nullptr;
+    IsotopeParameters getIsotopeParameters();
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -183,6 +193,7 @@ protected:
 public slots:
     QDockWidget* createDockWidget(QString title, QWidget* w);
     void showPeakInfo(Peak*);
+    void showScanInfo(Scan*);
     void setProgressBar(QString, int step, int totalSteps);
     void setStatusText(QString text = QString::null);
     void setMzValue();
@@ -259,6 +270,12 @@ public slots:
     void deleteAllPeakTables();
     BackgroundPeakUpdate* newWorkerThread(QString funcName);
     QWidget* eicWidgetController();
+
+    //Issue 376
+    void unsetLastSelectedPeakGroup(){_lastSelectedPeakGroup = nullptr;}
+
+    //Issue 400
+    void toggleFilledEICs(bool isShowEICLines){if (btnEICFill) btnEICFill->setChecked(!isShowEICLines);}
 
 private slots:
     void createMenus();

@@ -1,6 +1,6 @@
 #include "line.h"
 
-EicLine::EicLine(QGraphicsItem* parent, QGraphicsScene *scene):QGraphicsItem(parent)
+EicLine::EicLine(QGraphicsItem* parent, QGraphicsScene *scene, MainWindow* mainwindow): QGraphicsItem(parent)
 {
     setHighlighted(false);
     setAcceptHoverEvents(false);
@@ -14,6 +14,8 @@ EicLine::EicLine(QGraphicsItem* parent, QGraphicsScene *scene):QGraphicsItem(par
     _emphasizePoints = false;
 
     if(scene) scene->addItem(this);
+
+    _mainwindow = mainwindow;
 }
 
 QRectF EicLine::boundingRect() const
@@ -36,14 +38,22 @@ void EicLine::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
     	painter->setPen(pen);
     }
 
-    if (_fillPath) painter->drawPolygon(_line);
-    //else painter->drawPolyline(_line);
-    else painter->drawLines(_line);
+    //Issue 374: User intuition is to always show polygon
+    painter->drawPolygon(_line);
+
+//    if (_fillPath) painter->drawPolygon(_line);
+//    //else painter->drawPolyline(_line);
+//    else painter->drawLines(_line);
 
     if (_emphasizePoints) {
 
-        painter->setPen(QPen(Qt::black));//TODO: dark mode
-        painter->setBrush(QBrush(Qt::black));//TODO: dark mode
+        if (_mainwindow) {
+            painter->setPen(QPen(_mainwindow->getBackgroundAdjustedBlack(_mainwindow->spectraWidget)));
+            painter->setBrush(QBrush(_mainwindow->getBackgroundAdjustedBlack(_mainwindow->spectraWidget)));
+        } else {
+            painter->setPen(QPen(Qt::black));
+            painter->setBrush(QBrush(Qt::black));
+        }
 
         int paintDiameter = 5;
 
