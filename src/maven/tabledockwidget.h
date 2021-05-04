@@ -140,7 +140,7 @@ private:
 	  void readPeakXML(QXmlStreamReader& xml,PeakGroup* parent);
 
          MainWindow* _mainwindow;
-         std::vector<PeakGroup>allgroups;
+         std::vector<PeakGroup*>allgroups{};
          std::multimap<PeakGroup*, QTreeWidgetItem*> groupToItem = {};
 
           TrainDialog* traindialog;

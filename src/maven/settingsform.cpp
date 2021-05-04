@@ -119,15 +119,22 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
 
 }
 
-void SettingsForm::recomputeIsotopes() { 
+void SettingsForm::recomputeIsotopes() {
+    qDebug() << "SettingsForm::recomputeIsotopes()";
     getFormValues();
     if (!mainwindow) return;
 
-    //update isotope plot in EICview
+    //update isotope plot in EIC View
     if (mainwindow->getEicWidget()->isVisible()) {
-        PeakGroup* group =mainwindow->getEicWidget()->getSelectedGroup();
-        cerr << "recomputeIsotopes() " << group << endl;
-        mainwindow->isotopeWidget->setPeakGroup(group);
+
+        PeakGroup* group = mainwindow->getEicWidget()->getSelectedGroup();
+        qDebug() << "SettingsForm::recomputeIsotopes() group=" << group;
+
+        //Issue 410: invalidate isotope parameters to trigger re-rendering
+        group->isotopeParameters.isotopeParametersType = IsotopeParametersType::INVALID;
+
+        mainwindow->getEicWidget()->setSelectedGroup(group);
+
     }
 }
 

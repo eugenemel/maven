@@ -50,6 +50,7 @@ public slots:
                     void toggleOverlayLabels();
                     void toggleDisplayFullTitle();
                     void toggleDisplayCompoundId();
+                    void toggleDisplayHighPrecisionMz();
                     void clearOverlayAndReplot();
 
                     inline void setMs3MatchingTolerance(float tolr){_ms3MatchingTolr=tolr;}
@@ -71,6 +72,7 @@ public slots:
                     map<mzSample*,unordered_set<int>> _sampleScanMap = {};
                     bool _isDisplayFullTitle=false;
                     bool _isDisplayCompoundId=false;
+                    bool _isDisplayHighPrecisionMz=false;
 
                     vector<mzLink> links;
                     bool  _drawXAxis;

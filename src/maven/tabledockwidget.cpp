@@ -618,9 +618,9 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
 
 bool TableDockWidget::hasPeakGroup(PeakGroup* group) {
     for(unsigned int i=0; i < allgroups.size(); i++ ) {
-        if ( allgroups[i] == *group ) return true;
-        if (static_cast<double>(std::abs(group->meanMz - allgroups[i].meanMz)) < 1e-5 &&
-                static_cast<double>(std::abs(group->meanRt-allgroups[i].meanRt)) < 1e-5
+        if ( allgroups[i] == group ) return true;
+        if (static_cast<double>(std::abs(group->meanMz - allgroups[i]->meanMz)) < 1e-5 &&
+                static_cast<double>(std::abs(group->meanRt-allgroups[i]->meanRt)) < 1e-5
             ) {
             return true;
         }
@@ -671,15 +671,18 @@ PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, boo
 //         << group->ms2EventCount
 //         << endl;
 
-    allgroups.push_back(*group);
+    //Issue 377, 409: avoid address changes from vector.push_back()
+    //these tabledockwidget PeakGroup* objects persist forever, even after the table has been deleted
+    //TODO: consider deleting PeakGroup* when not needed any longer
+    PeakGroup *permanentGroup = new PeakGroup(*group);
+
+    allgroups.push_back(permanentGroup);
 
     if (isDeletePeakGroupPtr){
        //qDebug() << "TableDockWidget::addPeakGroup() Deleting group: " << group;
        delete(group);
        group = nullptr;
     }
-
-    PeakGroup* g = &allgroups[allgroups.size()-1];
 
     //debugging for Issues 277, 235
 //    qDebug() << "TableDockWidget::addPeakGroup() group=" << g;
@@ -693,7 +696,7 @@ PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, boo
         showAllGroups();
     }
 
-    return g;
+    return permanentGroup;
 }
 
 void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation *directInfusionGroupAnnotation, int clusterNum) {
@@ -715,8 +718,8 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation 
             directInfusionGroupAnnotation->precMzMax = theoMz + 0.5f;
         }
 
-        PeakGroup pg;
-        pg.metaGroupId = clusterNum;
+        PeakGroup *pg = new PeakGroup();
+        pg->metaGroupId = clusterNum;
 
         unsigned int peakCounter = 1;
         float maxRt = 0;
@@ -751,7 +754,7 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation 
             p.peakAreaCorrected = p.peakIntensity;
             p.peakArea = p.peakIntensity;
 
-            pg.addPeak(p);
+            pg->addPeak(p);
 
             peakCounter++;
 
@@ -759,29 +762,29 @@ void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation 
 
         }
 
-        pg.compound = compound;
-        pg.compoundDb = compound->db;
-        pg.compoundId = compound->id;
+        pg->compound = compound;
+        pg->compoundDb = compound->db;
+        pg->compoundId = compound->id;
 
-        pg.adduct = adduct;
-        pg.minMz = directInfusionGroupAnnotation->precMzMin;
-        pg.maxMz = directInfusionGroupAnnotation->precMzMax;
-        pg.meanMz = theoMz;
-        pg.minRt = 0;
-        pg.maxRt = maxRt;
+        pg->adduct = adduct;
+        pg->minMz = directInfusionGroupAnnotation->precMzMin;
+        pg->maxMz = directInfusionGroupAnnotation->precMzMax;
+        pg->meanMz = theoMz;
+        pg->minRt = 0;
+        pg->maxRt = maxRt;
 
         if (directInfusionGroupAnnotation->fragmentationPattern && directInfusionGroupAnnotation->fragmentationPattern->consensus) {
-            pg.fragmentationPattern = directInfusionGroupAnnotation->fragmentationPattern->consensus;
+            pg->fragmentationPattern = directInfusionGroupAnnotation->fragmentationPattern->consensus;
         }
 
-        pg.fragMatchScore = directInfusionMatchData->fragmentationMatchScore;
-        pg.fragMatchScore.mergedScore = pg.fragMatchScore.numMatches;
+        pg->fragMatchScore = directInfusionMatchData->fragmentationMatchScore;
+        pg->fragMatchScore.mergedScore = pg->fragMatchScore.numMatches;
 
-        pg.groupRank = directInfusionMatchData->proportion;
+        pg->groupRank = directInfusionMatchData->proportion;
 
         //avoid writing random junk to table
-        pg.maxNoNoiseObs = 0;
-        pg.maxQuality = 0;
+        pg->maxNoNoiseObs = 0;
+        pg->maxQuality = 0;
 
         allgroups.push_back(pg);
     }
@@ -798,7 +801,7 @@ void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation, int cluster
     if (!ms3Annotation) return;
 
     //the main group
-    PeakGroup pg;
+    PeakGroup *pg = new PeakGroup();
     //pg.metaGroupId = clusterNum;
 
     int maxNumMs3Matches = 0;
@@ -812,9 +815,9 @@ void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation, int cluster
 
         Ms3SingleSampleMatch *ms3SingleSampleMatch = it->second;
 
-        if (!pg.compound){
+        if (!pg->compound){
 
-            pg.compound = ms3SingleSampleMatch->ms3Compound->baseCompound;
+            pg->compound = ms3SingleSampleMatch->ms3Compound->baseCompound;
 
             ms3Compound = ms3SingleSampleMatch->ms3Compound;
 
@@ -840,16 +843,16 @@ void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation, int cluster
         p.rtmin = 0;
         p.rtmax = FLT_MAX;
 
-        p.peakMz = pg.compound->precursorMz;
-        p.baseMz = pg.compound->precursorMz;
-        p.mzmin = pg.compound->precursorMz - 0.5f; //TODO
-        p.mzmax = pg.compound->precursorMz + 0.5f; //TODO
+        p.peakMz = pg->compound->precursorMz;
+        p.baseMz = pg->compound->precursorMz;
+        p.mzmin = pg->compound->precursorMz - 0.5f; //TODO
+        p.mzmax = pg->compound->precursorMz + 0.5f; //TODO
 
         if (it->second->numMs3MzMatches > maxNumMs3Matches){
             maxNumMs3Matches = it->second->numMs3MzMatches;
         }
 
-        pg.addPeak(p);
+        pg->addPeak(p);
 
         for (auto it2 = ms3SingleSampleMatch->sumMs3IntensityByMs2Mz.begin(); it2 != ms3SingleSampleMatch->sumMs3IntensityByMs2Mz.end(); ++it2) {
 
@@ -892,8 +895,8 @@ void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation, int cluster
     }
 
     //avoid writing random junk to table
-    pg.groupRank = 0;
-    pg.fragMatchScore.mergedScore = maxNumMs3Matches;
+    pg->groupRank = 0;
+    pg->fragMatchScore.mergedScore = maxNumMs3Matches;
 
     for (auto it = childrenPeakGroupsByPrecMs2Mz.begin(); it != childrenPeakGroupsByPrecMs2Mz.end(); ++it){
 
@@ -902,13 +905,13 @@ void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation, int cluster
         stringstream s;
         s << std::fixed << setprecision(0)
           << "target: ("
-          << pg.compound->precursorMz
+          << pg->compound->precursorMz
           << ", "
           << mzUtils::intKeyToMz(it->first)
           << ")";
 
         child.tagString = s.str();
-        pg.addChild(child);
+        pg->addChild(child);
     }
 
     // qDebug() << "TableDockWidget::addMs3Annotation():" << groupTagString(&pg);
@@ -924,8 +927,8 @@ void TableDockWidget::addMs3Annotation(Ms3Annotation* ms3Annotation, int cluster
 
 QList<PeakGroup*> TableDockWidget::getAllGroups() {
     QList<PeakGroup*> groups;
-    for(int i=0; i < allgroups.size(); i++ ) {
-        groups.push_back(&allgroups[i]);
+    for(unsigned int i=0; i < allgroups.size(); i++ ) {
+        groups.push_back(allgroups[i]);
     }
     return groups;
 }
@@ -989,8 +992,8 @@ void TableDockWidget::showAllGroups() {
 
     QMap<int,QTreeWidgetItem*> parents;
     for(unsigned int i=0; i < allgroups.size(); i++ ) {
-        int metaGroupId  = allgroups[i].metaGroupId;
-        if (metaGroupId && allgroups[i].meanMz > 0 && allgroups[i].peakCount()>0) {
+        int metaGroupId  = allgroups[i]->metaGroupId;
+        if (metaGroupId && allgroups[i]->meanMz > 0 && allgroups[i]->peakCount()>0) {
 
             QTreeWidgetItem* parent = nullptr;
             if (!parents.contains(metaGroupId)) {
@@ -1006,7 +1009,7 @@ void TableDockWidget::showAllGroups() {
                     }
                     parents[metaGroupId]->setText(0,clusterString);
 
-                    parents[metaGroupId]->setText(3,QString::number(allgroups[i].meanRt,'f',2));
+                    parents[metaGroupId]->setText(3,QString::number(allgroups[i]->meanRt,'f',2));
                     parents[metaGroupId]->setExpanded(true);
                     parent = parents[metaGroupId];
                 }
@@ -1014,9 +1017,9 @@ void TableDockWidget::showAllGroups() {
                 parent = parents[metaGroupId];
             }
 
-            addRow(&allgroups[i], parent); 
+            addRow(allgroups[i], parent);
         } else {
-            addRow(&allgroups[i], nullptr);
+            addRow(allgroups[i], nullptr);
         }
     }
 
@@ -1331,7 +1334,7 @@ void TableDockWidget::showLastGroup() {
 
 PeakGroup* TableDockWidget::getLastBookmarkedGroup() {
     if (allgroups.size() > 0) {
-        return &(allgroups.back());
+        return allgroups.back();
     } else {
         return nullptr;
     }
@@ -1367,7 +1370,7 @@ void TableDockWidget::Train() {
     MTRand mtrand;
 
     for(int i=0; i <allgroups.size(); i++ ) {
-        PeakGroup* grp = &allgroups[i];
+        PeakGroup* grp = allgroups[i];
         if (grp->isGroupGood()) good_groups.push_back(grp);
         if (grp->isGroupBad()) bad_groups.push_back(grp);
     }
@@ -1437,10 +1440,10 @@ void TableDockWidget::updateStatus() {
     int totalCount=0;
     int goodCount=0;
     int badCount=0;
-    for(auto &g : allgroups) {
-        if (g.isGroupGood()){
+    for(auto g : allgroups) {
+        if (g->isGroupGood()){
             goodCount++;
-        } else if (g.isGroupBad()) {
+        } else if (g->isGroupBad()) {
             badCount++;
         }
         totalCount++;
@@ -1683,9 +1686,9 @@ void TableDockWidget::saveModel() {
 
     if (clsf) {
         vector<PeakGroup*>groups;
-        for(int i=0; i < allgroups.size(); i++ )
-            if(allgroups[i].isGroupGood()|| allgroups[i].isGroupBad())
-                groups.push_back(&allgroups[i]);
+        for(unsigned int i=0; i < allgroups.size(); i++ )
+            if(allgroups[i]->isGroupGood()|| allgroups[i]->isGroupBad())
+                groups.push_back(allgroups[i]);
         clsf->saveFeatures(groups,fileName.toStdString() + ".csv");
     }
 }
@@ -1695,12 +1698,12 @@ void TableDockWidget::findMatchingCompounds() {
     //matching compounds
     float ppm = _mainwindow->getUserPPM();
     float ionizationMode = _mainwindow->getIonizationMode();
-    for(int i=0; i < allgroups.size(); i++ ) {
-        PeakGroup& g = allgroups[i];
-        vector<MassCalculator::Match> matches = DB.findMatchingCompounds(g.meanMz,ppm,ionizationMode);
+    for(unsigned int i=0; i < allgroups.size(); i++ ) {
+        PeakGroup *g = allgroups[i];
+        vector<MassCalculator::Match> matches = DB.findMatchingCompounds(g->meanMz,ppm,ionizationMode);
         foreach(auto& m, matches) {
-            g.compound = m.compoundLink;
-            g.adduct   = m.adductLink;
+            g->compound = m.compoundLink;
+            g->adduct   = m.adductLink;
         }
     }
     updateTable();
@@ -1785,7 +1788,7 @@ void TableDockWidget::writePeakTableXML(QXmlStreamWriter& stream) {
 
     if (allgroups.size() ) {
         stream.writeStartElement("PeakGroups");
-        for(int i=0; i < allgroups.size(); i++ ) writeGroupXML(stream,&allgroups[i]);
+        for(unsigned int i=0; i < allgroups.size(); i++ ) writeGroupXML(stream, allgroups[i]);
         stream.writeEndElement();
     }
 }
@@ -1793,7 +1796,7 @@ void TableDockWidget::writePeakTableXML(QXmlStreamWriter& stream) {
 void TableDockWidget::align() { 
     if ( allgroups.size() > 0 ) {
         vector<PeakGroup*> groups;
-        for(int i=0; i <allgroups.size(); i++ ) groups.push_back(&allgroups[i]);
+        for(unsigned int i=0; i <allgroups.size(); i++ ) groups.push_back(allgroups[i]);
         Aligner aligner;
         aligner.setMaxItterations(_mainwindow->alignmentDialog->maxItterations->value());
         aligner.setPolymialDegree(_mainwindow->alignmentDialog->polynomialDegree->value());
@@ -2010,12 +2013,12 @@ void TableDockWidget::loadPeakTableXML(QString fileName) {
             if (xml.name()=="PeakGroup") { if(group) group->groupStatistics(); group  = NULL; }
         }
     }
-    for(int i=0; i < allgroups.size(); i++ ) allgroups[i].groupStatistics();
+    for(unsigned int i=0; i < allgroups.size(); i++ ) allgroups[i]->groupStatistics();
     showAllGroups();
 }
 
 void TableDockWidget::clearClusters() {
-    for(unsigned int i=0; i<allgroups.size(); i++) allgroups[i].metaGroupId=0;
+    for(unsigned int i=0; i<allgroups.size(); i++) allgroups[i]->metaGroupId=0;
     showAllGroups();
 }
 
@@ -2032,14 +2035,14 @@ void TableDockWidget::clusterGroups() {
     double ppm	= _mainwindow->getUserPPM();
 
     //clear cluster information
-    for(unsigned int i=0; i<allgroups.size(); i++) allgroups[i].metaGroupId=0;
+    for(unsigned int i=0; i<allgroups.size(); i++) allgroups[i]->metaGroupId=0;
 
     vector<mzSample*> samples = _mainwindow->getSamples();
 
     //run clustering
     PeakGroup::clusterGroups(allgroups,samples,maxRtDiff,minSampleCorrelation,minRtCorrelation,ppm);
 
-    _mainwindow->setProgressBar("Clustering., done!",allgroups.size(),allgroups.size());
+    _mainwindow->setProgressBar("Clustering done!",allgroups.size(),allgroups.size());
     showAllGroups();
 }
 
@@ -2069,8 +2072,8 @@ void TableDockWidget::showFocusedGroups() {
 }
 
 void TableDockWidget::clearFocusedGroups() {
-    for(int i=0; i< allgroups.size();i++) {
-        allgroups[i].isFocused=false;
+    for(unsigned int i=0; i< allgroups.size();i++) {
+        allgroups[i]->isFocused=false;
     }
 }
 
@@ -2266,13 +2269,13 @@ void TableDockWidget::traverseAndSetVisibleState(QTreeWidgetItem *item, bool isV
 
 void TableDockWidget::rescoreFragmentation() {
     float ppm=20.0;
-    for(PeakGroup& grp: allgroups) {
-        if(grp.compound) {
-            grp.computeFragPattern(ppm);
-            if(grp.fragmentationPattern.nobs() == 0) continue;
-            Compound* cpd = grp.compound;
-            grp.fragMatchScore = cpd->scoreCompoundHit(&grp.fragmentationPattern,ppm,false);
-            grp.fragMatchScore.mergedScore = grp.fragMatchScore.hypergeomScore;
+    for(auto grp: allgroups) {
+        if(grp->compound) {
+            grp->computeFragPattern(ppm);
+            if(grp->fragmentationPattern.nobs() == 0) continue;
+            Compound* cpd = grp->compound;
+            grp->fragMatchScore = cpd->scoreCompoundHit(&(grp->fragmentationPattern),ppm,false);
+            grp->fragMatchScore.mergedScore = grp->fragMatchScore.hypergeomScore;
         }
     }
     updateTable();
@@ -2387,9 +2390,9 @@ void TableDockWidget::exportAlignmentFile() {
 //Issue 271: avoid nullptr issues
 void TableDockWidget::disconnectCompounds(QString dbName) {
     qDebug() << "TableDockWidget::disconnectCompounds():" << dbName;
-    for (PeakGroup& pg : allgroups) {
-        if (pg.compound && (dbName == "ALL" || pg.compound->db == dbName.toStdString())) {
-            pg.compound = nullptr;
+    for (auto pg : allgroups) {
+        if (pg->compound && (dbName == "ALL" || pg->compound->db == dbName.toStdString())) {
+            pg->compound = nullptr;
         }
     }
 }
@@ -2397,10 +2400,10 @@ void TableDockWidget::disconnectCompounds(QString dbName) {
 
 void TableDockWidget::reconnectCompounds(QString dbName) {
     qDebug() << "TableDockWidget::reconnectCompounds():" << dbName;
-    for (PeakGroup& pg : allgroups) {
-        if (!pg.compound && !pg.compoundDb.empty() && !pg.compoundId.empty()) {
-            Compound *compound = DB.findSpeciesById(pg.compoundId, pg.compoundDb, false);
-            if (compound) pg.compound = compound;
+    for (auto pg : allgroups) {
+        if (!pg->compound && !pg->compoundDb.empty() && !pg->compoundId.empty()) {
+            Compound *compound = DB.findSpeciesById(pg->compoundId, pg->compoundDb, false);
+            if (compound) pg->compound = compound;
         }
     }
 }

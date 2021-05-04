@@ -149,7 +149,7 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
     if (_integratedGroup){
 
         //Issue 373: before calling delete, avoid possible dangling pointer bad access
-        if (_alwaysDisplayGroup && *_integratedGroup == *_alwaysDisplayGroup){
+        if (_alwaysDisplayGroup && _integratedGroup == _alwaysDisplayGroup){
             _alwaysDisplayGroup = nullptr;
         }
 
@@ -995,11 +995,16 @@ void EicWidget::replot(PeakGroup* group) {
     //qDebug() << "\tscoreQuality msec=" << timerX.elapsed();
 
     if (group) {
-        qDebug() << "EicWidget::replot() group data:";
+        qDebug() << "EicWidget::replot() group=" << group;
         qDebug() << "EicWidget::replot() group->meanMz=" << group->meanMz;
         qDebug() << "EicWidget::replot() group->meanRt=" << group->meanRt;
         if(group->compound) qDebug() << "EicWidget::replot() group->compound=" << group->compound->name.c_str();
         if(!group->compound) qDebug() << "EicWidget::replot() group->compound= nullptr";
+        if(group->adduct) {
+            qDebug() << "EicWidget::replot() group->compound=" << group->adduct->name.c_str();
+        } else {
+            qDebug() << "EicWidget::replot() group->adduct= nullptr";
+        }
     }
 
     setSelectedGroup(group);
@@ -1364,6 +1369,7 @@ void EicWidget::showAllPeaks() {
     //Issue 177: Always show this group if any peaks are shown, and the window allows for it
     //Issue 367: Even if the window doesn't show all of the peaks for the group (as in zooming in)
     if (_alwaysDisplayGroup) {
+        qDebug() << "_alwaysDisplayGroup=" << _alwaysDisplayGroup;
         addPeakPositions(_alwaysDisplayGroup);
     }
     qDebug() <<"EicWidget::showAllPeaks() completed";
