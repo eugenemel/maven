@@ -172,15 +172,17 @@ void SpectraWidget::setTitle() {
     //parameters only apply to a single scan
     if (!_currentFragment) {
 
+        int numDigits = _isDisplayHighPrecisionMz ? 7 : 4;
+
         QString precString("<br>PreMz: ");
         if (_currentScan && _currentScan->mslevel == 3 && _currentScan->ms1PrecursorForMs3) {
-            QString ms1PrecursorForMs3 = "<br>Ms1PreMz: <b>" + QString::number(_currentScan->ms1PrecursorForMs3,'f',4) + "</b>";
+            QString ms1PrecursorForMs3 = "<br>Ms1PreMz: <b>" + QString::number(_currentScan->ms1PrecursorForMs3,'f',numDigits) + "</b>";
             title += ms1PrecursorForMs3;
             precString = QString(" Ms2PreMz: ");
         }
 
         if (_currentScan && _currentScan->precursorMz) {
-            QString precursorMzLink = precString + "<b>" + QString::number(_currentScan->precursorMz,'f',4) + "</b>";
+            QString precursorMzLink = precString + "<b>" + QString::number(_currentScan->precursorMz,'f',numDigits) + "</b>";
             title += precursorMzLink ;
         }
 
@@ -190,7 +192,7 @@ void SpectraWidget::setTitle() {
         }
 
         if (_currentScan && _currentScan->productMz>0) {
-            QString precursorMzLink= " ProMz: <b>" + QString::number(_currentScan->productMz,'f',4) + "</b>";
+            QString precursorMzLink= " ProMz: <b>" + QString::number(_currentScan->productMz,'f',numDigits) + "</b>";
             title += precursorMzLink ;
         }
 
@@ -519,7 +521,9 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
         //Issue 159: add fragment labels
         if (this->_showOverlayLabels) {
 
-            QString lblString = QString::number(hitMz,'f',4);
+            int numDigits = _isDisplayHighPrecisionMz ? 7 : 4;
+
+            QString lblString = QString::number(hitMz,'f', numDigits);
 
             if (!hit.fragLabelList[i].isEmpty()) {
                 lblString += QString(" "+ hit.fragLabelList[i]);
@@ -1123,7 +1127,9 @@ void SpectraWidget::drawArrow(float mz1, float intensity1, float mz2, float inte
     }
 
 
-    QString note = tr("m/z: %1 intensity: %2 &Delta;%3").arg( QString::number(mz1,'f',3),QString::number(intensity1,'f',0),QString::number(distance,'f',3));
+    int numDigits = _isDisplayHighPrecisionMz ? 7 : 3;
+
+    QString note = tr("m/z: %1 intensity: %2 &Delta;%3").arg( QString::number(mz1,'f',numDigits),QString::number(intensity1,'f',0),QString::number(distance,'f',3));
 
     if (_note  != NULL ) {
         _note->setPos(x2+1,y2-30);
