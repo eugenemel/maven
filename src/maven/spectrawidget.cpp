@@ -667,10 +667,16 @@ void SpectraWidget::drawGraph() {
         if(pos < 0 || pos >= scan->mz.size()) continue;
 
         int prec=2;
-        if(abs(_maxX-_minX)>300) prec=1;
-        else if(abs(_maxX-_minX)>100) prec=3;
-        else if(abs(_maxX-_minX)>50) prec=4;
-        else if(abs(_maxX-_minX)>10) prec=6;
+
+        //testing
+        if (_isDisplayHighPrecisionMz) {
+            prec = 7;
+        } else {
+            if(abs(_maxX-_minX)>300) prec=1;
+            else if(abs(_maxX-_minX)>100) prec=3;
+            else if(abs(_maxX-_minX)>50) prec=4;
+            else if(abs(_maxX-_minX)>10) prec=6;
+        }
 
         //position label
         int x = toX(scan->mz[pos]);
@@ -1254,6 +1260,12 @@ void SpectraWidget::contextMenuEvent(QContextMenuEvent * event) {
     connect(a5, SIGNAL(triggered()), SLOT(setCentroidedMode()));
 
     menu.addSeparator();
+
+    QAction *aHighPrecision = menu.addAction("Display High Precision m/z");
+    connect(aHighPrecision, SIGNAL(triggered()), SLOT(toggleDisplayHighPrecisionMz()));
+    aHighPrecision->setCheckable(true);
+    aHighPrecision->setChecked(_isDisplayHighPrecisionMz);
+
     QAction* a7 = menu.addAction("Display Fragment Labels");
     connect (a7, SIGNAL(triggered()), SLOT(toggleOverlayLabels()));
     a7->setCheckable(true);
@@ -1434,6 +1446,13 @@ void SpectraWidget::toggleDisplayFullTitle() {
 void SpectraWidget::toggleDisplayCompoundId() {
     qDebug() << "SpectraWidget::toggleDisplayCompoundId()";
     _isDisplayCompoundId= !_isDisplayCompoundId;
+    drawGraph();
+    repaint();
+}
+
+void SpectraWidget::toggleDisplayHighPrecisionMz() {
+    qDebug() << "SpectraWidget::toggleDisplayHighPrecision()";
+    _isDisplayHighPrecisionMz= !_isDisplayHighPrecisionMz;
     drawGraph();
     repaint();
 }
