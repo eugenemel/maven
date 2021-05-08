@@ -70,13 +70,13 @@ void ClassifierNeuralNet::loadDefaultModel(){
 
 void ClassifierNeuralNet::loadModel(string filename) { 
 	if ( ! fileExists(filename) ) {
-			cerr << "Can't load " << filename << endl;
+            cout << "Can't load " << filename << endl;
 			return;
 	}
 	if ( brain != NULL ) delete(brain);
 	brain = new nnwork(num_features,hidden_layer,num_outputs);
 	brain->load((char*) filename.c_str());
-	cerr << "Read in classification model " << filename << endl;
+    cout << "Read in classification model " << filename << endl;
 }
 
 
@@ -94,7 +94,7 @@ vector<float> ClassifierNeuralNet::getFeatures(Peak& p) {
                 set[8] =  p.width <= 3 && p.signalBaselineRatio >= 3.0f ? 1.0f : 0.0f;
                 //set[9] =  ((float) (p.width >= 3) + (int) (p.symmetry >= 5) + (int) (p.signalBaselineRatio > 3.0))/3;
                 if ( p.peakRank/10.0f > 1 ) set[6]=1.0f;
-                //cerr << "tiny=" << set[8] << " " << set[7] << " " << p.symmetry << endl;
+                //cout << "tiny=" << set[8] << " " << set[7] << " " << p.symmetry << endl;
                 //set[7] =  ((float) (p.baseLineRightCleanCount >= 5) +  (int) (p.baseLineLeftCleanCount >= 5))/2;
         }
         return set;
@@ -210,7 +210,7 @@ void ClassifierNeuralNet::train(vector<PeakGroup*>& groups) {
 				if (p) {
         				float result[2] = {0.1, 0.1};
 						p->label == 'g' ? result[0]=0.9 : result[1]=0.9;
-						//cerr << p->label << endl;
+                        //cout << p->label << endl;
 						//
 						float fts[1000]; 
 						vector<float> features = getFeatures(*p);
@@ -220,6 +220,6 @@ void ClassifierNeuralNet::train(vector<PeakGroup*>& groups) {
 				}
 				if (g >= goodpeaks.size() && b >= badpeaks.size()) break;
 		}
-		cerr << "Done training. " << endl;
+        cout << "Done training. " << endl;
 
 */
