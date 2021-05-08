@@ -80,24 +80,24 @@ void ClassifierNeuralNet::loadModel(string filename) {
 }
 
 
-vector<float> ClassifierNeuralNet::getFeatures(Peak& p) { 
-		vector<float>set(num_features,0);
-		if (p.width>0 ) {
-				set[0] =  p.peakAreaFractional;
-				set[1] =  p.noNoiseFraction;
-				set[2] =  p.symmetry/(p.width+1)*log2(p.width+1);
-				set[3] =  p.groupOverlapFrac;
-				set[4] =  p.gaussFitR2*100.0;
-				set[5] =  p.signalBaselineRatio>0 ? log2(p.signalBaselineRatio)/10.0 : 0;
-				set[6] =  p.peakRank/10.0;
-				set[7] =  p.peakIntensity>0 ? log10(p.peakIntensity) : 0;
-				set[8] =  p.width <= 3 && p.signalBaselineRatio >= 3.0 ? 1 : 0;
-				//set[9] =  ((float) (p.width >= 3) + (int) (p.symmetry >= 5) + (int) (p.signalBaselineRatio > 3.0))/3;
-				if ( p.peakRank/10.0 > 1 ) set[6]=1;
-				//cerr << "tiny=" << set[8] << " " << set[7] << " " << p.symmetry << endl;
-				//set[7] =  ((float) (p.baseLineRightCleanCount >= 5) +  (int) (p.baseLineLeftCleanCount >= 5))/2;
-		}
-		return set;
+vector<float> ClassifierNeuralNet::getFeatures(Peak& p) {
+        vector<float>set(static_cast<unsigned long>(num_features),0);
+        if (p.width>0 ) {
+                set[0] =  p.peakAreaFractional;
+                set[1] =  p.noNoiseFraction;
+                set[2] =  p.symmetry/(p.width+1.0f)*log2(p.width+1.0f);
+                set[3] =  p.groupOverlapFrac;
+                set[4] =  p.gaussFitR2*100.0f;
+                set[5] =  p.signalBaselineRatio>0.0f ? log2(p.signalBaselineRatio)/10.0f : 0.0f;
+                set[6] =  p.peakRank/10.0f;
+                set[7] =  p.peakIntensity>0.0f ? log10(p.peakIntensity) : 0.0f;
+                set[8] =  p.width <= 3 && p.signalBaselineRatio >= 3.0f ? 1.0f : 0.0f;
+                //set[9] =  ((float) (p.width >= 3) + (int) (p.symmetry >= 5) + (int) (p.signalBaselineRatio > 3.0))/3;
+                if ( p.peakRank/10.0f > 1 ) set[6]=1.0f;
+                //cerr << "tiny=" << set[8] << " " << set[7] << " " << p.symmetry << endl;
+                //set[7] =  ((float) (p.baseLineRightCleanCount >= 5) +  (int) (p.baseLineLeftCleanCount >= 5))/2;
+        }
+        return set;
 }
 
 //OLD APPROACH
