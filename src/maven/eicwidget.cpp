@@ -1431,8 +1431,8 @@ void EicWidget::addPeakPositions(PeakGroup* group) {
 				scene()->addItem(p);
 
 //                //Issue 381: debugging
-//                qDebug() << "group=" << group << ", [" << to_string(group->meanMz).c_str() << "@" << to_string(group->meanRt).c_str() << "]: "
-//                         << "sample: " << peak.sample->sampleName.c_str() << ", rt=" << peak.rt << ", coords=(" << toX(peak.rt) << ", " << toY(peak.peakIntensity);
+//                qDebug() << "group=" << group << ", [" << to_string(group->meanMz).c_str() << "@" << to_string(group->meanRt).c_str() << "], " << group->peakCount() << " peaks: "
+//                         << "sample: " << peak.sample->sampleName.c_str() << ", rt=" << peak.rt << ", coords=(" << toX(peak.rt) << ", " << toY(peak.peakIntensity) << ")";
 		} 
 }
 
