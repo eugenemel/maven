@@ -2,6 +2,7 @@
 EicPoint::EicPoint(float x, float y, Peak* peak, MainWindow* mw)
 {
 
+
     setFlag(QGraphicsItem::ItemIsFocusable);
     setFlag(QGraphicsItem::ItemIsSelectable);
     setAcceptHoverEvents(true);
@@ -16,6 +17,10 @@ EicPoint::EicPoint(float x, float y, Peak* peak, MainWindow* mw)
     _color=QColor(Qt::black);
     _pen=QPen(_color);
     _brush=QBrush(_color);
+    _boundingRect = QRectF(static_cast<double>(_x)-static_cast<double>(_cSize)/2.0,
+                           static_cast<double>(_y)-static_cast<double>(_cSize)/2.0,
+                           static_cast<double>(_cSize),
+                           static_cast<double>(_cSize));
 
     setPointShape(CIRCLE);
     forceFillColor(false);
@@ -44,7 +49,8 @@ EicPoint::EicPoint(float x, float y, Peak* peak, MainWindow* mw)
 
 QRectF EicPoint::boundingRect() const
 {
-    return(QRectF(_x-_cSize/2,_y-_cSize/2,_cSize,_cSize));
+    return _boundingRect;
+    //return(QRectF(_x-_cSize/2,_y-_cSize/2,_cSize,_cSize));
 }
 
 void EicPoint::hoverEnterEvent (QGraphicsSceneHoverEvent*) {
@@ -124,9 +130,15 @@ void EicPoint::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
     float paintDiameter = _cSize*scale;  
     if (paintDiameter<5) paintDiameter=5; if (paintDiameter>30) paintDiameter=30;
 
+    _boundingRect = QRectF(static_cast<double>(_x)-static_cast<double>(paintDiameter)/2.0,
+                           static_cast<double>(_y)-static_cast<double>(paintDiameter)/2.0,
+                           static_cast<double>(paintDiameter),
+                           static_cast<double>(paintDiameter)
+                           );
+
     PeakGroup* selGroup = _mw->getEicWidget()->getSelectedGroup();
 
-    if (_group != NULL && selGroup->minMz == _group->minMz && selGroup->minRt == _group->minRt ) {
+    if (_group && selGroup && abs(selGroup->meanRt - _group->meanRt) < 1e-6f) {
         brush.setStyle(Qt::SolidPattern);
         pen.setColor(_color.darker());
         pen.setWidth(_pen.width()+1);

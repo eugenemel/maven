@@ -185,11 +185,8 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
         eicCount += eics.size();
 
         //find peaks
-        for(int i=0; i < eics.size(); i++ )  eics[i]->getPeakPositions(eic_smoothingWindow);
-        vector<PeakGroup> peakgroups = EIC::groupPeaks(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow);
-
-        //20191002: Too slow! Reverting to previous approach.
-//        vector<PeakGroup> peakgroups = EIC::groupPeaksB(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow, minSmoothedPeakIntensity);
+        for(int i=0; i < eics.size(); i++ )  eics[i]->getPeakPositionsC(eic_smoothingWindow, false);
+        vector<PeakGroup> peakgroups = EIC::groupPeaksC(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow, baseline_smoothingWindow, baseline_dropTopX);
 
         numAllPeakGroups += peakgroups.size();
 
@@ -485,12 +482,10 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         if (eicMaxIntensity < minGroupIntensity) { delete_all(eics); continue; }
 
         //find peaks
-        for(int i=0; i < eics.size(); i++ )  eics[i]->getPeakPositions(eic_smoothingWindow);
+        for(unsigned int i=0; i < eics.size(); i++ )  eics[i]->getPeakPositionsC(static_cast<int>(eic_smoothingWindow), false);
 
-        vector<PeakGroup> peakgroups = EIC::groupPeaks(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow);
-
-        //20191002: Too slow! Reverting to previous approach.
-        //vector<PeakGroup> peakgroups = EIC::groupPeaksB(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow, minSmoothedPeakIntensity);
+        //Issue 381
+        vector<PeakGroup> peakgroups = EIC::groupPeaksC(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow, baseline_smoothingWindow, baseline_dropTopX);
 
         //score quality of each group
         vector<PeakGroup*> groupsToAppend;
@@ -1067,10 +1062,11 @@ void BackgroundPeakUpdate::processSRMTransitions(vector<SRMTransition*>& transit
 
         //find peaks
         for(unsigned int i=0; i < eics.size(); i++ ) {
-            eics[i]->getPeakPositions(static_cast<int>(eic_smoothingWindow));
+            eics[i]->getPeakPositionsC(static_cast<int>(eic_smoothingWindow), false);
         }
 
-        vector<PeakGroup> peakgroups = EIC::groupPeaks(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow);
+        //Issue 381
+        vector<PeakGroup> peakgroups = EIC::groupPeaksC(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow, baseline_smoothingWindow, baseline_dropTopX);
 
         vector<PeakGroup*> groupsToAppend;
 

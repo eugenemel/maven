@@ -17,7 +17,7 @@ class EicPoint : public QObject, public QGraphicsItem {
 
 public:
     enum POINTSHAPE { CIRCLE, SQUARE, TRIANGLE_UP, TRIANGLE_DOWN };
-    EicPoint(QObject *parent = 0);
+    EicPoint(QObject *parent = nullptr);
     EicPoint(float x, float y, Peak* peak, MainWindow* mw);
     void setColor(QColor &c)  { _color = c; _pen.setColor(c); _brush.setColor(c); }
     void setPen(QPen &p)  { _pen = p;  }
@@ -58,6 +58,7 @@ private:
     POINTSHAPE pointShape;
     bool _forceFill;
     float _cSize;
+    QRectF _boundingRect;
 
 private slots:
 	void bookmark();

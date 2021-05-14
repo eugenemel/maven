@@ -1429,6 +1429,10 @@ void EicWidget::addPeakPositions(PeakGroup* group) {
 				p->setPen(pen);
 				p->setPeakGroup(group);
 				scene()->addItem(p);
+
+//                //Issue 381: debugging
+//                qDebug() << "group=" << group << ", [" << to_string(group->meanMz).c_str() << "@" << to_string(group->meanRt).c_str() << "], " << group->peakCount() << " peaks: "
+//                         << "sample: " << peak.sample->sampleName.c_str() << ", rt=" << peak.rt << ", coords=(" << toX(peak.rt) << ", " << toY(peak.peakIntensity) << ")";
 		} 
 }
 
@@ -1707,16 +1711,21 @@ void EicWidget::groupPeaks() {
 	 //qDebug() << "EicWidget::groupPeaks() " << endl;
 	//delete previous set of pointers to groups
 	QSettings *settings 		= getMainWindow()->getSettings();
-	float eic_smoothingWindow =   settings->value("eic_smoothingWindow").toDouble();
-	float grouping_maxRtWindow =  settings->value("grouping_maxRtWindow").toDouble();
+    float eic_smoothingWindow =   settings->value("eic_smoothingWindow").toFloat();
+    float grouping_maxRtWindow =  settings->value("grouping_maxRtWindow").toFloat();
+    float baselineDropTopX = settings->value("baseline_quantile").toFloat();
+    float baselineSmoothing = settings->value("baseline_smoothing").toFloat();
 
     //old approach
-    peakgroups = EIC::groupPeaks(eics, eic_smoothingWindow, grouping_maxRtWindow);
+    //peakgroups = EIC::groupPeaks(eics, eic_smoothingWindow, grouping_maxRtWindow);
 
     //ms2-centric new approach
     //peakgroups = EIC::groupPeaksB(eics, eic_smoothingWindow, grouping_maxRtWindow, minSmoothedPeakIntensity);
 
-    EIC::removeLowRankGroups(peakgroups,50);
+    //Issue 381
+    peakgroups = EIC::groupPeaksC(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow, static_cast<int>(baselineSmoothing), static_cast<int>(baselineDropTopX));
+
+    EIC::removeLowRankGroups(peakgroups, 50);
 
     for (auto& pg : peakgroups) {
 
