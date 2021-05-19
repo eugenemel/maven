@@ -1594,7 +1594,7 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
 {
     QMenu menu;
 
-    if (windowTitle() == "Bookmarks") {
+    if (windowTitle() == "Bookmarks" || windowTitle() == "rumsDB" || windowTitle() == "clamDB") {
         QAction* z8 = menu.addAction("Edit Selected Peak Group ID");
         connect(z8, SIGNAL(triggered()), SLOT(showEditPeakGroupDialog()));
 
