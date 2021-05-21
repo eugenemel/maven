@@ -56,6 +56,8 @@ private:
         bool _showQValueType;
 
         MainWindow* _mw;
+        float _yValuesMean = 0.0f;
+        float _yValuesCoV = 0.0f;
 };
 
 #endif

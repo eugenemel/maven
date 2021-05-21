@@ -98,6 +98,17 @@ void BarPlot::setPeakGroup(PeakGroup* group) {
         _colors.push_back(color);
         _yvalues.push_back(yvalues[i]);
     }
+
+    _yValuesMean = 0.0f;
+    _yValuesCoV = 0.0f;
+    if (_yvalues.size() > 0) {
+        StatisticsVector<float> statVector(yvalues);
+        _yValuesMean = static_cast<float>(statVector.mean());
+        if (_yvalues.size() > 1) {
+            _yValuesCoV = static_cast<float>(statVector.stddev())/_yValuesMean;
+        }
+    }
+    qDebug() << "group=" << group << " mean=" << to_string(_yValuesMean).c_str() << ", CoV=" << to_string(_yValuesCoV).c_str();
     qDebug() << "BarPlot::setPeakGroup() group=" << group << "completed";
 }
 
