@@ -167,6 +167,23 @@ void BarPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
     default: title = "?"; break;
     }
 
+    //Issue 422
+    if (_yValuesMean > 0.0f){
+
+        pair<char, int> numberFormatDetails = getNumTypeAndNumPrec(_yValuesMean);
+        char numType = numberFormatDetails.first;
+        int numPrec = numberFormatDetails.second;
+
+        title += " (avg=" + QString::number(_yValuesMean, numType, numPrec);
+
+        if (_yValuesCoV > 0.0f && _yValuesCoV < 1) {
+            title += ", cv=" + QString::number(_yValuesCoV, 'f', 3) + ")";
+        } else {
+            title += ")";
+        }
+
+    }
+
     int legendXPosAdj = 0;
     int peakTitleYPosAdj = 0;
 
@@ -219,15 +236,9 @@ void BarPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
             painter->drawText(posX+6+legendXPosAdj,posY+_barwidth-2,_labels[i]);
         }
 
-        char numType='g';
-        int  numPrec=2;
-        if (maxYvalue < 10000 ) { numType='f'; numPrec=0;}
-        if (maxYvalue < 1000 ) { numType='f';  numPrec=1;}
-        if (maxYvalue < 100 ) { numType='f';   numPrec=2;}
-        if (maxYvalue < 1 ) { numType='f';     numPrec=3;}
-
-        //Issue 324: handle normalized intensities using scientific notation
-        if (maxYvalue < 0.01) {numType ='g'; numPrec=2;}
+        pair<char, int> numberFormatDetails = getNumTypeAndNumPrec(maxYvalue);
+        char numType = numberFormatDetails.first;
+        int numPrec = numberFormatDetails.second;
 
         if (_yvalues[i] > 0 && _showIntensityText) {
             QString value = QString::number(_yvalues[i],numType,numPrec);
@@ -245,4 +256,19 @@ void BarPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
 
     _latestWidth = _width;
     _latestHeight = _height;
+}
+
+pair<char, int> BarPlot::getNumTypeAndNumPrec(float maxYvalue) {
+
+    char numType='g';
+    int  numPrec=2;
+    if (maxYvalue < 10000 ) { numType='f'; numPrec=0;}
+    if (maxYvalue < 1000 ) { numType='f';  numPrec=1;}
+    if (maxYvalue < 100 ) { numType='f';   numPrec=2;}
+    if (maxYvalue < 1 ) { numType='f';     numPrec=3;}
+
+    //Issue 324: handle normalized intensities using scientific notation
+    if (maxYvalue < 0.01f) {numType ='g'; numPrec=2;}
+
+    return make_pair(numType, numPrec);
 }
