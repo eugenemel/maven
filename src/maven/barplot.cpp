@@ -210,7 +210,7 @@ void BarPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
 
     for(int i=0; i < _yvalues.size(); i++ ) {
         int posX = legendX;
-        int posY = legendY + i*_barwidth + peakTitleYPosAdj;
+        int posY = legendY + i*_barwidth + peakTitleYPosAdj + _titleSpacer;
         int width = _barwidth;
         int height = _yvalues[i] / maxYvalue * maxBarHeight;
 
@@ -250,7 +250,7 @@ void BarPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
 
     painter->setPen(Qt::black);        // do not draw outline
     painter->setBrush(Qt::NoBrush);
-    painter->drawLine(legendX+legendXPosAdj, legendY+peakTitleYPosAdj, legendX+legendXPosAdj, legendY+_height);
+    painter->drawLine(legendX+legendXPosAdj, legendY+peakTitleYPosAdj+_titleSpacer, legendX+legendXPosAdj, legendY+_height);
 
     _width = legendShift+maxBarHeight;
 
