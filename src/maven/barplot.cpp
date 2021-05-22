@@ -101,8 +101,12 @@ void BarPlot::setPeakGroup(PeakGroup* group) {
 
     _yValuesMean = 0.0f;
     _yValuesCoV = 0.0f;
-    if (_yvalues.size() > 0) {
-        StatisticsVector<float> statVector(yvalues);
+
+    vector<float> yvaluesNoZeros = yvalues;
+    yvaluesNoZeros.erase(std::remove(yvaluesNoZeros.begin(), yvaluesNoZeros.end(), 0.0f), yvaluesNoZeros.end());
+
+    if (yvaluesNoZeros.size() > 0) {
+        StatisticsVector<float> statVector(yvaluesNoZeros);
         _yValuesMean = static_cast<float>(statVector.mean());
         if (_yvalues.size() > 1) {
             _yValuesCoV = static_cast<float>(statVector.stddev())/_yValuesMean;
