@@ -610,6 +610,10 @@ void ProjectDockWidget::getSampleInfoSQLITE() {
     currentProject->setSamples(_mainwindow->getSamples());
     currentProject->doAlignment();
     loadAllPeakTables();
+
+    //Issue 423: update UI
+    currentProject->loadUIOptions();
+    _mainwindow->updateQuantTypeComboBox();
 }
 
 void ProjectDockWidget::loadAllPeakTables() {
