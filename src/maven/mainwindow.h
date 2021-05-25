@@ -277,6 +277,9 @@ public slots:
     //Issue 400
     void toggleFilledEICs(bool isShowEICLines){if (btnEICFill) btnEICFill->setChecked(!isShowEICLines);}
 
+    //Issue 423
+    void updateQuantTypeComboBox();
+
 private slots:
     void createMenus();
     void createToolBars();
