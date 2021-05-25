@@ -98,6 +98,21 @@ void BarPlot::setPeakGroup(PeakGroup* group) {
         _colors.push_back(color);
         _yvalues.push_back(yvalues[i]);
     }
+
+    _yValuesMean = 0.0f;
+    _yValuesCoV = 0.0f;
+
+    vector<float> yvaluesNoZeros = yvalues;
+    yvaluesNoZeros.erase(std::remove(yvaluesNoZeros.begin(), yvaluesNoZeros.end(), 0.0f), yvaluesNoZeros.end());
+
+    if (yvaluesNoZeros.size() > 0) {
+        StatisticsVector<float> statVector(yvaluesNoZeros);
+        _yValuesMean = static_cast<float>(statVector.mean());
+        if (_yvalues.size() > 1) {
+            _yValuesCoV = static_cast<float>(statVector.stddev())/_yValuesMean;
+        }
+    }
+    qDebug() << "BarPlot::setPeakGroup() group=" << group << " mean=" << to_string(_yValuesMean).c_str() << ", CoV=" << to_string(_yValuesCoV).c_str();
     qDebug() << "BarPlot::setPeakGroup() group=" << group << "completed";
 }
 
@@ -145,15 +160,23 @@ void BarPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
     int legendX = 0;
     int legendY = 0;
 
-    QString title;
-    switch (qtype ) {
-    case PeakGroup::AreaTop: title = "Peak AreaTop"; break;
-    case PeakGroup::Area: title = "Peak Area"; break;
-    case PeakGroup::Height: title = "Peak Height"; break;
-    case PeakGroup::Quality: title = "Peak Quality"; break;
-    case PeakGroup::RetentionTime: title = "RetentionTime"; break;
-    case PeakGroup::SNRatio: title = "Peak S/N Ratio"; break;
-    default: title = "?"; break;
+    QString title = _mw->quantType->currentText();
+
+    //Issue 422
+    if (_yValuesMean > 0.0f){
+
+        pair<char, int> numberFormatDetails = getNumTypeAndNumPrec(_yValuesMean);
+        char numType = numberFormatDetails.first;
+        int numPrec = numberFormatDetails.second;
+
+        title += " (avg=" + QString::number(_yValuesMean, numType, numPrec);
+
+        if (_yValuesCoV > 0.0f && _yValuesCoV < 1) {
+            title += ", cv=" + QString::number(_yValuesCoV, 'f', 3) + ")";
+        } else {
+            title += ")";
+        }
+
     }
 
     int legendXPosAdj = 0;
@@ -182,7 +205,7 @@ void BarPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
 
     for(int i=0; i < _yvalues.size(); i++ ) {
         int posX = legendX;
-        int posY = legendY + i*_barwidth + peakTitleYPosAdj;
+        int posY = legendY + i*_barwidth + peakTitleYPosAdj + _titleSpacer;
         int width = _barwidth;
         int height = _yvalues[i] / maxYvalue * maxBarHeight;
 
@@ -208,15 +231,9 @@ void BarPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
             painter->drawText(posX+6+legendXPosAdj,posY+_barwidth-2,_labels[i]);
         }
 
-        char numType='g';
-        int  numPrec=2;
-        if (maxYvalue < 10000 ) { numType='f'; numPrec=0;}
-        if (maxYvalue < 1000 ) { numType='f';  numPrec=1;}
-        if (maxYvalue < 100 ) { numType='f';   numPrec=2;}
-        if (maxYvalue < 1 ) { numType='f';     numPrec=3;}
-
-        //Issue 324: handle normalized intensities using scientific notation
-        if (maxYvalue < 0.01) {numType ='g'; numPrec=2;}
+        pair<char, int> numberFormatDetails = getNumTypeAndNumPrec(maxYvalue);
+        char numType = numberFormatDetails.first;
+        int numPrec = numberFormatDetails.second;
 
         if (_yvalues[i] > 0 && _showIntensityText) {
             QString value = QString::number(_yvalues[i],numType,numPrec);
@@ -228,10 +245,25 @@ void BarPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
 
     painter->setPen(Qt::black);        // do not draw outline
     painter->setBrush(Qt::NoBrush);
-    painter->drawLine(legendX+legendXPosAdj, legendY+peakTitleYPosAdj, legendX+legendXPosAdj, legendY+_height);
+    painter->drawLine(legendX+legendXPosAdj, legendY+peakTitleYPosAdj+_titleSpacer, legendX+legendXPosAdj, legendY+_height);
 
     _width = legendShift+maxBarHeight;
 
     _latestWidth = _width;
     _latestHeight = _height;
+}
+
+pair<char, int> BarPlot::getNumTypeAndNumPrec(float maxYvalue) {
+
+    char numType='g';
+    int  numPrec=2;
+    if (maxYvalue < 10000 ) { numType='f'; numPrec=0;}
+    if (maxYvalue < 1000 ) { numType='f';  numPrec=1;}
+    if (maxYvalue < 100 ) { numType='f';   numPrec=2;}
+    if (maxYvalue < 1 ) { numType='f';     numPrec=3;}
+
+    //Issue 324: handle normalized intensities using scientific notation
+    if (maxYvalue < 0.01f) {numType ='g'; numPrec=2;}
+
+    return make_pair(numType, numPrec);
 }

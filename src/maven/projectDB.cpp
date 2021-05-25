@@ -1395,3 +1395,45 @@ void ProjectDB::loadSearchParams(){
             return dbnames;
         }
 
+void ProjectDB::loadUIOptions() {
+
+    quantTypeMap.clear();
+    quantTypeInverseMap.clear();
+
+    qDebug() << "ProjectDB::loadUIOptions()... ";
+
+        QSqlQuery queryCheckTable(sqlDB);
+
+        if (!queryCheckTable.exec("SELECT name FROM sqlite_master WHERE type='table' AND name='ui';")){
+            qDebug() << "Ho..." << queryCheckTable.lastError();
+            qDebug() << "Could not check file for presence or absence of ui table. Skipping.";
+            return;
+        }
+
+        bool isHasUITable = false;
+        while (queryCheckTable.next()) {
+        if ("ui" == queryCheckTable.value(0).toString()){
+                isHasUITable = true;
+                break;
+            }
+        }
+
+        if (!isHasUITable) return;
+
+        QSqlQuery queryMatches(sqlDB);
+        queryMatches.exec("select * from ui;");
+
+        while (queryMatches.next()) {
+
+            QString key = queryMatches.value("key").toString();
+            QString value = queryMatches.value("value").toString();
+
+        if (key == "quantType") {
+            quantTypeMap = mzUtils::decodeParameterMap(value.toStdString());
+            for (auto it = quantTypeMap.begin(); it != quantTypeMap.end(); ++it) {
+                quantTypeInverseMap.insert(make_pair(it->second, it->first));
+            }
+
+        }
+        }
+}

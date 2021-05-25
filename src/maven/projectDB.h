@@ -33,6 +33,10 @@ class ProjectDB {
             map<string, shared_ptr<DirectInfusionSearchParameters>> diSearchParameters = {};
             map<string, shared_ptr<PeaksSearchParameters>> peaksSearchParameters = {};
 
+            //UI adjustments
+            unordered_map<string, string> quantTypeMap{}; //<original, renamed>
+            unordered_map<string, string> quantTypeInverseMap{}; //<renamed, original>
+
             void clearLoadedPeakGroups() { allgroups.clear(); }
             void saveSamples(vector<mzSample *> &sampleSet);
             void saveGroups(vector<PeakGroup>   &allgroups, QString setName);
@@ -48,6 +52,7 @@ class ProjectDB {
             map<int, vector<Peak>> getAllPeaks();
             void loadMatchTable();
             void loadSearchParams();
+            void loadUIOptions();
 
             void deleteAll();
             void deleteGroups();

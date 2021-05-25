@@ -1571,6 +1571,26 @@ void MainWindow::createToolBars() {
     addToolBar(Qt::RightToolBarArea,sideBar);
 }
 
+//Issue 423: update based on currentProject, or Projects being unloaded.
+void MainWindow::updateQuantTypeComboBox() {
+    quantType->clear();
+
+    vector<string> quantTypes{"AreaTop","Area","Height","Retention Time","Quality"};
+
+    for (auto quantTypeString : quantTypes) {
+        if (projectDockWidget->currentProject) {
+            if (projectDockWidget->currentProject->quantTypeMap.find(quantTypeString) != projectDockWidget->currentProject->quantTypeMap.end()) {
+                quantType->addItem(projectDockWidget->currentProject->quantTypeMap[quantTypeString].c_str());
+            } else {
+                quantType->addItem(quantTypeString.c_str());
+            }
+        } else {
+            quantType->addItem(quantTypeString.c_str());
+        }
+    }
+
+}
+
 void MainWindow::historyLast() {
     if(history.size()==0) return;
     eicWidget->setMzSlice(history.last());
@@ -2510,6 +2530,13 @@ void MainWindow::getCovariants(Peak* peak ) {
 PeakGroup::QType MainWindow::getUserQuantType() {
     if (quantType) {
         QString type = quantType->currentText();
+
+        if (projectDockWidget->currentProject) {
+            if (projectDockWidget->currentProject->quantTypeInverseMap.find(type.toStdString()) != projectDockWidget->currentProject->quantTypeInverseMap.end()) {
+                type = QString(projectDockWidget->currentProject->quantTypeInverseMap[type.toStdString()].c_str());
+            }
+        }
+
         if (type  == "AreaTop") return PeakGroup::AreaTop;
         else if (type  == "Area")    return PeakGroup::Area;
         else if (type  == "Height")  return PeakGroup::Height;

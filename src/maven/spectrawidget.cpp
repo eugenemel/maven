@@ -457,6 +457,12 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
     QPen sn2FragmentPen(QColor("darkviolet"), 2);
     sn2FragmentPen.setStyle(Qt::DashDotLine);
 
+    QPen sn3FragmentPen(QColor("plum"), 2);
+    sn3FragmentPen.setStyle(Qt::DashDotLine);
+
+    QPen sn4FragmentPen(QColor("powderblue"), 2);
+    sn4FragmentPen.setStyle(Qt::DashDotLine);
+
     float SCALE=0.45;
 
     //create label
@@ -517,6 +523,10 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
                 line->setPen(sn1FragmentPen);
             } else if (label.startsWith("$")) { // sn2
                 line->setPen(sn2FragmentPen);
+            } else if (label.startsWith("!")) { // sn3
+                line->setPen(sn3FragmentPen);
+            } else if (label.startsWith("^")) { // sn4
+                line->setPen(sn4FragmentPen);
             } else {
                 line->setPen(graypen);
             }

@@ -44,6 +44,7 @@ protected:
    void	wheelEvent ( QGraphicsSceneWheelEvent * event );
 	
 private:
+    pair<char, int> getNumTypeAndNumPrec(float maxYvalue);
 	QVector<QString> _labels;
 	QVector<QColor>  _colors; 
 	QVector<float>   _yvalues;
@@ -56,6 +57,9 @@ private:
         bool _showQValueType;
 
         MainWindow* _mw;
+        float _yValuesMean = 0.0f;
+        float _yValuesCoV = 0.0f;
+        int _titleSpacer = 10;
 };
 
 #endif
