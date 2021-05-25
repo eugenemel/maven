@@ -279,7 +279,7 @@ QString IsotopeWidget::groupIsotopeMatrixExport(PeakGroup* group, bool includeSa
         if ( tag.isEmpty() && group->compound != nullptr ) tag = QString(group->compound->name.c_str());
         if ( tag.isEmpty() && group->srmId.length()   ) tag = QString(group->srmId.c_str());
         if ( tag.isEmpty() && group->meanMz > 0 )       tag = QString::number(group->meanMz,'f',6) + "@" +  QString::number(group->meanRt,'f',2);
-        if ( tag.isEmpty() )  tag = QString::number(group->groupId);
+        if ( tag.isEmpty() )  tag = QString::number(group->getGroupId());
         QString isotopeInfo;
 
        vector <mzSample*> vsamples = _mw->getVisibleSamples();

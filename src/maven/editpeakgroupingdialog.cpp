@@ -50,10 +50,10 @@ void EditPeakGroupDialog::setPeakGroup(PeakGroup *selectedPeakGroup) {
     if (compoundString.isEmpty() && _mainwindow->getProjectWidget()->currentProject){
         //try to get original compound string from matches (mzkitchen workflow)
 
-        if (_mainwindow->getProjectWidget()->currentProject->topMatch.find(selectedPeakGroup->groupId)
+        if (_mainwindow->getProjectWidget()->currentProject->topMatch.find(selectedPeakGroup->getGroupId())
                 != _mainwindow->getProjectWidget()->currentProject->topMatch.end()){
 
-            shared_ptr<mzrollDBMatch> originalCompoundNameAndScore = _mainwindow->getProjectWidget()->currentProject->topMatch.at(selectedPeakGroup->groupId);
+            shared_ptr<mzrollDBMatch> originalCompoundNameAndScore = _mainwindow->getProjectWidget()->currentProject->topMatch.at(selectedPeakGroup->getGroupId());
 
             compoundString.append(originalCompoundNameAndScore->compoundName.c_str());
         }

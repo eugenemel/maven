@@ -95,7 +95,7 @@ void MassCalcWidget::showTablerumsDBMatches(PeakGroup *grp) {
     p->setSortingEnabled(false);
     p->setUpdatesEnabled(false);
 
-    int peakGroupId = grp->groupId;
+    int peakGroupId = grp->getGroupId();
 
     if (_mw->getProjectWidget()->currentProject){
         pair<matchIterator, matchIterator> rumsDBMatches = _mw->getProjectWidget()->currentProject->allMatches.equal_range(peakGroupId);

@@ -659,9 +659,9 @@ PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, boo
     if (!group) return nullptr;
 
     //debugging
-//    cerr << "[TableDockWidget::addPeakGroup] "
+// cerr << "[TableDockWidget::addPeakGroup] "
 //         << group << " Id="
-//         << group->groupId
+//         << group->getGroupId() << endl;
 //         << ":(" << group->meanMz
 //         << "," << group->meanRt
 //         << ") <--> "
@@ -675,6 +675,7 @@ PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, boo
     //these tabledockwidget PeakGroup* objects persist forever, even after the table has been deleted
     //TODO: consider deleting PeakGroup* when not needed any longer
     PeakGroup *permanentGroup = new PeakGroup(*group);
+    permanentGroup->setGroupId(group->getGroupId());
 
     allgroups.push_back(permanentGroup);
 
@@ -1713,7 +1714,7 @@ void TableDockWidget::writeGroupXML(QXmlStreamWriter& stream, PeakGroup* g) {
     if (!g)return;
 
     stream.writeStartElement("PeakGroup");
-    stream.writeAttribute("groupId",  QString::number(g->groupId) );
+    stream.writeAttribute("groupId",  QString::number(g->getGroupId()) );
     stream.writeAttribute("tagString",  QString(g->tagString.c_str()) );
     stream.writeAttribute("metaGroupId",  QString::number(g->metaGroupId) );
     stream.writeAttribute("expectedRtDiff",  QString::number(g->expectedRtDiff,'f',4) );
@@ -1810,7 +1811,7 @@ PeakGroup* TableDockWidget::readGroupXML(QXmlStreamReader& xml,PeakGroup* parent
     PeakGroup g;
     PeakGroup* gp=nullptr;
 
-    g.groupId = xml.attributes().value("groupId").toString().toInt();
+    //g.groupId = xml.attributes().value("groupId").toString().toInt();
     g.tagString = xml.attributes().value("tagString").toString().toStdString();
     g.metaGroupId = xml.attributes().value("metaGroupId").toString().toInt();
     g.expectedRtDiff = xml.attributes().value("expectedRtDiff").toString().toDouble();

@@ -148,7 +148,7 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
 
     groupReport << group->getPeakGroupLabel() << SEP << setprecision(7)
                 << group->metaGroupId << SEP
-                << group->groupId << SEP
+                << group->getGroupId() << SEP
                 << doubleQuoteString(idString) << SEP //header is titled 'ID'
                 << group->goodPeakCount << SEP
                 << group->meanMz << SEP

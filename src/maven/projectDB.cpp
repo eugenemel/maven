@@ -227,8 +227,8 @@ void ProjectDB::deletePeakGroup(PeakGroup* g, QString tableName) {
      if (!g) return;
 
      vector<int>selectedGroups;
-     selectedGroups.push_back(g->groupId);
-     for(const PeakGroup& child: g->children)  selectedGroups.push_back(child.groupId);
+     selectedGroups.push_back(g->getGroupId());
+     for(PeakGroup& child: g->children)  selectedGroups.push_back(child.getGroupId());
 
      if(selectedGroups.size() == 0) return;
 
@@ -300,7 +300,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                                   )\
                                     \
                                  values\
-                                 (NULL,?,?,?,?,\
+                                 (?,?,?,?,?,\
                                     ?,?,?,?,?,\
                                     ?,?,?,?,?,\
                                     ?,?,\
@@ -309,9 +309,14 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                                   )\
                                  ");
 
-     //cerr << "inserting .. " << g->groupId << endl;
 	 QSqlQuery query1(sqlDB);
+                                 
+            int stableGroupId=g->getGroupId();
+            cerr << "inserting .. " << g->getGroupId() << "\t" << "stableId=" << stableGroupId << endl;
+            
+                                 	
             query1.prepare(INSERTSQL);
+            query1.addBindValue(stableGroupId);
             query1.addBindValue(parentGroupId);
             query1.addBindValue(QString(g->tagString.c_str()));
             query1.addBindValue(g->metaGroupId);
@@ -373,9 +378,9 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
      int lastInsertGroupId = query1.lastInsertId().toString().toInt();
 
      if (tableName == "rumsDB" || tableName== "clamDB") {
-         rumsDBOldToNewGroupIDs.insert(make_pair(g->groupId, lastInsertGroupId));
+         rumsDBOldToNewGroupIDs.insert(make_pair(g->getGroupId(), lastInsertGroupId));
      } else if (tableName == "Bookmarks") {
-         bookmarksOldToNewGroupIDs.insert(make_pair(g->groupId, lastInsertGroupId));
+         bookmarksOldToNewGroupIDs.insert(make_pair(g->getGroupId(), lastInsertGroupId));
      }
 
      QSqlQuery query2(sqlDB);
@@ -673,9 +678,17 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
 
      while (query.next()) {
 
-        PeakGroup g;
-        g.groupId = query.value("groupId").toInt();
+
+
+        int stableGroupId = query.value("groupId").toInt();
         int parentGroupId = query.value("parentGroupId").toInt();
+
+        PeakGroup g;
+        if(stableGroupId >= g.getGroupCounter()) { g.initGroupCount(stableGroupId); }
+        g.setGroupId(stableGroupId); //watch out this might create conflict with existing groupId
+        cerr << "Loaded groupId=" << "\t" << stableGroupId << endl;
+
+
         g.tagString = query.value("tagString").toString().toStdString();
         g.metaGroupId = query.value("metaGroupId").toInt();
         g.expectedRtDiff = query.value("expectedRtDiff").toDouble();
@@ -773,10 +786,10 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
         }
 
         //Issue 283
-        if (peakGroupMap.find(g.groupId) == peakGroupMap.end()) {
+        if (peakGroupMap.find(g.getGroupId()) == peakGroupMap.end()) {
             loadGroupPeaks(&g);
         } else {
-            g.peaks = peakGroupMap.at(g.groupId);
+            g.peaks = peakGroupMap.at(g.getGroupId());
         }
 
         if (parentGroupId == 0) {
@@ -795,8 +808,8 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
                 return lhs.second < rhs.second;
             });
 
-            sort(allgroups.begin(), allgroups.end(), [](const PeakGroup& lhs, const PeakGroup& rhs){
-                return lhs.groupId < rhs.groupId;
+            sort(allgroups.begin(), allgroups.end(), [](PeakGroup& lhs, PeakGroup& rhs){
+                return lhs.getGroupId() < rhs.getGroupId();
             });
 
             unsigned int childPosition = 0;
@@ -813,7 +826,7 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
 
                 PeakGroup& parent = allgroups.at(parentPosition);
 
-                if (parent.groupId == parentGroupId) { //found parent for child
+                if (parent.getGroupId() == parentGroupId) { //found parent for child
                     parent.children.push_back(child);
                     child.parent = &parent;
                     isMatchedChild = true;
@@ -849,7 +862,7 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
                 PeakGroup child = pair.first;
                 int parentGroupId = pair.second;
 
-                if (parent.groupId == parentGroupId) { //found parent for child
+                if (parent.getGroupId() == parentGroupId) { //found parent for child
                     parent.children.push_back(child);
                     child.parent = &parent;
                     matchedChildren.push_back(pair);
@@ -1109,7 +1122,7 @@ void ProjectDB::loadGroupPeaks(PeakGroup* parent) {
 
      QSqlQuery query(sqlDB);
      query.prepare("select P.*, S.name as sampleName from peaks P, samples S where P.sampleId = S.sampleId and P.groupId = ?");
-     query.bindValue(0,parent->groupId);
+     query.bindValue(0,parent->getGroupId());
      //qDebug() << "loadin peaks for group " << parent->groupId;
      query.exec();
 

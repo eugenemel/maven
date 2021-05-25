@@ -51,7 +51,7 @@ enum itemType {
         SRMTransitionType
 };
 
-extern Database DB; 
+extern Database DB;
 
 
 #endif

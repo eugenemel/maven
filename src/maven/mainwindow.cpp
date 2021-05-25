@@ -2141,7 +2141,7 @@ QString MainWindow::groupTextExport(PeakGroup* group ) {
         if ( s!=NULL) sampleName = s->sampleName;
 
         peakinfo << QString(sampleName.c_str())
-                << QString::number(group->groupId)
+                << QString::number(group->getGroupId())
                 << compoundName
                 << QString::number(expectedRt, 'f',4 )
                 << QString::number(peak.peakMz, 'f',4 )
