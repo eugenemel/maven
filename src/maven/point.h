@@ -36,14 +36,14 @@ public:
     int type() const override {return Type;}
 
 protected:
-    QRectF boundingRect() const;
- 	void hoverEnterEvent ( QGraphicsSceneHoverEvent * event );
-	void hoverLeaveEvent ( QGraphicsSceneHoverEvent * event );
-    void mousePressEvent( QGraphicsSceneMouseEvent * event);
-	void mouseDoubleClickEvent (QGraphicsSceneMouseEvent* event);
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-    void contextMenuEvent ( QGraphicsSceneContextMenuEvent* event );
-	void keyPressEvent(QKeyEvent *event);
+    QRectF boundingRect() const override;
+    void hoverEnterEvent ( QGraphicsSceneHoverEvent * event ) override;
+    void hoverLeaveEvent ( QGraphicsSceneHoverEvent * event ) override;
+    void mousePressEvent( QGraphicsSceneMouseEvent * event) override;
+    void mouseDoubleClickEvent (QGraphicsSceneMouseEvent* event) override;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    void contextMenuEvent ( QGraphicsSceneContextMenuEvent* event ) override;
+    void keyPressEvent(QKeyEvent *event) override;
     
 private:
     float _x;
