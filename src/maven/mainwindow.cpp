@@ -1484,6 +1484,7 @@ void MainWindow::createToolBars() {
     layout->addSpacing(10);
 
     quantType = new QComboBox(hBox);
+    quantType->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 
     //Issue 285: bookmarkedPeaks is created before quantType is initialized, need to connect bookmarks table manually.
     //All other peak groups tables will be connected in the TableDockWidget() constructor.
@@ -1588,7 +1589,6 @@ void MainWindow::updateQuantTypeComboBox() {
             quantType->addItem(quantTypeString.c_str());
         }
     }
-
 }
 
 void MainWindow::historyLast() {
