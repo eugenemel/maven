@@ -34,7 +34,8 @@ class ProjectDB {
             map<string, shared_ptr<PeaksSearchParameters>> peaksSearchParameters = {};
 
             //UI adjustments
-            unordered_map<string, string> quantTypeMap{};
+            unordered_map<string, string> quantTypeMap{}; //<original, renamed>
+            unordered_map<string, string> quantTypeInverseMap{}; //<renamed, original>
 
             void clearLoadedPeakGroups() { allgroups.clear(); }
             void saveSamples(vector<mzSample *> &sampleSet);

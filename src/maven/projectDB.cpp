@@ -1398,6 +1398,8 @@ void ProjectDB::loadSearchParams(){
 void ProjectDB::loadUIOptions() {
 
     quantTypeMap.clear();
+    quantTypeInverseMap.clear();
+
     qDebug() << "ProjectDB::loadUIOptions()... ";
 
         QSqlQuery queryCheckTable(sqlDB);
@@ -1428,6 +1430,10 @@ void ProjectDB::loadUIOptions() {
 
         if (key == "quantType") {
             quantTypeMap = mzUtils::decodeParameterMap(value.toStdString());
+            for (auto it = quantTypeMap.begin(); it != quantTypeMap.end(); ++it) {
+                quantTypeInverseMap.insert(make_pair(it->second, it->first));
+            }
+
         }
         }
 }

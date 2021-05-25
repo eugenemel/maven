@@ -2532,9 +2532,8 @@ PeakGroup::QType MainWindow::getUserQuantType() {
         QString type = quantType->currentText();
 
         if (projectDockWidget->currentProject) {
-            if (projectDockWidget->currentProject->quantTypeMap.find(type.toStdString()) != projectDockWidget->currentProject->quantTypeMap.end()) {
-                string renamedQuantType = projectDockWidget->currentProject->quantTypeMap[type.toStdString()];
-                type = QString(renamedQuantType.c_str());
+            if (projectDockWidget->currentProject->quantTypeInverseMap.find(type.toStdString()) != projectDockWidget->currentProject->quantTypeInverseMap.end()) {
+                type = QString(projectDockWidget->currentProject->quantTypeInverseMap[type.toStdString()].c_str());
             }
         }
 
