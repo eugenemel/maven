@@ -160,16 +160,7 @@ void BarPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
     int legendX = 0;
     int legendY = 0;
 
-    QString title;
-    switch (qtype ) {
-    case PeakGroup::AreaTop: title = "Peak AreaTop"; break;
-    case PeakGroup::Area: title = "Peak Area"; break;
-    case PeakGroup::Height: title = "Peak Height"; break;
-    case PeakGroup::Quality: title = "Peak Quality"; break;
-    case PeakGroup::RetentionTime: title = "RetentionTime"; break;
-    case PeakGroup::SNRatio: title = "Peak S/N Ratio"; break;
-    default: title = "?"; break;
-    }
+    QString title = _mw->quantType->currentText();
 
     //Issue 422
     if (_yValuesMean > 0.0f){
