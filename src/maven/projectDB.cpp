@@ -33,18 +33,23 @@ void ProjectDB::deleteAll() {
     QSqlQuery query(sqlDB);
     query.exec("drop table IF EXISTS compounds");
     query.exec("drop table IF EXISTS samples");
-    query.exec("drop table IF EXISTS peakgroups");
-    query.exec("drop table IF EXISTS peaks");
+  //  query.exec("drop table IF EXISTS peakgroups");
+  //  query.exec("drop table IF EXISTS peaks");
     query.exec("drop table IF EXISTS rt_update_key");
     query.exec("drop table IF EXISTS matches");
-    query.exec("drop table IF EXISTS search_params"); //Issue 197
+  //  query.exec("drop table IF EXISTS search_params"); //Issue 197
+
+     //droping table commands above clubber auto-increment
+     //this is an issue..for now, going to clear content of the peakgroups table
+     //with delete command
+     deleteGroups();
 }
 
 void ProjectDB::deleteGroups() {
     QSqlQuery query(sqlDB);
-    query.exec("drop table peakgroups");
-    query.exec("drop table peaks");
-    query.exec("drop table IF EXISTS search_params"); //Issue 197
+    query.exec("delete from peakgroups");
+    query.exec("delete from peaks");
+    query.exec("delete from search_params"); //Issue 197
 }
 
 
@@ -217,7 +222,7 @@ QStringList ProjectDB::getSearchTableNames() {
        qDebug() << "entry=" << tableName;
     }
 
-    qDebug() << "End Search Table Names.";
+    qDebug() << "End Search Table iames.";
 
     return dbnames;
 }
@@ -300,7 +305,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                                   )\
                                     \
                                  values\
-                                 (NULL,?,?,?,?,\
+                                 (?,?,?,?,?,\
                                     ?,?,?,?,?,\
                                     ?,?,?,?,?,\
                                     ?,?,\
@@ -309,9 +314,15 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                                   )\
                                  ");
 
-     //cerr << "inserting .. " << g->groupId << endl;
-	 QSqlQuery query1(sqlDB);
+     //inserting null value string into autoincrement will increment index
+     QVariant stableId(QVariant::String);
+
+     //check if this peakgroup already been inserted, if so.. use previous groupId from database
+     if(g->hasDatabaseID()) stableId=QVariant(g->getDatabaseID());
+
+     QSqlQuery query1(sqlDB);
             query1.prepare(INSERTSQL);
+            query1.addBindValue(stableId);
             query1.addBindValue(parentGroupId);
             query1.addBindValue(QString(g->tagString.c_str()));
             query1.addBindValue(g->metaGroupId);
@@ -369,14 +380,20 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 
      if(! query1.exec() ) {
         qDebug() << query1.lastError();
+     } else {
+        //success on insert, record stable id in peakgroup
+        //now we have a stable id for this group from autoincrement value
+        int lastInsertGroupId = query1.lastInsertId().toString().toInt();
+        if(!g->hasDatabaseID()) g->setDatabaseID(lastInsertGroupId);
      }
-     int lastInsertGroupId = query1.lastInsertId().toString().toInt();
 
+     int lastInsertGroupId = query1.lastInsertId().toString().toInt();
      if (tableName == "rumsDB" || tableName== "clamDB") {
          rumsDBOldToNewGroupIDs.insert(make_pair(g->groupId, lastInsertGroupId));
      } else if (tableName == "Bookmarks") {
          bookmarksOldToNewGroupIDs.insert(make_pair(g->groupId, lastInsertGroupId));
      }
+
 
      QSqlQuery query2(sqlDB);
      if(!query2.exec("create table IF NOT EXISTS peaks( \
@@ -426,10 +443,10 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 
                     if(!p.getSample()) {
 
-                        string errMsg = "ProjectDB::writeGroupSqlite(): peak sample (peak.getSample()) is null. Illegal memory access of peak.getSample()->getSampleId(). Exiting program.";
+                        string errMsg = "ProjectDB::oupSqlite(): peak sample (peak.getSample()) is null. Illegal memory access of peak.getSample()->getSampleId(). Exiting program.";
                         cerr << errMsg << endl;
 
-                        QString msg = QString("ProjectDB::writeGroupSqlite(): peak sample (peak.getSample()) is null. Illegal memory access of peak.getSample()->getSampleId(). Exiting program.");
+                        QString msg = QString("ProjectDB::oupSqlite(): peak sample (peak.getSample()) is null. Illegal memory access of peak.getSample()->getSampleId(). Exiting program.");
 
                         qDebug() << msg;
                         abort();
@@ -675,6 +692,8 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
 
         PeakGroup g;
         g.groupId = query.value("groupId").toInt();
+        g.setDatabaseID(g.groupId); //store id of peakgroup, aka stableId
+
         int parentGroupId = query.value("parentGroupId").toInt();
         g.tagString = query.value("tagString").toString().toStdString();
         g.metaGroupId = query.value("metaGroupId").toInt();

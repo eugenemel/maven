@@ -748,7 +748,8 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
     currentProject=project;
 
     if(project->isOpen()) {
-        project->deleteAll(); /// this is crazy
+        project->deleteAll(); 	  // this is crazy!!!! drops all tables in sqldatabase,
+        project->deleteGroups(); //delete all peakgroups and peaks, autoincrement index is not reset
         project->setSamples(sampleSet);
         project->saveSamples(sampleSet);
         project->saveAlignment();
