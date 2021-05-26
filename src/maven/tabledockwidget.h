@@ -49,6 +49,7 @@ public slots:
 	  //void showInfo(PeakGroup* group);
       PeakGroup* addPeakGroup(PeakGroup* group, bool updateTable);
       PeakGroup* addPeakGroup(PeakGroup* group, bool updateTable, bool isDeletePeakGroupPtr);
+      void addSavedPeakGroup(PeakGroup group); //Issue 424: only use for saved peak groups
       void addDirectInfusionAnnotation(DirectInfusionGroupAnnotation *directInfusionGroupAnnotation, int clusterNum);
       void addMs3Annotation(Ms3Annotation* ms3Annotation, int clusterNum);
       void setupPeakTable();
