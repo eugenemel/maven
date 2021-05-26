@@ -300,7 +300,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                                   )\
                                     \
                                  values\
-                                 (NULL,?,?,?,?,\
+                                 (?,?,?,?,?,\
                                     ?,?,?,?,?,\
                                     ?,?,?,?,?,\
                                     ?,?,\
@@ -312,6 +312,14 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
      //cerr << "inserting .. " << g->groupId << endl;
 	 QSqlQuery query1(sqlDB);
             query1.prepare(INSERTSQL);
+
+            //Issue 424
+            if (g->savedGroupId == -1) { // group does not have previously saved ID value, rely on autoincrement
+                query1.addBindValue(QVariant(QVariant::Int)); //equivalent to nullptr, triggers autoincrement
+            } else {
+                query1.addBindValue(g->savedGroupId);
+            }
+
             query1.addBindValue(parentGroupId);
             query1.addBindValue(QString(g->tagString.c_str()));
             query1.addBindValue(g->metaGroupId);

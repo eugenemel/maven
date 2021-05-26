@@ -698,7 +698,7 @@ void ProjectDockWidget::loadAllPeakTables() {
         //put them in right place
         if(g->searchTableName.empty()) g->searchTableName="Bookmarks";
         TableDockWidget* table = _mainwindow->findPeakTable(g->searchTableName.c_str());
-        if(table) table->addPeakGroup(g,false);
+        if(table) table->addSavedPeakGroup(*g);
     }
 
     //updated display widgets
@@ -759,48 +759,45 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
 
         map<QString, QString> searchTableData{};
 
-        for(TableDockWidget* peakTable : _mainwindow->getAllPeakTables() ) {
+        //Issue 424: insert saved IDs before autoincrements to avoid conflicts
+        //Explicitly use UI table QString instead of group->searchTableName to avoid possible table renaming
+        vector<pair<PeakGroup*,QString>> groupAndPeakTable{};
+        for (auto peakTable : _mainwindow->getAllPeakTables()) {
+            for (auto group : peakTable->getAllGroups()) {
+                groupAndPeakTable.push_back(make_pair(group, peakTable->windowTitle()));
+            }
+            searchTableData.insert(make_pair(peakTable->windowTitle(), peakTable->getEncodedTableInfo()));
+        }
 
-            qDebug() << peakTable->windowTitle() << ": Starting peak group table save...";
+        sort(groupAndPeakTable.begin(), groupAndPeakTable.end(), [](const pair<PeakGroup*,QString>& lhs, const pair<PeakGroup*,QString>& rhs){
+            if (lhs.first->savedGroupId == -1 && rhs.first->savedGroupId == -1) {
+                return lhs.second < rhs.second;
+            } else {
+                return lhs.first->savedGroupId > rhs.first->savedGroupId;
+            }
+        });
 
-            unsigned int onePeakTableCount = 0;
+        for(auto groupData: groupAndPeakTable) {
+            PeakGroup *group = groupData.first;
+            QString tableName = groupData.second;
+            project->writeGroupSqlite(group, 0, tableName);
 
-            for(PeakGroup* group : peakTable->getAllGroups()) {
-
-                unsigned int numGroupsAdded = 1 + group->childCount();
-
-                groupCount = groupCount + numGroupsAdded;
-
-                //Issue 75:
-                //Bookmarks take precedence over original table name (if it exists).
-                QString searchTableName;
-                if (peakTable->windowTitle() == "Bookmarks" || group->searchTableName.empty()) {
-                     searchTableName = peakTable->windowTitle();
-                } else {
-                    searchTableName = QString(group->searchTableName.c_str());
-                }
-
-                //qDebug() << "Write PeakGroup to DB: ID=" << group->groupId << ", table=" << searchTableName;
-
-                project->writeGroupSqlite(group, 0, searchTableName);
-                onePeakTableCount = onePeakTableCount + numGroupsAdded;
-
-                if(group->compound){
-                    compoundSet.insert(group->compound);
-                }
-
+            if(group->compound){
+                compoundSet.insert(group->compound);
             }
 
-            searchTableData.insert(make_pair(peakTable->windowTitle(), peakTable->getEncodedTableInfo()));
-
-            qDebug() << peakTable->windowTitle() << ": Saved " << onePeakTableCount << "groups.";
+            groupCount += group->childCount() + 1;
         }
+
+        qDebug() << "Saved" << groupCount << "peak groups into mzrollDB file.";
 
         project->savePeakGroupsTableData(searchTableData);
 
-        qDebug() << "All tables: Saved" << groupCount << "groups.";
+        qDebug() << "Saved parameter information for" << searchTableData.size() << "searches into mzrollDB file.";
 
         project->saveCompounds(compoundSet);
+
+        qDebug() << "Saved" << compoundSet.size() << "compounds into mzrollDB file.";
 
         project->saveMatchTable();
 

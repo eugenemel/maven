@@ -699,6 +699,26 @@ PeakGroup* TableDockWidget::addPeakGroup(PeakGroup *group, bool updateTable, boo
     return permanentGroup;
 }
 
+/**
+ * Issue 424:
+ * This should only be called when adding a PeakGroup that was loaded from a file (the PeakGroup was previously saved).
+ * PeakGroups that are created transiently (e.g., from the EicWidget) should not use this method.
+ * Similarly, Bookmarking peakgroups should also not use this method (instead, use addPeakGroup()).
+ * background_peaks_update should also prefer addPeakGroup(). (Peaks and Compound searches).
+ */
+void TableDockWidget::addSavedPeakGroup(PeakGroup group) {
+
+    PeakGroup *permanentGroup = new PeakGroup(group);
+    permanentGroup->savedGroupId = permanentGroup->groupId;
+
+    //children must also preserve their group ID
+    for (auto& group : permanentGroup->children) {
+        group.savedGroupId = group.groupId;
+    }
+
+    allgroups.push_back(permanentGroup);
+}
+
 void TableDockWidget::addDirectInfusionAnnotation(DirectInfusionGroupAnnotation *directInfusionGroupAnnotation, int clusterNum) {
 
     for (auto directInfusionMatchData : directInfusionGroupAnnotation->compounds){
