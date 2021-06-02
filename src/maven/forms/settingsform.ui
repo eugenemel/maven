@@ -866,12 +866,12 @@
           <item row="3" column="0">
            <widget class="QLabel" name="label_23">
             <property name="text">
-             <string>Scripts Folder</string>
+             <string>Peak Quality Model</string>
             </property>
            </widget>
           </item>
           <item row="3" column="1">
-           <widget class="QPushButton" name="scriptsFolderSelect">
+           <widget class="QPushButton" name="btnPeakQualityModel">
             <property name="icon">
              <iconset resource="../mzroll.qrc">
               <normaloff>:/images/fileopen.png</normaloff>:/images/fileopen.png</iconset>
@@ -879,7 +879,7 @@
            </widget>
           </item>
           <item row="3" column="2">
-           <widget class="QLineEdit" name="scriptsFolder"/>
+           <widget class="QLineEdit" name="txtPeakQualityModel"/>
           </item>
          </layout>
         </widget>
