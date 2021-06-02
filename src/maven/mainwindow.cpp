@@ -53,8 +53,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
             << QApplication::applicationDirPath()  + "/methods"
             << QApplication::applicationDirPath() + "/../Resources/methods";
 
-    QString defaultModelFile =   settings->value("clsfModelFilename").value<QString>();
-    defaultModelFile.replace(QRegExp(".*/"),"");  //clear pathtname..
+    QString defaultModelFile("default.model");
+    defaultModelFile.replace(QRegExp(".*/"),"");  //clear path name..
     qDebug() << "Searching for method folder:";
     foreach (QString d, dirs) {
         qDebug() << " Checking dir: " + d;
@@ -121,14 +121,31 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
         DB.loadPeakGroupTags(tagsFile.toStdString());
     }
 
-    clsf = new ClassifierNeuralNet();    //clsf = new ClassifierNaiveBayes();
-    QString clsfModelFilename = methodsFolder +  "/"  +   defaultModelFile;
-    if(QFile::exists(clsfModelFilename)) {
-        clsf->loadModel(clsfModelFilename.toStdString());
-    } else {
-       clsf->loadDefaultModel();
-        qDebug() << "ERROR: Can't find default.model in method folder="  << methodsFolder;
-        qDebug() << "       Using build in neural network model";
+    clsf = new ClassifierNeuralNet();
+
+    //Issue 430: Use previously saved file, if it exists
+    bool isFoundClsfModel = false;
+    QString clsfModelFilename;
+    if (settings->contains("clsfModelFilename")) {
+        clsfModelFilename = settings->value("clsfModelFilename").value<QString>();
+        if (QFile::exists(clsfModelFilename)){
+            clsf->loadModel(clsfModelFilename.toStdString());
+            isFoundClsfModel = clsf->hasModel();
+        }
+    }
+
+    if (!isFoundClsfModel) {
+        clsfModelFilename = methodsFolder +  "/default.model";
+        if(QFile::exists(clsfModelFilename)) {
+            clsf->loadModel(clsfModelFilename.toStdString());
+            isFoundClsfModel = clsf->hasModel();
+        }
+    }
+
+    if (!isFoundClsfModel) {
+        clsf->loadDefaultModel();
+         qDebug() << "ERROR: Can't find default.model in method folder="  << methodsFolder;
+         qDebug() << "       Using built-in neural network model";
     }
 
     //Compound Library  Manager

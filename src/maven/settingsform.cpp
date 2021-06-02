@@ -42,7 +42,7 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
 
     //remote url used to fetch compound lists, pathways, and notes
     connect(data_server_url, SIGNAL(textChanged(QString)), SLOT(getFormValues()));
-    connect(scriptsFolderSelect, SIGNAL(clicked()), SLOT(selectScriptsFolder()));
+    connect(btnPeakQualityModel, SIGNAL(clicked()), SLOT(updateClassifierFile()));
     connect(methodsFolderSelect, SIGNAL(clicked()), SLOT(selectMethodsFolder()));
     connect(RProgramSelect, SIGNAL(clicked()), SLOT(selectRProgram()));
 
@@ -238,14 +238,18 @@ void SettingsForm::setFormValues() {
     scan_filter_min_intensity->setValue( settings->value("scan_filter_min_intensity").toInt());
     scan_filter_min_quantile->setValue(  settings->value("scan_filter_min_quantile").toInt());
 
-   QStringList folders;       folders << "scriptsFolder" << "methodsFolder" << "Rprogram";
-   QList<QLineEdit*> items;    items  << scriptsFolder << methodsFolder << Rprogram;
+   QStringList folders;       folders << "peakQualityModelFile" << "methodsFolder" << "Rprogram";
+   QList<QLineEdit*> items;    items  << txtPeakQualityModel << methodsFolder << Rprogram;
 
    unsigned int itemCount=0;
     foreach(QString itemName, folders) {
         if(settings->contains(itemName)) items[itemCount]->setText( settings->value(itemName).toString());
         itemCount++;
     }
+
+    //Issue 430
+    if (settings->contains("clsfModelFilename"))
+        this->txtPeakQualityModel->setText(settings->value("clsfModelFilename").toString());
 
     if(settings->contains("remote_server_url"))
         data_server_url->setText( settings->value("data_server_url").toString());
@@ -555,6 +559,21 @@ void SettingsForm::selectFile(QString key) {
         settings->setValue(key,newFile);
         setFormValues();
     }
+}
+
+void SettingsForm::updateClassifierFile() {
+
+    QString oFile = ".";
+    if(settings->contains("clsfModelFilename")) oFile =  settings->value("clsfModelFilename").toString();
+    QString newFile = QFileDialog::getOpenFileName(this,"Select file",".","*.model");
+
+    if (! newFile.isEmpty()) {
+        settings->setValue("clsfModelFilename", newFile);
+        Classifier *clsf = mainwindow->getClassifier();
+        if (clsf) clsf->loadModel(settings->value("clsfModelFilename").value<QString>().toStdString());
+        setFormValues();
+    }
+
 }
 
 

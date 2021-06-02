@@ -35,9 +35,9 @@ class SettingsForm : public QDialog, public Ui_SettingsForm
                  inline void showPeakDetectionTab()   { tabWidget->setCurrentIndex(2); }
                  inline void setIsotopeDetectionTab()  { tabWidget->setCurrentIndex(3); }
 
-                 inline void selectScriptsFolder() {   selectFolder("scriptsFolder"); }                 
                  inline void selectMethodsFolder() {   selectFolder("methodsFolder"); }
                  inline void selectRProgram() {         selectFile("Rprogram"); }
+                 void updateClassifierFile();
 
 
 
