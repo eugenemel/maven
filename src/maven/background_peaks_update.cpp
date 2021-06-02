@@ -86,7 +86,6 @@ void BackgroundPeakUpdate::run(void) {
 	_stopped = false;
 
     if ( samples.size() == 0) samples = mainwindow->getSamples(); //get samples
-    clsf = mainwindow->getClassifier();	//get classification model
 
 	if (samples.size() > 0 && samples[0]->getPolarity() > 0 ) ionizationMode = +1; 
 	else ionizationMode = -1; //set ionization mode for compound matching

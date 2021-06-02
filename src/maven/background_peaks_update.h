@@ -110,6 +110,7 @@ public:
    bool isRetainUnmatchedCompounds;
    bool isClusterPeakGroups;
 
+   Classifier* clsf;
 
 
 //CLASS FUNCTIONS
@@ -139,7 +140,6 @@ private:
 
   MassCalculator mcalc;
   MainWindow *mainwindow;
-  Classifier* clsf;
   PeakGroup* _group;
   vector<mzSample*>samples;
   vector<Compound*>compounds;

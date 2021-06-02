@@ -194,7 +194,18 @@ void PeakDetectionDialog::findPeaks() {
             peakupdater->eic_smoothingAlgorithm = EIC::SmootherType::GAUSSIAN;
         }
 
+        //Issue 430: prefer model, if available
+        if (QFile::exists(classificationModelFilename->text())) {
 
+            peakupdater->clsf = new ClassifierNeuralNet();
+            peakupdater->clsf->loadModel(classificationModelFilename->text().toStdString());
+            if (!peakupdater->clsf->hasModel()) {
+                delete(peakupdater->clsf);
+                peakupdater->clsf = mainwindow->getClassifier();
+            }
+        } else {
+            peakupdater->clsf = mainwindow->getClassifier();
+        }
 
         peakupdater->baseline_smoothingWindow = baseline_smoothing->value();
         peakupdater->baseline_dropTopX        = baseline_quantile->value();
