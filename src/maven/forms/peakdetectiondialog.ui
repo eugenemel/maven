@@ -623,7 +623,7 @@
           <item row="4" column="0">
            <widget class="QLabel" name="label_10">
             <property name="text">
-             <string>Min. Peak Group Intensity</string>
+             <string>Min. Highest Peak Intensity</string>
             </property>
            </widget>
           </item>
@@ -660,11 +660,14 @@
             <property name="suffix">
              <string> ions</string>
             </property>
+            <property name="decimals">
+             <number>0</number>
+            </property>
             <property name="maximum">
              <double>999999999.000000000000000</double>
             </property>
             <property name="singleStep">
-             <double>10000.000000000000000</double>
+             <double>1000.000000000000000</double>
             </property>
             <property name="value">
              <double>10000.000000000000000</double>
@@ -693,7 +696,7 @@
              <number>100000000</number>
             </property>
             <property name="value">
-             <number>0</number>
+             <number>1</number>
             </property>
            </widget>
           </item>
@@ -753,6 +756,9 @@
            <widget class="QDoubleSpinBox" name="fragMinScore">
             <property name="maximum">
              <double>10000000.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>10.000000000000000</double>
             </property>
            </widget>
           </item>
