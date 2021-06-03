@@ -20,7 +20,7 @@ class PeakDetectionDialog : public QDialog, public Ui_PeakDetectionDialog
 				 enum FeatureDetectionType { FullSpectrum=0, CompoundDB, QQQ };
 				 PeakDetectionDialog(QWidget *parent);
 				 ~PeakDetectionDialog();
-				 void setSettings(QSettings* settings) { this->settings = settings; }
+                 void setSettings(QSettings* settings) { this->settings = settings; setUIValuesFromSettings();}
 				 void setMainWindow(MainWindow* w) { this->mainwindow = w; }
 
 		public slots:
@@ -37,6 +37,7 @@ class PeakDetectionDialog : public QDialog, public Ui_PeakDetectionDialog
                  void showLibraryDialog();
 
 		private:
+                void setUIValuesFromSettings();
 				QSettings *settings;
 				MainWindow *mainwindow;
    				BackgroundPeakUpdate* peakupdater;

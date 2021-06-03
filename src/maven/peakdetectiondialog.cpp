@@ -20,6 +20,15 @@ PeakDetectionDialog::PeakDetectionDialog(QWidget *parent) :
 
 }
 
+void PeakDetectionDialog::setUIValuesFromSettings(){
+    if (!settings) {
+        qDebug() << "PeakDetectionDialog::setUIValuesFromSettings(): No settings currently set, unable to set UI values";
+    }
+    if (settings->contains("clsfModelFilename")) {
+        classificationModelFilename->setText(settings->value("clsfModelFilename").toString());
+    }
+}
+
 PeakDetectionDialog::~PeakDetectionDialog() { 
 	cancel();
 	if (peakupdater) delete(peakupdater);
@@ -100,14 +109,18 @@ void PeakDetectionDialog::setFeatureDetection(FeatureDetectionType type) {
 
 	adjustSize();
 }
+
+//Issue 430: loading model does not affect mainwindow classifier model
+//model is not actually loaded until later
 void PeakDetectionDialog::loadModel() { 
 
     const QString name = QFileDialog::getOpenFileName(this,
 				"Select Classification Model", ".",tr("Model File (*.model)"));
 
-	classificationModelFilename->setText(name); 
-	Classifier* clsf = mainwindow->getClassifier();	//get classification model
-	if (clsf ) clsf->loadModel( classificationModelFilename->text().toStdString() );
+    //Issue 430: prefer model, if available
+    if (QFile::exists(classificationModelFilename->text())) {
+        classificationModelFilename->setText(name);
+    }
 }
 
 void PeakDetectionDialog::setOutputDir() { 
@@ -200,6 +213,7 @@ void PeakDetectionDialog::findPeaks() {
             peakupdater->clsf = new ClassifierNeuralNet();
             peakupdater->clsf->loadModel(classificationModelFilename->text().toStdString());
             if (!peakupdater->clsf->hasModel()) {
+                qDebug() << "PeakDetectionDialog::findPeaks(): unable to load peak quality model file, using mainwindow->getClassifier()";
                 delete(peakupdater->clsf);
                 peakupdater->clsf = mainwindow->getClassifier();
             }
