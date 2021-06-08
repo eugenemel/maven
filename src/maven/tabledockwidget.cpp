@@ -1618,6 +1618,9 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
         QAction* z8 = menu.addAction("Edit Selected Peak Group ID");
         connect(z8, SIGNAL(triggered()), SLOT(showEditPeakGroupDialog()));
 
+        QAction *z10 = menu.addAction("Set Compound Search Selected Compound");
+        connect(z10, SIGNAL(triggered()), SLOT(setCompoundSearchSelectedCompound()));
+
         QAction *z9 = menu.addAction("Export RT Alignment from Selected");
         connect(z9, SIGNAL(triggered()), SLOT(exportAlignmentFile()));
         menu.addSeparator();
@@ -2426,6 +2429,12 @@ void TableDockWidget::reconnectCompounds(QString dbName) {
             if (compound) pg->compound = compound;
         }
     }
+}
+
+//Issue 429
+void TableDockWidget::setCompoundSearchSelectedCompound(){
+    qDebug() << "TableDockWidget::setCompoundSearchSelectedCompound()";
+    //TODO
 }
 
 map<string, int> TableDockWidget::groupViewColumnNameToNumber{

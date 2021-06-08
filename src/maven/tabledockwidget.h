@@ -119,6 +119,7 @@ public slots:
       void disconnectCompounds(QString);
       void reconnectCompounds(QString);
       void refreshPeakGroupQuant();
+      void setCompoundSearchSelectedCompound();
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event);
