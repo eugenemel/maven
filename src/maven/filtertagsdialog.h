@@ -33,6 +33,7 @@ class FilterTagsDialog : public QDialog, public Ui_filterTagsDialog {
         QTableWidgetItem *noTags = nullptr;
         QTableWidgetItem *goodTag = nullptr;
         QTableWidgetItem *badTag = nullptr;
+        QTableWidgetItem *reAssignedCompoundTag = nullptr;
 };
 
 struct TagFilterState {

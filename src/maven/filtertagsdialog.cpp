@@ -116,6 +116,38 @@ FilterTagsDialog::FilterTagsDialog(QWidget *parent) : QDialog(parent) {
 
     counter++;
 
+    //Issue 429: Compound manually changed (reassigned)
+
+    tblTags->insertRow(counter);
+
+    QTableWidgetItem *c_item0 = new QTableWidgetItem();
+    c_item0->setCheckState(Qt::Checked);
+    tblTags->setItem(counter, 0, c_item0);
+
+    reAssignedCompoundTag = c_item0;
+
+    QTableWidgetItem *c_item1 = new QTableWidgetItem();
+    c_item1->setText("Reannotated");
+    tblTags->setItem(counter, 1, c_item1);
+
+    QTableWidgetItem *c_item2 = new QTableWidgetItem();
+    c_item2->setText("@");
+    tblTags->setItem(counter, 2, c_item2);
+
+    QTableWidgetItem *c_item3 = new QTableWidgetItem();
+    c_item3->setText(""); // no hotkey for this item - added automatically when compounds reannotated.
+    tblTags->setItem(counter, 3, c_item3);
+
+    QTableWidgetItem *c_item4 = new QTableWidgetItem();
+    c_item4->setIcon(QIcon(":/images/compound_reassigned.png"));
+    tblTags->setItem(counter, 4, c_item4);
+
+    QTableWidgetItem *c_item5 = new QTableWidgetItem();
+    c_item5->setText("Compound associated with Peak Group re-assigned manually.");
+    tblTags->setItem(counter, 5, c_item5);
+
+    counter++;
+
     //Peak group tags
     for (auto &x : DB.peakGroupTags) {
 
@@ -165,6 +197,7 @@ void FilterTagsDialog::selectAll() {
     noTags->setCheckState(Qt::Checked);
     goodTag->setCheckState(Qt::Checked);
     badTag->setCheckState(Qt::Checked);
+    reAssignedCompoundTag->setCheckState(Qt::Checked);
 
     for (auto it = checkBoxTag.begin(); it != checkBoxTag.end(); ++it) {
         it->first->setCheckState(Qt::Checked);
@@ -180,6 +213,7 @@ void FilterTagsDialog::deselectAll() {
     noTags->setCheckState(Qt::Unchecked);
     goodTag->setCheckState(Qt::Unchecked);
     badTag->setCheckState(Qt::Unchecked);
+    reAssignedCompoundTag->setCheckState(Qt::Unchecked);
 
     for (auto it = checkBoxTag.begin(); it != checkBoxTag.end(); ++it) {
         it->first->setCheckState(Qt::Unchecked);
@@ -219,6 +253,7 @@ void FilterTagsDialog::processNewFilter() {
     updateFilter();
 }
 
+
 TagFilterState FilterTagsDialog::getFilterState() {
 
     TagFilterState tagFilterState;
@@ -235,13 +270,19 @@ TagFilterState FilterTagsDialog::getFilterState() {
     }
 
     if (goodTag->checkState() == Qt::Checked) {
-        passingLabels.push_back('g');
+        passingLabels.push_back(PeakGroup::ReservedLabel::GOOD);
     } else {
         isAllPass = false;
     }
 
     if (badTag->checkState() == Qt::Checked) {
-        passingLabels.push_back('b');
+        passingLabels.push_back(PeakGroup::ReservedLabel::BAD);
+    } else {
+        isAllPass = false;
+    }
+
+    if (reAssignedCompoundTag->checkState() == Qt::Checked) {
+        passingLabels.push_back(PeakGroup::ReservedLabel::COMPOUND_MANUALLY_CHANGED);
     } else {
         isAllPass = false;
     }
