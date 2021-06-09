@@ -198,7 +198,10 @@ void MassCalcWidget::showTable() {
         if (databaseSelect->currentText() != "All" and databaseSelect->currentText() != db) continue;
 
         NumericTreeWidgetItem* item = new NumericTreeWidgetItem(treeWidget,Qt::UserRole);
-        item->setData(0,Qt::UserRole,QVariant(i));
+        item->setData(0, Qt::UserRole,QVariant(i));
+
+        item->setData(0, CompoundType, QVariant::fromValue(c));
+        item->setData(1, AdductType, QVariant::fromValue(a));
 
         item->setText(0, c->name.c_str());
         item->setText(1, c->adductString.c_str());

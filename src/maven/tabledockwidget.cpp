@@ -323,6 +323,8 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
             icons.push_back(QIcon(rsrcPath + "/good.png"));
         } else if (c == 'b') {
             icons.push_back(QIcon(rsrcPath + "/bad.png"));
+        } else if (c == PeakGroup::ReservedLabel::COMPOUND_MANUALLY_CHANGED) {
+            icons.push_back(QIcon(rsrcPath + "/compound_reassigned.png"));
         } else if (DB.peakGroupTags.find(c) != DB.peakGroupTags.end()) {
             icons.push_back(DB.peakGroupTags[c]->icon);
         }
@@ -2434,7 +2436,52 @@ void TableDockWidget::reconnectCompounds(QString dbName) {
 //Issue 429
 void TableDockWidget::setCompoundSearchSelectedCompound(){
     qDebug() << "TableDockWidget::setCompoundSearchSelectedCompound()";
-    //TODO
+
+    if (this->getSelectedGroups().size() != 1) return; // only works on a single group
+
+    PeakGroup *currentGroup = this->getSelectedGroup();
+
+    if (!currentGroup) return;
+
+    if (_mainwindow->massCalcWidget->isHidden()) return;
+
+    QList<QTreeWidgetItem*> selectedCompoundSearchMatches = _mainwindow->massCalcWidget->treeWidget->selectedItems();
+    if (selectedCompoundSearchMatches.size() != 1) return;
+
+    QTreeWidgetItem *currentSelectedRow = selectedCompoundSearchMatches.at(0);
+
+    QVariant v = currentSelectedRow->data(0, CompoundType);
+    Compound *compound =  v.value<Compound*>();
+
+    if (!compound) return;
+
+    if (currentGroup->compound == compound) return;
+
+    currentGroup->compound = compound;
+    currentGroup->importedCompoundName = ""; // set this to empty string to allow groupTagString() to work
+    currentGroup->fragMatchScore.mergedScore = -1;
+
+    //update UI
+    QTreeWidgetItem *item = treeWidget->selectedItems().at(0);
+    item->setText(groupViewColumnNameToNumber.at("ID"), groupTagString(currentGroup));
+    item->setText(groupViewColumnNameToNumber.at("Compound"), QString(compound->name.c_str()));
+
+    if (compound->expectedRt) {
+        item->setText(groupViewColumnNameToNumber.at("RT Diff"),
+                      QString::number(currentGroup->meanRt - compound->expectedRt, 'f', 2));//RT Diff
+    }
+
+    if (viewType == groupView) {
+        item->setText(groupViewColumnNameToNumber.at("MS2 Score"), QString::number(-1)); //invalidate score
+    }
+
+    if (!currentGroup->isGroupLabeled(PeakGroup::ReservedLabel::COMPOUND_MANUALLY_CHANGED)) {
+        tagGroup(QString(PeakGroup::ReservedLabel::COMPOUND_MANUALLY_CHANGED));
+        //calls updateItem()
+    } else {
+        updateItem(item);
+    }
+
 }
 
 map<string, int> TableDockWidget::groupViewColumnNameToNumber{
