@@ -695,9 +695,10 @@ void Database::loadPeakGroupTags(string filename) {
         }
 
         if (
-                label == 'b' || //mark group good
-                label == 'g' || //mark group bad
-                label == 'x' //group deleted
+                label == PeakGroup::ReservedLabel::GOOD ||
+                label == PeakGroup::ReservedLabel::BAD ||
+                label == PeakGroup::ReservedLabel::DELETED ||
+                label == PeakGroup::ReservedLabel::COMPOUND_MANUALLY_CHANGED
                 )
         {
             qDebug() << "PeakGroupTag with label ==" << label << "could not be used: reserved label.";
