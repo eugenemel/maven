@@ -201,7 +201,7 @@ void MassCalcWidget::showTable() {
         item->setData(0, Qt::UserRole,QVariant(i));
 
         item->setData(0, CompoundType, QVariant::fromValue(c));
-        item->setData(1, AdductType, QVariant::fromValue(a));
+        item->setData(0, AdductType, QVariant::fromValue(a));
 
         item->setText(0, c->name.c_str());
         item->setText(1, c->adductString.c_str());

@@ -550,8 +550,6 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
                       QString::number(group->meanMz, 'f', 4));                      //m/z
     }
 
-
-
     item->setText(groupViewColumnNameToNumber.at("RT"),
                   QString::number(group->meanRt, 'f', 2));                          //RT
 
@@ -2453,6 +2451,9 @@ void TableDockWidget::setCompoundSearchSelectedCompound(){
     QVariant v = currentSelectedRow->data(0, CompoundType);
     Compound *compound =  v.value<Compound*>();
 
+    QVariant v2= currentSelectedRow->data(0, AdductType);
+    Adduct *adduct = v2.value<Adduct*>();
+
     if (!compound) return;
 
     if (currentGroup->compound == compound) return;
@@ -2461,14 +2462,24 @@ void TableDockWidget::setCompoundSearchSelectedCompound(){
     currentGroup->importedCompoundName = ""; // set this to empty string to allow groupTagString() to work
     currentGroup->fragMatchScore.mergedScore = -1;
 
+    bool isChangeAdduct = adduct && currentGroup->adduct && adduct->name != currentGroup->adduct->name;
+    if (isChangeAdduct) {
+        currentGroup->adduct = adduct;
+    }
+
     //update UI
     QTreeWidgetItem *item = treeWidget->selectedItems().at(0);
+
     item->setText(groupViewColumnNameToNumber.at("ID"), groupTagString(currentGroup));
     item->setText(groupViewColumnNameToNumber.at("Compound"), QString(compound->name.c_str()));
 
     if (compound->expectedRt) {
         item->setText(groupViewColumnNameToNumber.at("RT Diff"),
                       QString::number(currentGroup->meanRt - compound->expectedRt, 'f', 2));//RT Diff
+    }
+
+    if (isChangeAdduct) {
+        item->setText(groupViewColumnNameToNumber.at("Adduct"), QString(adduct->name.c_str()));
     }
 
     if (viewType == groupView) {
