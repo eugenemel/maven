@@ -345,7 +345,8 @@ void MassCalcWidget::showInfo() {
 
         MassCalculator::Match m = matches[mNum];
         if (m.compoundLink) {
-            _mw->getEicWidget()->setCompound(m.compoundLink,m.adductLink);
+            //Issue 426: do not update EIC widget
+//            _mw->getEicWidget()->setCompound(m.compoundLink,m.adductLink);
             _mw->fragmentationSpectraWidget->overlayCompound(m.compoundLink);
         }
 
@@ -359,11 +360,12 @@ void MassCalcWidget::showInfo() {
         if (compound) {
             _mw->fragmentationSpectraWidget->overlayCompound(compound);
 
-            Adduct *adduct = DB.findAdductByName(adductName.toStdString());
+            //Issue 426: do not update EIC widget
+//            Adduct *adduct = DB.findAdductByName(adductName.toStdString());
 
-            if (adduct) {
-                _mw->getEicWidget()->setCompound(compound, adduct);
-            }
+//            if (adduct) {
+//                _mw->getEicWidget()->setCompound(compound, adduct);
+//            }
         }
     }
 
