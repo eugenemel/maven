@@ -37,6 +37,7 @@ EicWidget::EicWidget(QWidget *p) {
     showEICLines(false);
     showMS2Events(true);
     emphasizeEICPoints(false); //Issue 374
+    preservePreviousRtRange(false); //Issue 426
 
     //scene()->setItemIndexMethod(QGraphicsScene::NoIndex);
     scene()->setItemIndexMethod(QGraphicsScene::BspTreeIndex);

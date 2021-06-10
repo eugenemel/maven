@@ -92,6 +92,7 @@ public slots:
     void showMS2Events(bool f) { _showMS2Events=f; }
     void disconnectCompounds(QString libraryName);
     void emphasizeEICPoints(bool f) { _emphasizeEICPoints=f;}
+    void preservePreviousRtRange(bool f) { _isPreservePreviousRtRange=f;}
 
     void startAreaIntegration() { toggleAreaIntegration(true); }
     void startSpectralAveraging() { toggleSpectraAveraging(true); }
@@ -182,6 +183,9 @@ private:
     bool _showIsotopePlot;
     bool _showBarPlot;
     bool _showBoxPlot;
+
+    //Issue 426
+    bool _isPreservePreviousRtRange;
 
     //Issue 374
     bool _emphasizeEICPoints;
