@@ -299,21 +299,22 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
         }
     }
 
-    int good=0; int bad=0;
-    int total=group->peakCount();
-    for(int i=0; i < group->peakCount(); i++ ) {
-        group->peaks[i].quality > 0.5 ? good++ : bad++;
-    }
+    //Issue 426: Remove highlighting on peak groups
+//    int good=0; int bad=0;
+//    int total=group->peakCount();
+//    for(int i=0; i < group->peakCount(); i++ ) {
+//        group->peaks[i].quality > 0.5 ? good++ : bad++;
+//    }
 
-    QBrush brush=Qt::NoBrush;
-    if (good > 0 && group->isGroupBad() ) {
-        float incorrectFraction= ((float) good)/total;
-        brush  = QBrush(QColor::fromRgbF(0.8,0,0,incorrectFraction));
-    } else if(bad>0 && group->isGroupGood()) {
-        float incorrectFraction= ((float) bad)/total;
-        brush  = QBrush(QColor::fromRgbF(0.8,0,0,incorrectFraction));
-    }
-    item->setBackground(0,brush);
+//    QBrush brush=Qt::NoBrush;
+//    if (good > 0 && group->isGroupBad() ) {
+//        float incorrectFraction= ((float) good)/total;
+//        brush  = QBrush(QColor::fromRgbF(0.8,0,0,incorrectFraction));
+//    } else if(bad>0 && group->isGroupGood()) {
+//        float incorrectFraction= ((float) bad)/total;
+//        brush  = QBrush(QColor::fromRgbF(0.8,0,0,incorrectFraction));
+//    }
+//    item->setBackground(0,brush);
 
     //Issue 127: gather all icons
     vector<QIcon> icons;
