@@ -748,7 +748,7 @@
           <item row="0" column="0">
            <widget class="QLabel" name="label_19">
             <property name="text">
-             <string>Match at Least X  Peaks</string>
+             <string>Match at Least X Fragments</string>
             </property>
            </widget>
           </item>
@@ -833,7 +833,7 @@
           <item row="1" column="0">
            <widget class="QLabel" name="lblDiagnostic">
             <property name="text">
-             <string>Match at Least X Diagnostic Peaks</string>
+             <string>Match at Least X Diagnostic Fragments</string>
             </property>
            </widget>
           </item>
