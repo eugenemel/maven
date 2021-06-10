@@ -178,7 +178,7 @@ void MassCalcWidget::showTable() {
         QString rtDiff = QString::number(matches[i].rtdiff,'f', 1);
 
         QString matchScore;
-        if (scoringAlgorithm == "rumsDB") {
+        if (scoringAlgorithm == "rumsDB/clamDB") {
             matchScore = "N/A";
         } else {
             matchScore = QString::number( matches[i].fragScore.getScoreByName(scoringAlgorithm) , 'f', 3);
