@@ -2400,6 +2400,13 @@ QWidget* MainWindow::eicWidgetController() {
     btnEICDots->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnEICDots->setToolTip(tr("Show Scans as Dots"));
 
+    btnLockRt = new QToolButton(toolBar);
+    btnLockRt->setCheckable(true);
+    btnLockRt->setChecked(false);
+    btnLockRt->setIcon(QIcon(rsrcPath + "/padlock.png"));
+    btnLockRt->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnLockRt->setToolTip("Preserve displayed RT range");
+
     btnBarPlot = new QToolButton(toolBar);
     btnBarPlot->setCheckable(true);
     btnBarPlot->setChecked(false);
@@ -2439,6 +2446,7 @@ QWidget* MainWindow::eicWidgetController() {
     toolBar->addWidget(btnGroupPeaks);
 
     toolBar->addSeparator();
+    toolBar->addWidget(btnLockRt);
     toolBar->addWidget(btnBarPlot);
     toolBar->addWidget(btnIsotopePlot);
     //toolBar->addWidget(btn)
@@ -2486,6 +2494,9 @@ QWidget* MainWindow::eicWidgetController() {
     connect(btnGroupPeaks, SIGNAL(toggled(bool)), eicWidget, SLOT(automaticPeakGrouping(bool)));
     connect(btnGroupPeaks, SIGNAL(toggled(bool)), eicWidget, SLOT(groupPeaks()));
     connect(btnGroupPeaks, SIGNAL(toggled(bool)), eicWidget, SLOT(replot()));
+
+    connect(btnLockRt, SIGNAL(toggled(bool)), eicWidget, SLOT(preservePreviousRtRange(bool)));
+    connect(btnLockRt, SIGNAL(toggled(bool)), eicWidget, SLOT(replot()));
 
     connect(btnBarPlot, SIGNAL(toggled(bool)), eicWidget, SLOT(showBarPlot(bool)));
     connect(btnBarPlot, SIGNAL(toggled(bool)), eicWidget, SLOT(replot()));

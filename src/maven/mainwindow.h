@@ -181,6 +181,7 @@ public:
     QToolButton *btnGroupPeaks = nullptr;
     QToolButton *btnEICFill = nullptr;
     QToolButton *btnEICDots = nullptr;
+    QToolButton *btnLockRt = nullptr;
     QToolButton *btnBarPlot = nullptr;
     QToolButton *btnIsotopePlot = nullptr;
     IsotopeParameters getIsotopeParameters();
