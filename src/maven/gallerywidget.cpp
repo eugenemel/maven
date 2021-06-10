@@ -393,8 +393,8 @@ void GalleryWidget::mousePressEvent(QMouseEvent *event) {
             }
 
 			mzSlice slice =  v.value<mzSlice>();
-            if (mainwindow != NULL) {
-                mainwindow->getEicWidget()->setMzSlice(slice);
+            if (mainwindow) {
+                mainwindow->getEicWidget()->setMzSlice(slice, false); //use slice RT values
 				return;
             }
 

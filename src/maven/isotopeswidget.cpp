@@ -380,11 +380,11 @@ void IsotopeWidget::showInfo() {
    if (mz > 0 ) {
 	   double ppm = _mw->getUserPPM();
 	   mzSlice slice  = _mw->getEicWidget()->getMzSlice();
-	   slice.mzmin = mz - mz/1e6*ppm;
-	   slice.mzmax = mz + mz/1e6*ppm;
+       slice.mzmin = mz - mz/1e6f*static_cast<float>(ppm);
+       slice.mzmax = mz + mz/1e6f*static_cast<float>(ppm);
 	   if(_compound ) slice.compound = _compound;
 	   if(!_compound) slice.compound = tempCompound;
-	   _mw->getEicWidget()->setMzSlice(slice);
+       _mw->getEicWidget()->setMzSlice(slice, false); //Use slice RT values
    }
 }
 

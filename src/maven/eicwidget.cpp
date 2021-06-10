@@ -429,12 +429,10 @@ void EicWidget::computeEICs(bool isUseSampleBoundsRT) {
         _slice.rtmax=bounds.rtmax;
     }
 
-    //Issue 22: TODO: this is a bandaid, does not address fundamental problem!
-    //fix suggested by Eugene (2019-06-12)
     if(_slice.mzmin > _slice.mzmax){
         std::swap(_slice.mzmin,_slice.mzmax);
         qDebug() << "swapping slice.mzmin and slice.mzmax.";
-    } // why????
+    }
 
     //get eics
      eics = BackgroundPeakUpdate::pullEICs(&_slice,
@@ -1529,27 +1527,33 @@ void EicWidget::setCompound(Compound* c, Adduct* adduct) {
 
     if (adduct)  mz = adduct->computeAdductMass(c->getExactMass());
 
-    float minmz = mz - mz/1e6*ppm;
-    float maxmz = mz + mz/1e6*ppm;
+    float minmz = mz - mz/1e6f*ppm;
+    float maxmz = mz + mz/1e6f*ppm;
     float rtmin = _slice.rtmin;
     float rtmax = _slice.rtmax;
 
-    if (_autoZoom) {
+    bool isUseSampleBoundsRT = true;
+
+    //RT locking takes precedence over autozoom
+    if (_isPreservePreviousRtRange) {
+        isUseSampleBoundsRT = false;
+    } else if (_autoZoom) {
         if (c->expectedRt > 0 ) {
-            rtmin = c->expectedRt-2;
-            rtmax = c->expectedRt+2;
+            rtmin = max(c->expectedRt-2.0f, 0.0f);
+            rtmax = c->expectedRt+2.0f;
+            isUseSampleBoundsRT = false;
         }
     }
+
     //clock_gettime(CLOCK_REALTIME, &tE);
    //qDebug() << "Time taken" << (tE.tv_sec-tS.tv_sec)*1000 + (tE.tv_nsec - tS.tv_nsec)/1e6;
-
 
     mzSlice slice(minmz,maxmz,rtmin,rtmax);
     slice.compound = c;
     slice.adduct   = adduct;
     if(!c->srmId.empty()) slice.srmId=c->srmId;
 
-    setMzSlice(slice);
+    setMzSlice(slice, isUseSampleBoundsRT);
 
    //clock_gettime(CLOCK_REALTIME, &tE);
    //qDebug() << "Time taken" << (tE.tv_sec-tS.tv_sec)*1000 + (tE.tv_nsec - tS.tv_nsec)/1e6;
@@ -1686,23 +1690,23 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
     replot(group);
 }
 
-void EicWidget::setPPM(double ppm) { 
- //qDebug <<"EicWidget::setPPM(double ppm) "; 
-        mzSlice x = _slice;
-	if ( x.mz <= 0 ) x.mz = x.mzmin + (x.mzmax - x.mzmin)/2.0;
-	x.mzmin = x.mz - x.mz/1e6*ppm;
-	x.mzmax = x.mz + x.mz/1e6*ppm;
- 	setMzSlice(x);
+void EicWidget::setPPM(double ppm) {
+ //qDebug <<"EicWidget::setPPM(double ppm) ";
+    mzSlice x = _slice;
+    if ( x.mz <= 0.0f ) x.mz = x.mzmin + (x.mzmax - x.mzmin)/2.0f;
+    x.mzmin = x.mz - x.mz/1e6f*static_cast<float>(ppm);
+    x.mzmax = x.mz + x.mz/1e6f*static_cast<float>(ppm);
+    setMzSlice(x, !_isPreservePreviousRtRange);
 }
 
 void EicWidget::setMzSlice(float mz){
      //qDebug() << "EicWidget::setMzSlice()" << setprecision(8) << mz << endl;
-	mzSlice x (_slice.mzmin,_slice.mzmax,_slice.rtmin,_slice.rtmax);
+    mzSlice x (_slice.mzmin, _slice.mzmax, _slice.rtmin, _slice.rtmax);
 	x.mz = mz;
     x.mzmin = mz - mz/1e6f*static_cast<float>(getMainWindow()->getUserPPM());
     x.mzmax = mz + mz/1e6f*static_cast<float>(getMainWindow()->getUserPPM());
     x.compound = nullptr;
-	setMzSlice(x);
+    setMzSlice(x, !_isPreservePreviousRtRange);
 }
 
 void EicWidget::groupPeaks() {
