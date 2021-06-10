@@ -106,5 +106,6 @@
         <file>images/plain_gaussian.png</file>
         <file>images/isotope_legend.png</file>
         <file>images/compound_reassigned.png</file>
+        <file>images/padlock.png</file>
     </qresource>
 </RCC>
