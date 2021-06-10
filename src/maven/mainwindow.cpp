@@ -2405,7 +2405,7 @@ QWidget* MainWindow::eicWidgetController() {
     btnLockRt->setChecked(false);
     btnLockRt->setIcon(QIcon(rsrcPath + "/padlock.png"));
     btnLockRt->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnLockRt->setToolTip("Preserve displayed RT range");
+    btnLockRt->setToolTip("Lock RT range");
 
     btnBarPlot = new QToolButton(toolBar);
     btnBarPlot->setCheckable(true);
