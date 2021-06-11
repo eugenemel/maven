@@ -510,8 +510,8 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
 
         //matched?
         if (pos >= 0 && pos < _currentScan->nobs()) {
-            //cerr << "matched:" << hitMz << " " <<  _currentScan->mz[pos] << " "  << hitIntensity << " " << _currentScan->intensity[pos] << endl;
-            int x = toX(_currentScan->mz[pos]);
+
+            int x = toX(hitMz); //Issue 342: match is drawn from perspective of reference m/z for consistency
             int y = toY(_maxY,SCALE);
 
             QGraphicsLineItem* line = new QGraphicsLineItem(x,y,x,toY(0),0);
