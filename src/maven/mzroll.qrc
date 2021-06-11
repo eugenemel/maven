@@ -107,5 +107,6 @@
         <file>images/isotope_legend.png</file>
         <file>images/compound_reassigned.png</file>
         <file>images/padlock.png</file>
+        <file>images/free_range.png</file>
     </qresource>
 </RCC>

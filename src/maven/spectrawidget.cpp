@@ -1260,6 +1260,18 @@ void SpectraWidget::contextMenuEvent(QContextMenuEvent * event) {
     QAction* a0 = menu.addAction("Reset Zoom");
     connect(a0, SIGNAL(triggered()), SLOT(resetZoom()));
 
+    menu.addSeparator();
+
+    QAction *aFree = menu.addAction(QIcon(rsrcPath +"/free_range.png"), "Span m/z range");
+    connect(aFree, SIGNAL(triggered()), SLOT(freeMzRange()));
+    aFree->setToolTip("m/z range spans current spectral data");
+
+    QAction *aLock = menu.addAction(QIcon(rsrcPath + "/padlock.png"), " Lock m/z range");
+    connect(aLock, SIGNAL(triggered()), SLOT(lockMzRange()));
+    aLock->setToolTip("Lock m/z range to current displayed range");
+
+    menu.addSeparator();
+
     QAction* a1 = menu.addAction("Go To Scan");
     connect(a1, SIGNAL(triggered()), SLOT(gotoScan()));
 
@@ -1481,4 +1493,12 @@ void SpectraWidget::toggleDisplayHighPrecisionMz() {
     _isDisplayHighPrecisionMz= !_isDisplayHighPrecisionMz;
     drawGraph();
     repaint();
+}
+
+void SpectraWidget::lockMzRange(){
+    qDebug() << "SpectraWidget::lockMzRange()";
+}
+
+void SpectraWidget::freeMzRange(){
+    qDebug() << "SpectraWidget::freeMzRange()";
 }

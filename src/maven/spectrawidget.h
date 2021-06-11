@@ -60,6 +60,8 @@ public slots:
                     void selectObservedPeak(int peakIndex);
 
                     void findBounds(bool checkX, bool checkY);
+                    void lockMzRange();
+                    void freeMzRange();
         private:
                     int _msLevel;
                     MainWindow* mainwindow;
