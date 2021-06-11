@@ -1496,9 +1496,49 @@ void SpectraWidget::toggleDisplayHighPrecisionMz() {
 }
 
 void SpectraWidget::lockMzRange(){
-    qDebug() << "SpectraWidget::lockMzRange()";
+    qDebug() << "SpectraWidget::lockMzRange():";
+    qDebug() << "ms level" << _msLevel << ": [" << _minX << "-" << _maxX << "]";
+
+    if (_msLevel == 1) {
+
+        mainwindow->getSettings()->setValue("chkAutoMzMin", Qt::CheckState::Unchecked);
+        mainwindow->getSettings()->setValue("chkAutoMzMax", Qt::CheckState::Unchecked);
+        mainwindow->getSettings()->setValue("spnMzMinVal", _minX);
+        mainwindow->getSettings()->setValue("spnMzMaxVal", _maxX);
+
+        mainwindow->settingsForm->chkMs1Autoscale->blockSignals(true);
+        mainwindow->settingsForm->chkMs1Autoscale->setCheckState(Qt::CheckState::Unchecked);
+        mainwindow->settingsForm->chkMs1Autoscale->blockSignals(false);
+
+        mainwindow->settingsForm->spnMs1MzMinVal->blockSignals(true);
+        mainwindow->settingsForm->spnMs1MzMinVal->setValue(static_cast<double>(_minX));
+        mainwindow->settingsForm->spnMs1MzMaxVal->blockSignals(false);
+
+        mainwindow->settingsForm->spnMs1MzMaxVal->blockSignals(true);
+        mainwindow->settingsForm->spnMs1MzMaxVal->setValue(static_cast<double>(_maxX));
+        mainwindow->settingsForm->spnMs1MzMaxVal->blockSignals(false);
+    }
+
+    findBounds(true, true);
+    replot();
+    repaint();
 }
 
 void SpectraWidget::freeMzRange(){
     qDebug() << "SpectraWidget::freeMzRange()";
+
+    if (_msLevel == 1) {
+
+        mainwindow->getSettings()->setValue("chkAutoMzMin", Qt::CheckState::Checked);
+        mainwindow->getSettings()->setValue("chkAutoMzMax", Qt::CheckState::Checked);
+
+        mainwindow->settingsForm->chkMs1Autoscale->blockSignals(true);
+        mainwindow->settingsForm->chkMs1Autoscale->setCheckState(Qt::CheckState::Checked);
+        mainwindow->settingsForm->chkMs1Autoscale->blockSignals(false);
+
+    }
+
+    findBounds(true, true);
+    replot();
+    repaint();
 }
