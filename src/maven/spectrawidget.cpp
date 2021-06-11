@@ -1517,6 +1517,45 @@ void SpectraWidget::lockMzRange(){
         mainwindow->settingsForm->spnMs1MzMaxVal->blockSignals(true);
         mainwindow->settingsForm->spnMs1MzMaxVal->setValue(static_cast<double>(_maxX));
         mainwindow->settingsForm->spnMs1MzMaxVal->blockSignals(false);
+
+    } else if (_msLevel == 2) {
+
+        mainwindow->getSettings()->setValue("chkMs2AutoMzMin", Qt::CheckState::Unchecked);
+        mainwindow->getSettings()->setValue("chkMs2AutoMzMax", Qt::CheckState::Unchecked);
+        mainwindow->getSettings()->setValue("spnMs2MzMin", _minX);
+        mainwindow->getSettings()->setValue("spnMs2MzMax", _maxX);
+
+        mainwindow->settingsForm->chkMs2Autoscale->blockSignals(true);
+        mainwindow->settingsForm->chkMs2Autoscale->setCheckState(Qt::CheckState::Unchecked);
+        mainwindow->settingsForm->chkMs2Autoscale->blockSignals(false);
+
+        mainwindow->settingsForm->spnMs2MzMin->blockSignals(true);
+        mainwindow->settingsForm->spnMs2MzMin->setValue(static_cast<double>(_minX));
+        mainwindow->settingsForm->spnMs2MzMin->blockSignals(false);
+
+        mainwindow->settingsForm->spnMs2MzMax->blockSignals(true);
+        mainwindow->settingsForm->spnMs2MzMax->setValue(static_cast<double>(_maxX));
+        mainwindow->settingsForm->spnMs2MzMax->blockSignals(false);
+
+    } else if (_msLevel == 3) {
+
+        mainwindow->getSettings()->setValue("chkMs3AutoMzMin", Qt::CheckState::Unchecked);
+        mainwindow->getSettings()->setValue("chkMs3AutoMzMax", Qt::CheckState::Unchecked);
+        mainwindow->getSettings()->setValue("spnMs3MzMin", _minX);
+        mainwindow->getSettings()->setValue("spnMs3MzMax", _maxX);
+
+        mainwindow->settingsForm->chkMs3Autoscale->blockSignals(true);
+        mainwindow->settingsForm->chkMs3Autoscale->setCheckState(Qt::CheckState::Unchecked);
+        mainwindow->settingsForm->chkMs3Autoscale->blockSignals(false);
+
+        mainwindow->settingsForm->spnMs3MzMin->blockSignals(true);
+        mainwindow->settingsForm->spnMs3MzMin->setValue(static_cast<double>(_minX));
+        mainwindow->settingsForm->spnMs3MzMin->blockSignals(false);
+
+        mainwindow->settingsForm->spnMs3MzMax->blockSignals(true);
+        mainwindow->settingsForm->spnMs3MzMax->setValue(static_cast<double>(_maxX));
+        mainwindow->settingsForm->spnMs3MzMax->blockSignals(false);
+
     }
 
     findBounds(true, true);
@@ -1525,6 +1564,7 @@ void SpectraWidget::lockMzRange(){
 }
 
 void SpectraWidget::freeMzRange(){
+
     qDebug() << "SpectraWidget::freeMzRange()";
 
     if (_msLevel == 1) {
@@ -1536,6 +1576,23 @@ void SpectraWidget::freeMzRange(){
         mainwindow->settingsForm->chkMs1Autoscale->setCheckState(Qt::CheckState::Checked);
         mainwindow->settingsForm->chkMs1Autoscale->blockSignals(false);
 
+    } else if (_msLevel == 2) {
+
+        mainwindow->getSettings()->setValue("chkMs2AutoMzMin", Qt::CheckState::Checked);
+        mainwindow->getSettings()->setValue("chkMs2AutoMzMax", Qt::CheckState::Checked);
+
+        mainwindow->settingsForm->chkMs2Autoscale->blockSignals(true);
+        mainwindow->settingsForm->chkMs2Autoscale->setCheckState(Qt::CheckState::Checked);
+        mainwindow->settingsForm->chkMs2Autoscale->blockSignals(false);
+
+    } else if (_msLevel == 3) {
+
+        mainwindow->getSettings()->setValue("chkMs3AutoMzMin", Qt::CheckState::Checked);
+        mainwindow->getSettings()->setValue("chkMs3AutoMzMax", Qt::CheckState::Checked);
+
+        mainwindow->settingsForm->chkMs3Autoscale->blockSignals(true);
+        mainwindow->settingsForm->chkMs3Autoscale->setCheckState(Qt::CheckState::Checked);
+        mainwindow->settingsForm->chkMs3Autoscale->blockSignals(false);
     }
 
     findBounds(true, true);
