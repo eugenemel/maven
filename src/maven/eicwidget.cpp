@@ -1629,16 +1629,6 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
 
     _alwaysDisplayGroup = group;
 
-    //Issue 367: copying approach may cause other problems
-//    if (_alwaysDisplayGroup) {
-//        delete(_alwaysDisplayGroup);
-//        _alwaysDisplayGroup = nullptr;
-//    }
-
-//    if (group) {
-//        _alwaysDisplayGroup = new PeakGroup(*group);
-//    }
-
     if (!group) return;
 
     _slice.mz = group->meanMz;
@@ -1655,15 +1645,6 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
         _slice.srmProductMz = group->srmProductMz;
     }
 
-    //TODO: how is _autoZoom used? switching to 5x peak width approach (Issue 368)
-//    if ( _autoZoom && group->parent) {
-//        _slice.rtmin = group->parent->minRt- 2 * _zoomFactor;
-//        _slice.rtmax = group->parent->maxRt+ 2 * _zoomFactor;
-//    } else if (_autoZoom) {
-//        _slice.rtmin = group->minRt- 2 * _zoomFactor;
-//        _slice.rtmax = group->maxRt+ 2 * _zoomFactor;
-//    }
-
     //use 5x peak width for display, or at least 6 seconds, or no more than 3 minutes
     float peakWidth = group->maxRt - group->minRt;
     if (peakWidth < 0.1f) peakWidth = 0.1f;
@@ -1671,12 +1652,6 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
 
     _slice.rtmin = max(group->minRt - 2 * peakWidth, 0.0f);
     _slice.rtmax = min(getMainWindow()->getVisibleSamplesMaxRt(), group->maxRt + 2 * peakWidth);
-
-    //TODO: Delete me?
-//    //make sure that plot region is within visible sample bounds
-//    mzSlice bounds = visibleEICBounds();
-//    if (_slice.rtmin < bounds.rtmin ) _slice.rtmin = bounds.rtmin;
-//    if (_slice.rtmax > bounds.rtmax ) _slice.rtmax = bounds.rtmax;
 
     _slice.mz = group->meanMz;
     _slice.mzmin = group->minMz;
