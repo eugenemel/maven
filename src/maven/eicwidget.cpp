@@ -1702,8 +1702,13 @@ void EicWidget::groupPeaks() {
     //ms2-centric new approach
     //peakgroups = EIC::groupPeaksB(eics, eic_smoothingWindow, grouping_maxRtWindow, minSmoothedPeakIntensity);
 
-    //Issue 381
+    //Issue 381, 441: EIC::groupPeaksC()
     peakgroups = EIC::groupPeaksC(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow, static_cast<int>(baselineSmoothing), static_cast<int>(baselineDropTopX));
+
+    //Issue 441 debugging
+    if (!eics.empty()) {
+        qDebug() << "EICWidget::groupPeaks(): EIC Range =[" << eics.at(0)->rtmin << "-" << eics.at(0)->rtmax << "]: found" << peakgroups.size() << "groups";
+    }
 
     EIC::removeLowRankGroups(peakgroups, 50);
 
