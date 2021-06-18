@@ -61,8 +61,9 @@ void BarPlot::clear() {
 
 void BarPlot::setPeakGroup(PeakGroup* group) {
     clear();
-    if (group == NULL ) return;
-    if (_mw == NULL   ) return;
+    if (!group) return;
+    if (!_mw) return;
+
     qDebug() << "BarPlot::setPeakGroup() group=" << group;
 
     qtype = _mw->getUserQuantType();
