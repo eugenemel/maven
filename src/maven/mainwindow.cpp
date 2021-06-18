@@ -1183,16 +1183,22 @@ void MainWindow::readSettings() {
         settings->setValue("clsfModelFilename",QString("default.model"));
 
     if( ! settings->contains("grouping_maxRtWindow") )
-        settings->setValue("grouping_maxRtWindow", 0.5 );
+        settings->setValue("grouping_maxRtWindow", 0.25);
 
     if( ! settings->contains("grouping_maxMzWindow") )
         settings->setValue("grouping_maxMzWindow", 100);
 
     if( ! settings->contains("eic_smoothingAlgorithm") )
-        settings->setValue("eic_smoothingAlgorithm", 0);
+        settings->setValue("eic_smoothingAlgorithm", EIC::SmootherType::GAUSSIAN);
 
     if( ! settings->contains("eic_smoothingWindow") )
         settings->setValue("eic_smoothingWindow", 5);
+
+    if ( ! settings->contains("baseline_quantile"))
+        settings->setValue("baseline_quantile", 80);
+
+    if (! settings->contains("baseline_smoothing"))
+        settings->setValue("baseline_smoothing", 5);
 
     if( ! settings->contains("eic_ppmWindow") )
         settings->setValue("eic_ppmWindow",100);
