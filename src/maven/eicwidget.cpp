@@ -1685,10 +1685,10 @@ void EicWidget::setMzSlice(float mz){
 }
 
 void EicWidget::groupPeaks() {
+    qDebug() << "EicWidget::groupPeaks()";
 
     if (!_groupPeaks) return;
 
-	 //qDebug() << "EicWidget::groupPeaks() " << endl;
 	//delete previous set of pointers to groups
 	QSettings *settings 		= getMainWindow()->getSettings();
     float eic_smoothingWindow =   settings->value("eic_smoothingWindow").toFloat();
