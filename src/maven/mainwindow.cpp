@@ -1226,10 +1226,10 @@ void MainWindow::readSettings() {
         settings->setValue("maxNaturalAbundanceErr",100);
 
     if( ! settings->contains("maxIsotopeScanDiff") )
-        settings->setValue("maxIsotopeScanDiff",10);
+        settings->setValue("maxIsotopeScanDiff",5);
 
     if( ! settings->contains("minIsotopicCorrelation") )
-        settings->setValue("minIsotopicCorrelation",0.1);
+        settings->setValue("minIsotopicCorrelation",0.2);
 
     if ( settings->contains("lastOpenedProject")) {
         settings->setValue("lastOpenedProject","");
