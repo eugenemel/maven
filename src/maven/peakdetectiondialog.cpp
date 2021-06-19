@@ -153,6 +153,7 @@ void PeakDetectionDialog::show() {
 void PeakDetectionDialog::updateLibraryList(){
 
     QString text = compoundDatabase->currentText();
+
     QStringList dbnames = DB.getLoadedDatabaseNames();
 
     dbnames.push_front("ALL");
@@ -168,8 +169,15 @@ void PeakDetectionDialog::updateLibraryList(){
              compoundDatabase->setCurrentIndex(index);
          }
     } else {
+
         QString selectedDB = mainwindow->ligandWidget->getDatabaseName();
-        compoundDatabase->setCurrentIndex(compoundDatabase->findText(selectedDB));
+
+        //Issue 444
+        if (selectedDB == SELECT_DB){
+            compoundDatabase->setCurrentIndex(compoundDatabase->findText("ALL"));
+        } else {
+            compoundDatabase->setCurrentIndex(compoundDatabase->findText(selectedDB));
+        }
     }
 
 }
