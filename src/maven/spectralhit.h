@@ -31,7 +31,7 @@ class SpectralHit {
 
 
 	SpectralHit() { 
-		scan = NULL; 
+        scan = nullptr;
 		precursorMz=0;
 		matchCount=0; 
 		productPPM=0; 
