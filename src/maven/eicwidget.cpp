@@ -1574,9 +1574,13 @@ void EicWidget::setCompound(Compound* c, Adduct* adduct, bool isPreservePrevious
 
 void EicWidget::setMzSlice(const mzSlice& slice, bool isUseSampleBoundsRT) {
     qDebug() << "EicWidget::setmzSlice()";
+
+    //Issue 434: recompute EICs if the (m/z, RT) boundaries differ
+    bool isRecomputeEICs = !mzSlice::isEqualMzRtBoundaries(slice, _slice);
+
     _slice = mzSlice(slice);
 
-    if (!mzSlice::isEqualMzRtBoundaries(slice, _slice)) {
+    if (isRecomputeEICs) {
         recompute(isUseSampleBoundsRT);
     }
 
@@ -1588,14 +1592,6 @@ void EicWidget::setSRMTransition(const SRMTransition& transition){
 
     //Issue 367: Changing SRM transition should remove any memory of any previous displayed peak.
     _alwaysDisplayGroup = nullptr;
-
-    //Issue 367: making a copy of the peak group to always display may fix the crashing issue,
-    //but potentially causes other problems
-    //
-//    if (_alwaysDisplayGroup) {
-//        delete(_alwaysDisplayGroup);
-//        _alwaysDisplayGroup = nullptr;
-//    }
 
     //update slice data
     setMzSlice(mzSlice(transition));
