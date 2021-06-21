@@ -1494,7 +1494,7 @@ void EicWidget::setSrmId(string srmId) {
    	replot();
 }
 
-void EicWidget::setCompound(Compound* c, Adduct* adduct) {
+void EicWidget::setCompound(Compound* c, Adduct* adduct, bool isPreservePreviousRtRange) {
     qDebug() << "EicWidget::setCompound() compound=" << c << ", adduct=" << adduct;
     if (!c) return;
     if ( getMainWindow()->sampleCount() == 0) return;
@@ -1535,7 +1535,9 @@ void EicWidget::setCompound(Compound* c, Adduct* adduct) {
     bool isUseSampleBoundsRT = true;
 
     //RT locking takes precedence over autozoom
-    if (_isPreservePreviousRtRange) {
+    //_isPreservePreviousRtRange (with underscore) is user set, manually locked
+    // isPreservePreviousRtRange (no underscore) is an internal, non-user facing call, as from MassCalcGUI::showInfo()
+    if (_isPreservePreviousRtRange || isPreservePreviousRtRange) {
         isUseSampleBoundsRT = false;
     } else if (_autoZoom) {
         if (c->expectedRt > 0 ) {
@@ -1574,8 +1576,9 @@ void EicWidget::setMzSlice(const mzSlice& slice, bool isUseSampleBoundsRT) {
     qDebug() << "EicWidget::setmzSlice()";
     _slice = mzSlice(slice);
 
-    recompute(isUseSampleBoundsRT);
-    //TODO: don't recompute if not necessary.
+    if (!mzSlice::isEqualMzRtBoundaries(slice, _slice)) {
+        recompute(isUseSampleBoundsRT);
+    }
 
     replot(nullptr);
 }
