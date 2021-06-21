@@ -44,6 +44,7 @@ public:
 
     inline bool isTargetedMs3Table(){return windowTitle().startsWith("Targeted MS3 Search");}
     inline bool isDirectInfusionTable(){return windowTitle().startsWith("Direct Infusion Analysis");}
+    inline bool isDetectedFeaturesTable(){return windowTitle().startsWith("Detected Features");}
 
 public slots: 
 	  //void showInfo(PeakGroup* group);
