@@ -885,8 +885,21 @@ void MainWindow::setCompoundFocus(Compound*c) {
 
     //show fragmentation
     if (fragmentationSpectraWidget->isVisible())  {
+
         PeakGroup* group = eicWidget->getSelectedGroup();
-        fragmentationSpectraWidget->overlayPeakGroup(group);
+
+        if (group && group->compound && group->compound == c) {
+
+            fragmentationSpectraWidget->overlayPeakGroup(group);
+
+            //Did not detect any MS2 scans
+            if (!fragmentationSpectraWidget->getCurrentScan()) {
+                fragmentationSpectraWidget->showMS2CompoundSpectrum(c);
+            }
+
+        } else {
+            fragmentationSpectraWidget->showMS2CompoundSpectrum(c);
+        }
     }
 
     if (c) setUrl(c);

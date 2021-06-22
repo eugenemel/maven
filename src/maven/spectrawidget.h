@@ -31,10 +31,14 @@ public slots:
                     void replot();
                     void spectraToClipboard();
                     void spectraToClipboardTop();
+
                     void overlaySpectralHit(SpectralHit& hit);
                     void overlayCompound(Compound* c);
                     void overlayPeakGroup(PeakGroup* group);
                     void overlayTheoreticalSpectra(Compound* c);
+
+                    //Issue 442
+                    void showMS2CompoundSpectrum(Compound *c);
 
                     void resetZoom();
                     void zoomIn();
@@ -92,8 +96,8 @@ public slots:
                     float _zoomFactor;
 
                     float _maxIntensityScaleFactor = 1.3f;
-                    float _showOverlayScale = 0.45;
-                    float _showOverlayOffset = 0.50;
+                    float _showOverlayScale = 0.45f;
+                    float _showOverlayOffset = 0.50f;
 
                     SpectralHit  _spectralHit;
 
@@ -135,6 +139,8 @@ public slots:
 
                     //strictly for internal adjustment - use setScan(Scan* scan) for slots.
                     void setCurrentScan(Scan* scan);
+
+                    SpectralHit generateSpectralHitFromCompound(Compound *c);
 
 		protected:
                     //void leaveEvent ( QEvent * event );

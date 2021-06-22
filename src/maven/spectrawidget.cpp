@@ -391,6 +391,17 @@ void SpectraWidget::overlayTheoreticalSpectra(Compound* c) {
     overlaySpectralHit(hit);
 }
 
+void SpectraWidget::showMS2CompoundSpectrum(Compound *c) {
+    if (_msLevel != 2) return;
+    clearOverlay();
+
+    _showOverlay = true;
+    _currentScan = nullptr; //clear out previous scan information
+    _spectralHit = generateSpectralHitFromCompound(c);
+
+    drawGraph();
+}
+
 void SpectraWidget::overlayCompound(Compound* c) {
    clearOverlay();
    if(!_currentScan or !c) return;
@@ -400,43 +411,63 @@ void SpectraWidget::overlayCompound(Compound* c) {
        return;
    }
 
-   SpectralHit hit;
-   hit.compoundId = c->name.c_str();
-   hit.originalCompoundId = c->id.c_str();
-   hit.scan = _currentScan;
-   hit.precursorMz = c->precursorMz;
-   hit.productPPM=  mainwindow->massCalcWidget->fragmentPPM->value();
-   cerr << "SpectraWidget::overlayCompound() " << c->name << " #theory=" << c->fragment_mzs.size() << "\t #obs=" << hit.scan->nobs() << "\t #matched=" << hit.matchCount << endl;
-
-   for(int i=0; i < c->fragment_mzs.size(); i++) 	   hit.mzList << c->fragment_mzs[i];
-   for(int i=0; i < c->fragment_intensity.size(); i++) hit.intensityList << c->fragment_intensity[i];
-
-   //Issue 159: Careful to avoid array out of bounds violations
-   for(int i=0; i < c->fragment_mzs.size(); i++) {
-       if (c->fragment_labels.size() == c->fragment_mzs.size()) {
-           hit.fragLabelList << QString(c->fragment_labels[i].c_str());
-       } else {
-           hit.fragLabelList << QString("");
-       }
-   }
-
-   //remove previous annotations
-   links.clear();
-
-   //add new annotations
-   for(auto ion: c->fragment_iontype) {
-         float mz= c->fragment_mzs[ion.first];
-         string note = ion.second;
-         links.push_back(mzLink(mz,mz,note));
-   }
-
-   //for(int i=0; i < c->fragment_mzs.size(); i++) { cerr << "overlay:" << c->fragment_mzs[i] << endl; }
+   _spectralHit = generateSpectralHitFromCompound(c);
 
    _showOverlay = true;
-   overlaySpectralHit(hit);
+   overlaySpectralHit(_spectralHit);
+
    resetZoom();
 }
 
+SpectralHit SpectraWidget::generateSpectralHitFromCompound(Compound *c) {
+
+    SpectralHit hit;
+
+    if (!c) return hit;
+
+    hit.compoundId = c->name.c_str();
+    hit.originalCompoundId = c->id.c_str();
+    hit.scan = _currentScan;
+    hit.precursorMz = c->precursorMz;
+    hit.productPPM=  mainwindow->massCalcWidget->fragmentPPM->value();
+
+    qDebug() << "SpectraWidget::overlayCompound() compound=" << c->name.c_str()
+         << "# m/z=" << c->fragment_mzs.size();
+
+    if (hit.scan) {
+        qDebug() << "#obs=" << hit.scan->nobs()
+                 << "#matched=" << hit.matchCount;
+    }
+
+    for(unsigned int i=0; i < c->fragment_mzs.size(); i++){
+        hit.mzList << static_cast<double>(c->fragment_mzs[i]);
+    }
+
+    for(unsigned int i=0; i < c->fragment_intensity.size(); i++){
+        hit.intensityList << static_cast<double>(c->fragment_intensity[i]);
+    }
+
+    //Issue 159: Careful to avoid array out of bounds violations
+    for(unsigned int i=0; i < c->fragment_mzs.size(); i++) {
+        if (c->fragment_labels.size() == c->fragment_mzs.size()) {
+            hit.fragLabelList << QString(c->fragment_labels[i].c_str());
+        } else {
+            hit.fragLabelList << QString("");
+        }
+    }
+
+    //remove previous annotations
+    links.clear();
+
+    //add new annotations
+    for(auto ion: c->fragment_iontype) {
+          float mz= c->fragment_mzs[ion.first];
+          string note = ion.second;
+          links.push_back(mzLink(mz,mz,note));
+    }
+
+    return hit;
+}
 
 void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
 
@@ -463,7 +494,12 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
     QPen sn4FragmentPen(QColor("powderblue"), 2);
     sn4FragmentPen.setStyle(Qt::DashDotLine);
 
-    float SCALE=0.45;
+    float SCALE=0.45f;
+
+    if (!hit.scan) {
+        findBounds(true, false);
+        SCALE = 0.9f;
+    }
 
     //create label
     QGraphicsTextItem* text = new QGraphicsTextItem(hit.compoundId);
@@ -481,23 +517,24 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
         _items.push_back(compoundIdText);
     }
 
-
     for(int i=0; i < hit.mzList.size(); i++) {
         float hitMz=hit.mzList[i];
         int hitIntensity= 1;
         if (i < hit.intensityList.size()) hitIntensity=hit.intensityList[i];
 
         double ppmMz = hitMz;
-        if (_currentScan->precursorMz > 0) {
+        if (_currentScan && _currentScan->precursorMz > 0) {
             ppmMz = _currentScan->precursorMz;
         }
 
         //Issue 226: targeted ms3 search
         int pos = -1;
-        if (_msLevel == 3) {
-            pos = _currentScan->findHighestIntensityPosAMU(hitMz, _ms3MatchingTolr);
-        } else {
-            pos = _currentScan->findHighestIntensityPos(hitMz, static_cast<float>(ppmMz), ppmWindow);
+        if (_currentScan) {
+            if (_msLevel == 3) {
+                pos = _currentScan->findHighestIntensityPosAMU(hitMz, _ms3MatchingTolr);
+            } else {
+                pos = _currentScan->findHighestIntensityPos(hitMz, static_cast<float>(ppmMz), ppmWindow);
+            }
         }
 
         int x = toX(hitMz);
@@ -591,7 +628,6 @@ void SpectraWidget::selectObservedPeak(int peakIndex) {
 
 void SpectraWidget::drawGraph() {
 
-
     //clean up previous plot
     if ( _arrow ) {
         _arrow->setVisible(false);
@@ -601,7 +637,13 @@ void SpectraWidget::drawGraph() {
 
     scene()->setSceneRect(10,10,this->width()-10, this->height()-10);
     Scan* scan = _currentScan;
-    if (!scan) return;
+
+    // Issue 442: support showing library spectrum alone
+    bool isDrawCompound = _showOverlay && !_spectralHit.compoundId.isEmpty();
+    bool isDrawGraph = (scan || isDrawCompound);
+    bool isDrawCompoundOnly = !scan && isDrawCompound;
+
+    if (!isDrawGraph) return;
 
     //draw title text
     setTitle();
@@ -621,8 +663,8 @@ void SpectraWidget::drawGraph() {
     EicLine* sline = new EicLine(nullptr, scene(), mainwindow);
     sline->setColor(sampleColor);
     sline->setPen(slineColor);
-   _items.push_back(sline);
 
+    _items.push_back(sline);
 
    if( _profileMode ) {
         QBrush slineFill(sampleColor);
@@ -632,53 +674,59 @@ void SpectraWidget::drawGraph() {
 
     QMap<float,int>shownPositions; //items sorted by key
 
-    float SCALE=1.0;
-    float OFFSET=0;
+    float SCALE=1.0f;
+    float OFFSET=0.0f;
     if (_showOverlay) {
         SCALE= _showOverlayScale;
         OFFSET= showOverlayOffset();
     }
 
-
     int yzero = toY(0,SCALE,OFFSET);
-    sline->addPoint(toX(_maxX),yzero);
-    sline->addPoint(toX(_minX),yzero);
 
-    for(int j=0; j<scan->nobs(); j++ ) {
-        if ( scan->mz[j] < _minX  || scan->mz[j] > _maxX ) continue;
+    if (!isDrawCompoundOnly) {
+        sline->addPoint(toX(_maxX),yzero);
+        sline->addPoint(toX(_minX),yzero);
+    } else {
+        SCALE = 0.9f;
+    }
 
-        if ( scan->intensity[j] / _maxY > 0.001 ) { // do want this?
-            shownPositions[ scan->intensity[j] ] = j;
-        }
+    if (scan) {
+        for(int j=0; j<scan->nobs(); j++ ) {
+            if ( scan->mz[j] < _minX  || scan->mz[j] > _maxX ) continue;
 
-        int x = toX(scan->mz[j]);
-        int y = toY(scan->intensity[j],SCALE,OFFSET);
+            if ( scan->intensity[j] / _maxY > 0.001 ) { // do want this?
+                shownPositions[ scan->intensity[j] ] = j;
+            }
 
-        if( _profileMode ) {
-               sline->addPoint(x,y);
-        } else {
+            int x = toX(scan->mz[j]);
+            int y = toY(scan->intensity[j],SCALE,OFFSET);
 
-            QGraphicsLineItem* line = new QGraphicsLineItem(x,y,x,yzero,0);
-            scene()->addItem(line);
-            line->setPen(blackpen);
-            _items.push_back(line);
+            if( _profileMode ) {
+                   sline->addPoint(x,y);
+            } else {
 
-//            cerr << "(axisCoord, intensity) = (" << yzero << ", 0)" << endl;
-//            cerr << "(axisCoord, intensity) = (" << y << ", " << scan->intensity[j] << ")" << endl;
+                QGraphicsLineItem* line = new QGraphicsLineItem(x,y,x,yzero,0);
+                scene()->addItem(line);
+                line->setPen(blackpen);
+                _items.push_back(line);
 
-        }
+    //            cerr << "(axisCoord, intensity) = (" << yzero << ", 0)" << endl;
+    //            cerr << "(axisCoord, intensity) = (" << y << ", " << scan->intensity[j] << ")" << endl;
 
-        float tol = 0.005f;
-        if (_msLevel == 3) {
-            tol = _ms3MatchingTolr;
-        }
+            }
 
-        if( abs(scan->mz[j]-_focusedMz) < tol) {
-            QPen redpen(Qt::red, 3);
-            QGraphicsLineItem* line = new QGraphicsLineItem(x,y,x,toY(0,SCALE,OFFSET),0);
-            scene()->addItem(line);
-            line->setPen(redpen);
-            _items.push_back(line);
+            float tol = 0.005f;
+            if (_msLevel == 3) {
+                tol = _ms3MatchingTolr;
+            }
+
+            if( abs(scan->mz[j]-_focusedMz) < tol) {
+                QPen redpen(Qt::red, 3);
+                QGraphicsLineItem* line = new QGraphicsLineItem(x,y,x,toY(0,SCALE,OFFSET),0);
+                scene()->addItem(line);
+                line->setPen(redpen);
+                _items.push_back(line);
+            }
         }
     }
 
@@ -754,19 +802,16 @@ void SpectraWidget::drawGraph() {
         label->setExpanded(true);
     }
 
-    if(_showOverlay and _spectralHit.mzList.size()>0) {
+    if(isDrawCompound) {
         drawSpectralHitLines(_spectralHit);
     }
 
     addAxes();
 }
 
-
-
 void SpectraWidget::findBounds(bool checkX, bool checkY) {
 
-    //bounds
-    if (!_currentScan || _currentScan->mz.size() == 0) return;
+    //if (_currentScan || _currentScan->nobs() == 0) return;
 
     float minMZ;
     float maxMZ;
@@ -782,8 +827,13 @@ void SpectraWidget::findBounds(bool checkX, bool checkY) {
         double mzMinVal = mainwindow->getSettings()->value("spnMs2MzMin", 0.0).toDouble();
         double mzMaxVal = mainwindow->getSettings()->value("spnMs2MzMax", 1200.0).toDouble();
 
-        minMZ = isAutoMzMin ? _currentScan->mz[0] - mzMinOffset : mzMinVal;
-        maxMZ = isAutoMzMax ? _currentScan->mz[_currentScan->mz.size()-1] + mzMaxOffset : mzMaxVal;
+        if (_currentScan && _currentScan->mz.size() > 0) {
+            minMZ = isAutoMzMin ? _currentScan->mz[0] - mzMinOffset : mzMinVal;
+            maxMZ = isAutoMzMax ? _currentScan->mz[_currentScan->mz.size()-1] + mzMaxOffset : mzMaxVal;
+        } else if (!_spectralHit.compoundId.isEmpty()){
+            minMZ = isAutoMzMin ? _spectralHit.getMinMz() - mzMinOffset : mzMinVal;
+            maxMZ = isAutoMzMax ? _spectralHit.getMaxMz() + mzMaxOffset : mzMaxVal;
+        }
 
     } else if (_msLevel == 1){
 
@@ -796,8 +846,13 @@ void SpectraWidget::findBounds(bool checkX, bool checkY) {
         double mzMinVal = mainwindow->getSettings()->value("spnMzMinVal", 0.0).toDouble();
         double mzMaxVal = mainwindow->getSettings()->value("spnMzMaxVal", 1200.0).toDouble();
 
-        minMZ = isAutoMzMin ? _currentScan->mz[0] - mzMinOffset : mzMinVal;
-        maxMZ = isAutoMzMax ? _currentScan->mz[_currentScan->mz.size()-1] + mzMaxOffset : mzMaxVal;
+        if (_currentScan && _currentScan->mz.size() > 0) {
+            minMZ = isAutoMzMin ? _currentScan->mz[0] - mzMinOffset : mzMinVal;
+            maxMZ = isAutoMzMax ? _currentScan->mz[_currentScan->mz.size()-1] + mzMaxOffset : mzMaxVal;
+        } else if (!_spectralHit.compoundId.isEmpty()) {
+            minMZ = isAutoMzMin ? _spectralHit.getMinMz() - mzMinOffset : mzMinVal;
+            maxMZ = isAutoMzMax ? _spectralHit.getMaxMz() + mzMaxOffset : mzMaxVal;
+        }
 
     } else if (_msLevel == 3) {
 
@@ -812,6 +867,14 @@ void SpectraWidget::findBounds(bool checkX, bool checkY) {
 
         minMZ = isAutoMzMin ? _currentScan->mz[0] - mzMinOffset : mzMinVal;
         maxMZ = isAutoMzMax ? _currentScan->mz[_currentScan->mz.size()-1] + mzMaxOffset : mzMaxVal;
+
+        if (_currentScan && _currentScan->mz.size()> 0){
+            minMZ = isAutoMzMin ? _currentScan->mz[0] - mzMinOffset : mzMinVal;
+            maxMZ = isAutoMzMax ? _currentScan->mz[_currentScan->mz.size()-1] + mzMaxOffset : mzMaxVal;
+        } else if (!_spectralHit.compoundId.isEmpty()) {
+            minMZ = isAutoMzMin ? _spectralHit.getMinMz() - mzMinOffset : mzMinVal;
+            maxMZ = isAutoMzMax ? _spectralHit.getMaxMz() + mzMaxOffset : mzMaxVal;
+        }
 
     } else {
         minMZ = 0;
@@ -833,17 +896,17 @@ void SpectraWidget::findBounds(bool checkX, bool checkY) {
 
     if ( abs(_minX -_maxX)<1e-6 ) { _minX-=0.5; _maxX+=0.5; }
 
-    if (checkY)  {
-    	_minY = 0; 
-		_maxY = 1;
-		for(int j=0; j<_currentScan->nobs(); j++ ) {
+    _minY = 0;
+    _maxY = 1;
+
+    if (checkY && _currentScan)  {
+        for(unsigned int j=0; j<_currentScan->nobs(); j++ ) {
 			if (_currentScan->mz[j] >= _minX && _currentScan->mz[j] <= _maxX) {
 				if (_currentScan->intensity[j] > _maxY) _maxY = _currentScan->intensity[j];
             }
         }
     }
-
-    _minY=0; _maxY *= _maxIntensityScaleFactor;
+    _maxY *= _maxIntensityScaleFactor;
 
 //   cerr << "findBounds():  mz=" << _minX << "-" << _maxX << " ints=" << _minY << "-" << _maxY << endl;
 }
@@ -923,7 +986,10 @@ void SpectraWidget::addAxes() {
 
     if (_drawYAxis ) {
 
-        if (_showOverlay) {
+        //Issue 442: Only draw two y axes when both theoretical compound and data are displayed
+        bool isCompoundAndScan = _currentScan && !_spectralHit.compoundId.isEmpty();
+
+        if (isCompoundAndScan) {
 
             //scan y-axis
             Axes* y = new Axes(1,_minY, _maxY, 5);
@@ -1054,16 +1120,20 @@ void SpectraWidget::addLabel(QString text,float x, float y) {
 }
 
 void SpectraWidget::mouseMoveEvent(QMouseEvent* event){
-	if (_currentScan == NULL ) return;
+    if (_currentScan == nullptr && _spectralHit.compoundId.isEmpty()) return;
 
     QGraphicsView::mouseMoveEvent(event);
     QPointF pos = event->pos();
 
     if (pos.y() < 5 || pos.y() > height()-5 || pos.x() < 5 || pos.y() > width()-5 ) {
-        _vnote->hide(); _note->hide(); _varrow->hide(); _arrow->hide();
+        _vnote->hide();
+        _note->hide();
+        _varrow->hide();
+        _arrow->hide();
         return;
     }
 
+    if (!_currentScan) return;
 
     int nearestPos = findNearestMz(pos);
     if (nearestPos >= 0) {
@@ -1074,7 +1144,10 @@ void SpectraWidget::mouseMoveEvent(QMouseEvent* event){
         //if (mainwindow->massCalcWidget->isVisible())
         //	  mainwindow->massCalcWidget->setMass(_currentScan->mz[nearestPos]);
     } else {
-        _vnote->hide(); _note->hide(); _varrow->hide(); _arrow->hide();
+        _vnote->hide();
+        _note->hide();
+        _varrow->hide();
+        _arrow->hide();
     }
 
 
