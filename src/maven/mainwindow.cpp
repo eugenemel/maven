@@ -1556,23 +1556,23 @@ void MainWindow::createToolBars() {
     sideBar->setObjectName("sideBar");
 
 
-    QToolButton* btnSamples = addDockWidgetButton(sideBar,projectDockWidget,QIcon(rsrcPath + "/samples.png"), "Show Samples Widget (F2)");
-    QToolButton* btnLigands = addDockWidgetButton(sideBar,ligandWidget,QIcon(rsrcPath + "/molecule.png"), "Show Compound Widget (F3)");
-    QToolButton* btnSpectra = addDockWidgetButton(sideBar,spectraDockWidget,QIcon(rsrcPath + "/spectra.png"), "Show Spectra Widget (F4)");
-    QToolButton* btnFragSpectra = addDockWidgetButton(sideBar, fragmentationSpectraDockWidget, QIcon(rsrcPath + "/spectra_with_2.png"), "Show Fragmentation Spectra Widget");
-    QToolButton* btnMs3Spectra = addDockWidgetButton(sideBar, ms3SpectraDockWidget, QIcon(rsrcPath + "/spectra_with_3.png"), "Show MS3 Spectra Widget");
-    QToolButton* btnIsotopes = addDockWidgetButton(sideBar,isotopeWidget,QIcon(rsrcPath + "/isotope.png"), "Show Isotopes Widget (F5)");
-    QToolButton* btnFindCompound = addDockWidgetButton(sideBar,massCalcWidget,QIcon(rsrcPath + "/findcompound.png"), "Show Match Compound Widget (F6)");
-    QToolButton* btnCovariants = addDockWidgetButton(sideBar,covariantsPanel,QIcon(rsrcPath + "/covariants.png"), "Find Covariants Widget (F7)");
-    QToolButton* btnBookmarks = addDockWidgetButton(sideBar,bookmarkedPeaks,QIcon(rsrcPath + "/showbookmarks.png"), "Show Bookmarks (F10)");
-    QToolButton* btnGallery = addDockWidgetButton(sideBar,galleryDockWidget,QIcon(rsrcPath + "/gallery.png"), "Show Gallery Widget");
-    QToolButton* btnScatter = addDockWidgetButton(sideBar,scatterDockWidget,QIcon(rsrcPath + "/scatterplot.png"), "Show Scatter Plot Widget");
-    QToolButton* btnSRM = addDockWidgetButton(sideBar,srmDockWidget,QIcon(rsrcPath + "/qqq.png"), "Show SRM List (F12)");
+    QToolButton* btnSamples = addDockWidgetButton(sideBar,projectDockWidget,QIcon(rsrcPath + "/samples.png"), "Samples (F2)");
+    QToolButton* btnLigands = addDockWidgetButton(sideBar,ligandWidget,QIcon(rsrcPath + "/molecule.png"), "Compound Library (F3)");
+    QToolButton* btnSpectra = addDockWidgetButton(sideBar,spectraDockWidget,QIcon(rsrcPath + "/spectra.png"), "MS1 Spectra (F4)");
+    QToolButton* btnFragSpectra = addDockWidgetButton(sideBar, fragmentationSpectraDockWidget, QIcon(rsrcPath + "/spectra_with_2.png"), "MS2 Spectra");
+    QToolButton* btnMs3Spectra = addDockWidgetButton(sideBar, ms3SpectraDockWidget, QIcon(rsrcPath + "/spectra_with_3.png"), "MS3 Spectra");
+    QToolButton* btnIsotopes = addDockWidgetButton(sideBar,isotopeWidget,QIcon(rsrcPath + "/isotope.png"), "Isotopes Widget (F5)");
+    QToolButton* btnFindCompound = addDockWidgetButton(sideBar,massCalcWidget,QIcon(rsrcPath + "/findcompound.png"), "Compound Search (F6)");
+    QToolButton* btnCovariants = addDockWidgetButton(sideBar,covariantsPanel,QIcon(rsrcPath + "/covariants.png"), "Covariants Widget (F7)");
+    QToolButton* btnBookmarks = addDockWidgetButton(sideBar,bookmarkedPeaks,QIcon(rsrcPath + "/showbookmarks.png"), "Bookmarks (F10)");
+    QToolButton* btnGallery = addDockWidgetButton(sideBar,galleryDockWidget,QIcon(rsrcPath + "/gallery.png"), "Gallery");
+    QToolButton* btnScatter = addDockWidgetButton(sideBar,scatterDockWidget,QIcon(rsrcPath + "/scatterplot.png"), "Scatter Plot");
+    QToolButton* btnSRM = addDockWidgetButton(sideBar,srmDockWidget,QIcon(rsrcPath + "/qqq.png"), "SRM List (F12)");
     //QToolButton* btnRconsole = addDockWidgetButton(sideBar,rconsoleDockWidget,QIcon(rsrcPath + "/R.png"), "Show R Console");
-    QToolButton* btnBarPlot = addDockWidgetButton(sideBar,barPlotDockWidget, QIcon(rsrcPath + "/bar_plot_samples.png"), "Show EIC Legend");
-    QToolButton* btnIsotopeLegend = addDockWidgetButton(sideBar, isotopeLegendDockWidget, QIcon(rsrcPath +"/isotope_legend.png"), "Show Isotope Bar Plot");
+    QToolButton* btnBarPlot = addDockWidgetButton(sideBar,barPlotDockWidget, QIcon(rsrcPath + "/bar_plot_samples.png"), "EIC Legend");
+    QToolButton* btnIsotopeLegend = addDockWidgetButton(sideBar, isotopeLegendDockWidget, QIcon(rsrcPath +"/isotope_legend.png"), "Isotope Bar Plot");
 
-    //btnSamples->setShortcut(Qt::Key_F2);
+    btnSamples->setShortcut(Qt::Key_F2);
     btnLigands->setShortcut(Qt::Key_F3);
     btnSpectra->setShortcut(Qt::Key_F4);
     btnIsotopes->setShortcut(Qt::Key_F5);
