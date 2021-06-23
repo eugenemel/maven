@@ -1515,6 +1515,7 @@ void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g, vector<tuple<float, 
 
     int bestMatchingId = -1;
     FragmentationMatchScore bestScore;
+    bestScore.mergedScore = -1; // Issue 443
     for (unsigned int pos = lb - searchableDatabase.begin(); pos < searchableDatabase.size(); pos++){
 
         float precMz = get<0>(searchableDatabase[pos]);
@@ -1540,16 +1541,16 @@ void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g, vector<tuple<float, 
         s.mergedScore = s.getScoreByName(scoringScheme.toStdString());
 
         if (s.mergedScore > bestScore.mergedScore ) {
-            bestMatchingId = pos;
+            bestMatchingId = static_cast<int>(pos);
             bestScore = s;
         }
     }
 
     if (bestMatchingId != -1){
-        g->compound = get<1>(searchableDatabase[bestMatchingId]);
+        g->compound = get<1>(searchableDatabase[static_cast<unsigned int>(bestMatchingId)]);
         g->compoundId = g->compound->id;
         g->compoundDb = g->compound->db;
-        g->adduct = get<2>(searchableDatabase[bestMatchingId]);
+        g->adduct = get<2>(searchableDatabase[static_cast<unsigned int>(bestMatchingId)]);
         g->fragMatchScore = bestScore;
     }
 }
