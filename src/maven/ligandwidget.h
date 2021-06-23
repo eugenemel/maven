@@ -49,7 +49,9 @@ class LigandWidgetTreeBuilder : public QThread {
     LigandWidgetTreeBuilder(LigandWidget* ligandWidget){
         this->ligandWidget = ligandWidget;
     }
-    ~LigandWidgetTreeBuilder(){}
+    ~LigandWidgetTreeBuilder(){
+        wait();
+    }
 
 protected:
     void run(void);
@@ -84,7 +86,6 @@ public:
 public slots: 
     void setCompoundFocus(Compound* c);
     void setDatabase(QString dbname);
-    void setFilterString(QString s);
     void showGallery();
     void rebuildCompoundTree(); //relies on filterString
     void saveCompoundList();

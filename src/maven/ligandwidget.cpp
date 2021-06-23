@@ -12,12 +12,7 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   setFloating(false);
   setObjectName("Compounds");
 
-  ligandWidgetTreeBuilder = new LigandWidgetTreeBuilder(this);
-
-  connect(ligandWidgetTreeBuilder, SIGNAL(updateProgress(int, QString)), this, SLOT(updateProgressGUI(int, QString)));
-  connect(ligandWidgetTreeBuilder, SIGNAL(sendCompoundToTree(Compound*)), this, SLOT(addCompound(Compound*)));
-  connect(ligandWidgetTreeBuilder, SIGNAL(toggleEnabling(bool)), this, SLOT(toggleEnabling(bool)));
-  connect(ligandWidgetTreeBuilder, SIGNAL(completed()), this, SLOT(showTable()));
+  ligandWidgetTreeBuilder = nullptr;
 
   treeWidget=new QTreeWidget(this);
   treeWidget->setObjectName(QString::fromUtf8("treeWidget"));
@@ -86,9 +81,7 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   int btnTextPadding = 25;
   btnSubmit->setMaximumWidth(txtSize+btnTextPadding);
 
-  connect(filterEditor, SIGNAL(textChanged(QString)), this, SLOT(setFilterString(QString)));
-
-  connect(filterEditor, SIGNAL(editingFinished()), this, SLOT(rebuildCompoundTree()));
+  connect(filterEditor, SIGNAL(returnPressed()), this, SLOT(rebuildCompoundTree()));
   connect(btnSubmit, SIGNAL(clicked()), this, SLOT(rebuildCompoundTree()));
 
   //toolBar->addWidget(new QLabel("Compounds: "));
@@ -200,13 +193,6 @@ void LigandWidget::setCompoundFocus(Compound* c) {
     rebuildCompoundTree();
 }
 
-
-void LigandWidget::setFilterString(QString needle) {
-    if(needle != filterString) {
-        filterString = needle;
-	} 
-}
-
 void LigandWidget::updateProgressGUI(int progress, QString label) {
     filteringProgressBar->setValue(progress);
     filteringProgressBarLbl->setText(label);
@@ -231,9 +217,27 @@ void LigandWidget::rebuildCompoundTree() {
 
     qDebug() << "LigandWidget::rebuildCompoundTree(): Currently loaded database has a total of" << maxSteps << "compounds.";
 
+    filterString = filterEditor->text();
     filteringProgressBar->setRange(0, maxSteps);
 
     treeWidget->clear();
+    visibleCompounds.clear();
+
+    if (ligandWidgetTreeBuilder) {
+
+        if (ligandWidgetTreeBuilder->isRunning()){
+            ligandWidgetTreeBuilder->quit();
+        }
+
+        delete(ligandWidgetTreeBuilder);
+    }
+
+    ligandWidgetTreeBuilder = new LigandWidgetTreeBuilder(this);
+
+    connect(ligandWidgetTreeBuilder, SIGNAL(updateProgress(int, QString)), this, SLOT(updateProgressGUI(int, QString)));
+    connect(ligandWidgetTreeBuilder, SIGNAL(sendCompoundToTree(Compound*)), this, SLOT(addCompound(Compound*)));
+    connect(ligandWidgetTreeBuilder, SIGNAL(toggleEnabling(bool)), this, SLOT(toggleEnabling(bool)));
+    connect(ligandWidgetTreeBuilder, SIGNAL(completed()), this, SLOT(showTable()));
 
     ligandWidgetTreeBuilder->start();
 }
@@ -282,7 +286,7 @@ void LigandWidget::showTable() {
     treeWidget->setSortingEnabled(false);
 
     string dbname = databaseSelect->currentText().toStdString();
-    cerr << "ligandwidget::showTable() " << dbname << endl;
+    qDebug() << "ligandwidget::showTable():" << dbname.c_str() << "# compounds=" << visibleCompounds.size();
 
     for (auto compound : visibleCompounds) {
 
@@ -312,6 +316,9 @@ void LigandWidget::showTable() {
 
     }
     treeWidget->setSortingEnabled(true);
+
+    repaint();
+    treeWidget->repaint();
 }
 
 void LigandWidget::saveCompoundList(){
@@ -456,8 +463,6 @@ void LigandWidgetTreeBuilder::run(void) {
 
     emit(toggleEnabling(false));
 
-    ligandWidget->visibleCompounds.clear();
-
     for(unsigned int i=0;  i < DB.compoundsDB.size(); i++ ) {
 
         Compound* compound = DB.compoundsDB[i];
@@ -478,6 +483,10 @@ void LigandWidgetTreeBuilder::run(void) {
                categoryString.contains(regexp)                              // category
                ){
            matchCount++;
+
+           //Issue 446: debugging
+           //qDebug() << "LigandWidgetTreeBuilder::run() i=" << i << ": " << compound->name.c_str();
+
            emit(sendCompoundToTree(compound));
        }
 
