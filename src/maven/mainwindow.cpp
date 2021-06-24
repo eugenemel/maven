@@ -251,14 +251,16 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     ms3ScansListWidget->setVisible(false);
     ms2ConsensusScansListWidget->setVisible(false);
     bookmarkedPeaks->setVisible(false);
-    spectraDockWidget->setVisible(false);
+    spectraDockWidget->setVisible(true);
     scatterDockWidget->setVisible(false);
     heatMapDockWidget->setVisible(false);
     galleryDockWidget->setVisible(false);
     projectDockWidget->setVisible(false);
     rconsoleDockWidget->setVisible(false);
-    fragmentationSpectraDockWidget->setVisible(false);    //treemap->setVisible(false);
+    fragmentationSpectraDockWidget->setVisible(true);    //treemap->setVisible(false);
     ms3SpectraDockWidget->setVisible(false);
+    srmDockWidget->setVisible(false);
+
     //peaksPanel->setVisible(false);
     //treeMapDockWidget =  createDockWidget("TreeMap",treemap);
 
