@@ -18,10 +18,10 @@ ScatterPlot::ScatterPlot(QWidget* w):PlotDockWidget(w,0) {
 	setWindowTitle("Scatter Plot");
 
     showSimilarFlag = false;
-    plotType = mzrt;
+    plotType = plotTypeEnum::scatter;
 
     setupToolBar();
-	setTable(NULL);
+    setTable(nullptr);
 
 }
 
