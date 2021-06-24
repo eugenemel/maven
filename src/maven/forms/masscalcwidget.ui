@@ -52,6 +52,13 @@
      </layout>
     </item>
     <item>
+     <widget class="QCheckBox" name="chkReferenceObservedAdductMatch">
+      <property name="text">
+       <string>Reference Adduct must match Observed Adduct</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QTreeWidget" name="treeWidget">
       <column>
        <property name="text">

@@ -17,6 +17,7 @@ MassCalcWidget::MassCalcWidget(MainWindow* mw) {
   connect(databaseSelect, SIGNAL(currentIndexChanged(QString)), this, SLOT(showTable()));
   connect(scoringSchema, SIGNAL(currentIndexChanged(QString)), this, SLOT(showTableCheckRumsDB()));
   connect(this,SIGNAL(visibilityChanged(bool)),this,SLOT(updateDatabaseList()));
+  connect(chkReferenceObservedAdductMatch, SIGNAL(toggled(bool)), this, SLOT(showTable()));
 
    scoringSchema->clear();
 
@@ -196,6 +197,9 @@ void MassCalcWidget::showTable() {
 
         //filter hits by database
         if (databaseSelect->currentText() != "All" and databaseSelect->currentText() != db) continue;
+
+        //Issue 437: filter hits by adduct matching
+        if (chkReferenceObservedAdductMatch->isChecked() && a->name != c->adductString) continue;
 
         NumericTreeWidgetItem* item = new NumericTreeWidgetItem(treeWidget,Qt::UserRole);
         item->setData(0, Qt::UserRole,QVariant(i));
