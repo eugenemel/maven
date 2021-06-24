@@ -133,11 +133,13 @@ void EicWidget::mouseReleaseEvent(QMouseEvent *event) {
         } else if ( deltaX < 0 ) {	 //zoomout
             qDebug() << "zoomOut";
             //zoom(_zoomFactor * 1.2 );
-            _slice.rtmin *= 0.8;
-            _slice.rtmax *= 1.22;
+            _slice.rtmin *= 0.8f;
+            _slice.rtmax *= 1.22f;
+            bounds = visibleSamplesBounds(); //Issue 447
             if ( _slice.rtmin < bounds.rtmin) _slice.rtmin=bounds.rtmin;
             if ( _slice.rtmax > bounds.rtmax) _slice.rtmax=bounds.rtmax;
         }
+        recompute(false); // Issue 447
         replot(getSelectedGroup());
         _intensityZoomVal = -1.0f;
     }
@@ -1460,6 +1462,7 @@ void EicWidget::resetZoom(bool isReplot) {
     _slice.rtmax=bounds.rtmax;
     //qDebug() << "EicWidget::resetZoom() " << _slice.rtmin << " " << _slice.rtmax << endl;
 
+    recompute();
     if (isReplot) replot(nullptr);
 }
 
