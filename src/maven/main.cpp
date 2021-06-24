@@ -47,6 +47,39 @@ int main(int argc, char *argv[])
     splash.finish(mainWindow);
     mainWindow->show();
 
+    QString currentVersion(MAVEN_VERSION);
+
+    QProcess process;
+    process.start("curl https://github.com/eugenemel/maven/releases/latest/");
+    process.waitForFinished(10000); // wait for 10 seconds
+    QString stdout = process.readAllStandardOutput();
+
+    QRegularExpression regex("(?<=tag/).*(?=\")");
+    QRegularExpressionMatch match = regex.match(stdout);
+    QString latestVersion = match.captured(0);
+
+    //Issue 445
+    //if the current version is not a development version,
+    //the lateset version could be retrieved,
+    //and a more recent version exists,
+    //ask the user if they'd like to visit the download page
+    if (!currentVersion.contains("-") && !latestVersion.isEmpty() && latestVersion != currentVersion){
+
+        QMessageBox versionMsgBox;
+        versionMsgBox.setText("A more recent version of MAVEN is available.");
+        versionMsgBox.setInformativeText("Would you like to update MAVEN to the latest version?");
+        QPushButton *visitButton = versionMsgBox.addButton("Visit Download Page", QMessageBox::ActionRole);
+        QPushButton *okButton = versionMsgBox.addButton("Skip for now", QMessageBox::ActionRole);
+
+        versionMsgBox.exec();
+
+        if (versionMsgBox.clickedButton() == visitButton) {
+            QDesktopServices::openUrl(QUrl("https://github.com/eugenemel/maven/releases/latest/"));
+        } else if (versionMsgBox.clickedButton() == okButton) {
+            versionMsgBox.close();
+        }
+    }
+
     if ( filelist.size() > 0 ) {
         mzFileIO* fileLoader  = new mzFileIO(mainWindow);
         fileLoader->setMainWindow(mainWindow);
