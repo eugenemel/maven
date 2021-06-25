@@ -161,12 +161,34 @@ void TreeDockWidget::setInfo(vector<SRMTransition*>& srmTransitions) {
 
 void TreeDockWidget::setInfo(Peak* peak) {
 	treeWidget->clear();
-    addPeak(peak, NULL);
+    addPeak(peak, nullptr);
 }
 
+void TreeDockWidget::selectMs2Scans(Peak *peak) {
+
+    if (!peak) return;
+    if (!peak->sample) return;
+
+    treeWidget->blockSignals(true);
+    treeWidget->clearSelection();
+    for (int i = 0; i < treeWidget->topLevelItemCount(); i++) {
+
+        QTreeWidgetItem *item = treeWidget->topLevelItem(i);
+
+        QVariant v =   item->data(0,Qt::UserRole);
+        Scan*  scan =  v.value<Scan*>();
+
+        if (scan && scan->mslevel == 2 && scan->sample == peak->sample &&
+                scan->rt >= peak->rtmin && scan->rt <= peak->rtmax) {
+            item->setSelected(true);
+        }
+    }
+    showInfo();
+    treeWidget->blockSignals(false);
+}
 
 void TreeDockWidget::showInfo() {
-    MainWindow* mainwindow = (MainWindow*)parentWidget();
+    MainWindow* mainwindow = static_cast<MainWindow*>(parentWidget());
         if ( ! mainwindow ) return;
 
         int mslevel = -1;

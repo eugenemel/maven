@@ -58,6 +58,8 @@ public slots:
 
       bool hasPeakGroup(PeakGroup* group);
 
+      void selectMs2Scans(Peak *peak);
+
       protected slots:
           void keyPressEvent(QKeyEvent *e );
       void contextMenuEvent ( QContextMenuEvent *e );
