@@ -47,6 +47,13 @@ int main(int argc, char *argv[])
     splash.finish(mainWindow);
     mainWindow->show();
 
+//    #ifdef _WIN32
+//    qDebug() << "Version auto-updating is not supported on windows.";
+//    qDebug() << "The most recent version is available at https://github.com/eugenemel/maven/releases/latest/"
+//    #else
+
+//    #endif
+
     QString currentVersion(MAVEN_VERSION);
 
     QProcess process;
@@ -55,8 +62,8 @@ int main(int argc, char *argv[])
 
     QString stdout;
     try {
-        QByteArray stdoutBytes = process.readAllStandardOutput();
-        stdout = QString(stdoutBytes);
+        auto stdoutBytes = process.readAllStandardOutput();
+        stdout = QString(static_cast<QByteArray>(stdoutBytes));
     } catch (exception e) {
         //swallow - skip version comparison
     }
