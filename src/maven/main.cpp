@@ -47,26 +47,13 @@ int main(int argc, char *argv[])
     splash.finish(mainWindow);
     mainWindow->show();
 
-//    #ifdef _WIN32
-//    qDebug() << "Version auto-updating is not supported on windows.";
-//    qDebug() << "The most recent version is available at https://github.com/eugenemel/maven/releases/latest/"
-//    #else
-
-//    #endif
-
     QString currentVersion(MAVEN_VERSION);
 
     QProcess process;
     process.start("curl https://github.com/eugenemel/maven/releases/latest/");
     process.waitForFinished(10000); // wait for 10 seconds
 
-    QString stdoutString;
-    try {
-        auto stdoutBytes = process.readAllStandardOutput();
-        stdoutString = QString(static_cast<QByteArray>(stdoutBytes));
-    } catch (exception e) {
-        //swallow - skip version comparison
-    }
+    QString stdoutString = process.readAllStandardOutput();
 
     QRegularExpression regex("(?<=tag/).*(?=\")");
     QRegularExpressionMatch match = regex.match(stdoutString);
