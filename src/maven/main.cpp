@@ -52,7 +52,14 @@ int main(int argc, char *argv[])
     QProcess process;
     process.start("curl https://github.com/eugenemel/maven/releases/latest/");
     process.waitForFinished(10000); // wait for 10 seconds
-    QString stdout = process.readAllStandardOutput();
+
+    QString stdout;
+    try {
+        QByteArray stdoutBytes = process.readAllStandardOutput();
+        stdout = QString(stdoutBytes);
+    } catch (exception e) {
+        //swallow - skip version comparison
+    }
 
     QRegularExpression regex("(?<=tag/).*(?=\")");
     QRegularExpressionMatch match = regex.match(stdout);
