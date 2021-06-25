@@ -60,16 +60,16 @@ int main(int argc, char *argv[])
     process.start("curl https://github.com/eugenemel/maven/releases/latest/");
     process.waitForFinished(10000); // wait for 10 seconds
 
-    QString stdout;
+    QString stdoutString;
     try {
         auto stdoutBytes = process.readAllStandardOutput();
-        stdout = QString(static_cast<QByteArray>(stdoutBytes));
+        stdoutString = QString(static_cast<QByteArray>(stdoutBytes));
     } catch (exception e) {
         //swallow - skip version comparison
     }
 
     QRegularExpression regex("(?<=tag/).*(?=\")");
-    QRegularExpressionMatch match = regex.match(stdout);
+    QRegularExpressionMatch match = regex.match(stdoutString);
     QString latestVersion = match.captured(0);
 
     //Issue 445
