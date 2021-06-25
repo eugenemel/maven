@@ -562,6 +562,7 @@ void TreeDockWidget::setupScanListHeader() {
     treeWidget->setHeaderLabels(colNames);
     treeWidget->setSortingEnabled(true);
     treeWidget->setHeaderHidden(false);
+    treeWidget->sortByColumn(1, Qt::AscendingOrder);
 
 }
 
