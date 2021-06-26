@@ -317,7 +317,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     addDockWidget(Qt::BottomDockWidgetArea,bookmarkedPeaks,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,galleryDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,srmDockWidget,Qt::Horizontal);
-    addDockWidget(Qt::BottomDockWidgetArea,rconsoleDockWidget,Qt::Horizontal);
+   // addDockWidget(Qt::BottomDockWidgetArea,rconsoleDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,fragmentationSpectraDockWidget,Qt::Horizontal);
     addDockWidget(Qt::BottomDockWidgetArea,ms3SpectraDockWidget,Qt::Horizontal);
 
@@ -1355,11 +1355,11 @@ void MainWindow::createMenus() {
     actionDatabases->setToolTip("Library Search");
     connect(actionDatabases, SIGNAL(triggered()), SLOT(compoundDatabaseSearch()));
 
-    QAction *actionRconsole = widgetsMenu->addAction(QIcon(rsrcPath + "/R.png"), "R console");
-    actionRconsole->setCheckable(true);
-    actionRconsole->setChecked(false);
-    actionRconsole->setToolTip("R Console");
-    connect(actionRconsole, SIGNAL(triggered(bool)), rconsoleDockWidget, SLOT(setVisible(bool)));
+//    QAction *actionRconsole = widgetsMenu->addAction(QIcon(rsrcPath + "/R.png"), "R console");
+//    actionRconsole->setCheckable(true);
+//    actionRconsole->setChecked(false);
+//    actionRconsole->setToolTip("R Console");
+//    connect(actionRconsole, SIGNAL(triggered(bool)), rconsoleDockWidget, SLOT(setVisible(bool)));
 
     widgetsMenu->addSeparator();
 
