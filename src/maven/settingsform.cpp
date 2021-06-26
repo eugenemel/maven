@@ -44,7 +44,6 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(data_server_url, SIGNAL(textChanged(QString)), SLOT(getFormValues()));
     connect(btnPeakQualityModel, SIGNAL(clicked()), SLOT(updateClassifierFile()));
     connect(methodsFolderSelect, SIGNAL(clicked()), SLOT(selectMethodsFolder()));
-    connect(RProgramSelect, SIGNAL(clicked()), SLOT(selectRProgram()));
 
     connect(centroid_scan_flag,SIGNAL(toggled(bool)), SLOT(getFormValues()));
     connect(scan_filter_min_quantile, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
@@ -238,8 +237,8 @@ void SettingsForm::setFormValues() {
     scan_filter_min_intensity->setValue( settings->value("scan_filter_min_intensity").toInt());
     scan_filter_min_quantile->setValue(  settings->value("scan_filter_min_quantile").toInt());
 
-   QStringList folders;       folders << "peakQualityModelFile" << "methodsFolder" << "Rprogram";
-   QList<QLineEdit*> items;    items  << txtPeakQualityModel << methodsFolder << Rprogram;
+   QStringList folders;       folders << "peakQualityModelFile" << "methodsFolder";
+   QList<QLineEdit*> items;    items  << txtPeakQualityModel << methodsFolder;
 
    unsigned int itemCount=0;
     foreach(QString itemName, folders) {

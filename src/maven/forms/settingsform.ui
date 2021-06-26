@@ -682,25 +682,7 @@
        <string>Bookmark Options</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_9">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_24">
-         <property name="text">
-          <string>R Executable </string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QLineEdit" name="Rprogram"/>
-       </item>
-       <item row="0" column="1">
-        <widget class="QPushButton" name="RProgramSelect">
-         <property name="icon">
-          <iconset resource="../mzroll.qrc">
-           <normaloff>:/images/fileopen.png</normaloff>:/images/fileopen.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0" colspan="3">
+       <item row="1" column="0" colspan="2">
         <widget class="QGroupBox" name="grpBkmkOptions">
          <property name="title">
           <string>Bookmark Options</string>
@@ -708,8 +690,8 @@
          <widget class="QCheckBox" name="chkBkmkWarnMzRt">
           <property name="geometry">
            <rect>
-            <x>20</x>
-            <y>30</y>
+            <x>10</x>
+            <y>20</y>
             <width>783</width>
             <height>20</height>
            </rect>

@@ -36,7 +36,6 @@ class SettingsForm : public QDialog, public Ui_SettingsForm
                  inline void setIsotopeDetectionTab()  { tabWidget->setCurrentIndex(3); }
 
                  inline void selectMethodsFolder() {   selectFolder("methodsFolder"); }
-                 inline void selectRProgram() {         selectFile("Rprogram"); }
                  void updateClassifierFile();
 
 
