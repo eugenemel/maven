@@ -148,10 +148,10 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QS
     btnPDF->setToolTip("Generate PDF Report");
     connect(btnPDF, SIGNAL(clicked()), this, SLOT(printPdfReport()));
 
-    QToolButton *btnRunScript = new QToolButton(toolBar);
-    btnRunScript->setIcon(QIcon(rsrcPath + "/R.png"));
-    btnRunScript->setToolTip("Run Script");
-    connect(btnRunScript, SIGNAL(clicked()), SLOT(runScript()));
+//    QToolButton *btnRunScript = new QToolButton(toolBar);
+//    btnRunScript->setIcon(QIcon(rsrcPath + "/R.png"));
+//    btnRunScript->setToolTip("Run Script");
+//    connect(btnRunScript, SIGNAL(clicked()), SLOT(runScript()));
 
     /*
     QToolButton *btnMoveTo = new QToolButton(toolBar);
@@ -196,7 +196,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QS
     toolBar->addSeparator();
     toolBar->addWidget(btnPDF);
     toolBar->addWidget(btnGroupCSV);
-    toolBar->addWidget(btnRunScript);
+    //toolBar->addWidget(btnRunScript);
 
     toolBar->addSeparator();
     /*
