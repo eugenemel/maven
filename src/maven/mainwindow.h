@@ -45,7 +45,6 @@ class DirectInfusionDialog;
 class SelectAdductsDialog;
 class AlignmentDialog;
 class CalibrateDialog;
-//class RConsoleDialog;
 class SpectraWidget;
 class LigandWidget;
 class IsotopeWidget;
