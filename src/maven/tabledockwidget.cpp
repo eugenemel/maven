@@ -2505,14 +2505,11 @@ void TableDockWidget::setCompoundSearchSelectedCompound(){
 
     //Issue 438: Update compound maps
     if (oldCompound && compoundToGroup.find(oldCompound) != compoundToGroup.end()) {
-        compoundToGroup[oldCompound].erase(
-                    std::remove(compoundToGroup[oldCompound].begin(),
-                                compoundToGroup[oldCompound].end(),
-                                currentGroup
-                    ),
-                    compoundToGroup[oldCompound].end());
 
-        if (compoundToGroup[oldCompound].empty()){
+        vector<PeakGroup*>& groups = compoundToGroup[oldCompound];
+        groups.erase(remove(groups.begin(), groups.end(), currentGroup), groups.end());
+
+        if (groups.empty()){
             compoundToGroup.erase(oldCompound);
         }
     }
@@ -2538,14 +2535,11 @@ void TableDockWidget::setCompoundSearchSelectedCompound(){
 
     //Issue 438: Update group ID maps
     if (groupIdToGroup.find(oldGroupTagString) != groupIdToGroup.end()) {
-        groupIdToGroup[oldGroupTagString].erase(
-                    std::remove(groupIdToGroup[oldGroupTagString].begin(),
-                                groupIdToGroup[oldGroupTagString].end(),
-                                currentGroup
-                    ),
-                    groupIdToGroup[oldGroupTagString].end());
 
-        if (groupIdToGroup[oldGroupTagString].empty()){
+        vector<PeakGroup*>& groups = groupIdToGroup[oldGroupTagString];
+        groups.erase(remove(groups.begin(), groups.end(), currentGroup), groups.end());
+
+        if (groups.empty()){
             groupIdToGroup.erase(oldGroupTagString);
         }
     }
