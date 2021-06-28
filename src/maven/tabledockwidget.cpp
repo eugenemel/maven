@@ -2501,6 +2501,27 @@ void TableDockWidget::setCompoundSearchSelectedCompound(){
 
     if (currentGroup->compound == compound) return;
 
+    Compound *oldCompound = currentGroup->compound;
+
+    //Issue 438: Update compound maps
+    if (oldCompound && compoundToGroup.find(oldCompound) != compoundToGroup.end()) {
+        compoundToGroup[oldCompound].erase(
+                    std::remove(compoundToGroup[oldCompound].begin(),
+                                compoundToGroup[oldCompound].end(),
+                                currentGroup
+                    ),
+                    compoundToGroup[oldCompound].end());
+
+        if (compoundToGroup[oldCompound].empty()){
+            compoundToGroup.erase(oldCompound);
+        }
+    }
+
+    if (compoundToGroup.find(compound) == compoundToGroup.end()) {
+        compoundToGroup.insert(make_pair(compound, vector<PeakGroup*>()));
+    }
+    compoundToGroup[compound].push_back(currentGroup);
+
     currentGroup->compound = compound;
     currentGroup->importedCompoundName = ""; // set this to empty string to allow groupTagString() to work
     currentGroup->fragMatchScore.mergedScore = -1;
@@ -2562,8 +2583,16 @@ void TableDockWidget::setCompoundSearchSelectedCompound(){
     set<QTreeWidgetItem*> itemsToUpdate{};
 
     vector<PeakGroup*> groupsSameTagString = groupIdToGroup[updatedGroupTagString];
+    vector<PeakGroup*> groupsSameCompound = compoundToGroup[compound];
 
-    for (PeakGroup* group : groupsSameTagString) {
+    for (PeakGroup *group : groupsSameTagString) {
+        pair<rowIterator, rowIterator> tableRows = groupToItem.equal_range(group);
+        for (rowIterator it = tableRows.first; it != tableRows.second; it++) {
+             itemsToUpdate.insert(it->second);
+        }
+    }
+
+    for (PeakGroup *group : groupsSameCompound) {
         pair<rowIterator, rowIterator> tableRows = groupToItem.equal_range(group);
         for (rowIterator it = tableRows.first; it != tableRows.second; it++) {
              itemsToUpdate.insert(it->second);
