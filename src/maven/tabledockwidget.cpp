@@ -457,6 +457,8 @@ void TableDockWidget::duplicateEntryBackground(QTreeWidgetItem *item){
     if (peakGroup && peakGroup->compound && compoundToGroup.find(peakGroup->compound) != compoundToGroup.end()) {
         if (compoundToGroup[peakGroup->compound].size() > 1) {
             item->setBackgroundColor(groupViewColumnNameToNumber.at("Compound"), QColor("moccasin"));
+        } else {
+            item->setBackgroundColor(groupViewColumnNameToNumber.at("Compound"), Qt::white);
         }
     }
 
@@ -464,6 +466,8 @@ void TableDockWidget::duplicateEntryBackground(QTreeWidgetItem *item){
     if (groupIdToGroup.find(groupTagString) != groupIdToGroup.end()) {
         if (groupIdToGroup[groupTagString].size() > 1) {
             item->setBackgroundColor(groupViewColumnNameToNumber.at("ID"), QColor("coral"));
+        } else {
+            item->setBackgroundColor(groupViewColumnNameToNumber.at("ID"), Qt::white);
         }
     }
 }
