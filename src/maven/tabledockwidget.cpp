@@ -2581,18 +2581,25 @@ void TableDockWidget::setCompoundSearchSelectedCompound(){
     }
 
     set<QTreeWidgetItem*> itemsToUpdate{};
+    set<PeakGroup*> groupsToUpdate{};
 
     vector<PeakGroup*> groupsSameTagString = groupIdToGroup[updatedGroupTagString];
-    vector<PeakGroup*> groupsSameCompound = compoundToGroup[compound];
+    copy(groupsSameTagString.begin(), groupsSameTagString.end(), inserter(groupsToUpdate, groupsToUpdate.end()));
 
-    for (PeakGroup *group : groupsSameTagString) {
-        pair<rowIterator, rowIterator> tableRows = groupToItem.equal_range(group);
-        for (rowIterator it = tableRows.first; it != tableRows.second; it++) {
-             itemsToUpdate.insert(it->second);
-        }
+    vector<PeakGroup*> groupsSameCompound = compoundToGroup[compound];
+    copy(groupsSameCompound.begin(), groupsSameCompound.end(), inserter(groupsToUpdate, groupsToUpdate.end()));
+
+    if (groupIdToGroup.find(oldGroupTagString) != groupIdToGroup.end()) {
+        vector<PeakGroup*> groupsOldTagString = groupIdToGroup[oldGroupTagString];
+        copy(groupsOldTagString.begin(), groupsOldTagString.end(), inserter(groupsToUpdate, groupsToUpdate.end()));
     }
 
-    for (PeakGroup *group : groupsSameCompound) {
+    if (oldCompound && compoundToGroup.find(oldCompound) != compoundToGroup.end()) {
+        vector<PeakGroup*> groupsOldCompound = compoundToGroup[oldCompound];
+        copy(groupsOldCompound.begin(), groupsOldCompound.end(), inserter(groupsToUpdate, groupsToUpdate.end()));
+    }
+
+    for (PeakGroup *group : groupsToUpdate) {
         pair<rowIterator, rowIterator> tableRows = groupToItem.equal_range(group);
         for (rowIterator it = tableRows.first; it != tableRows.second; it++) {
              itemsToUpdate.insert(it->second);
