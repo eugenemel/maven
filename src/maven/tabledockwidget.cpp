@@ -2513,7 +2513,30 @@ void TableDockWidget::setCompoundSearchSelectedCompound(){
     //update UI
     QTreeWidgetItem *item = treeWidget->selectedItems().at(0);
 
-    item->setText(groupViewColumnNameToNumber.at("ID"), groupTagString(currentGroup));
+    QString oldGroupTagString = item->text(groupViewColumnNameToNumber.at("ID"));
+
+    //Issue 438: Update group ID maps
+    if (groupIdToGroup.find(oldGroupTagString) != groupIdToGroup.end()) {
+        groupIdToGroup[oldGroupTagString].erase(
+                    std::remove(groupIdToGroup[oldGroupTagString].begin(),
+                                groupIdToGroup[oldGroupTagString].end(),
+                                currentGroup
+                    ),
+                    groupIdToGroup[oldGroupTagString].end());
+
+        if (groupIdToGroup[oldGroupTagString].empty()){
+            groupIdToGroup.erase(oldGroupTagString);
+        }
+    }
+
+    QString updatedGroupTagString = groupTagString(currentGroup);
+
+    if (groupIdToGroup.find(updatedGroupTagString) == groupIdToGroup.end()){
+        groupIdToGroup.insert(make_pair(updatedGroupTagString, vector<PeakGroup*>()));
+    }
+    groupIdToGroup[updatedGroupTagString].push_back(currentGroup);
+
+    item->setText(groupViewColumnNameToNumber.at("ID"), updatedGroupTagString);
     item->setText(groupViewColumnNameToNumber.at("Compound"), QString(compound->name.c_str()));
 
     if (compound->expectedRt) {
@@ -2533,6 +2556,21 @@ void TableDockWidget::setCompoundSearchSelectedCompound(){
         tagGroup(QString(PeakGroup::ReservedLabel::COMPOUND_MANUALLY_CHANGED));
         //calls updateItem()
     } else {
+        updateItem(item);
+    }
+
+    set<QTreeWidgetItem*> itemsToUpdate{};
+
+    vector<PeakGroup*> groupsSameTagString = groupIdToGroup[updatedGroupTagString];
+
+    for (PeakGroup* group : groupsSameTagString) {
+        pair<rowIterator, rowIterator> tableRows = groupToItem.equal_range(group);
+        for (rowIterator it = tableRows.first; it != tableRows.second; it++) {
+             itemsToUpdate.insert(it->second);
+        }
+    }
+
+    for (QTreeWidgetItem *item : itemsToUpdate) {
         updateItem(item);
     }
 
