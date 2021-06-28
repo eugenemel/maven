@@ -138,6 +138,7 @@ private:
           void deletePeaks();
           void addRow(PeakGroup* group, QTreeWidgetItem* root);
           void heatmapBackground(QTreeWidgetItem* item);
+          void duplicateEntryBackground(QTreeWidgetItem* item);
 	  PeakGroup* readGroupXML(QXmlStreamReader& xml,PeakGroup* parent);
           void writeGroupXML(QXmlStreamWriter& stream, PeakGroup* g);
 	  void readPeakXML(QXmlStreamReader& xml,PeakGroup* parent);
@@ -145,6 +146,9 @@ private:
          MainWindow* _mainwindow;
          std::vector<PeakGroup*>allgroups{};
          std::multimap<PeakGroup*, QTreeWidgetItem*> groupToItem = {};
+
+         map<Compound*, vector<PeakGroup*>> compoundToGroup{};
+         map<QString, vector<PeakGroup*>> groupIdToGroup{};
 
           TrainDialog* traindialog;
           ClusterDialog*       clusterDialog;

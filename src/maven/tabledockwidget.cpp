@@ -289,6 +289,7 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
     item->setText(0, groupTagString(group));         // ID
     item->setText(2, adductText);                    // Adduct
     heatmapBackground(item);
+    duplicateEntryBackground(item);
 
     //score peak quality
     Classifier* clsf = _mainwindow->getClassifier();
@@ -406,7 +407,7 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
 void TableDockWidget::heatmapBackground(QTreeWidgetItem* item) {
     if(viewType != peakView) return;
 
-    int firstColumn=3;
+    int firstColumn=5;
     StatisticsVector<float>values;
     for(unsigned int i=firstColumn; i< item->columnCount(); i++) {
           values.push_back(item->text(i).toFloat());
@@ -444,6 +445,26 @@ void TableDockWidget::heatmapBackground(QTreeWidgetItem* item) {
             //item->setText(firstColumn+i,QString::number(values[i])) ;
             item->setBackgroundColor(firstColumn+i,color);
        }
+    }
+}
+
+//Issue 438
+void TableDockWidget::duplicateEntryBackground(QTreeWidgetItem *item){
+
+    QVariant v = item->data(0, PeakGroupType);
+    PeakGroup *peakGroup = v.value<PeakGroup*>();
+
+    if (peakGroup && peakGroup->compound && compoundToGroup.find(peakGroup->compound) != compoundToGroup.end()) {
+        if (compoundToGroup[peakGroup->compound].size() > 1) {
+            item->setBackgroundColor(groupViewColumnNameToNumber.at("Compound"), QColor("moccasin"));
+        }
+    }
+
+    QString groupTagString = item->text(groupViewColumnNameToNumber.at("ID"));
+    if (groupIdToGroup.find(groupTagString) != groupIdToGroup.end()) {
+        if (groupIdToGroup[groupTagString].size() > 1) {
+            item->setBackgroundColor(groupViewColumnNameToNumber.at("ID"), QColor("coral"));
+        }
     }
 }
 
@@ -984,6 +1005,9 @@ void TableDockWidget::deleteAll() {
     treeWidget->clear();
     allgroups.clear();
     groupToItem.clear();
+    compoundToGroup.clear();
+    groupIdToGroup.clear();
+
     this->hide();
 
     _mainwindow->getEicWidget()->replotForced();
@@ -1006,8 +1030,26 @@ void TableDockWidget::showAllGroups() {
 
     treeWidget->clear();
     groupToItem.clear();    //addRow() calls will refill the map
+    compoundToGroup.clear();
+    groupIdToGroup.clear();
 
     if (allgroups.size() == 0 ) return;
+
+    //Issue 438: only apply to top level (do not apply to children)
+    //used for highlighting colors
+    for (auto group : allgroups) {
+        if (group->compound) {
+            if (compoundToGroup.find(group->compound) == compoundToGroup.end()) {
+                compoundToGroup.insert(make_pair(group->compound, vector<PeakGroup*>{}));
+            }
+            compoundToGroup[group->compound].push_back(group);
+        }
+        QString groupIdString = groupTagString(group);
+        if (groupIdToGroup.find(groupIdString) == groupIdToGroup.end()) {
+            groupIdToGroup.insert(make_pair(groupIdString, vector<PeakGroup*>{}));
+        }
+        groupIdToGroup[groupIdString].push_back(group);
+    }
 
     treeWidget->setSortingEnabled(false);
 
