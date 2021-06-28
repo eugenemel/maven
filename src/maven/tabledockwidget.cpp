@@ -2387,7 +2387,26 @@ void TableDockWidget::updateSelectedPeakGroup() {
     }
 
     if (isUpdateItem) {
-        updateItem(treeWidget->currentItem());
+
+        QString oldGroupTagString = treeWidget->currentItem()->text(groupViewColumnNameToNumber.at("ID"));
+        QString updatedGroupTagString = groupTagString(selectedPeakGroup);
+
+        if (groupIdToGroup.find(oldGroupTagString) != groupIdToGroup.end()) {
+
+            vector<PeakGroup*>& groups = groupIdToGroup[oldGroupTagString];
+            groups.erase(remove(groups.begin(), groups.end(), selectedPeakGroup), groups.end());
+
+            if (groups.empty()){
+                groupIdToGroup.erase(oldGroupTagString);
+            }
+        }
+
+        if (groupIdToGroup.find(updatedGroupTagString) == groupIdToGroup.end()){
+            groupIdToGroup.insert(make_pair(updatedGroupTagString, vector<PeakGroup*>()));
+        }
+        groupIdToGroup[updatedGroupTagString].push_back(selectedPeakGroup);
+
+        updateHighlightedItems(oldGroupTagString, updatedGroupTagString, nullptr, nullptr);
     }
 
 }
@@ -2578,14 +2597,24 @@ void TableDockWidget::setCompoundSearchSelectedCompound(){
         updateItem(item);
     }
 
+    updateHighlightedItems(oldGroupTagString, updatedGroupTagString, oldCompound, compound);
+
+}
+
+void TableDockWidget::updateHighlightedItems(QString oldGroupTagString,  QString updatedGroupTagString, Compound *oldCompound, Compound *compound) {
+
     set<QTreeWidgetItem*> itemsToUpdate{};
     set<PeakGroup*> groupsToUpdate{};
 
-    vector<PeakGroup*> groupsSameTagString = groupIdToGroup[updatedGroupTagString];
-    copy(groupsSameTagString.begin(), groupsSameTagString.end(), inserter(groupsToUpdate, groupsToUpdate.end()));
+    if (groupIdToGroup.find(updatedGroupTagString) != groupIdToGroup.end()) {
+        vector<PeakGroup*> groupsSameTagString = groupIdToGroup[updatedGroupTagString];
+        copy(groupsSameTagString.begin(), groupsSameTagString.end(), inserter(groupsToUpdate, groupsToUpdate.end()));
+    }
 
-    vector<PeakGroup*> groupsSameCompound = compoundToGroup[compound];
-    copy(groupsSameCompound.begin(), groupsSameCompound.end(), inserter(groupsToUpdate, groupsToUpdate.end()));
+    if (compound && compoundToGroup.find(compound) != compoundToGroup.end()) {
+        vector<PeakGroup*> groupsSameCompound = compoundToGroup[compound];
+        copy(groupsSameCompound.begin(), groupsSameCompound.end(), inserter(groupsToUpdate, groupsToUpdate.end()));
+    }
 
     if (groupIdToGroup.find(oldGroupTagString) != groupIdToGroup.end()) {
         vector<PeakGroup*> groupsOldTagString = groupIdToGroup[oldGroupTagString];
@@ -2607,7 +2636,6 @@ void TableDockWidget::setCompoundSearchSelectedCompound(){
     for (QTreeWidgetItem *item : itemsToUpdate) {
         updateItem(item);
     }
-
 }
 
 map<string, int> TableDockWidget::groupViewColumnNameToNumber{

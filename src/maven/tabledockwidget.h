@@ -142,6 +142,7 @@ private:
 	  PeakGroup* readGroupXML(QXmlStreamReader& xml,PeakGroup* parent);
           void writeGroupXML(QXmlStreamWriter& stream, PeakGroup* g);
 	  void readPeakXML(QXmlStreamReader& xml,PeakGroup* parent);
+      void updateHighlightedItems(QString oldGroupTagString,  QString updatedGroupTagString, Compound *oldCompound, Compound *compound);
 
          MainWindow* _mainwindow;
          std::vector<PeakGroup*>allgroups{};
