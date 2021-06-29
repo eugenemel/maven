@@ -53,9 +53,8 @@ int main(int argc, char *argv[])
     }
 
     if (isNotifyNewerMaven) {
-        QString currentVersion(MAVEN_VERSION);
 
-        currentVersion = QString("8.1.1.1");
+        QString currentVersion(MAVEN_VERSION);
 
         QProcess process;
         process.start("curl https://github.com/eugenemel/maven/releases/latest/");
