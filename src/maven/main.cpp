@@ -47,37 +47,46 @@ int main(int argc, char *argv[])
     splash.finish(mainWindow);
     mainWindow->show();
 
-    QString currentVersion(MAVEN_VERSION);
+    bool isNotifyNewerMaven = true;
+    if (mainWindow->getSettings() && mainWindow->getSettings()->contains("chkNotifyNewerMaven")) {
+        isNotifyNewerMaven = static_cast<Qt::CheckState>(mainWindow->getSettings()->value("chkNotifyNewerMaven").toInt()) == Qt::CheckState::Checked;
+    }
 
-    QProcess process;
-    process.start("curl https://github.com/eugenemel/maven/releases/latest/");
-    process.waitForFinished(10000); // wait for 10 seconds
+    if (isNotifyNewerMaven) {
+        QString currentVersion(MAVEN_VERSION);
 
-    QString stdoutString = process.readAllStandardOutput();
+        currentVersion = QString("8.1.1.1");
 
-    QRegularExpression regex("(?<=tag/).*(?=\")");
-    QRegularExpressionMatch match = regex.match(stdoutString);
-    QString latestVersion = match.captured(0);
+        QProcess process;
+        process.start("curl https://github.com/eugenemel/maven/releases/latest/");
+        process.waitForFinished(10000); // wait for 10 seconds
 
-    //Issue 445
-    //if the current version is not a development version,
-    //the lateset version could be retrieved,
-    //and a more recent version exists,
-    //ask the user if they'd like to visit the download page
-    if (!currentVersion.contains("-") && !latestVersion.isEmpty() && latestVersion != currentVersion){
+        QString stdoutString = process.readAllStandardOutput();
 
-        QMessageBox versionMsgBox;
-        versionMsgBox.setText("A more recent version of MAVEN is available.");
-        versionMsgBox.setInformativeText("Would you like to update MAVEN to the latest version?");
-        QPushButton *visitButton = versionMsgBox.addButton("Visit Download Page", QMessageBox::ActionRole);
-        QPushButton *okButton = versionMsgBox.addButton("Skip for now", QMessageBox::ActionRole);
+        QRegularExpression regex("(?<=tag/).*(?=\")");
+        QRegularExpressionMatch match = regex.match(stdoutString);
+        QString latestVersion = match.captured(0);
 
-        versionMsgBox.exec();
+        //Issue 445
+        //if the current version is not a development version,
+        //the lateset version could be retrieved,
+        //and a more recent version exists,
+        //ask the user if they'd like to visit the download page
+        if (!currentVersion.contains("-") && !latestVersion.isEmpty() && latestVersion != currentVersion){
 
-        if (versionMsgBox.clickedButton() == visitButton) {
-            QDesktopServices::openUrl(QUrl("https://github.com/eugenemel/maven/releases/latest/"));
-        } else if (versionMsgBox.clickedButton() == okButton) {
-            versionMsgBox.close();
+            QMessageBox versionMsgBox;
+            versionMsgBox.setText("A more recent version of MAVEN is available.");
+            versionMsgBox.setInformativeText("Would you like to update MAVEN to the latest version?");
+            QPushButton *visitButton = versionMsgBox.addButton("Visit Download Page", QMessageBox::ActionRole);
+            QPushButton *okButton = versionMsgBox.addButton("Skip for now", QMessageBox::ActionRole);
+
+            versionMsgBox.exec();
+
+            if (versionMsgBox.clickedButton() == visitButton) {
+                QDesktopServices::openUrl(QUrl("https://github.com/eugenemel/maven/releases/latest/"));
+            } else if (versionMsgBox.clickedButton() == okButton) {
+                versionMsgBox.close();
+            }
         }
     }
 

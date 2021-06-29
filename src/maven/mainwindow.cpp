@@ -1246,6 +1246,11 @@ void MainWindow::readSettings() {
     if( ! settings->contains("minIsotopicCorrelation") )
         settings->setValue("minIsotopicCorrelation",0.2);
 
+    //Issue 451
+    if (! settings->contains("chkNotifyNewerMaven")) {
+        settings->setValue("chkNotifyNewerMaven", Qt::CheckState::Checked);
+    }
+
     if ( settings->contains("lastOpenedProject")) {
         settings->setValue("lastOpenedProject","");
     }

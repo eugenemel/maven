@@ -16,6 +16,9 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
 
     connect(tabWidget, SIGNAL(currentChanged(int)), SLOT(getFormValues()));
 
+    //locations
+    connect(chkNotifyNewerMaven, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+
     //peak detection
     connect(recomputeEICButton, SIGNAL(clicked(bool)), SLOT(recomputeEIC()));
     connect(chkDisplayConsensusSpectrum, SIGNAL(toggled(bool)), SLOT(getFormValues()));
@@ -199,6 +202,9 @@ void SettingsForm::setFormValues() {
    // qDebug() << "SettingsForm::setFormValues()";
 
     if (!settings) return;
+
+    if (settings->contains("chkNotifyNewerMaven"))
+        this->chkNotifyNewerMaven->setCheckState( (Qt::CheckState) settings->value("chkNotifyNewerMaven").toInt());
 
     //Issue 255: disable Savitzky-Golay smoothing
     int smoothingAlg = settings->value("eic_smoothingAlgorithm").toInt();
@@ -409,6 +415,7 @@ void SettingsForm::getFormValues() {
     if (!settings) return;
     //qDebug() << "SettingsForm::getFormValues() ";
 
+    settings->setValue("chkNotifyNewerMaven", chkNotifyNewerMaven->checkState());
 
     settings->setValue("eic_smoothingAlgorithm",eic_smoothingAlgorithm->currentIndex());
 

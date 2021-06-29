@@ -795,46 +795,14 @@
           <string>Location of Remote and Local Libraries</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_10">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_17">
-            <property name="text">
-             <string>Remote Data Server</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLineEdit" name="data_server_url">
-            <property name="text">
-             <string>http://genomics-pubs.princeton.edu/mzroll/</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_18">
-            <property name="text">
-             <string>Methods Folder</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QPushButton" name="methodsFolderSelect">
-            <property name="icon">
-             <iconset resource="../mzroll.qrc">
-              <normaloff>:/images/fileopen.png</normaloff>:/images/fileopen.png</iconset>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLineEdit" name="methodsFolder"/>
-          </item>
-          <item row="2" column="0">
+          <item row="3" column="0">
            <widget class="QLabel" name="label_19">
             <property name="text">
              <string>Pathways Folder</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="3" column="1">
            <widget class="QPushButton" name="pathwaysFolderSelect">
             <property name="icon">
              <iconset resource="../mzroll.qrc">
@@ -842,17 +810,30 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="2">
-           <widget class="QLineEdit" name="pathwaysFolder"/>
+          <item row="4" column="2">
+           <widget class="QLineEdit" name="txtPeakQualityModel"/>
           </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_23">
+          <item row="1" column="2">
+           <widget class="QLineEdit" name="data_server_url">
             <property name="text">
-             <string>Peak Quality Model</string>
+             <string>http://genomics-pubs.princeton.edu/mzroll/</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
+          <item row="3" column="2">
+           <widget class="QLineEdit" name="pathwaysFolder"/>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLineEdit" name="methodsFolder"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_18">
+            <property name="text">
+             <string>Methods Folder</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
            <widget class="QPushButton" name="btnPeakQualityModel">
             <property name="icon">
              <iconset resource="../mzroll.qrc">
@@ -860,8 +841,37 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="2">
-           <widget class="QLineEdit" name="txtPeakQualityModel"/>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_23">
+            <property name="text">
+             <string>Peak Quality Model</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QPushButton" name="methodsFolderSelect">
+            <property name="icon">
+             <iconset resource="../mzroll.qrc">
+              <normaloff>:/images/fileopen.png</normaloff>:/images/fileopen.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_17">
+            <property name="text">
+             <string>Remote Data Server</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="2">
+           <widget class="QCheckBox" name="chkNotifyNewerMaven">
+            <property name="text">
+             <string>Notify me when a newer version of MAVEN is available</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
