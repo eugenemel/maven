@@ -2735,9 +2735,9 @@ bool MainWindow::isSampleFileType(QString filename) {
        return 1;
     } else if (filename.endsWith("mzCSV",Qt::CaseInsensitive)) {
        return 1;
-    } else if (filename.contains("mzData",Qt::CaseInsensitive)) {
+    } else if (filename.endsWith("mzData",Qt::CaseInsensitive)) {
       return 1;
-    } else if (filename.contains("mzML",Qt::CaseInsensitive)) {
+    } else if (filename.endsWith("mzML",Qt::CaseInsensitive)) {
       return 1;
     }
     return 0;
