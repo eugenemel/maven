@@ -4,6 +4,7 @@
 Appveyor: [![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/github/eugenemel/maven?branch=master&svg=true&retina=true)](https://ci.appveyor.com/project/eugenemel/maven)
 Travis: [![Travis Build Status](https://travis-ci.com/eugenemel/maven.svg?branch=master)](https://travis-ci.com/eugenemel/maven)
 
+As of 20210703, We have switched from `travis-ci.org` to `travis-ci.com`
 
 ## Download latest release
 
