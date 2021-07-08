@@ -1,6 +1,7 @@
 #include <QElapsedTimer>
 #include "database.h"
 #include <unordered_map>
+#include "lipidsummarizationutils.h"
 
 bool Database::connect(QString filename) {
     qDebug() << "Connecting to " << filename << endl;
@@ -971,6 +972,18 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
          } else if (line.startsWith("EXACTMASS:",Qt::CaseInsensitive)) {
             float exactMass = line.mid(10,line.length()).simplified().toDouble();
             cpd->setExactMass(exactMass);
+         } else if (line.startsWith("CLASS:", Qt::CaseInsensitive)) {
+            string lipidClass = line.mid(7, line.length()).simplified().toStdString();
+            cpd->metaDataMap.insert(make_pair(LipidSummarizationUtils::getLipidClassSummaryKey(),
+                                              lipidClass));
+         } else if (line.startsWith("SUMCOMPOSITION:", Qt::CaseInsensitive)) {
+            string sumComposition = line.mid(16, line.length()).simplified().toStdString();
+            cpd->metaDataMap.insert(make_pair(LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey(),
+                                              sumComposition));
+         } else if (line.startsWith("SUMCHAINLENGTHS:", Qt::CaseInsensitive)) {
+            string chainLengthSummary = line.mid(17, line.length()).simplified().toStdString();
+            cpd->metaDataMap.insert(make_pair(LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey(),
+                                              chainLengthSummary));
          } else if (line.startsWith("ADDUCT:",Qt::CaseInsensitive)) {
             cpd->adductString = line.mid(8,line.length()).simplified().toStdString();
 
