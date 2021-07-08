@@ -972,6 +972,10 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
          } else if (line.startsWith("EXACTMASS:",Qt::CaseInsensitive)) {
             float exactMass = line.mid(10,line.length()).simplified().toDouble();
             cpd->setExactMass(exactMass);
+         } else if (line.startsWith("CLASS:", Qt::CaseInsensitive)) {
+            string lipidClass = line.mid(7, line.length()).simplified().toStdString();
+            cpd->metaDataMap.insert(make_pair(LipidSummarizationUtils::getLipidClassSummaryKey(),
+                                              lipidClass));
          } else if (line.startsWith("SUMCOMPOSITION:", Qt::CaseInsensitive)) {
             string sumComposition = line.mid(16, line.length()).simplified().toStdString();
             cpd->metaDataMap.insert(make_pair(LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey(),
