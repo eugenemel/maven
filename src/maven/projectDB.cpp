@@ -333,6 +333,8 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 
         if (g->adduct) {
             query1.addBindValue(QString(g->adduct->name.c_str()) );
+        } else if (g->compound && !g->compound->adductString.empty()){
+            query1.addBindValue(QString(g->compound->adductString.c_str()));
         } else {
             query1.addBindValue(QString());
         }
