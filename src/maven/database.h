@@ -89,6 +89,8 @@ class Database {
         vector<Compound*> compoundsDB;
         std::map<char, PeakGroupTag*> peakGroupTags;
 
+        vector<Adduct*> availableAdducts{}; //based on file, not activated
+
 
       private:
 		QSqlDatabase ligandDB;

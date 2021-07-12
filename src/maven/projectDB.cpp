@@ -727,7 +727,20 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
         if (!srmId.empty()) g.setSrmId(srmId);
 
         if (!adductName.empty()) {
-              g.adduct = DB.findAdductByName(adductName);
+             Adduct *dbAdduct =DB.findAdductByName(adductName);
+
+            if (dbAdduct) {
+                g.adduct = dbAdduct;
+            } else {
+                for (Adduct *adduct : DB.availableAdducts) {
+                    if (adduct && adduct->name == adductName) {
+                        g.adduct = adduct;
+                        DB.adductsDB.push_back(adduct);
+                        break;
+                    }
+                }
+            }
+
         }
 
         //Issue 402: inflate saved IsotopeParameters, if applicable

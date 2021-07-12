@@ -25,9 +25,9 @@ SelectAdductsDialog::SelectAdductsDialog(QWidget *parent, MainWindow *mw, QSetti
 
     //fill out table with all available and valid adducts
     int counter = 0;
-    for (int i = 0; i < mainwindow->availableAdducts.size(); i++) {
+    for (int i = 0; i < DB.availableAdducts.size(); i++) {
 
-        Adduct* adduct = mainwindow->availableAdducts.at(i);
+        Adduct* adduct = DB.availableAdducts.at(i);
 
         if (abs(adduct->charge) < 1e-6) continue; //require charged species
 

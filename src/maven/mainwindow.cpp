@@ -77,9 +77,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
     QString commonAdducts =     methodsFolder + "/" + "ADDUCTS.csv";
     if(QFile::exists(commonAdducts))  {
-        availableAdducts = DB.loadAdducts(commonAdducts.toStdString());
+        DB.availableAdducts = DB.loadAdducts(commonAdducts.toStdString());
     } else {
-        availableAdducts = DB.defaultAdducts();
+        DB.availableAdducts = DB.defaultAdducts();
     }
 
     //compare with settings to determine which adducts can be used
@@ -88,7 +88,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
         QString enabledAdductsList = settings->value("enabledAdducts").toString();
         QStringList enabledAdductNames = enabledAdductsList.split(";", QString::SkipEmptyParts);
 
-        for (Adduct* adduct : availableAdducts) {
+        for (Adduct* adduct : DB.availableAdducts) {
             if (enabledAdductNames.contains(QString(adduct->name.c_str()))) {
                 enabledAdducts.push_back(adduct);
             }
@@ -97,7 +97,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
         //Issue 230: default to only M+H and M-H adducts
         vector<Adduct*> enabledAdductsCandidate{};
-        for (auto adduct : availableAdducts) {
+        for (auto adduct : DB.availableAdducts) {
             if (adduct->name == "[M+H]+" || adduct->name == "[M-H]-") {
                 enabledAdductsCandidate.push_back(adduct);
                 if (enabledAdductsCandidate.size() == 2) break;
@@ -108,7 +108,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
             enabledAdducts = enabledAdductsCandidate;
             settings->setValue("enabledAdducts", "[M+H]+;[M-H]-;");
         } else {
-            enabledAdducts = availableAdducts;
+            enabledAdducts = DB.availableAdducts;
         }
     }
 
