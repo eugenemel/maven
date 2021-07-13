@@ -361,6 +361,11 @@ void EicWidget::setFocusLines(vector<float> rts){
         scene()->addItem(focusLine);
     }
 
+    //Issue 461: explicitly add this RT last, to ensure it is visible
+    if (_focusLineRt > _slice.rtmin && _focusLineRt < _slice.rtmax) {
+        setFocusLine(_focusLineRt);
+    }
+
 }
 
 void EicWidget::drawSelectionLine(float rtmin, float rtmax) { 
