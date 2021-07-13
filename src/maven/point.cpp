@@ -44,8 +44,10 @@ EicPoint::EicPoint(float x, float y, Peak* peak, MainWindow* mw)
          //mouse hover events
          connect(this, SIGNAL(peakGroupFocus(PeakGroup*)), mw->getEicWidget(), SLOT(setSelectedGroup(PeakGroup*)));
          connect(this, SIGNAL(peakGroupFocus(PeakGroup*)), mw->getEicWidget()->scene(), SLOT(update()));
-         connect(this, SIGNAL(peakGroupSelected(PeakGroup*)), mw->massCalcWidget, SLOT(setPeakGroup(PeakGroup*)));
-         connect(this, SIGNAL(peakGroupSelected(PeakGroup*)), mw->fragmentationSpectraWidget, SLOT(overlayPeakGroup(PeakGroup*)));
+
+         //Issue 456: hovering over a peak is tantamount to selecting it
+         connect(this, SIGNAL(peakGroupFocus(PeakGroup*)), mw->massCalcWidget, SLOT(setPeakGroup(PeakGroup*)));
+         connect(this, SIGNAL(peakGroupFocus(PeakGroup*)), mw->fragmentationSpectraWidget, SLOT(overlayPeakGroup(PeakGroup*)));
     }
 
     //mouse press events
