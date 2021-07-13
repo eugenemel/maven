@@ -35,8 +35,11 @@ EicPoint::EicPoint(float x, float y, Peak* peak, MainWindow* mw)
 
          connect(this, SIGNAL(peakSelected(Peak*)), mw->getEicWidget(), SLOT(showPeakArea(Peak*)));
 
-         //Issue 449
-         connect(this, SIGNAL(peakSelected(Peak*)), mw->ms2ScansListWidget, SLOT(selectMs2Scans(Peak*)));
+         //Issue 449: select only MS2 associated with a single peak
+         //connect(this, SIGNAL(peakSelected(Peak*)), mw->ms2ScansListWidget, SLOT(selectMs2Scans(Peak*)));
+
+         //Issue 460: select all MS2 scans instead of single peak
+         connect(this, SIGNAL(groupClicked(PeakGroup*)), mw->ms2ScansListWidget, SLOT(selectMs2Scans(PeakGroup*)));
 
          //mouse hover events
          connect(this, SIGNAL(peakGroupFocus(PeakGroup*)), mw->getEicWidget(), SLOT(setSelectedGroup(PeakGroup*)));
@@ -118,6 +121,11 @@ void EicPoint::mousePressEvent (QGraphicsSceneMouseEvent* event) {
             emit peakSelectedNoShiftModifier(_peak);
         }
         emit peakSelected(_peak);
+
+        PeakGroup* selGroup = _mw->getEicWidget()->getSelectedGroup();
+        if (selGroup) {
+            emit(groupClicked(selGroup));
+        }
     }
 
     //e.g. MS/MS event triangles

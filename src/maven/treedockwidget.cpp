@@ -187,6 +187,37 @@ void TreeDockWidget::selectMs2Scans(Peak *peak) {
     treeWidget->blockSignals(false);
 }
 
+void TreeDockWidget::selectMs2Scans(PeakGroup* group) {
+
+    if (!group) return;
+
+    treeWidget->blockSignals(true);
+    treeWidget->clearSelection();
+    for (int i = 0; i < treeWidget->topLevelItemCount(); i++) {
+
+        QTreeWidgetItem *item = treeWidget->topLevelItem(i);
+
+        QVariant v =   item->data(0,Qt::UserRole);
+        Scan*  scan =  v.value<Scan*>();
+
+        if (scan && scan->mslevel == 2 && scan->sample) {
+
+            for (unsigned int i = 0; i < group->peaks.size(); i++) {
+                mzSample *peakSample = group->peaks[i].getSample();
+
+                if (peakSample && scan->sample == peakSample &&
+                        scan->rt >= group->peaks[i].rtmin && scan->rt <= group->peaks[i].rtmax) {
+                       item->setSelected(true);
+                       break;
+                }
+            }
+
+        }
+    }
+    showInfo();
+    treeWidget->blockSignals(false);
+}
+
 void TreeDockWidget::showInfo() {
     MainWindow* mainwindow = static_cast<MainWindow*>(parentWidget());
         if ( ! mainwindow ) return;
