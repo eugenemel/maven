@@ -417,6 +417,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     }
 
     settings->setValue("closeEvent", 0 );
+
+    connect(libraryDialog, SIGNAL(loadLibrarySignal(QString)), this, SLOT(updateAdductsInGUI()));
 }
 
 QDockWidget* MainWindow::createDockWidget(QString title, QWidget* w) {
@@ -1543,7 +1545,7 @@ void MainWindow::createToolBars() {
 
     adductType = new QComboBox(hBox);
     adductType->setMinimumSize(250, 0);
-    updateAdductComboBox(DB.adductsDB);
+    updateAdductsInGUI();
     connect(adductType,SIGNAL(currentIndexChanged(QString)),SLOT(changeUserAdduct()));
 
     settings->beginGroup("searchHistory");
@@ -2795,9 +2797,7 @@ QColor MainWindow::getBackgroundAdjustedBlack(QWidget *widget){
     }
 }
 
-void MainWindow::updateAdductComboBox(vector<Adduct*> enabledAdducts) {
-
-    DB.adductsDB = enabledAdducts;
+void MainWindow::updateAdductsInGUI() {
 
     adductType->clear();
 
@@ -2805,13 +2805,21 @@ void MainWindow::updateAdductComboBox(vector<Adduct*> enabledAdducts) {
         isotopeWidget->adductComboBox->clear();
     }
 
+    QString enabledAdductNames;
     for(Adduct* a: DB.adductsDB) {
         adductType->addItem(a->name.c_str(),QVariant::fromValue(a));
 
         if (isotopeWidget) {
             isotopeWidget->adductComboBox->addItem(a->name.c_str(),QVariant::fromValue(a));
         }
+
+        enabledAdductNames.append(a->name.c_str());
+        enabledAdductNames.append(";");
     }
+
+    settings->setValue("enabledAdducts", enabledAdductNames);
+
+    selectAdductsDialog->updateGUI();
 
     emit(updatedAvailableAdducts());
 }

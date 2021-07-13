@@ -20,6 +20,7 @@ class SelectAdductsDialog : public QDialog, public Ui_selectAdductsDialog {
        void selectAll();
        void deselectAll();
        void updateSelectedAdducts();
+       void updateGUI();
 
     private:
        QSettings *settings;

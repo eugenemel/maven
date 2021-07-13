@@ -65,6 +65,7 @@ class Database {
         QStringList getLoadedDatabaseNames() { return loadedDatabase.keys(); }
         int getLoadedDatabaseCount(QString databaseName){return loadedDatabase[databaseName];}
         map<string,int>   getChromotographyMethods();
+        QStringList getAdductNames(QString dbName);
 
         Compound* findSpeciesById(string id, string db, bool attemptToLoadDB=true);
 		Compound* findSpeciesByPrecursor(float precursorMz, float productMz,int polarity,double amuQ1, double amuQ3);
@@ -90,7 +91,6 @@ class Database {
         std::map<char, PeakGroupTag*> peakGroupTags;
 
         vector<Adduct*> availableAdducts{}; //based on file, not activated
-
 
       private:
 		QSqlDatabase ligandDB;

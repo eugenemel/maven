@@ -96,24 +96,35 @@ void SelectAdductsDialog::deselectAll() {
 void SelectAdductsDialog::updateSelectedAdducts() {
     qDebug() << "SelectAdductsDialog::updateSelectedAdducts()";
 
-    QString enabledAdductNames;
     vector<Adduct*> updatedEnabledAdducts;
     for (auto it = checkBoxAdduct.begin(); it != checkBoxAdduct.end(); ++it) {
         if (it->first->checkState() == Qt::Checked){
-            enabledAdductNames.append(it->second->name.c_str());
-            enabledAdductNames.append(";");
-
             updatedEnabledAdducts.push_back(it->second);
         }
     }
-
-    settings->setValue("enabledAdducts", enabledAdductNames);
 
     sort(updatedEnabledAdducts.begin(), updatedEnabledAdducts.end(), [](const Adduct* lhs, const Adduct* rhs){
         return lhs->name < rhs->name;
     });
 
-    mainwindow->updateAdductComboBox(updatedEnabledAdducts);
+    DB.adductsDB = updatedEnabledAdducts;
+
+    mainwindow->updateAdductsInGUI();
 
     hide();
+}
+
+void SelectAdductsDialog::updateGUI() {
+    QString enabledAdductsList = settings->value("enabledAdducts").toString();
+    QStringList enabledAdductNames = enabledAdductsList.split(";", QString::SkipEmptyParts);
+
+    for (unsigned int i = 0; i< tblAdducts->rowCount(); i++) {
+        QString adductName = tblAdducts->item(static_cast<int>(i), 1)->text();
+
+        if (enabledAdductNames.contains(adductName)) {
+            tblAdducts->item(static_cast<int>(i), 0)->setCheckState(Qt::Checked);
+        } else {
+            tblAdducts->item(static_cast<int>(i), 0)->setCheckState(Qt::Unchecked);
+        }
+    }
 }

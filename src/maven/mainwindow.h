@@ -247,7 +247,7 @@ public slots:
     void historyLast();
     void getCovariants(Peak* peak);
     void markGroup(PeakGroup* group,char label);
-    void updateAdductComboBox(vector<Adduct*> enabledAdducts);
+    void updateAdductsInGUI();
 
     void changeUserAdduct();
     Adduct* getUserAdduct();

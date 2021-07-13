@@ -166,6 +166,7 @@ void LigandWidget::setDatabase(QString dbname) {
     emit(databaseChanged(getDatabaseName()));
 
     DB.loadCompoundsSQL(dbname,DB.getLigandDB());
+
     rebuildCompoundTree();
 
     emit(_mw->libraryDialog->loadLibrarySignal(getDatabaseName()));

@@ -391,6 +391,31 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
                      << compoundsDB.size();
         }
 
+        bool isUpdatedAdducts = false;
+
+        //Issue 462: add adducts
+        for (QString adductName : getAdductNames(databaseName)) {
+
+            bool isAlreadyLoaded = false;
+            for (auto adduct : adductsDB) {
+                if (adduct->name == adductName.toStdString()){
+                    isAlreadyLoaded = true;
+                    break;
+                }
+            }
+
+            if (!isAlreadyLoaded) {
+                for (auto adduct : availableAdducts) {
+                    if (adduct->name == adductName.toStdString()) {
+                        adductsDB.push_back(adduct);
+                        isUpdatedAdducts = true;
+                        break;
+                    }
+                }
+            }
+
+        }
+
         delete(timer);
 }
 
@@ -593,6 +618,22 @@ QStringList Database::getDatabaseNames() {
     QStringList dbnames;
     while (query.next())  dbnames << query.value(0).toString();
     return dbnames;
+}
+
+//Issue 462
+QStringList Database::getAdductNames(QString dbName) {
+    QSqlQuery query(ligandDB);
+
+    QString sqlQuery("select distinct adductString from compounds where compounds.dbName IS '");
+    sqlQuery.append(dbName);
+    sqlQuery.append("'");
+
+    query.prepare(sqlQuery);
+    if (!query.exec())  qDebug() << query.lastError();
+
+    QStringList adductNames;
+    while(query.next()) adductNames << query.value(0).toString();
+    return adductNames;
 }
 
 /**
