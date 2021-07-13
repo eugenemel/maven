@@ -83,6 +83,7 @@ void SelectAdductsDialog::selectAll() {
         it->first->setCheckState(Qt::Checked);
     }
     tblAdducts->update();
+    tblAdducts->repaint();
 }
 
 void SelectAdductsDialog::deselectAll() {
@@ -91,6 +92,7 @@ void SelectAdductsDialog::deselectAll() {
         it->first->setCheckState(Qt::Unchecked);
     }
     tblAdducts->update();
+    tblAdducts->repaint();
 }
 
 void SelectAdductsDialog::updateSelectedAdducts() {
