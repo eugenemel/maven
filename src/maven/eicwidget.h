@@ -43,12 +43,12 @@ public slots:
     void zoom(float factor);
 
     void setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax);
-    void setMzSlice(const mzSlice& slice, bool isUseSampleBoundsRT=true);
+    void setMzSlice(const mzSlice& slice, bool isUseSampleBoundsRT=true, bool isPreserveSelectedGroup=false);
     void setSRMTransition(const SRMTransition& transition);
     void setRtWindow(float rtmin, float rtmax );
     void setSrmId(string srmId);
     void setPeakGroup(PeakGroup* group);
-    void setCompound(Compound* c, Adduct* a, bool isPreservePreviousRtRange=false);
+    void setCompound(Compound* c, Adduct* a, bool isPreservePreviousRtRange=false, bool isSelectGroupNearRt=true, bool isPreserveSelectedGroup=false);
     void setSelectedGroup(PeakGroup* group);
 
     void addEICLines(bool showSpline);
@@ -59,6 +59,7 @@ public slots:
     void addMergedEIC();
     void setFocusLine(float rt);
     void setFocusLines(vector<float> rts);
+    void drawFocusLines();
     void drawSelectionLine(float rtmin,float rtmax);
     void addFocusLine(PeakGroup*);
     void addBarPlot(PeakGroup*);
@@ -68,7 +69,7 @@ public slots:
     void addMS2Events(float mzmin, float mzmax);
     void integrateRegion(float rtmin, float rtmax);
     void recompute(bool isUseSampleBoundsRT=true);
-    void replot(PeakGroup*);
+    void replot(PeakGroup* group);
     void replot();
     void replotForced();
     void print(QPaintDevice* printer);
@@ -211,6 +212,7 @@ private:
     QGraphicsLineItem* _focusLine;
     QGraphicsLineItem* _selectionLine;
 
+    vector<float> _focusLinesRts{};
     QVector<QGraphicsLineItem*> _focusLines;
     vector<EicLine*> _peakAreas{};
 

@@ -352,9 +352,14 @@ void EicWidget::setFocusLine(float rt) {
 }
 
 void EicWidget::setFocusLines(vector<float> rts){
+    _focusLinesRts = rts;
+    drawFocusLines();
+}
+
+void EicWidget::drawFocusLines() {
 
     //new collection of focus lines
-    for (float rt : rts){
+    for (float rt : _focusLinesRts){
         QGraphicsLineItem *focusLine = new QGraphicsLineItem(nullptr);
 
         QPen pen(Qt::gray, 1, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin);
@@ -372,7 +377,6 @@ void EicWidget::setFocusLines(vector<float> rts){
     if (_focusLineRt > _slice.rtmin && _focusLineRt < _slice.rtmax) {
         setFocusLine(_focusLineRt);
     }
-
 }
 
 void EicWidget::drawSelectionLine(float rtmin, float rtmax) { 
@@ -1510,19 +1514,13 @@ void EicWidget::setSrmId(string srmId) {
    	replot();
 }
 
-void EicWidget::setCompound(Compound* c, Adduct* adduct, bool isPreservePreviousRtRange) {
+void EicWidget::setCompound(Compound* c, Adduct* adduct, bool isPreservePreviousRtRange, bool isSelectGroupNearRt, bool isPreserveSelectedGroup) {
     qDebug() << "EicWidget::setCompound() compound=" << c << ", adduct=" << adduct;
     if (!c) return;
     if ( getMainWindow()->sampleCount() == 0) return;
 
     // Issue 280
     _alwaysDisplayGroup = nullptr;
-
-    //Issue 367: Copying approach may cause other problems
-//    if (_alwaysDisplayGroup) {
-//        delete(_alwaysDisplayGroup);
-//        _alwaysDisplayGroup = nullptr;
-//    }
 
     vector <mzSample*> samples = getMainWindow()->getVisibleSamples();
     if (samples.size() == 0 ) return;
@@ -1571,7 +1569,7 @@ void EicWidget::setCompound(Compound* c, Adduct* adduct, bool isPreservePrevious
     slice.adduct   = adduct;
     if(!c->srmId.empty()) slice.srmId=c->srmId;
 
-    setMzSlice(slice, isUseSampleBoundsRT);
+    setMzSlice(slice, isUseSampleBoundsRT, isPreserveSelectedGroup);
 
    //clock_gettime(CLOCK_REALTIME, &tE);
    //qDebug() << "Time taken" << (tE.tv_sec-tS.tv_sec)*1000 + (tE.tv_nsec - tS.tv_nsec)/1e6;
@@ -1584,7 +1582,7 @@ void EicWidget::setCompound(Compound* c, Adduct* adduct, bool isPreservePrevious
 
     if (c->expectedRt > 0 ) {
         setFocusLine(c->expectedRt);
-        selectGroupNearRt(c->expectedRt);
+        if (isSelectGroupNearRt) selectGroupNearRt(c->expectedRt);
     }
 
 //   clock_gettime(CLOCK_REALTIME, &tE);
@@ -1592,7 +1590,7 @@ void EicWidget::setCompound(Compound* c, Adduct* adduct, bool isPreservePrevious
 
 }
 
-void EicWidget::setMzSlice(const mzSlice& slice, bool isUseSampleBoundsRT) {
+void EicWidget::setMzSlice(const mzSlice& slice, bool isUseSampleBoundsRT, bool isPreserveSelectedGroup) {
     qDebug() << "EicWidget::setmzSlice()";
 
     //Issue 434: recompute EICs if the (m/z, RT) boundaries differ
@@ -1604,7 +1602,11 @@ void EicWidget::setMzSlice(const mzSlice& slice, bool isUseSampleBoundsRT) {
         recompute(isUseSampleBoundsRT);
     }
 
-    replot(nullptr);
+    if (isPreserveSelectedGroup) {
+        replot(&_selectedGroup);
+    } else {
+        replot(nullptr);
+    }
 }
 
 void EicWidget::setSRMTransition(const SRMTransition& transition){

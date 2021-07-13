@@ -349,7 +349,8 @@ void MassCalcWidget::showInfo() {
 
         MassCalculator::Match m = matches[mNum];
         if (m.compoundLink) {
-            _mw->getEicWidget()->setCompound(m.compoundLink, m.adductLink, true);
+            _mw->getEicWidget()->setCompound(m.compoundLink, m.adductLink, true, false, true);
+            _mw->getEicWidget()->drawFocusLines();
             _mw->fragmentationSpectraWidget->overlayCompound(m.compoundLink);
 
             if (!_mw->fragmentationSpectraWidget->getCurrentScan()) {
@@ -374,7 +375,8 @@ void MassCalcWidget::showInfo() {
             Adduct *adduct = DB.findAdductByName(adductName.toStdString());
 
             if (adduct) {
-                _mw->getEicWidget()->setCompound(compound, adduct, true);
+                _mw->getEicWidget()->setCompound(compound, adduct, true, false, true);
+                _mw->getEicWidget()->drawFocusLines();
             }
         }
     }
