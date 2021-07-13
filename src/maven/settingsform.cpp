@@ -153,7 +153,7 @@ void SettingsForm::bringIntoView(){
 void SettingsForm::recomputeEIC() { 
     getFormValues();
     if (mainwindow && mainwindow->getEicWidget()) {
-        mainwindow->getEicWidget()->recompute();
+        mainwindow->getEicWidget()->recompute(!mainwindow->getEicWidget()->isPreservePreviousRtRange());
         mainwindow->getEicWidget()->replot();
     }
 }

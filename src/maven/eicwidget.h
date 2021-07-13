@@ -95,6 +95,8 @@ public slots:
     void emphasizeEICPoints(bool f) { _emphasizeEICPoints=f;}
     void preservePreviousRtRange(bool f) { _isPreservePreviousRtRange=f;}
 
+    bool isPreservePreviousRtRange() {return _isPreservePreviousRtRange;}
+
     void startAreaIntegration() { toggleAreaIntegration(true); }
     void startSpectralAveraging() { toggleSpectraAveraging(true); }
     void toggleAreaIntegration (bool f) { _areaIntegration=f; f ? setCursor(Qt::SizeHorCursor) : setCursor(Qt::ArrowCursor); }
