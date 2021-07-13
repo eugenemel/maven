@@ -350,7 +350,8 @@ void EicWidget::setFocusLines(vector<float> rts){
     for (float rt : rts){
         QGraphicsLineItem *focusLine = new QGraphicsLineItem(nullptr);
 
-        QPen pen(Qt::red, 2, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin);
+        QPen pen(Qt::gray, 1, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin);
+
         focusLine->setPen(pen);
         focusLine->setLine(toX(rt), 0, toX(rt), height() );
         focusLine->setZValue(1000);
