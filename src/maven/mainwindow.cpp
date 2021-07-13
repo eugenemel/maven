@@ -885,8 +885,13 @@ void MainWindow::setCompoundFocus(Compound*c) {
     }
 
     if (isotopeWidget && isotopeWidget->isVisible() ) isotopeWidget->setCompound(c);
-    if (massCalcWidget && massCalcWidget->isVisible() )  massCalcWidget->setMass(mz);
-
+    if (massCalcWidget && massCalcWidget->isVisible() ) {
+        if (eicWidget->getSelectedGroup()) {
+            massCalcWidget->setPeakGroup(eicWidget->getSelectedGroup());
+        } else {
+            massCalcWidget->setMass(mz);
+        }
+    }
     //show fragmentation
     if (fragmentationSpectraWidget->isVisible())  {
 
@@ -2063,10 +2068,6 @@ void MainWindow::showPeakInfo(Peak* _peak) {
 
     if (spectraDockWidget->isVisible() && scan) {
         spectraWidget->setScan(_peak);
-    }
-
-    if( massCalcWidget->isVisible() ) {
-        massCalcWidget->setCharge(ionizationMode);
     }
 
     if( ms2ScansListWidget->isVisible() ) {

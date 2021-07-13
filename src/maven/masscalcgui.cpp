@@ -264,12 +264,23 @@ void MassCalcWidget::setFragment(Fragment * f){
     matches = DB.findMatchingCompounds(_mz,_ppm,_charge);
     lineEdit->setText(QString::number(_mz,'f',5));
 
+    PeakGroup *grp = _mw->getEicWidget()->getSelectedGroup();
+
     for(MassCalculator::Match& m: matches ) {
        Compound* cpd = m.compoundLink;
        m.fragScore = cpd->scoreCompoundHit(f,fragmentPPM->value(),false);
+       if (grp){
+           m.diff = mzUtils::ppmDist((double) m.mass, (double) grp->meanMz);
+           if (cpd->expectedRt > 0){
+               m.rtdiff =  grp->meanRt - cpd->expectedRt;
+           }
+       }
     }
 
     showTable();
+
+    lineEdit->repaint();
+    repaint();
 }
 
 void MassCalcWidget::setFragmentationScan(Scan* scan) {
@@ -346,6 +357,9 @@ void MassCalcWidget::showInfo() {
 
         QVariant v = item->data(0,Qt::UserRole);
         int mNum = v.toInt();
+
+        //this should not happen, but add this check here to avoid program crashing
+        if (mNum < 0 || mNum >= matches.size()) return;
 
         MassCalculator::Match m = matches[mNum];
         if (m.compoundLink) {
