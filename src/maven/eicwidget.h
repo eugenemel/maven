@@ -114,6 +114,8 @@ public slots:
     void freezeView(bool freeze);
     void groupPeaks();
     void clearEICLines();
+    void clearFocusLine();
+    void clearFocusLines();
     void clearPeakAreas();
 
 protected:

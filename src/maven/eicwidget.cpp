@@ -290,7 +290,22 @@ void EicWidget::selectionChangedAction() {}
 
 void EicWidget::clearEICLines() {
     qDebug() <<" EicWidget::clearEICLines()";
+    clearFocusLines();
+    clearFocusLine();
+}
 
+void EicWidget::clearFocusLine() {
+    if (_focusLine){
+        if (_focusLine->scene()) {
+            scene()->removeItem(_focusLine);
+        }
+        delete(_focusLine);
+        _focusLine = nullptr;
+    }
+    _focusLineRt = -1.0f;
+}
+
+void EicWidget::clearFocusLines() {
     //delete, clear out old focus lines
     for (auto item : _focusLines){
         if (item){
@@ -302,14 +317,6 @@ void EicWidget::clearEICLines() {
         }
     }
     _focusLines.clear();
-
-    if (_focusLine){
-        if (_focusLine->scene()) {
-            scene()->removeItem(_focusLine);
-        }
-        delete(_focusLine);
-        _focusLine = nullptr;
-    }
 }
 
 void EicWidget::clearPeakAreas() {
@@ -1571,10 +1578,14 @@ void EicWidget::setCompound(Compound* c, Adduct* adduct, bool isPreservePrevious
 
 
     for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].compound = c;
+
+    //Issue 461: Always remove the previous compound focus line
+    clearFocusLine();
+
     if (c->expectedRt > 0 ) {
         setFocusLine(c->expectedRt);
         selectGroupNearRt(c->expectedRt);
-    } 
+    }
 
 //   clock_gettime(CLOCK_REALTIME, &tE);
   // qDebug() << "Time taken" << (tE.tv_sec-tS.tv_sec)*1000 + (tE.tv_nsec - tS.tv_nsec)/1e6;
