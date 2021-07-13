@@ -474,6 +474,8 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
     float ppmWindow =    hit.productPPM;
     double maxIntensity= hit.getMaxIntensity();
 
+    if (maxIntensity <= 0.0) return;
+
     QPen redpen(Qt::red,1);
     QPen bluepen(Qt::blue,2);
     QPen graypen(Qt::gray,1);
@@ -519,6 +521,9 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
 
     for(int i=0; i < hit.mzList.size(); i++) {
         float hitMz=hit.mzList[i];
+
+        if (hitMz <= 0.0f) continue;
+
         int hitIntensity= 1;
         if (i < hit.intensityList.size()) hitIntensity=hit.intensityList[i];
 
