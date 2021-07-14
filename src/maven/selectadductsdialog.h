@@ -29,4 +29,10 @@ class SelectAdductsDialog : public QDialog, public Ui_selectAdductsDialog {
 
 };
 
+class AdductsCheckBoxWidgetItem : public QTableWidgetItem {
+    public:
+        bool operator < (const QTableWidgetItem &other) const {
+           return (other.checkState() < checkState());
+        }
+};
 #endif // SELECTADDUCTSDIALOG_H

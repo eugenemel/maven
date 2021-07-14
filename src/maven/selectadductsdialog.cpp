@@ -33,7 +33,7 @@ SelectAdductsDialog::SelectAdductsDialog(QWidget *parent, MainWindow *mw, QSetti
 
         tblAdducts->insertRow(counter);
 
-        QTableWidgetItem *item = new QTableWidgetItem();
+        AdductsCheckBoxWidgetItem *item = new AdductsCheckBoxWidgetItem();
         if (enabledAdductNames.contains(QString(adduct->name.c_str()))) {
             item->setCheckState(Qt::Checked);
         } else {
