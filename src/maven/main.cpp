@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 
         //Issue 445
         //if the current version is not a development version,
-        //the lateset version could be retrieved,
+        //the latest version could be retrieved,
         //and a more recent version exists,
         //ask the user if they'd like to visit the download page
         if (!currentVersion.contains("-") && !latestVersion.isEmpty() && latestVersion != currentVersion){
