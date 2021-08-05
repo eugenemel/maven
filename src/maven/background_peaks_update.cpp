@@ -959,7 +959,7 @@ void BackgroundPeakUpdate::processMassSlices() {
         massSlices.setSamples(samples);
 
         if(mustHaveMS2) {
-            //rsamples must be loaded for this to work
+            //samples must be loaded for this to work
             massSlices.algorithmE(ppmMerge, rtStepSize*avgScanTime);
         } else {
             massSlices.algorithmB(ppmMerge, minGroupIntensity ,rtStepSize);
