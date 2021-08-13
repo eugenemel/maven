@@ -160,7 +160,14 @@ void LigandWidget::setDatabase(QString dbname) {
     }
 
    int index = databaseSelect->findText(dbname,Qt::MatchExactly);
-   if (index != -1 ) databaseSelect->setCurrentIndex(index);
+
+   if (index != -1 ) {
+       //Issue 477: setCurrentIndex() will call LigandWidget::setDatabase() again,
+       //here we want to change the value of the index without triggering any downstream events
+       databaseSelect->blockSignals(true);
+       databaseSelect->setCurrentIndex(index);
+       databaseSelect->blockSignals(false);
+   }
 
     _mw->getSettings()->setValue("lastCompoundDatabase", getDatabaseName());
 
