@@ -122,7 +122,8 @@ void LibraryMangerDialog::loadCompoundsFile(QString filename){
     int compoundCount = DB.loadCompoundsFile(filename);
     DB.loadCompoundsSQL(dbname.c_str(),DB.getLigandDB());
 
-    emit(loadLibrarySignal(QString(dbname.c_str())));
+    //Issue 477: this does not appear to be doing anything
+    //emit(loadLibrarySignal(QString(dbname.c_str())));
 
     if (compoundCount > 0 && mainwindow->ligandWidget) {
         mainwindow->ligandWidget->updateDatabaseList();
