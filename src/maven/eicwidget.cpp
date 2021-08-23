@@ -815,14 +815,20 @@ void EicWidget::addMergedEIC() {
     int baseline_smoothing = settings->value("baseline_smoothing").toInt();
     int baseline_quantile =  settings->value("baseline_quantile").toInt();
 
+    EIC *eic = nullptr;
+    if (eics.empty()) {
+        return;
+    } else if (eics.size() == 1) {
+        eic = eics[0];
+    } else {
+        eic = EIC::eicMerge(eics);
+        eic->setSmootherType((EIC::SmootherType) eic_smoothingAlgorithm);
+        eic->setBaselineSmoothingWindow(baseline_smoothing);
+        eic->setBaselineDropTopX(baseline_quantile);
+        eic->getPeakPositions(eic_smoothingWindow);
+    }
 
     EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
-
-    EIC* eic = EIC::eicMerge(eics);
-    eic->setSmootherType((EIC::SmootherType) eic_smoothingAlgorithm);
-    eic->setBaselineSmoothingWindow(baseline_smoothing);
-    eic->setBaselineDropTopX(baseline_quantile);
-    eic->getPeakPositions(eic_smoothingWindow);
 
     for (int j=0; j < eic->size(); j++ ){
         if ( eic->rt[j] < _slice.rtmin) continue;
