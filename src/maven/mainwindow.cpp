@@ -337,7 +337,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     tabifyDockWidget(spectraDockWidget,isotopeWidget);
     tabifyDockWidget(spectraDockWidget,covariantsPanel);
     tabifyDockWidget(spectraDockWidget,galleryDockWidget);
-    tabifyDockWidget(spectraDockWidget,rconsoleDockWidget);
+    //tabifyDockWidget(spectraDockWidget,rconsoleDockWidget);
 
     tabifyDockWidget(ms1ScansListWidget, ms2ScansListWidget);
     tabifyDockWidget(ms1ScansListWidget, ms3ScansListWidget);
@@ -1272,6 +1272,10 @@ void MainWindow::writeSettings() {
     settings->setValue("size", size());
     settings->setValue("ppmWindowBox",ppmWindowBox->value());
     settings->setValue("geometry", saveGeometry());
+
+    //Issue 479: Always hide the MS1 spectrum widget, as it can be very slow to render
+    spectraDockWidget->setVisible(false);
+
     settings->setValue("windowState", saveState());
     settings->setValue("ionizationMode", getIonizationMode());
 
