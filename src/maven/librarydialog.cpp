@@ -120,6 +120,15 @@ void LibraryMangerDialog::loadCompoundsFile(QString filename){
     string dbname = mzUtils::cleanFilename(dbfilename);
 
     int compoundCount = DB.loadCompoundsFile(filename);
+
+    //Issue 485: When no compounds were added, warn the user.
+    if (compoundCount == 0) {
+        QMessageBox::warning(this,
+                             tr("No Compounds Imported"),
+                             tr("No compounds were imported.  Check the compounds file to ensure the file is properly formatted.")
+                             );
+    }
+
     DB.loadCompoundsSQL(dbname.c_str(),DB.getLigandDB());
 
     //Issue 477: this does not appear to be doing anything
