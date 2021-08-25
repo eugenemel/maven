@@ -824,7 +824,7 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
                 fields[i]= fields[i].replace("\"","");
             }
             if (n>2 && fields[i][0] == '\'' && fields[i][n-1] == '\'') {
-                fields[i]= fields[i].replace("\"","");
+                fields[i]= fields[i].replace("\'","");
             }
             fields[i] = fields[i].trimmed();
         }
