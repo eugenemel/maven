@@ -1548,6 +1548,9 @@ void MainWindow::createToolBars() {
     quantType->addItem("Height");
     quantType->addItem("Retention Time");
     quantType->addItem("Quality");
+    quantType->addItem("Area Uncorrected");
+    quantType->addItem("Area Fractional");
+    quantType->addItem("S/N Ratio");
     quantType->setToolTip("Peak Quantitation Type");
     connect(quantType, SIGNAL(activated(int)), eicWidget, SLOT(replot()));
     connect(quantType, SIGNAL(currentIndexChanged(int)), bookmarkedPeaks, SLOT(refreshPeakGroupQuant()));
