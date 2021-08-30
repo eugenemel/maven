@@ -1630,7 +1630,14 @@ void MainWindow::createToolBars() {
 void MainWindow::updateQuantTypeComboBox() {
     quantType->clear();
 
-    vector<string> quantTypes{"AreaTop","Area","Height","Retention Time","Quality"};
+    vector<string> quantTypes{"AreaTop",
+                              "Area",
+                              "Height",
+                              "Retention Time",
+                              "Quality",
+                              "Area Uncorrected",
+                              "Area Fractional",
+                              "S/N Ratio"};
 
     for (auto quantTypeString : quantTypes) {
         if (projectDockWidget->currentProject) {
@@ -2603,6 +2610,8 @@ PeakGroup::QType MainWindow::getUserQuantType() {
         else if (type  == "Height")  return PeakGroup::Height;
         else if (type  == "Retention Time")  return PeakGroup::RetentionTime;
         else if (type  == "Quality")  return PeakGroup::Quality;
+        else if (type == "Area Uncorrected") return PeakGroup::AreaNotCorrected;
+        else if (type == "Area Fractional") return PeakGroup::AreaFractional;
         else if (type  == "S/N Ratio")  return PeakGroup::SNRatio;
     }
     return PeakGroup::AreaTop;
