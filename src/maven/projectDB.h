@@ -46,6 +46,7 @@ class ProjectDB {
             void savePeakGroupsTableData(map<QString, QString> searchTableData);
             void writeSearchResultsToDB();
             int writeGroupSqlite(PeakGroup* group, int parentGroupId, QString tableName);
+            void saveMS2MatchScores(PeakGroup* group, int lastGroupId);
 
             void loadPeakGroups(QString tableName, QString rumsDBLibrary, bool isAttemptToLoadDB=true, const map<int, vector<Peak>>& peakGroupMap={}, Classifier *classifier=nullptr);
             void loadGroupPeaks(PeakGroup* group);

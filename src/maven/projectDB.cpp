@@ -388,6 +388,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
          bookmarksOldToNewGroupIDs.insert(make_pair(g->groupId, lastInsertGroupId));
      }
 
+     
      QSqlQuery query2(sqlDB);
      if(!query2.exec("create table IF NOT EXISTS peaks( \
                     peakId integer primary key AUTOINCREMENT, \
@@ -484,6 +485,11 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
     				if(!query3.exec())  qDebug() << query3.lastError();
 		}
 
+        //save ms2cores 
+        saveMS2MatchScores(g, lastInsertGroupId);
+
+
+        //children of this group
         if ( g->childCount() ) {
            for(int i=0; i < g->children.size(); i++ ) {
                 PeakGroup* child = &(g->children[i]); 
@@ -958,6 +964,44 @@ void ProjectDB::loadMatchTable() {
 
         qDebug() << "ProjectDB::loadMatchTable(): Loaded " << topMatch.size() << " top matches.";
         qDebug() << "ProjectDB::loadMatchTable(): Loaded " << allMatches.size() << "matches.";
+}
+
+void ProjectDB::saveMS2MatchScores(PeakGroup* g, int lastGroupId) {
+        
+       if(!g or g->fragMatchScore.numMatches == 0) return;
+
+        QSqlQuery query0(sqlDB);
+        query0.exec("CREATE TABLE IF NOT EXISTS ms2_match_scores(\
+                        groupId integer primary key,\
+                        numMatches double,\
+                        numDiagnosticMatches double,\
+                        fractionMatched double,\
+                        ticMatched double,\
+                        hypergeomScore double,\
+                        mvhScore double,\
+                        dotProduct double,\
+                        weightedDotProduct double,\
+                        ppmError double,\
+                        ms2purity double)");
+
+       int gid = g->savedGroupId != -1 ? g->savedGroupId : lastGroupId;
+
+       QSqlQuery query1(sqlDB);
+       query1.prepare("replace into ms2_match_scores values(?,?,?, ?,?,?, ?,?,?, ?,?)");
+       query1.addBindValue(gid);
+       query1.addBindValue(g->fragMatchScore.numMatches);
+       query1.addBindValue(g->fragMatchScore.numDiagnosticMatches);
+       query1.addBindValue(g->fragMatchScore.fractionMatched);
+       query1.addBindValue(g->fragMatchScore.ticMatched);
+       query1.addBindValue(g->fragMatchScore.hypergeomScore);
+       query1.addBindValue(g->fragMatchScore.mvhScore);
+       query1.addBindValue(g->fragMatchScore.dotProduct);
+       query1.addBindValue(g->fragMatchScore.weightedDotProduct);
+       query1.addBindValue(g->fragMatchScore.ppmError);
+       query1.addBindValue(g->fragMatchScore.ms2purity);
+       if(!query1.exec()) { qDebug() << query1.lastError(); }
+       //qDebug()  << "Saved ms2 scores for " << g->savedGroupId  << " " << lastGroupId;
+
 }
 
 void ProjectDB::saveMatchTable() {
