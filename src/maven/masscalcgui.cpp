@@ -199,7 +199,22 @@ void MassCalcWidget::showTable() {
         if (databaseSelect->currentText() != "All" and databaseSelect->currentText() != db) continue;
 
         //Issue 437: filter hits by adduct matching
-        if (chkReferenceObservedAdductMatch->isChecked() && a->name != c->adductString) continue;
+        bool isAdductMatch = true;
+        if (chkReferenceObservedAdductMatch->isChecked()) {
+
+            //Issue 495: Allow leeway in [M] vs [M]+ vs [M]- matches - treat these as synonyms
+            bool compoundMZeroAdduct = (c->adductString == "[M]" || c->adductString == "[M]+" || c->adductString == "[M]-");
+            bool adductMZeroAdduct = (c->adductString == "[M]" || c->adductString == "[M]+" || c->adductString == "[M]-");
+
+            if (compoundMZeroAdduct && adductMZeroAdduct) {
+                isAdductMatch = true;
+            } else {
+                isAdductMatch = a->name == c->adductString;
+            }
+
+        }
+
+        if (!isAdductMatch) continue;
 
         NumericTreeWidgetItem* item = new NumericTreeWidgetItem(treeWidget,Qt::UserRole);
         item->setData(0, Qt::UserRole,QVariant(i));

@@ -538,7 +538,10 @@ vector<MassCalculator::Match> Database::findMatchingCompounds(float mz, float pp
 
     //compute plausable adducts
     for(Adduct* a: adductsDB ) {
-            if (SIGN(a->charge) != SIGN(charge)) continue;
+
+            // Issue 495: Treat a zero-charge adduct like a wildcard
+            if (charge != 0 && SIGN(a->charge) != SIGN(charge)) continue;
+
             float pmz = a->computeParentMass(mz);
             set<Compound*>hits = this->findSpeciesByMass(pmz,ppm);
 
