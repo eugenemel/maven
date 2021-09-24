@@ -445,7 +445,11 @@ void ProjectDockWidget::saveProjectAs() {
         if(!fileName.endsWith(".mzrollDB",Qt::CaseInsensitive)) fileName = fileName + ".mzrollDB";
         saveProjectSQLITE(fileName);
         lastOpennedProject = fileName;
+
+        //Issue 469: Update name in window
+        _mainwindow->setWindowTitle(PROGRAMNAME + "_" + QString(MAVEN_VERSION) + " " + fileName);
      }
+
 }
 
 void ProjectDockWidget::saveProject() {
