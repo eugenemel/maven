@@ -1167,7 +1167,10 @@ void ProjectDockWidget::importSampleMetadata(){
         vector<string> headerValues;
         split(line, ',', headerValues);
         for (unsigned int i = 0; i < headerValues.size(); i++) {
-            indexOf[headerValues.at(i)] = i;
+            //Issue 476: Fix encoding/decoding issue
+            QString str = QString(headerValues.at(i).c_str());
+            string cleanedString = str.toStdString();
+            indexOf[cleanedString] = i;
         }
     }
 
