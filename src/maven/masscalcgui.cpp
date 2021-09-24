@@ -230,13 +230,18 @@ void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
      qDebug() << "MassCalcWidget::setPeakGroup()";
 
     if(!grp) return;
+    if (grp->meanMz <= 0.0) return; //Issue 495
 
-    _mz = grp->meanMz;    
+    _mz = grp->meanMz;
 
     matches = DB.findMatchingCompounds(_mz,_ppm,_charge);
 
     //TODO: this information should be saved in the file, not computed on the fly like this, unless desired by design.
     if (grp->fragmentationPattern.nobs() == 0){
+        qDebug() << "MassCalcWidget::setPeakGroup(): grp->computeFragPattern() minMz="
+                 << grp->minMz
+                 << ", maxMz="
+                 << grp->maxMz;
         grp->computeFragPattern(fragmentPPM->value());
     }
 
