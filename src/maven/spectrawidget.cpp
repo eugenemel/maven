@@ -519,6 +519,42 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
         _items.push_back(compoundIdText);
     }
 
+    //Issue 481: Prefer on-the-fly fragment matches to avoid obviously bad matches
+    vector<int> matches{};
+    if (_msLevel == 2 && (_currentFragment || (_currentScan && _currentScan->precursorMz > 0))) {
+
+        float productPpmTolr = static_cast<float>(mainwindow->massCalcWidget->fragmentPPM->value());
+        float maxDeltaMz = (productPpmTolr * static_cast<float>(_currentScan->precursorMz))/1000000;
+
+        //hit
+        Fragment a;
+        a.precursorMz = hit.precursorMz;
+        vector<float> mzs(hit.mzList.size());
+        for (unsigned int i = 0; i < mzs.size(); i++) {
+            mzs[i] = static_cast<float>(hit.mzList[i]);
+        }
+        a.mzs = mzs;
+
+        vector<float> intensities(hit.intensityList.size());
+        for (unsigned int i = 0; i < intensities.size(); i++){
+            intensities[i] = static_cast<float>(hit.intensityList[i]);
+        }
+        a.intensity_array = intensities;
+
+        //_currentFragment or _currentScan
+        if (_currentFragment) {
+            matches = Fragment::findFragPairsGreedyMz(&a, _currentFragment, maxDeltaMz);
+        } else {
+            Fragment b;
+            b.precursorMz = _currentScan->precursorMz;
+            b.mzs = _currentScan->mz;
+            b.intensity_array = _currentScan->intensity;
+            matches = Fragment::findFragPairsGreedyMz(&a, &b, maxDeltaMz);
+        }
+
+
+    }
+
     for(int i=0; i < hit.mzList.size(); i++) {
         float hitMz=hit.mzList[i];
 
@@ -538,7 +574,11 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
             if (_msLevel == 3) {
                 pos = _currentScan->findHighestIntensityPosAMU(hitMz, _ms3MatchingTolr);
             } else {
-                pos = _currentScan->findHighestIntensityPos(hitMz, static_cast<float>(ppmMz), ppmWindow);
+                if (!matches.empty()) {
+                    pos = matches[i];
+                } else {
+                    pos = _currentScan->findHighestIntensityPos(hitMz, static_cast<float>(ppmMz), ppmWindow);
+                }
             }
         }
 
