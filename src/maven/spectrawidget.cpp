@@ -360,9 +360,10 @@ void SpectraWidget::overlayPeakGroup(PeakGroup* group) {
                 break;
             }
         }
+        setScan(scan);
+    } else {
+        setScan(nullptr);
     }
-
-    setScan(scan);
 
     if (group->compound)  {
         if(group->compound->fragment_mzs.size()) overlayCompound(group->compound);
