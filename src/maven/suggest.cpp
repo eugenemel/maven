@@ -8,7 +8,7 @@ SuggestPopup::SuggestPopup(QLineEdit *parent): QObject(parent), editor(parent)
 		popup->setFocusProxy(parent);
 		popup->setMouseTracking(true);
 
-        popup->setColumnCount(3);
+        popup->setColumnCount(3); //Issue 498 - switch from compound name to compound+adduct
 		popup->setUniformRowHeights(true);
 		popup->setRootIsDecorated(false);
 		popup->setEditTriggers(QTreeWidget::NoEditTriggers);
@@ -123,11 +123,14 @@ void SuggestPopup::doSearchCompounds(QString needle, int maxHitCount, QString db
         if(!dbLimit.isEmpty() and c->db != currentDb) continue;
 
         QString name(c->name.c_str() );
+        QString adduct(c->adductString.c_str());
         QString formula(c->formula.c_str() );
         QString id(c->id.c_str() );
 
-        if ( name.length()==0) continue;
-        if ( compound_matches.count(name) ) continue;
+        QString srchKey = name + " " + adduct;
+
+        if ( srchKey.length()==0) continue;
+        if ( compound_matches.count(srchKey) ) continue;
 
         //location of match
         int index = regexp.indexIn(name);
@@ -136,7 +139,7 @@ void SuggestPopup::doSearchCompounds(QString needle, int maxHitCount, QString db
 
         //score
         float c1=0;
-        if ( searchHistory.contains(name)) c1 = searchHistory.value(name);
+        if ( searchHistory.contains(srchKey)) c1 = searchHistory.value(srchKey);
         if ( c->fragment_mzs.size() > 0 ) c1 += 10;
         if ( index == 0 ) c1 += 10;
         if ( c->db == currentDb ) c1 += 1000;
@@ -150,9 +153,9 @@ void SuggestPopup::doSearchCompounds(QString needle, int maxHitCount, QString db
         float score=1+c1+c2+c3;
         //qDebug() << name << c1 << c2 << c3;
 
-        if ( !scores.contains(name) || scores[name] < score ) {
-            scores[name]=score;
-            compound_matches[name]=c;
+        if ( !scores.contains(srchKey) || scores[srchKey] < score ) {
+            scores[srchKey]=score;
+            compound_matches[srchKey]=c;
         }
 
         if (scores.size()>maxHitCount) break;
@@ -163,15 +166,15 @@ void SuggestPopup::doSearchHistory(QString needle)  {
 		QRegExp regexp(needle,Qt::CaseInsensitive,QRegExp::RegExp);
 		if (!needle.isEmpty() && !regexp.isValid()) return;
 
-		foreach( QString name, searchHistory.keys() ) {
-				if ( name.length()==0) continue;
-				if ( scores.contains(name) ) continue;
-				if ( name.contains(needle) || name.contains(regexp)){
-						float c1= searchHistory.value(name);
-						float c2= 1.00/name.length();
+        foreach( QString srchKey, searchHistory.keys() ) {
+                if ( srchKey.length()==0) continue;
+                if ( scores.contains(srchKey) ) continue;
+                if ( srchKey.contains(needle) || srchKey.contains(regexp)){
+                        float c1= searchHistory.value(srchKey);
+                        float c2= 1.00/srchKey.length();
 						float c3=0;
 						float score=1+c1+c2+c3;
-						scores[name]=score;
+                        scores[srchKey]=score;
 				}
 		}
 }
@@ -225,14 +228,38 @@ void SuggestPopup::doSearch(QString needle)
 
              qDebug() << name << " " << score;
 
-             NumericTreeWidgetItem *item=NULL;
+             NumericTreeWidgetItem *item = nullptr;
              if( compound_matches.contains(name)) {
                  Compound* c = compound_matches[name];
                  item = new NumericTreeWidgetItem(popup,CompoundType);
-                 item->setData(0,Qt::UserRole,QVariant::fromValue(c));
+                 item->setData(0, Qt::UserRole,QVariant::fromValue(c));
                  dbName=c->db.c_str();
                  fragmentsCount=c->fragment_mzs.size();
-                 mw = QString::number(c->getExactMass(),'f',3);
+
+                 //Issue 498: Switch to precursor m/z
+                 float precMz;
+                 if (c->precursorMz > 0) {
+                     precMz = c->precursorMz;
+                 } else {
+                     Adduct *adduct = nullptr;
+                     if (!c->adductString.empty()) {
+                         for (auto availableAdduct : DB.adductsDB) {
+                             if (availableAdduct->name == c->adductString) {
+                                 adduct = availableAdduct;
+                                 break;
+                             }
+                         }
+
+                         if (adduct) {
+                             precMz = adduct->computeAdductMass(c->getExactMass());
+                         } else {
+                             precMz = c->getExactMass(); //fallback
+                         }
+                     } else {
+                         precMz = c->getExactMass(); //fallback
+                     }
+                 }
+                 mw = QString::number(static_cast<double>(precMz),'f',3);
              }
 
              if (item) {
