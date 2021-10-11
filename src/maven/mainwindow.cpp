@@ -855,6 +855,15 @@ void MainWindow::setCompoundFocus(Compound*c) {
     */
 
     Adduct* adduct = getUserAdduct();
+
+    if (!c->adductString.empty()) {
+        Adduct *compoundAdduct = DB.findAdductByName(c->adductString);
+        if (compoundAdduct != adduct) {
+            adduct = compoundAdduct;
+            setAdductFocus(adduct);
+        }
+    }
+
     searchText->setText(c->name.c_str());
 
     float mz = adduct->computeAdductMass(c->getExactMass());

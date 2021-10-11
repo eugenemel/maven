@@ -448,13 +448,15 @@ void LigandWidget::showLigand() {
             QVariant v = item->data(0,Qt::UserRole);
             Compound*  c =  v.value<Compound*>();
             if (c) {
-                if (!c->adductString.empty()) {
-                    Adduct *adduct = DB.findAdductByName(c->adductString);
-                    if (adduct) {
-                        _mw->setAdductFocus(adduct);
-                    }
+                //Issue 488: handled in MainWindow::setCompoundFocus() call
 
-                }
+//                if (!c->adductString.empty()) {
+//                    Adduct *adduct = DB.findAdductByName(c->adductString);
+//                    if (adduct) {
+//                        _mw->setAdductFocus(adduct);
+//                    }
+
+//                }
                 _mw->setCompoundFocus(c);
             }
     }
