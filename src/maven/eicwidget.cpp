@@ -1677,8 +1677,11 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
     if (peakWidth < 0.1f) peakWidth = 0.1f;
     if (peakWidth > 3.0f) peakWidth = 3.0f;
 
-    _slice.rtmin = max(group->minRt - 2 * peakWidth, 0.0f);
-    _slice.rtmax = min(getMainWindow()->getVisibleSamplesMaxRt(), group->maxRt + 2 * peakWidth);
+    //Issue 483: Locked range takes precedence
+    if (!_isPreservePreviousRtRange || (_slice.rtmax - _slice.rtmin <= 0.001f) ){
+        _slice.rtmin = max(group->minRt - 2 * peakWidth, 0.0f);
+        _slice.rtmax = min(getMainWindow()->getVisibleSamplesMaxRt(), group->maxRt + 2 * peakWidth);
+    }
 
     _slice.mz = group->meanMz;
     _slice.mzmin = group->minMz;
