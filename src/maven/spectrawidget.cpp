@@ -114,6 +114,7 @@ void SpectraWidget::setCurrentFragment(Fragment *fragment, int mslevel) {
         drawGraph();
         repaint();
 
+        //Issue 481: keep the scan around to avoid dangling pointer bugs?
         delete(scan);
     }
 
@@ -232,6 +233,11 @@ void SpectraWidget::setScan(Scan* scan) {
 
 void SpectraWidget::setScan(Scan* scan, float mzmin, float mzmax) {
     if (!scan) return;
+
+    //Issue 481: dangling pointer bugs
+    _currentFragment = nullptr;
+    _sampleScanMap = {};
+
     cerr << "SpectraWidget::setScan(scan,min,max) : " << scan->scannum << endl;
     setCurrentScan(scan);
     _minX = mzmin;
@@ -249,6 +255,10 @@ void SpectraWidget::setScan(mzSample* sample, int scanNum=-1) {
     if (scanNum > sample->scans.size() ) scanNum = sample->scans.size()-1;
 
     if ( scanNum >= 0 && scanNum < sample->scans.size() ) { 
+
+        _currentFragment = nullptr;
+        _sampleScanMap = {};
+
         setCurrentScan(sample->scans[ scanNum ]);
         cerr << "SpectraWidget::setScan(scan) " << endl;
         findBounds(false,true);
@@ -269,6 +279,9 @@ void SpectraWidget::setScan(Peak* peak) {
 
     Scan* scan = sample->getScan(peak->scan);
     if (!scan) return;
+
+    _currentFragment = nullptr;
+    _sampleScanMap = {};
 
     setCurrentScan(scan);
 
@@ -524,35 +537,41 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
     if (_msLevel == 2 && (_currentFragment || (_currentScan && _currentScan->precursorMz > 0))) {
 
         float productPpmTolr = static_cast<float>(mainwindow->massCalcWidget->fragmentPPM->value());
-        float maxDeltaMz = (productPpmTolr * static_cast<float>(_currentScan->precursorMz))/1000000;
+        float maxDeltaMz = -1.0f;
 
-        //hit
-        Fragment a;
-        a.precursorMz = hit.precursorMz;
-        vector<float> mzs(hit.mzList.size());
-        for (unsigned int i = 0; i < mzs.size(); i++) {
-            mzs[i] = static_cast<float>(hit.mzList[i]);
-        }
-        a.mzs = mzs;
-
-        vector<float> intensities(hit.intensityList.size());
-        for (unsigned int i = 0; i < intensities.size(); i++){
-            intensities[i] = static_cast<float>(hit.intensityList[i]);
-        }
-        a.intensity_array = intensities;
-
-        //_currentFragment or _currentScan
         if (_currentFragment) {
-            matches = Fragment::findFragPairsGreedyMz(&a, _currentFragment, maxDeltaMz);
-        } else {
-            Fragment b;
-            b.precursorMz = _currentScan->precursorMz;
-            b.mzs = _currentScan->mz;
-            b.intensity_array = _currentScan->intensity;
-            matches = Fragment::findFragPairsGreedyMz(&a, &b, maxDeltaMz);
+            maxDeltaMz = (productPpmTolr * static_cast<float>(_currentFragment->precursorMz))/1000000;
+        } else if (_currentScan) {
+            maxDeltaMz = (productPpmTolr * static_cast<float>(_currentScan->precursorMz))/1000000;
         }
 
+        if (maxDeltaMz > 0) {
+            //hit
+            Fragment a;
+            a.precursorMz = hit.precursorMz;
+            vector<float> mzs(hit.mzList.size());
+            for (unsigned int i = 0; i < mzs.size(); i++) {
+                mzs[i] = static_cast<float>(hit.mzList[i]);
+            }
+            a.mzs = mzs;
 
+            vector<float> intensities(hit.intensityList.size());
+            for (unsigned int i = 0; i < intensities.size(); i++){
+                intensities[i] = static_cast<float>(hit.intensityList[i]);
+            }
+            a.intensity_array = intensities;
+
+            //_currentFragment or _currentScan
+            if (_currentFragment) {
+                matches = Fragment::findFragPairsGreedyMz(&a, _currentFragment, maxDeltaMz);
+            } else if (_currentScan) {
+                Fragment b;
+                b.precursorMz = _currentScan->precursorMz;
+                b.mzs = _currentScan->mz;
+                b.intensity_array = _currentScan->intensity;
+                matches = Fragment::findFragPairsGreedyMz(&a, &b, maxDeltaMz);
+            }
+        }
     }
 
     for(int i=0; i < hit.mzList.size(); i++) {
