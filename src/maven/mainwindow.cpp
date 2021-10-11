@@ -2708,7 +2708,7 @@ void MainWindow::isotopeC13Correct(MatrixXf& MM, int numberofCarbons) {
 
 void MainWindow::updateEicSmoothingWindow(int value) {
     settings->setValue("eic_smoothingWindow",value);
-    getEicWidget()->recompute();
+    getEicWidget()->recompute(!getEicWidget()->isPreservePreviousRtRange());
     getEicWidget()->replot();
 }
 

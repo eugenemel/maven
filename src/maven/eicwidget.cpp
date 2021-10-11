@@ -584,7 +584,7 @@ void EicWidget::replotForced() {
     QTime timerZ; timerZ.start();
  //qDebug <<" EicWidget::replotForced()";
     if (isVisible() ) {
-        recompute();
+        recompute(!_isPreservePreviousRtRange); //Issue 483: Respect RT locking
         replot();
 	}
     qDebug() << "replotForced done msec=" << timerZ.elapsed();
@@ -1686,7 +1686,7 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
     _slice.mz = group->meanMz;
     _slice.mzmin = group->minMz;
     _slice.mzmax = group->maxMz;
-    recompute(false); // use peak group RT bounds
+    recompute(false); // use peak group RT bounds, or previous RT range bounds
 
     if (group->compound)  for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].compound = group->compound;
     if (group->adduct) for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].adduct = group->adduct;
