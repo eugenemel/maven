@@ -142,6 +142,10 @@ public slots:
 
                     SpectralHit generateSpectralHitFromCompound(Compound *c);
 
+                    //Issue 481: Use cache to avoid excessive recomputation during resizing
+                    bool isUseCachedMatches = false;
+                    vector<int> _matches{};
+
 		protected:
                     //void leaveEvent ( QEvent * event );
                     //void enterEvent(QEvent * event);

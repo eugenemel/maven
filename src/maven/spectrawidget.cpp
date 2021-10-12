@@ -362,7 +362,7 @@ void SpectraWidget::overlayPeakGroup(PeakGroup* group) {
         }
         setScan(scan);
     } else {
-        setScan(nullptr);
+        setScan(scan); // setScan(nullptr)
     }
 
     if (group->compound)  {
@@ -535,7 +535,15 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
 
     //Issue 481: Prefer on-the-fly fragment matches to avoid obviously bad matches
     vector<int> matches{};
-    if (_msLevel == 2 && (_currentFragment || (_currentScan && _currentScan->precursorMz > 0))) {
+
+    if (isUseCachedMatches && !_matches.empty()) {
+        matches = _matches;
+    }
+
+    //Issue 481: debugging
+    //qDebug() << "SpectraWidget::drawSpectralHitLines(): _currentFragment=" << _currentFragment <<", _currentScan=" << _currentScan;
+
+    if (matches.empty() && _msLevel == 2 && (_currentFragment || (_currentScan && _currentScan->precursorMz > 0))) {
 
         float productPpmTolr = static_cast<float>(mainwindow->massCalcWidget->fragmentPPM->value());
         float maxDeltaMz = -1.0f;
@@ -572,6 +580,7 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
                 b.intensity_array = _currentScan->intensity;
                 matches = Fragment::findFragPairsGreedyMz(&a, &b, maxDeltaMz);
             }
+            _matches = matches;
         }
     }
 
@@ -1027,7 +1036,9 @@ void SpectraWidget::incrementScan(int increment, int msLevel=0 ) {
 
 
 void SpectraWidget::resizeEvent (QResizeEvent * event) {
+    isUseCachedMatches=true;
     replot();
+    isUseCachedMatches=false;
 }
 
 /*
