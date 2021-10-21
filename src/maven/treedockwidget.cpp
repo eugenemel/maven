@@ -327,7 +327,8 @@ void TreeDockWidget::showInfo() {
                     mainwindow->getEicWidget()->clearEICLines();
                     mainwindow->getEicWidget()->setFocusLines(rtsVector);
 
-                    delete(f);
+                    //Issue 501: Introduce memory leak to avoid dangling pointer bugs
+                    //delete(f);
                 }
 
             }
@@ -390,7 +391,8 @@ void TreeDockWidget::showInfo() {
                 mainwindow->getEicWidget()->clearEICLines();
                 mainwindow->getEicWidget()->setFocusLines(rtsVector);
 
-                delete(f);
+                //Issue 501: Introduce memory leak to avoid dangling pointer bugs
+                //delete(f);
             }
 
         } else {
