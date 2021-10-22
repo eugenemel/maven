@@ -662,9 +662,15 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         }
 
         if(keepFoundGroups) {
+
+            //Issue 501: debugging
+            if (allgroups[j].compound && allgroups[j].adduct) {
+                qDebug() << "PeakGroup: " << allgroups[j].compound->name.c_str() << " " << allgroups[j].adduct->name.c_str();
+            }
+
             //cerr << "[BackgroundPeakUpdate::processSlices] "<< &allgroups[j] << " Id="<< (&allgroups[j])->groupId << ":(" << (&allgroups[j])->meanMz << "," << (&allgroups[j])->meanRt << ")" << endl;
             emit(newPeakGroup(&allgroups[j],false, false));
-            //qDebug() << "Emmiting..." << allgroups[j].meanMz;
+            //qDebug() << "Emiting..." << allgroups[j].meanMz;
             QCoreApplication::processEvents();
         }
 
@@ -728,7 +734,8 @@ vector<tuple<float, Compound*, Adduct*>> BackgroundPeakUpdate::prepareCompoundDa
 
             float precMz = 0.0f;
 
-            if (c->precursorMz > 0) {
+            //Issue 501: predetermined precursor m/z is only valid for one specific adduct form
+            if (c->precursorMz > 0 && c->adductString == a->name) {
                 precMz = c->precursorMz;
             } else if (!c->formula.empty()){
                 precMz = a->computeAdductMass(c->getExactMass());
