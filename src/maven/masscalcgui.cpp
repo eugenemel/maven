@@ -260,7 +260,12 @@ void MassCalcWidget::setPeakGroup(PeakGroup* grp) {
         grp->computeFragPattern(fragmentPPM->value());
     }
 
-    if(grp->fragmentationPattern.nobs() == 0) return;
+    //Issue 503: clear table to avoid staleness issues
+    if(grp->fragmentationPattern.nobs() == 0){
+        treeWidget->clear();
+        treeWidget->update();
+        return;
+    }
 
     for(MassCalculator::Match& m: matches ) {
        Compound* cpd = m.compoundLink;
