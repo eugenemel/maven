@@ -2666,3 +2666,45 @@ map<string, int> TableDockWidget::groupViewColumnNameToNumber{
     {"Max S/N", 14},
     {"Max Quality", 15}
 };
+
+map<string, int> TableDockWidget::groupViewColumnNameToNumberWithLipidSummarization{
+    {"ID", 0},
+    {"Compound", 1},
+
+    //Issue 506: additional columns
+    {"Lipid Class", 2},
+    {"Summed Composition", 3},
+    {"Acyl Chain Length", 4},
+
+    {"Adduct", 5},
+    {"m/z", 6},
+    {"RT", 7},
+    {"RT Diff", 8},
+    {"MS2 Score", 9},
+    {"Rank", 10},
+    {"Charge", 11},
+    {"Isotope #", 12},
+    {"# Peaks", 13},
+    {"# MS2s", 14},
+    {"Max Width", 15},
+    {"Max Intensity", 16},
+    {"Max S/N", 17},
+    {"Max Quality", 18}
+};
+
+//Issue 506: Support different columns designs
+int TableDockWidget::getGroupViewColumnNumber(string key){
+    if( _isShowLipidSummarizationColumns) {
+        if (groupViewColumnNameToNumberWithLipidSummarization.find(key) != groupViewColumnNameToNumberWithLipidSummarization.end()) {
+            return groupViewColumnNameToNumberWithLipidSummarization[key];
+        }
+    } else {
+        if (groupViewColumnNameToNumber.find(key) != groupViewColumnNameToNumber.end()) {
+            return groupViewColumnNameToNumber[key];
+        }
+    }
+
+    //default to ID column to avoid exceptions
+    return 0;
+}
+

@@ -175,6 +175,9 @@ private:
 
           bool _isShowLipidSummarizationColumns = false;
           static map<string, int> groupViewColumnNameToNumber;
+          static map<string, int> groupViewColumnNameToNumberWithLipidSummarization;
+
+          int getGroupViewColumnNumber(string key);
 };
 
 typedef std::multimap<PeakGroup*, QTreeWidgetItem*>::iterator rowIterator;
