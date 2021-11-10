@@ -1670,8 +1670,17 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
 
         QAction *z9 = menu.addAction("Export RT Alignment from Selected");
         connect(z9, SIGNAL(triggered()), SLOT(exportAlignmentFile()));
-        menu.addSeparator();
+
     }
+
+    QAction* actionShowLipidSummarizationColumn = menu.addAction("View Lipid Summarization Columns");
+    actionShowLipidSummarizationColumn->setCheckable(true);
+    actionShowLipidSummarizationColumn->setChecked(_isShowLipidSummarizationColumns);
+
+    connect(actionShowLipidSummarizationColumn, SIGNAL(toggled(bool)), SLOT(showLipidSummarizationColumns(bool)));
+    connect(actionShowLipidSummarizationColumn, SIGNAL(toggled(bool)), SLOT(showAllGroups()));
+
+    menu.addSeparator();
 
     if (!DB.peakGroupTags.empty()) {
 
@@ -1735,6 +1744,7 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
     connect(zz1, SIGNAL(triggered()), treeWidget,SLOT(collapseAll()));
     QAction* zz2 = analysis.addAction("Expand All");
     connect(zz2, SIGNAL(triggered()), treeWidget,SLOT(expandAll()));
+
 
     menu.addMenu(&analysis);
 
