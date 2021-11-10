@@ -136,6 +136,9 @@ private:
          void traverseAndDeleteGroups(QTreeWidgetItem *item);
          void traverseAndCollectVisibleGroups(QTreeWidgetItem *item, QList<PeakGroup*>& groups);
          void traverseAndSetVisibleState(QTreeWidgetItem *item, bool isVisible);
+
+         bool isPassesTextFilter(QTreeWidgetItem *item, QString needle); //Issue 506
+
           void deletePeaks();
           void addRow(PeakGroup* group, QTreeWidgetItem* root);
           void heatmapBackground(QTreeWidgetItem* item);

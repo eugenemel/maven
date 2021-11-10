@@ -577,14 +577,12 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     //Issue 506
     if (viewType == groupView && _isShowLipidSummarizationColumns) {
 
-        //TODO: filter needs to respect these columns
-
         string acylChainLengthSummarized = LipidSummarizationUtils::getAcylChainLengthSummary(compoundText.toStdString());
         string acylChainCompositionSummarized = LipidSummarizationUtils::getAcylChainCompositionSummary(compoundText.toStdString());
         string lipidClassSummarized = LipidSummarizationUtils::getLipidClassSummary(compoundText.toStdString());
 
         item->setText(getGroupViewColumnNumber("Lipid Class"), lipidClassSummarized.c_str());
-        item->setText(getGroupViewColumnNumber("Summed Composition"), acylChainCompositionSummarized.c_str());
+        item->setText(getGroupViewColumnNumber("Sum Composition"), acylChainCompositionSummarized.c_str());
         item->setText(getGroupViewColumnNumber("Acyl Chain Length"), acylChainLengthSummarized.c_str());
     }
 
@@ -2337,7 +2335,7 @@ bool TableDockWidget::traverseNode(QTreeWidgetItem *item, QString needle) {
 
     //check the node itself
     //must pass both the string and tag filters.
-    if (item->text(0).contains(needle, Qt::CaseInsensitive)){
+    if (isPassesTextFilter(item, needle)){
 
        QVariant v = item->data(0,PeakGroupType);
        PeakGroup* group =  v.value<PeakGroup*>();
@@ -2358,6 +2356,25 @@ bool TableDockWidget::traverseNode(QTreeWidgetItem *item, QString needle) {
     //or this node has a child that is visible,
     //this node will be visible.
     return !(item->isHidden());
+}
+
+bool TableDockWidget::isPassesTextFilter(QTreeWidgetItem *item, QString needle) {
+    if (!item) return false;
+
+    bool isPassesID = item->text(getGroupViewColumnNumber("ID")).contains(needle, Qt::CaseInsensitive);
+    bool isPassesAdduct = item->text(getGroupViewColumnNumber("Adduct")).contains(needle, Qt::CaseInsensitive);
+
+    if (isPassesID || isPassesAdduct) return true;
+
+    if (_isShowLipidSummarizationColumns) {
+        bool isPassesLipidClass = item->text(getGroupViewColumnNumber("Lipid Class")).contains(needle, Qt::CaseInsensitive);
+        bool isPassesSummedComposition = item->text(getGroupViewColumnNumber("Sum Composition")).contains(needle, Qt::CaseInsensitive);
+        bool isPassesAcylChainLengths = item->text(getGroupViewColumnNumber("Acyl Chain Length")).contains(needle, Qt::CaseInsensitive);
+
+        if (isPassesLipidClass || isPassesSummedComposition || isPassesAcylChainLengths) return true;
+    }
+
+    return false;
 }
 
 //Issue 313
@@ -2696,7 +2713,7 @@ map<string, int> TableDockWidget::groupViewColumnNameToNumberWithLipidSummarizat
 
     //Issue 506: additional columns
     {"Lipid Class", 1},
-    {"Summed Composition", 2},
+    {"Sum Composition", 2},
     {"Acyl Chain Length", 3},
 
     {"Compound", 4},
