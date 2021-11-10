@@ -233,8 +233,16 @@ void TableDockWidget::setupPeakTable() {
 
     if (viewType == groupView) {
 
-        vector<string> groupViewColNames(groupViewColumnNameToNumber.size());
-        for (auto it = groupViewColumnNameToNumber.begin(); it != groupViewColumnNameToNumber.end(); ++it){
+        map<string, int> colNamesMap;
+
+        if (_isShowLipidSummarizationColumns) {
+            colNamesMap = groupViewColumnNameToNumberWithLipidSummarization;
+        } else {
+            colNamesMap = groupViewColumnNameToNumber;
+        }
+
+        vector<string> groupViewColNames(colNamesMap.size());
+        for (auto it = colNamesMap.begin(); it != colNamesMap.end(); ++it){
             groupViewColNames.at(static_cast<unsigned long>(it->second)) = it->first;
         }
 
@@ -286,8 +294,8 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
         adductText = QString(group->adduct->name.c_str());
     }
 
-    item->setText(0, groupTagString(group));         // ID
-    item->setText(2, adductText);                    // Adduct
+    item->setText(getGroupViewColumnNumber("ID"), groupTagString(group));             // ID
+    item->setText(getGroupViewColumnNumber("Adduct"), adductText);                    // Adduct
     heatmapBackground(item);
     duplicateEntryBackground(item);
 
@@ -456,18 +464,18 @@ void TableDockWidget::duplicateEntryBackground(QTreeWidgetItem *item){
 
     if (peakGroup && peakGroup->compound && compoundToGroup.find(peakGroup->compound) != compoundToGroup.end()) {
         if (compoundToGroup[peakGroup->compound].size() > 1) {
-            item->setBackgroundColor(groupViewColumnNameToNumber.at("Compound"), QColor("moccasin"));
+            item->setBackgroundColor(getGroupViewColumnNumber("Compound"), QColor("moccasin"));
         } else {
-            item->setBackgroundColor(groupViewColumnNameToNumber.at("Compound"), Qt::white);
+            item->setBackgroundColor(getGroupViewColumnNumber("Compound"), Qt::white);
         }
     }
 
-    QString groupTagString = item->text(groupViewColumnNameToNumber.at("ID"));
+    QString groupTagString = item->text(getGroupViewColumnNumber("ID"));
     if (groupIdToGroup.find(groupTagString) != groupIdToGroup.end()) {
         if (groupIdToGroup[groupTagString].size() > 1) {
-            item->setBackgroundColor(groupViewColumnNameToNumber.at("ID"), QColor("coral"));
+            item->setBackgroundColor(getGroupViewColumnNumber("ID"), QColor("coral"));
         } else {
-            item->setBackgroundColor(groupViewColumnNameToNumber.at("ID"), Qt::white);
+            item->setBackgroundColor(getGroupViewColumnNumber("ID"), Qt::white);
         }
     }
 }
@@ -564,53 +572,66 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
 
     item->setData(0, PeakGroupType,QVariant::fromValue(group));
 
-    item->setText(groupViewColumnNameToNumber.at("ID"), groupTagString(group));     //ID
-    item->setText(groupViewColumnNameToNumber.at("Compound"), compoundText);        //Compound
-    item->setText(groupViewColumnNameToNumber.at("Adduct"), adductText);            //Adduct
+    item->setText(getGroupViewColumnNumber("ID"), groupTagString(group));     //ID
+
+    //Issue 506
+    if (viewType == groupView && _isShowLipidSummarizationColumns) {
+
+        //TODO: fill out with correct data
+        //TODO: filter needs to respect these columns
+        //TODO: column headers
+
+        item->setText(getGroupViewColumnNumber("Lipid Class"), "a");
+        item->setText(getGroupViewColumnNumber("Summed Composition"), "b");
+        item->setText(getGroupViewColumnNumber("Acyl Chain Length"), "c");
+    }
+
+    item->setText(getGroupViewColumnNumber("Compound"), compoundText);        //Compound
+    item->setText(getGroupViewColumnNumber("Adduct"), adductText);            //Adduct
 
     if (group->_type == PeakGroup::GroupType::SRMTransitionType) {
-        item->setText(groupViewColumnNameToNumber.at("m/z"),
+        item->setText(getGroupViewColumnNumber("m/z"),
                       QString::number(group->srmPrecursorMz, 'f', 4));              //SRM precursor m/z
     } else {
-        item->setText(groupViewColumnNameToNumber.at("m/z"),
+        item->setText(getGroupViewColumnNumber("m/z"),
                       QString::number(group->meanMz, 'f', 4));                      //m/z
     }
 
-    item->setText(groupViewColumnNameToNumber.at("RT"),
+    item->setText(getGroupViewColumnNumber("RT"),
                   QString::number(group->meanRt, 'f', 2));                          //RT
 
     if (group->compound and group->compound->expectedRt) {
-        item->setText(groupViewColumnNameToNumber.at("RT Diff"),
+        item->setText(getGroupViewColumnNumber("RT Diff"),
                 QString::number(group->meanRt - group->compound->expectedRt, 'f', 2));//RT Diff
     }
 
     if (viewType == groupView) {
 
         if (group->_type == PeakGroup::GroupType::SRMTransitionType) {
-            item->setText(groupViewColumnNameToNumber.at("MS2 Score"),
+            item->setText(getGroupViewColumnNumber("MS2 Score"),
                           QString::number(group->srmProductMz, 'f', 4));           //SRM product m/z
         }  else {
-            item->setText(groupViewColumnNameToNumber.at("MS2 Score"),
+            item->setText(getGroupViewColumnNumber("MS2 Score"),
                     QString::number(group->fragMatchScore.mergedScore));           //MS2 Score
         }
 
-        item->setText(groupViewColumnNameToNumber.at("Rank"),
+        item->setText(getGroupViewColumnNumber("Rank"),
                       QString::number(group->groupRank,'f',3));                     //Rank
-        item->setText(groupViewColumnNameToNumber.at("Charge"),
+        item->setText(getGroupViewColumnNumber("Charge"),
                       QString::number(group->chargeState));                         //Charge
-        item->setText(groupViewColumnNameToNumber.at("Isotope #"),
+        item->setText(getGroupViewColumnNumber("Isotope #"),
                       QString::number(group->isotopicIndex));                       //Isotope #
-        item->setText(groupViewColumnNameToNumber.at("# Peaks"),
+        item->setText(getGroupViewColumnNumber("# Peaks"),
                       QString::number(group->peakCount()));                         //# Peaks
-        item->setText(groupViewColumnNameToNumber.at("# MS2s"),
+        item->setText(getGroupViewColumnNumber("# MS2s"),
                 QString::number(group->ms2EventCount));                             //# MS2s
-        item->setText(groupViewColumnNameToNumber.at("Max Width"),
+        item->setText(getGroupViewColumnNumber("Max Width"),
                       QString::number(group->maxNoNoiseObs));                       //Max Width
-        item->setText(groupViewColumnNameToNumber.at("Max Intensity"),
+        item->setText(getGroupViewColumnNumber("Max Intensity"),
                       QString::number(group->maxIntensity,'g',2));                  //Max Intensity
-        item->setText(groupViewColumnNameToNumber.at("Max S/N"),
+        item->setText(getGroupViewColumnNumber("Max S/N"),
                       QString::number(group->maxSignalBaselineRatio,'f',0));        //Max S/N
-        item->setText(groupViewColumnNameToNumber.at("Max Quality"),
+        item->setText(getGroupViewColumnNumber("Max Quality"),
                       QString::number(group->maxQuality,'f',2));                    //Max Quality
 
     } else if ( viewType == peakView) {
@@ -1111,14 +1132,14 @@ void TableDockWidget::showAllGroupsThenSort() {
     if (viewType == groupView) {
         if (isTargetedMs3Table()) {
 
-            treeWidget->sortByColumn(groupViewColumnNameToNumber.at("Max Intensity"),
+            treeWidget->sortByColumn(getGroupViewColumnNumber("Max Intensity"),
                                      Qt::DescendingOrder); //decreasing by max intensity
 
         } else if (isDirectInfusionTable()) {
-            treeWidget->sortByColumn(groupViewColumnNameToNumber.at("m/z"),
+            treeWidget->sortByColumn(getGroupViewColumnNumber("m/z"),
                                      Qt::AscendingOrder); // increasing by m/z
         } else {
-            treeWidget->sortByColumn(groupViewColumnNameToNumber.at("MS2 Score"),
+            treeWidget->sortByColumn(getGroupViewColumnNumber("MS2 Score"),
                                      Qt::DescendingOrder); //decreasing by score
         }
     }
@@ -1678,6 +1699,7 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
     actionShowLipidSummarizationColumn->setChecked(_isShowLipidSummarizationColumns);
 
     connect(actionShowLipidSummarizationColumn, SIGNAL(toggled(bool)), SLOT(showLipidSummarizationColumns(bool)));
+    connect(actionShowLipidSummarizationColumn, SIGNAL(toggled(bool)), SLOT(setupPeakTable()));
     connect(actionShowLipidSummarizationColumn, SIGNAL(toggled(bool)), SLOT(showAllGroups()));
 
     menu.addSeparator();
@@ -2398,7 +2420,7 @@ void TableDockWidget::updateSelectedPeakGroup() {
 
     if (isUpdateItem) {
 
-        QString oldGroupTagString = treeWidget->currentItem()->text(groupViewColumnNameToNumber.at("ID"));
+        QString oldGroupTagString = treeWidget->currentItem()->text(getGroupViewColumnNumber("ID"));
         QString updatedGroupTagString = groupTagString(selectedPeakGroup);
 
         if (groupIdToGroup.find(oldGroupTagString) != groupIdToGroup.end()) {
@@ -2564,7 +2586,7 @@ void TableDockWidget::setCompoundSearchSelectedCompound(){
     //update UI
     QTreeWidgetItem *item = treeWidget->selectedItems().at(0);
 
-    QString oldGroupTagString = item->text(groupViewColumnNameToNumber.at("ID"));
+    QString oldGroupTagString = item->text(getGroupViewColumnNumber("ID"));
 
     //Issue 438: Update group ID maps
     if (groupIdToGroup.find(oldGroupTagString) != groupIdToGroup.end()) {
@@ -2584,20 +2606,20 @@ void TableDockWidget::setCompoundSearchSelectedCompound(){
     }
     groupIdToGroup[updatedGroupTagString].push_back(currentGroup);
 
-    item->setText(groupViewColumnNameToNumber.at("ID"), updatedGroupTagString);
-    item->setText(groupViewColumnNameToNumber.at("Compound"), QString(compound->name.c_str()));
+    item->setText(getGroupViewColumnNumber("ID"), updatedGroupTagString);
+    item->setText(getGroupViewColumnNumber("Compound"), QString(compound->name.c_str()));
 
     if (compound->expectedRt) {
-        item->setText(groupViewColumnNameToNumber.at("RT Diff"),
+        item->setText(getGroupViewColumnNumber("RT Diff"),
                       QString::number(currentGroup->meanRt - compound->expectedRt, 'f', 2));//RT Diff
     }
 
     if (isChangeAdduct) {
-        item->setText(groupViewColumnNameToNumber.at("Adduct"), QString(adduct->name.c_str()));
+        item->setText(getGroupViewColumnNumber("Adduct"), QString(adduct->name.c_str()));
     }
 
     if (viewType == groupView) {
-        item->setText(groupViewColumnNameToNumber.at("MS2 Score"), QString::number(-1)); //invalidate score
+        item->setText(getGroupViewColumnNumber("MS2 Score"), QString::number(-1)); //invalidate score
     }
 
     if (!currentGroup->isGroupLabeled(PeakGroup::ReservedLabel::COMPOUND_MANUALLY_CHANGED)) {
@@ -2669,14 +2691,15 @@ map<string, int> TableDockWidget::groupViewColumnNameToNumber{
 
 map<string, int> TableDockWidget::groupViewColumnNameToNumberWithLipidSummarization{
     {"ID", 0},
-    {"Compound", 1},
 
     //Issue 506: additional columns
-    {"Lipid Class", 2},
-    {"Summed Composition", 3},
-    {"Acyl Chain Length", 4},
+    {"Lipid Class", 1},
+    {"Summed Composition", 2},
+    {"Acyl Chain Length", 3},
 
+    {"Compound", 4},
     {"Adduct", 5},
+
     {"m/z", 6},
     {"RT", 7},
     {"RT Diff", 8},
