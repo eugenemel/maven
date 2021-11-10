@@ -577,12 +577,15 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     //Issue 506
     if (viewType == groupView && _isShowLipidSummarizationColumns) {
 
-        //TODO: fill out with correct data
         //TODO: filter needs to respect these columns
 
-        item->setText(getGroupViewColumnNumber("Lipid Class"), "a");
-        item->setText(getGroupViewColumnNumber("Summed Composition"), "b");
-        item->setText(getGroupViewColumnNumber("Acyl Chain Length"), "c");
+        string acylChainLengthSummarized = LipidSummarizationUtils::getAcylChainLengthSummary(compoundText.toStdString());
+        string acylChainCompositionSummarized = LipidSummarizationUtils::getAcylChainCompositionSummary(compoundText.toStdString());
+        string lipidClassSummarized = LipidSummarizationUtils::getLipidClassSummary(compoundText.toStdString());
+
+        item->setText(getGroupViewColumnNumber("Lipid Class"), lipidClassSummarized.c_str());
+        item->setText(getGroupViewColumnNumber("Summed Composition"), acylChainCompositionSummarized.c_str());
+        item->setText(getGroupViewColumnNumber("Acyl Chain Length"), acylChainLengthSummarized.c_str());
     }
 
     item->setText(getGroupViewColumnNumber("Compound"), compoundText);        //Compound
