@@ -579,7 +579,6 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
 
         //TODO: fill out with correct data
         //TODO: filter needs to respect these columns
-        //TODO: column headers
 
         item->setText(getGroupViewColumnNumber("Lipid Class"), "a");
         item->setText(getGroupViewColumnNumber("Summed Composition"), "b");
