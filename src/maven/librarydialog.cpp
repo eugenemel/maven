@@ -116,8 +116,14 @@ void LibraryMangerDialog::unloadAllLibraries() {
 }
 
 void LibraryMangerDialog::loadCompoundsFile(QString filename){
+
     string dbfilename = filename.toStdString();
     string dbname = mzUtils::cleanFilename(dbfilename);
+
+    //Issue 484: In case the contents of the file have changed since last opened,
+    //explicitly unload and delete any stale library information.
+    DB.unloadCompounds(dbname.c_str());
+    DB.deleteCompoundsSQL(dbname.c_str(), DB.getLigandDB());
 
     int compoundCount = DB.loadCompoundsFile(filename);
 
