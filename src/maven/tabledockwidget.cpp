@@ -2366,6 +2366,12 @@ bool TableDockWidget::isPassesTextFilter(QTreeWidgetItem *item, QString needle) 
 
     if (isPassesID || isPassesAdduct) return true;
 
+    //Issue 510
+    bool isPassesMz = item->text(getGroupViewColumnNumber("m/z")).contains(needle, Qt::CaseInsensitive);
+    bool isPassesRt = item->text(getGroupViewColumnNumber("RT")).contains(needle, Qt::CaseInsensitive);
+
+    if (isPassesMz | isPassesRt) return true;
+
     if (_isShowLipidSummarizationColumns) {
         bool isPassesLipidClass = item->text(getGroupViewColumnNumber("Lipid Class")).contains(needle, Qt::CaseInsensitive);
         bool isPassesSummedComposition = item->text(getGroupViewColumnNumber("Sum Composition")).contains(needle, Qt::CaseInsensitive);
