@@ -526,6 +526,20 @@ void EicWidget::findPlotBounds() {
     _minX = _slice.rtmin;
     _maxX = _slice.rtmax;
 
+    //Issue 709: Treat SRM transition slices differently, use RT range from instrument
+    //Designed for Sciex 7500 instrument
+    float rtMin = 9999.0f;
+    float rtMax = -1.0f;
+    if (_slice.isSrmTransitionSlice()) {
+        for (auto eic : eics) {
+            if (eic->rtmin < rtMin) rtMin = eic->rtmin;
+            if (eic->rtmax > rtMax) rtMax = eic->rtmax;
+        }
+
+       _minX = rtMin;
+       _maxX = rtMax;
+    }
+
     qDebug() << "EicWidget::findPlotBounds() _minX=" << _minX << "minutes, _maxX=" << _maxX << " minutes";
 
     _minY = 0;
