@@ -885,7 +885,7 @@ void MainWindow::setCompoundFocus(Compound*c) {
             srmTransition.productMz = c->productMz;
             eicWidget->setSelectedGroup(nullptr);
             eicWidget->setSRMTransition(srmTransition);
-            eicWidget->resetZoom(false);
+            eicWidget->resetZoom(true);
 
         } else {
             eicWidget->setCompound(c,adduct);
