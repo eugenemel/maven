@@ -496,8 +496,8 @@ mzSlice EicWidget::visibleEICBounds() {
         if( i == 0 || eic->mzmax > bounds.mzmax ) bounds.mzmax = eic->mzmax;
         if( i == 0 || eic->maxIntensity > bounds.ionCount) bounds.ionCount = eic->maxIntensity;
     }
-        return bounds;
-    //} Feng note: move this bracket to above "return bounds" fixes a maximum retention time bug.
+
+    return bounds;
 }
 
 mzSlice EicWidget::visibleSamplesBounds() {
