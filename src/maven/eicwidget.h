@@ -222,7 +222,10 @@ private:
     void computeEICs(bool isUseSampleBoundsRT=true);
     void cleanup();		//deallocate eics, fragments, peaks, peakgroups
     void clearPlot();	//removes non permenent graphics objects
+
     void findPlotBounds(); //find _minX, _maxX...etc
+    void findRtBounds();
+
     mzSlice visibleSamplesBounds(); //find absoulte max and min for visible samples
     mzSlice visibleEICBounds(); //find absolute min and max for extracted ion chromatograms
 

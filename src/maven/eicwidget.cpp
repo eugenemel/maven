@@ -515,13 +515,7 @@ mzSlice EicWidget::visibleSamplesBounds() {
     return bounds;
 }
 
-void EicWidget::findPlotBounds() {
-    //mzSlice bounds = visibleEICBounds();
-
-    //get bounds
-    if ( eics.size() == 0 ) return;
-    if ( _slice.rtmax - _slice.rtmin <= 0 ) return;
-    //qDebug() << "EicWidget::findPlotBounds()";
+void EicWidget::findRtBounds() {
 
     _minX = _slice.rtmin;
     _maxX = _slice.rtmax;
@@ -536,9 +530,20 @@ void EicWidget::findPlotBounds() {
             if (eic->rtmax > rtMax) rtMax = eic->rtmax;
         }
 
-       _minX = rtMin;
-       _maxX = rtMax;
+       _minX = rtMin < 9999.0f ? rtMin : _slice.rtmin;
+       _maxX = rtMax > -1.0f? rtMax : _slice.rtmax;
     }
+}
+
+void EicWidget::findPlotBounds() {
+    //mzSlice bounds = visibleEICBounds();
+
+    //get bounds
+    if ( eics.size() == 0 ) return;
+    if ( _slice.rtmax - _slice.rtmin <= 0 ) return;
+    //qDebug() << "EicWidget::findPlotBounds()";
+
+    findRtBounds();
 
     qDebug() << "EicWidget::findPlotBounds() _minX=" << _minX << "minutes, _maxX=" << _maxX << " minutes";
 
