@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>802</width>
+    <width>813</width>
     <height>978</height>
    </rect>
   </property>
@@ -380,49 +380,10 @@
           <string>EIC Processing</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
-          <item row="3" column="1">
-           <widget class="QSpinBox" name="baseline_quantile">
-            <property name="suffix">
-             <string> %</string>
-            </property>
-            <property name="prefix">
-             <string/>
-            </property>
-            <property name="maximum">
-             <number>100</number>
-            </property>
-            <property name="value">
-             <number>80</number>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_14">
+          <item row="1" column="0">
+           <widget class="QLabel" name="lblSmootherType">
             <property name="text">
-             <string>Peak Grouping (Max Group Rt Difference)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QDoubleSpinBox" name="grouping_maxRtDiff">
-            <property name="suffix">
-             <string> min</string>
-            </property>
-            <property name="maximum">
-             <double>1000000.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-            <property name="value">
-             <double>0.500000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>Baseline Smoothing Window</string>
+             <string>EIC Smoother Type</string>
             </property>
            </widget>
           </item>
@@ -449,36 +410,18 @@
            </widget>
           </item>
           <item row="4" column="1">
-           <widget class="QSpinBox" name="baseline_smoothing">
+           <widget class="QSpinBox" name="baseline_quantile">
             <property name="suffix">
-             <string> scans</string>
+             <string> %</string>
+            </property>
+            <property name="prefix">
+             <string/>
             </property>
             <property name="maximum">
-             <number>1000000</number>
+             <number>100</number>
             </property>
             <property name="value">
-             <number>5</number>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_13">
-            <property name="text">
-             <string>EIC Smoothing Window</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_15">
-            <property name="text">
-             <string>Drop top x%  intensities from chromatogram</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="lblSmootherType">
-            <property name="text">
-             <string>EIC Smoother Type</string>
+             <number>80</number>
             </property>
            </widget>
           </item>
@@ -494,6 +437,89 @@
               <string>Moving Average</string>
              </property>
             </item>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_13">
+            <property name="text">
+             <string>EIC Smoothing Window</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QSpinBox" name="baseline_smoothing">
+            <property name="suffix">
+             <string> scans</string>
+            </property>
+            <property name="maximum">
+             <number>1000000</number>
+            </property>
+            <property name="value">
+             <number>5</number>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_15">
+            <property name="text">
+             <string>Drop top x%  intensities from chromatogram</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QDoubleSpinBox" name="grouping_maxRtDiff">
+            <property name="suffix">
+             <string> min</string>
+            </property>
+            <property name="maximum">
+             <double>1000000.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.500000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_14">
+            <property name="text">
+             <string>Peak Group Max RT Difference</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Baseline Smoothing Window</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="lblMergeOverlap">
+            <property name="text">
+             <string>Peak Group Merge Overlap</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QDoubleSpinBox" name="spnMergeOverlap">
+            <property name="decimals">
+             <number>2</number>
+            </property>
+            <property name="minimum">
+             <double>0.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.800000000000000</double>
+            </property>
            </widget>
           </item>
          </layout>
