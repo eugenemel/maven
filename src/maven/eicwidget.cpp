@@ -1744,15 +1744,23 @@ void EicWidget::groupPeaks() {
     float grouping_maxRtWindow =  settings->value("grouping_maxRtWindow").toFloat();
     float baselineDropTopX = settings->value("baseline_quantile").toFloat();
     float baselineSmoothing = settings->value("baseline_smoothing").toFloat();
+    float mergeOverlap = settings->value("spnMergeOverlap").toFloat();
 
     //old approach
     //peakgroups = EIC::groupPeaks(eics, eic_smoothingWindow, grouping_maxRtWindow);
-
     //ms2-centric new approach
     //peakgroups = EIC::groupPeaksB(eics, eic_smoothingWindow, grouping_maxRtWindow, minSmoothedPeakIntensity);
-
     //Issue 381, 441: EIC::groupPeaksC()
-    peakgroups = EIC::groupPeaksC(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow, static_cast<int>(baselineSmoothing), static_cast<int>(baselineDropTopX));
+
+    //Issue 482, 513: EIC::groupPeaksD()
+    peakgroups = EIC::groupPeaksD(
+                eics,
+                static_cast<int>(eic_smoothingWindow),
+                grouping_maxRtWindow,
+                static_cast<int>(baselineSmoothing),
+                static_cast<int>(baselineDropTopX),
+                mergeOverlap
+                );
 
     //Issue 441 debugging
     if (!eics.empty()) {
