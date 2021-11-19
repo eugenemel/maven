@@ -56,7 +56,6 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     //bookmark options
     connect(chkBkmkWarnMz, SIGNAL(toggled(bool)), SLOT(getFormValues()));
     connect(chkBkmkWarnMzRt, SIGNAL(toggled(bool)), SLOT(getFormValues()));
-//    connect(chkIncludeChildren, SIGNAL(toggled(bool)), SLOT(getFormValues()));
 
     //spectra widget display options
     //ms1 options
@@ -216,6 +215,10 @@ void SettingsForm::setFormValues() {
 
     eic_smoothingWindow->setValue(settings->value("eic_smoothingWindow").toDouble());
     grouping_maxRtWindow->setValue(settings->value("grouping_maxRtWindow").toDouble());
+
+    if (settings->contains("spnMergeOverlap"))
+        spnMergeOverlap->setValue(settings->value("spnMergeOverlap").toDouble());
+
     maxNaturalAbundanceErr->setValue(settings->value("maxNaturalAbundanceErr").toDouble());
     maxIsotopeScanDiff->setValue(settings->value("maxIsotopeScanDiff").toDouble());
     minIsotopicCorrelation->setValue(settings->value("minIsotopicCorrelation").toDouble());
@@ -430,6 +433,7 @@ void SettingsForm::getFormValues() {
 
     settings->setValue("eic_smoothingWindow",eic_smoothingWindow->value());
     settings->setValue("grouping_maxRtWindow",grouping_maxRtWindow->value());
+    settings->setValue("spnMergeOverlap",spnMergeOverlap->value());
     settings->setValue("maxNaturalAbundanceErr",maxNaturalAbundanceErr->value());
     settings->setValue("maxIsotopeScanDiff",maxIsotopeScanDiff->value());
 
