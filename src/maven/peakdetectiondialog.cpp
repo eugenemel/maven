@@ -458,6 +458,10 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
         }
         peaksSearchParameters->eicMaxPeakGroupRtDiff = static_cast<float>(this->grouping_maxRtDiff->value());
 
+        //grouping
+        peaksSearchParameters->grpVersion = "EIC::groupPeaksD()";
+        peaksSearchParameters->grpMergeOverlap = static_cast<float>(this->spnMergeOverlap->value());
+
         //quality
         peaksSearchParameters->qualitySignalBaselineRatio = static_cast<float>(this->sigBaselineRatio->value());
         peaksSearchParameters->qualitySignalBlankRatio = static_cast<float>(this->sigBlankRatio->value());
