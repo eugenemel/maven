@@ -80,7 +80,8 @@ public:
    int   eicMaxGroups;
 
    //grouping of peaks across samples
-   float grouping_maxRtWindow;		//do no group peaks that are greater than differ more than X in retention time
+   float grouping_maxRtWindow;
+   float mergeOverlap;
 
    PeakGroupCompoundMatchingPolicy peakGroupCompoundMatchingPolicy;
 

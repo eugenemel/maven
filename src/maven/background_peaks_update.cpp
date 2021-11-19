@@ -1072,7 +1072,14 @@ void BackgroundPeakUpdate::processSRMTransitions(vector<SRMTransition*>& transit
         }
 
         //Issue 381
-        vector<PeakGroup> peakgroups = EIC::groupPeaksC(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow, baseline_smoothingWindow, baseline_dropTopX);
+        vector<PeakGroup> peakgroups = EIC::groupPeaksD(
+                    eics,
+                    static_cast<int>(eic_smoothingWindow),
+                    grouping_maxRtWindow,
+                    baseline_smoothingWindow,
+                    baseline_dropTopX,
+                    mergeOverlap
+                    );
 
         vector<PeakGroup*> groupsToAppend;
 

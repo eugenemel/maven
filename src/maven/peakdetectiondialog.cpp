@@ -233,6 +233,7 @@ void PeakDetectionDialog::findPeaks() {
         peakupdater->baseline_dropTopX        = baseline_quantile->value();
 		peakupdater->eic_smoothingWindow= eic_smoothingWindow->value();
 		peakupdater->grouping_maxRtWindow = grouping_maxRtDiff->value();
+        peakupdater->mergeOverlap = static_cast<float>(spnMergeOverlap->value());
 		peakupdater->matchRtFlag =  matchRt->isChecked();
         peakupdater->featureMatchRtFlag = this->featureMatchRts->isChecked();
 		peakupdater->minGoodPeakCount = minGoodGroupCount->value();
