@@ -62,5 +62,8 @@ mkdir -p "${distpath}/scripts"
 cp -v src/maven_core/bin/scripts/* "${distpath}/scripts"
 cp -v "${exepath}" "${distpath}/"
 
+#Issue 499: Overwrite bad qsqlite.dll file with working qsqlite.dll file
+cp src/maven_core/bin/dll/qsqlite.dll "${distpath}"/sqldrivers
+
 rm -rf "dist/${zipfn}"
 (cd "${distpath}" && 7z a -tzip "../${zipfn}" *)
