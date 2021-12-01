@@ -1016,7 +1016,11 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
          } else if (line.startsWith("EXACTMASS:",Qt::CaseInsensitive)) {
             float exactMass = line.mid(10,line.length()).simplified().toDouble();
             cpd->setExactMass(exactMass);
-         } else if (line.startsWith("CLASS:", Qt::CaseInsensitive)) {
+        } else if (line.startsWith("HMDB:", Qt::CaseInsensitive)) {
+           string hmdb = line.mid(6, line.length()).simplified().toStdString();
+           cpd->metaDataMap.insert(make_pair(CompoundUtils::getIdentifierKey(IdentifierType::HMDB), hmdb));
+           cpd->category.push_back(hmdb);
+        } else if (line.startsWith("CLASS:", Qt::CaseInsensitive)) {
             string lipidClass = line.mid(7, line.length()).simplified().toStdString();
             cpd->metaDataMap.insert(make_pair(LipidSummarizationUtils::getLipidClassSummaryKey(),
                                               lipidClass));
