@@ -139,7 +139,9 @@ void BarPlot::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
     float maxYvalue=0;
     for(int i=0;i<_yvalues.size();i++) { if (_yvalues[i]>maxYvalue) maxYvalue=_yvalues[i]; }
     if (maxYvalue==0){
-        painter->drawText(5,25,QString("No Values")); //Issue 517
+        if (!this->isOnEicWidget) {
+            painter->drawText(5,25,QString("No Values")); //Issue 517
+        }
         return;
     }
 
