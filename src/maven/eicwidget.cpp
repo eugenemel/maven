@@ -1705,6 +1705,15 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
     _slice.mz = group->meanMz;
     _slice.mzmin = group->minMz;
     _slice.mzmax = group->maxMz;
+
+    //Issue 518
+    if (group->_type == PeakGroup::GroupType::DIMSType && group->compound && group->compound->precursorMz > 0.0f) {
+        float precMz = group->compound->precursorMz;
+        _slice.mz = precMz;
+        _slice.mzmin = precMz - static_cast<float>(getMainWindow()->getUserPPM())*precMz/1.0e6f;
+        _slice.mzmax = precMz + static_cast<float>(getMainWindow()->getUserPPM())*precMz/1.0e6f;
+    }
+
     recompute(false); // use peak group RT bounds, or previous RT range bounds
 
     if (group->compound)  for(int i=0; i < peakgroups.size(); i++ ) peakgroups[i].compound = group->compound;
