@@ -1738,6 +1738,9 @@ void EicWidget::groupPeaks() {
 
     if (!_groupPeaks) return;
 
+    //Issue 518: RT-based peak grouping does not make sense for DIMS data
+    if (_alwaysDisplayGroup && _alwaysDisplayGroup->type() == PeakGroup::GroupType::DIMSType) return;
+
 	//delete previous set of pointers to groups
 	QSettings *settings 		= getMainWindow()->getSettings();
     float eic_smoothingWindow =   settings->value("eic_smoothingWindow").toFloat();
