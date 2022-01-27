@@ -745,6 +745,10 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
         if (currentProject && currentProject->isOpen()) {
             project->topMatch = currentProject->topMatch;
             project->allMatches = currentProject->allMatches;
+
+            //ui options
+            project->quantTypeMap = currentProject->quantTypeMap;
+            project->quantTypeInverseMap = currentProject->quantTypeInverseMap;
         }
     }
 
@@ -752,7 +756,7 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
     currentProject=project;
 
     if(project->isOpen()) {
-        project->deleteAll(); /// this is crazy
+        project->deleteAll(); //extreme, but ensures that re-saving always saves data using most recent code
         project->setSamples(sampleSet);
         project->saveSamples(sampleSet);
         project->saveAlignment();
@@ -804,6 +808,7 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
         qDebug() << "Saved" << compoundSet.size() << "compounds into mzrollDB file.";
 
         project->saveMatchTable();
+        project->saveUiTable();
 
         _mainwindow->setStatusText(tr("Saved %1 groups to %2").arg(QString::number(groupCount),filename));
     } else {

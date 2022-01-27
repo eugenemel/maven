@@ -38,6 +38,7 @@ void ProjectDB::deleteAll() {
     query.exec("drop table IF EXISTS rt_update_key");
     query.exec("drop table IF EXISTS matches");
     query.exec("drop table IF EXISTS search_params"); //Issue 197
+    query.exec("drop table IF EXISTS ui"); //Issue 525
 }
 
 void ProjectDB::deleteGroups() {
@@ -1031,6 +1032,49 @@ void ProjectDB::saveMatchTable() {
         query0.exec("end transaction");
 
         qDebug() << "ProjectDB::saveMatchTable(): Saved " << allMatches.size() << "matches.";
+}
+
+void ProjectDB::saveUiTable() {
+        qDebug() << "ProjectDB::saveUiTable()... ";
+
+        //As additional UI options are available, update this logic
+        if (quantTypeMap.empty()) {
+            return;
+        }
+
+        QSqlQuery query0(sqlDB);
+        query0.exec("begin transaction");
+
+        //create table if it doesn't exist already
+        if(!query0.exec("CREATE TABLE IF NOT EXISTS ui("
+                        "key TEXT,"
+                        "value TEXT"
+                        ");")){
+        qDebug() << "Ho... " << query0.lastError();
+        }
+
+        QString key = "quantType";
+        QString value = "{";
+        for (auto it = quantTypeMap.begin(); it != quantTypeMap.end(); ++it) {
+            value.append(it->first.c_str());
+            value.append("=");
+            value.append(it->second.c_str());
+            value.append(";");
+        }
+        value.append("}");
+
+        QSqlQuery query1(sqlDB);
+        query1.prepare("INSERT INTO ui VALUES(?,?)");
+        query1.addBindValue(key);
+        query1.addBindValue(value);
+
+        if(!query1.exec()){
+            qDebug() << query1.lastError();
+        }
+
+        query0.exec("end transaction");
+
+        qDebug() << "ProjectDB::saveUiTable(): Saved UI options.";
 }
 
 mzSample* ProjectDB::getSampleById(int sampleId) { 
