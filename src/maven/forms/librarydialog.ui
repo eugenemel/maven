@@ -95,7 +95,7 @@
    <item row="0" column="0" colspan="3">
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Library Manager - Mangage Existing and New Databases / Spectra </string>
+      <string>Library Manager - Manage Existing and New Databases / Spectra </string>
      </property>
     </widget>
    </item>
