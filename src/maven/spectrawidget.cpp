@@ -589,8 +589,8 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
 
         if (hitMz <= 0.0f) continue;
 
-        int hitIntensity= 1;
-        if (i < hit.intensityList.size()) hitIntensity=hit.intensityList[i];
+        float hitIntensity= 1.0f;
+        if (i < hit.intensityList.size()) hitIntensity= static_cast<float>(hit.intensityList[i]);
 
         double ppmMz = hitMz;
         if (_currentScan && _currentScan->precursorMz > 0) {
@@ -611,8 +611,8 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
             }
         }
 
-        int x = toX(hitMz);
-        int y = toY(hitIntensity/maxIntensity*_maxY,SCALE);
+        int x = static_cast<int>(toX(hitMz));
+        int y = static_cast<int>(toY(hitIntensity/static_cast<float>(maxIntensity)*_maxY,SCALE));
 
         QGraphicsLineItem* line = new QGraphicsLineItem(x,y,x,toY(0),0);
         pos >= 0 ?  line->setPen(bluepen) : line->setPen(redpen);
