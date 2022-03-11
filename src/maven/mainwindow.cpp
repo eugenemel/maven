@@ -858,7 +858,7 @@ void MainWindow::setCompoundFocus(Compound*c) {
 
     if (!c->adductString.empty()) {
         Adduct *compoundAdduct = DB.findAdductByName(c->adductString);
-        if (compoundAdduct != adduct) {
+        if (compoundAdduct && compoundAdduct != adduct) {
             adduct = compoundAdduct;
             setAdductFocus(adduct);
         }
