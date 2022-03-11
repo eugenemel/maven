@@ -89,10 +89,10 @@ public slots:
                     bool  _log10Transform;
                     bool _showOverlayLabels = true;
 
-                    float _minX;
-                    float _maxX;
-                    float _minY;
-                    float _maxY;
+                    float _minX; // units = m/z
+                    float _maxX; // units = m/z
+                    float _minY; // units = intensity
+                    float _maxY; // units = intensity
                     float _zoomFactor;
 
                     float _maxIntensityScaleFactor = 1.3f;
