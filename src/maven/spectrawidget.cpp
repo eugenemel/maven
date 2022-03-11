@@ -413,6 +413,7 @@ void SpectraWidget::showMS2CompoundSpectrum(Compound *c) {
     _currentScan = nullptr; //clear out previous scan information
     _spectralHit = generateSpectralHitFromCompound(c);
 
+    findBounds(true, true);
     drawGraph();
 }
 
@@ -510,12 +511,7 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
     QPen sn4FragmentPen(QColor("powderblue"), 2);
     sn4FragmentPen.setStyle(Qt::DashDotLine);
 
-    float SCALE=0.45f;
-
-    if (!hit.scan) {
-        findBounds(true, false);
-        SCALE = 0.9f;
-    }
+    float SCALE = hit.scan ? 0.45f : 0.90f; // split plot or single plot
 
     //create label
     QGraphicsTextItem* text = new QGraphicsTextItem(hit.compoundId);
@@ -589,6 +585,9 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
 
         if (hitMz <= 0.0f) continue;
 
+        //Issue 531
+        if (hitMz < _minX || hitMz > _maxX) continue;
+
         float hitIntensity= 1.0f;
         if (i < hit.intensityList.size()) hitIntensity= static_cast<float>(hit.intensityList[i]);
 
@@ -613,6 +612,8 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
 
         int x = static_cast<int>(toX(hitMz));
         int y = static_cast<int>(toY(hitIntensity/static_cast<float>(maxIntensity)*_maxY,SCALE));
+
+        //qDebug() << "SpectraWidget::drawSpectralHitLines():" << "(mz, I) = (" <<hitMz <<","<<hitIntensity <<")";
 
         QGraphicsLineItem* line = new QGraphicsLineItem(x,y,x,toY(0),0);
         pos >= 0 ?  line->setPen(bluepen) : line->setPen(redpen);
@@ -982,7 +983,7 @@ void SpectraWidget::findBounds(bool checkX, bool checkY) {
     }
     _maxY *= _maxIntensityScaleFactor;
 
-//   cerr << "findBounds():  mz=" << _minX << "-" << _maxX << " ints=" << _minY << "-" << _maxY << endl;
+    //qDebug() << "SpectraWidget::findBounds():  mz=" << _minX << "-" << _maxX << " ints=" << _minY << "-" << _maxY;
 }
 
 void SpectraWidget::keyPressEvent( QKeyEvent *e ) {
@@ -1116,7 +1117,11 @@ void SpectraWidget::mousePressEvent(QMouseEvent *event) {
 }
 
 void SpectraWidget::mouseReleaseEvent(QMouseEvent *event) {
-    if(! _currentScan) return;
+
+    bool isDrawCompound = _showOverlay && !_spectralHit.compoundId.isEmpty();
+    bool isDrawGraph = (_currentScan || isDrawCompound);
+
+    if(! isDrawGraph) return;
 
     QGraphicsView::mouseReleaseEvent(event);
     _mouseEndPos	= event->pos();
@@ -1130,19 +1135,32 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *event) {
         float xmax = invX( std::max(_mouseStartPos.x(), _mouseEndPos.x()) );
         _minX = xmin;
         _maxX = xmax;
+        //qDebug() << "SpectraWidget::mouseReleaseEvent(): xmin=" << xmin << ", xmax=" << xmax;
     } else if ( deltaXfrac < -0.01 ) {
-		if ( _currentScan->mz.size() > 0 ) {
-			float minmz = _currentScan->mz[0];
-			float maxmz = _currentScan->mz[_currentScan->nobs()-1];
-            _minX *= 0.9;
-            _maxX *= 1.1;
+
+        float minmz = -1;
+        float maxmz = -1;
+        if (_currentScan && _currentScan->mz.size() > 0 ) {
+            minmz = _currentScan->mz[0];
+            maxmz = _currentScan->mz[_currentScan->nobs()-1];
+        } else if (isDrawCompound) {
+            minmz = _spectralHit.getMinMz();
+            maxmz = _spectralHit.getMaxMz();
+        }
+
+        if (minmz >= 0 && maxmz >= 0) {
+
+            _minX *= 0.9f;
+            _maxX *= 1.1f;
+
             if (_minX < minmz ) _minX=minmz;
             if (_maxX > maxmz ) _maxX=maxmz;
         }
+
     } else if (_nearestCoord.x() > 0 ) {
         setMzFocus(_nearestCoord.x());
     }
-    findBounds(false,true);
+    findBounds(false, true);
     replot();
 }
 
@@ -1369,7 +1387,7 @@ void SpectraWidget::zoomIn() {
     _minX = _centerX-D/2;
     _maxX = _centerX+D/2;
     //cerr << _centerX << " " << _minX << " " << _maxX << " " << _minZ << " " << _maxZ << endl;
-    findBounds(false,true);
+    findBounds(false, true);
     replot();
 
 }
@@ -1386,7 +1404,7 @@ void SpectraWidget::zoomRegion(float centerMz, float window) {
 	float _centerX = _focusCoord.x();
 	_minX =  _centerX - window;
 	_maxX =  _centerX + window;
-    findBounds(false,true);
+    findBounds(false, true);
     replot();
 }
 
