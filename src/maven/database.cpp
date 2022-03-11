@@ -1034,30 +1034,13 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
                                               chainLengthSummary));
          } else if (line.startsWith("ADDUCT:",Qt::CaseInsensitive)) {
             cpd->adductString = line.mid(8,line.length()).simplified().toStdString();
-
-            if (!cpd->adductString.empty()){
-                if (cpd->charge == 0) {
-                    if (cpd->adductString.compare (cpd->adductString.length() - 1, 1, "+") == 0){
-                        cpd->charge = 1;
-                    } else if (cpd->adductString.compare (cpd->adductString.length() - 1, 1, "-") == 0) {
-                        cpd->charge = -1;
-                    }
-                }
-            }
-
-        } else if (line.startsWith("PRECURSORTYPE:", Qt::CaseInsensitive) || (line.startsWith("PRECURSOR TYPE:", Qt::CaseInsensitive))) {
+            cpd->setChargeFromAdductName();
+         } else if (line.startsWith("PRECURSORTYPE:", Qt::CaseInsensitive)) {
            cpd->adductString = line.mid(15,line.length()).simplified().toStdString();
-
-           if (!cpd->adductString.empty()){
-               if (cpd->charge == 0) {
-                   if (cpd->adductString.compare (cpd->adductString.length() - 1, 1, "+") == 0){
-                       cpd->charge = 1;
-                   } else if (cpd->adductString.compare (cpd->adductString.length() - 1, 1, "-") == 0) {
-                       cpd->charge = -1;
-                   }
-               }
-           }
-
+           cpd->setChargeFromAdductName();
+         } else if (line.startsWith("PRECURSOR TYPE:", Qt::CaseInsensitive) || line.startsWith("PRECURSOR_TYPE:", Qt::CaseInsensitive)) {
+            cpd->adductString = line.mid(16,line.length()).simplified().toStdString();
+            cpd->setChargeFromAdductName();
          } else if (line.startsWith("IONIZATION:", Qt::CaseInsensitive)) {
             QString ionizationString = line.mid(12,line.length()).simplified();
 
@@ -1065,8 +1048,10 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
                 cpd->adductString = ionizationString.toStdString();
             } else if (ionizationString == "[M-H]") {
                 cpd->adductString = "[M-H]-";
+                cpd->setChargeFromAdductName();
             } else if (ionizationString == "[M+H]") {
                 cpd->adductString = "[M+H]+";
+                cpd->setChargeFromAdductName();
             }
 
          } else if (line.startsWith("FORMULA:",Qt::CaseInsensitive)) {
