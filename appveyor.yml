@@ -18,7 +18,7 @@ build_script:
   - SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
 
   # Install 64-bit QT
-  - bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-qt-creator"
+  # - bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-qt-creator" # Issue 529: comment out to try to fix
 
   # Install zlib
   - bash -lc "pacman -S --needed --noconfirm zlib-devel"
