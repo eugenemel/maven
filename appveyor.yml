@@ -10,6 +10,11 @@ environment:
     BIT: 64
   PATH: 'C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%'
 
+# Issue 529: Added install block
+install:
+  - set QTDIR=C:\Qt\6.2.2\mingw_64
+  - set PATH=%PATH%;%QTDIR%\bin;C:\MinGW\bin;C:\Qt\Tools\mingw64\bin
+  
 build_script:
   # Get submodules
   - git submodule update --init --recursive
