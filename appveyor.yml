@@ -12,8 +12,8 @@ environment:
 
 # Issue 529: Added install block
 install:
-  - set QTDIR=C:\Qt\6.2.2\msvc2019_64
-  - set PATH=%PATH%;%QTDIR%\bin;C:\MinGW\bin;C:\Qt\Tools\msvc2019_64\bin
+  - set QTDIR=C:\Qt\6.2.2\mingw_64
+  - set PATH=%PATH%;%QTDIR%\bin;C:\MinGW\bin;C:\Qt\Tools\mingw64\bin
   
 build_script:
   # Get submodules
