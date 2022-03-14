@@ -212,7 +212,7 @@ public slots:
     void UndoAlignment();
     void doGuidedAligment(QString filename);
     void spectraFocused(Peak* _peak);
-    void setCompoundFocus(Compound* c);
+    void setCompoundFocus(Compound* c, bool isUpdateAdduct=true);
     void setAdductFocus(Adduct *adduct);
     void showFragmentationScans(float pmz);
     void showConsensusFragmentationScans(float pmz);

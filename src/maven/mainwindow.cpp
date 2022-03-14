@@ -845,7 +845,7 @@ void MainWindow::setAdductFocus(Adduct *adduct) {
     }
 }
 
-void MainWindow::setCompoundFocus(Compound*c) {
+void MainWindow::setCompoundFocus(Compound *c, bool isUpdateAdduct) {
     if (!c) return;
 
     /*
@@ -856,7 +856,7 @@ void MainWindow::setCompoundFocus(Compound*c) {
 
     Adduct* adduct = getUserAdduct();
 
-    if (!c->adductString.empty()) {
+    if (isUpdateAdduct && !c->adductString.empty()) {
         Adduct *compoundAdduct = DB.findAdductByName(c->adductString);
         if (compoundAdduct && compoundAdduct != adduct) {
             adduct = compoundAdduct;
@@ -2788,7 +2788,7 @@ void MainWindow::changeUserAdduct() {
 
         mzSlice& currentSlice = eicWidget->getMzSlice();
         if(currentSlice.compound) {
-            setCompoundFocus(currentSlice.compound);
+            setCompoundFocus(currentSlice.compound, false);
         } else if (!searchText->text().isEmpty()){
             //Issue 361
             doSearch(searchText->text());
