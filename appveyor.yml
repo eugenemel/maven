@@ -2,7 +2,7 @@ image: Visual Studio 2022
 version: 1.0.{build}
 environment:
   matrix:
-  - COMPILER: cl # Clang #msys2
+  - COMPILER: cl
     PLATFORM: x64
     MSYS2_ARCH: x86_64
     MSYS2_DIR: msys64
@@ -11,23 +11,16 @@ environment:
   PATH: 'C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%'
 
 # Issue 529: Added install block
-#install:
-#  - set QTDIR=C:\Qt\6.2.2\mingw_64
-#  - set PATH=%PATH%;%QTDIR%\bin;C:\MinGW\bin;C:\Qt\Tools\mingw64\bin
-
 install:
   - set QTDIR=C:\Qt\5.15.2\mingw81_64
   - set PATH=%PATH%;%QTDIR%\bin;C:\MinGW\bin;C:\Qt\Tools\mingw64\bin
-  
+
 build_script:
   # Get submodules
   - git submodule update --init --recursive
 
   # Not sure why, but seem to have to set path here
   - SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
-
-  # Install 64-bit QT
-  # - bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-qt-creator" # Issue 529: comment out to try to fix
 
   # Install zlib
   - bash -lc "pacman -S --needed --noconfirm zlib-devel"
