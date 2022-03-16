@@ -590,7 +590,7 @@ void TreeDockWidget::filterTree(QString needle) {
 
 void TreeDockWidget::setupScanListHeader() {
     QStringList colNames;
-    colNames << "pre m/z" << "rt" << "purity" << "z" << "TIC" << "#peaks" << "scannum" << "sample";
+    colNames << "pre m/z" << "rt" << "purity" << "CE" << "TIC" << "#peaks" << "scannum" << "sample";
     treeWidget->setColumnCount(colNames.size());
     treeWidget->setHeaderLabels(colNames);
     treeWidget->setSortingEnabled(true);
@@ -627,10 +627,10 @@ void TreeDockWidget::addScanItem(Scan* scan) {
         item->setData(0,Qt::UserRole,QVariant::fromValue(scan));
         item->setIcon(0,icon);
 
-        item->setText(0,QString::number(scan->precursorMz,'f',4));	
-        item->setText(1,QString::number(scan->rt));
+        item->setText(0,QString::number(static_cast<double>(scan->precursorMz),'f',4));
+        item->setText(1,QString::number(static_cast<double>(scan->rt)));
         item->setText(2,QString::number(scan->getPrecursorPurity(20.00),'g',3));
-        item->setText(3,QString::number(scan->precursorCharge));
+        item->setText(3,QString::number(static_cast<double>(scan->collisionEnergy),'f',0));
         item->setText(4,QString::number(scan->totalIntensity(),'g',3));
         item->setText(5,QString::number(scan->nobs()));
         item->setText(6,QString::number(scan->scannum));
