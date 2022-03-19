@@ -511,6 +511,9 @@ void SpectraWidget::drawSpectralHitLines(SpectralHit& hit) {
     QPen sn4FragmentPen(QColor("powderblue"), 2);
     sn4FragmentPen.setStyle(Qt::DashDotLine);
 
+    //Issue 534: for some reason, this isn't working.
+    //float SCALE = (_currentScan || _currentFragment) ? 0.45f : (1.0f/_maxY); // split plot or single plot
+
     float SCALE = (_currentScan || _currentFragment) ? 0.45f : 0.90f; // split plot or single plot
 
     //create label
