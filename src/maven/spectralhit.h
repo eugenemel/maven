@@ -51,12 +51,14 @@ class SpectralHit {
         }
 
         double getMinMz() {
+            if (mzList.empty()) return 0.0;
             double min = mzList.first();
             foreach(double x, mzList)  if(x<min) min=x; 
             return  min;
         }
 
         double getMaxMz() {
+            if (mzList.empty()) return 1200.0;
             double max = mzList.last();
             foreach(double x, mzList)  if(x>max) max=x;
             return max;
