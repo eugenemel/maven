@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
         QString filename(argv[i]);
 
         if (filename.endsWith(".mzrollDB",Qt::CaseInsensitive) ) {
-                        mainWindow->projectDockWidget->loadProjectSQLITE(filename);
+            mainWindow->projectDockWidget->loadProjectSQLITE(filename);
 		}
 
         if (filename.endsWith("mzxml",Qt::CaseInsensitive) ||
