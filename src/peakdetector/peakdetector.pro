@@ -18,7 +18,7 @@ INCLUDEPATH += $$CORE/pugixml/src/ $$CORE/libmaven $$CORE/pugixml/src $$CORE/lib
 
 LDFLAGS  +=  $$OUTPUT_DIR/lib
 
-LIBS += -L. -L$$CORE/build/lib  -lmaven -lpugixml -lneural -lz -lmstoolkitlite
+LIBS += -L. -L$$CORE/build/lib  -lmaven -lpugixml -lneural -lmstoolkitlite -lz
 
 contains (DEFINES,CDFPARSER) {
     LIBS +=  -lcdfread -lnetcdf
