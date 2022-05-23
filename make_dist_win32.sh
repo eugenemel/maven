@@ -50,6 +50,9 @@ rm -rf "${distpath}"
 mkdir -p "${distpath}"
 windeployqt.exe "${exepath}" --dir "${distpath}/${b}"
 
+# Issue 540: Add peakdetector executable
+windeployqt.exe "${exepath}/../peakdetector.exe" --dir "${distpath}/${b}"
+
 for f in $(ldd "${exepath}" | awk '{print $3}' | grep 'mingw64'); do
     b=${f##*/}
     cp -v "${f}" "${distpath}/${b}"
@@ -66,7 +69,10 @@ cp -v "${exepath}" "${distpath}/"
 cp src/maven_core/bin/dll/qsqlite.dll "${distpath}"/sqldrivers
 
 #Issue 540: Add peakdetector artifact to windows distribution
-cp src/maven/bin/peakdetector.exe "${distpath}"
+#cp src/maven/bin/peakdetector.exe "${distpath}"
+
+windeployqt.exe "${exepath}/../peakdetector.exe"
+cp -v "${exepath}"
 
 rm -rf "dist/${zipfn}"
 (cd "${distpath}" && 7z a -tzip "../${zipfn}" *)
