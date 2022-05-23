@@ -65,5 +65,8 @@ cp -v "${exepath}" "${distpath}/"
 #Issue 499: Overwrite bad qsqlite.dll file with working qsqlite.dll file
 cp src/maven_core/bin/dll/qsqlite.dll "${distpath}"/sqldrivers
 
+#Issue 540: Add peakdetector artifact to windows distribution
+cp src/maven/bin/peakdetector.exe "${distpath}"
+
 rm -rf "dist/${zipfn}"
 (cd "${distpath}" && 7z a -tzip "../${zipfn}" *)
