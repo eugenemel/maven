@@ -51,7 +51,10 @@ mkdir -p "${distpath}"
 windeployqt.exe "${exepath}" --dir "${distpath}/${b}"
 
 # Issue 540: Add peakdetector executable
-windeployqt.exe "${exepath}/../peakdetector.exe" --dir "${distpath}/${b}"
+windeployqt.exe "src/maven/bin/peakdetector.exe" --dir "${distpath}/${b}"
+
+# Issue 540: Add mzDeltas executable
+windeployqt.exe "src/maven_core/bin/mzDeltas.exe" --dir "${distpath}/${b}"
 
 for f in $(ldd "${exepath}" | awk '{print $3}' | grep 'mingw64'); do
     b=${f##*/}
