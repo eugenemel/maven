@@ -71,7 +71,6 @@ cp src/maven_core/bin/dll/qsqlite.dll "${distpath}"/sqldrivers
 #Issue 540: Add peakdetector artifact to windows distribution
 #cp src/maven/bin/peakdetector.exe "${distpath}"
 
-windeployqt.exe "${exepath}/../peakdetector.exe"
 cp -v "${exepath}"
 
 rm -rf "dist/${zipfn}"
