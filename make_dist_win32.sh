@@ -68,8 +68,11 @@ cp -v "${exepath}" "${distpath}/"
 #Issue 499: Overwrite bad qsqlite.dll file with working qsqlite.dll file
 cp src/maven_core/bin/dll/qsqlite.dll "${distpath}"/sqldrivers
 
-#Issue 540: mzDeltas does not work with windeployqt
-cp src/maven_core/bin/mzDeltas.exe "${distpath}"
+#Issue 540: mzDeltas does not work with windeployqt, copy executable directly
+cp -v src/maven_core/bin/mzDeltas.exe "${distpath}"
+
+#Issue 540: Copy peakdetector executable to final location
+cp -v "src/maven/bin/peakdetector.exe" "${distpath}/"
 
 rm -rf "dist/${zipfn}"
 (cd "${distpath}" && 7z a -tzip "../${zipfn}" *)
