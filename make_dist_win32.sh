@@ -53,9 +53,6 @@ windeployqt.exe "${exepath}" --dir "${distpath}/${b}"
 # Issue 540: Add peakdetector executable
 windeployqt.exe "src/maven/bin/peakdetector.exe" --dir "${distpath}/${b}"
 
-# Issue 540: Add mzDeltas executable
-windeployqt.exe "src/maven_core/bin/mzDeltas.exe" --dir "${distpath}/${b}"
-
 for f in $(ldd "${exepath}" | awk '{print $3}' | grep 'mingw64'); do
     b=${f##*/}
     cp -v "${f}" "${distpath}/${b}"
@@ -71,8 +68,8 @@ cp -v "${exepath}" "${distpath}/"
 #Issue 499: Overwrite bad qsqlite.dll file with working qsqlite.dll file
 cp src/maven_core/bin/dll/qsqlite.dll "${distpath}"/sqldrivers
 
-#Issue 540: Add peakdetector artifact to windows distribution
-#cp src/maven/bin/peakdetector.exe "${distpath}"
+#Issue 540: mzDeltas does not work with windeployqt
+cp src/maven_core/bin/mzDeltas.exe "${distpath}"
 
 cp -v "${exepath}"
 
