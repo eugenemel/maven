@@ -6,4 +6,5 @@ SUBDIRS += src/maven_core/libneural \
 		   src/maven_core/MSToolkit \
 		   src/maven_core/libmaven \
 		   src/maven \
+		   src/maven_core/mzDeltas \
 		   src/peakdetector
