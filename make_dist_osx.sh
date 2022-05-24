@@ -63,9 +63,6 @@ cp src/maven_core/bin/scripts/* "${apppath}/Contents/Resources/scripts"
 # cp bin/*.csv   "${apppath}/Contents/Resources"
 # cp bin/*.model "${apppath}/Contents/Resources"
 
-# Issue 540: Add peakdetector artifact to mac os x distribution
-cp src/maven/bin/peakdetector.app/Contents/MacOS/peakdetector "${distpath}"
-
 echo "Running macdeployqt"
 macdeployqt "${apppath}"
 # TODO This doesn't appear to get built, is that correct or are we missing something?
