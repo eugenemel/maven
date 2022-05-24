@@ -71,7 +71,5 @@ cp src/maven_core/bin/dll/qsqlite.dll "${distpath}"/sqldrivers
 #Issue 540: mzDeltas does not work with windeployqt
 cp src/maven_core/bin/mzDeltas.exe "${distpath}"
 
-cp -v "${exepath}"
-
 rm -rf "dist/${zipfn}"
 (cd "${distpath}" && 7z a -tzip "../${zipfn}" *)
