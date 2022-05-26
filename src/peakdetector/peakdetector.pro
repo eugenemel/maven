@@ -26,27 +26,20 @@ contains (DEFINES,CDFPARSER) {
 
 #BUILD OPENMP PARALLEL VERSION
 
-#TO ACTIVE BUILD RUN: qmake CONFIG+=parallel
-CONFIG += parallel
+mac {
+        exists(/usr/local/opt/llvm) {
+            message("mac os x: llvm found. Will build parallel.")
 
-mac { 	#compiler and linker need to be clang-omp++
-        QMAKE_CXX=/usr/local/Cellar/llvm/13.0.1_1/bin/clang++
-        QMAKE_LINK=/usr/local/Cellar/llvm/13.0.1_1/bin/clang++
+            #compiler and linker need to be clang-omp++
+            QMAKE_CXX=/usr/local/opt/llvm/bin/clang++
+            QMAKE_LINK=/usr/local/opt/llvm/bin/clang++
+            QMAKE_CXXFLAGS += -I/usr/lib
+            QMAKE_CXXFLAGS += -I/
+            LIBS += -L/usr/local/opt/llvm/lib/
 
-        #Phil: these includes confuse my Qt Creator
-        #QMAKE_CXXFLAGS += -I/usr/local//Cellar/libomp/include/
-        #QMAKE_CXXFLAGS += -I/usr/local/Cellar//llvm/9.0.0_1/include/c++/v1
-
-        QMAKE_CXXFLAGS += -I/usr/local/Cellar/llvm/9.0.0_1/lib/clang/9.0.0_1/include/
-        QMAKE_CXXFLAGS += -I/usr/local/Cellar/llvm/13.0.1_1/lib/clang/13.0.1/include/
-
-		QMAKE_CXXFLAGS += -I/usr/lib
-		QMAKE_CXXFLAGS += -I/
-		
-        LIBS += -L/usr/local/Cellar/libomp/9.0.0_1/lib/
-        LIBS += -L/usr/local/opt/llvm/lib/
+            CONFIG += parallel
+        }
 }
-
 
 parallel {
 	message("Building OpenMP peakdetector_parallel")
