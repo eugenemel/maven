@@ -33,8 +33,6 @@ mac {
             #compiler and linker need to be clang-omp++
             QMAKE_CXX=/usr/local/opt/llvm/bin/clang++
             QMAKE_LINK=/usr/local/opt/llvm/bin/clang++
-            QMAKE_CXXFLAGS += -I/usr/lib
-            QMAKE_CXXFLAGS += -I/
             LIBS += -L/usr/local/opt/llvm/lib/
 
             CONFIG += parallel
