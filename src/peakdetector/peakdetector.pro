@@ -39,6 +39,14 @@ mac {
         }
 }
 
+unix {
+    CONFIG += parallel
+}
+
+win32 {
+
+}
+
 parallel {
 	message("Building OpenMP peakdetector_parallel")
 	QMAKE_CXXFLAGS += -DOMP_PARALLEL -fopenmp
