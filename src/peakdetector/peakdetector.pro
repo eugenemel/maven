@@ -40,7 +40,9 @@ mac {
 }
 
 unix {
-    CONFIG += parallel
+    !mac {
+            CONFIG += parallel
+    }
 }
 
 win32 {
