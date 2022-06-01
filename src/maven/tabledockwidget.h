@@ -100,7 +100,9 @@ public slots:
       void deleteSelected();
 	  void align();
 	  void deleteAll();
-          void clusterGroups();
+      void clusterGroups();
+      void clusterByCompounds();
+      void unchildrenizeGroups();
 	  void findMatchingCompounds();
 	  void filterPeakTable();
           void loadSpreadsheet(QString fileName);

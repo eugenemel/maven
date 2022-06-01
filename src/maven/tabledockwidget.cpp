@@ -1762,6 +1762,13 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
     QMenu analysis("Cluster Analysis");
     QAction* zz0 = analysis.addAction("Cluster Groups by Retention Time");
     connect(zz0, SIGNAL(triggered()), this ,SLOT(clusterGroups()));
+
+//    //TODO: do not reenable until Issue #544 is complete
+//    QAction* zz3 = analysis.addAction("Set Child Groups by Compound");
+//    connect(zz3, SIGNAL(triggered()), this, SLOT(clusterByCompounds()));
+//    QAction* zz4 = analysis.addAction("Promote all Child Groups");
+//    connect(zz4, SIGNAL(triggered()), this, SLOT(unchildrenizeGroups()));
+
     QAction* zz1 = analysis.addAction("Collapse All");
     connect(zz1, SIGNAL(triggered()), treeWidget,SLOT(collapseAll()));
     QAction* zz2 = analysis.addAction("Expand All");
@@ -2144,7 +2151,87 @@ void TableDockWidget::clusterGroups() {
     //run clustering
     PeakGroup::clusterGroups(allgroups,samples,maxRtDiff,minSampleCorrelation,minRtCorrelation,ppm);
 
-    _mainwindow->setProgressBar("Clustering done!",allgroups.size(),allgroups.size());
+    _mainwindow->setProgressBar("Clustering done!", allgroups.size(), allgroups.size());
+    showAllGroups();
+}
+
+// Issue 539 / 544: Try clustering
+//TODO: these methods are unreliable / will cause null access violations until #544 is completed
+void TableDockWidget::clusterByCompounds() {
+    qDebug() << "TableDockWidget::clusterByCompounds()";
+
+    map<Compound*, vector<PeakGroup*>> groupsByCompound{};
+
+    vector<PeakGroup*> updated_all_groups{};
+
+    //organize peakgroups by common compound
+    for (auto pg : allgroups) {
+        pg->parent = nullptr;
+        if (pg->compound) {
+            Compound *compound = pg->compound;
+            vector<PeakGroup*> compoundGroups{};
+            if (groupsByCompound.find(compound) == groupsByCompound.end()) {
+                groupsByCompound.insert(make_pair(compound, compoundGroups));
+            }
+            groupsByCompound.at(compound).push_back(pg);
+            for (auto pg_child : pg->children) {
+                //TODO: add children
+            }
+        } else {
+            updated_all_groups.push_back(pg);
+        }
+    }
+
+    for (auto it = groupsByCompound.begin(); it != groupsByCompound.end(); ++it){
+        vector<PeakGroup*> groups = it->second;
+
+        PeakGroup* pg = groups.at(0);
+
+        if (groups.size() > 1) {
+            sort(groups.begin(), groups.end(), [](PeakGroup* lhs, PeakGroup* rhs){
+
+                if (abs(lhs->fragMatchScore.mergedScore-rhs->fragMatchScore.mergedScore) < 1e-6){
+                    return lhs->compound->name.compare(rhs->compound->name);
+                }
+                return lhs->fragMatchScore.mergedScore < rhs->fragMatchScore.mergedScore ? -1 : 1;
+
+            });
+
+            //add children
+            for (unsigned int i = 1; i < groups.size(); i++) {
+                PeakGroup *pg_child = groups.at(i);
+                pg->children.push_back(*pg_child);
+            }
+        }
+
+        updated_all_groups.push_back(pg);
+
+    }
+
+    allgroups = updated_all_groups;
+
+    showAllGroups();
+
+}
+
+void TableDockWidget::unchildrenizeGroups() {
+    qDebug() << "TableDockWidget::unchildrenizeGroups()";
+
+     vector<PeakGroup*> updated_all_groups{};
+
+    for (auto pg : allgroups) {
+        updated_all_groups.push_back(pg);
+
+        for (auto child : pg->children) {
+            updated_all_groups.push_back(&child);
+        }
+
+        pg->children = {};
+        pg->setParent(nullptr);
+    }
+
+    allgroups = updated_all_groups;
+
     showAllGroups();
 }
 
