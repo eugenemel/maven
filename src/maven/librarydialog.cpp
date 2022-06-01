@@ -54,7 +54,7 @@ void LibraryMangerDialog::loadLibrary() {
 
         qDebug() << "LibraryMangerDialog::loadLibrary(): Load Library" << libraryName;
 
-        DB.loadCompoundsSQL(libraryName,DB.getLigandDB());
+        DB.loadCompoundsSQL(libraryName, DB.getLigandDB());
 
         emit(loadLibrarySignal(libraryName));
 
@@ -91,7 +91,7 @@ void LibraryMangerDialog::unloadLibrary() {
 
         QString libraryName = item->text(0);
 
-        qDebug() << "LibraryMangerDialog::unloadLibrary(): Unload Library" << libraryName;
+        qDebug() << "LibraryManagerDialog::unloadLibrary(): Unload Library" << libraryName;
 
         emit(unloadLibrarySignal(libraryName));
 
@@ -104,7 +104,7 @@ void LibraryMangerDialog::unloadLibrary() {
 
 void LibraryMangerDialog::unloadAllLibraries() {
 
-    qDebug() << "LibraryMangerDialog::unloadAllLibraries()";
+    qDebug() << "LibraryManagerDialog::unloadAllLibraries()";
 
     emit(unloadLibrarySignal("ALL"));
 
