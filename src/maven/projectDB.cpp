@@ -485,6 +485,70 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
     				if(!query3.exec())  qDebug() << query3.lastError();
 		}
 
+     //Issue 546: featurization table
+     if (!g->compounds.empty()) {
+
+        QSqlQuery query4(sqlDB);
+        if(!query4.exec("create table IF NOT EXISTS peakgroupmatch( \
+                       matchId integer primary key AUTOINCREMENT, \
+                       groupId int,\
+                       compoundId varchar(254),\
+                       ppmError real,\
+                       rtError real,\
+                       \
+                       numMatches int,\
+                       fractionMatched real,\
+                       spearmanRankCorrelation real,\
+                       ticMatched real,\
+                       mzFragError real,\
+                       \
+                       dotProduct real,\
+                       hypergeomScore real,\
+                       mvhScore real,\
+                       weightedDotProduct real,\
+                       \
+                       )"))  qDebug() << query4.lastError();
+
+        QSqlQuery query5(sqlDB);
+        query5.prepare("insert into peakgroupmatch values("
+                       "NULL,?,?,?,?,"
+                       "?,?,?,?,?,"
+                       "?,?,?,?,?,"
+                       "?,?,?,?,?)"
+                       );
+
+        for (pair<Compound*, FragmentationMatchScore> pair : g->compounds) {
+
+             //
+             query5.addBindValue(QString::number(lastInsertGroupId));
+             query5.addBindValue(QString(pair.first->id.c_str()));
+             query5.addBindValue(pair.second.ppmError);
+
+             float rtError = -1.0f;
+             if (pair.first->expectedRt > 0) {
+                rtError = abs(pair.first->expectedRt - g->medianRt());
+             }
+             query5.addBindValue(rtError);
+
+             //
+
+             query5.addBindValue(pair.second.numMatches);
+             query5.addBindValue(pair.second.fractionMatched);
+             query5.addBindValue(pair.second.spearmanRankCorrelation);
+             query5.addBindValue(pair.second.ticMatched);
+             query5.addBindValue(pair.second.mzFragError);
+
+             //
+
+             query5.addBindValue(pair.second.dotProduct);
+             query5.addBindValue(pair.second.hypergeomScore);
+             query5.addBindValue(pair.second.mvhScore);
+             query5.addBindValue(pair.second.weightedDotProduct);
+
+             if(!query5.exec())  qDebug() << query5.lastError();
+        }
+     }
+
         if ( g->childCount() ) {
            for(int i=0; i < g->children.size(); i++ ) {
                 PeakGroup* child = &(g->children[i]); 
