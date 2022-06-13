@@ -514,7 +514,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                        "NULL,?,?,?,?,"
                        "?,?,?,?,?,"
                        "?,?,?,?,?,"
-                       "?,?,?,?,?)"
+                       "?,?,?,?)"
                        );
 
         for (pair<Compound*, FragmentationMatchScore> pair : g->compounds) {
