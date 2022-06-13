@@ -505,14 +505,13 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                        dotProduct real,\
                        hypergeomScore real,\
                        mvhScore real,\
-                       weightedDotProduct real,\
+                       weightedDotProduct real\
                        \
                        )"))  qDebug() << query4.lastError();
 
         QSqlQuery query5(sqlDB);
         query5.prepare("insert into peakgroupmatch values("
                        "NULL,?,?,?,?,"
-                       "?,?,?,?,?,"
                        "?,?,?,?,?,"
                        "?,?,?,?)"
                        );
