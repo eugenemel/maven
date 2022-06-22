@@ -313,6 +313,9 @@ void TreeDockWidget::showInfo() {
                                       minNumScansForConsensus,
                                       minFractionScansForConsensus);
 
+                    //Issue 550: SpectraWidget::setCurrentFragment() expects Fragment* sorted by mz
+                    f->sortByMz();
+
                     if (mslevel == 1){
                         mainwindow->getSpectraWidget()->setCurrentFragment(f->consensus, mslevel);
                     } else if (mslevel == 2){
@@ -380,6 +383,9 @@ void TreeDockWidget::showInfo() {
                                   isNormalizeIntensityArray,
                                   minNumScansForConsensus,
                                   minFractionScansForConsensus);
+
+                //Issue 550: SpectraWidget::setCurrentFragment() expects Fragment* sorted by mz
+                f->sortByMz();
 
                 if (mslevel == 2){
                     mainwindow->fragmentationSpectraWidget->setCurrentFragment(f->consensus, mslevel);
