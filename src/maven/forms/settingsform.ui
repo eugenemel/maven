@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1094</width>
-    <height>278</height>
+    <height>309</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -523,6 +523,16 @@
            <widget class="QCheckBox" name="chkDisplayConsensusSpectrum">
             <property name="text">
              <string>Display consensus spectra when browsing peak groups</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="chkShowRtRange">
+            <property name="text">
+             <string>Display peak group RT range on click</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
             </property>
            </widget>
           </item>

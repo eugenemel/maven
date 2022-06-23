@@ -399,15 +399,15 @@ void EicWidget::drawFocusLines() {
     }
 }
 
-void EicWidget::drawRtRangeLines(PeakGroup* peakGroup) {
-    if (!peakGroup) return;
-
-    float rtmin = peakGroup->minRt;
-    float rtmax = peakGroup->maxRt;
-
-    if (rtmax <= rtmin) return;
+void EicWidget::drawRtRangeLines(float rtmin, float rtmax) {
 
     clearRtRangeLines();
+
+    int isShowRtRange = getMainWindow()->getSettings()->value("chkShowRtRange", 0).toInt();
+
+    if (!isShowRtRange) {
+        return;
+    }
 
     _rtMinLine = new QGraphicsLineItem(nullptr);
     _rtMaxLine = new QGraphicsLineItem(nullptr);
@@ -422,6 +422,23 @@ void EicWidget::drawRtRangeLines(PeakGroup* peakGroup) {
 
     scene()->addItem(_rtMinLine);
     scene()->addItem(_rtMaxLine);
+}
+
+void EicWidget::drawRtRangeLines(PeakGroup* peakGroup) {
+    if (!peakGroup) return;
+
+    float rtmin = peakGroup->minRt;
+    float rtmax = peakGroup->maxRt;
+
+    if (rtmax <= rtmin) return;
+
+    drawRtRangeLines(rtmin, rtmax);
+}
+
+void EicWidget::drawRtRangeLinesCurrentGroup() {
+    if (_selectedGroup.meanRt > 0) {
+        drawRtRangeLines(_selectedGroup.minRt, _selectedGroup.maxRt);
+    }
 }
 
 void EicWidget::drawSelectionLine(float rtmin, float rtmax) { 

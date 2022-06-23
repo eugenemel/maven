@@ -60,6 +60,8 @@ public slots:
     void setFocusLine(float rt);
     void setFocusLines(vector<float> rts);
     void drawRtRangeLines(PeakGroup* group);
+    void drawRtRangeLines(float rtmin, float rtmax);
+    void drawRtRangeLinesCurrentGroup();
     void drawFocusLines();
     void drawSelectionLine(float rtmin,float rtmax);
     void addFocusLine(PeakGroup*);

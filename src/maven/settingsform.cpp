@@ -23,6 +23,8 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(recomputeEICButton, SIGNAL(clicked(bool)), SLOT(recomputeEIC()));
     connect(chkDisplayConsensusSpectrum, SIGNAL(toggled(bool)), SLOT(getFormValues()));
     connect(chkDisplayConsensusSpectrum, SIGNAL(toggled(bool)), mainwindow, SLOT(updateGUIWithLastSelectedPeakGroup()));
+    connect(chkShowRtRange, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+    connect(chkShowRtRange, SIGNAL(toggled(bool)), mainwindow->getEicWidget(), SLOT(drawRtRangeLinesCurrentGroup()));
 
     connect(ionizationMode, SIGNAL(currentIndexChanged(int)), SLOT(getFormValues()));
 //    connect(isotopeC13Correction, SIGNAL(toggled(bool)), SLOT(getFormValues()));
@@ -231,6 +233,9 @@ void SettingsForm::setFormValues() {
     if (settings->contains("chkDisplayConsensusSpectrum"))
         this->chkDisplayConsensusSpectrum->setCheckState((Qt::CheckState) settings->value("chkDisplayConsensusSpectrum").toInt());
 
+    if (settings->contains("chkShowRtRange"))
+        chkShowRtRange->setCheckState((Qt::CheckState) settings->value("chkShowRtRange").toInt());
+
     C13Labeled->setCheckState( (Qt::CheckState) settings->value("C13Labeled").toInt() );
     N15Labeled->setCheckState( (Qt::CheckState) settings->value("N15Labeled").toInt()  );
     S34Labeled->setCheckState( (Qt::CheckState) settings->value("S34Labeled").toInt() );
@@ -413,6 +418,7 @@ void SettingsForm::setFormValues() {
 
 }
 
+//This method sets the settings to the current state of the GUI.
 
 void SettingsForm::getFormValues() {
     if (!settings) return;
@@ -457,6 +463,7 @@ void SettingsForm::getFormValues() {
     settings->setValue("scan_filter_min_quantile", scan_filter_min_quantile->value());
     settings->setValue("txtEICScanFilter", txtEICScanFilter->toPlainText());
     settings->setValue("chkDisplayConsensusSpectrum", chkDisplayConsensusSpectrum->checkState());
+    settings->setValue("chkShowRtRange", chkShowRtRange->checkState());
 
     settings->setValue("data_server_url", data_server_url->text());
 
