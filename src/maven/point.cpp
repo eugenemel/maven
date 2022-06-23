@@ -28,26 +28,24 @@ EicPoint::EicPoint(float x, float y, Peak* peak, MainWindow* mw)
     if (_peak) {
         _cSize += 20*(_peak->quality);
         //mouse press events
-         connect(this, SIGNAL(peakSelected(Peak*)), mw, SLOT(showPeakInfo(Peak*)));
+         //connect(this, SIGNAL(peakSelected(Peak*)), mw, SLOT(showPeakInfo(Peak*)));
 
          //If shift modifier is not down, clear out old selection
-         connect(this, SIGNAL(peakSelectedNoShiftModifier(Peak*)), mw->getEicWidget(), SLOT(clearPeakAreas()));
+         //connect(this, SIGNAL(peakSelectedNoShiftModifier(Peak*)), mw->getEicWidget(), SLOT(clearPeakAreas()));
 
-         connect(this, SIGNAL(peakSelected(Peak*)), mw->getEicWidget(), SLOT(showPeakArea(Peak*)));
-
-         //Issue 449: select only MS2 associated with a single peak
-         //connect(this, SIGNAL(peakSelected(Peak*)), mw->ms2ScansListWidget, SLOT(selectMs2Scans(Peak*)));
+         //connect(this, SIGNAL(peakSelected(Peak*)), mw->getEicWidget(), SLOT(showPeakArea(Peak*)));
 
          //Issue 460: select all MS2 scans instead of single peak
          connect(this, SIGNAL(groupClicked(PeakGroup*)), mw->ms2ScansListWidget, SLOT(selectMs2Scans(PeakGroup*)));
+         connect(this, SIGNAL(groupClicked(PeakGroup*)), mw->massCalcWidget, SLOT(setPeakGroup(PeakGroup*)));
 
          //mouse hover events
          connect(this, SIGNAL(peakGroupFocus(PeakGroup*)), mw->getEicWidget(), SLOT(setSelectedGroup(PeakGroup*)));
          connect(this, SIGNAL(peakGroupFocus(PeakGroup*)), mw->getEicWidget()->scene(), SLOT(update()));
 
          //Issue 456: hovering over a peak is tantamount to selecting it
-         connect(this, SIGNAL(peakGroupFocus(PeakGroup*)), mw->massCalcWidget, SLOT(setPeakGroup(PeakGroup*)));
-         connect(this, SIGNAL(peakGroupFocus(PeakGroup*)), mw->fragmentationSpectraWidget, SLOT(overlayPeakGroup(PeakGroup*)));
+         // connect(this, SIGNAL(peakGroupFocus(PeakGroup*)), mw->massCalcWidget, SLOT(setPeakGroup(PeakGroup*)));
+         // connect(this, SIGNAL(peakGroupFocus(PeakGroup*)), mw->fragmentationSpectraWidget, SLOT(overlayPeakGroup(PeakGroup*)));
     }
 
     //mouse press events

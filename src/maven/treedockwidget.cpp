@@ -263,7 +263,9 @@ void TreeDockWidget::showInfo() {
                     mainwindow->getSpectraWidget()->setScan(scan);
                 } else if (scan->mslevel == 2){
                     mainwindow->fragmentationSpectraWidget->setScan(scan);
-                    mainwindow->massCalcWidget->setFragmentationScan(scan);
+
+                    //TODO: Issue 550 Need to ensure that this is coming from the user
+                    //mainwindow->massCalcWidget->setFragmentationScan(scan);
                 } else if (scan->mslevel == 3) {
                     mainwindow->ms3SpectraWidget->setScan(scan);
                 }
@@ -314,13 +316,15 @@ void TreeDockWidget::showInfo() {
                                       minFractionScansForConsensus);
 
                     //Issue 550: SpectraWidget::setCurrentFragment() expects Fragment* sorted by mz
-                    f->sortByMz();
+                    f->consensus->sortByMz();
 
                     if (mslevel == 1){
                         mainwindow->getSpectraWidget()->setCurrentFragment(f->consensus, mslevel);
                     } else if (mslevel == 2){
                         mainwindow->fragmentationSpectraWidget->setCurrentFragment(f->consensus, mslevel);
-                        mainwindow->massCalcWidget->setFragment(f->consensus);
+
+                        //TODO: Issue 550 Either remove, or sync efforts with MS2-scan based selection
+                        //mainwindow->massCalcWidget->setFragment(f->consensus);
                     } else if (mslevel == 3) {
                         mainwindow->ms3SpectraWidget->setCurrentFragment(f->consensus, mslevel);
                     }
@@ -385,11 +389,13 @@ void TreeDockWidget::showInfo() {
                                   minFractionScansForConsensus);
 
                 //Issue 550: SpectraWidget::setCurrentFragment() expects Fragment* sorted by mz
-                f->sortByMz();
+                f->consensus->sortByMz();
 
                 if (mslevel == 2){
                     mainwindow->fragmentationSpectraWidget->setCurrentFragment(f->consensus, mslevel);
-                    mainwindow->massCalcWidget->setFragment(f->consensus);
+
+                    //TODO: Issue 550 Either remove, or sync efforts with MS2-scan based selection
+                    //mainwindow->massCalcWidget->setFragment(f->consensus);
                 }
 
                 vector<float> rtsVector;
