@@ -8,7 +8,7 @@ TreeDockWidget::TreeDockWidget(MainWindow *mw, QString title, int numColms) {
 		treeWidget=new QTreeWidget(this);
 		treeWidget->setColumnCount(numColms);
 		treeWidget->setObjectName(title);
-		connect(treeWidget,SIGNAL(itemSelectionChanged()), SLOT(showInfo()));
+        connect(treeWidget,SIGNAL(itemSelectionChanged()), SLOT(showInfoAndUpdateMassCalcGUI()));
 		treeWidget->setHeaderHidden(true);
 
         //QShortcut* ctrlA = new QShortcut(QKeySequence(tr("Ctrl+A", "Select All")), this);
@@ -218,7 +218,21 @@ void TreeDockWidget::selectMs2Scans(PeakGroup* group) {
     treeWidget->blockSignals(false);
 }
 
-void TreeDockWidget::showInfo() {
+/**
+ * @brief TreeDockWidget::showInfoAndUpdateMassCalcGUI
+ * Path to showInfo - only use this for user clicks
+ */
+void TreeDockWidget::showInfoAndUpdateMassCalcGUI() {
+    showInfo(true);
+}
+
+/**
+ * @brief TreeDockWidget::showInfo
+ * @param isUpdateMassCalcGUI
+ * If true, Also update the mass calc gui with computed values
+ */
+void TreeDockWidget::showInfo(bool isUpdateMassCalcGUI) {
+
     MainWindow* mainwindow = static_cast<MainWindow*>(parentWidget());
         if ( ! mainwindow ) return;
 
@@ -264,8 +278,9 @@ void TreeDockWidget::showInfo() {
                 } else if (scan->mslevel == 2){
                     mainwindow->fragmentationSpectraWidget->setScan(scan);
 
-                    //TODO: Issue 550 Need to ensure that this is coming from the user
-                    //mainwindow->massCalcWidget->setFragmentationScan(scan);
+                    //Issue 550: option to update compound widget
+                    if (isUpdateMassCalcGUI) mainwindow->massCalcWidget->setFragmentationScan(scan);
+
                 } else if (scan->mslevel == 3) {
                     mainwindow->ms3SpectraWidget->setScan(scan);
                 }
@@ -323,8 +338,9 @@ void TreeDockWidget::showInfo() {
                     } else if (mslevel == 2){
                         mainwindow->fragmentationSpectraWidget->setCurrentFragment(f->consensus, mslevel);
 
-                        //TODO: Issue 550 Either remove, or sync efforts with MS2-scan based selection
-                        //mainwindow->massCalcWidget->setFragment(f->consensus);
+                        //Issue 550: option to update compound widget
+                        if (isUpdateMassCalcGUI) mainwindow->massCalcWidget->setFragment(f->consensus);
+
                     } else if (mslevel == 3) {
                         mainwindow->ms3SpectraWidget->setCurrentFragment(f->consensus, mslevel);
                     }
@@ -394,8 +410,8 @@ void TreeDockWidget::showInfo() {
                 if (mslevel == 2){
                     mainwindow->fragmentationSpectraWidget->setCurrentFragment(f->consensus, mslevel);
 
-                    //TODO: Issue 550 Either remove, or sync efforts with MS2-scan based selection
-                    //mainwindow->massCalcWidget->setFragment(f->consensus);
+                    //Issue 550: option to update compound widget
+                    if (isUpdateMassCalcGUI) mainwindow->massCalcWidget->setFragment(f->consensus);
                 }
 
                 vector<float> rtsVector;

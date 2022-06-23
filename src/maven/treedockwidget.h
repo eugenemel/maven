@@ -28,7 +28,9 @@ public slots:
       QTreeWidgetItem* addItem(QTreeWidgetItem* parentItem, string key , string value, int type);
 
 
-	  void showInfo();
+      void showInfo(bool isUpdateMassCalcGUI=false);
+      void showInfoAndUpdateMassCalcGUI();
+
 	  void setInfo(Peak* peak);
 	  void setInfo(PeakGroup* group);
 	  void setInfo(Compound* c);
