@@ -390,10 +390,11 @@ void MassCalcWidget::showInfo() {
         if (m.compoundLink) {
             _mw->getEicWidget()->setCompound(m.compoundLink, m.adductLink, true, false, true);
             _mw->getEicWidget()->drawFocusLines();
-            _mw->fragmentationSpectraWidget->overlayCompound(m.compoundLink);
 
             if (!_mw->fragmentationSpectraWidget->getCurrentScan()) {
                 _mw->fragmentationSpectraWidget->showMS2CompoundSpectrum(m.compoundLink);
+            } else {
+                _mw->fragmentationSpectraWidget->overlayCompound(m.compoundLink, false);
             }
         }
 
@@ -405,10 +406,12 @@ void MassCalcWidget::showInfo() {
         Compound *compound = DB.findSpeciesById(to_string(compoundId.toInt()), _mw->rumsDBDatabaseName.toStdString(), _mw->isAttemptToLoadDB);
 
         if (compound) {
-            _mw->fragmentationSpectraWidget->overlayCompound(compound);
+
 
             if (!_mw->fragmentationSpectraWidget->getCurrentScan()) {
                 _mw->fragmentationSpectraWidget->showMS2CompoundSpectrum(compound);
+            } else {
+                _mw->fragmentationSpectraWidget->overlayCompound(compound, false);
             }
 
             Adduct *adduct = DB.findAdductByName(adductName.toStdString());

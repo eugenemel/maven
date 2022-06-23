@@ -309,11 +309,13 @@ void SpectraWidget::setScan(Peak* peak) {
     repaint();
 }
 
-void SpectraWidget::overlaySpectralHit(SpectralHit& hit) {
+void SpectraWidget::overlaySpectralHit(SpectralHit& hit, bool isSetScanToHitScan) {
         _spectralHit = hit;//copy hit
 
         //determine limits of overlayed spectra
-        setScan(hit.scan, hit.getMinMz()-0.5, hit.getMaxMz()+0.5);
+        if (isSetScanToHitScan) {
+            setScan(hit.scan, hit.getMinMz()-0.5, hit.getMaxMz()+0.5);
+        }
 
         findBounds(true, true);
 
@@ -366,9 +368,9 @@ void SpectraWidget::overlayPeakGroup(PeakGroup* group) {
     }
 
     if (group->compound)  {
-        if(group->compound->fragment_mzs.size()) overlayCompound(group->compound);
+        if(group->compound->fragment_mzs.size()) overlayCompound(group->compound, false);
         else if (!group->compound->smileString.empty()) overlayTheoreticalSpectra(group->compound);
-        else  overlayCompound(group->compound);
+        else  overlayCompound(group->compound, false);
     }
 
 }
@@ -417,7 +419,7 @@ void SpectraWidget::showMS2CompoundSpectrum(Compound *c) {
     drawGraph();
 }
 
-void SpectraWidget::overlayCompound(Compound* c) {
+void SpectraWidget::overlayCompound(Compound* c, bool isSetScanToHitScan) {
    clearOverlay();
    if(!_currentScan or !c) return;
 
@@ -429,7 +431,7 @@ void SpectraWidget::overlayCompound(Compound* c) {
    _spectralHit = generateSpectralHitFromCompound(c);
 
    _showOverlay = true;
-   overlaySpectralHit(_spectralHit);
+   overlaySpectralHit(_spectralHit, isSetScanToHitScan);
 
    resetZoom();
 }

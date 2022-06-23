@@ -32,8 +32,8 @@ public slots:
                     void spectraToClipboard();
                     void spectraToClipboardTop();
 
-                    void overlaySpectralHit(SpectralHit& hit);
-                    void overlayCompound(Compound* c);
+                    void overlaySpectralHit(SpectralHit& hit, bool isSetScanToHitScan=true);
+                    void overlayCompound(Compound* c, bool isSetScanToHitScan=true);
                     void overlayPeakGroup(PeakGroup* group);
                     void overlayTheoreticalSpectra(Compound* c);
 
