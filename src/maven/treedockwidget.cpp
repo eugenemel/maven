@@ -218,6 +218,34 @@ void TreeDockWidget::selectMs2Scans(PeakGroup* group) {
     treeWidget->blockSignals(false);
 }
 
+void TreeDockWidget::selectMs2Scans(Scan* ms2Scan) {
+
+    if (!ms2Scan) return;
+    if (!ms2Scan->sample) return;
+    if (ms2Scan->mslevel != 2) return;
+
+    treeWidget->blockSignals(true);
+    treeWidget->clearSelection();
+
+    for (int i = 0; i < treeWidget->topLevelItemCount(); i++) {
+
+        QTreeWidgetItem *item = treeWidget->topLevelItem(i);
+
+        QVariant v =   item->data(0,Qt::UserRole);
+        Scan*  scan =  v.value<Scan*>();
+
+        if (scan && scan->mslevel == 2 && scan->sample && scan == ms2Scan) {
+
+            if (scan == ms2Scan) {
+                item->setSelected(true);
+            }
+
+        }
+    }
+    showInfo();
+    treeWidget->blockSignals(false);
+}
+
 /**
  * @brief TreeDockWidget::showInfoAndUpdateMassCalcGUI
  * Path to showInfo - only use this for user clicks

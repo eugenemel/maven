@@ -2125,12 +2125,18 @@ void MainWindow::showScanInfo(Scan* _scan){
         massCalcWidget->setFragmentationScan(_scan);
     }
 
-    if (_scan->mslevel >= 2 && _scan->sample && spectraWidget->isVisible()) {
-        int scanHistory=50;
-        Scan* lastfullscan = _scan->getLastFullScan(scanHistory);
-        if(lastfullscan) {
-            spectraWidget->setScan(lastfullscan);
-            spectraWidget->zoomRegion(_scan->precursorMz,0.5);
+    //Issue 550: Add focus line based on RT click
+    if (_scan->mslevel == 2) {
+
+        ms2ScansListWidget->selectMs2Scans(_scan);
+
+        if (_scan->sample && spectraWidget->isVisible()) {
+            int scanHistory=50;
+            Scan* lastfullscan = _scan->getLastFullScan(scanHistory);
+            if(lastfullscan) {
+                spectraWidget->setScan(lastfullscan);
+                spectraWidget->zoomRegion(_scan->precursorMz,0.5);
+            }
         }
     }
 }
