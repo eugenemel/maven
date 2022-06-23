@@ -1177,15 +1177,31 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
        compoundSet.push_back(cpd);
    }
 
+    //Issue 551: Expand error message
     bool isHasUnequalMatches = false;
     for (Compound *cpd : compoundSet) {
         if (cpd->fragment_mzs.size() != cpd->fragment_intensity.size()){
             isHasUnequalMatches = true;
-            cerr << "COMPOUND: " << cpd->name << ": #mzs=" << cpd->fragment_mzs.size() << "; #ints=" << cpd->fragment_intensity.size() << endl;
+            qDebug() << "COMPOUND:"
+                     << cpd->name.c_str()
+                     << cpd->adductString.c_str()
+                     << ":#mzs=" << cpd->fragment_mzs.size()
+                     << "; #ints=" << cpd->fragment_intensity.size();
+
+            qDebug() << "FRAGMENTS:" << endl;
+            for (auto mz : cpd->fragment_mzs) {
+                qDebug() << mz;
+            }
+            qDebug() << endl;
+            qDebug() << "INTENSITIES:";
+            for (auto i : cpd->fragment_intensity) {
+                qDebug() << i;
+            }
+            qDebug() << endl;
         }
     }
 
-    cerr << "COMPOUND LIBRARY HAS ANY COMPOUNDS WITH MISMATCHED (m/z, intensity) PAIRS? " << (isHasUnequalMatches ? "yes" : "no") << endl;
+    qDebug() << "COMPOUND LIBRARY HAS ANY COMPOUNDS WITH MISMATCHED (m/z, intensity) PAIRS? " << (isHasUnequalMatches ? "yes" : "no") << endl;
     if (isHasUnequalMatches) {
         qDebug() << "One or more compounds in the library" << fileName << "does not have proper corresponding (m/z, intensity) pairs in its database.";
         qDebug() << "Please delete this library and reload it.";
