@@ -21,6 +21,8 @@ EicWidget::EicWidget(QWidget *p) {
     _statusText=nullptr;
     _alwaysDisplayGroup = nullptr;
     _integratedGroup = nullptr;
+    _rtMinLine = nullptr;
+    _rtMaxLine = nullptr;
 
 	autoZoom(true);
 	showPeaks(true);
@@ -292,6 +294,24 @@ void EicWidget::clearEICLines() {
     qDebug() <<" EicWidget::clearEICLines()";
     clearFocusLines();
     clearFocusLine();
+    clearRtRangeLines();
+}
+
+void EicWidget::clearRtRangeLines() {
+    if (_rtMinLine) {
+        if (_rtMinLine->scene()) {
+            scene()->removeItem(_rtMinLine);
+        }
+        delete(_rtMinLine);
+        _rtMinLine = nullptr;
+    }
+    if (_rtMaxLine) {
+        if (_rtMaxLine->scene()) {
+            scene()->removeItem(_rtMaxLine);
+        }
+        delete(_rtMaxLine);
+        _rtMaxLine = nullptr;
+    }
 }
 
 void EicWidget::clearFocusLine() {
@@ -377,6 +397,31 @@ void EicWidget::drawFocusLines() {
     if (_focusLineRt > _slice.rtmin && _focusLineRt < _slice.rtmax) {
         setFocusLine(_focusLineRt);
     }
+}
+
+void EicWidget::drawRtRangeLines(PeakGroup* peakGroup) {
+    if (!peakGroup) return;
+
+    float rtmin = peakGroup->minRt;
+    float rtmax = peakGroup->maxRt;
+
+    if (rtmax <= rtmin) return;
+
+    clearRtRangeLines();
+
+    _rtMinLine = new QGraphicsLineItem(nullptr);
+    _rtMaxLine = new QGraphicsLineItem(nullptr);
+
+    QPen pen(Qt::blue, 3, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin);
+
+    _rtMinLine->setPen(pen);
+    _rtMaxLine->setPen(pen);
+
+    _rtMinLine->setLine(toX(rtmin), 0, toX(rtmin), height());
+    _rtMaxLine->setLine(toX(rtmax), 0, toX(rtmax), height());
+
+    scene()->addItem(_rtMinLine);
+    scene()->addItem(_rtMaxLine);
 }
 
 void EicWidget::drawSelectionLine(float rtmin, float rtmax) { 

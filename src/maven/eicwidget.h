@@ -59,6 +59,7 @@ public slots:
     void addMergedEIC();
     void setFocusLine(float rt);
     void setFocusLines(vector<float> rts);
+    void drawRtRangeLines(PeakGroup* group);
     void drawFocusLines();
     void drawSelectionLine(float rtmin,float rtmax);
     void addFocusLine(PeakGroup*);
@@ -119,6 +120,7 @@ public slots:
     void clearEICLines();
     void clearFocusLine();
     void clearFocusLines();
+    void clearRtRangeLines();
     void clearPeakAreas();
 
 protected:
@@ -216,6 +218,11 @@ private:
 
     vector<float> _focusLinesRts{};
     QVector<QGraphicsLineItem*> _focusLines;
+
+    //Issue 550
+    QGraphicsLineItem* _rtMinLine;
+    QGraphicsLineItem* _rtMaxLine;
+
     vector<EicLine*> _peakAreas{};
 
     void showPeak(float freq, float amplitude);

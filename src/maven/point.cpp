@@ -38,6 +38,7 @@ EicPoint::EicPoint(float x, float y, Peak* peak, MainWindow* mw)
          //Issue 460: select all MS2 scans instead of single peak
          connect(this, SIGNAL(groupClicked(PeakGroup*)), mw->ms2ScansListWidget, SLOT(selectMs2Scans(PeakGroup*)));
          connect(this, SIGNAL(groupClicked(PeakGroup*)), mw->massCalcWidget, SLOT(setPeakGroup(PeakGroup*)));
+         connect(this, SIGNAL(groupClicked(PeakGroup*)), mw->getEicWidget(), SLOT(drawRtRangeLines(PeakGroup*)));
 
          //mouse hover events
          connect(this, SIGNAL(peakGroupFocus(PeakGroup*)), mw->getEicWidget(), SLOT(setSelectedGroup(PeakGroup*)));
