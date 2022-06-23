@@ -1839,6 +1839,9 @@ void MainWindow::updateGUIWithLastSelectedPeakGroup(){
     //no need to compute consensus spectrum if it won't be displayed.
     if (isDisplayConsensusSpectrum) {
 
+        //Issue 550
+        qDebug() << "MainWindow::updateGUIWithLastSelectedPeakGroup(): Drawing consensus MS2 spectrum.";
+
         if (_lastSelectedPeakGroup->fragmentationPattern.nobs() == 0) {
             //if saving a loaded fragmentation file, this should all be stored from the file.
 
@@ -1885,8 +1888,6 @@ void MainWindow::updateGUIWithLastSelectedPeakGroup(){
         massCalcWidget->setPeakGroup(_lastSelectedPeakGroup);
         massCalcWidget->lineEdit->setText(QString::number(static_cast<double>(_lastSelectedPeakGroup->meanMz),'f',5));
     }
-
-    //note that this method is the only caller of showPeakInfo()
 
     if (_lastSelectedPeakGroup->peaks.empty()) return;
 
