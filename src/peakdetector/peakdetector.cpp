@@ -2070,7 +2070,7 @@ void mzkitchenSearch() {
 
         shared_ptr<LCLipidSearchParameters> lipidSearchParams = LCLipidSearchParameters::decode(mzkitchenSearchParameters);
         lipidSearchParams->searchVersion = "lipids_lclipidprocessor_v1";
-        MzKitchenProcessor::matchLipids_LC(allgroups, mzkitchenCompounds, lipidSearchParams, false);
+        MzKitchenProcessor::matchLipids_LC(allgroups, mzkitchenCompounds, lipidSearchParams, true); //Issue 666: turn on debugging for testing
         searchTableData.insert(make_pair("clamDB", QString(lipidSearchParams->encodeParams().c_str())));
 
     } else if (mzkitchenSearchType == "metaboliteSearch") {
