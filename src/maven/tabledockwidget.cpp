@@ -1078,6 +1078,12 @@ void TableDockWidget::showAllGroups() {
 
     treeWidget->setSortingEnabled(false);
 
+    //Issue 539: organized based on compounds
+    qDebug() << "TODO: Issue 539, group compounds together?" << _isGroupCompoundsTogether;
+    if (_isGroupCompoundsTogether) {
+        //TODO: Issue 539 logic
+    }
+
     QMap<int,QTreeWidgetItem*> parents;
     for(unsigned int i=0; i < allgroups.size(); i++ ) {
         int metaGroupId  = allgroups[i]->metaGroupId;
@@ -1762,6 +1768,13 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
     QMenu analysis("Cluster Analysis");
     QAction* zz0 = analysis.addAction("Cluster Groups by Retention Time");
     connect(zz0, SIGNAL(triggered()), this ,SLOT(clusterGroups()));
+
+    //Issue 539: Alternative approach
+    QAction* zz3 = analysis.addAction("Group Compounds Together");
+    zz3->setCheckable(true);
+    zz3->setChecked(_isGroupCompoundsTogether);
+    connect(zz3, SIGNAL(toggled(bool)), SLOT(groupCompoundsTogether(bool)));
+    connect(zz3, SIGNAL(toggled(bool)), SLOT(showAllGroups()));
 
 //    //TODO: do not reenable until Issue #544 is complete
 //    QAction* zz3 = analysis.addAction("Set Child Groups by Compound");

@@ -124,6 +124,7 @@ public slots:
       void refreshPeakGroupQuant();
       void setCompoundSearchSelectedCompound();
       void showLipidSummarizationColumns(bool f) {_isShowLipidSummarizationColumns = f;}
+      void groupCompoundsTogether(bool f) {_isGroupCompoundsTogether = f;}
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event);
@@ -179,6 +180,7 @@ private:
           shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParams = nullptr;
 
           bool _isShowLipidSummarizationColumns = false;
+          bool _isGroupCompoundsTogether = false;
           static map<string, int> groupViewColumnNameToNumber;
           static map<string, int> groupViewColumnNameToNumberWithLipidSummarization;
 
