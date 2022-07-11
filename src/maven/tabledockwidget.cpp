@@ -1061,24 +1061,6 @@ void TableDockWidget::showAllGroups() {
     if (allgroups.size() == 0 ) return;
     treeWidget->setSortingEnabled(false);
 
-    // Issue 539: START NEW
-
-    //Issue 438: only apply to top level (do not apply to children)
-    //used for highlighting colors
-//    for (auto group : allgroups) {
-//        if (group->compound) {
-//            if (compoundToGroup.find(group->compound) == compoundToGroup.end()) {
-//                compoundToGroup.insert(make_pair(group->compound, vector<PeakGroup*>{}));
-//            }
-//            compoundToGroup[group->compound].push_back(group);
-//        }
-//        QString groupIdString = groupTagString(group);
-//        if (groupIdToGroup.find(groupIdString) == groupIdToGroup.end()) {
-//            groupIdToGroup.insert(make_pair(groupIdString, vector<PeakGroup*>{}));
-//        }
-//        groupIdToGroup[groupIdString].push_back(group);
-//    }
-
     //Issue 539: organized based on compounds
     //Either organize groups by compounds, or color them based on duplicate compounds (not both)
     vector<vector<PeakGroup*>> allGroups;
@@ -1131,7 +1113,7 @@ void TableDockWidget::showAllGroups() {
                     }
                     parents[metaGroupId]->setText(0,clusterString);
 
-                    parents[metaGroupId]->setText(3,QString::number(pg->meanRt,'f',2));
+                    parents[metaGroupId]->setText(3,QString::number(static_cast<double>(pg->meanRt),'f',2));
                     parents[metaGroupId]->setExpanded(true);
                     parent = parents[metaGroupId];
                 }
@@ -1159,44 +1141,6 @@ void TableDockWidget::showAllGroups() {
             addRow(groupI[j], pgParent);
         }
     }
-
-    // Issue 539: END NEW
-    // Issue 539: START OLD
-
-//    QMap<int,QTreeWidgetItem*> parents;
-//    for(unsigned int i=0; i < allgroups.size(); i++ ) {
-//        int metaGroupId  = allgroups[i]->metaGroupId;
-//        if (metaGroupId && allgroups[i]->meanMz > 0 && allgroups[i]->peakCount()>0) {
-
-//            QTreeWidgetItem* parent = nullptr;
-//            if (!parents.contains(metaGroupId)) {
-//                if (windowTitle() != "Bookmarks") {
-//                    parents[metaGroupId]= new QTreeWidgetItem(treeWidget);
-
-//                    //Issue 311: improve UI
-//                    QString clusterString;
-//                    if (metaGroupId == DirectInfusionSearchSet::getNoMs2ScansMapKey() && isDirectInfusionTable()){
-//                        clusterString = QString("Compounds with no MS2 matches");
-//                    } else {
-//                        clusterString = QString("Cluster ").append(QString::number(metaGroupId));
-//                    }
-//                    parents[metaGroupId]->setText(0,clusterString);
-
-//                    parents[metaGroupId]->setText(3,QString::number(allgroups[i]->meanRt,'f',2));
-//                    parents[metaGroupId]->setExpanded(true);
-//                    parent = parents[metaGroupId];
-//                }
-//            } else {
-//                parent = parents[metaGroupId];
-//            }
-
-//            addRow(allgroups[i], parent);
-//        } else {
-//            addRow(allgroups[i], nullptr);
-//        }
-//    }
-
-        // Issue 539: END OLD
 
     QScrollBar* vScroll = treeWidget->verticalScrollBar();
     if ( vScroll ) {
