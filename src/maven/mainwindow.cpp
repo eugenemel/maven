@@ -1966,7 +1966,7 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> MainWindow::getSrmSlices() {
     double amuQ3 = getSettings()->value("amuQ3").toDouble();
 
     vector<mzSlice*>slices;
-    map<pair<float, float>, SRMTransition*> srmTransitions{}; //TODO: key should have RT values also?
+    map<pair<float, float>, SRMTransition*> srmTransitions{};
 
     for(int i=0; i < samples.size(); i++ ) {
     	mzSample* sample = samples[i];
