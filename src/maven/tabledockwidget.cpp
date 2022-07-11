@@ -1059,35 +1059,63 @@ void TableDockWidget::showAllGroups() {
     groupIdToGroup.clear();
 
     if (allgroups.size() == 0 ) return;
+    treeWidget->setSortingEnabled(false);
+
+    // Issue 539: START NEW
 
     //Issue 438: only apply to top level (do not apply to children)
     //used for highlighting colors
-    for (auto group : allgroups) {
-        if (group->compound) {
-            if (compoundToGroup.find(group->compound) == compoundToGroup.end()) {
-                compoundToGroup.insert(make_pair(group->compound, vector<PeakGroup*>{}));
-            }
-            compoundToGroup[group->compound].push_back(group);
-        }
-        QString groupIdString = groupTagString(group);
-        if (groupIdToGroup.find(groupIdString) == groupIdToGroup.end()) {
-            groupIdToGroup.insert(make_pair(groupIdString, vector<PeakGroup*>{}));
-        }
-        groupIdToGroup[groupIdString].push_back(group);
-    }
-
-    treeWidget->setSortingEnabled(false);
+//    for (auto group : allgroups) {
+//        if (group->compound) {
+//            if (compoundToGroup.find(group->compound) == compoundToGroup.end()) {
+//                compoundToGroup.insert(make_pair(group->compound, vector<PeakGroup*>{}));
+//            }
+//            compoundToGroup[group->compound].push_back(group);
+//        }
+//        QString groupIdString = groupTagString(group);
+//        if (groupIdToGroup.find(groupIdString) == groupIdToGroup.end()) {
+//            groupIdToGroup.insert(make_pair(groupIdString, vector<PeakGroup*>{}));
+//        }
+//        groupIdToGroup[groupIdString].push_back(group);
+//    }
 
     //Issue 539: organized based on compounds
-    qDebug() << "TODO: Issue 539, group compounds together?" << _isGroupCompoundsTogether;
+    //Either organize groups by compounds, or color them based on duplicate compounds (not both)
+    vector<vector<PeakGroup*>> allGroups;
     if (_isGroupCompoundsTogether) {
-        //TODO: Issue 539 logic
+        allGroups = clusterByCompounds();
+    } else {
+        allGroups = vector<vector<PeakGroup*>>(allgroups.size());
+        for (unsigned int i = 0; i < allgroups.size(); i++) {
+
+            PeakGroup* group = allgroups[i];
+            allGroups[i] = vector<PeakGroup*>{group};
+
+            //Issue 438: only apply to top level (do not apply to children)
+            //used for highlighting colors
+            if (group->compound) {
+                if (compoundToGroup.find(group->compound) == compoundToGroup.end()) {
+                    compoundToGroup.insert(make_pair(group->compound, vector<PeakGroup*>{}));
+                }
+                compoundToGroup[group->compound].push_back(group);
+            }
+            QString groupIdString = groupTagString(group);
+            if (groupIdToGroup.find(groupIdString) == groupIdToGroup.end()) {
+                groupIdToGroup.insert(make_pair(groupIdString, vector<PeakGroup*>{}));
+            }
+            groupIdToGroup[groupIdString].push_back(group);
+        }
     }
 
     QMap<int,QTreeWidgetItem*> parents;
-    for(unsigned int i=0; i < allgroups.size(); i++ ) {
-        int metaGroupId  = allgroups[i]->metaGroupId;
-        if (metaGroupId && allgroups[i]->meanMz > 0 && allgroups[i]->peakCount()>0) {
+    for (unsigned int i = 0; i < allGroups.size(); i++) {
+        vector<PeakGroup*> groupI = allGroups[i];
+
+        PeakGroup *pg = groupI[0];
+
+        //First PeakGroup in a vector<PeakGroup> may also be involved in a cluster.
+        int metaGroupId  = pg->metaGroupId;
+        if (metaGroupId && pg->meanMz > 0 && pg->peakCount()>0) {
 
             QTreeWidgetItem* parent = nullptr;
             if (!parents.contains(metaGroupId)) {
@@ -1103,7 +1131,7 @@ void TableDockWidget::showAllGroups() {
                     }
                     parents[metaGroupId]->setText(0,clusterString);
 
-                    parents[metaGroupId]->setText(3,QString::number(allgroups[i]->meanRt,'f',2));
+                    parents[metaGroupId]->setText(3,QString::number(pg->meanRt,'f',2));
                     parents[metaGroupId]->setExpanded(true);
                     parent = parents[metaGroupId];
                 }
@@ -1111,11 +1139,64 @@ void TableDockWidget::showAllGroups() {
                 parent = parents[metaGroupId];
             }
 
-            addRow(allgroups[i], parent);
+            addRow(pg, parent);
         } else {
-            addRow(allgroups[i], nullptr);
+            addRow(pg, nullptr);
+        }
+
+        //only need to retrieve the parent peak group if there are more peak groups to organize.
+        if (groupI.size() == 1) continue;
+
+        QTreeWidgetItem* pgParent = nullptr;
+        pair<rowIterator, rowIterator> tableRows = groupToItem.equal_range(pg);
+        for (rowIterator it = tableRows.first; it != tableRows.second; ++it) {
+             pgParent = it->second;
+             break;
+        }
+
+        //All subsequent PeakGroups in a vector<PeakGroup> must be subordinate to the first PeakGroup.
+        for (unsigned int j = 1; j < groupI.size(); j++) {
+            addRow(groupI[j], pgParent);
         }
     }
+
+    // Issue 539: END NEW
+    // Issue 539: START OLD
+
+//    QMap<int,QTreeWidgetItem*> parents;
+//    for(unsigned int i=0; i < allgroups.size(); i++ ) {
+//        int metaGroupId  = allgroups[i]->metaGroupId;
+//        if (metaGroupId && allgroups[i]->meanMz > 0 && allgroups[i]->peakCount()>0) {
+
+//            QTreeWidgetItem* parent = nullptr;
+//            if (!parents.contains(metaGroupId)) {
+//                if (windowTitle() != "Bookmarks") {
+//                    parents[metaGroupId]= new QTreeWidgetItem(treeWidget);
+
+//                    //Issue 311: improve UI
+//                    QString clusterString;
+//                    if (metaGroupId == DirectInfusionSearchSet::getNoMs2ScansMapKey() && isDirectInfusionTable()){
+//                        clusterString = QString("Compounds with no MS2 matches");
+//                    } else {
+//                        clusterString = QString("Cluster ").append(QString::number(metaGroupId));
+//                    }
+//                    parents[metaGroupId]->setText(0,clusterString);
+
+//                    parents[metaGroupId]->setText(3,QString::number(allgroups[i]->meanRt,'f',2));
+//                    parents[metaGroupId]->setExpanded(true);
+//                    parent = parents[metaGroupId];
+//                }
+//            } else {
+//                parent = parents[metaGroupId];
+//            }
+
+//            addRow(allgroups[i], parent);
+//        } else {
+//            addRow(allgroups[i], nullptr);
+//        }
+//    }
+
+        // Issue 539: END OLD
 
     QScrollBar* vScroll = treeWidget->verticalScrollBar();
     if ( vScroll ) {
@@ -1770,17 +1851,11 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
     connect(zz0, SIGNAL(triggered()), this ,SLOT(clusterGroups()));
 
     //Issue 539: Alternative approach
-    QAction* zz3 = analysis.addAction("Group Compounds Together");
+    QAction* zz3 = analysis.addAction("Cluster Groups by Compound");
     zz3->setCheckable(true);
     zz3->setChecked(_isGroupCompoundsTogether);
     connect(zz3, SIGNAL(toggled(bool)), SLOT(groupCompoundsTogether(bool)));
     connect(zz3, SIGNAL(toggled(bool)), SLOT(showAllGroups()));
-
-//    //TODO: do not reenable until Issue #544 is complete
-//    QAction* zz3 = analysis.addAction("Set Child Groups by Compound");
-//    connect(zz3, SIGNAL(triggered()), this, SLOT(clusterByCompounds()));
-//    QAction* zz4 = analysis.addAction("Promote all Child Groups");
-//    connect(zz4, SIGNAL(triggered()), this, SLOT(unchildrenizeGroups()));
 
     QAction* zz1 = analysis.addAction("Collapse All");
     connect(zz1, SIGNAL(triggered()), treeWidget,SLOT(collapseAll()));
@@ -2168,18 +2243,16 @@ void TableDockWidget::clusterGroups() {
     showAllGroups();
 }
 
-// Issue 539 / 544: Try clustering
-//TODO: these methods are unreliable / will cause null access violations until #544 is completed
-void TableDockWidget::clusterByCompounds() {
+vector<vector<PeakGroup*>> TableDockWidget::clusterByCompounds() {
+
     qDebug() << "TableDockWidget::clusterByCompounds()";
 
     map<Compound*, vector<PeakGroup*>> groupsByCompound{};
 
-    vector<PeakGroup*> updated_all_groups{};
+    auto allCompounds = vector<vector<PeakGroup*>>();
 
     //organize peakgroups by common compound
     for (auto pg : allgroups) {
-        pg->parent = nullptr;
         if (pg->compound) {
             Compound *compound = pg->compound;
             vector<PeakGroup*> compoundGroups{};
@@ -2187,43 +2260,25 @@ void TableDockWidget::clusterByCompounds() {
                 groupsByCompound.insert(make_pair(compound, compoundGroups));
             }
             groupsByCompound.at(compound).push_back(pg);
-            for (auto pg_child : pg->children) {
-                //TODO: add children
-            }
         } else {
-            updated_all_groups.push_back(pg);
+            vector<PeakGroup*> singleton{pg};
+            allCompounds.push_back(singleton);
         }
     }
 
+    //sort compounds appropriately
     for (auto it = groupsByCompound.begin(); it != groupsByCompound.end(); ++it){
         vector<PeakGroup*> groups = it->second;
-
-        PeakGroup* pg = groups.at(0);
-
         if (groups.size() > 1) {
-            sort(groups.begin(), groups.end(), [](PeakGroup* lhs, PeakGroup* rhs){
-
-                if (abs(lhs->fragMatchScore.mergedScore-rhs->fragMatchScore.mergedScore) < 1e-6){
-                    return lhs->compound->name.compare(rhs->compound->name);
-                }
-                return lhs->fragMatchScore.mergedScore < rhs->fragMatchScore.mergedScore ? -1 : 1;
-
+            sort(groups.begin(), groups.end(), [&](PeakGroup* lhs, PeakGroup* rhs){
+                return (lhs->fragMatchScore.mergedScore > rhs->fragMatchScore.mergedScore);
             });
-
-            //add children
-            for (unsigned int i = 1; i < groups.size(); i++) {
-                PeakGroup *pg_child = groups.at(i);
-                pg->children.push_back(*pg_child);
-            }
         }
 
-        updated_all_groups.push_back(pg);
-
+        allCompounds.push_back(groups);
     }
 
-    allgroups = updated_all_groups;
-
-    showAllGroups();
+    return allCompounds;
 
 }
 

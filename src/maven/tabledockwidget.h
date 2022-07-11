@@ -46,6 +46,8 @@ public:
     inline bool isDirectInfusionTable(){return windowTitle().startsWith("Direct Infusion Analysis");}
     inline bool isDetectedFeaturesTable(){return windowTitle().startsWith("Detected Features");}
 
+    vector<vector<PeakGroup*>> clusterByCompounds();
+
 public slots: 
 	  //void showInfo(PeakGroup* group);
       PeakGroup* addPeakGroup(PeakGroup* group, bool updateTable);
@@ -101,7 +103,6 @@ public slots:
 	  void align();
 	  void deleteAll();
       void clusterGroups();
-      void clusterByCompounds();
       void unchildrenizeGroups();
 	  void findMatchingCompounds();
 	  void filterPeakTable();
