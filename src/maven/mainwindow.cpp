@@ -1964,7 +1964,7 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> MainWindow::getSrmSlices() {
     params->amuQ1 = getSettings()->value("amuQ1").toFloat();
     params->amuQ3 = getSettings()->value("amuQ3").toFloat();
 
-    auto slices2 = QQQProcessor::getSRMSlices(
+    auto slices = QQQProcessor::getSRMSlices(
                 getVisibleSamples(),
                 params,
                 DB.compoundsDB,
@@ -1972,130 +1972,7 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> MainWindow::getSrmSlices() {
                 false
                 );
 
-    //debugging: test this new approach
-    //return(slices2);
-
-    QSet<QString>srms;
-    //+118.001@cid34.00 [57.500-58.500]
-    //+ c ESI SRM ms2 102.000@cid19.00 [57.500-58.500]
-    //-87.000 [42.500-43.500]
-    //- c ESI SRM ms2 159.000 [113.500-114.500]
-
-    QRegExp rx1a("[+/-](\\d+\\.\\d+)");
-    QRegExp rx1b("ms2\\s*(\\d+\\.\\d+)");
-    QRegExp rx2("(\\d+\\.\\d+)-(\\d+\\.\\d+)");
-    int countMatches=0;
-
-    double amuQ1 = getSettings()->value("amuQ1").toDouble();
-    double amuQ3 = getSettings()->value("amuQ3").toDouble();
-
-    vector<mzSlice*>slices;
-    map<pair<float, float>, SRMTransition*> srmTransitions{};
-
-    for(int i=0; i < samples.size(); i++ ) {
-    	mzSample* sample = samples[i];
-        for( int j=0; j < sample->scans.size(); j++ ) {
-            Scan* scan = sample->getScan(j);
-            if (!scan) continue;
-
-            QString filterLine(scan->filterLine.c_str());
-            if (filterLine.isEmpty()) continue;
-
-            if (srms.contains(filterLine))  continue;
-            srms.insert(filterLine);
-
-            mzSlice* s = new mzSlice(0,0,0,0);
-            s->srmId = scan->filterLine.c_str();
-            slices.push_back(s);
-
-            //match compounds
-            Compound* compound = nullptr;
-            Adduct* adduct = nullptr;
-
-            float precursorMz = scan->precursorMz;
-            float productMz   = scan->productMz;
-            int   polarity= scan->getPolarity();
-            if (polarity==0) filterLine[0] == '+' ? polarity=1 : polarity =-1;
-            if (getIonizationMode()) polarity=getIonizationMode(); //user specified ionization mode
-
-            if ( precursorMz == 0 ) {
-                if( rx1a.indexIn(filterLine) != -1 ) {
-                    precursorMz = rx1a.capturedTexts()[1].toDouble();
-                } else if ( rx1b.indexIn(filterLine) != -1 ) {
-                    precursorMz = rx1b.capturedTexts()[1].toDouble();
-                }
-            }
-
-            if (productMz == 0) {
-                if ( rx2.indexIn(filterLine) != -1 ) {
-                    float lb = rx2.capturedTexts()[1].toDouble();
-                    float ub = rx2.capturedTexts()[2].toDouble();
-                    productMz = lb+(ub-lb)/2;
-                }
-            }
-
-            if (precursorMz != 0 && productMz != 0 ) {
-                compound = DB.findSpeciesByPrecursor(precursorMz,productMz,polarity,amuQ1,amuQ3);
-            }
-
-            /*
-            if(!compound) {
-            qDebug() <<  "Matching failed: precursorMz=" << precursorMz
-                         << " productMz=" << productMz
-                         << " polarity=" << polarity;
-            }
-            */
-
-            if (compound) {
-                compound->srmId=filterLine.toStdString();
-                s->compound=compound;
-                s->rt = compound->expectedRt;
-                countMatches++;
-
-                if (!compound->adductString.empty()) {
-                    for (auto availableAdduct : DB.adductsDB) {
-                        if (availableAdduct->name == compound->adductString) {
-                            adduct = availableAdduct;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            //Issue 347
-            pair<float, float> srmKey = make_pair(precursorMz, productMz);
-            SRMTransition *srmTransition = new SRMTransition();
-            if (srmTransitions.find(srmKey) != srmTransitions.end()) {
-                srmTransition = srmTransitions[srmKey];
-            } else {
-                srmTransition->precursorMz = precursorMz;
-                srmTransition->productMz = productMz;
-            }
-
-            srmTransition->mzSlices.push_back(make_pair(sample, s));
-
-            if (compound){
-                srmTransition->compound = compound;
-                if (compound->expectedRt > 0) {
-                    srmTransition->rt = compound->expectedRt;
-                }
-            }
-            if (adduct) srmTransition->adduct = adduct;
-
-            srmTransitions[srmKey] = srmTransition;
-        }
-        //qDebug() << "SRM mapping: " << countMatches << " compounds mapped out of " << srms.size();
-    }
-
-    vector<SRMTransition*> srmTransitionsAsVector(srmTransitions.size());
-
-    unsigned int counter = 0;
-    for (auto it = srmTransitions.begin(); it != srmTransitions.end(); ++it) {
-        srmTransitionsAsVector[counter] = it->second;
-        counter++;
-    }
-
-    return make_pair(slices, srmTransitionsAsVector);
+    return(slices);
 }
 
 
