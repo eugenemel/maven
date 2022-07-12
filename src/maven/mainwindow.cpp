@@ -1415,7 +1415,10 @@ void MainWindow::createMenus() {
     SRMTransitionListWidget->setChecked(false);
 
     connect(SRMTransitionListWidget, SIGNAL(clicked(bool)), SLOT(showSRMList()));
-    connect(SRMTransitionListWidget, SIGNAL(toggled(bool)), srmTransitionDockWidget, SLOT(setVisible(bool)));
+
+    //Issue 553: swap components
+    connect(SRMTransitionListWidget, SIGNAL(toggled(bool)), srmDockWidget, SLOT(setVisible(bool)));
+    //connect(SRMTransitionListWidget, SIGNAL(toggled(bool)), srmTransitionDockWidget, SLOT(setVisible(bool)));
 
     connect(libraryDialog, SIGNAL(loadLibrarySignal(QString)), SLOT(showSRMList()));
     connect(libraryDialog, SIGNAL(afterUnloadedLibrarySignal(QString)), SLOT(showSRMList()));
@@ -1597,7 +1600,11 @@ void MainWindow::createToolBars() {
     QToolButton* btnBookmarks = addDockWidgetButton(sideBar,bookmarkedPeaks,QIcon(rsrcPath + "/showbookmarks.png"), "Bookmarks (F10)");
     QToolButton* btnGallery = addDockWidgetButton(sideBar,galleryDockWidget,QIcon(rsrcPath + "/gallery.png"), "Gallery");
     QToolButton* btnScatter = addDockWidgetButton(sideBar,scatterDockWidget,QIcon(rsrcPath + "/scatterplot.png"), "Scatter Plot");
-    QToolButton* btnSRM = addDockWidgetButton(sideBar,srmDockWidget,QIcon(rsrcPath + "/qqq.png"), "SRM List (F12)");
+
+    //Issue 553: swap components
+    QToolButton* btnSRM = addDockWidgetButton(sideBar,srmTransitionDockWidget,QIcon(rsrcPath + "/qqq.png"), "SRM List (F12)");
+    //QToolButton* btnSRM = addDockWidgetButton(sideBar,srmDockWidget,QIcon(rsrcPath + "/qqq.png"), "SRM List (F12)");
+
     //QToolButton* btnRconsole = addDockWidgetButton(sideBar,rconsoleDockWidget,QIcon(rsrcPath + "/R.png"), "Show R Console");
     QToolButton* btnBarPlot = addDockWidgetButton(sideBar,barPlotDockWidget, QIcon(rsrcPath + "/bar_plot_samples.png"), "EIC Legend");
     QToolButton* btnIsotopeLegend = addDockWidgetButton(sideBar, isotopeLegendDockWidget, QIcon(rsrcPath +"/isotope_legend.png"), "Isotope Bar Plot");
@@ -1951,6 +1958,23 @@ void MainWindow::UndoAlignment() {
 }
 
 pair<vector<mzSlice*>, vector<SRMTransition*>> MainWindow::getSrmSlices() {
+
+    shared_ptr<QQQSearchParameters> params = shared_ptr<QQQSearchParameters>(new QQQSearchParameters());
+
+    params->amuQ1 = getSettings()->value("amuQ1").toFloat();
+    params->amuQ3 = getSettings()->value("amuQ3").toFloat();
+
+    auto slices2 = QQQProcessor::getSRMSlices(
+                getVisibleSamples(),
+                params,
+                DB.compoundsDB,
+                DB.adductsDB,
+                false
+                );
+
+    //debugging: test this new approach
+    //return(slices2);
+
     QSet<QString>srms;
     //+118.001@cid34.00 [57.500-58.500]
     //+ c ESI SRM ms2 102.000@cid19.00 [57.500-58.500]
