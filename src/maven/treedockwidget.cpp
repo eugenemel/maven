@@ -501,7 +501,7 @@ void TreeDockWidget::showInfo(bool isUpdateMassCalcGUI) {
                                               << compoundName << " " << adductName;
 
                                     mainwindow->getEicWidget()->setSRMTransition(srmTransition);
-                                    mainwindow->getEicWidget()->resetZoom(false);
+                                    mainwindow->getEicWidget()->resetZoom(true);
 
                             } else {
                                     cerr << "UNKNOWN TYPE=" << v.type() << endl;
