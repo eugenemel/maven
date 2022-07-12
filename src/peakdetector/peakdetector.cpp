@@ -116,9 +116,14 @@ float minQuality = 0.5;
 int minPrecursorCharge = 0;
 
 //msp searches
+bool isMzkitchenSearch = false;
 static string mzkitchenSearchType = "";
 static string mzkitchenMspFile = "";
 static string mzkitchenSearchParameters = "";
+
+//translation list seaches
+bool isQQQSearch = false;
+shared_ptr<QQQSearchParameters> QQQparams = shared_ptr<QQQSearchParameters>(new QQQSearchParameters());
 
 static map<QString, QString> searchTableData{};
 
@@ -155,8 +160,9 @@ void makeImages(ParallelMassSlicer* massSlices, vector<mzSample*> sampleSubset, 
 void loadProject(string projectFile);
 void anchorPointsBasedAlignment();
 
-//Issue 673 / 739
+//special searches
 void mzkitchenSearch();
+bool isSpecialSearch();
 
 int testResults(string projectFile);
 
@@ -181,6 +187,7 @@ int main(int argc, char *argv[]) {
     QCoreApplication a(argc, argv);
 
     double programStartTime = getTime();
+
     //read command line options
     processOptions(argc, argv);
 
@@ -267,17 +274,42 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    //this set of slices uses RT alignment
-    vector<mzSlice*> slices = processMassSlices(-1, algorithmType, nameSuffix);
+    vector<mzSlice*> slices{};
 
-	//extract EICs
+    if (isQQQSearch) {
+
+        vector<Compound*> compounds = Database::loadCompoundCSVFile(QString(QQQparams->transitionListFilePath.c_str()));
+        vector<Adduct*> adducts{};
+
+        auto slicesData = QQQProcessor::getSRMSlices(
+                    samples,
+                    QQQparams,
+                    compounds,
+                    adducts,
+                    false
+                    );
+
+        //Each slice is an SRM transition, corresponding to a compound
+        for (SRMTransition* transition : slicesData.second) {
+            if (transition->compound) {
+                mzSlice *slice = new mzSlice(*transition);
+                slices.push_back(slice);
+
+                //debugging
+                cout << setprecision(2) << slice->srmPrecursorMz << ", "<< slice->srmProductMz << ": " << slice->compound->name << endl;
+            }
+        }
+
+        delete_all(slicesData.first);
+
+    } else {
+        slices = processMassSlices(-1, algorithmType, nameSuffix);
+    }
+
+    //extract EICs and form groups
     double functionStartTime = getTime();
     processSlices(slices, groupingAlgorithmType, nameSuffix, true);
     printf("Execution time (processSlices) : %f seconds \n", ((float)getTime() - (float)functionStartTime) );
-
-    //TODO: Issue 673: lipid search
-    //May want to put this inside processSlices() -> writeReport()
-    // or otherwise restructure
 
     //cleanup
     delete_all(samples);
@@ -707,8 +739,12 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
         Compound* compound = slices[i]->compound;
 
 		if (i % 1000 == 0) {
-            cout << "\tEIC Slice\t" << setprecision(5) << mzmin <<  "-" << mzmax << " @ " << rtmin << "-" << rtmax << " I=" << slices[i]->ionCount << endl;
-		}
+            if (isQQQSearch) {
+                cout << "\tEIC Slice " << setprecision(5) << "precursor m/z: " << slice->srmPrecursorMz << " product m/z: " << slice->srmProductMz << endl;
+            } else {
+                cout << "\tEIC Slice " << setprecision(5) << mzmin <<  "-" << mzmax << " @ " << rtmin << "-" << rtmax << " I=" << slices[i]->ionCount << endl;
+            }
+        }
 
         //PULL EICS
         double startEICPullTime = getTime();
@@ -718,7 +754,10 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
         for (auto sample: samples) {
 			EIC* eic = nullptr;
 
-            if ( !slice->srmId.empty() ) {
+            if (isQQQSearch) {
+                auto key = slice->getSrmMzKey();
+                eic = sample->getEIC(key, slice);
+            } else if ( !slice->srmId.empty() ) {
                 eic = sample->getEIC(slice->srmId);
             } else {
                 eic = sample->getEIC(mzmin, mzmax, rtmin, rtmax, 1);
@@ -806,7 +845,7 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
             if (group.maxSignalBaselineRatio < minSignalBaseLineRatio) continue;
             if (group.maxIntensity < minGroupIntensity ) continue;
 
-            if (getChargeStateFromMS1(&group) < minPrecursorCharge) continue;
+            if (!isQQQSearch && getChargeStateFromMS1(&group) < minPrecursorCharge) continue;
 
             //build consensus ms2 specta
             vector<Scan*>ms2events = group.getFragmentationEvents();
@@ -837,6 +876,7 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
             } else {
                 group.groupRank = (1.1 - group.maxQuality) * (1 / log(group.maxIntensity + 1));
             }
+
             groupsToAppend.push_back(&group);
         }
 
@@ -879,7 +919,7 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
     printf("\tExecution time (EndPhaseTime)    : %f seconds \n", endPhaseTime);
     printf("\tParallelisation (PeakGrouping)   : True\n");
 
-    if (!mzkitchenSearchType.empty()) {
+    if (isMzkitchenSearch) {
         mzkitchenSearch();
     }
 
@@ -1006,6 +1046,15 @@ void processOptions(int argc, char* argv[]) {
     for (int i = 0; i < argc; i++) {
         cout << argv[i] << " "; cout << endl;
     }
+
+    //Issue 553: handle QQQ searches
+    if (mzkitchenSearchType == "qqqSearch") {
+        isQQQSearch = true;
+        QQQparams = QQQSearchParameters::decode(mzkitchenSearchParameters);
+        saveScanData = false; //override setting, saving scans for QQQ data doesn't make any sense
+    } else if (mzkitchenSearchType != "") {
+        isMzkitchenSearch = true;
+    }
 }
 
 void printSettings() {
@@ -1073,6 +1122,10 @@ void loadSamples(vector<string>&filenames) {
 
         mzSample* sample = new mzSample();
         sample->loadSample(filenames[i].c_str());
+
+        if (isQQQSearch) {
+            sample->enumerateSRMScans();
+        }
 
         if ( sample->scans.size() >= 1 ) {
 
@@ -1200,11 +1253,6 @@ void writeReport(string setName) {
 
     reNumberGroups();
 
-    //Issue 663: when a lipid msp file is provided, matching is handled separately.
-    if (!mzkitchenMspFile.empty()) {
-         matchFragmentation();
-    }
-
     if (isRunClustering) {
 
         //run clustering
@@ -1220,6 +1268,8 @@ void writeReport(string setName) {
 
     //5% of time writeReport() spent up to this point
 
+    QString tblName = isMzkitchenSearch ? QString("clamDB") : QString("QQQ Peak Detection");
+
     if (saveSqlLiteProject)  {
 
         //open project if need be
@@ -1227,12 +1277,12 @@ void writeReport(string setName) {
             cout << "Overwriting previous search results" << endl;
             project->deleteSearchResults(setName.c_str());
 
-            if (!mzkitchenMspFile.empty()) {
-                project->deleteSearchResults("clamDB");
+            if (isSpecialSearch()) {
+                project->deleteSearchResults(tblName);
                 project->savePeakGroupsTableData(searchTableData);
                 for (auto& group : allgroups){
                     if (group.compound){
-                        project->writeGroupSqlite(&group, 0, "clamDB");
+                        project->writeGroupSqlite(&group, 0, tblName);
                     } else {
                         project->writeGroupSqlite(&group, 0, setName.c_str());
                     }
@@ -1253,12 +1303,13 @@ void writeReport(string setName) {
 				project->setSamples(samples);
                 project->saveSamples(samples);
                 project->saveAlignment(); //~50% of time in writeReport() spent here
+
                 if(saveScanData) project->saveScans(samples); //~50% of time in writeReport() spent here
 
-                if (!mzkitchenMspFile.empty()) {
+                if (isSpecialSearch()) {
                     for (auto& group : allgroups){
                         if (group.compound){
-                            project->writeGroupSqlite(&group, 0, "clamDB");
+                            project->writeGroupSqlite(&group, 0, tblName);
                         } else {
                             project->writeGroupSqlite(&group, 0, setName.c_str());
                         }
@@ -1274,7 +1325,11 @@ void writeReport(string setName) {
     }
 
     cout << "writeReport() " << allgroups.size() << " groups " << endl;
-    writeCSVReport   (outputdir + setName + ".tsv");
+
+    if (!isSpecialSearch()) {
+         writeCSVReport(outputdir + setName + ".tsv");
+    }
+
     //writeMS2SimilarityMatrix(outputdir + setName + ".fragMatrix.tsv");
     //if(writeConsensusMS2) writeConsensusMS2Spectra(outputdir + setName + ".msp");
     //if(writeConsensusMS2) classConsensusMS2Spectra(outputdir + setName + "CLASS.msp");
@@ -2094,4 +2149,8 @@ void mzkitchenSearch() {
     }
 
     cout << "Identified " << identifiedGroups << " compounds in " << allgroups.size() << " peak groups." << endl;
+}
+
+bool isSpecialSearch() {
+    return (isMzkitchenSearch || isQQQSearch);
 }
