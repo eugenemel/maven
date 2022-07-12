@@ -662,8 +662,8 @@ float EicWidget::invY(float y) {
 }
 
 void EicWidget::replotForced() {
+    qDebug() <<" EicWidget::replotForced()";
     QTime timerZ; timerZ.start();
- //qDebug <<" EicWidget::replotForced()";
     if (isVisible() ) {
         recompute(!_isPreservePreviousRtRange); //Issue 483: Respect RT locking
         replot();
@@ -1554,7 +1554,7 @@ void EicWidget::blockEicPointSignals(bool isBlockSignals) {
 }
 
 void EicWidget::resetZoom(bool isReplot) {
- //qDebug <<"EicWidget::resetZoom() "; 
+    qDebug() <<"EicWidget::resetZoom()";
     mzSlice bounds(0,0,0,0);
 
     if ( getMainWindow()->sampleCount() > 0 ) {
