@@ -845,20 +845,23 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
             if (group.maxSignalBaselineRatio < minSignalBaseLineRatio) continue;
             if (group.maxIntensity < minGroupIntensity ) continue;
 
-            if (!isQQQSearch && getChargeStateFromMS1(&group) < minPrecursorCharge) continue;
+            if (!isQQQSearch) {
 
-            //build consensus ms2 specta
-            vector<Scan*>ms2events = group.getFragmentationEvents();
-            if (ms2events.size()) {
-                sort(ms2events.begin(), ms2events.end(), Scan::compIntensity);
-                Fragment f = Fragment(ms2events[0], 0.01f, 1, 1024);
-                for (Scan* s : ms2events) {  f.addFragment(new Fragment(s, 0, 0.01f, 1024)); }
-                f.buildConsensus(productPpmTolr);
-                group.fragmentationPattern = f.consensus;
-                group.ms2EventCount = static_cast<int>(ms2events.size());
+                if (getChargeStateFromMS1(&group) < minPrecursorCharge) continue;
+
+                //build consensus ms2 specta
+                vector<Scan*>ms2events = group.getFragmentationEvents();
+                if (ms2events.size()) {
+                    sort(ms2events.begin(), ms2events.end(), Scan::compIntensity);
+                    Fragment f = Fragment(ms2events[0], 0.01f, 1, 1024);
+                    for (Scan* s : ms2events) {  f.addFragment(new Fragment(s, 0, 0.01f, 1024)); }
+                    f.buildConsensus(productPpmTolr);
+                    group.fragmentationPattern = f.consensus;
+                    group.ms2EventCount = static_cast<int>(ms2events.size());
+                }
+
+                if (mustHaveMS2 and group.ms2EventCount == 0 ) continue;
             }
-
-            if (mustHaveMS2 and group.ms2EventCount == 0 ) continue;
 
             if (compound) group.compound = compound;
             if (!slice->srmId.empty()) group.srmId = slice->srmId;
