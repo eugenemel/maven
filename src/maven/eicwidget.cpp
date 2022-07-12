@@ -1586,13 +1586,13 @@ MainWindow* EicWidget::getMainWindow() {
 }
 
 void EicWidget::setRtWindow(float rtmin, float rtmax ) {
- //qDebug <<"EicWidget::setRtWindow(float rtmin, float rtmax ) ";
+     qDebug() <<"EicWidget::setRtWindow(" << rtmin << ", " << rtmax << ")";
 	_slice.rtmin = rtmin;
 	_slice.rtmax = rtmax;
 }
 
 void EicWidget::setSrmId(string srmId) { 
- //qDebug <<"EicWidget::setSrmId(string srmId) "; 
+     qDebug() <<"EicWidget::setSrmId(string srmId) ";
          //qDebug << "EicWidget::setSrmId" <<  srmId.c_str();
     _slice.compound = nullptr;
 	_slice.srmId = srmId;
