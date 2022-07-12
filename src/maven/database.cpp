@@ -74,7 +74,7 @@ int Database::loadCompoundsFile(QString filename) {
          || filename.endsWith("sptxt",Qt::CaseInsensitive)) {
         compounds = loadNISTLibrary(filename);
     } else {
-        compounds = loadCompoundCSVFile(filename);
+        compounds = Database::loadCompoundCSVFile(filename);
     }
 
     deleteCompoundsSQL(dbname.c_str(),ligandDB);
