@@ -1964,8 +1964,10 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> MainWindow::getSrmSlices() {
     params->amuQ1 = getSettings()->value("amuQ1").toFloat();
     params->amuQ3 = getSettings()->value("amuQ3").toFloat();
 
+    vector<mzSample*> visibleSamples = getVisibleSamples();
+
     auto slices = QQQProcessor::getSRMSlices(
-                getVisibleSamples(),
+                visibleSamples,
                 params,
                 DB.compoundsDB,
                 DB.adductsDB,
