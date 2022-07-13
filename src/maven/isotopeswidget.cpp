@@ -384,7 +384,10 @@ void IsotopeWidget::showInfo() {
        slice.mzmax = mz + mz/1e6f*static_cast<float>(ppm);
 	   if(_compound ) slice.compound = _compound;
 	   if(!_compound) slice.compound = tempCompound;
-       _mw->getEicWidget()->setMzSlice(slice, false); //Use slice RT values
+
+       //Issue 536
+       _mw->getEicWidget()->unsetAlwaysDisplayGroup();
+       _mw->getEicWidget()->setMzSlice(slice, false, false); //Use slice RT values
    }
 }
 

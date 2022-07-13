@@ -36,6 +36,7 @@ public:
 
 
 public slots:
+    void unsetAlwaysDisplayGroup() {_alwaysDisplayGroup = nullptr;}
     void setMzSlice(float mz);
     void setPPM(double ppm);
 
