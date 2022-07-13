@@ -121,6 +121,61 @@ void IsotopeWidget::rebuildTableFromPeakGroup(PeakGroup* group) {
         links[i] = link;
     }
 
+    //Issue 536: Add links for theoretical masses
+    if (group->compound && !group->compound->getFormula().empty()) {
+        string f = group->compound->getFormula();
+
+        IsotopeParameters isotopeParameters= _mw->getIsotopeParameters();
+
+        int maxNumProtons = INT_MAX;
+        if (isotopeParameters.isExtractNIsotopes) {
+            maxNumProtons = isotopeParameters.maxIsotopesToExtract;
+        }
+
+        vector<Isotope> massList = MassCalculator::computeIsotopes(
+                    f,
+                    getCurrentAdduct(),
+                    maxNumProtons,
+                    isotopeParameters.isC13Labeled,
+                    isotopeParameters.isN15Labeled,
+                    isotopeParameters.isS34Labeled,
+                    isotopeParameters.isD2Labeled);
+
+        if (!massList.empty()) {
+
+            map<string, mzLink> oldLinks = map<string, mzLink>{};
+            for (auto link : links) {
+                oldLinks.insert(make_pair(link.note, link));
+            }
+
+            links = vector<mzLink>(massList.size());
+
+            double maxAbundance = 0.0;
+            for (auto isotope : massList){
+                if (isotope.abundance > maxAbundance) maxAbundance = isotope.abundance;
+            }
+
+            for (unsigned int i = 0; i < links.size(); i++) {
+                links[i].note = massList[i].name;
+                links[i].mz2 = static_cast<float>(massList[i].mz);
+                links[i].value2 = 0.0f;
+                links[i].isotopeFrac = 0.0f;
+
+                if (oldLinks.find(massList[i].name) != oldLinks.end()) {
+                    mzLink oldLink = oldLinks.at(massList[i].name);
+
+                    links[i].value2 = oldLink.value2;
+                    links[i].isotopeFrac = oldLink.isotopeFrac;
+                }
+
+                links[i].percentExpected = 100.0f * static_cast<float>(massList[i].abundance);
+                links[i].percentRelative =  maxAbundance > 0 ? 100.0f * static_cast<float>(massList[i].abundance/maxAbundance) : 0.0f;
+            }
+        }
+
+
+    }
+
     sort(links.begin(),links.end(),mzLink::compMz);
     showTable();
 }
