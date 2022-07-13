@@ -582,19 +582,24 @@ void EicWidget::findRtBounds() {
     _minX = _slice.rtmin;
     _maxX = _slice.rtmax;
 
-    //Issue 709: Treat SRM transition slices differently, use RT range from instrument
-    //Designed for Sciex 7500 instrument
-    float rtMin = 9999.0f;
-    float rtMax = -1.0f;
-    if (_slice.isSrmTransitionSlice()) {
-        for (auto eic : eics) {
-            if (eic->rtmin < rtMin) rtMin = eic->rtmin;
-            if (eic->rtmax > rtMax) rtMax = eic->rtmax;
-        }
+    //Maven Issue 554: This is pretty weird, use RT locking if the whole
+    //gradient is desired
 
-       _minX = rtMin < 9999.0f ? rtMin : _slice.rtmin;
-       _maxX = rtMax > -1.0f? rtMax : _slice.rtmax;
-    }
+//    //
+//    //Mass Spec Issue 709 / Maven Issue 511:
+//    //Treat SRM transition slices differently, use RT range from instrument
+//    //Designed for Sciex 7500 instrument
+//    float rtMin = 9999.0f;
+//    float rtMax = -1.0f;
+//    if (_slice.isSrmTransitionSlice()) {
+//        for (auto eic : eics) {
+//            if (eic->rtmin < rtMin) rtMin = eic->rtmin;
+//            if (eic->rtmax > rtMax) rtMax = eic->rtmax;
+//        }
+
+//       _minX = rtMin < 9999.0f ? rtMin : _slice.rtmin;
+//       _maxX = rtMax > -1.0f? rtMax : _slice.rtmax;
+//    }
 }
 
 void EicWidget::findPlotBounds() {
