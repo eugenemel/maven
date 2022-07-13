@@ -1289,13 +1289,17 @@ void writeReport(string setName) {
             if (isSpecialSearch()) {
                 project->deleteSearchResults(tblName);
                 project->savePeakGroupsTableData(searchTableData);
+
+                set<Compound*> compoundSet;
                 for (auto& group : allgroups){
                     if (group.compound){
+                        compoundSet.insert(group.compound);
                         project->writeGroupSqlite(&group, 0, tblName);
                     } else {
                         project->writeGroupSqlite(&group, 0, setName.c_str());
                     }
                 }
+                project->saveCompounds(compoundSet);
             } else {
                 project->saveGroups(allgroups, setName.c_str());
             }
@@ -1311,18 +1315,23 @@ void writeReport(string setName) {
                 project->deleteAll();
 				project->setSamples(samples);
                 project->saveSamples(samples);
+
+                //this is only necessary if RT alignment is actually performed
                 project->saveAlignment(); //~50% of time in writeReport() spent here
 
                 if(saveScanData) project->saveScans(samples); //~50% of time in writeReport() spent here
 
                 if (isSpecialSearch()) {
+                    set<Compound*> compoundSet;
                     for (auto& group : allgroups){
                         if (group.compound){
+                            compoundSet.insert(group.compound);
                             project->writeGroupSqlite(&group, 0, tblName);
                         } else {
                             project->writeGroupSqlite(&group, 0, setName.c_str());
                         }
                     }
+                    project->saveCompounds(compoundSet);
                 } else {
                     project->saveGroups(allgroups, setName.c_str());
                 }
