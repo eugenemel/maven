@@ -880,6 +880,12 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                 group.groupRank = (1.1 - group.maxQuality) * (1 / log(group.maxIntensity + 1));
             }
 
+            if (isQQQSearch) {
+                group.setType(PeakGroup::SRMTransitionType);
+                group.srmPrecursorMz = slice->srmPrecursorMz;
+                group.srmProductMz = slice->srmProductMz;
+            }
+
             groupsToAppend.push_back(&group);
         }
 
