@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 {
 
     QApplication app(argc, argv);
-    QPixmap pixmap(":/images/splash.png","PNG",Qt::ColorOnly);
+    QPixmap pixmap(":/images/maven_2_img.png","PNG",Qt::ColorOnly);
     QSplashScreen splash(pixmap);
     splash.setMask(pixmap.mask());
     splash.show();

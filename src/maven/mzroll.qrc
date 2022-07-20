@@ -108,5 +108,6 @@
         <file>images/compound_reassigned.png</file>
         <file>images/padlock.png</file>
         <file>images/free_range.png</file>
+        <file>images/maven_2_img.png</file>
     </qresource>
 </RCC>
