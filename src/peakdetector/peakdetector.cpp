@@ -2150,7 +2150,7 @@ void mzkitchenSearch() {
 
         shared_ptr<MzkitchenMetaboliteSearchParameters> metaboliteSearchParams = MzkitchenMetaboliteSearchParameters::decode(mzkitchenSearchParameters);
         metaboliteSearchParams->searchVersion = "mzkitchen22_metabolite_search";
-        MzKitchenProcessor::matchMetabolites(allgroups, mzkitchenCompounds, metaboliteSearchParams, false);
+        MzKitchenProcessor::matchMetabolites(allgroups, mzkitchenCompounds, metaboliteSearchParams, true);
         searchTableData.insert(make_pair("clamDB", QString(metaboliteSearchParams->encodeParams().c_str())));
 
     } else {
