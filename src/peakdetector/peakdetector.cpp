@@ -2137,6 +2137,12 @@ void mzkitchenSearch() {
         return lhs->precursorMz < rhs->precursorMz;
     });
 
+//    //Issue 752: Debugging --> WORKING PROPERLY
+//    cout <<" COMPOUNDS: " << endl;
+//    for (auto c : mzkitchenCompounds) {
+//        cout << c->name << " "<<  c->adductString << " precMz=" << c->precursorMz << endl;
+//    }
+
     cout << "MSP spectral library \'" << mzkitchenMspFile << "\' contains " << mzkitchenCompounds.size() << " compounds." << endl;
 
     if (mzkitchenSearchType == "lipidSearch") {
