@@ -224,6 +224,8 @@ public slots:
     void bookmarkSelectedPeakGroup();
     void findCovariants(Peak* _peak);
     void reportBugs();
+    void openReference();
+    void openTutorialVideo();
     void updateEicSmoothingWindow(int value);
     pair<vector<mzSlice*>, vector<SRMTransition*>> getSrmSlices();
 

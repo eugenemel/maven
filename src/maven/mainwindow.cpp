@@ -439,6 +439,13 @@ void MainWindow::reportBugs() {
 
 }
 
+void MainWindow::openReference() {
+    QDesktopServices::openUrl(QUrl("https://www.mdpi.com/2218-1989/12/8/684/htm"));
+}
+
+void MainWindow::openTutorialVideo() {
+    QDesktopServices::openUrl(QUrl("https://www.youtube.com/watch?v=QUSX0GJ6Gsk"));
+}
 
 void MainWindow::setUrl(QString url,QString link) {
 
@@ -1325,6 +1332,22 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 }
 
 void MainWindow::createMenus() {
+
+    //Issue 558
+    QMenu *aboutMenu = menuBar()->addMenu(tr("&About"));
+
+    QAction* reference = new QAction("Reference", this);
+    connect(reference, SIGNAL(triggered()), this, SLOT(openReference()));
+    aboutMenu->addAction(reference);
+
+    QAction *tutorialVideo = new QAction("Tutorial Video", this);
+    connect(tutorialVideo, SIGNAL(triggered()), this, SLOT(openTutorialVideo()));
+    aboutMenu->addAction(tutorialVideo);
+
+    QAction *reportBug = new QAction("Report Bug", this);
+    connect(reportBug, SIGNAL(triggered()), this, SLOT(reportBugs()));
+    aboutMenu->addAction(reportBug);
+
     QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
     QMenu* widgetsMenu =  menuBar()->addMenu(tr("&Widgets"));
 
