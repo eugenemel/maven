@@ -11,3 +11,9 @@ As of 20210703, We have switched from `travis-ci.org` to `travis-ci.com`
 [Maven Releases](https://github.com/eugenemel/maven/releases)
 
 [Maven Core](https://github.com/eugenemel/maven_core)
+
+## Materials
+
+[Manuscript](https://www.mdpi.com/2218-1989/12/8/684/htm)
+
+[Tutorial Video](https://www.youtube.com/watch?v=QUSX0GJ6Gsk)
