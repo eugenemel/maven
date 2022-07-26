@@ -1081,8 +1081,6 @@ void printSettings() {
 
     cout << endl;
     cout << "#Grouping and Peak Picking" << endl;
-
-    cout << "#eic_smoothingWindow=" << eic_smoothingWindow << endl;
     cout << "#baseline_smoothingWindow=" << baseline_smoothingWindow << endl;
     cout << "#baseline_dropTopX=" << baseline_dropTopX << endl;
     cout << "#eic_smoothingWindow=" << eic_smoothingWindow << endl;
@@ -1090,7 +1088,7 @@ void printSettings() {
 
     cout << endl;
     cout << "#Peak Group Cleaning and Filtering" << endl;
-
+    cout << "#groupingAlgorithmType=" << groupingAlgorithmType << endl;
     cout << "#minGoodGroupCount=" << minGoodGroupCount << endl;
     cout << "#minQuality=" << minQuality << endl;
     cout << "#minSignalBlankRatio=" << minSignalBlankRatio << endl;
@@ -2155,7 +2153,7 @@ void mzkitchenSearch() {
     } else if (mzkitchenSearchType == "metaboliteSearch") {
 
         //debugging
-        //cout << setprecision(10);
+        cout << setprecision(10);
 
         shared_ptr<MzkitchenMetaboliteSearchParameters> metaboliteSearchParams = MzkitchenMetaboliteSearchParameters::decode(mzkitchenSearchParameters);
         metaboliteSearchParams->searchVersion = "mzkitchen22_metabolite_search";
