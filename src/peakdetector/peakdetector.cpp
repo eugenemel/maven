@@ -2154,6 +2154,9 @@ void mzkitchenSearch() {
 
     } else if (mzkitchenSearchType == "metaboliteSearch") {
 
+        //debugging
+        //cout << setprecision(10);
+
         shared_ptr<MzkitchenMetaboliteSearchParameters> metaboliteSearchParams = MzkitchenMetaboliteSearchParameters::decode(mzkitchenSearchParameters);
         metaboliteSearchParams->searchVersion = "mzkitchen22_metabolite_search";
         MzKitchenProcessor::matchMetabolites(allgroups, mzkitchenCompounds, metaboliteSearchParams, true);
