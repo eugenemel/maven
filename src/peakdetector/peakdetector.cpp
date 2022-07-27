@@ -2128,18 +2128,13 @@ void anchorPointsBasedAlignment() {
 void mzkitchenSearch() {
 
     cout << "Performing mzkitchen msp search on identified peak groups." << endl;
+    cout << setprecision(10);
 
     vector<Compound*> mzkitchenCompounds = DB.loadNISTLibrary(mzkitchenMspFile.c_str());
 
     sort(mzkitchenCompounds.begin(), mzkitchenCompounds.end(), [](const Compound* lhs, const Compound* rhs){
         return lhs->precursorMz < rhs->precursorMz;
     });
-
-//    //Issue 752: Debugging --> WORKING PROPERLY
-//    cout <<" COMPOUNDS: " << endl;
-//    for (auto c : mzkitchenCompounds) {
-//        cout << c->name << " "<<  c->adductString << " precMz=" << c->precursorMz << endl;
-//    }
 
     cout << "MSP spectral library \'" << mzkitchenMspFile << "\' contains " << mzkitchenCompounds.size() << " compounds." << endl;
 
@@ -2152,12 +2147,9 @@ void mzkitchenSearch() {
 
     } else if (mzkitchenSearchType == "metaboliteSearch") {
 
-        //debugging
-        cout << setprecision(10);
-
         shared_ptr<MzkitchenMetaboliteSearchParameters> metaboliteSearchParams = MzkitchenMetaboliteSearchParameters::decode(mzkitchenSearchParameters);
         metaboliteSearchParams->searchVersion = "mzkitchen22_metabolite_search";
-        MzKitchenProcessor::matchMetabolites(allgroups, mzkitchenCompounds, metaboliteSearchParams, true);
+        MzKitchenProcessor::matchMetabolites(allgroups, mzkitchenCompounds, metaboliteSearchParams, false);
         searchTableData.insert(make_pair("clamDB", QString(metaboliteSearchParams->encodeParams().c_str())));
 
     } else {
