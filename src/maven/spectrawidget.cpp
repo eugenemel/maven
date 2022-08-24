@@ -1444,9 +1444,6 @@ void SpectraWidget::contextMenuEvent(QContextMenuEvent * event) {
 
     menu.addSeparator();
 
-    QAction* a3a = menu.addAction("Copy Top Peaks to Clipboard");
-    connect(a3a, SIGNAL(triggered()), SLOT(spectraToClipboardTop()));
-
     QAction* a3 = menu.addAction("Copy Spectrum to Clipboard");
     connect(a3, SIGNAL(triggered()), SLOT(spectraToClipboard()));
 
@@ -1499,43 +1496,27 @@ void SpectraWidget::contextMenuEvent(QContextMenuEvent * event) {
     menu.exec(event->globalPos());
 }
 
-void SpectraWidget::spectraToClipboard() {
-	if(!_currentScan) return;
-
-    QStringList clipboardText;
-	for(int i=0; i < _currentScan->nobs(); i++ ) {
-        clipboardText  << tr("%1\t%2")
-				.arg(QString::number(_currentScan->mz[i],'f', 6))
-				.arg(QString::number(_currentScan->intensity[i],'f',6));
-    }
-    QApplication::clipboard()->setText(clipboardText.join("\n"));
-
-}
-
-void SpectraWidget::spectraToClipboardTop() {
-    if(!_currentScan) return;
-    vector< pair<float,float> > mzarray= _currentScan->getTopPeaks(0.05,1,5);
-
-    QStringList clipboardText;
-    for(int i=0; i < mzarray.size(); i++ ) {
-    pair<float,float> p = mzarray[i];
-            clipboardText  << tr("%1\t%2")
-                .arg(QString::number(p.second,'f', 5))
-                .arg(QString::number(p.first, 'f', 2));
-    }
-    QApplication::clipboard()->setText(clipboardText.join("\n"));
-}
-
-void SpectraWidget::encodedSpectrumToClipboard(){
+string SpectraWidget::getSpectrumString(string type){
+    string spectrum = "";
     if (_currentFragment) {
-        QApplication::clipboard()->setText(_currentFragment->encodeMsMsSpectrum().c_str());
+        spectrum = _currentFragment->encodeSpectrum(5, type);
     } else if (_currentScan) {
         Fragment *f = new Fragment();
         f->mzs = _currentScan->mz;
         f->intensity_array = _currentScan->intensity;
-        QApplication::clipboard()->setText(f->encodeMsMsSpectrum().c_str());
+        spectrum = f->encodeSpectrum(5, type);
         delete(f);
     }
+    return spectrum;
+}
+
+void SpectraWidget::spectraToClipboard() {
+    QApplication::clipboard()->setText(getSpectrumString("\t").c_str());
+}
+
+
+void SpectraWidget::encodedSpectrumToClipboard(){
+    QApplication::clipboard()->setText(getSpectrumString("encoded").c_str());
 }
 
 

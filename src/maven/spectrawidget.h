@@ -30,7 +30,6 @@ public slots:
                     void showLastFullScan();
                     void replot();
                     void spectraToClipboard();
-                    void spectraToClipboardTop();
                     void encodedSpectrumToClipboard();
 
                     void overlaySpectralHit(SpectralHit& hit, bool isSetScanToHitScan=true);
@@ -146,7 +145,7 @@ public slots:
                     //Issue 481: Use cache to avoid excessive recomputation during resizing
                     bool isUseCachedMatches = false;
                     vector<int> _matches{};
-
+                    string getSpectrumString(string type);
 		protected:
                     //void leaveEvent ( QEvent * event );
                     //void enterEvent(QEvent * event);
