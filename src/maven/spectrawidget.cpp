@@ -1444,6 +1444,17 @@ void SpectraWidget::contextMenuEvent(QContextMenuEvent * event) {
 
     menu.addSeparator();
 
+    QAction* a3a = menu.addAction("Copy Top Peaks to Clipboard");
+    connect(a3a, SIGNAL(triggered()), SLOT(spectraToClipboardTop()));
+
+    QAction* a3 = menu.addAction("Copy Spectrum to Clipboard");
+    connect(a3, SIGNAL(triggered()), SLOT(spectraToClipboard()));
+
+    QAction* aCopyEncoded = menu.addAction("Copy Encoded Spectrum to Clipboard");
+    connect(aCopyEncoded, SIGNAL(triggered()), SLOT(encodedSpectrumToClipboard()));
+
+    menu.addSeparator();
+
     QAction* a1 = menu.addAction("Go To Scan");
     connect(a1, SIGNAL(triggered()), SLOT(gotoScan()));
 
@@ -1455,12 +1466,6 @@ void SpectraWidget::contextMenuEvent(QContextMenuEvent * event) {
 
     QAction* a3b = menu.addAction("Find Similar Scans");
     connect(a3b, SIGNAL(triggered()), SLOT(findSimilarScans()));
-
-    QAction* a3a = menu.addAction("Copy Top Peaks to Clipboard");
-    connect(a3a, SIGNAL(triggered()), SLOT(spectraToClipboardTop()));
-
-    QAction* a3 = menu.addAction("Copy Spectra to Clipboard");
-    connect(a3, SIGNAL(triggered()), SLOT(spectraToClipboard()));
 
     QAction* a4 = menu.addAction("Profile Mode");
     connect(a4, SIGNAL(triggered()), SLOT(setProfileMode()));
@@ -1519,6 +1524,18 @@ void SpectraWidget::spectraToClipboardTop() {
                 .arg(QString::number(p.first, 'f', 2));
     }
     QApplication::clipboard()->setText(clipboardText.join("\n"));
+}
+
+void SpectraWidget::encodedSpectrumToClipboard(){
+    if (_currentFragment) {
+        QApplication::clipboard()->setText(_currentFragment->encodeMsMsSpectrum().c_str());
+    } else if (_currentScan) {
+        Fragment *f = new Fragment();
+        f->mzs = _currentScan->mz;
+        f->intensity_array = _currentScan->intensity;
+        QApplication::clipboard()->setText(f->encodeMsMsSpectrum().c_str());
+        delete(f);
+    }
 }
 
 

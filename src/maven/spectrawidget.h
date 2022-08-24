@@ -31,6 +31,7 @@ public slots:
                     void replot();
                     void spectraToClipboard();
                     void spectraToClipboardTop();
+                    void encodedSpectrumToClipboard();
 
                     void overlaySpectralHit(SpectralHit& hit, bool isSetScanToHitScan=true);
                     void overlayCompound(Compound* c, bool isSetScanToHitScan=true);
