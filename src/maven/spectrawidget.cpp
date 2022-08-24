@@ -1445,7 +1445,10 @@ void SpectraWidget::contextMenuEvent(QContextMenuEvent * event) {
     menu.addSeparator();
 
     QAction* a3 = menu.addAction("Copy Spectrum to Clipboard");
-    connect(a3, SIGNAL(triggered()), SLOT(spectraToClipboard()));
+    connect(a3, SIGNAL(triggered()), SLOT(spectrumToClipboard()));
+
+    QAction* aCopyNormSpectrum = menu.addAction("Copy Normalized Spectrum to Clipboard");
+    connect(aCopyNormSpectrum, SIGNAL(triggered()), SLOT(normalizedSpectrumToClipboard()));
 
     QAction* aCopyEncoded = menu.addAction("Copy Encoded Spectrum to Clipboard");
     connect(aCopyEncoded, SIGNAL(triggered()), SLOT(encodedSpectrumToClipboard()));
@@ -1496,27 +1499,30 @@ void SpectraWidget::contextMenuEvent(QContextMenuEvent * event) {
     menu.exec(event->globalPos());
 }
 
-string SpectraWidget::getSpectrumString(string type){
+string SpectraWidget::getSpectrumString(string type, bool isNormalizeToMaxIntensity){
     string spectrum = "";
     if (_currentFragment) {
-        spectrum = _currentFragment->encodeSpectrum(5, type);
+        spectrum = _currentFragment->encodeSpectrum(5, type, isNormalizeToMaxIntensity);
     } else if (_currentScan) {
         Fragment *f = new Fragment();
         f->mzs = _currentScan->mz;
         f->intensity_array = _currentScan->intensity;
-        spectrum = f->encodeSpectrum(5, type);
+        spectrum = f->encodeSpectrum(5, type, isNormalizeToMaxIntensity);
         delete(f);
     }
     return spectrum;
 }
 
-void SpectraWidget::spectraToClipboard() {
-    QApplication::clipboard()->setText(getSpectrumString("\t").c_str());
+void SpectraWidget::spectrumToClipboard() {
+    QApplication::clipboard()->setText(getSpectrumString("\t", false).c_str());
 }
 
+void SpectraWidget::normalizedSpectrumToClipboard(){
+    QApplication::clipboard()->setText(getSpectrumString("\t", true).c_str());
+}
 
 void SpectraWidget::encodedSpectrumToClipboard(){
-    QApplication::clipboard()->setText(getSpectrumString("encoded").c_str());
+    QApplication::clipboard()->setText(getSpectrumString("encoded", true).c_str());
 }
 
 
