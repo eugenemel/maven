@@ -1061,6 +1061,7 @@ void processOptions(int argc, char* argv[]) {
         isQQQSearch = true;
         QQQparams = QQQSearchParameters::decode(mzkitchenSearchParameters);
         saveScanData = false; //override setting, saving scans for QQQ data doesn't make any sense
+        isMzkitchenSearch = false; //QQQ search is vastly different from mzkitchen search, avoid accidental calling of mzkitchenSearch() function
     } else if (mzkitchenSearchType != "") {
         isMzkitchenSearch = true;
     }
@@ -1098,7 +1099,7 @@ void printSettings() {
 
 
     for (unsigned int i = 0; i < filenames.size(); i++) {
-        cout << "#Sample" << i << " :" << filenames[i] << endl;
+        cout << "#Sample " << i << ": " << filenames[i] << endl;
     }
     cout << endl;
 }
