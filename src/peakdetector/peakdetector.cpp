@@ -278,6 +278,8 @@ int main(int argc, char *argv[]) {
 
     if (isQQQSearch) {
 
+        cout << "Transition List File: \"" << QQQparams->transitionListFilePath << "\"" << endl;
+
         vector<Compound*> compounds = Database::loadCompoundCSVFile(QString(QQQparams->transitionListFilePath.c_str()));
         vector<Adduct*> adducts{};
 
