@@ -1066,6 +1066,16 @@ void processOptions(int argc, char* argv[]) {
         cout << "mzkitchenSearchParameters:\n"
              << mzkitchenSearchParameters << endl;
 
+        unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(mzkitchenSearchParameters);
+
+        if (decodedMap.size() == 0){
+            cout << "mzUtils::decodeParameterMap() fails to decode any parameters from the map." << endl;
+        } else {
+            for (auto it = decodedMap.begin(); it != decodedMap.end(); ++it) {
+                cout << "(" << it->first << ", " << it->second << ")" << endl;
+            }
+        }
+
         QQQparams = QQQSearchParameters::decode(mzkitchenSearchParameters);
 
 
