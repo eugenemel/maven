@@ -1061,7 +1061,18 @@ void processOptions(int argc, char* argv[]) {
     //Issue 553: handle QQQ searches
     if (mzkitchenSearchType == "qqqSearch") {
         isQQQSearch = true;
+
+        //debugging
+        cout << "mzkitchenSearchParameters:\n"
+             << mzkitchenSearchParameters << endl;
+
         QQQparams = QQQSearchParameters::decode(mzkitchenSearchParameters);
+
+
+        //debugging
+        cout << "QQQparams->transitionListFilePath:\n"
+             << QQQparams->transitionListFilePath << endl;
+
         saveScanData = false; //override setting, saving scans for QQQ data doesn't make any sense
         isMzkitchenSearch = false; //QQQ search is vastly different from mzkitchen search, avoid accidental calling of mzkitchenSearch() function
     } else if (mzkitchenSearchType != "") {
