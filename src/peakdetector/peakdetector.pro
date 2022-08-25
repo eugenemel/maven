@@ -56,9 +56,10 @@ win32 {
 
 parallel {
 	message("Building OpenMP peakdetector_parallel")
-	QMAKE_CXXFLAGS += -DOMP_PARALLEL -fopenmp
+
+        QMAKE_CXXFLAGS += -DOMP_PARALLEL -fopenmp -I/usr/local/opt/libomp/include/
         QMAKE_LFLAGS += -fopenmp
-	LIBS += -fopenmp
+        LIBS += -fopenmp
 }
 
 SOURCES= peakdetector.cpp  options.cpp $$MAVEN/classifier.cpp $$MAVEN/classifierNeuralNet.cpp $$MAVEN/projectDB.cpp $$MAVEN/database.cpp $$NATSORT/strnatcmp.c
