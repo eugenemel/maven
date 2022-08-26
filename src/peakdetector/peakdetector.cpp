@@ -298,7 +298,7 @@ int main(int argc, char *argv[]) {
                 slices.push_back(slice);
 
                 //debugging
-                cout << setprecision(2) << slice->srmPrecursorMz << ", "<< slice->srmProductMz << ": " << slice->compound->name << endl;
+                cout << fixed << setprecision(2) << slice->srmPrecursorMz << ", "<< slice->srmProductMz << ": " << slice->compound->name << endl;
             }
         }
 
@@ -742,7 +742,7 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
 
         if (i % 1000 == 0) {
             if (isQQQSearch) {
-                cout << "\tEIC Slice " << setprecision(5) << "precursor m/z: " << slice->srmPrecursorMz << " product m/z: " << slice->srmProductMz << endl;
+                cout << "\tEIC Slice "<< fixed << setprecision(5) << "precursor m/z: " << slice->srmPrecursorMz << " product m/z: " << slice->srmProductMz << endl;
             } else {
                 cout << "\tEIC Slice " << setprecision(5) << mzmin <<  "-" << mzmax << " @ " << rtmin << "-" << rtmax << " I=" << slices[i]->ionCount << endl;
             }
