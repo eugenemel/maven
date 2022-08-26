@@ -740,7 +740,7 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
         float rtmax = slices[i]->rtmax;
         Compound* compound = slices[i]->compound;
 
-		if (i % 1000 == 0) {
+        if (i % 1000 == 0) {
             if (isQQQSearch) {
                 cout << "\tEIC Slice " << setprecision(5) << "precursor m/z: " << slice->srmPrecursorMz << " product m/z: " << slice->srmProductMz << endl;
             } else {
@@ -958,7 +958,7 @@ void processOptions(int argc, char* argv[]) {
         "i?minGroupIntensity <float>",
         "j?minSmoothedPeakIntensity <float>",
         "k?productPpmTolr <float>",
-		"l?saveScanData <int>",
+        "l?saveScanData <int>",
         "m?methodsFolder <string>",
         "n?eicMaxGroups <int>",
         "o?outputdir <string>",
