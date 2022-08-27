@@ -778,6 +778,10 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
 
         totalEicCounter += eics.size();
 
+        // ------------------------- //
+        // PEAK PICKING AND GROUPING //
+        // ------------------------- //
+
         vector<PeakGroup> peakgroups;
         if (groupingAlgorithmType == "A") {
 
@@ -819,6 +823,10 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
         for (auto eic : eics){
             totalPeakCounter += eic->peaks.size();
         }
+
+        // -------------------- //
+        // PEAK GROUP FILTERING //
+        // -------------------- //
 
         //sort peaks by intensity
         sort(peakgroups.begin(), peakgroups.end(), PeakGroup::compIntensity);
