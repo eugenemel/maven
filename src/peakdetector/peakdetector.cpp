@@ -294,7 +294,7 @@ int main(int argc, char *argv[]) {
         //Each slice is an SRM transition, corresponding to a compound
         for (SRMTransition* transition : slicesData.second) {
             if (transition->compound) {
-                mzSlice *slice = new mzSlice(*transition);
+                mzSlice *slice = new mzSlice(transition);
                 slices.push_back(slice);
 
                 //debugging
@@ -757,8 +757,12 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
 			EIC* eic = nullptr;
 
             if (isQQQSearch) {
-                auto key = slice->getSrmMzKey();
-                eic = sample->getEIC(key, slice);
+                if (!slice->srmTransition) {
+                    cerr << "mzSlice* does not contain SRMTransition* for QQQ Search! Exiting.";
+                    abort();
+                }
+                eic = sample->getEIC(slice->srmTransition, QQQparams->consensusIntensityAgglomerationType);
+
             } else if ( !slice->srmId.empty() ) {
                 eic = sample->getEIC(slice->srmId);
             } else {
