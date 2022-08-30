@@ -853,16 +853,23 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                 group.groupStatistics();
             }
 
-            //debugging TODO: remove me
+            // start debugging remove
+            // debugging TODO: remove me
             cout << "GROUPDATA "
                  << fixed << setprecision(5)
                  << group.compound->id << " "
+                 << " numPeaks=" << group.peakCount()
                  << " quality=" << group.maxQuality
                  << " goodGroupCount=" << group.goodPeakCount
                  << " maxNoNoiseObs=" << group.maxNoNoiseObs
                  << " maxSignalBaselineRatio=" << group.maxSignalBaselineRatio
                  << " maxIntensity=" << group.maxIntensity
                  << endl;
+
+            for (auto p : group.peaks) {
+                cout << "    " << "(" << p.rt << ", " << p.peakIntensity << "): " << p.sample->sampleName << endl;
+            }
+            // end debugging remove
 
             if (clsf.hasModel() && group.goodPeakCount < minGoodGroupCount) continue;
             if (clsf.hasModel() && group.maxQuality < minQuality) continue;
@@ -912,9 +919,11 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                 group.srmProductMz = slice->srmProductMz;
             }
 
-            //debugging TODO: remove me
+            // start debuging remove
+            // debugging TODO: remove me
             cout << "GROUP PASS"
                  << endl;
+            // end debugging remove
 
             groupsToAppend.push_back(&group);
         }
