@@ -820,7 +820,8 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                 eics.at(j)->getPeakPositionsC(eic_smoothingWindow, false);
             }
 
-            peakgroups = EIC::groupPeaksD(eics, eic_smoothingWindow, grouping_maxRtWindow, baseline_smoothingWindow, baseline_dropTopX, mergeOverlap);
+            //TODO: remove debugging flag
+            peakgroups = EIC::groupPeaksD(eics, eic_smoothingWindow, grouping_maxRtWindow, baseline_smoothingWindow, baseline_dropTopX, mergeOverlap, true);
 
         }
 
