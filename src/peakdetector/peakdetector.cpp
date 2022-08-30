@@ -853,6 +853,17 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                 group.groupStatistics();
             }
 
+            //debugging TODO: remove me
+            cout << "GROUPDATA "
+                 << fixed << setprecision(5)
+                 << group.compound->id << " "
+                 << " quality=" << group.maxQuality
+                 << " goodGroupCount=" << group.goodPeakCount
+                 << " maxNoNoiseObs=" << group.maxNoNoiseObs
+                 << " maxSignalBaselineRatio=" << group.maxSignalBaselineRatio
+                 << " maxIntensity=" << group.maxIntensity
+                 << endl;
+
             if (clsf.hasModel() && group.goodPeakCount < minGoodGroupCount) continue;
             if (clsf.hasModel() && group.maxQuality < minQuality) continue;
 
@@ -900,6 +911,10 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                 group.srmPrecursorMz = slice->srmPrecursorMz;
                 group.srmProductMz = slice->srmProductMz;
             }
+
+            //debugging TODO: remove me
+            cout << "GROUP PASS"
+                 << endl;
 
             groupsToAppend.push_back(&group);
         }
