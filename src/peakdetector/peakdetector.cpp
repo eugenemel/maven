@@ -853,23 +853,22 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                 group.groupStatistics();
             }
 
-            // start debugging remove
-            // debugging TODO: remove me
-            cout << "GROUPDATA "
-                 << fixed << setprecision(5)
-                 << group.compound->id << " "
-                 << " numPeaks=" << group.peakCount()
-                 << " quality=" << group.maxQuality
-                 << " goodGroupCount=" << group.goodPeakCount
-                 << " maxNoNoiseObs=" << group.maxNoNoiseObs
-                 << " maxSignalBaselineRatio=" << group.maxSignalBaselineRatio
-                 << " maxIntensity=" << group.maxIntensity
-                 << endl;
+//            // start debugging block
+//            cout << "GROUPDATA "
+//                 << fixed << setprecision(5)
+//                 << group.compound->id << " "
+//                 << " numPeaks=" << group.peakCount()
+//                 << " quality=" << group.maxQuality
+//                 << " goodGroupCount=" << group.goodPeakCount
+//                 << " maxNoNoiseObs=" << group.maxNoNoiseObs
+//                 << " maxSignalBaselineRatio=" << group.maxSignalBaselineRatio
+//                 << " maxIntensity=" << group.maxIntensity
+//                 << endl;
 
-            for (auto p : group.peaks) {
-                cout << "    " << "(" << p.rt << ", " << p.peakIntensity << "): " << p.sample->sampleName << endl;
-            }
-            // end debugging remove
+//            for (auto p : group.peaks) {
+//                cout << "    " << "(" << p.rt << ", " << p.peakIntensity << "): " << p.sample->sampleName << endl;
+//            }
+//          // end debugging block
 
             if (clsf.hasModel() && group.goodPeakCount < minGoodGroupCount) continue;
             if (clsf.hasModel() && group.maxQuality < minQuality) continue;
@@ -919,11 +918,10 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                 group.srmProductMz = slice->srmProductMz;
             }
 
-            // start debuging remove
-            // debugging TODO: remove me
-            cout << "GROUP PASS"
-                 << endl;
-            // end debugging remove
+//            // start debuging block
+//            cout << "GROUP PASS"
+//                 << endl;
+//            // end debugging block
 
             groupsToAppend.push_back(&group);
         }
