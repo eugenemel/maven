@@ -728,7 +728,8 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
     long totalGroupPreFilteringCounter = 0;
     long totalGroupsToAppendCounter = 0;
 
-    #pragma omp parallel for num_threads(16) schedule(dynamic) shared(allgroups) reduction(+:totalEicCounter) reduction(+:totalPeakCounter) reduction(+:totalGroupPreFilteringCounter) reduction(+:totalGroupsToAppendCounter)
+    //TODO: reenable multithreading
+    //#pragma omp parallel for num_threads(16) schedule(dynamic) shared(allgroups) reduction(+:totalEicCounter) reduction(+:totalPeakCounter) reduction(+:totalGroupPreFilteringCounter) reduction(+:totalGroupsToAppendCounter)
     for (unsigned int i = 0; i < slices.size();  i++ ) {
         if (i % 1000 == 0)
             cout << setprecision(2) << "Processing slices: (TID " << omp_get_thread_num() << ") " <<  i / (float) slices.size() * 100 << "% groups=" << allgroups.size() << endl;
