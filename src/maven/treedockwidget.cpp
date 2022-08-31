@@ -142,9 +142,14 @@ void TreeDockWidget::setInfo(vector<SRMTransition*>& srmTransitions) {
         QString adductName;
         QString retentionTime;
 
-        if (srmTransition->compound) compoundName = QString(srmTransition->compound->name.c_str());
+        //Issue 563: SRM Transitions have no RT themselves, it is only the compounds that provide RTs
+        if (srmTransition->compound) {
+            compoundName = QString(srmTransition->compound->name.c_str());
+            if (srmTransition->compound->expectedRt > 0) {
+                retentionTime = QString::number(static_cast<double>(srmTransition->compound->expectedRt), 'f', 2);
+            }
+        }
         if (srmTransition->adduct) adductName = QString(srmTransition->adduct->name.c_str());
-        if (srmTransition->rt > 0) retentionTime = QString::number(srmTransition->rt, 'f', 2);
 
         QTreeWidgetItem *item = new QTreeWidgetItem(treeWidget, SRMTransitionType);
         item->setData(0, Qt::UserRole, QVariant::fromValue(*srmTransition));
@@ -153,8 +158,8 @@ void TreeDockWidget::setInfo(vector<SRMTransition*>& srmTransitions) {
         item->setText(2, retentionTime);
         item->setText(3, compoundName);
         item->setText(4, adductName);
-        item->setText(5, QString::number(srmTransition->mzSlices.size())); //# scans
-        item->setText(6, QString::number(srmTransition->getSamples().size())); // # samples
+        item->setText(5, QString::number(srmTransition->srmIds.size())); //# srmIds in all samples
+        item->setText(6, QString::number(srmTransition->srmIdBySample.size())); // # samples
     }
 }
 

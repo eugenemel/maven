@@ -852,6 +852,7 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
         int N=fields.size();
         vector<string>categorylist;
         //qDebug() << N << line;
+        string transition_id, ion_type;
 
         if ( header.count("mz") && header["mz"]<N)  mz = fields[ header["mz"]].toDouble();
         if ( header.count("rt") && header["rt"]<N)  rt = fields[ header["rt"]].toDouble();
@@ -874,6 +875,9 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
         if ( header.count("CE") && header["CE"]<N) collisionenergy=fields[ header["CE"]].toDouble();
 
         if ( header.count("adduct")) adductName = fields[ header["adduct"] ].toStdString();
+
+        if ( header.count("transition_id")) transition_id = fields [ header["transition_id"] ].toStdString();
+        if ( header.count("ion_type")) ion_type = fields [ header["ion_type"] ].toStdString();
 
         //cerr << lineCount << " " << endl;
         //for(int i=0; i<headers.size(); i++) cerr << headers[i] << ", ";
@@ -918,6 +922,17 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
             compound->logP=logP;
             compound->adductString = adductName;
             for(int i=0; i < categorylist.size(); i++) compound->category.push_back(categorylist[i]);
+
+            if (!transition_id.empty()) {
+                compound->metaDataMap.insert(
+                   make_pair(QQQProcessor::getTransitionIdFilterStringKey(), transition_id));
+            }
+
+            if (!ion_type.empty()) {
+                compound->metaDataMap.insert(
+                   make_pair(QQQProcessor::getTransitionIonTypeFilterStringKey(), ion_type));
+            }
+
             compoundSet.push_back(compound);
             //addCompound(compound);
             loadCount++;
