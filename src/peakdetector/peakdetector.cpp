@@ -309,7 +309,6 @@ int main(int argc, char *argv[]) {
                 }
             }
         }
-        exit(0);
 
         //these slices are not needed
         delete_all(slicesData.first);
@@ -738,8 +737,7 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
     long totalGroupPreFilteringCounter = 0;
     long totalGroupsToAppendCounter = 0;
 
-    //TODO: reenable multithreading
-    //#pragma omp parallel for num_threads(16) schedule(dynamic) shared(allgroups) reduction(+:totalEicCounter) reduction(+:totalPeakCounter) reduction(+:totalGroupPreFilteringCounter) reduction(+:totalGroupsToAppendCounter)
+    #pragma omp parallel for num_threads(16) schedule(dynamic) shared(allgroups) reduction(+:totalEicCounter) reduction(+:totalPeakCounter) reduction(+:totalGroupPreFilteringCounter) reduction(+:totalGroupsToAppendCounter)
     for (unsigned int i = 0; i < slices.size();  i++ ) {
         if (i % 1000 == 0)
             cout << setprecision(2) << "Processing slices: (TID " << omp_get_thread_num() << ") " <<  i / (float) slices.size() * 100 << "% groups=" << allgroups.size() << endl;
@@ -863,23 +861,6 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                 group.groupStatistics();
             }
 
-//            // start debugging block
-//            cout << "GROUPDATA "
-//                 << fixed << setprecision(5)
-//                 << group.compound->id << " "
-//                 << " numPeaks=" << group.peakCount()
-//                 << " quality=" << group.maxQuality
-//                 << " goodGroupCount=" << group.goodPeakCount
-//                 << " maxNoNoiseObs=" << group.maxNoNoiseObs
-//                 << " maxSignalBaselineRatio=" << group.maxSignalBaselineRatio
-//                 << " maxIntensity=" << group.maxIntensity
-//                 << endl;
-
-//            for (auto p : group.peaks) {
-//                cout << "    " << "(" << p.rt << ", " << p.peakIntensity << "): " << p.sample->sampleName << endl;
-//            }
-//          // end debugging block
-
             if (clsf.hasModel() && group.goodPeakCount < minGoodGroupCount) continue;
             if (clsf.hasModel() && group.maxQuality < minQuality) continue;
 
@@ -903,37 +884,46 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                 }
 
                 if (mustHaveMS2 and group.ms2EventCount == 0 ) continue;
-            }
 
-            if (compound) group.compound = compound;
-            if (!slice->srmId.empty()) group.srmId = slice->srmId;
+                if (compound) group.compound = compound;
+                if (!slice->srmId.empty()) group.srmId = slice->srmId;
 
-            if (compound && pullIsotopesFlag && !group.isIsotope()) {
-                pullIsotopes(&group);
-            }
+                if (compound && pullIsotopesFlag && !group.isIsotope()) {
+                    pullIsotopes(&group);
+                }
 
-            group.groupRank = 1000;
-            if (matchRtFlag && compound && compound->expectedRt > 0) {
-                float rtDiff =  abs(compound->expectedRt - (group.meanRt));
-                group.expectedRtDiff = rtDiff;
-                group.groupRank = rtDiff * rtDiff * (1.1 - group.maxQuality) * (1 / log(group.maxIntensity + 1));
-                if (group.expectedRtDiff > rtWindow ) continue;
-            } else {
-                group.groupRank = (1.1 - group.maxQuality) * (1 / log(group.maxIntensity + 1));
-            }
+                group.groupRank = 1000;
+                if (matchRtFlag && compound && compound->expectedRt > 0) {
+                    float rtDiff =  abs(compound->expectedRt - (group.meanRt));
+                    group.expectedRtDiff = rtDiff;
+                    group.groupRank = rtDiff * rtDiff * (1.1 - group.maxQuality) * (1 / log(group.maxIntensity + 1));
+                    if (group.expectedRtDiff > rtWindow ) continue;
+                } else {
+                    group.groupRank = (1.1 - group.maxQuality) * (1 / log(group.maxIntensity + 1));
+                }
 
-            if (isQQQSearch) {
+                groupsToAppend.push_back(&group);
+
+            } else { //isQQQSearch == true
+
+                // Currently, this will generate a many-to-many mapping
+                // where each peak group is assigned to each compound in slice.
+                //
+                // TODO: implement logic to assign each compound to each peakgroup (max one peak group per compound).
+                // TODO: this could happen later, as the metadata associated with qual/quant ions is carried along in the compound.
+
                 group.setType(PeakGroup::SRMTransitionType);
                 group.srmPrecursorMz = slice->srmPrecursorMz;
                 group.srmProductMz = slice->srmProductMz;
+
+                for (Compound* qqqCompound : slice->compoundVector) {
+                    PeakGroup groupCopy = PeakGroup(group);
+
+                    groupCopy.compound = qqqCompound;
+                    groupsToAppend.push_back(&groupCopy);
+                }
             }
 
-//            // start debuging block
-//            cout << "GROUP PASS"
-//                 << endl;
-//            // end debugging block
-
-            groupsToAppend.push_back(&group);
         }
 
         totalGroupsToAppendCounter += groupsToAppend.size();
@@ -977,6 +967,11 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
 
     if (isMzkitchenSearch) {
         mzkitchenSearch();
+    }
+
+    if (isQQQSearch) {
+        // TODO: write code to deal with many-to-many peak group <--> compound assignments,
+        // quant vs qual compounds, etc.
     }
 
     double startWriteReportTime = getTime();
