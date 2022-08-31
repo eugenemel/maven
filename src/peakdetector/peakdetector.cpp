@@ -917,10 +917,15 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                 group.srmProductMz = slice->srmProductMz;
 
                 for (Compound* qqqCompound : slice->compoundVector) {
-                    PeakGroup groupCopy = PeakGroup(group);
 
-                    groupCopy.compound = qqqCompound;
-                    groupsToAppend.push_back(&groupCopy);
+                    //TODO: memory leak
+                    PeakGroup *groupCopy = new PeakGroup(group);
+                    groupCopy->compound = qqqCompound;
+
+                    // debugging
+                    // cout << fixed << setprecision(2) << "(" << groupCopy.srmPrecursorMz << ", " << groupCopy.srmProductMz << "): "<< groupCopy.medianRt() << " " << groupCopy.compound->id << endl;
+
+                    groupsToAppend.push_back(groupCopy);
                 }
             }
 
