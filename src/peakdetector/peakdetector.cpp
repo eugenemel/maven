@@ -288,20 +288,30 @@ int main(int argc, char *argv[]) {
                     QQQparams,
                     compounds,
                     adducts,
-                    false
+                    false // debug
                     );
 
-        //Each slice is an SRM transition, corresponding to a compound
+        //Each slice is an SRM transition, corresponding to one or more compounds
         for (SRMTransition* transition : slicesData.second) {
             if (transition->compound) {
                 mzSlice *slice = new mzSlice(transition);
                 slices.push_back(slice);
 
-                //debugging
-                cout << fixed << setprecision(2) << slice->srmPrecursorMz << ", "<< slice->srmProductMz << ": " << slice->compound->name << endl;
+                transition->printKey();
+                cout << ":\n";
+
+                sort(slice->compoundVector.begin(), slice->compoundVector.end(), [](Compound* lhs, Compound* rhs){
+                    return lhs->id < rhs->id;
+                });
+
+                for (auto p : slice->compoundVector) {
+                    cout << "   " << p->id << endl;
+                }
             }
         }
+        exit(0);
 
+        //these slices are not needed
         delete_all(slicesData.first);
 
     } else {
