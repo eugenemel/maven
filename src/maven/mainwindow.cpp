@@ -1982,8 +1982,11 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> MainWindow::getSrmSlices() {
 
     shared_ptr<QQQSearchParameters> params = shared_ptr<QQQSearchParameters>(new QQQSearchParameters());
 
-    params->amuQ1 = getSettings()->value("amuQ1").toFloat();
-    params->amuQ3 = getSettings()->value("amuQ3").toFloat();
+    //Issue 564: If this becomes a problem, this can always be changed back.
+    //The strictness is necessary to deal with crappy transitions
+
+    params->amuQ1 = 0.01f;//getSettings()->value("amuQ1").toFloat();
+    params->amuQ3 = 0.01f;//getSettings()->value("amuQ3").toFloat();
 
     vector<mzSample*> visibleSamples = getVisibleSamples();
 
