@@ -268,6 +268,7 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             int cid  =  query.value("cid").toInt();
             string db   =  query.value("dbName").toString().toStdString();
             double expectedRt =  query.value("expectedRt").toDouble();
+            string transition_id = query.value("srmId").toString().toStdString();
 
             //skip compound if it already exists in internal database
             if ( compoundIdMap.contains(id + db) ) continue;
@@ -280,6 +281,7 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             compound->cid  =  cid;
             compound->db   =  db;
             compound->expectedRt =  expectedRt;
+            compound->srmId = transition_id;
 
             auto boundValues = query.boundValues();
 
@@ -926,6 +928,7 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
             if (!transition_id.empty()) {
                 compound->metaDataMap.insert(
                    make_pair(QQQProcessor::getTransitionIdFilterStringKey(), transition_id));
+                compound->srmId = transition_id;
             }
 
             if (!ion_type.empty()) {
