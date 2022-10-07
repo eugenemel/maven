@@ -141,10 +141,14 @@ void TreeDockWidget::setInfo(vector<SRMTransition*>& srmTransitions) {
         QString compoundName;
         QString adductName;
         QString retentionTime;
+        QString catName;
 
         //Issue 563: SRM Transitions have no RT themselves, it is only the compounds that provide RTs
         if (srmTransition->compound) {
             compoundName = QString(srmTransition->compound->name.c_str());
+            if (!srmTransition->compound->category.empty()) {
+                catName = QString(srmTransition->compound->category.at(0).c_str());
+            }
             if (srmTransition->compound->expectedRt > 0) {
                 retentionTime = QString::number(static_cast<double>(srmTransition->compound->expectedRt), 'f', 2);
             }
@@ -155,12 +159,14 @@ void TreeDockWidget::setInfo(vector<SRMTransition*>& srmTransitions) {
         item->setData(0, Qt::UserRole, QVariant::fromValue(*srmTransition));
         item->setText(0, QString::number(srmTransition->precursorMz, 'f', 2));
         item->setText(1, QString::number(srmTransition->productMz, 'f', 2));
-        item->setText(2, QString::number(srmTransition->collisionEnergy, 'f', 1));
-        item->setText(3, retentionTime);
-        item->setText(4, compoundName);
-        item->setText(5, adductName);
-        item->setText(6, QString::number(srmTransition->srmIds.size())); //# srmIds in all samples
-        item->setText(7, QString::number(srmTransition->srmIdBySample.size())); // # samples
+        item->setText(2, QString(srmTransition->name.c_str()));
+        item->setText(3, QString::number(srmTransition->collisionEnergy, 'f', 1));
+        item->setText(4, retentionTime);
+        item->setText(5, catName);
+        item->setText(6, compoundName);
+        item->setText(7, adductName);
+        item->setText(8, QString::number(srmTransition->srmIds.size())); //# srmIds in all samples
+        item->setText(9, QString::number(srmTransition->srmIdBySample.size())); // # samples
     }
 }
 
@@ -672,7 +678,17 @@ void TreeDockWidget::setupConsensusScanListHeader() {
 
 void TreeDockWidget::setupSRMTransitionListHeader() {
     QStringList colNames;
-    colNames << "Precursor m/z" << "Product m/z" << "CE" << "RT" << "Compound" << "Adduct" << "# scans" << "# samples";
+    colNames << "Precursor m/z"
+             << "Product m/z"
+             << "Name"
+             << "CE"
+             << "RT"
+             << "Category"
+             << "Compound"
+             << "Adduct"
+             << "# scans"
+             << "# samples";
+
     treeWidget->setColumnCount(colNames.size());
     treeWidget->setHeaderLabels(colNames);
     treeWidget->setSortingEnabled(true);
