@@ -1172,10 +1172,13 @@ void EicWidget::setTitle() {
             tagString.clear();
         }
 
-        titleText =  tr("<b>%1</b> precursor m/z: %2 product m/z: %3 CE: %4 EV").arg(
+        titleText =  tr("<b>%1</b><br><br>"
+                        "<b>transition name:</b> %2<br>"
+                        "<b>precursor m/z:</b> %3 <b>product m/z:</b> %4 <b>CE:</b> %5 EV").arg(
                     tagString,
-                    QString::number(static_cast<double>(_slice.srmPrecursorMz), 'f', 4),
-                    QString::number(static_cast<double>(_slice.srmProductMz), 'f', 4),
+                    _slice.srmTransition->name.c_str(),
+                    QString::number(static_cast<double>(_slice.srmPrecursorMz), 'f', 2),
+                    QString::number(static_cast<double>(_slice.srmProductMz), 'f', 2),
                     QString::number(static_cast<double>(_slice.srmTransition->collisionEnergy),'f',1)
                     );
     } else {
