@@ -155,11 +155,12 @@ void TreeDockWidget::setInfo(vector<SRMTransition*>& srmTransitions) {
         item->setData(0, Qt::UserRole, QVariant::fromValue(*srmTransition));
         item->setText(0, QString::number(srmTransition->precursorMz, 'f', 2));
         item->setText(1, QString::number(srmTransition->productMz, 'f', 2));
-        item->setText(2, retentionTime);
-        item->setText(3, compoundName);
-        item->setText(4, adductName);
-        item->setText(5, QString::number(srmTransition->srmIds.size())); //# srmIds in all samples
-        item->setText(6, QString::number(srmTransition->srmIdBySample.size())); // # samples
+        item->setText(2, QString::number(srmTransition->collisionEnergy, 'f', 1));
+        item->setText(3, retentionTime);
+        item->setText(4, compoundName);
+        item->setText(5, adductName);
+        item->setText(6, QString::number(srmTransition->srmIds.size())); //# srmIds in all samples
+        item->setText(7, QString::number(srmTransition->srmIdBySample.size())); // # samples
     }
 }
 
@@ -671,7 +672,7 @@ void TreeDockWidget::setupConsensusScanListHeader() {
 
 void TreeDockWidget::setupSRMTransitionListHeader() {
     QStringList colNames;
-    colNames << "Precursor m/z" << "Product m/z" << "RT" << "Compound" << "Adduct" << "# scans" << "# samples";
+    colNames << "Precursor m/z" << "Product m/z" << "CE" << "RT" << "Compound" << "Adduct" << "# scans" << "# samples";
     treeWidget->setColumnCount(colNames.size());
     treeWidget->setHeaderLabels(colNames);
     treeWidget->setSortingEnabled(true);
