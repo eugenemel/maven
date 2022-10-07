@@ -87,6 +87,7 @@ public:
     vector <mzSample*> samples;		//list of loaded samples
     static mzSample* loadSampleStatic(QString filename);
     QString rumsDBDatabaseName;
+    pair<vector<mzSlice*>, vector<SRMTransition*>> srmSlices;
 
     //Issue 271 compound loading upon mzrollDB open options
     bool isAttemptToLoadDB = true;
@@ -292,7 +293,7 @@ private:
     QSettings* settings;
     Classifier* clsf;
     QList< QPointer<TableDockWidget> > groupTables;
-    EicWidget *eicWidget; //plot of extractred EIC
+    EicWidget *eicWidget; //plot of extracted EIC
     History history;
 
     int _ionizationMode;

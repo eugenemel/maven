@@ -45,7 +45,7 @@ public slots:
 
     void setMzRtWindow(float mzmin, float mzmax, float rtmin, float rtmax);
     void setMzSlice(const mzSlice& slice, bool isUseSampleBoundsRT=true, bool isPreserveSelectedGroup=false);
-    void setSRMTransition(const SRMTransition& transition);
+    void setSRMTransition(SRMTransition* transition);
     void setRtWindow(float rtmin, float rtmax );
     void setSrmId(string srmId);
     void setPeakGroup(PeakGroup* group);

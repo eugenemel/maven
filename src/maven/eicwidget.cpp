@@ -1681,8 +1681,10 @@ void EicWidget::setMzSlice(const mzSlice& slice, bool isUseSampleBoundsRT, bool 
     }
 }
 
-void EicWidget::setSRMTransition(const SRMTransition& transition){
-    qDebug() << "EicWidget::setSRMTransition()";
+void EicWidget::setSRMTransition(SRMTransition* transition){
+    qDebug() << "EicWidget::setSRMTransition()" << transition;
+
+    if (!transition) return;
 
     //Issue 367: Changing SRM transition should remove any memory of any previous displayed peak.
     _alwaysDisplayGroup = nullptr;

@@ -883,15 +883,10 @@ void MainWindow::setCompoundFocus(Compound *c, bool isUpdateAdduct) {
     if (eicWidget->isVisible() && samples.size() > 0 ){
 
         //Issue 347
-        if (c->productMz > 0.0f) {
+        if (c->srmTransition) {
 
-            SRMTransition srmTransition;
-            srmTransition.compound = c;
-            srmTransition.adduct = adduct;
-            srmTransition.precursorMz = c->precursorMz;
-            srmTransition.productMz = c->productMz;
             eicWidget->setSelectedGroup(nullptr);
-            eicWidget->setSRMTransition(srmTransition);
+            eicWidget->setSRMTransition(c->srmTransition);
             eicWidget->resetZoom(true);
 
         } else {
@@ -1748,17 +1743,20 @@ void MainWindow::compoundDatabaseSearch() {
 }
 
 void MainWindow::showSRMList() {
-    pair<vector<mzSlice*>, vector<SRMTransition*>> slices = getSrmSlices();
-    if (slices.first.size() ==  0 ) return;
 
-    srmDockWidget->setInfo(slices.first);
-    srmTransitionDockWidget->setInfo(slices.second);
+    srmSlices = getSrmSlices();
+    if (srmSlices.first.size() ==  0 ) return;
 
-    delete_all(slices.first);
-    delete_all(slices.second);
+    srmDockWidget->setInfo(srmSlices.first);
+    srmTransitionDockWidget->setInfo(srmSlices.second);
 
-    slices.first.clear();
-    slices.second.clear();
+// Issue 564: Trade dangling pointer issues for memory leaks
+
+//    delete_all(slices.first);
+//    delete_all(slices.second);
+
+//    slices.first.clear();
+//    slices.second.clear();
     //peakDetectionDialog->setFeatureDetection(PeakDetectionDialog::QQQ);
     //peakDetectionDialog->show();
 }
