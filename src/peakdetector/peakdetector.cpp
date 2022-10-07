@@ -293,6 +293,12 @@ int main(int argc, char *argv[]) {
 
         //Each slice is an SRM transition, corresponding to one or more compounds
         for (SRMTransition* transition : slicesData.second) {
+
+//            //debugging
+//            string srmIdString = *(transition->srmIds.begin());
+//            cout << srmIdString << endl;
+//            continue;
+
             if (transition->compound) {
                 mzSlice *slice = new mzSlice(transition);
                 slices.push_back(slice);
@@ -307,6 +313,10 @@ int main(int argc, char *argv[]) {
                 for (auto p : slice->compoundVector) {
                     cout << "   " << p->id << endl;
                 }
+            } else {
+                cout << "MISSING: ";
+                transition->printKey();
+                cout << endl;
             }
         }
 
