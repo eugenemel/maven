@@ -792,7 +792,7 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
 
     QFile data(fileName);
     if (!data.open(QFile::ReadOnly) ) {
-        qDebug() << "Can't open " << fileName; exit(-1);
+        qDebug() << "Can't open " << fileName;
         return compoundSet;
     }
 
