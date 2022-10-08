@@ -1245,7 +1245,9 @@ vector<EIC*> BackgroundPeakUpdate::pullEICs(mzSlice* slice,
 
         EIC* e = nullptr;
 
-        if (mzKey.first > 0 && mzKey.second > 0) { // SRM <precursor mz, product mz>
+        if (slice->srmTransition) {
+            e = sample->getEIC(slice->srmTransition, Fragment::ConsensusIntensityAgglomerationType::Median);
+        } else if (mzKey.first > 0 && mzKey.second > 0) { // SRM <precursor mz, product mz>
            e = sample->getEIC(mzKey, slice);
         } else if ( ! slice->srmId.empty() ) {
             //cout << "computeEIC srm:" << slice->srmId << endl;
