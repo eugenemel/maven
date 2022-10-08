@@ -1172,15 +1172,19 @@ void EicWidget::setTitle() {
             tagString.clear();
         }
 
-        titleText =  tr("<b>%1</b><br><br>"
-                        "<b>transition name:</b> %2<br>"
-                        "<b>precursor m/z:</b> %3 <b>product m/z:</b> %4 <b>CE:</b> %5 EV").arg(
-                    tagString,
-                    _slice.srmTransition->name.c_str(),
-                    QString::number(static_cast<double>(_slice.srmPrecursorMz), 'f', 2),
-                    QString::number(static_cast<double>(_slice.srmProductMz), 'f', 2),
-                    QString::number(static_cast<double>(_slice.srmTransition->collisionEnergy),'f',1)
-                    );
+        //Isuse 564: avoid NPE
+        if (_slice.srmTransition) {
+            titleText =  tr("<b>%1</b><br><br>"
+                            "<b>transition name:</b> %2<br>"
+                            "<b>precursor m/z:</b> %3 <b>product m/z:</b> %4 <b>CE:</b> %5 EV").arg(
+                        tagString,
+                        _slice.srmTransition->name.c_str(),
+                        QString::number(static_cast<double>(_slice.srmPrecursorMz), 'f', 2),
+                        QString::number(static_cast<double>(_slice.srmProductMz), 'f', 2),
+                        QString::number(static_cast<double>(_slice.srmTransition->collisionEnergy),'f',1)
+                        );
+        }
+
     } else {
         titleText =  tr("<b>%1</b> m/z: %2-%3").arg(
                     tagString,
@@ -1742,6 +1746,9 @@ void EicWidget::setPeakGroup(PeakGroup* group) {
     if (group->_type == PeakGroup::GroupType::SRMTransitionType) {
         _slice.srmPrecursorMz = group->srmPrecursorMz;
         _slice.srmProductMz = group->srmProductMz;
+        if (group->compound && group->compound->srmTransition) {
+            _slice.srmTransition = group->compound->srmTransition;
+        }
     }
 
     //use 5x peak width for display, or at least 6 seconds, or no more than 3 minutes
