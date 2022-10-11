@@ -278,6 +278,8 @@ int main(int argc, char *argv[]) {
 
     if (isQQQSearch) {
 
+        vector<string> missingTransitions{};
+
         cout << "Transition List File: \"" << QQQparams->transitionListFilePath << "\"" << endl;
 
         vector<Compound*> compounds = Database::loadCompoundCSVFile(QString(QQQparams->transitionListFilePath.c_str()));
@@ -314,12 +316,23 @@ int main(int argc, char *argv[]) {
                     cout << "   " << p->id << endl;
                 }
             } else {
-                cout << "MISSING: ";
-                transition->printKey();
-                cout << endl;
+                missingTransitions.push_back(transition->getKey());
             }
         }
 
+        if (!missingTransitions.empty()) {
+            cout << "=====================================\n";
+            cout << "ERROR: " << missingTransitions.size() << " transitions could not be mapped to compound(s)!\n";
+            for (auto missingTransition : missingTransitions) {
+                cout << missingTransition << endl;
+            }
+            cout << "\nPlease update the transition list file\n";
+            cout << "\"" << QQQparams->transitionListFilePath << "\"\n"
+                 << "with compound matching to the missing transitions and try again.\n";
+            cout << "=====================================\n";
+            cout << endl;
+            exit(-1);
+        }
         //these slices are not needed
         delete_all(slicesData.first);
 
