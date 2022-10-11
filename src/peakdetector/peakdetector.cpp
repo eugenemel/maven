@@ -293,32 +293,14 @@ int main(int argc, char *argv[]) {
                     false // debug
                     );
 
-        //Each slice is an SRM transition, corresponding to one or more compounds
-        for (SRMTransition* transition : slicesData.second) {
+        pair<vector<mzSlice*>, vector<string>> slicesResult = QQQProcessor::getMzSlices(
+                    slicesData.second,
+                    true, //isRequireCompound
+                    true  //debug
+                    );
 
-//            //debugging
-//            string srmIdString = *(transition->srmIds.begin());
-//            cout << srmIdString << endl;
-//            continue;
-
-            if (transition->compound) {
-                mzSlice *slice = new mzSlice(transition);
-                slices.push_back(slice);
-
-                transition->printKey();
-                cout << ":\n";
-
-                sort(slice->compoundVector.begin(), slice->compoundVector.end(), [](Compound* lhs, Compound* rhs){
-                    return lhs->id < rhs->id;
-                });
-
-                for (auto p : slice->compoundVector) {
-                    cout << "   " << p->id << endl;
-                }
-            } else {
-                missingTransitions.push_back(transition->getKey());
-            }
-        }
+        slices = slicesResult.first;
+        missingTransitions = slicesResult.second;
 
         if (!missingTransitions.empty()) {
             cout << "=====================================\n";
@@ -333,6 +315,7 @@ int main(int argc, char *argv[]) {
             cout << endl;
             exit(-1);
         }
+
         //these slices are not needed
         delete_all(slicesData.first);
 
