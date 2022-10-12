@@ -37,6 +37,7 @@ public slots:
 	  void setInfo(vector<Compound*>&compounds);
       void setInfo(double ms1PrecMz, double ms2PrecMz);
       void setInfo(vector<SRMTransition*>& srmTransitions);
+      void setInfo(set<string>& srmIds);
 
 	  void setInfo(vector<mzLink>&links);
       void setInfo(vector<mzSlice*>&slices);

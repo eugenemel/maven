@@ -109,6 +109,25 @@ void TreeDockWidget::clearTree() {
 }
 
 
+void TreeDockWidget::setInfo(set<string>& srmIds) {
+    QStringList header; header << "srmId (all samples)";
+    treeWidget->clear();
+    treeWidget->setHeaderLabels( header );
+    treeWidget->setSortingEnabled(true);
+
+    for(auto srmId : srmIds) {
+
+            QString tag = QString(srmId.c_str());
+
+            mzSlice slice;
+            slice.srmId = srmId;
+
+            QTreeWidgetItem *parent = new QTreeWidgetItem(treeWidget, mzSliceType);
+            parent->setText(0,tag);
+            parent->setData(0, Qt::UserRole, QVariant::fromValue(slice));
+    }
+}
+
 void TreeDockWidget::setInfo(vector<mzSlice*>& slices) { 
     QStringList header; header << "Slices";
 	treeWidget->clear();
@@ -120,7 +139,7 @@ void TreeDockWidget::setInfo(vector<mzSlice*>& slices) {
 			Compound* x = slice->compound;
 			QString tag = QString(slice->srmId.c_str());
 
-			QTreeWidgetItem *parent = new QTreeWidgetItem(treeWidget,mzSliceType);
+            QTreeWidgetItem *parent = new QTreeWidgetItem(treeWidget, mzSliceType);
 			parent->setText(0,tag);
   	    	parent->setData(0,Qt::UserRole,QVariant::fromValue(*slice));
 
