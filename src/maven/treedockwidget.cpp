@@ -128,28 +128,6 @@ void TreeDockWidget::setInfo(set<string>& srmIds) {
     }
 }
 
-void TreeDockWidget::setInfo(vector<mzSlice*>& slices) { 
-    QStringList header; header << "Slices";
-	treeWidget->clear();
-    treeWidget->setHeaderLabels( header );
-    treeWidget->setSortingEnabled(true);
-
-	for(int i=0; i < slices.size(); i++ ) { 
-			mzSlice* slice = slices[i];
-			Compound* x = slice->compound;
-			QString tag = QString(slice->srmId.c_str());
-
-            QTreeWidgetItem *parent = new QTreeWidgetItem(treeWidget, mzSliceType);
-			parent->setText(0,tag);
-  	    	parent->setData(0,Qt::UserRole,QVariant::fromValue(*slice));
-
-			if (x) { 
-				addCompound(x, parent);
-				parent->setText(0, tr("%1 %2").arg(QString(x->name.c_str()), tag ));
-			}
-	}
-}
-
 void TreeDockWidget::setInfo(vector<SRMTransition*>& srmTransitions) {
     treeWidget->clear();
     treeWidget->setSortingEnabled(true);

@@ -40,7 +40,6 @@ public slots:
       void setInfo(set<string>& srmIds);
 
 	  void setInfo(vector<mzLink>&links);
-      void setInfo(vector<mzSlice*>&slices);
       void setupScanListHeader();
       void setupConsensusScanListHeader();
       void setupMs1ScanHeader();
