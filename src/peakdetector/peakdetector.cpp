@@ -285,7 +285,7 @@ int main(int argc, char *argv[]) {
         vector<Compound*> compounds = Database::loadCompoundCSVFile(QString(QQQparams->transitionListFilePath.c_str()));
         vector<Adduct*> adducts{};
 
-        auto slicesData = QQQProcessor::getSRMSlices(
+        vector<SRMTransition*> transitions = QQQProcessor::getSRMTransitions(
                     samples,
                     QQQparams,
                     compounds,
@@ -294,7 +294,7 @@ int main(int argc, char *argv[]) {
                     );
 
         pair<vector<mzSlice*>, vector<string>> slicesResult = QQQProcessor::getMzSlices(
-                    slicesData.second,
+                    transitions,
                     true, //isRequireCompound
                     true  //debug
                     );
@@ -315,9 +315,6 @@ int main(int argc, char *argv[]) {
             cout << endl;
             exit(-1);
         }
-
-        //these slices are not needed
-        delete_all(slicesData.first);
 
     } else {
         slices = processMassSlices(-1, algorithmType, nameSuffix);
