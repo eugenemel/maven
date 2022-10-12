@@ -1744,11 +1744,13 @@ void MainWindow::compoundDatabaseSearch() {
 
 void MainWindow::showSRMList() {
 
-    srmSlices = getSrmSlices();
-    if (srmSlices.first.size() ==  0 ) return;
+    srmTransitions = getSRMTransitions();
+    if (srmTransitions.empty()) return;
 
-    srmDockWidget->setInfo(srmSlices.first);
-    srmTransitionDockWidget->setInfo(srmSlices.second);
+    set<string> srmIds = QQQProcessor::getSRMIds(srmTransitions);
+    srmDockWidget->setInfo(srmIds);
+
+    srmTransitionDockWidget->setInfo(srmTransitions);
 
 // Issue 564: Trade dangling pointer issues for memory leaks
 
@@ -1978,7 +1980,7 @@ void MainWindow::UndoAlignment() {
     getEicWidget()->replotForced();
 }
 
-pair<vector<mzSlice*>, vector<SRMTransition*>> MainWindow::getSrmSlices() {
+vector<SRMTransition*> MainWindow::getSRMTransitions() {
 
     shared_ptr<QQQSearchParameters> params = shared_ptr<QQQSearchParameters>(new QQQSearchParameters());
 
@@ -1990,7 +1992,7 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> MainWindow::getSrmSlices() {
 
     vector<mzSample*> visibleSamples = getVisibleSamples();
 
-    auto slices = QQQProcessor::getSRMSlices(
+    vector<SRMTransition*> transitions = QQQProcessor::getSRMTransitions(
                 visibleSamples,
                 params,
                 DB.compoundsDB,
@@ -1998,7 +2000,7 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> MainWindow::getSrmSlices() {
                 false
                 );
 
-    return(slices);
+    return(transitions);
 }
 
 

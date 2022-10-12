@@ -87,7 +87,7 @@ public:
     vector <mzSample*> samples;		//list of loaded samples
     static mzSample* loadSampleStatic(QString filename);
     QString rumsDBDatabaseName;
-    pair<vector<mzSlice*>, vector<SRMTransition*>> srmSlices;
+    vector<SRMTransition*> srmTransitions;
 
     //Issue 271 compound loading upon mzrollDB open options
     bool isAttemptToLoadDB = true;
@@ -228,7 +228,7 @@ public slots:
     void openReference();
     void openTutorialVideo();
     void updateEicSmoothingWindow(int value);
-    pair<vector<mzSlice*>, vector<SRMTransition*>> getSrmSlices();
+    vector<SRMTransition*> getSRMTransitions();
 
     void open();
     void print();
