@@ -1003,23 +1003,32 @@ void BackgroundPeakUpdate::computePeaks() {
 void BackgroundPeakUpdate::findPeaksQQQ() {
     if(!mainwindow) return;
 
-    pair<vector<mzSlice*>,vector<SRMTransition*>> transitions = mainwindow->getSrmSlices();
-    vector<mzSlice*> slices = transitions.first;
+    vector<SRMTransition*> transitions = mainwindow->getSRMTransitions();
+
+    pair<vector<mzSlice*>, vector<string>> slicesAndMissing = QQQProcessor::getMzSlices(
+                transitions,
+                true, // isRequireCompound
+                false // debug
+                );
+
+    vector<mzSlice*> slices = slicesAndMissing.first;
 
     //processSlices(slices,"QQQ Peaks");
     //Issue 347
-    processSRMTransitions(transitions.second);
+    if (slices.empty()) return;
 
-    delete_all(slices);
-    delete_all(transitions.second);
+    processSRMTransitions(slices);
 
-    slices.clear();
-    transitions.second.clear();
+//    delete_all(slices);
+//    delete_all(transitions.second);
+
+//    slices.clear();
+//    transitions.second.clear();
 }
 
-void BackgroundPeakUpdate::processSRMTransitions(vector<SRMTransition*>& transitions){
+void BackgroundPeakUpdate::processSRMTransitions(vector<mzSlice*>&slices){
 
-    if (transitions.size() == 0) return;
+    if (slices.size() == 0) return;
     allgroups.clear();
 
     QSettings* settings = mainwindow->getSettings();
@@ -1029,20 +1038,24 @@ void BackgroundPeakUpdate::processSRMTransitions(vector<SRMTransition*>& transit
 
     QTime timer;
     timer.start();
-    qDebug() << "BackgroundPeakUpdate::processSRMTransitions(): " << transitions.size() << " transitions.";
+    qDebug() << "BackgroundPeakUpdate::processSRMTransitions(): " << slices.size() << " transitions.";
 
     int eicCount=0;
     int groupCount=0;
     int peakCount=0;
 
-    for (unsigned int s = 0; s < transitions.size(); s++) {
+    for (unsigned int s = 0; s < slices.size(); s++) {
 
-        SRMTransition *transition = transitions[s];
+        mzSlice *slice = slices[s];
+
+        if (!slice || !slice->srmTransition) continue;
+
+        SRMTransition *transition = slice->srmTransition;
 
         //Issue 347: SRM transitions that do not match to a compound or adduct are not retained.
         if (!transition->compound || !transition->adduct) continue;
 
-        vector<EIC*>eics = pullEICs(nullptr,
+        vector<EIC*>eics = pullEICs(slice,
                                     samples,
                                     EicLoader::PeakDetection,
                                     static_cast<int>(eic_smoothingWindow),
@@ -1143,7 +1156,7 @@ void BackgroundPeakUpdate::processSRMTransitions(vector<SRMTransition*>& transit
 
         if (showProgressFlag && s % 10 == 0) {
             QString progressText = "Found " + QString::number(allgroups.size()) + " groups";
-            emit(updateProgressBar( progressText , (static_cast<int>(s)+1), std::min(static_cast<int>(transitions.size()),limitGroupCount)));
+            emit(updateProgressBar( progressText , (static_cast<int>(s)+1), std::min(static_cast<int>(slices.size()),limitGroupCount)));
         }
 
     }
