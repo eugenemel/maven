@@ -334,6 +334,7 @@ void TreeDockWidget::showInfo(bool isUpdateMassCalcGUI) {
                     Scan*  scan =  v.value<Scan*>();
 
                     rts.insert(scan->rt);
+                    bool isRetainFragmentsAbovePrecursorMzOrMS1 = isRetainFragmentsAbovePrecursorMz || scan->mslevel == 1;
 
                     if (f) {
                         Fragment *brother = new Fragment(scan,
@@ -341,7 +342,7 @@ void TreeDockWidget::showInfo(bool isUpdateMassCalcGUI) {
                                                          minSNRatio,
                                                          maxNumberOfFragments,
                                                          baseLinePercentile,
-                                                         isRetainFragmentsAbovePrecursorMz,
+                                                         isRetainFragmentsAbovePrecursorMzOrMS1,
                                                          precursorPurityPpm,
                                                          minIntensity);
                         f->addFragment(brother);
@@ -351,7 +352,7 @@ void TreeDockWidget::showInfo(bool isUpdateMassCalcGUI) {
                                          minSNRatio,
                                          maxNumberOfFragments,
                                          baseLinePercentile,
-                                         isRetainFragmentsAbovePrecursorMz,
+                                         isRetainFragmentsAbovePrecursorMzOrMS1,
                                          precursorPurityPpm,
                                          minIntensity);
                         mslevel = scan->mslevel;
@@ -369,6 +370,9 @@ void TreeDockWidget::showInfo(bool isUpdateMassCalcGUI) {
 
                     //Issue 550: SpectraWidget::setCurrentFragment() expects Fragment* sorted by mz
                     f->consensus->sortByMz();
+
+                    //debugging
+                    qDebug() << "[TreeDockWidget::showInfo()]: "<< f->consensus->mzs.size() << " spectral peaks in consensus spectrum.";
 
                     if (mslevel == 1){
                         mainwindow->getSpectraWidget()->setCurrentFragment(f->consensus, mslevel);
