@@ -294,16 +294,18 @@ int main(int argc, char *argv[]) {
                     );
 
         // Every peak group in an mzSlice is associated with every compound in the mzSlice->compoundVector.
-        // If there are no compounds associated with an mzSlice, none of the peak groups associated with that
-        // mzSlice are retained.
+        // If there are no compounds associated with an mzSlice, the peak group will not be rendered correctly in
+        // MAVEN - MAVEN doesn't know how to show an mzSlice from SRM data that doesn't have a compound assocaited with it.
         //
         // For this reason, at least one compound is required to generate an mzSlice in the first place.
 
-        vector<mzSlice*> slices = QQQProcessor::getMzSlices(
+        slices = QQQProcessor::getMzSlices(
                     transitions,
                     true, //isRequireCompound
                     true  //debug
                     );
+
+        cout << "Identified " << transitions.size() << " SRM transitions, generating " << slices.size() << " mz slices." << endl;
 
     } else {
         slices = processMassSlices(-1, algorithmType, nameSuffix);
@@ -908,17 +910,26 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                 group.srmPrecursorMz = slice->srmPrecursorMz;
                 group.srmProductMz = slice->srmProductMz;
 
-                for (Compound* qqqCompound : slice->compoundVector) {
+                if (!slice->compound && slice->compoundVector.empty()) {
 
                     //TODO: memory leak
                     PeakGroup *groupCopy = new PeakGroup(group);
-                    groupCopy->compound = qqqCompound;
-
-                    // debugging
-                    // cout << fixed << setprecision(2) << "(" << groupCopy.srmPrecursorMz << ", " << groupCopy.srmProductMz << "): "<< groupCopy.medianRt() << " " << groupCopy.compound->id << endl;
-
                     groupsToAppend.push_back(groupCopy);
+
+                } else {
+                    for (Compound* qqqCompound : slice->compoundVector) {
+
+                        //TODO: memory leak
+                        PeakGroup *groupCopy = new PeakGroup(group);
+                        groupCopy->compound = qqqCompound;
+
+                        // debugging
+                        // cout << fixed << setprecision(2) << "(" << groupCopy.srmPrecursorMz << ", " << groupCopy.srmProductMz << "): "<< groupCopy.medianRt() << " " << groupCopy.compound->id << endl;
+
+                        groupsToAppend.push_back(groupCopy);
+                    }
                 }
+
             }
 
         }
