@@ -293,6 +293,12 @@ int main(int argc, char *argv[]) {
                     false // debug
                     );
 
+        // Every peak group in an mzSlice is associated with every compound in the mzSlice->compoundVector.
+        // If there are no compounds associated with an mzSlice, none of the peak groups associated with that
+        // mzSlice are retained.
+        //
+        // For this reason, at least one compound is required to generate an mzSlice in the first place.
+
         vector<mzSlice*> slices = QQQProcessor::getMzSlices(
                     transitions,
                     true, //isRequireCompound
