@@ -285,9 +285,6 @@ int main(int argc, char *argv[]) {
         vector<Compound*> compounds = Database::loadCompoundCSVFile(QString(QQQparams->transitionListFilePath.c_str()));
         vector<Adduct*> adducts{};
 
-        //testing
-        QQQparams->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::REQUIRE_ALL_TRANSITIONS_TO_ONE_OR_MORE_COMPOUNDS;
-
         vector<SRMTransition*> transitions = QQQProcessor::getSRMTransitions(
                     samples,
                     QQQparams,
