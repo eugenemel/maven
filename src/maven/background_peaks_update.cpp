@@ -1005,13 +1005,11 @@ void BackgroundPeakUpdate::findPeaksQQQ() {
 
     vector<SRMTransition*> transitions = mainwindow->getSRMTransitions();
 
-    pair<vector<mzSlice*>, vector<string>> slicesAndMissing = QQQProcessor::getMzSlices(
+    vector<mzSlice*> slices = QQQProcessor::getMzSlices(
                 transitions,
                 true, // isRequireCompound
                 false // debug
                 );
-
-    vector<mzSlice*> slices = slicesAndMissing.first;
 
     //processSlices(slices,"QQQ Peaks");
     //Issue 347

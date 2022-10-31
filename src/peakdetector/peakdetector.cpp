@@ -285,6 +285,9 @@ int main(int argc, char *argv[]) {
         vector<Compound*> compounds = Database::loadCompoundCSVFile(QString(QQQparams->transitionListFilePath.c_str()));
         vector<Adduct*> adducts{};
 
+        //testing
+        QQQparams->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::REQUIRE_ALL_TRANSITIONS_TO_ONE_OR_MORE_COMPOUNDS;
+
         vector<SRMTransition*> transitions = QQQProcessor::getSRMTransitions(
                     samples,
                     QQQparams,
@@ -293,28 +296,11 @@ int main(int argc, char *argv[]) {
                     false // debug
                     );
 
-        pair<vector<mzSlice*>, vector<string>> slicesResult = QQQProcessor::getMzSlices(
+        vector<mzSlice*> slices = QQQProcessor::getMzSlices(
                     transitions,
                     true, //isRequireCompound
                     true  //debug
                     );
-
-        slices = slicesResult.first;
-        missingTransitions = slicesResult.second;
-
-        if (!missingTransitions.empty()) {
-            cout << "=====================================\n";
-            cout << "ERROR: " << missingTransitions.size() << " transitions could not be mapped to compound(s)!\n";
-            for (auto missingTransition : missingTransitions) {
-                cout << missingTransition << endl;
-            }
-            cout << "\nPlease update the transition list file\n";
-            cout << "\"" << QQQparams->transitionListFilePath << "\"\n"
-                 << "with compound matching to the missing transitions and try again.\n";
-            cout << "=====================================\n";
-            cout << endl;
-            exit(-1);
-        }
 
     } else {
         slices = processMassSlices(-1, algorithmType, nameSuffix);
