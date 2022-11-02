@@ -868,20 +868,19 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
         float logP=0;
         int N=fields.size();
         vector<string>categorylist;
-        //qDebug() << N << line;
         string transition_id, ion_type;
 
         if ( header.count("mz") && header["mz"]<N)  mz = fields[ header["mz"]].toDouble();
         if ( header.count("rt") && header["rt"]<N)  rt = fields[ header["rt"]].toDouble();
         if ( header.count("expectedrt") && header["expectedrt"]<N) rt = fields[ header["expectedrt"]].toDouble();
-        if ( header.count("charge")&& header["charge"]<N) charge = fields[ header["charge"]].toDouble();
-        if ( header.count("formula")&& header["formala"]<N) formula = fields[ header["formula"] ].toStdString();
-        if ( header.count("id")&& header["id"]<N) 	 id = fields[ header["id"] ].toStdString();
-        if ( header.count("name")&& header["name"]<N) 	 name = fields[ header["name"] ].toStdString();
-        if ( header.count("compound")&& header["compound"]<N) 	 name = fields[ header["compound"] ].toStdString();
-        if ( header.count("metabolite")&& header["metabolite"]<N) 	 name = fields[ header["compound"] ].toStdString();
-        if ( header.count("smile")&& header["smile"]<N) 	 smile = fields[ header["smile"] ].toStdString();
-        if ( header.count("logp")&& header["logp"]<N) 	 logP = fields[ header["logp"] ].toDouble();
+        if ( header.count("charge") && header["charge"]<N) charge = fields[ header["charge"]].toDouble();
+        if ( header.count("formula") && header["formala"]<N) formula = fields[ header["formula"] ].toStdString();
+        if ( header.count("id") && header["id"]<N) 	 id = fields[ header["id"] ].toStdString();
+        if ( header.count("name") && header["name"]<N) 	 name = fields[ header["name"] ].toStdString();
+        if ( header.count("compound") && header["compound"]<N) 	 name = fields[ header["compound"] ].toStdString();
+        if ( header.count("metabolite") && header["metabolite"]<N) 	 name = fields[ header["compound"] ].toStdString();
+        if ( header.count("smile") && header["smile"]<N) 	 smile = fields[ header["smile"] ].toStdString();
+        if ( header.count("logp") && header["logp"]<N) 	 logP = fields[ header["logp"] ].toDouble();
 
         if ( header.count("precursormz") && header["precursormz"]<N) precursormz=fields[ header["precursormz"]].toDouble();
         if ( header.count("productmz") && header["productmz"]<N)  productmz = fields[header["productmz"]].toDouble();
@@ -891,10 +890,10 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
         if ( header.count("Q3") && header["Q3"]<N)  productmz = fields[header["Q3"]].toDouble();
         if ( header.count("CE") && header["CE"]<N) collisionenergy=fields[ header["CE"]].toDouble();
 
-        if ( header.count("adduct") && header["transition_id"] < N) adductName = fields[ header["adduct"] ].toStdString();
+        if ( header.count("adduct") && header["adduct"] < N) adductName = fields[ header["adduct"] ].toStdString();
 
         if ( header.count("transition_id") && header["transition_id"] < N) transition_id = fields [ header["transition_id"] ].toStdString();
-        if ( header.count("ion_type") && header["transition_id"] < N) ion_type = fields [ header["ion_type"] ].toStdString();
+        if ( header.count("ion_type") && header["ion_type"] < N) ion_type = fields [ header["ion_type"] ].toStdString();
 
         //cerr << lineCount << " " << endl;
         //for(int i=0; i<headers.size(); i++) cerr << headers[i] << ", ";
@@ -918,7 +917,7 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
 
         }
 
-        //cerr << "Loading: " << id << " " << formula << "mz=" << mz << " rt=" << rt << " charge=" << charge << endl;
+
 
         if (mz <= 0) mz=0;
         if (id.empty()&& !name.empty()) id=name;
