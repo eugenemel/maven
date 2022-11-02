@@ -284,7 +284,7 @@ int main(int argc, char *argv[]) {
 
         vector<Compound*> compounds = Database::loadCompoundCSVFile(
                     QString(QQQparams->transitionListFilePath.c_str()),
-                    true // debug
+                    false // debug
                     );
 
         vector<Adduct*> adducts{};
