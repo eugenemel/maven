@@ -848,6 +848,16 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
             continue;
         }
 
+        if (debug) {
+            for (int i = 0; i < headers.size(); i++) {
+                cout << "[Database::loadCompoundCSVFile()]: \ti=" << i << ": " << headers[i].toStdString() << " = ";
+                if (i < fields.size()-1) {
+                    cout << fields[i].toStdString();
+                }
+                cout << endl;
+            }
+        }
+
         string id, name, formula, smile, adductName;
         float rt=0;
         float mz=0;
