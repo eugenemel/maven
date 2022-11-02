@@ -282,7 +282,11 @@ int main(int argc, char *argv[]) {
 
         cout << "Transition List File: \"" << QQQparams->transitionListFilePath << "\"" << endl;
 
-        vector<Compound*> compounds = Database::loadCompoundCSVFile(QString(QQQparams->transitionListFilePath.c_str()));
+        vector<Compound*> compounds = Database::loadCompoundCSVFile(
+                    QString(QQQparams->transitionListFilePath.c_str()),
+                    true // debug
+                    );
+
         vector<Adduct*> adducts{};
 
         vector<SRMTransition*> transitions = QQQProcessor::getSRMTransitions(
