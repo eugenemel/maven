@@ -891,10 +891,10 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
         if ( header.count("Q3") && header["Q3"]<N)  productmz = fields[header["Q3"]].toDouble();
         if ( header.count("CE") && header["CE"]<N) collisionenergy=fields[ header["CE"]].toDouble();
 
-        if ( header.count("adduct")) adductName = fields[ header["adduct"] ].toStdString();
+        if ( header.count("adduct") && header["transition_id"] < N) adductName = fields[ header["adduct"] ].toStdString();
 
-        if ( header.count("transition_id")) transition_id = fields [ header["transition_id"] ].toStdString();
-        if ( header.count("ion_type")) ion_type = fields [ header["ion_type"] ].toStdString();
+        if ( header.count("transition_id") && header["transition_id"] < N) transition_id = fields [ header["transition_id"] ].toStdString();
+        if ( header.count("ion_type") && header["transition_id"] < N) ion_type = fields [ header["ion_type"] ].toStdString();
 
         //cerr << lineCount << " " << endl;
         //for(int i=0; i<headers.size(); i++) cerr << headers[i] << ", ";
@@ -920,7 +920,7 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
 
         //cerr << "Loading: " << id << " " << formula << "mz=" << mz << " rt=" << rt << " charge=" << charge << endl;
 
-        if (mz == 0) mz=precursormz;
+        if (mz <= 0) mz=0;
         if (id.empty()&& !name.empty()) id=name;
         if (id.empty() && name.empty()) id="cmpd:" + integer2string(loadCount);
 
