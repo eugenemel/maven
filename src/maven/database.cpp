@@ -788,7 +788,7 @@ vector<Adduct*> Database::defaultAdducts() {
 
 
 
-vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
+vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
 
     vector<Compound*> compoundSet; //return
 
@@ -814,6 +814,11 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName){
 
     do {
         line = stream.readLine().trimmed();
+
+        if (debug) {
+            cout << "[Database::loadCompoundCSVFile()]: " << line.toStdString() << endl;
+        }
+
         if (line.isEmpty() || line[0] == '#') continue;
 
         lineCount++;

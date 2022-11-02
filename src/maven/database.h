@@ -41,7 +41,7 @@ class Database {
 
         void loadMethodsFolder(QString methodsFolder);
         int  loadCompoundsFile(QString filename);
-        static vector<Compound*> loadCompoundCSVFile(QString fileName);
+        static vector<Compound*> loadCompoundCSVFile(QString fileName, bool debug=false);
         vector<Compound*> loadNISTLibrary(QString fileName);
 
         void loadCompoundsSQL(QString databaseName,QSqlDatabase& dbConnection);
