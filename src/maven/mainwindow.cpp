@@ -1753,13 +1753,14 @@ void MainWindow::showSRMList(bool recalculateTransitions) {
     //Issue 591: Option to avoid excessive recomputations
     if (recalculateTransitions || srmTransitions.empty()) {
          srmTransitions = getSRMTransitions();
+
+         if (srmTransitions.empty()) return;
+
+         set<string> srmIds = QQQProcessor::getSRMIds(srmTransitions);
+         srmDockWidget->setInfo(srmIds);
+
+         srmTransitionDockWidget->setInfo(srmTransitions);
     }
-    if (srmTransitions.empty()) return;
-
-    set<string> srmIds = QQQProcessor::getSRMIds(srmTransitions);
-    srmDockWidget->setInfo(srmIds);
-
-    srmTransitionDockWidget->setInfo(srmTransitions);
 
 // Issue 564: Trade dangling pointer issues for memory leaks
 
