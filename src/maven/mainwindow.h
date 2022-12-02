@@ -244,7 +244,7 @@ public slots:
     void showMassSlices();
     void showDirectInfusionDialog();
     void showSelectAdductsDialog();
-    void showSRMList();
+    void showSRMList(bool recalculateTransitions=true);
     void addToHistory(const mzSlice& slice);
     void historyNext();
     void historyLast();

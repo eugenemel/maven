@@ -1429,15 +1429,20 @@ void MainWindow::createMenus() {
     aConsensusMs2Events->setChecked(false);
     connect(aConsensusMs2Events, SIGNAL(toggled(bool)), ms2ConsensusScansListWidget,SLOT(setVisible(bool)));
 
-    QAction *SRMTransitionListWidget = widgetsMenu->addAction("SRM Transition List");
-    SRMTransitionListWidget->setCheckable(true);
-    SRMTransitionListWidget->setChecked(false);
+    QAction *SRMListAction = widgetsMenu->addAction("SRM List");
+    SRMListAction->setCheckable(true);
+    SRMListAction->setChecked(false);
 
-    connect(SRMTransitionListWidget, SIGNAL(clicked(bool)), SLOT(showSRMList()));
+    connect(SRMListAction, SIGNAL(clicked(bool)), SLOT(showSRMList()));
 
-    //Issue 553: swap components
-    connect(SRMTransitionListWidget, SIGNAL(toggled(bool)), srmDockWidget, SLOT(setVisible(bool)));
-    //connect(SRMTransitionListWidget, SIGNAL(toggled(bool)), srmTransitionDockWidget, SLOT(setVisible(bool)));
+    QAction *SRMTransitionListAction = widgetsMenu->addAction("SRM Transition List");
+    SRMTransitionListAction->setCheckable(true);
+    SRMTransitionListAction->setChecked(false);
+
+    connect(SRMTransitionListAction, SIGNAL(clicked(bool)), SLOT(showSRMList()));
+
+    connect(SRMListAction, SIGNAL(toggled(bool)), srmDockWidget, SLOT(setVisible(bool)));
+    connect(SRMTransitionListAction, SIGNAL(toggled(bool)), srmTransitionDockWidget, SLOT(setVisible(bool)));
 
     connect(libraryDialog, SIGNAL(loadLibrarySignal(QString)), SLOT(showSRMList()));
     connect(libraryDialog, SIGNAL(afterUnloadedLibrarySignal(QString)), SLOT(showSRMList()));
@@ -1743,9 +1748,12 @@ void MainWindow::compoundDatabaseSearch() {
     peakDetectionDialog->show();
 }
 
-void MainWindow::showSRMList() {
+void MainWindow::showSRMList(bool recalculateTransitions) {
 
-    srmTransitions = getSRMTransitions();
+    //Issue 591: Option to avoid excessive recomputations
+    if (recalculateTransitions || srmTransitions.empty()) {
+         srmTransitions = getSRMTransitions();
+    }
     if (srmTransitions.empty()) return;
 
     set<string> srmIds = QQQProcessor::getSRMIds(srmTransitions);
