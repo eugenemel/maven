@@ -1435,11 +1435,12 @@ void MainWindow::createMenus() {
 
     connect(SRMListAction, SIGNAL(clicked(bool)), SLOT(showSRMList()));
 
-    QAction *SRMTransitionListAction = widgetsMenu->addAction("SRM Transition List");
+    SRMTransitionListAction = widgetsMenu->addAction("SRM Transition List");
     SRMTransitionListAction->setCheckable(true);
     SRMTransitionListAction->setChecked(false);
 
     connect(SRMTransitionListAction, SIGNAL(clicked(bool)), SLOT(showSRMList()));
+    connect(SRMTransitionListAction, SIGNAL(toggled(bool)), btnSRM, SLOT(setChecked(bool)));
 
     connect(SRMListAction, SIGNAL(toggled(bool)), srmDockWidget, SLOT(setVisible(bool)));
     connect(SRMTransitionListAction, SIGNAL(toggled(bool)), srmTransitionDockWidget, SLOT(setVisible(bool)));
@@ -1625,9 +1626,7 @@ void MainWindow::createToolBars() {
     QToolButton* btnGallery = addDockWidgetButton(sideBar,galleryDockWidget,QIcon(rsrcPath + "/gallery.png"), "Gallery");
     QToolButton* btnScatter = addDockWidgetButton(sideBar,scatterDockWidget,QIcon(rsrcPath + "/scatterplot.png"), "Scatter Plot");
 
-    //Issue 553: swap components
-    QToolButton* btnSRM = addDockWidgetButton(sideBar,srmTransitionDockWidget,QIcon(rsrcPath + "/qqq.png"), "SRM List (F12)");
-    //QToolButton* btnSRM = addDockWidgetButton(sideBar,srmDockWidget,QIcon(rsrcPath + "/qqq.png"), "SRM List (F12)");
+    btnSRM = addDockWidgetButton(sideBar,srmTransitionDockWidget,QIcon(rsrcPath + "/qqq.png"), "SRM List (F12)");
 
     //QToolButton* btnRconsole = addDockWidgetButton(sideBar,rconsoleDockWidget,QIcon(rsrcPath + "/R.png"), "Show R Console");
     QToolButton* btnBarPlot = addDockWidgetButton(sideBar,barPlotDockWidget, QIcon(rsrcPath + "/bar_plot_samples.png"), "EIC Legend");
@@ -1643,6 +1642,7 @@ void MainWindow::createToolBars() {
     btnSRM->setShortcut(Qt::Key_F12);
 
     connect(btnSRM,SIGNAL(clicked(bool)),SLOT(showSRMList()));
+    connect(btnSRM,SIGNAL(clicked(bool)), SRMTransitionListAction, SLOT(setChecked(bool)));
 
     sideBar->setOrientation(Qt::Vertical);
     sideBar->setMovable(false);

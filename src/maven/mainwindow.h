@@ -184,6 +184,8 @@ public:
     QToolButton *btnLockRt = nullptr;
     QToolButton *btnBarPlot = nullptr;
     QToolButton *btnIsotopePlot = nullptr;
+    QToolButton *btnSRM = nullptr;
+    QAction *SRMTransitionListAction = nullptr;
     IsotopeParameters getIsotopeParameters();
 
 protected:
