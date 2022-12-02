@@ -365,6 +365,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     ms2ConsensusScansListWidget->hide();
 
     srmTransitionDockWidget->hide();
+    srmDockWidget->hide();
 
     setUserPPM(5);
     if ( settings->contains("ppmWindowBox")) {
