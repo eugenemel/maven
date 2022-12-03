@@ -1433,13 +1433,13 @@ void MainWindow::createMenus() {
     SRMListAction->setCheckable(true);
     SRMListAction->setChecked(false);
 
-    connect(SRMListAction, SIGNAL(clicked(bool)), SLOT(showSRMList()));
+    connect(SRMListAction, SIGNAL(clicked(bool)), SLOT(showSRMListCached()));
 
     SRMTransitionListAction = widgetsMenu->addAction("SRM Transition List");
     SRMTransitionListAction->setCheckable(true);
     SRMTransitionListAction->setChecked(false);
 
-    connect(SRMTransitionListAction, SIGNAL(clicked(bool)), SLOT(showSRMList()));
+    connect(SRMTransitionListAction, SIGNAL(clicked(bool)), SLOT(showSRMListCached()));
     connect(SRMTransitionListAction, SIGNAL(toggled(bool)), btnSRM, SLOT(setChecked(bool)));
 
     connect(SRMListAction, SIGNAL(toggled(bool)), srmDockWidget, SLOT(setVisible(bool)));
@@ -1641,7 +1641,7 @@ void MainWindow::createToolBars() {
     btnBookmarks->setShortcut(Qt::Key_F10);
     btnSRM->setShortcut(Qt::Key_F12);
 
-    connect(btnSRM,SIGNAL(clicked(bool)),SLOT(showSRMList()));
+    connect(btnSRM,SIGNAL(clicked(bool)),SLOT(showSRMListCached()));
     connect(btnSRM,SIGNAL(clicked(bool)), SRMTransitionListAction, SLOT(setChecked(bool)));
 
     sideBar->setOrientation(Qt::Vertical);
@@ -1746,6 +1746,10 @@ void MainWindow::showSelectAdductsDialog() {
 void MainWindow::compoundDatabaseSearch() {
     peakDetectionDialog->setFeatureDetection(PeakDetectionDialog::CompoundDB);
     peakDetectionDialog->show();
+}
+
+void MainWindow::showSRMListCached() {
+    showSRMList(false);
 }
 
 void MainWindow::showSRMList(bool recalculateTransitions) {

@@ -247,6 +247,7 @@ public slots:
     void showDirectInfusionDialog();
     void showSelectAdductsDialog();
     void showSRMList(bool recalculateTransitions=true);
+    void showSRMListCached();
     void addToHistory(const mzSlice& slice);
     void historyNext();
     void historyLast();
