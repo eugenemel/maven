@@ -41,7 +41,6 @@ int minorVersion = 1;
 int modVersion =   4;
 
 Database DB;
-QSqlDatabase projectDB;
 ClassifierNeuralNet clsf;
 vector <mzSample*> samples;
 vector <Compound*> compoundsDB;
@@ -326,9 +325,16 @@ int main(int argc, char *argv[]) {
     samples.clear();
     allgroups.clear();
 
+    //Issue 592: Explicitly close database as good programming practice
+    if (project) {
+        project->closeDatabaseConnection();
+        delete(project);
+        project = nullptr;
+    }
+
     printf("Total program execution time : %f seconds \n", getTime() - programStartTime);
 
-    return (0);
+    return 0;
 }
 
 mzSlice getGlobalBounds(vector<mzSample*>sampleSubset) {
