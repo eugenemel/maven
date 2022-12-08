@@ -1076,7 +1076,6 @@ void processOptions(int argc, char* argv[]) {
         "8?baselineDropTopX <int>",
         "9?mzkitchenSearchParameters <string>",
         "0?mzKitchenSearchType <string>",
-        "#?rtBoundsSlopeThreshold <float>",
         nullptr
     };
 
@@ -1123,7 +1122,6 @@ void processOptions(int argc, char* argv[]) {
         case '8' : baseline_dropTopX = atoi(optarg); break;
         case '9' : mzkitchenSearchParameters = string(optarg); break;
         case '0' : mzkitchenSearchType = string(optarg); break;
-        case '#': rtBoundsSlopeThreshold = stof(optarg); break;
         default : break;
         }
     }
