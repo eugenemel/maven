@@ -1122,6 +1122,7 @@ void processOptions(int argc, char* argv[]) {
         QQQparams = QQQSearchParameters::decode(mzkitchenSearchParameters);
         saveScanData = false; //override setting, saving scans for QQQ data doesn't make any sense
         isMzkitchenSearch = false; //QQQ search is vastly different from mzkitchen search, avoid accidental calling of mzkitchenSearch() function
+        isRunClustering = false; //In this context, clustering is RT elution time based, doesn't make sense for SRM data
     } else if (mzkitchenSearchType != "") {
         isMzkitchenSearch = true;
     }
