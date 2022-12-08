@@ -994,9 +994,17 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
 
     double startWriteReportTime = getTime();
     if (writeReportFlag){
+        if (isQQQSearch) {
+            //Issue 596: TODO: bug in writing search parameters to mzrollDB
+            //TODO: add peakdetector parameters
+            searchTableData.insert(make_pair("QQQ Peak Detection",
+                                             QString(QQQparams->encodeParams().c_str())));
+        }
         writeReport(setName);
+        printf("Execution time (Write report) : %f seconds \n", getTime() - startWriteReportTime);
+    } else {
+        cout << "Report not written." << endl;
     }
-    printf("Execution time (Write report) : %f seconds \n", getTime() - startWriteReportTime);
 
     cout << "DONE!" << endl;
 }
