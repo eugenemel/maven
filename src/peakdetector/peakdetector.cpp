@@ -100,6 +100,7 @@ float avgScanTime = 0.2f;
 int eic_smoothingWindow = 5;
 int baseline_smoothingWindow = 5; //only for peakGrouping "C"
 int baseline_dropTopX = 60; //only for peakGrouping "C"
+float rtBoundsSlopeThreshold = -1.0f; // only for peakGrouping "C"
 
 //peak grouping across samples
 float grouping_maxRtWindow = 0.25f;
@@ -804,7 +805,15 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
 
             //find peaks
             for(unsigned int j=0; j < eics.size(); j++ ) {
-                eics.at(j)->getPeakPositionsC(eic_smoothingWindow, false);
+                eics.at(j)->setBaselineDropTopX(baseline_dropTopX);
+                eics.at(j)->setBaselineSmoothingWindow(baseline_smoothingWindow);
+                eics.at(j)->getPeakPositionsC(
+                            eic_smoothingWindow,
+                            false, // debug
+                            true, // isComputePeakBounds
+                            -1.0f, // rtBoundsMaxIntensityFraction
+                            rtBoundsSlopeThreshold // rtBoundsSlopeThreshold
+                            );
             }
 
             peakgroups = EIC::groupPeaks(eics, eic_smoothingWindow, grouping_maxRtWindow);
@@ -819,7 +828,13 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
             for(unsigned int j=0; j < eics.size(); j++ ) {
                 eics.at(j)->setBaselineDropTopX(baseline_dropTopX);
                 eics.at(j)->setBaselineSmoothingWindow(baseline_smoothingWindow);
-                eics.at(j)->getPeakPositionsC(eic_smoothingWindow, false);
+                eics.at(j)->getPeakPositionsC(
+                            eic_smoothingWindow,
+                            false, // debug
+                            true, // isComputePeakBounds
+                            -1.0f, // rtBoundsMaxIntensityFraction
+                            rtBoundsSlopeThreshold // rtBoundsSlopeThreshold
+                            );
             }
 
             peakgroups = EIC::groupPeaksC(eics, eic_smoothingWindow, grouping_maxRtWindow, baseline_smoothingWindow, baseline_dropTopX);
@@ -830,10 +845,22 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
             for(unsigned int j=0; j < eics.size(); j++ ) {
                 eics.at(j)->setBaselineDropTopX(baseline_dropTopX);
                 eics.at(j)->setBaselineSmoothingWindow(baseline_smoothingWindow);
-                eics.at(j)->getPeakPositionsC(eic_smoothingWindow, false);
+                eics.at(j)->getPeakPositionsC(
+                            eic_smoothingWindow,
+                            false, // debug
+                            true, // isComputePeakBounds
+                            -1.0f, // rtBoundsMaxIntensityFraction
+                            rtBoundsSlopeThreshold // rtBoundsSlopeThreshold
+                            );
             }
 
-            peakgroups = EIC::groupPeaksD(eics, eic_smoothingWindow, grouping_maxRtWindow, baseline_smoothingWindow, baseline_dropTopX, mergeOverlap);
+            peakgroups = EIC::groupPeaksD(
+                        eics,
+                        eic_smoothingWindow,
+                        grouping_maxRtWindow,
+                        baseline_smoothingWindow,
+                        baseline_dropTopX,
+                        mergeOverlap);
 
         }
 
@@ -1049,6 +1076,7 @@ void processOptions(int argc, char* argv[]) {
         "8?baselineDropTopX <int>",
         "9?mzkitchenSearchParameters <string>",
         "0?mzKitchenSearchType <string>",
+        "#?rtBoundsSlopeThreshold <float>",
         nullptr
     };
 
@@ -1095,6 +1123,7 @@ void processOptions(int argc, char* argv[]) {
         case '8' : baseline_dropTopX = atoi(optarg); break;
         case '9' : mzkitchenSearchParameters = string(optarg); break;
         case '0' : mzkitchenSearchType = string(optarg); break;
+        case '#': rtBoundsSlopeThreshold = stof(optarg); break;
         default : break;
         }
     }
