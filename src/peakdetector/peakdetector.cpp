@@ -800,10 +800,10 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
         // PEAK PICKING AND GROUPING //
         // ------------------------- //
 
-        vector<PeakGroup> peakgroups;
-        if (groupingAlgorithmType == "A") {
+        //find peaks
+        if (groupingAlgorithmType != "B") {
+            //peaks are found during EIC::groupPeaksB()
 
-            //find peaks
             for(unsigned int j=0; j < eics.size(); j++ ) {
                 eics.at(j)->setBaselineDropTopX(baseline_dropTopX);
                 eics.at(j)->setBaselineSmoothingWindow(baseline_smoothingWindow);
@@ -815,53 +815,28 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                             rtBoundsSlopeThreshold // rtBoundsSlopeThreshold
                             );
             }
+        }
+
+        vector<PeakGroup> peakgroups{};
+        if (groupingAlgorithmType == "A") {
 
             peakgroups = EIC::groupPeaks(eics, eic_smoothingWindow, grouping_maxRtWindow);
 
         } else if (groupingAlgorithmType == "B") {
 
-            //peaks are found during EIC::groupPeaksB()
             peakgroups = EIC::groupPeaksB(eics, eic_smoothingWindow, grouping_maxRtWindow, minSmoothedPeakIntensity);
-        } else if (groupingAlgorithmType == "C") {
 
-            //find peaks
-            for(unsigned int j=0; j < eics.size(); j++ ) {
-                eics.at(j)->setBaselineDropTopX(baseline_dropTopX);
-                eics.at(j)->setBaselineSmoothingWindow(baseline_smoothingWindow);
-                eics.at(j)->getPeakPositionsC(
-                            eic_smoothingWindow,
-                            false, // debug
-                            true, // isComputePeakBounds
-                            -1.0f, // rtBoundsMaxIntensityFraction
-                            rtBoundsSlopeThreshold // rtBoundsSlopeThreshold
-                            );
-            }
+        } else if (groupingAlgorithmType == "C") {
 
             peakgroups = EIC::groupPeaksC(eics, eic_smoothingWindow, grouping_maxRtWindow, baseline_smoothingWindow, baseline_dropTopX);
 
         } else if (groupingAlgorithmType == "D") {
 
-            //find peaks
-            for(unsigned int j=0; j < eics.size(); j++ ) {
-                eics.at(j)->setBaselineDropTopX(baseline_dropTopX);
-                eics.at(j)->setBaselineSmoothingWindow(baseline_smoothingWindow);
-                eics.at(j)->getPeakPositionsC(
-                            eic_smoothingWindow,
-                            false, // debug
-                            true, // isComputePeakBounds
-                            -1.0f, // rtBoundsMaxIntensityFraction
-                            rtBoundsSlopeThreshold // rtBoundsSlopeThreshold
-                            );
-            }
+            peakgroups = EIC::groupPeaksD(eics, eic_smoothingWindow, grouping_maxRtWindow, baseline_smoothingWindow, baseline_dropTopX, mergeOverlap);
 
-            peakgroups = EIC::groupPeaksD(
-                        eics,
-                        eic_smoothingWindow,
-                        grouping_maxRtWindow,
-                        baseline_smoothingWindow,
-                        baseline_dropTopX,
-                        mergeOverlap);
-
+        } else if (groupingAlgorithmType == "E") {
+            cerr << "TODO: implement grouping E()" << endl;
+            abort();
         }
 
         for (auto eic : eics){
