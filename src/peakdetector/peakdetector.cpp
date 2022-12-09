@@ -835,8 +835,24 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
             peakgroups = EIC::groupPeaksD(eics, eic_smoothingWindow, grouping_maxRtWindow, baseline_smoothingWindow, baseline_dropTopX, mergeOverlap);
 
         } else if (groupingAlgorithmType == "E") {
-            cerr << "TODO: implement grouping E()" << endl;
-            abort();
+
+            shared_ptr<PeakPickingAndGroupingParameters> params = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
+
+            params->mergedSmoothingWindow = eic_smoothingWindow;
+            params->groupMaxRtDiff = grouping_maxRtWindow;
+            params->mergedBaselineSmoothingWindow = baseline_smoothingWindow;
+            params->mergedBaselineDropTopX = baseline_dropTopX;
+            params->groupMergeOverlap = mergeOverlap;
+
+            // Test: introduce merging parameters, filter out all peaks
+            // TODO: parameters need to come from command line instead of hard-coded here
+
+            params->mergedIsComputeBounds = true;
+            params->mergedPeakRtBoundsSlopeThreshold = 0.01f;
+            params->mergedSmoothedMaxToBoundsMinRatio = 2.0f;
+            params->mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MAXIMUM; // strictest - both sides must be good
+
+            peakgroups = EIC::groupPeaksE(eics, params, false);
         }
 
         for (auto eic : eics){
