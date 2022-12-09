@@ -850,7 +850,8 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
             params->mergedIsComputeBounds = true;
             params->mergedPeakRtBoundsSlopeThreshold = 0.01f;
             params->mergedSmoothedMaxToBoundsMinRatio = 2.0f;
-            params->mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MAXIMUM; // strictest - both sides must be good
+            //params->mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MAXIMUM; // strictest - both sides must be good
+            params->mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MEDIAN; // strictest - both sides must be good
 
             peakgroups = EIC::groupPeaksE(eics, params, false);
         }
