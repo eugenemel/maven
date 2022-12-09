@@ -102,6 +102,12 @@ int baseline_smoothingWindow = 5; //only for peakGrouping "C"
 int baseline_dropTopX = 60; //only for peakGrouping "C"
 float rtBoundsSlopeThreshold = -1.0f; // only for peakGrouping "C"
 
+//merged EIC
+float mergedPeakRtBoundsMaxIntensityFraction = -1.0f;
+float mergedPeakRtBoundsSlopeThreshold = -1.0f;
+float mergedSmoothedMaxToBoundsMinRatio = -1.0f;
+SmoothedMaxToBoundsIntensityPolicy mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MEDIAN;
+
 //peak grouping across samples
 float grouping_maxRtWindow = 0.25f;
 float mergeOverlap = 0.8f;
@@ -844,14 +850,14 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
             params->mergedBaselineDropTopX = baseline_dropTopX;
             params->groupMergeOverlap = mergeOverlap;
 
-            // Test: introduce merging parameters, filter out all peaks
-            // TODO: parameters need to come from command line instead of hard-coded here
+            if (mergedPeakRtBoundsMaxIntensityFraction > 0 || mergedPeakRtBoundsSlopeThreshold > 0 || mergedSmoothedMaxToBoundsMinRatio > 0) {
+                params->mergedIsComputeBounds = true;
+            }
 
-            params->mergedIsComputeBounds = true;
-            params->mergedPeakRtBoundsSlopeThreshold = 0.01f;
-            params->mergedSmoothedMaxToBoundsMinRatio = 2.0f;
-            //params->mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MAXIMUM; // strictest - both sides must be good
-            params->mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MEDIAN; // strictest - both sides must be good
+            params->mergedPeakRtBoundsMaxIntensityFraction = mergedPeakRtBoundsMaxIntensityFraction;
+            params->mergedPeakRtBoundsSlopeThreshold = mergedPeakRtBoundsSlopeThreshold;
+            params->mergedSmoothedMaxToBoundsMinRatio = mergedSmoothedMaxToBoundsMinRatio;
+            params->mergedSmoothedMaxToBoundsIntensityPolicy = mergedSmoothedMaxToBoundsIntensityPolicy;
 
             peakgroups = EIC::groupPeaksE(eics, params, false);
         }
@@ -1076,6 +1082,7 @@ void processOptions(int argc, char* argv[]) {
     OptArgvIter  iter(--argc, ++argv);
     const char * optarg;
 
+    //single character CL options
     while ( const char optchar = opts(iter, optarg) ) {
         switch (optchar) {
         case 'a' : alignSamplesFlag = atoi(optarg); break;
@@ -1118,9 +1125,27 @@ void processOptions(int argc, char* argv[]) {
         }
     }
 
-
     for (int i = 1; i < argc ; i++) {
         string optString(argv[i]);
+
+        //CL options not covered in single character shortcuts
+        if (strcmp(argv[i], "--mergedPeakRtBoundsMaxIntensityFraction") == 0) {
+            mergedPeakRtBoundsMaxIntensityFraction = atof(argv[i+1]);
+        } else if (strcmp(argv[i], "--mergedPeakRtBoundsSlopeThreshold") == 0) {
+            mergedPeakRtBoundsSlopeThreshold = atof(argv[i+1]);
+        } else if (strcmp(argv[i], "--mergedSmoothedMaxToBoundsMinRatio") == 0) {
+            mergedSmoothedMaxToBoundsMinRatio = atof(argv[i+1]);
+        } else if (strcmp(argv[i], "--mergedSmoothedMaxToBoundsIntensityPolicy") == 0) {
+            string policy = string(argv[i+1]);
+            if (policy == "MEDIAN") {
+                mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MEDIAN;
+            } else if (policy == "MAXIMUM") {
+                mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MAXIMUM;
+            } else if (policy == "MINIMUM") {
+                mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MINIMUM;
+            }
+        }
+
         if (mzUtils::ends_with(optString, ".rt")) alignmentFile = optString;
         if (mzUtils::ends_with(optString, ".apts")) anchorPointsFile = optString;
         if (mzUtils::ends_with(optString, ".mzrollDB")) projectFile = optString;
@@ -1175,6 +1200,25 @@ void printSettings() {
     cout << "#eic_smoothingWindow=" << eic_smoothingWindow << endl;
     cout << "#grouping_maxRtWindow=" << grouping_maxRtWindow << endl;
 
+    if (groupingAlgorithmType == "E") {
+        cout << endl;
+        cout << "#Merged EIC Grouping Settings" << endl;
+        cout << "mergedSmoothingWindow="<< eic_smoothingWindow << endl;
+        cout << "mergedPeakRtBoundsMaxIntensityFraction=" << mergedPeakRtBoundsMaxIntensityFraction << endl;
+        cout << "mergedPeakRtBoundsSlopeThreshold=" << mergedPeakRtBoundsSlopeThreshold << endl;
+        cout << "mergedSmoothedMaxToBoundsMinRatio=" << mergedSmoothedMaxToBoundsMinRatio << endl;
+        cout << "mergedSmoothedMaxToBoundsIntensityPolicy=";
+        if (mergedSmoothedMaxToBoundsIntensityPolicy == SmoothedMaxToBoundsIntensityPolicy::MEDIAN) {
+            cout << "MEDIAN" << endl;
+        } else if (mergedSmoothedMaxToBoundsIntensityPolicy == SmoothedMaxToBoundsIntensityPolicy::MAXIMUM) {
+            cout << "MAXIMUM" << endl;
+        } else if (mergedSmoothedMaxToBoundsIntensityPolicy == SmoothedMaxToBoundsIntensityPolicy::MINIMUM) {
+            cout << "MINIMUM" << endl;
+        }
+        cout << "mergedBaselineSmoothingWindow=" << baseline_smoothingWindow << endl;
+        cout << "mergedBaselineDropTopX=" << baseline_dropTopX << endl;
+    }
+
     cout << endl;
     cout << "#Peak Group Cleaning and Filtering" << endl;
     cout << "#groupingAlgorithmType=" << groupingAlgorithmType << endl;
@@ -1183,6 +1227,7 @@ void printSettings() {
     cout << "#minSignalBlankRatio=" << minSignalBlankRatio << endl;
     cout << "#minSignalBaseLineRatio=" << minSignalBaseLineRatio << endl;
     cout << "#mergeOverlap=" << mergeOverlap << endl;
+
     cout << "=================================================" << endl;
 
 
