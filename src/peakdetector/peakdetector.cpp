@@ -997,8 +997,8 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
     cout << "Number of peakgroups prior to classifier-based filtering: " << totalGroupPreFilteringCounter << endl;
     cout << "Number of peakgroups prior to eicMaxGroups filtering: " << totalGroupsToAppendCounter << endl;
 
-    //Issue 692: peakGroupsD() includes reduceGroups()
-    if (groupingAlgorithmType != "D") {
+    //Issue 692: peakGroupsD() and later include reduceGroups()
+    if (groupingAlgorithmType == "A" || groupingAlgorithmType == "B" || groupingAlgorithmType == "C") {
         reduceGroups();
     }
 
