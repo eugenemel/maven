@@ -1144,6 +1144,8 @@ void processOptions(int argc, char* argv[]) {
             } else if (policy == "MINIMUM") {
                 mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MINIMUM;
             }
+        } else if (strcmp(argv[i], "--rtBoundsSlopeThreshold") == 0) {
+            rtBoundsSlopeThreshold = atof(argv[i+1]);
         }
 
         if (mzUtils::ends_with(optString, ".rt")) alignmentFile = optString;
