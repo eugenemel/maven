@@ -97,6 +97,8 @@ void TreeDockWidget::addMs1TitleBar() {
    titleBarWidget->addToolBar(toolBar);
 
    setTitleBarWidget(titleBarWidget);
+
+   connect(btnFilterMs1Scans, SIGNAL(clicked()), _mw, SLOT(showMs1Scans()));
 }
 
 //Issue 259
@@ -388,7 +390,12 @@ void TreeDockWidget::showInfo(bool isUpdateMassCalcGUI) {
                 Scan*  scan =  v.value<Scan*>();
 
                 if (scan->mslevel == 1){
-                    mainwindow->getSpectraWidget()->setScan(scan);
+
+                    //hide for performance reasons
+                    if (mainwindow->getSpectraWidget()->isVisible()) {
+                        mainwindow->getSpectraWidget()->setScan(scan);
+                    }
+
                 } else if (scan->mslevel == 2){
                     mainwindow->fragmentationSpectraWidget->setScan(scan);
 

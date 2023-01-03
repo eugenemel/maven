@@ -220,6 +220,7 @@ public slots:
     void showFragmentationScans(float pmz);
     void showConsensusFragmentationScans(float pmz);
     void showMs1Scans(float pmz);
+    void showMs1Scans(); //use lastMs1ScansMz value
     void showMs3Scans(float preMs1Mz, float preMs2Mz);
     QString groupTextExport(PeakGroup* group);
     void bookmarkPeakGroup(PeakGroup* group);
@@ -305,6 +306,7 @@ private:
 
     QToolBar* sideBar;
     QToolButton* addDockWidgetButton( QToolBar*, QDockWidget*, QIcon, QString);
+    float lastMs1ScansMz = -1.0f;
 
 signals:
     void updatedAvailableAdducts();

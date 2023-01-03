@@ -2244,9 +2244,17 @@ void MainWindow::showConsensusFragmentationScans(float pmz) {
     }
 }
 
+void MainWindow::showMs1Scans() {
+    if (lastMs1ScansMz > 0.0f) {
+        showMs1Scans(lastMs1ScansMz);
+    }
+}
+
 void MainWindow::showMs1Scans(float pmz) {
 
     if (!ms1ScansListWidget || !ms1ScansListWidget->isVisible() || samples.empty()) return;
+
+    lastMs1ScansMz = pmz;
 
     TreeDockWidgetMs1FilterOptions treeDockWidgetMs1FilterOptions = ms1ScansListWidget->getTreeDockWidgetMs1FilterOptions();
 
