@@ -7,6 +7,12 @@
 
 class MainWindow;
 
+//Issue 583
+class TreeDockWidgetMs1FilterOptions {
+public:
+    unsigned long numScansLimit = 500;
+};
+
 using namespace std;
 
 class TreeDockWidget: public QDockWidget {
@@ -22,10 +28,12 @@ public:
     //this->treeWidget will contain items only of this type
     inline void setExclusiveItemType(int exclusiveItemType){this->exclusiveItemType = exclusiveItemType;}
 
+    TreeDockWidgetMs1FilterOptions getTreeDockWidgetMs1FilterOptions();
+
 public slots: 
 	  //void showInfo(PeakGroup* group);
-	  QTreeWidgetItem* addItem(QTreeWidgetItem* parentItem, string key , float value,  int type);
-      QTreeWidgetItem* addItem(QTreeWidgetItem* parentItem, string key , string value, int type);
+      QTreeWidgetItem* addItem(QTreeWidgetItem* parentItem, string key, float value,  int type);
+      QTreeWidgetItem* addItem(QTreeWidgetItem* parentItem, string key, string value, int type);
 
 
       void showInfo(bool isUpdateMassCalcGUI=false);

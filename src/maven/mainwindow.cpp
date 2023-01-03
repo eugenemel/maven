@@ -2248,6 +2248,8 @@ void MainWindow::showMs1Scans(float pmz) {
 
     if (!ms1ScansListWidget || !ms1ScansListWidget->isVisible() || samples.empty()) return;
 
+    TreeDockWidgetMs1FilterOptions treeDockWidgetMs1FilterOptions = ms1ScansListWidget->getTreeDockWidgetMs1FilterOptions();
+
     float ppm = static_cast<float>(getUserPPM());
 
     float minMz = pmz - pmz * ppm / 1e6f;
@@ -2258,11 +2260,16 @@ void MainWindow::showMs1Scans(float pmz) {
     //Issue 392: Only display scans from visible samples
     vector<mzSample*> visibleSamples = getVisibleSamples();
 
+    unsigned long scansAdded = 0;
     for ( unsigned int i=0; i < visibleSamples.size(); i++ ) {
         for (unsigned int j=0; j < visibleSamples[i]->scans.size(); j++ ) {
             Scan* s = visibleSamples[i]->scans[j];
             if (s->mslevel == 1 && minMz >= s->minMz() && maxMz <= s->maxMz()) {
                 ms1ScansListWidget->addMs1ScanItem(s);
+                scansAdded++;
+            }
+            if (scansAdded > treeDockWidgetMs1FilterOptions.numScansLimit) {
+                return;
             }
         }
     }

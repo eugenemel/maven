@@ -751,6 +751,15 @@ void TreeDockWidget::setupMs1ScanHeader() {
     treeWidget->setHeaderHidden(false);
 }
 
+TreeDockWidgetMs1FilterOptions TreeDockWidget::getTreeDockWidgetMs1FilterOptions() {
+
+    TreeDockWidgetMs1FilterOptions treeDockWidgetMs1FilterOptions;
+
+    //TODO
+
+    return treeDockWidgetMs1FilterOptions;
+}
+
 void TreeDockWidget::addMs1ScanItem(Scan* scan) {
     if (!scan) return;
 
