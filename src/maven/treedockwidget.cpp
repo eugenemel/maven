@@ -58,7 +58,7 @@ void TreeDockWidget::addMs1TitleBar() {
 
    chkLimitScans = new QCheckBox();
    chkLimitScans->setText("Display first");
-   chkLimitScans->setChecked(false);
+   chkLimitScans->setChecked(true);
 
    spnLimit = new QSpinBox();
    spnLimit->setMinimum(1);
@@ -827,7 +827,11 @@ TreeDockWidgetMs1FilterOptions TreeDockWidget::getTreeDockWidgetMs1FilterOptions
 
     TreeDockWidgetMs1FilterOptions treeDockWidgetMs1FilterOptions;
 
-    //TODO
+    treeDockWidgetMs1FilterOptions.isLimitScans = chkLimitScans->isChecked();
+    treeDockWidgetMs1FilterOptions.numScansLimit = static_cast<unsigned long>(spnLimit->value());
+    treeDockWidgetMs1FilterOptions.txtNameFilter = txtSampleFilter->text();
+    treeDockWidgetMs1FilterOptions.minRt = static_cast<float>(spnRtMin->value());
+    treeDockWidgetMs1FilterOptions.maxRt = static_cast<float>(spnRtMax->value());
 
     return treeDockWidgetMs1FilterOptions;
 }
