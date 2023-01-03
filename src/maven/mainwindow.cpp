@@ -187,6 +187,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     covariantsPanel= new TreeDockWidget(this,"Covariants",3);
 
     ms1ScansListWidget = new TreeDockWidget(this, "MS1 List", 7);
+    ms1ScansListWidget->addMs1TitleBar();
     ms1ScansListWidget->setupMs1ScanHeader();
     ms1ScansListWidget->setExclusiveItemType(ScanType);
     ms1ScansListWidget->treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);

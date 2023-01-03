@@ -22,6 +22,11 @@ TreeDockWidget::TreeDockWidget(MainWindow *mw, QString title, int numColms) {
 		setObjectName(title);
 }
 
+//Issue 583
+void TreeDockWidget::addMs1TitleBar() {
+   qDebug() << "TreeDockWidget::addMs1TitleBar()";
+}
+
 //Issue 259
 void TreeDockWidget::addMs3TitleBar() {
 

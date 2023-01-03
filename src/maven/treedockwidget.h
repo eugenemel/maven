@@ -51,6 +51,7 @@ public slots:
       void addMs3ScanItem(Scan *scan);
       void addMs2ScanVectorItem(vector<Scan*> scans);
 
+      void addMs1TitleBar();
       void addMs3TitleBar();
       void ms3SearchFromSpinBoxes();
 
