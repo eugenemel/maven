@@ -100,6 +100,13 @@ public slots:
       MainWindow* _mw = nullptr;
       QDoubleSpinBox *ms1PrecMzSpn = nullptr;
       QDoubleSpinBox *ms2PrecMzSpn = nullptr;
+
+      QDoubleSpinBox *spnRtMin = nullptr;
+      QDoubleSpinBox *spnRtMax = nullptr;
+      QSpinBox *spnLimit = nullptr;
+      QCheckBox *chkLimitScans = nullptr;
+      QPushButton *btnFilterMs1Scans = nullptr;
+
 };
 
 #endif

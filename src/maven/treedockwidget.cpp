@@ -25,6 +25,74 @@ TreeDockWidget::TreeDockWidget(MainWindow *mw, QString title, int numColms) {
 //Issue 583
 void TreeDockWidget::addMs1TitleBar() {
    qDebug() << "TreeDockWidget::addMs1TitleBar()";
+
+   treeWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+
+   QToolBar *toolBar = new QToolBar(this);
+   toolBar->setFloatable(false);
+   toolBar->setMovable(false);
+
+   QLabel *lblRtScanRange = new QLabel("Scan RT:");
+
+   spnRtMin = new QDoubleSpinBox();
+   spnRtMin->setMinimum(0);
+   spnRtMin->setMaximum(999999999);
+   spnRtMin->setSingleStep(1);
+   spnRtMin->setMinimumWidth(120);
+   spnRtMin->setDecimals(1);
+   spnRtMin->setValue(0);
+   spnRtMin->setSuffix(QString(" min"));
+
+   QLabel *lblRtDash = new QLabel(" - ");
+
+   spnRtMax = new QDoubleSpinBox();
+   spnRtMax->setMinimum(0);
+   spnRtMax->setMaximum(999999999);
+   spnRtMax->setSingleStep(1);
+   spnRtMax->setDecimals(1);
+   spnRtMax->setValue(100);
+   spnRtMax->setSuffix(QString(" min"));
+
+   chkLimitScans = new QCheckBox();
+   chkLimitScans->setText("Display first");
+   chkLimitScans->setChecked(false);
+
+   spnLimit = new QSpinBox();
+   spnLimit->setMinimum(1);
+   spnLimit->setMaximum(999999999);
+   spnLimit->setSingleStep(1);
+   spnLimit->setValue(1000);
+   spnLimit->setSuffix(QString(" scans"));
+
+   btnFilterMs1Scans = new QPushButton("Update");
+
+   toolBar->addWidget(lblRtScanRange);
+   toolBar->addWidget(spnRtMin);
+   toolBar->addWidget(lblRtDash);
+   toolBar->addWidget(spnRtMax);
+   toolBar->addWidget(chkLimitScans);
+   toolBar->addWidget(spnLimit);
+   toolBar->addWidget(btnFilterMs1Scans);
+
+   QToolBar *labelToolBar = new QToolBar(this);
+   auto dummy1 = new QWidget(this);
+   dummy1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+   auto dummy2 = new QWidget(this);
+   dummy2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+   QLabel *lblTitle = new QLabel("MS1 Scans List");
+
+   labelToolBar->addWidget(dummy1);
+   labelToolBar->addWidget(lblTitle);
+   labelToolBar->addWidget(dummy2);
+
+   QMainWindow *titleBarWidget = new QMainWindow();
+
+   titleBarWidget->addToolBar(labelToolBar);
+   titleBarWidget->addToolBarBreak();
+   titleBarWidget->addToolBar(toolBar);
+
+   setTitleBarWidget(titleBarWidget);
 }
 
 //Issue 259
