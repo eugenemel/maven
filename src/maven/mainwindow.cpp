@@ -2262,13 +2262,19 @@ void MainWindow::showMs1Scans(float pmz) {
 
     unsigned long scansAdded = 0;
     for ( unsigned int i=0; i < visibleSamples.size(); i++ ) {
-        for (unsigned int j=0; j < visibleSamples[i]->scans.size(); j++ ) {
-            Scan* s = visibleSamples[i]->scans[j];
-            if (s->mslevel == 1 && minMz >= s->minMz() && maxMz <= s->maxMz()) {
+        mzSample *sample = visibleSamples[i];
+        if (treeDockWidgetMs1FilterOptions.sample && treeDockWidgetMs1FilterOptions.sample != sample) continue;
+
+        for (unsigned int j=0; j < sample->scans.size(); j++ ) {
+            Scan* s = sample->scans[j];
+            if (s->mslevel == 1 &&
+                    minMz >= s->minMz() && maxMz <= s->maxMz() &&
+                    s->rt >= treeDockWidgetMs1FilterOptions.minRt && s->rt <= treeDockWidgetMs1FilterOptions.maxRt) {
+
                 ms1ScansListWidget->addMs1ScanItem(s);
                 scansAdded++;
             }
-            if (scansAdded > treeDockWidgetMs1FilterOptions.numScansLimit) {
+            if (treeDockWidgetMs1FilterOptions.isLimitScans && scansAdded > treeDockWidgetMs1FilterOptions.numScansLimit) {
                 return;
             }
         }

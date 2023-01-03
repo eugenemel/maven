@@ -10,7 +10,14 @@ class MainWindow;
 //Issue 583
 class TreeDockWidgetMs1FilterOptions {
 public:
+
+    bool isLimitScans = false;
     unsigned long numScansLimit = 500;
+
+    mzSample *sample = nullptr; // use all samples
+
+    float minRt = 25.0f;
+    float maxRt = 35.0f;
 };
 
 using namespace std;
