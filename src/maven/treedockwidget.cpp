@@ -32,6 +32,9 @@ void TreeDockWidget::addMs1TitleBar() {
    toolBar->setFloatable(false);
    toolBar->setMovable(false);
 
+   txtSampleFilter = new QLineEdit();
+   txtSampleFilter->setPlaceholderText("Sample Name Filter");
+
    QLabel *lblRtScanRange = new QLabel("Scan RT:");
 
    spnRtMin = new QDoubleSpinBox();
@@ -66,6 +69,7 @@ void TreeDockWidget::addMs1TitleBar() {
 
    btnFilterMs1Scans = new QPushButton("Update");
 
+   toolBar->addWidget(txtSampleFilter);
    toolBar->addWidget(lblRtScanRange);
    toolBar->addWidget(spnRtMin);
    toolBar->addWidget(lblRtDash);

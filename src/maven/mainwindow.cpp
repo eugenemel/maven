@@ -2263,7 +2263,11 @@ void MainWindow::showMs1Scans(float pmz) {
     unsigned long scansAdded = 0;
     for ( unsigned int i=0; i < visibleSamples.size(); i++ ) {
         mzSample *sample = visibleSamples[i];
-        if (treeDockWidgetMs1FilterOptions.sample && treeDockWidgetMs1FilterOptions.sample != sample) continue;
+
+        if (!treeDockWidgetMs1FilterOptions.txtNameFilter.isEmpty()) {
+            QString sampleName(sample->sampleName.c_str());
+            if (!sampleName.contains(treeDockWidgetMs1FilterOptions.txtNameFilter, Qt::CaseInsensitive)) continue;
+        }
 
         for (unsigned int j=0; j < sample->scans.size(); j++ ) {
             Scan* s = sample->scans[j];

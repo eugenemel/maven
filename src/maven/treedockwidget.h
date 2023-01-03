@@ -12,12 +12,12 @@ class TreeDockWidgetMs1FilterOptions {
 public:
 
     bool isLimitScans = false;
-    unsigned long numScansLimit = 500;
+    unsigned long numScansLimit;
 
-    mzSample *sample = nullptr; // use all samples
+    QString txtNameFilter;
 
-    float minRt = 25.0f;
-    float maxRt = 35.0f;
+    float minRt;
+    float maxRt;
 };
 
 using namespace std;
@@ -106,6 +106,7 @@ public slots:
       QSpinBox *spnLimit = nullptr;
       QCheckBox *chkLimitScans = nullptr;
       QPushButton *btnFilterMs1Scans = nullptr;
+      QLineEdit *txtSampleFilter = nullptr;
 
 };
 
