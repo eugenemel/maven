@@ -825,7 +825,30 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
         //vector<string>fields;
         //mzUtils::split(line.toStdString(), sep, fields);
 
-        QStringList fieldsA = line.split(sep);
+        //Issue 567
+        //Solution taken from https://www.qtcentre.org/threads/37304-Split-strings-using-QStringList-split()-but-ignore-quotes
+        QStringList fieldsA;
+        if (sep == ',') {
+
+            bool inside = (line.at(0) == "\""); //true if the first character is "
+
+            QStringList tmpList = line.split(QRegExp("\""), QString::SkipEmptyParts); // Split by " and make sure you don't have an empty string at the beginning
+            QStringList csvlist;
+
+            foreach (QString s, tmpList) {
+                if (inside) { // If 's' is inside quotes ...
+                    csvlist.append(s); // ... get the whole string
+                } else { // If 's' is outside quotes ...
+                    csvlist.append(s.split(",", QString::SkipEmptyParts)); // ... get the splitted string
+                }
+                inside = !inside;
+                }
+
+            fieldsA = csvlist;
+        } else {
+            fieldsA = line.split(sep);
+        }
+
         QVector<QString> fields = fieldsA.toVector();
 
         for(unsigned int i=0; i < fields.size(); i++ ) {
