@@ -24,3 +24,7 @@ src/peakdetector/peakdetector.pro.user
 src/peakdetector/tmp
 src/peakdetector/Makefile
 src/peakdetector/.DS_Store
+
+# tests
+src/maven_tests/testqstring/testqstring.app/
+src/maven_tests/testqstring2/testqstring2.app/
