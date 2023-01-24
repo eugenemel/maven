@@ -7,6 +7,4 @@ TARGET = testqstring
 INCLUDEPATH += .
 DEFINES += QT_DEPRECATED_WARNINGS
 
-# Input
 SOURCES += testqstring.cpp
-
