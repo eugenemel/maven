@@ -2,4 +2,5 @@ TEMPLATE = subdirs
 CONFIG += ordered qt thread
 SUBDIRS += \
         testqstring \
-        testqstring2
+        testqstring2 \
+        testsimpleparsimony
