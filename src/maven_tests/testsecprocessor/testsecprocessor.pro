@@ -2,9 +2,11 @@
 # See https://doc.qt.io/qt-5/qttestlib-tutorial1-example.html
 
 # codebase paths
-CORE = ../../maven_core
-NATSORT = .
-MAVEN = ../maven/
+CORE = ../../../../maven_core
+NATSORT = ../../peakdetector/
+MAVEN = ../../maven
+
+include($$CORE/libmaven.pri)
 
 QT += core
 QT += sql gui
@@ -28,7 +30,5 @@ CONFIG -= network gui opengl
 CONFIG += sql qt std++14
 
 DEFINES += QT_DEPRECATED_WARNINGS
-
-QMAKE_CXXFLAGS += -D_LARGEFILE_SOURCE
 
 SOURCES += testsecprocessor.cpp

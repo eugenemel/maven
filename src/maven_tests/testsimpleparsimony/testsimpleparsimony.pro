@@ -2,13 +2,15 @@
 # See https://doc.qt.io/qt-5/qttestlib-tutorial1-example.html
 
 # codebase paths
-CORE = ../../maven_core
-NATSORT = .
-MAVEN = ../maven/
+CORE = ../../../../maven_core
+NATSORT = ../../peakdetector/
+MAVEN = ../../maven
+
+include($$CORE/libmaven.pri)
 
 QT += testlib
 TEMPLATE = app
-TARGET = testqstring
+TARGET = testsimpleparsimony
 INCLUDEPATH += . $$CORE/pugixml/src/ $$CORE/libmaven $$CORE/pugixml/src $$CORE/libneural $$CORE/MSToolkit/include $$CORE $$NATSORT
 LIBS += -L. -L$$CORE/build/lib  -lmaven -lpugixml -lneural -lmstoolkitlite -lz
 
