@@ -2,9 +2,11 @@
 # See https://doc.qt.io/qt-5/qttestlib-tutorial1-example.html
 
 # codebase paths
-CORE = ../../maven_core
-NATSORT = .
-MAVEN = ../maven/
+CORE = ../../../../maven_core
+NATSORT = ../../peakdetector/
+MAVEN = ../../maven
+
+include($$CORE/libmaven.pri)
 
 QT += core
 QT += sql gui
@@ -31,4 +33,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 QMAKE_CXXFLAGS += -D_LARGEFILE_SOURCE
 
-SOURCES += testmzkitchenprocessor.cpp
+HEADERS += $$MAVEN/database.h \
+           $$MAVEN/projectDB.h
+
+SOURCES += testmzkitchenprocessor.cpp \
+           $$MAVEN/database.cpp \
+           $$MAVEN/projectDB.cpp
