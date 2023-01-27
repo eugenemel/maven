@@ -1,11 +1,3 @@
-#ifndef _OFF_T
-#define _OFF_T
-#include <sys/_types.h> /* __darwin_off_t */
-typedef __darwin_off_t          off_t;
-#endif  /* _OFF_T */
-//#define _LARGEFILE_SOURCE
-typedef off_t f_off;
-
 #include <fstream>
 #include <vector>
 #include <map>
@@ -32,7 +24,7 @@ typedef off_t f_off;
 
 //fields
 Database DB;
-string mzkitchenMspFile = "";
+static string mzkitchenMspFile = "";
 
 //functions
 void processCLIArguments(int argc, char* argv[]);

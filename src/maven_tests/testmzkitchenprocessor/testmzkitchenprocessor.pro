@@ -31,8 +31,6 @@ CONFIG += sql qt std++14
 
 DEFINES += QT_DEPRECATED_WARNINGS
 
-QMAKE_CXXFLAGS += -D_LARGEFILE_SOURCE
-
 HEADERS += $$MAVEN/database.h \
            $$MAVEN/projectDB.h
 
