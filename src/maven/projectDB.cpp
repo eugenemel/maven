@@ -464,7 +464,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                     query3.addBindValue(p.peakAreaTop);
                     query3.addBindValue(p.peakAreaFractional);
                     query3.addBindValue(p.peakRank);
-                    query3.addBindValue(p.peakIntensity);;
+                    query3.addBindValue(p.peakIntensity);
                     query3.addBindValue(p.peakBaseLineLevel);
                     query3.addBindValue(p.peakMz);
                     query3.addBindValue(p.medianMz);
@@ -491,58 +491,77 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
         QSqlQuery query4(sqlDB);
         if(!query4.exec("create table IF NOT EXISTS peakgroupmatch( \
                        matchId integer primary key AUTOINCREMENT, \
+                       \
                        groupId int,\
                        compoundId varchar(254),\
                        compoundName varchar(254),\
                        compoundDB varchar(254),\
-                       \
                        ppmError real,\
                        rtError real,\
+                       \
                        numMatches int,\
+                       numDiagnosticMatches int,\
+                       numAcylChainMatches int,\
+                       numSn1Matches int,\
+                       numSn2Matches int,\
+                       numSn3Matches int,\
+                       numSn4Matches int,\
+                       numOxidations int,\
+                       isHasPrecursorMatch int,\
+                       \
                        fractionMatched real,\
                        spearmanRankCorrelation real,\
-                       \
                        ticMatched real,\
                        mzFragError real,\
                        dotProduct real,\
                        hypergeomScore real,\
                        mvhScore real,\
-                       \
                        weightedDotProduct real\
                        \
                        )"))  qDebug() << query4.lastError();
 
         QSqlQuery query5(sqlDB);
         query5.prepare("insert into peakgroupmatch values("
-                       "NULL,?,?,?,?,"
-                       "?,?,?,?,?,"
-                       "?,?,?,?,?,"
-                       "?)"
+                       "NULL,"                //primary key
+                       "?,?,?,?,?,?,"         // 6 compound, m/z, and RT
+                       "?,?,?,?,?,?,?,?,?,"   // 9 match counts
+                       "?,?,?,?,?,?,?,?"      // 8 similarity metrics
+                       ")"
                        );
 
         for (pair<Compound*, FragmentationMatchScore> pair : g->compounds) {
 
+             //[1] compound, m/z, and RT (6)
              query5.addBindValue(QString::number(lastInsertGroupId));
              query5.addBindValue(QString(pair.first->id.c_str()));
              query5.addBindValue(QString(pair.first->name.c_str()));
              query5.addBindValue(QString(pair.first->db.c_str()));
-
              query5.addBindValue(pair.second.ppmError);
              float rtError = -1.0f;
              if (pair.first->expectedRt > 0) {
                 rtError = abs(pair.first->expectedRt - g->medianRt());
              }
              query5.addBindValue(rtError);
+
+             //[2] match counts (9)
              query5.addBindValue(pair.second.numMatches);
+             query5.addBindValue(pair.second.numDiagnosticMatches);
+             query5.addBindValue(pair.second.numAcylChainMatches);
+             query5.addBindValue(pair.second.numSn1Matches);
+             query5.addBindValue(pair.second.numSn2Matches);
+             query5.addBindValue(pair.second.numSn3Matches);
+             query5.addBindValue(pair.second.numSn4Matches);
+             query5.addBindValue(pair.second.numOxidations);
+             query5.addBindValue(pair.second.isHasPrecursorMatch ? 1 : 0);
+
+             //[3] spectral similarity metrics (8)
              query5.addBindValue(pair.second.fractionMatched);
              query5.addBindValue(pair.second.spearmanRankCorrelation);
-
              query5.addBindValue(pair.second.ticMatched);
              query5.addBindValue(pair.second.mzFragError);
              query5.addBindValue(pair.second.dotProduct);
              query5.addBindValue(pair.second.hypergeomScore);
              query5.addBindValue(pair.second.mvhScore);
-
              query5.addBindValue(pair.second.weightedDotProduct);
 
              if(!query5.exec())  qDebug() << query5.lastError();
