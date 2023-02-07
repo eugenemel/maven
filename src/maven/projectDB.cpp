@@ -488,6 +488,24 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
      //Issue 546: featurization table
      if (!g->compounds.empty()) {
 
+        QSqlQuery queryCheckCols(sqlDB);
+
+        if (!queryCheckCols.exec("pragma table_info(peakgroupmatch);")) {
+            qDebug() << "Ho..." << queryCheckCols.lastError();
+        }
+
+        unsigned int counter = 0;
+        while (queryCheckCols.next()) {
+            counter++;
+        }
+
+        if (counter < 24) {
+            QSqlQuery dropPeakGroupMatch(sqlDB);
+            if (! dropPeakGroupMatch.exec("DROP TABLE peakgroupmatch;")){
+                qDebug() << "Ho..." << dropPeakGroupMatch.lastError();
+            }
+        }
+
         QSqlQuery query4(sqlDB);
         if(!query4.exec("create table IF NOT EXISTS peakgroupmatch( \
                        matchId integer primary key AUTOINCREMENT, \
