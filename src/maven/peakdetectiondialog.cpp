@@ -145,6 +145,9 @@ void PeakDetectionDialog::show() {
         fragScoringAlgorithm->addItem(scoringAlgorithm.c_str());
     }
 
+    //Issue 606
+    fragScoringAlgorithm->addItem(MzKitchenProcessor::LIPID_SCORING_NAME);
+
     compoundPPMWindow->setValue( mainwindow->getUserPPM() );  //total ppm window, not half sized.
 
     QDialog::show();
@@ -307,6 +310,8 @@ void PeakDetectionDialog::findPeaks() {
 
         //Issue 197
         shared_ptr<PeaksSearchParameters> peaksSearchParameters = getPeaksSearchParameters();
+        peakupdater->peaksSearchParameters = peaksSearchParameters;
+
         string encodedParams = peaksSearchParameters->encodeParams();
         string displayParams = encodedParams;
         replace(displayParams.begin(), displayParams.end(), ';', '\n');

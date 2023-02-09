@@ -414,6 +414,10 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
     qDebug() << "BackgroundPeakUpdate:processCompoundSlices() done. " << timer.elapsed() << " sec.";
 }
 
+void BackgroundPeakUpdate::updateLipidSearchParameters(shared_ptr<LCLipidSearchParameters> params){
+    //TODO
+}
+
 void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName) { 
     if (slices.size() == 0 ) return;
     allgroups.clear();
@@ -445,6 +449,12 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
     IsotopeParameters isotopeParameters = mainwindow->getIsotopeParameters();
     isotopeParameters.ppm = compoundPPMWindow;
+
+    //Issue 606
+    shared_ptr<LCLipidSearchParameters> lipidSearchParameters = shared_ptr<LCLipidSearchParameters>(new LCLipidSearchParameters());
+    if (scoringScheme == MzKitchenProcessor::LIPID_SCORING_NAME){
+        updateLipidSearchParameters(lipidSearchParameters);
+    }
 
     for (unsigned int s=0; s < slices.size();  s++ ) {
         mzSlice* slice = slices[s];
@@ -544,7 +554,12 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             //TODO: restructuring, expect that compound is always nullptr
 
-            matchFragmentation(&group, searchableDatabase);
+            if (scoringScheme == MzKitchenProcessor::LIPID_SCORING_NAME){
+                MzKitchenProcessor::assignBestLipidToGroup(&group, searchableDatabase, lipidSearchParameters);
+            } else {
+                matchFragmentation(&group, searchableDatabase);
+            }
+
             //If this is successful, then group.compound will not be nullptr.
 
             if (!isRetainUnmatchedCompounds && !group.compound){
