@@ -415,7 +415,12 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 }
 
 void BackgroundPeakUpdate::updateLipidSearchParameters(shared_ptr<LCLipidSearchParameters> params){
-    //TODO
+    string encodedPeaksParameters = peaksSearchParameters->encodeParams();
+
+    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedPeaksParameters);
+    params->fillInBaseParams(decodedMap);
+
+    //TODO: lipid-specific parameters
 }
 
 void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName) { 
