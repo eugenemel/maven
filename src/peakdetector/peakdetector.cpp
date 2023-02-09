@@ -2276,6 +2276,11 @@ void mzkitchenSearch() {
 
     if (mzkitchenSearchType == "lipidSearch") {
 
+        cout << "MzKitchenProcessor::matchLipids_LC() --> MzKitchenProcessor::assignBestLipidToGroup() for "
+             << allgroups.size()
+             << " lipids."
+             << endl;
+
         shared_ptr<LCLipidSearchParameters> lipidSearchParams = LCLipidSearchParameters::decode(mzkitchenSearchParameters);
         lipidSearchParams->searchVersion = "lipids_lclipidprocessor_v1";
         MzKitchenProcessor::matchLipids_LC(allgroups, mzkitchenCompounds, lipidSearchParams, false);
