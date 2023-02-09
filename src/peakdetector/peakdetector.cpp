@@ -2282,6 +2282,7 @@ void mzkitchenSearch() {
              << endl;
 
         shared_ptr<LCLipidSearchParameters> lipidSearchParams = LCLipidSearchParameters::decode(mzkitchenSearchParameters);
+        lipidSearchParams->IDisRequireMatchingAdduct = false; //this parameter must be false in a peakdetector context
         lipidSearchParams->searchVersion = "lipids_lclipidprocessor_v1";
         MzKitchenProcessor::matchLipids_LC(allgroups, mzkitchenCompounds, lipidSearchParams, false);
         searchTableData.insert(make_pair("clamDB", QString(lipidSearchParams->encodeParams().c_str())));
