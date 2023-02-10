@@ -550,8 +550,6 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
                 matchFragmentation(&group, searchableDatabase);
             }
 
-            //If this is successful, then group.compound will not be nullptr.
-
             if (!isRetainUnmatchedCompounds && !group.compound){
                 continue;
             }
@@ -714,7 +712,7 @@ void BackgroundPeakUpdate::cleanup() {
     allgroups.clear();
 }
 
-vector<CompoundIon> BackgroundPeakUpdate::prepareCompoundDatabase(vector<Compound*> set) {
+vector<CompoundIon> BackgroundPeakUpdate::prepareCompoundDatabase(vector<Compound*> set, bool debug) {
 
     vector<Adduct*> validAdducts;
     for (Adduct * a : DB.adductsDB) {
@@ -767,6 +765,14 @@ vector<CompoundIon> BackgroundPeakUpdate::prepareCompoundDatabase(vector<Compoun
 
         return lhs.adduct->name < rhs.adduct->name;
     });
+
+    if (debug) {
+        cout << "searchableDatabase:\n";
+        for (auto compoundIon : searchableDatabase) {
+            cout << compoundIon.toString() << "\n";
+        }
+        cout << endl;
+    }
 
     return searchableDatabase;
 }

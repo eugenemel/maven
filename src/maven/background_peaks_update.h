@@ -159,7 +159,7 @@ private:
   void processCompounds(vector<Compound*> set, string setName);
   void processCompoundSlices(vector<mzSlice*>&slices, string setName);
   void processSRMTransitions(vector<mzSlice*>&slices);
-  vector<CompoundIon> prepareCompoundDatabase(vector<Compound*> set);
+  vector<CompoundIon> prepareCompoundDatabase(vector<Compound*> set, bool debug=false);
   void computePeaks();
   void processMassSlices();
   void findPeaksOrbi(void);
