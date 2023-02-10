@@ -317,11 +317,15 @@ void PeakDetectionDialog::findPeaks() {
         //Issue 197
         shared_ptr<PeaksSearchParameters> peaksSearchParameters = getPeaksSearchParameters();
         peakupdater->peaksSearchParameters = peaksSearchParameters;
+        string encodedParams = peaksSearchParameters->encodeParams();
 
         //Issue 606: lipid-search specific parameters
         peakupdater->lipidSearchParameters = getLipidSearchParameters();
 
-        string encodedParams = peaksSearchParameters->encodeParams();
+        if (peakupdater->scoringScheme == MzKitchenProcessor::LIPID_SCORING_NAME) {
+            encodedParams = peakupdater->lipidSearchParameters->encodeParams();
+        }
+
         string displayParams = encodedParams;
         replace(displayParams.begin(), displayParams.end(), ';', '\n');
         replace(displayParams.begin(), displayParams.end(), '=', ' ');
