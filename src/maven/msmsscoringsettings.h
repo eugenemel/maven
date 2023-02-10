@@ -13,6 +13,7 @@ class MSMSScoringSettingsDialog : public QDialog, public Ui_MSMSScoringSettingsD
 
         public slots:
              void setLipidClassAdductFile();
+             void bringIntoView();
 };
 
 #endif

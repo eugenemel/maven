@@ -13,3 +13,13 @@ void MSMSScoringSettingsDialog::setLipidClassAdductFile(){
 
     this->classAdductFileName->setText(name);
 }
+
+void MSMSScoringSettingsDialog::bringIntoView(){
+    if (isVisible()){
+        show();
+        raise();
+        activateWindow();
+    } else {
+        show();
+    }
+}
