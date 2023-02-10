@@ -273,11 +273,11 @@ void PeakDetectionDialog::findPeaks() {
 
         peakupdater->mustHaveMS2 = featureMustHaveMs2->isChecked();
         peakupdater->compoundMustHaveMs2 = compoundMustHaveMS2->isChecked();
-        peakupdater->productPpmTolr = productPpmTolr->value();
+        peakupdater->productPpmTolr = scoringSettingsDialog->spnMatchTol->value();
         peakupdater->scoringScheme  = fragScoringAlgorithm->currentText();
-        peakupdater->minFragmentMatchScore = fragMinScore->value();
-        peakupdater->minNumFragments = fragMinPeaks->value();
-        peakupdater->minNumDiagnosticFragments = spnMinDiagnostic->value();
+        peakupdater->minFragmentMatchScore = scoringSettingsDialog->spnMinScore->value();
+        peakupdater->minNumFragments = scoringSettingsDialog->spnMinMatches->value();
+        peakupdater->minNumDiagnosticFragments = scoringSettingsDialog->spnMinDiagnostic->value();
         peakupdater->excludeIsotopicPeaks = excludeIsotopicPeaks->isChecked();
 
         string policyText = peakGroupCompoundMatchPolicyBox->itemText(peakGroupCompoundMatchPolicyBox->currentIndex()).toStdString();
@@ -495,11 +495,11 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
 
         //ms2 matching
         //peaksSearchParameters->ms2IsMatchMs2 = this->compoundMustHaveMS2->isChecked() / this->featureMustHaveMs2->isChecked()
-        peaksSearchParameters->ms2MinNumMatches = this->fragMinPeaks->value();
-        peaksSearchParameters->ms2MinNumDiagnosticMatches = this->spnMinDiagnostic->value();
-        peaksSearchParameters->ms2PpmTolr = static_cast<float>(this->productPpmTolr->value());
+        peaksSearchParameters->ms2MinNumMatches = scoringSettingsDialog->spnMinMatches->value();
+        peaksSearchParameters->ms2MinNumDiagnosticMatches = scoringSettingsDialog->spnMinDiagnostic->value();
+        peaksSearchParameters->ms2PpmTolr = static_cast<float>(scoringSettingsDialog->spnMatchTol->value());
         peaksSearchParameters->ms2ScoringAlgorithm = this->fragScoringAlgorithm->currentText().toStdString();
-        peaksSearchParameters->ms2MinScore = static_cast<float>(this->fragMinScore->value());
+        peaksSearchParameters->ms2MinScore = static_cast<float>(scoringSettingsDialog->spnMinScore->value());
 
         //Matching Options
         peaksSearchParameters->matchingIsRequireAdductPrecursorMatch = this->chkRequireAdductMatch->isChecked();

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>813</width>
-    <height>978</height>
+    <height>958</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -762,136 +762,6 @@
          </layout>
         </widget>
        </item>
-       <item row="2" column="0" rowspan="2">
-        <widget class="QGroupBox" name="grpFragMatching">
-         <property name="title">
-          <string>Fragmentation Matching</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_9">
-          <item row="6" column="0">
-           <widget class="QLabel" name="label_20">
-            <property name="text">
-             <string>Minimum Score</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <widget class="QComboBox" name="fragScoringAlgorithm"/>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_18">
-            <property name="text">
-             <string>Scoring Algorithm</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="1">
-           <widget class="QDoubleSpinBox" name="fragMinScore">
-            <property name="maximum">
-             <double>10000000.000000000000000</double>
-            </property>
-            <property name="value">
-             <double>10.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QSpinBox" name="fragMinPeaks">
-            <property name="suffix">
-             <string/>
-            </property>
-            <property name="prefix">
-             <string/>
-            </property>
-            <property name="minimum">
-             <number>0</number>
-            </property>
-            <property name="maximum">
-             <number>1000000</number>
-            </property>
-            <property name="value">
-             <number>3</number>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_19">
-            <property name="text">
-             <string>Match at Least X Fragments</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="lblDiagnostic">
-            <property name="text">
-             <string>Match at Least X Diagnostic Fragments</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_17">
-            <property name="text">
-             <string>Fragment PPM Tolr</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QSpinBox" name="spnMinDiagnostic"/>
-          </item>
-          <item row="2" column="1">
-           <widget class="QDoubleSpinBox" name="productPpmTolr">
-            <property name="prefix">
-             <string/>
-            </property>
-            <property name="suffix">
-             <string> ppm</string>
-            </property>
-            <property name="decimals">
-             <number>1</number>
-            </property>
-            <property name="minimum">
-             <double>0.100000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>10000.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>1.000000000000000</double>
-            </property>
-            <property name="value">
-             <double>20.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1">
-           <widget class="QPushButton" name="btnFragMatchingAdvanced">
-            <property name="text">
-             <string>Configure MS/MS Matching Scoring Settings</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="label_24">
-            <property name="text">
-             <string>MS/MS Matching Scoring Settings</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-         <zorder>productPpmTolr</zorder>
-         <zorder>label_17</zorder>
-         <zorder>label_19</zorder>
-         <zorder>label_18</zorder>
-         <zorder>fragScoringAlgorithm</zorder>
-         <zorder>fragMinScore</zorder>
-         <zorder>label_20</zorder>
-         <zorder>fragMinPeaks</zorder>
-         <zorder>spnMinDiagnostic</zorder>
-         <zorder>lblDiagnostic</zorder>
-         <zorder>btnFragMatchingAdvanced</zorder>
-         <zorder>label_24</zorder>
-        </widget>
-       </item>
        <item row="4" column="0">
         <widget class="QGroupBox" name="grpMatchingOptions">
          <property name="title">
@@ -923,6 +793,43 @@
            </widget>
           </item>
          </layout>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QGroupBox" name="grpFragMatching">
+         <property name="title">
+          <string>Fragmentation Matching</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_9">
+          <item row="1" column="1">
+           <widget class="QComboBox" name="fragScoringAlgorithm"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_18">
+            <property name="text">
+             <string>Scoring Algorithm</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QPushButton" name="btnFragMatchingAdvanced">
+            <property name="text">
+             <string>Configure MS/MS Matching Scoring Settings</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_24">
+            <property name="text">
+             <string>MS/MS Matching Scoring Settings</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+         <zorder>label_18</zorder>
+         <zorder>fragScoringAlgorithm</zorder>
+         <zorder>btnFragMatchingAdvanced</zorder>
+         <zorder>label_24</zorder>
         </widget>
        </item>
       </layout>
