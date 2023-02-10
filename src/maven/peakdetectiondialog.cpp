@@ -526,7 +526,17 @@ shared_ptr<LCLipidSearchParameters> PeakDetectionDialog::getLipidSearchParameter
     unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedPeaksParameters);
     lipidSearchParameters->fillInBaseParams(decodedMap);
 
-    //TODO: fill out rest of parameters
+    lipidSearchParameters->ms2MinNumAcylMatches = scoringSettingsDialog->spnMinAcyl->value();
+    lipidSearchParameters->ms2sn1MinNumMatches = scoringSettingsDialog->spnMinSn1->value();
+    lipidSearchParameters->ms2sn2MinNumMatches = scoringSettingsDialog->spnMinSn2->value();
+    lipidSearchParameters->ms2IsRequirePrecursorMatch = scoringSettingsDialog->chkRequirePrecursorInMS2->isChecked();
+
+    QString classAdductFile = scoringSettingsDialog->classAdductFileName->text();
+    if (QFile::exists(classAdductFile)) {
+        lipidSearchParameters->addClassAdductParamsFromCSVFile(classAdductFile.toStdString(), false);
+    } else {
+        qDebug() << "Class Adduct File '" << classAdductFile << "' Could not be read or does not exist.";
+    }
 
     return lipidSearchParameters;
 }
