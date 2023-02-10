@@ -547,17 +547,22 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                        ")"
                        );
 
-        for (pair<Compound*, FragmentationMatchScore> pair : g->compounds) {
+        for (pair<CompoundIon, FragmentationMatchScore> pair : g->compounds) {
+
+             string compoundId = pair.first.compound ? pair.first.compound->id.c_str() : "";
+             string compoundName = pair.first.compound ? pair.first.compound->name : "";
+             string compoundDb = pair.first.compound ? pair.first.compound->db : "";
+             float compoundExpectedRt = pair.first.compound ? pair.first.compound->expectedRt : -1.0f;
 
              //[1] compound, m/z, and RT (6)
              query5.addBindValue(QString::number(lastInsertGroupId));
-             query5.addBindValue(QString(pair.first->id.c_str()));
-             query5.addBindValue(QString(pair.first->name.c_str()));
-             query5.addBindValue(QString(pair.first->db.c_str()));
+             query5.addBindValue(QString(compoundId.c_str()));
+             query5.addBindValue(QString(compoundName.c_str()));
+             query5.addBindValue(QString(compoundDb.c_str()));
              query5.addBindValue(pair.second.ppmError);
              float rtError = -1.0f;
-             if (pair.first->expectedRt > 0) {
-                rtError = abs(pair.first->expectedRt - g->medianRt());
+             if (compoundExpectedRt > 0) {
+                rtError = abs(compoundExpectedRt - g->medianRt());
              }
              query5.addBindValue(rtError);
 
