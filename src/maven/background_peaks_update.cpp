@@ -755,11 +755,11 @@ vector<CompoundIon> BackgroundPeakUpdate::prepareCompoundDatabase(vector<Compoun
     }
 
     sort(searchableDatabase.begin(), searchableDatabase.end(), [](CompoundIon& lhs, CompoundIon& rhs){
-        if (lhs.precursorMz < rhs.precursorMz) {
+        if (lhs.precursorMz != rhs.precursorMz) {
             return lhs.precursorMz < rhs.precursorMz;
         }
 
-        if (lhs.compound->name < rhs.compound->name){
+        if (lhs.compound->name != rhs.compound->name){
             return lhs.compound->name < rhs.compound->name;
         }
 
