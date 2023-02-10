@@ -2289,6 +2289,11 @@ void mzkitchenSearch() {
 
     } else if (mzkitchenSearchType == "metaboliteSearch") {
 
+        cout << "MzKitchenProcessor::matchMetabolites() --> MzKitchenProcessor::assignBestMetaboliteToGroup() for "
+             << allgroups.size()
+             << " lipids."
+             << endl;
+
         shared_ptr<MzkitchenMetaboliteSearchParameters> metaboliteSearchParams = MzkitchenMetaboliteSearchParameters::decode(mzkitchenSearchParameters);
         metaboliteSearchParams->searchVersion = "mzkitchen22_metabolite_search";
         MzKitchenProcessor::matchMetabolites(allgroups, mzkitchenCompounds, metaboliteSearchParams, false);
