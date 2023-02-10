@@ -10,6 +10,9 @@ class MSMSScoringSettingsDialog : public QDialog, public Ui_MSMSScoringSettingsD
 
 		public:
              MSMSScoringSettingsDialog(QWidget *parent);
+
+        public slots:
+             void setLipidClassAdductFile();
 };
 
 #endif

@@ -5,3 +5,11 @@ MSMSScoringSettingsDialog::MSMSScoringSettingsDialog(QWidget *parent) :
         setupUi(this);
 		setModal(false);
 }
+
+void MSMSScoringSettingsDialog::setLipidClassAdductFile(){
+
+    const QString name = QFileDialog::getOpenFileName(this,
+                "Select Lipid Class/Adduct Parameters ", ".",tr("Comma-Separated Values (*.csv)"));
+
+    this->classAdductFileName->setText(name);
+}

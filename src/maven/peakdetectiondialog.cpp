@@ -20,6 +20,7 @@ PeakDetectionDialog::PeakDetectionDialog(QWidget *parent) :
     scoringSettingsDialog->setWindowFlags(scoringSettingsDialog->windowFlags() | Qt::WindowStaysOnTopHint);
     connect(scoringSettingsDialog->btnOK, SIGNAL(clicked(bool)), scoringSettingsDialog, SLOT(hide()));
     connect(btnFragMatchingAdvanced, SIGNAL(clicked()), scoringSettingsDialog, SLOT(show()));
+    connect(scoringSettingsDialog->btnLoadClassAdduct, SIGNAL(clicked()), scoringSettingsDialog, SLOT(setLipidClassAdductFile()));
 
     _featureDetectionType= CompoundDB;
 
