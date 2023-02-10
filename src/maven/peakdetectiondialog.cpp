@@ -318,6 +318,9 @@ void PeakDetectionDialog::findPeaks() {
         shared_ptr<PeaksSearchParameters> peaksSearchParameters = getPeaksSearchParameters();
         peakupdater->peaksSearchParameters = peaksSearchParameters;
 
+        //Issue 606: lipid-search specific parameters
+        peakupdater->lipidSearchParameters = getLipidSearchParameters();
+
         string encodedParams = peaksSearchParameters->encodeParams();
         string displayParams = encodedParams;
         replace(displayParams.begin(), displayParams.end(), ';', '\n');
@@ -511,5 +514,20 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
         //peak group clustering is not retained, as clusters can be easily added or removed with different parameters in the GUI
 
         return peaksSearchParameters;
+}
+
+shared_ptr<LCLipidSearchParameters> PeakDetectionDialog::getLipidSearchParameters() {
+    shared_ptr<LCLipidSearchParameters> lipidSearchParameters = shared_ptr<LCLipidSearchParameters>(new LCLipidSearchParameters());
+
+    shared_ptr<PeaksSearchParameters> peaksSearchParameters = getPeaksSearchParameters();
+
+    string encodedPeaksParameters = peaksSearchParameters->encodeParams();
+
+    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedPeaksParameters);
+    lipidSearchParameters->fillInBaseParams(decodedMap);
+
+    //TODO: fill out rest of parameters
+
+    return lipidSearchParameters;
 }
 

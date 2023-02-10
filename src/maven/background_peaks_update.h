@@ -116,6 +116,9 @@ public:
    //peaks search parameters
    shared_ptr<PeaksSearchParameters> peaksSearchParameters = shared_ptr<PeaksSearchParameters>(new PeaksSearchParameters());
 
+   //Issue 606: lipid specific parameters
+   shared_ptr<LCLipidSearchParameters> lipidSearchParameters = shared_ptr<LCLipidSearchParameters>(new LCLipidSearchParameters());
+
 
 //CLASS FUNCTIONS
  static vector<EIC*> pullEICs(mzSlice* slice,
@@ -167,8 +170,6 @@ private:
   void printSettings();
   void matchFragmentation(PeakGroup* g, vector<CompoundIon>& searchableDatabase);
   bool sliceHasMS2Event(mzSlice* slice);
-
-  void updateLipidSearchParameters(shared_ptr<LCLipidSearchParameters> params);
 
   private:
   volatile bool _stopped;
