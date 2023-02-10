@@ -5,10 +5,13 @@
 #include "stable.h"
 #include "database.h"
 #include "mainwindow.h"
+#include "msmsscoringsettings.h"
 
 class MainWindow;
 class TableDockWidget;
 class BackgroundPeakUpdate;
+class MSMSScoringSettingsDialog;
+
 extern Database DB; 
 
 
@@ -43,6 +46,7 @@ class PeakDetectionDialog : public QDialog, public Ui_PeakDetectionDialog
    				BackgroundPeakUpdate* peakupdater;
 				FeatureDetectionType _featureDetectionType;
                 shared_ptr<PeaksSearchParameters> getPeaksSearchParameters();
+                MSMSScoringSettingsDialog *scoringSettingsDialog;
 };
 
 #endif

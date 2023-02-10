@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MSMSScoringSettingsDialog</class>
+ <widget class="QDialog" name="MSMSScoringSettingsDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>507</width>
+    <height>438</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MS/MS Scoring Settings</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0" colspan="2">
+    <widget class="QGroupBox" name="groupBox_5">
+     <property name="title">
+      <string>MS/MS Scoring Settings</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_6">
+      <item row="3" column="2">
+       <widget class="QDoubleSpinBox" name="spnMatchTol">
+        <property name="suffix">
+         <string> ppm</string>
+        </property>
+        <property name="decimals">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <double>1000.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>1.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>20.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="lblMatchTol">
+        <property name="text">
+         <string>Spectral Match Tolerance</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QSpinBox" name="spnMinMatches">
+        <property name="suffix">
+         <string> or more fragments</string>
+        </property>
+        <property name="prefix">
+         <string>match </string>
+        </property>
+        <property name="maximum">
+         <number>99999999</number>
+        </property>
+        <property name="value">
+         <number>3</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="lblSpectralMatches">
+        <property name="text">
+         <string>Spectral Matches</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="lblDiagnosticMatches">
+        <property name="text">
+         <string>Diagnostic Matches</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="lblMinScore">
+        <property name="text">
+         <string>Minimum Score</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QSpinBox" name="spnMinDiagnostic">
+        <property name="suffix">
+         <string> or more fragments</string>
+        </property>
+        <property name="prefix">
+         <string>match </string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QDoubleSpinBox" name="spnMinScore">
+        <property name="maximum">
+         <double>9999999.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>5.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>10.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="2">
+    <widget class="QPushButton" name="btnOK">
+     <property name="text">
+      <string>OK</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" rowspan="2" colspan="2">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Mzkitchen Lipid Score Settings</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="spnMinSn1">
+        <property name="suffix">
+         <string> or more fragments</string>
+        </property>
+        <property name="prefix">
+         <string>match </string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QSpinBox" name="spnMinSn2">
+        <property name="suffix">
+         <string> or more fragments</string>
+        </property>
+        <property name="prefix">
+         <string>match </string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="lblSn1">
+        <property name="text">
+         <string>sn1 Matches</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QPushButton" name="btnLoadClassAdduct">
+        <property name="text">
+         <string>Load Class/Adduct Settings</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QSpinBox" name="spnMinAcyl">
+        <property name="suffix">
+         <string> or more fragments</string>
+        </property>
+        <property name="prefix">
+         <string>match </string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="2">
+       <widget class="QCheckBox" name="chkRequirePrecursorInMS2">
+        <property name="text">
+         <string>MS1 Precursor m/z must be present in MS/MS spectrum</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="lblAcylChain">
+        <property name="text">
+         <string>Acyl Chain Matches</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="lblClassAdduct">
+        <property name="text">
+         <string>Class/Adduct Specific Settings</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="lblSn2">
+        <property name="text">
+         <string>sn2 Matches</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0" colspan="2">
+       <widget class="QLineEdit" name="lineEdit"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

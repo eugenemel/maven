@@ -16,6 +16,11 @@ PeakDetectionDialog::PeakDetectionDialog(QWidget *parent) :
 
     setModal(true);
 
+    scoringSettingsDialog = new MSMSScoringSettingsDialog(this);
+    scoringSettingsDialog->setWindowFlags(scoringSettingsDialog->windowFlags() | Qt::WindowStaysOnTopHint);
+    connect(scoringSettingsDialog->btnOK, SIGNAL(clicked(bool)), scoringSettingsDialog, SLOT(hide()));
+    connect(btnFragMatchingAdvanced, SIGNAL(clicked()), scoringSettingsDialog, SLOT(show()));
+
     _featureDetectionType= CompoundDB;
 
 }
