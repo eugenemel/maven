@@ -208,8 +208,6 @@ void PeakDetectionDialog::findPeaks() {
             peakupdater=nullptr;
 		}
 
-        //TODO: warn user when scores don't make sense
-
 		peakupdater = new BackgroundPeakUpdate(this);
 		peakupdater->setMainWindow(mainwindow);
 
@@ -342,6 +340,30 @@ void PeakDetectionDialog::findPeaks() {
         replace(displayParams.begin(), displayParams.end(), ';', '\n');
         replace(displayParams.begin(), displayParams.end(), '=', ' ');
 
+        //Issue 606: Avoid running background job or making peaks table when score threshold/type make valid results impossible
+        bool isHighMs2ScoreThreshold = peakupdater->mustHaveMS2 && peakupdater->minFragmentMatchScore > 1.0f;
+
+        string selectedScoringType = peakupdater->scoringScheme.toStdString();
+        bool isLowScoreType = selectedScoringType == "NormDotProduct" ||
+                selectedScoringType == MzKitchenProcessor::METABOLITES_SCORING_NAME ||
+                selectedScoringType == "FractionRefMatched";
+
+        if (isHighMs2ScoreThreshold && isLowScoreType) {
+            auto isContinue = QMessageBox::question(
+                        this,
+                        tr("No Valid Matches Possible"),
+                        tr(
+                            "No compound matches are possible with the combination of MS/MS score type and threshold you have selected.\n\n"
+                            "To change the MS/MS score threshold, please click "
+                            "'Configure MS/MS Matching Scoring Settings' from the Peak Scoring tab.\n\n"
+                            "Would you like to continue?"),
+                        QMessageBox::Yes | QMessageBox::No);
+
+            if (isContinue != QMessageBox::Yes) {
+                return;
+            }
+        }
+
         TableDockWidget* peaksTable = mainwindow->addPeaksTable(title, QString(encodedParams.c_str()), QString(displayParams.c_str()));
 		peaksTable->setWindowTitle(title);
 
@@ -404,29 +426,6 @@ void PeakDetectionDialog::runBackgroupJob(QString funcName) {
 	}
 
 	if ( ! peakupdater->isRunning() ) { 
-
-        bool isHighMs2ScoreThreshold = peakupdater->mustHaveMS2 && peakupdater->minFragmentMatchScore > 1.0f;
-
-        string selectedScoringType = peakupdater->scoringScheme.toStdString();
-        bool isLowScoreType = selectedScoringType == "NormDotProduct" ||
-                selectedScoringType == MzKitchenProcessor::METABOLITES_SCORING_NAME ||
-                selectedScoringType == "FractionRefMatched";
-
-        if (isHighMs2ScoreThreshold && isLowScoreType) {
-            auto isContinue = QMessageBox::question(
-                        this,
-                        tr("No Valid Matches Possible"),
-                        tr(
-                            "No compound matches are possible with the combination of MS/MS score type and threshold you have selected.\n\n"
-                            "To change the MS/MS score threshold, please click "
-                            "'Configure MS/MS Matching Scoring Settings' from the Peak Scoring tab.\n\n"
-                            "Would you like to continue?"),
-                        QMessageBox::Yes | QMessageBox::No);
-
-            if (isContinue != QMessageBox::Yes) {
-                return;
-            }
-        }
 
 		peakupdater->setRunFunction(funcName);			//set thread function
 
