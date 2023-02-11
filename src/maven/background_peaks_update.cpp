@@ -547,7 +547,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             if (scoringScheme == MzKitchenProcessor::LIPID_SCORING_NAME){
                 MzKitchenProcessor::assignBestLipidToGroup(&group, searchableDatabase, lipidSearchParameters);
             } else if (scoringScheme == MzKitchenProcessor::METABOLITES_SCORING_NAME) {
-                MzKitchenProcessor::assignBestMetaboliteToGroup(&group, searchableDatabase, mzkitchenMetaboliteSearchParameters, true);
+                MzKitchenProcessor::assignBestMetaboliteToGroup(&group, searchableDatabase, mzkitchenMetaboliteSearchParameters);
             } else {
                 matchFragmentation(&group, searchableDatabase);
             }
