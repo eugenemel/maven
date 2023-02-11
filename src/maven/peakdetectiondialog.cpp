@@ -314,7 +314,13 @@ void PeakDetectionDialog::findPeaks() {
 		if (_featureDetectionType == FullSpectrum )  title = "Detected Features";
                 else if (_featureDetectionType == CompoundDB ) title = "Library Search";
                 else if (_featureDetectionType == QQQ ) title = "QQQ Compound DB Search";
-     
+
+        //Issue 606
+        if (peakupdater->scoringScheme == MzKitchenProcessor::LIPID_SCORING_NAME ||
+                peakupdater->scoringScheme == MzKitchenProcessor::METABOLITES_SCORING_NAME) {
+            title = "clamDB";
+        }
+
         title = mainwindow->getUniquePeakTableTitle(title);
 
         //Issue 197
@@ -398,6 +404,30 @@ void PeakDetectionDialog::runBackgroupJob(QString funcName) {
 	}
 
 	if ( ! peakupdater->isRunning() ) { 
+
+        bool isHighMs2ScoreThreshold = peakupdater->mustHaveMS2 && peakupdater->minFragmentMatchScore > 1.0f;
+
+        string selectedScoringType = peakupdater->scoringScheme.toStdString();
+        bool isLowScoreType = selectedScoringType == "NormDotProduct" ||
+                selectedScoringType == MzKitchenProcessor::METABOLITES_SCORING_NAME ||
+                selectedScoringType == "FractionRefMatched";
+
+        if (isHighMs2ScoreThreshold && isLowScoreType) {
+            auto isContinue = QMessageBox::question(
+                        this,
+                        tr("No Valid Matches Possible"),
+                        tr(
+                            "No compound matches are possible with the combination of MS/MS score type and threshold you have selected.\n\n"
+                            "To change the MS/MS score threshold, please click "
+                            "'Configure MS/MS Matching Scoring Settings' from the Peak Scoring tab.\n\n"
+                            "Would you like to continue?"),
+                        QMessageBox::Yes | QMessageBox::No);
+
+            if (isContinue != QMessageBox::Yes) {
+                return;
+            }
+        }
+
 		peakupdater->setRunFunction(funcName);			//set thread function
 
         qDebug() << "peakdetectiondialog::runBackgroundJob(QString funcName) Started.";
