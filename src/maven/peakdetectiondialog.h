@@ -48,6 +48,7 @@ class PeakDetectionDialog : public QDialog, public Ui_PeakDetectionDialog
 
                 shared_ptr<PeaksSearchParameters> getPeaksSearchParameters();
                 shared_ptr<LCLipidSearchParameters> getLipidSearchParameters();
+                shared_ptr<MzkitchenMetaboliteSearchParameters> getMzkitchenMetaboliteSearchParameters();
 
                 MSMSScoringSettingsDialog *scoringSettingsDialog;
 };

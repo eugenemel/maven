@@ -152,6 +152,7 @@ void PeakDetectionDialog::show() {
     }
 
     //Issue 606
+    fragScoringAlgorithm->addItem(MzKitchenProcessor::METABOLITES_SCORING_NAME);
     fragScoringAlgorithm->addItem(MzKitchenProcessor::LIPID_SCORING_NAME);
 
     compoundPPMWindow->setValue( mainwindow->getUserPPM() );  //total ppm window, not half sized.
@@ -206,6 +207,8 @@ void PeakDetectionDialog::findPeaks() {
             delete(peakupdater);
             peakupdater=nullptr;
 		}
+
+        //TODO: warn user when scores don't make sense
 
 		peakupdater = new BackgroundPeakUpdate(this);
 		peakupdater->setMainWindow(mainwindow);
@@ -319,11 +322,14 @@ void PeakDetectionDialog::findPeaks() {
         peakupdater->peaksSearchParameters = peaksSearchParameters;
         string encodedParams = peaksSearchParameters->encodeParams();
 
-        //Issue 606: lipid-search specific parameters
+        //Issue 606: mzkitchen-specific parameter sets
         peakupdater->lipidSearchParameters = getLipidSearchParameters();
+        peakupdater->mzkitchenMetaboliteSearchParameters = getMzkitchenMetaboliteSearchParameters();
 
         if (peakupdater->scoringScheme == MzKitchenProcessor::LIPID_SCORING_NAME) {
             encodedParams = peakupdater->lipidSearchParameters->encodeParams();
+        } else if (peakupdater->scoringScheme == MzKitchenProcessor::METABOLITES_SCORING_NAME) {
+            encodedParams = peakupdater->mzkitchenMetaboliteSearchParameters->encodeParams();
         }
 
         string displayParams = encodedParams;
@@ -334,11 +340,14 @@ void PeakDetectionDialog::findPeaks() {
 		peaksTable->setWindowTitle(title);
 
         connect(peakupdater, SIGNAL(newPeakGroup(PeakGroup*,bool, bool)), peaksTable, SLOT(addPeakGroup(PeakGroup*,bool, bool)));
+
         connect(peakupdater, SIGNAL(finished()), peaksTable, SLOT(showAllGroupsThenSort()));
+        connect(peakupdater, SIGNAL(finished()), scoringSettingsDialog, SLOT(close()));
+        connect(peakupdater, SIGNAL(finished()), this, SLOT(close()));
+
         connect(peakupdater, SIGNAL(terminated()), peaksTable, SLOT(showAllGroupsThenSort()));
-   		connect(peakupdater, SIGNAL(finished()), this, SLOT(close()));
+        connect(peakupdater, SIGNAL(terminated()), scoringSettingsDialog, SLOT(close()));
    		connect(peakupdater, SIGNAL(terminated()), this, SLOT(close()));
-		
 		
 		//RUN THREAD
 		if ( _featureDetectionType == QQQ ) {
@@ -543,5 +552,22 @@ shared_ptr<LCLipidSearchParameters> PeakDetectionDialog::getLipidSearchParameter
     }
 
     return lipidSearchParameters;
+}
+
+shared_ptr<MzkitchenMetaboliteSearchParameters> PeakDetectionDialog::getMzkitchenMetaboliteSearchParameters() {
+
+    shared_ptr<MzkitchenMetaboliteSearchParameters> mzkitchenMetaboliteSearchParameters = shared_ptr<MzkitchenMetaboliteSearchParameters>(new MzkitchenMetaboliteSearchParameters());
+
+    shared_ptr<PeaksSearchParameters> peaksSearchParameters = getPeaksSearchParameters();
+
+    string encodedPeaksParameters = peaksSearchParameters->encodeParams();
+
+    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedPeaksParameters);
+    mzkitchenMetaboliteSearchParameters->fillInBaseParams(decodedMap);
+
+    mzkitchenMetaboliteSearchParameters->rtIsRequireRtMatch = this->featureMatchRts->isChecked();
+    mzkitchenMetaboliteSearchParameters->rtMatchTolerance = static_cast<float>(this->spnFeatureToCompoundRtTolr->value());
+
+    return mzkitchenMetaboliteSearchParameters;
 }
 

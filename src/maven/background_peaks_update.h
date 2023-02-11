@@ -116,9 +116,9 @@ public:
    //peaks search parameters
    shared_ptr<PeaksSearchParameters> peaksSearchParameters = shared_ptr<PeaksSearchParameters>(new PeaksSearchParameters());
 
-   //Issue 606: lipid specific parameters
+   //Issue 606: mzkitchen-specific parameters
    shared_ptr<LCLipidSearchParameters> lipidSearchParameters = shared_ptr<LCLipidSearchParameters>(new LCLipidSearchParameters());
-
+   shared_ptr<MzkitchenMetaboliteSearchParameters> mzkitchenMetaboliteSearchParameters = shared_ptr<MzkitchenMetaboliteSearchParameters>(new MzkitchenMetaboliteSearchParameters());
 
 //CLASS FUNCTIONS
  static vector<EIC*> pullEICs(mzSlice* slice,
