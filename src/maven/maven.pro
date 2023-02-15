@@ -55,7 +55,8 @@ FORMS = forms/settingsform.ui  \
         forms/selectadductsdialog.ui \
         forms/setrumsDBdialog.ui \
         forms/filtertagsdialog.ui \
-        forms/searchparamsdialog.ui
+        forms/searchparamsdialog.ui \
+        forms/msmsscoringsettings.ui
 
 HEADERS +=  stable.h \
             filtertagsdialog.h \
@@ -108,7 +109,8 @@ HEADERS +=  stable.h \
             editpeakgroupingdialog.h \
             selectadductsdialog.h \
             setrumsdbdialog.h \
-            samplebarplotwidget.h
+            samplebarplotwidget.h \
+            msmsscoringsettings.h
 
 SOURCES +=  mainwindow.cpp  \
             classifier.cpp \
@@ -160,7 +162,8 @@ SOURCES +=  mainwindow.cpp  \
             editpeakgroupingdialog.cpp \
             selectadductsdialog.cpp \
             setrumsdbdialog.cpp \
-            samplebarplotwidget.cpp
+            samplebarplotwidget.cpp \
+            msmsscoringsettings.cpp
 
 
 sources.files =  $$HEADERS \

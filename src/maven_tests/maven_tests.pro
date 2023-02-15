@@ -4,4 +4,5 @@ SUBDIRS += \
         testqstring \
         testqstring2 \
         testsimpleparsimony \
-        testsecprocessor
+        testsecprocessor \
+        testmzkitchenprocessor

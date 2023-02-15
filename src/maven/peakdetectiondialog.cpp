@@ -16,6 +16,12 @@ PeakDetectionDialog::PeakDetectionDialog(QWidget *parent) :
 
     setModal(true);
 
+    scoringSettingsDialog = new MSMSScoringSettingsDialog(this);
+    scoringSettingsDialog->setWindowFlags(scoringSettingsDialog->windowFlags() | Qt::WindowStaysOnTopHint);
+    connect(scoringSettingsDialog->btnOK, SIGNAL(clicked(bool)), scoringSettingsDialog, SLOT(hide()));
+    connect(btnFragMatchingAdvanced, SIGNAL(clicked()), scoringSettingsDialog, SLOT(bringIntoView()));
+    connect(scoringSettingsDialog->btnLoadClassAdduct, SIGNAL(clicked()), scoringSettingsDialog, SLOT(setLipidClassAdductFile()));
+
     _featureDetectionType= CompoundDB;
 
 }
@@ -145,6 +151,10 @@ void PeakDetectionDialog::show() {
         fragScoringAlgorithm->addItem(scoringAlgorithm.c_str());
     }
 
+    //Issue 606
+    fragScoringAlgorithm->addItem(MzKitchenProcessor::METABOLITES_SCORING_NAME);
+    fragScoringAlgorithm->addItem(MzKitchenProcessor::LIPID_SCORING_NAME);
+
     compoundPPMWindow->setValue( mainwindow->getUserPPM() );  //total ppm window, not half sized.
 
     QDialog::show();
@@ -265,11 +275,11 @@ void PeakDetectionDialog::findPeaks() {
 
         peakupdater->mustHaveMS2 = featureMustHaveMs2->isChecked();
         peakupdater->compoundMustHaveMs2 = compoundMustHaveMS2->isChecked();
-        peakupdater->productPpmTolr = productPpmTolr->value();
+        peakupdater->productPpmTolr = scoringSettingsDialog->spnMatchTol->value();
         peakupdater->scoringScheme  = fragScoringAlgorithm->currentText();
-        peakupdater->minFragmentMatchScore = fragMinScore->value();
-        peakupdater->minNumFragments = fragMinPeaks->value();
-        peakupdater->minNumDiagnosticFragments = spnMinDiagnostic->value();
+        peakupdater->minFragmentMatchScore = scoringSettingsDialog->spnMinScore->value();
+        peakupdater->minNumFragments = scoringSettingsDialog->spnMinMatches->value();
+        peakupdater->minNumDiagnosticFragments = scoringSettingsDialog->spnMinDiagnostic->value();
         peakupdater->excludeIsotopicPeaks = excludeIsotopicPeaks->isChecked();
 
         string policyText = peakGroupCompoundMatchPolicyBox->itemText(peakGroupCompoundMatchPolicyBox->currentIndex()).toStdString();
@@ -302,25 +312,70 @@ void PeakDetectionDialog::findPeaks() {
 		if (_featureDetectionType == FullSpectrum )  title = "Detected Features";
                 else if (_featureDetectionType == CompoundDB ) title = "Library Search";
                 else if (_featureDetectionType == QQQ ) title = "QQQ Compound DB Search";
-     
+
+        //Issue 606
+        if (peakupdater->scoringScheme == MzKitchenProcessor::LIPID_SCORING_NAME ||
+                peakupdater->scoringScheme == MzKitchenProcessor::METABOLITES_SCORING_NAME) {
+            title = "clamDB";
+        }
+
         title = mainwindow->getUniquePeakTableTitle(title);
 
         //Issue 197
         shared_ptr<PeaksSearchParameters> peaksSearchParameters = getPeaksSearchParameters();
+        peakupdater->peaksSearchParameters = peaksSearchParameters;
         string encodedParams = peaksSearchParameters->encodeParams();
+
+        //Issue 606: mzkitchen-specific parameter sets
+        peakupdater->lipidSearchParameters = getLipidSearchParameters();
+        peakupdater->mzkitchenMetaboliteSearchParameters = getMzkitchenMetaboliteSearchParameters();
+
+        if (peakupdater->scoringScheme == MzKitchenProcessor::LIPID_SCORING_NAME) {
+            encodedParams = peakupdater->lipidSearchParameters->encodeParams();
+        } else if (peakupdater->scoringScheme == MzKitchenProcessor::METABOLITES_SCORING_NAME) {
+            encodedParams = peakupdater->mzkitchenMetaboliteSearchParameters->encodeParams();
+        }
+
         string displayParams = encodedParams;
         replace(displayParams.begin(), displayParams.end(), ';', '\n');
         replace(displayParams.begin(), displayParams.end(), '=', ' ');
+
+        //Issue 606: Avoid running background job or making peaks table when score threshold/type make valid results impossible
+        bool isHighMs2ScoreThreshold = peakupdater->mustHaveMS2 && peakupdater->minFragmentMatchScore > 1.0f;
+
+        string selectedScoringType = peakupdater->scoringScheme.toStdString();
+        bool isLowScoreType = selectedScoringType == "NormDotProduct" ||
+                selectedScoringType == MzKitchenProcessor::METABOLITES_SCORING_NAME ||
+                selectedScoringType == "FractionRefMatched";
+
+        if (isHighMs2ScoreThreshold && isLowScoreType) {
+            auto isContinue = QMessageBox::question(
+                        this,
+                        tr("No Valid Matches Possible"),
+                        tr(
+                            "No compound matches are possible with the combination of MS/MS score type and threshold you have selected.\n\n"
+                            "To change the MS/MS score threshold, please click "
+                            "'Configure MS/MS Matching Scoring Settings' from the Peak Scoring tab.\n\n"
+                            "Would you like to continue?"),
+                        QMessageBox::Yes | QMessageBox::No);
+
+            if (isContinue != QMessageBox::Yes) {
+                return;
+            }
+        }
 
         TableDockWidget* peaksTable = mainwindow->addPeaksTable(title, QString(encodedParams.c_str()), QString(displayParams.c_str()));
 		peaksTable->setWindowTitle(title);
 
         connect(peakupdater, SIGNAL(newPeakGroup(PeakGroup*,bool, bool)), peaksTable, SLOT(addPeakGroup(PeakGroup*,bool, bool)));
+
         connect(peakupdater, SIGNAL(finished()), peaksTable, SLOT(showAllGroupsThenSort()));
+        connect(peakupdater, SIGNAL(finished()), scoringSettingsDialog, SLOT(close()));
+        connect(peakupdater, SIGNAL(finished()), this, SLOT(close()));
+
         connect(peakupdater, SIGNAL(terminated()), peaksTable, SLOT(showAllGroupsThenSort()));
-   		connect(peakupdater, SIGNAL(finished()), this, SLOT(close()));
+        connect(peakupdater, SIGNAL(terminated()), scoringSettingsDialog, SLOT(close()));
    		connect(peakupdater, SIGNAL(terminated()), this, SLOT(close()));
-		
 		
 		//RUN THREAD
 		if ( _featureDetectionType == QQQ ) {
@@ -371,6 +426,7 @@ void PeakDetectionDialog::runBackgroupJob(QString funcName) {
 	}
 
 	if ( ! peakupdater->isRunning() ) { 
+
 		peakupdater->setRunFunction(funcName);			//set thread function
 
         qDebug() << "peakdetectiondialog::runBackgroundJob(QString funcName) Started.";
@@ -485,11 +541,11 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
 
         //ms2 matching
         //peaksSearchParameters->ms2IsMatchMs2 = this->compoundMustHaveMS2->isChecked() / this->featureMustHaveMs2->isChecked()
-        peaksSearchParameters->ms2MinNumMatches = this->fragMinPeaks->value();
-        peaksSearchParameters->ms2MinNumDiagnosticMatches = this->spnMinDiagnostic->value();
-        peaksSearchParameters->ms2PpmTolr = static_cast<float>(this->productPpmTolr->value());
+        peaksSearchParameters->ms2MinNumMatches = scoringSettingsDialog->spnMinMatches->value();
+        peaksSearchParameters->ms2MinNumDiagnosticMatches = scoringSettingsDialog->spnMinDiagnostic->value();
+        peaksSearchParameters->ms2PpmTolr = static_cast<float>(scoringSettingsDialog->spnMatchTol->value());
         peaksSearchParameters->ms2ScoringAlgorithm = this->fragScoringAlgorithm->currentText().toStdString();
-        peaksSearchParameters->ms2MinScore = static_cast<float>(this->fragMinScore->value());
+        peaksSearchParameters->ms2MinScore = static_cast<float>(scoringSettingsDialog->spnMinScore->value());
 
         //Matching Options
         peaksSearchParameters->matchingIsRequireAdductPrecursorMatch = this->chkRequireAdductMatch->isChecked();
@@ -500,5 +556,47 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
         //peak group clustering is not retained, as clusters can be easily added or removed with different parameters in the GUI
 
         return peaksSearchParameters;
+}
+
+shared_ptr<LCLipidSearchParameters> PeakDetectionDialog::getLipidSearchParameters() {
+    shared_ptr<LCLipidSearchParameters> lipidSearchParameters = shared_ptr<LCLipidSearchParameters>(new LCLipidSearchParameters());
+
+    shared_ptr<PeaksSearchParameters> peaksSearchParameters = getPeaksSearchParameters();
+
+    string encodedPeaksParameters = peaksSearchParameters->encodeParams();
+
+    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedPeaksParameters);
+    lipidSearchParameters->fillInBaseParams(decodedMap);
+
+    lipidSearchParameters->ms2MinNumAcylMatches = scoringSettingsDialog->spnMinAcyl->value();
+    lipidSearchParameters->ms2sn1MinNumMatches = scoringSettingsDialog->spnMinSn1->value();
+    lipidSearchParameters->ms2sn2MinNumMatches = scoringSettingsDialog->spnMinSn2->value();
+    lipidSearchParameters->ms2IsRequirePrecursorMatch = scoringSettingsDialog->chkRequirePrecursorInMS2->isChecked();
+
+    QString classAdductFile = scoringSettingsDialog->classAdductFileName->text();
+    if (QFile::exists(classAdductFile)) {
+        lipidSearchParameters->addClassAdductParamsFromCSVFile(classAdductFile.toStdString(), false);
+    } else {
+        qDebug() << "Class Adduct File '" << classAdductFile << "' Could not be read or does not exist.";
+    }
+
+    return lipidSearchParameters;
+}
+
+shared_ptr<MzkitchenMetaboliteSearchParameters> PeakDetectionDialog::getMzkitchenMetaboliteSearchParameters() {
+
+    shared_ptr<MzkitchenMetaboliteSearchParameters> mzkitchenMetaboliteSearchParameters = shared_ptr<MzkitchenMetaboliteSearchParameters>(new MzkitchenMetaboliteSearchParameters());
+
+    shared_ptr<PeaksSearchParameters> peaksSearchParameters = getPeaksSearchParameters();
+
+    string encodedPeaksParameters = peaksSearchParameters->encodeParams();
+
+    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedPeaksParameters);
+    mzkitchenMetaboliteSearchParameters->fillInBaseParams(decodedMap);
+
+    mzkitchenMetaboliteSearchParameters->rtIsRequireRtMatch = this->featureMatchRts->isChecked();
+    mzkitchenMetaboliteSearchParameters->rtMatchTolerance = static_cast<float>(this->spnFeatureToCompoundRtTolr->value());
+
+    return mzkitchenMetaboliteSearchParameters;
 }
 

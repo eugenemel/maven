@@ -2276,12 +2276,23 @@ void mzkitchenSearch() {
 
     if (mzkitchenSearchType == "lipidSearch") {
 
+        cout << "MzKitchenProcessor::matchLipids_LC() --> MzKitchenProcessor::assignBestLipidToGroup() for "
+             << allgroups.size()
+             << " lipids."
+             << endl;
+
         shared_ptr<LCLipidSearchParameters> lipidSearchParams = LCLipidSearchParameters::decode(mzkitchenSearchParameters);
+        lipidSearchParams->IDisRequireMatchingAdduct = false; //this parameter must be false in a peakdetector context
         lipidSearchParams->searchVersion = "lipids_lclipidprocessor_v1";
         MzKitchenProcessor::matchLipids_LC(allgroups, mzkitchenCompounds, lipidSearchParams, false);
         searchTableData.insert(make_pair("clamDB", QString(lipidSearchParams->encodeParams().c_str())));
 
     } else if (mzkitchenSearchType == "metaboliteSearch") {
+
+        cout << "MzKitchenProcessor::matchMetabolites() --> MzKitchenProcessor::assignBestMetaboliteToGroup() for "
+             << allgroups.size()
+             << " lipids."
+             << endl;
 
         shared_ptr<MzkitchenMetaboliteSearchParameters> metaboliteSearchParams = MzkitchenMetaboliteSearchParameters::decode(mzkitchenSearchParameters);
         metaboliteSearchParams->searchVersion = "mzkitchen22_metabolite_search";

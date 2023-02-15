@@ -13,7 +13,7 @@ QT += sql gui
 QT -= network opengl std++14
 
 TEMPLATE = app
-TARGET = testsecprocessor
+TARGET = testmzkitchenprocessor
 
 INCLUDEPATH += \
             . $$CORE/pugixml/src/ $$CORE/libmaven $$CORE/pugixml/src \
@@ -31,4 +31,9 @@ CONFIG += sql qt std++14
 
 DEFINES += QT_DEPRECATED_WARNINGS
 
-SOURCES += testsecprocessor.cpp
+HEADERS += $$MAVEN/database.h \
+           $$MAVEN/projectDB.h
+
+SOURCES += testmzkitchenprocessor.cpp \
+           $$MAVEN/database.cpp \
+           $$MAVEN/projectDB.cpp

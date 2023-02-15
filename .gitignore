@@ -29,3 +29,5 @@ src/peakdetector/.DS_Store
 src/maven_tests/testqstring/testqstring.app/
 src/maven_tests/testqstring2/testqstring2.app/
 src/maven_tests/testsimpleparsimony/testsimpleparsimony.app/
+src/maven_tests/testsecprocessor/testsecprocessor.app/
+src/maven_tests/testmzkitchenprocessor/testmzkitchenprocessor.app/

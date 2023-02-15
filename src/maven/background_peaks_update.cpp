@@ -422,7 +422,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
     QTime timer2;
     timer2.start();
     qDebug() << "Building searchable database.";
-    vector<tuple<float, Compound*, Adduct*>> searchableDatabase = prepareCompoundDatabase(this->compounds);
+    vector<CompoundIon> searchableDatabase = prepareCompoundDatabase(this->compounds);
     qDebug() << "Built searchable database of " << searchableDatabase.size() << " entries in " << timer2.elapsed() << " sec.";
 
     //process KNOWNS
@@ -544,8 +544,13 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             //TODO: restructuring, expect that compound is always nullptr
 
-            matchFragmentation(&group, searchableDatabase);
-            //If this is successful, then group.compound will not be nullptr.
+            if (scoringScheme == MzKitchenProcessor::LIPID_SCORING_NAME){
+                MzKitchenProcessor::assignBestLipidToGroup(&group, searchableDatabase, lipidSearchParameters);
+            } else if (scoringScheme == MzKitchenProcessor::METABOLITES_SCORING_NAME) {
+                MzKitchenProcessor::assignBestMetaboliteToGroup(&group, searchableDatabase, mzkitchenMetaboliteSearchParameters);
+            } else {
+                matchFragmentation(&group, searchableDatabase);
+            }
 
             if (!isRetainUnmatchedCompounds && !group.compound){
                 continue;
@@ -709,7 +714,7 @@ void BackgroundPeakUpdate::cleanup() {
     allgroups.clear();
 }
 
-vector<tuple<float, Compound*, Adduct*>> BackgroundPeakUpdate::prepareCompoundDatabase(vector<Compound*> set) {
+vector<CompoundIon> BackgroundPeakUpdate::prepareCompoundDatabase(vector<Compound*> set, bool debug) {
 
     vector<Adduct*> validAdducts;
     for (Adduct * a : DB.adductsDB) {
@@ -720,12 +725,12 @@ vector<tuple<float, Compound*, Adduct*>> BackgroundPeakUpdate::prepareCompoundDa
 
     if (validAdducts.size() == 0) {
         qDebug() << "All adducts disagree with the ionizationMode of the experiment. No peaks can be matched.";
-        return vector<tuple<float, Compound*, Adduct*>>();
+        return vector<CompoundIon>{};
     }
 
     long numEntries = static_cast<long>(set.size()) * static_cast<long>(validAdducts.size());
 
-    vector<tuple<float, Compound*, Adduct*>> searchableDatabase = vector<tuple<float, Compound*, Adduct*>>(numEntries);
+    vector<CompoundIon> searchableDatabase = vector<CompoundIon>(numEntries);
 
     unsigned int entryCounter = 0;
 
@@ -743,7 +748,7 @@ vector<tuple<float, Compound*, Adduct*>> BackgroundPeakUpdate::prepareCompoundDa
                 precMz = c->getExactMass();
             }
 
-            searchableDatabase[entryCounter] = tuple<float, Compound*, Adduct*>(precMz, c, a);
+            searchableDatabase[entryCounter] = CompoundIon(c, a, precMz);
 
             emit(updateProgressBar("Preparing Libraries for Peaks Search... ", entryCounter, numEntries));
 
@@ -751,7 +756,25 @@ vector<tuple<float, Compound*, Adduct*>> BackgroundPeakUpdate::prepareCompoundDa
         }
     }
 
-    sort(searchableDatabase.begin(), searchableDatabase.end());
+    sort(searchableDatabase.begin(), searchableDatabase.end(), [](CompoundIon& lhs, CompoundIon& rhs){
+        if (lhs.precursorMz != rhs.precursorMz) {
+            return lhs.precursorMz < rhs.precursorMz;
+        }
+
+        if (lhs.compound->name != rhs.compound->name){
+            return lhs.compound->name < rhs.compound->name;
+        }
+
+        return lhs.adduct->name < rhs.adduct->name;
+    });
+
+    if (debug) {
+        cout << "searchableDatabase:\n";
+        for (auto compoundIon : searchableDatabase) {
+            cout << compoundIon.toString() << "\n";
+        }
+        cout << endl;
+    }
 
     return searchableDatabase;
 }
@@ -1529,15 +1552,15 @@ void BackgroundPeakUpdate::printSettings() {
     cerr << "#compoundRTWindow=" << compoundRTWindow << endl;
 }
 
-void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g, vector<tuple<float, Compound*, Adduct*>>& searchableDatabase) {
+void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g, vector<CompoundIon>& searchableDatabase) {
     if(searchableDatabase.size() == 0) return;
     if(g->ms2EventCount == 0) return;
 
     float minMz = g->meanMz - (g->meanMz*featureCompoundMatchMzTolerance/1000000);
     float maxMz = g->meanMz + (g->meanMz*featureCompoundMatchMzTolerance/1000000);
 
-    auto lb = lower_bound(searchableDatabase.begin(), searchableDatabase.end(), minMz, [](const tuple<float, Compound*, Adduct*>& lhs, const float& rhs){
-        return get<0>(lhs) < rhs;
+    auto lb = lower_bound(searchableDatabase.begin(), searchableDatabase.end(), minMz, [](const CompoundIon& lhs, const float& rhs){
+        return lhs.precursorMz < rhs;
     });
 
     int bestMatchingId = -1;
@@ -1545,15 +1568,16 @@ void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g, vector<tuple<float, 
     bestScore.mergedScore = -1; // Issue 443
     for (unsigned int pos = lb - searchableDatabase.begin(); pos < searchableDatabase.size(); pos++){
 
-        float precMz = get<0>(searchableDatabase[pos]);
+        CompoundIon compoundIon = searchableDatabase[pos];
+        float precMz = compoundIon.precursorMz;
 
         //stop searching when the maxMz has been exceeded.
         if (precMz > maxMz) {
             break;
         }
 
-        Compound *cpd = get<1>(searchableDatabase[pos]);
-        Adduct *a = get<2>(searchableDatabase[pos]);
+        Compound *cpd = compoundIon.compound;
+        Adduct *a = compoundIon.adduct;
 
         if (isRequireMatchingAdduct && cpd->adductString != a->name) {
             continue;
@@ -1574,10 +1598,11 @@ void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g, vector<tuple<float, 
     }
 
     if (bestMatchingId != -1){
-        g->compound = get<1>(searchableDatabase[static_cast<unsigned int>(bestMatchingId)]);
+        CompoundIon bestMatchingCompoundIon = searchableDatabase[static_cast<unsigned int>(bestMatchingId)];
+        g->compound = bestMatchingCompoundIon.compound;
         g->compoundId = g->compound->id;
         g->compoundDb = g->compound->db;
-        g->adduct = get<2>(searchableDatabase[static_cast<unsigned int>(bestMatchingId)]);
+        g->adduct = bestMatchingCompoundIon.adduct;
         g->fragMatchScore = bestScore;
     }
 }

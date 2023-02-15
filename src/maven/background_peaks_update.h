@@ -113,6 +113,12 @@ public:
 
    Classifier* clsf;
 
+   //peaks search parameters
+   shared_ptr<PeaksSearchParameters> peaksSearchParameters = shared_ptr<PeaksSearchParameters>(new PeaksSearchParameters());
+
+   //Issue 606: mzkitchen-specific parameters
+   shared_ptr<LCLipidSearchParameters> lipidSearchParameters = shared_ptr<LCLipidSearchParameters>(new LCLipidSearchParameters());
+   shared_ptr<MzkitchenMetaboliteSearchParameters> mzkitchenMetaboliteSearchParameters = shared_ptr<MzkitchenMetaboliteSearchParameters>(new MzkitchenMetaboliteSearchParameters());
 
 //CLASS FUNCTIONS
  static vector<EIC*> pullEICs(mzSlice* slice,
@@ -153,7 +159,7 @@ private:
   void processCompounds(vector<Compound*> set, string setName);
   void processCompoundSlices(vector<mzSlice*>&slices, string setName);
   void processSRMTransitions(vector<mzSlice*>&slices);
-  vector<tuple<float, Compound*, Adduct*>> prepareCompoundDatabase(vector<Compound*> set);
+  vector<CompoundIon> prepareCompoundDatabase(vector<Compound*> set, bool debug=false);
   void computePeaks();
   void processMassSlices();
   void findPeaksOrbi(void);
@@ -162,7 +168,7 @@ private:
   vector<PeakGroup>allgroups;
   void cleanup();
   void printSettings();
-  void matchFragmentation(PeakGroup* g, vector<tuple<float, Compound*, Adduct*>>& searchableDatabase);
+  void matchFragmentation(PeakGroup* g, vector<CompoundIon>& searchableDatabase);
   bool sliceHasMS2Event(mzSlice* slice);
 
   private:
