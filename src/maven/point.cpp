@@ -47,6 +47,9 @@ EicPoint::EicPoint(float x, float y, Peak* peak, MainWindow* mw)
          //Issue 456: hovering over a peak is tantamount to selecting it
          // connect(this, SIGNAL(peakGroupFocus(PeakGroup*)), mw->massCalcWidget, SLOT(setPeakGroup(PeakGroup*)));
          // connect(this, SIGNAL(peakGroupFocus(PeakGroup*)), mw->fragmentationSpectraWidget, SLOT(overlayPeakGroup(PeakGroup*)));
+
+         //Issue 612: Display peak in MS1 spectrum plot (restoring old functionality)
+         connect(this, SIGNAL(peakSelected(Peak*)), mw, SLOT(showPeakInMs1Spectrum(Peak*)));
     }
 
     //mouse press events

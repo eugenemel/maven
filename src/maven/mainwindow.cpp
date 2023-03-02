@@ -2860,3 +2860,10 @@ IsotopeParameters MainWindow::getIsotopeParameters(){
 
     return isotopeParameters;
 }
+
+void MainWindow::showPeakInMs1Spectrum(Peak* peak) {
+    if (!peak) return;
+    if (spectraWidget->isVisible()) {
+        spectraWidget->setScan(peak, true);
+    }
+}

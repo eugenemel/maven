@@ -18,7 +18,7 @@ public:
 public slots:
     void setScan(Scan* s);
     void setScan(Scan* s, float mzmin, float mzmax );
-                    void setScan(Peak* peak);
+                    void setScan(Peak* peak, bool isForceZoom=false);
                     void setScan(mzSample* sample, int scanNum);
                     void setMzFocus(float mz);
                     void setMzFocus(Peak* peak);

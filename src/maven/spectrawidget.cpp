@@ -268,7 +268,7 @@ void SpectraWidget::setScan(mzSample* sample, int scanNum=-1) {
 }
 
 
-void SpectraWidget::setScan(Peak* peak) {
+void SpectraWidget::setScan(Peak* peak, bool isForceZoom) {
     cerr << "SpectraWidget::setScan(peak) " << endl;
     links.clear();
 
@@ -292,10 +292,15 @@ void SpectraWidget::setScan(Peak* peak) {
 
     //Issue 394: Respect settings form when displaying peaks
     //These affect the MS1 plot
-    if (mainwindow->getSettings()->contains("chkAutoMzMin") &&
-            mainwindow->getSettings()->value("chkAutoMzMin").toInt()) {
+
+    bool isChkSettings = mainwindow->getSettings()->contains("chkAutoMzMin") &&
+            mainwindow->getSettings()->value("chkAutoMzMin").toInt();
+
+    if (isChkSettings || isForceZoom) {
+
         _minX = peak->peakMz-2;
         _maxX = peak->peakMz+6;
+
     } else {
         _minX = mainwindow->getSettings()->value("spnMzMinVal", 0.0).toFloat();
         _maxX = mainwindow->getSettings()->value("spnMzMaxVal", 1200.0).toFloat();

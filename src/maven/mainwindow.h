@@ -287,6 +287,9 @@ public slots:
     //Issue 423
     void updateQuantTypeComboBox();
 
+    //Issue 612
+    void showPeakInMs1Spectrum(Peak* peak);
+
 private slots:
     void createMenus();
     void createToolBars();
