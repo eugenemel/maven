@@ -2362,12 +2362,12 @@ QWidget* MainWindow::eicWidgetController() {
 //    btnNext->setToolTip(tr("History Forward (Ctrl+Right)"));
 //    btnNext->setShortcut(tr("Ctrl+Right"));
 
-    btnAutoZoom = new QToolButton(toolBar);
-    btnAutoZoom->setCheckable(true);
-    btnAutoZoom->setChecked(true);
-    btnAutoZoom->setIcon(QIcon(rsrcPath + "/autofocus.png"));
-    btnAutoZoom->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnAutoZoom->setToolTip(tr("Center chromatogram on compound expected RT"));
+//    btnAutoZoom = new QToolButton(toolBar);
+//    btnAutoZoom->setCheckable(true);
+//    btnAutoZoom->setChecked(true);
+//    btnAutoZoom->setIcon(QIcon(rsrcPath + "/autofocus.png"));
+//    btnAutoZoom->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+//    btnAutoZoom->setToolTip(tr("Center chromatogram on compound expected RT"));
 
     QToolButton *btnGallery= new QToolButton(toolBar);
     btnGallery->setIcon(QIcon(rsrcPath + "/gallery.png"));
@@ -2474,7 +2474,7 @@ QWidget* MainWindow::eicWidgetController() {
     toolBar->addWidget(btnGroupPeaks);
 
     toolBar->addSeparator();
-    toolBar->addWidget(btnAutoZoom);
+    //toolBar->addWidget(btnAutoZoom);
     toolBar->addWidget(btnLockRt);
     toolBar->addWidget(btnBarPlot);
     toolBar->addWidget(btnIsotopePlot);
