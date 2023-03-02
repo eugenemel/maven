@@ -290,6 +290,9 @@ public slots:
     //Issue 612
     void showPeakInMs1Spectrum(Peak* peak);
 
+    //Issue 613
+    void showPeakInCovariantsWidget(Peak* peak);
+
 private slots:
     void createMenus();
     void createToolBars();

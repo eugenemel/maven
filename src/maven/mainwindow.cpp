@@ -2546,7 +2546,7 @@ QWidget* MainWindow::eicWidgetController() {
 
 void MainWindow::getCovariants(Peak* peak ) {
     if(!peak) return;
-    if(!covariantsPanel->isVisible() or ! galleryDockWidget->isVisible()) return;
+    if(!covariantsPanel->isVisible()) return;
 
     Scan* scan = peak->getScan();
     if (!scan) return;
@@ -2865,5 +2865,12 @@ void MainWindow::showPeakInMs1Spectrum(Peak* peak) {
     if (!peak) return;
     if (spectraWidget->isVisible()) {
         spectraWidget->setScan(peak, true);
+    }
+}
+
+void MainWindow::showPeakInCovariantsWidget(Peak *peak) {
+    if (!peak) return;
+    if (covariantsPanel->isVisible()) {
+        getCovariants(peak);
     }
 }
