@@ -48,7 +48,7 @@ class CSVReports {
 		ofstream peakReport;
         ofstream mzLinkReport;
 		PeakGroup::QType qtype;
-		
+        set<string> writtenIds{};
 
 };
 

@@ -121,6 +121,13 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
         return;
     }
 
+    //Issue 615: Avoid duplicates by checking that ID string not already written
+    string idString = TableDockWidget::groupTagString(group).toStdString();
+    if (writtenIds.find(idString) != writtenIds.end()) {
+        return; // peakgroup already written
+    }
+    writtenIds.insert(idString);
+
     //get ionization mode
 	/* this is not used for now
     int ionizationMode; 
@@ -143,8 +150,6 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
             peakWidths.at(i) = sampleToPeak.at(sample).rtmax - sampleToPeak.at(sample).rtmin;
         }
     }
-
-    string idString = TableDockWidget::groupTagString(group).toStdString();
 
     groupReport << group->getPeakGroupLabel() << SEP << setprecision(7)
                 << group->metaGroupId << SEP
