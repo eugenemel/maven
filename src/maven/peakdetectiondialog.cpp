@@ -452,7 +452,6 @@ void PeakDetectionDialog::showLibraryDialog() {
     }
 }
 
-
 shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(){
 
         shared_ptr<PeaksSearchParameters> peaksSearchParameters = shared_ptr<PeaksSearchParameters>(new PeaksSearchParameters());
