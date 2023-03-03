@@ -548,7 +548,7 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     //cerr << "addRow" << group->groupId << " "  << group->meanMz << " " << group->meanRt << " " << group->children.size() << " " << group->tagString << endl;
 
     if (!group) return;
-    if (group->peakCount() == 0 ) return;
+    if (group->peakCount() == 0 && group->type() != PeakGroup::IsotopeType) return;
     if (group->meanMz <= 0 ) return;
     if (group->deletedFlag || group->isGroupLabeled('x')) return; //deleted group
 
