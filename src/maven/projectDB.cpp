@@ -427,7 +427,10 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                     groupOverlapFrac real,\
                     localMaxFlag real,\
                     fromBlankSample int,\
-                    label int)")) {
+                    label int, \
+                    smoothedIntensity real,\
+                    smoothedPeakArea real\
+                    )")) {
                             qDebug() << query2.lastError();
                         }
 
@@ -435,8 +438,8 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                         query3.prepare(
                     "insert into peaks values( \
                     NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,? \
-                    \
-                    \);");
+                    ,?,?\
+                    );");
 		
 			for(int j=0; j < g->peaks.size(); j++ ) { 
 					Peak& p = g->peaks[j];
@@ -488,6 +491,10 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                     query3.addBindValue(p.localMaxFlag);
                     query3.addBindValue(p.fromBlankSample);
 					query3.addBindValue(QString::number(p.label));
+
+                    query3.addBindValue(p.smoothedIntensity);
+                    query3.addBindValue(p.smoothedPeakArea);
+
     				if(!query3.exec())  qDebug() << query3.lastError();
 		}
 
