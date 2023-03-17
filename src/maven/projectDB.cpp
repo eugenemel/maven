@@ -777,6 +777,7 @@ void ProjectDB::alterPeaksTable(){
     addPeaksTableColumn("smoothedPeakArea");
     addPeaksTableColumn("smoothedPeakAreaCorrected");
     addPeaksTableColumn("smoothedPeakAreaTop");
+    addPeaksTableColumn("smoothedSignalBaselineRatio");
     addPeaksTableColumn("minScanFWHM", "int");
     addPeaksTableColumn("maxScanFWHM", "int");
     addPeaksTableColumn("rtminFWHM");
