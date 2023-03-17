@@ -85,6 +85,7 @@ class ProjectDB {
 	    vector<mzSample*> getSamples() { return samples; }
 
         void addPeaksTableColumn(QString columnName, QString columnType="real", QString numericDefault="0");
+        void alterPeaksTable();
 
 };
 

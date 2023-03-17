@@ -721,6 +721,21 @@ void ProjectDB::addPeaksTableColumn(QString columnName, QString columnType, QStr
       }
 }
 
+void ProjectDB::alterPeaksTable(){
+    addPeaksTableColumn("smoothedIntensity");
+    addPeaksTableColumn("smoothedPeakArea");
+    addPeaksTableColumn("smoothedPeakAreaCorrected");
+    addPeaksTableColumn("smoothedPeakAreaTop");
+    addPeaksTableColumn("minScanFWHM", "int");
+    addPeaksTableColumn("maxScanFWHM", "int");
+    addPeaksTableColumn("rtminFWHM");
+    addPeaksTableColumn("rtmaxFWHM");
+    addPeaksTableColumn("minPosFWHM", "int");
+    addPeaksTableColumn("maxPosFWHM", "int");
+    addPeaksTableColumn("peakAreaFWHM");
+    addPeaksTableColumn("smoothedPeakAreaFWHM");
+}
+
 void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool isAttemptToLoadDB, const map<int, vector<Peak>>& peakGroupMap, Classifier *classifier) {
 
         QSqlQuery queryCheckCols(sqlDB);
