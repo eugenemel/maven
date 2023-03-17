@@ -436,7 +436,11 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                     minPosFWHM int,\
                     maxPosFWHM int,\
                     minScanFWHM int,\
-                    maxScanFWHM int \
+                    maxScanFWHM int,\
+                    rtminFWHM real,\
+                    rtmaxFWHM real,\
+                    peakAreaFWHM real,\
+                    smoothedPeakAreaFWHM real\
                     )")) {
                             qDebug() << query2.lastError();
                         }
@@ -445,7 +449,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                         query3.prepare(
                     "insert into peaks values( \
                     NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,? \
-                    ,?,?,?,?,?,?,?,?,?\
+                    ,?,?,?,?,?,?,?,?,?,?,?,?,?\
                     );");
 		
 			for(int j=0; j < g->peaks.size(); j++ ) { 
@@ -498,18 +502,19 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                     query3.addBindValue(p.localMaxFlag);
                     query3.addBindValue(p.fromBlankSample);
 					query3.addBindValue(QString::number(p.label));
-
                     query3.addBindValue(p.smoothedIntensity);
                     query3.addBindValue(p.smoothedPeakArea);
                     query3.addBindValue(p.smoothedPeakAreaCorrected);
                     query3.addBindValue(p.smoothedPeakAreaTop);
                     query3.addBindValue(p.smoothedSignalBaselineRatio);
-
                     query3.addBindValue(p.minPosFWHM);
                     query3.addBindValue(p.maxPosFWHM);
                     query3.addBindValue(p.minScanFWHM);
                     query3.addBindValue(p.maxScanFWHM);
-
+                    query3.addBindValue(p.rtminFWHM);
+                    query3.addBindValue(p.rtmaxFWHM);
+                    query3.addBindValue(p.peakAreaFWHM);
+                    query3.addBindValue(p.smoothedPeakAreaFWHM);
 
     				if(!query3.exec())  qDebug() << query3.lastError();
 		}
