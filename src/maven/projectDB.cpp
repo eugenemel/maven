@@ -395,16 +395,16 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                     groupId int,\
                     sampleId int, \
                     pos int, \
-					minpos int, \
-					maxpos int, \
+                    minpos int, \
+                    maxpos int, \
                     rt real, \
                     rtmin real, \
                     rtmax real, \
                     mzmin real, \
                     mzmax real, \
                     scan int,	\
-					minscan int, \
-					maxscan int,\
+                    minscan int, \
+                    maxscan int,\
                     peakArea real,\
                     peakAreaCorrected real,\
                     peakAreaTop real,\
@@ -416,10 +416,10 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                     medianMz real,\
                     baseMz real,\
                     quality real,\
-					width int,\
+                    width int,\
                     gaussFitSigma real,\
                     gaussFitR2 real,\
-					noNoiseObs int,\
+                    noNoiseObs int,\
                     noNoiseFraction real,\
                     symmetry real,\
                     signalBaselineRatio real,\
@@ -427,10 +427,16 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                     groupOverlapFrac real,\
                     localMaxFlag real,\
                     fromBlankSample int,\
-                    label int)"))  qDebug() << query2.lastError();
-			
+                    label int)")) {
+                            qDebug() << query2.lastError();
+                        }
+
 	 		QSqlQuery query3(sqlDB); 
-            query3.prepare("insert into peaks values(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                        query3.prepare(
+                    "insert into peaks values( \
+                    NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,? \
+                    \
+                    \);");
 		
 			for(int j=0; j < g->peaks.size(); j++ ) { 
 					Peak& p = g->peaks[j];
