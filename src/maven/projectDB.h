@@ -87,6 +87,8 @@ class ProjectDB {
         void addPeaksTableColumn(QString columnName, QString columnType="real", QString numericDefault="0");
         void alterPeaksTable();
 
+        void alterPeakGroupsTable();
+
 };
 
 struct mzrollDBMatch {

@@ -736,104 +736,89 @@ void ProjectDB::alterPeaksTable(){
     addPeaksTableColumn("smoothedPeakAreaFWHM");
 }
 
+void ProjectDB::alterPeakGroupsTable(){
+           QSqlQuery queryCheckCols(sqlDB);
+
+           QString strCheckCols = QString();
+           strCheckCols.append("pragma table_info(peakgroups);");
+
+           if (!queryCheckCols.exec(strCheckCols)) {
+               qDebug() << "Ho..." << queryCheckCols.lastError();
+           }
+
+           bool isHasDisplayName = false;
+           bool isHasSrmPrecursorMz = false;
+           bool isHasSrmProductMz = false;
+           bool isHasIsotopicIndex = false;
+           bool isHasIsotopeParameters = false;
+
+           while (queryCheckCols.next()) {
+               if ("displayName" == queryCheckCols.value(1).toString()) {
+                   isHasDisplayName = true;
+               } else if ("srmPrecursorMz" == queryCheckCols.value(1).toString()) {
+                   isHasSrmPrecursorMz = true;
+               } else if ("srmProductMz" == queryCheckCols.value(1).toString()) {
+                   isHasSrmProductMz = true;
+               } else if ("isotopicIndex" == queryCheckCols.value(1).toString()) {
+                   isHasIsotopicIndex = true;
+               } else if ("isotopeParameters" == queryCheckCols.value(1).toString()) {
+                   isHasIsotopeParameters = true;
+               }
+           }
+
+           qDebug() << "ProjectDB::loadPeakGroups(): "
+                    << "isHasDisplayName? " << isHasDisplayName
+                    << "isHasSrmPrecursorMz? " << isHasSrmPrecursorMz
+                    << "isHasSrmProductMz? " << isHasSrmProductMz
+                    << "isHasIsotopicIndex? " << isHasIsotopicIndex
+                    << "isHasIsotopeParameters? " << isHasIsotopeParameters;
+
+           if (!isHasDisplayName) {
+               QSqlQuery queryAdjustPeakGroupsTable(sqlDB);
+               QString strAdjustPeakGroupsTable = QString("ALTER TABLE peakgroups ADD displayName VARCHAR(254);");
+               if (!queryAdjustPeakGroupsTable.exec(strAdjustPeakGroupsTable)){
+                   qDebug() << "Ho..." <<queryCheckCols.lastError();
+               }
+           }
+
+           if (!isHasSrmPrecursorMz) {
+               QSqlQuery queryAddSrmPrecursor(sqlDB);
+               QString strAddSrmPrecursor = QString("ALTER TABLE peakgroups ADD srmPrecursorMz REAL DEFAULT 0;");
+               if (!queryAddSrmPrecursor.exec(strAddSrmPrecursor)) {
+                   qDebug() << "Ho..." << queryAddSrmPrecursor.lastError();
+               }
+           }
+
+           if (!isHasSrmProductMz) {
+               QSqlQuery queryAddSrmProduct(sqlDB);
+               QString strAddSrmProduct = QString("ALTER TABLE peakgroups ADD srmProductMz REAL DEFAULT 0;");
+               if (!queryAddSrmProduct.exec(strAddSrmProduct)) {
+                   qDebug() << "Ho..." << queryAddSrmProduct.lastError();
+               }
+           }
+
+           if (!isHasIsotopicIndex) {
+               QSqlQuery queryAddIsotopicIndex(sqlDB);
+               QString strAddIsotopicIndex = QString("ALTER TABLE peakgroups ADD isotopicIndex INTEGER DEFAULT 0;");
+               if (!queryAddIsotopicIndex.exec(strAddIsotopicIndex)) {
+                   qDebug() << "Ho..." << queryAddIsotopicIndex.lastError();
+               }
+           }
+
+           if (!isHasIsotopeParameters) {
+               QSqlQuery queryAddIsotopeParameters(sqlDB);
+               QString strAddIsotopeParameters = QString("ALTER TABLE peakgroups ADD isotopeParameters TEXT DEFAULT '';");
+               if (!queryAddIsotopeParameters.exec(strAddIsotopeParameters)){
+                   qDebug() << "Ho..." <<queryCheckCols.lastError();
+               }
+           }
+
+}
+
 void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool isAttemptToLoadDB, const map<int, vector<Peak>>& peakGroupMap, Classifier *classifier) {
 
-        QSqlQuery queryCheckCols(sqlDB);
-
-        QString strCheckCols = QString();
-        strCheckCols.append("pragma table_info(");
-        strCheckCols.append(tableName);
-        strCheckCols.append(");");
-
-        if (!queryCheckCols.exec(strCheckCols)) {
-            qDebug() << "Ho..." << queryCheckCols.lastError();
-        }
-
-        bool isHasDisplayName = false;
-        bool isHasSrmPrecursorMz = false;
-        bool isHasSrmProductMz = false;
-        bool isHasIsotopicIndex = false;
-        bool isHasIsotopeParameters = false;
-
-        while (queryCheckCols.next()) {
-            if ("displayName" == queryCheckCols.value(1).toString()) {
-                isHasDisplayName = true;
-            } else if ("srmPrecursorMz" == queryCheckCols.value(1).toString()) {
-                isHasSrmPrecursorMz = true;
-            } else if ("srmProductMz" == queryCheckCols.value(1).toString()) {
-                isHasSrmProductMz = true;
-            } else if ("isotopicIndex" == queryCheckCols.value(1).toString()) {
-                isHasIsotopicIndex = true;
-            } else if ("isotopeParameters" == queryCheckCols.value(1).toString()) {
-                isHasIsotopeParameters = true;
-            }
-        }
-
-        qDebug() << "ProjectDB::loadPeakGroups(): "
-                 << "isHasDisplayName? " << isHasDisplayName
-                 << "isHasSrmPrecursorMz? " << isHasSrmPrecursorMz
-                 << "isHasSrmProductMz? " << isHasSrmProductMz
-                 << "isHasIsotopicIndex? " << isHasIsotopicIndex
-                 << "isHasIsotopeParameters? " << isHasIsotopeParameters;
-
-        if (!isHasDisplayName) {
-            QSqlQuery queryAdjustPeakGroupsTable(sqlDB);
-
-            QString strAdjustPeakGroupsTable = QString();
-            strAdjustPeakGroupsTable.append("ALTER TABLE ");
-            strAdjustPeakGroupsTable.append(tableName);
-            strAdjustPeakGroupsTable.append(" ADD displayName VARCHAR(254) ");
-
-            if (!queryAdjustPeakGroupsTable.exec(strAdjustPeakGroupsTable)){
-                qDebug() << "Ho..." <<queryCheckCols.lastError();
-            }
-        }
-
-        if (!isHasSrmPrecursorMz) {
-            QSqlQuery queryAddSrmPrecursor(sqlDB);
-
-            QString strAddSrmPrecursor = QString("ALTER TABLE ");
-            strAddSrmPrecursor.append(tableName);
-            strAddSrmPrecursor.append(" ADD srmPrecursorMz REAL DEFAULT 0");
-            if (!queryAddSrmPrecursor.exec(strAddSrmPrecursor)) {
-                qDebug() << "Ho..." << queryAddSrmPrecursor.lastError();
-            }
-        }
-
-        if (!isHasSrmProductMz) {
-            QSqlQuery queryAddSrmProduct(sqlDB);
-
-            QString strAddSrmProduct = QString("ALTER TABLE ");
-            strAddSrmProduct.append(tableName);
-            strAddSrmProduct.append(" ADD srmProductMz REAL DEFAULT 0");
-            if (!queryAddSrmProduct.exec(strAddSrmProduct)) {
-                qDebug() << "Ho..." << queryAddSrmProduct.lastError();
-            }
-        }
-
-        if (!isHasIsotopicIndex) {
-            QSqlQuery queryAddIsotopicIndex(sqlDB);
-
-            QString strAddIsotopicIndex = QString("ALTER TABLE ");
-            strAddIsotopicIndex.append(tableName);
-            strAddIsotopicIndex.append(" ADD isotopicIndex INTEGER DEFAULT 0");
-            if (!queryAddIsotopicIndex.exec(strAddIsotopicIndex)) {
-                qDebug() << "Ho..." << queryAddIsotopicIndex.lastError();
-            }
-        }
-
-        if (!isHasIsotopeParameters) {
-            QSqlQuery queryAddIsotopeParameters(sqlDB);
-
-            QString strAddIsotopeParameters = QString();
-            strAddIsotopeParameters.append("ALTER TABLE ");
-            strAddIsotopeParameters.append(tableName);
-            strAddIsotopeParameters.append(" ADD isotopeParameters TEXT DEFAULT ''");
-
-            if (!queryAddIsotopeParameters.exec(strAddIsotopeParameters)){
-                qDebug() << "Ho..." <<queryCheckCols.lastError();
-            }
-        }
+     alterPeakGroupsTable();
+     alterPeaksTable();
 
      QSqlQuery query(sqlDB);
      query.exec("create index if not exists peak_group_ids on peaks(groupId)");
@@ -1341,7 +1326,7 @@ void ProjectDB::loadGroupPeaks(PeakGroup* parent) {
      QSqlQuery query(sqlDB);
      query.prepare("select P.*, S.name as sampleName from peaks P, samples S where P.sampleId = S.sampleId and P.groupId = ?");
      query.bindValue(0,parent->groupId);
-     //qDebug() << "loadin peaks for group " << parent->groupId;
+     //qDebug() << "loading peaks for group " << parent->groupId;
      query.exec();
 
      while (query.next()) {
@@ -1381,6 +1366,23 @@ void ProjectDB::loadGroupPeaks(PeakGroup* parent) {
             p.localMaxFlag = query.value("localMaxFlag").toString().toInt();
             p.fromBlankSample = query.value("fromBlankSample").toString().toInt();
             p.label = query.value("label").toString().toInt();
+
+            //Issue 549: new fields
+            p.smoothedIntensity = query.value("smoothedIntensity").toFloat();
+            p.smoothedPeakArea = query.value("smoothedPeakArea").toFloat();
+            p.smoothedPeakAreaCorrected = query.value("smoothedPeakAreaCorrected").toFloat();
+            p.smoothedPeakAreaTop = query.value("smoothedPeakAreaTop").toFloat();
+            p.smoothedSignalBaselineRatio = query.value("smoothedSignalBaselineRatio").toFloat();
+
+            p.minPosFWHM = static_cast<unsigned int>(query.value("minPosFWHM").toInt());
+            p.maxPosFWHM = static_cast<unsigned int>(query.value("maxPosFWHM").toInt());
+            p.minScanFWHM = static_cast<unsigned int>(query.value("minScanFWHM").toInt());
+            p.maxScanFWHM = static_cast<unsigned int>(query.value("maxScanFWHM").toInt());
+
+            p.rtminFWHM = query.value("rtminFWHM").toFloat();
+            p.rtmaxFWHM = query.value("rtmaxFWHM").toFloat();
+            p.peakAreaFWHM = query.value("peakAreaFWHM").toFloat();
+            p.smoothedPeakAreaFWHM = query.value("smoothedPeakAreaFWHM").toFloat();
 
             string sampleName = query.value("sampleName").toString().toStdString();
 
