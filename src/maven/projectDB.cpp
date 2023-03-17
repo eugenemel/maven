@@ -672,6 +672,23 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                 p.fromBlankSample = query.value("fromBlankSample").toString().toInt();
                 p.label = query.value("label").toString().toInt();
 
+                //Issue 549: new fields
+                p.smoothedIntensity = query.value("smoothedIntensity").toFloat();
+                p.smoothedPeakArea = query.value("smoothedPeakArea").toFloat();
+                p.smoothedPeakAreaCorrected = query.value("smoothedPeakAreaCorrected").toFloat();
+                p.smoothedPeakAreaTop = query.value("smoothedPeakAreaTop").toFloat();
+                p.smoothedSignalBaselineRatio = query.value("smoothedSignalBaselineRatio").toFloat();
+
+                p.minPosFWHM = static_cast<unsigned int>(query.value("minPosFWHM").toInt());
+                p.maxPosFWHM = static_cast<unsigned int>(query.value("maxPosFWHM").toInt());
+                p.minScanFWHM = static_cast<unsigned int>(query.value("minScanFWHM").toInt());
+                p.maxScanFWHM = static_cast<unsigned int>(query.value("maxScanFWHM").toInt());
+
+                p.rtminFWHM = query.value("rtminFWHM").toFloat();
+                p.rtmaxFWHM = query.value("rtmaxFWHM").toFloat();
+                p.peakAreaFWHM = query.value("peakAreaFWHM").toFloat();
+                p.smoothedPeakAreaFWHM = query.value("smoothedPeakAreaFWHM").toFloat();
+
                 string sampleName = query.value("name").toString().toStdString();
 
                 for(int i=0; i< samples.size(); i++ ) {
