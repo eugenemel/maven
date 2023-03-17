@@ -83,6 +83,9 @@ class ProjectDB {
 
 	    void loadSamples();
 	    vector<mzSample*> getSamples() { return samples; }
+
+        void addPeaksTableColumn(QString columnName, QString columnType="real", QString numericDefault="0");
+
 };
 
 struct mzrollDBMatch {

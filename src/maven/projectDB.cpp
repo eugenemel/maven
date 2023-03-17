@@ -677,6 +677,49 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                 return allPeaks;
         }
 
+void ProjectDB::addPeaksTableColumn(QString columnName, QString columnType, QString numericDefault) {
+
+      QSqlQuery queryCheckCols(sqlDB);
+      QString strCheckCols = QString("pragma table_info(peaks);");
+
+      if (!queryCheckCols.exec(strCheckCols)) {
+          qDebug() << "SQL query causing execution error:" << strCheckCols;
+          qDebug() << "Ho..." << queryCheckCols.lastError();
+          return;
+      }
+
+      bool isHasColumn = false;
+      while (queryCheckCols.next()) {
+        if (columnName == queryCheckCols.value(1).toString()) {
+            isHasColumn = true;
+            break;
+        }
+      }
+
+      //If the column already exists, no need to update the table.
+      if (isHasColumn) return;
+
+      QSqlQuery queryAddColumnToPeaksTable(sqlDB);
+
+      QString strAddColumnToPeaksTable = QString();
+      strAddColumnToPeaksTable.append("ALTER TABLE peaks ADD ");
+      strAddColumnToPeaksTable.append(columnName);
+
+      if (columnType.toLower() == "string") {
+           strAddColumnToPeaksTable.append(" VARCHAR(254)");
+      } else if (columnType.toLower() == "int") {
+           strAddColumnToPeaksTable.append(" INTEGER DEFAULT ");
+           strAddColumnToPeaksTable.append(numericDefault);
+      } else {
+           strAddColumnToPeaksTable.append(" REAL DEFAULT ");
+           strAddColumnToPeaksTable.append(numericDefault);
+      }
+
+      if (!queryAddColumnToPeaksTable.exec(strAddColumnToPeaksTable)) {
+          qDebug() << "SQL query causing execution error:" << strAddColumnToPeaksTable;
+          qDebug() << "Ho..." << queryAddColumnToPeaksTable.lastError();
+      }
+}
 
 void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool isAttemptToLoadDB, const map<int, vector<Peak>>& peakGroupMap, Classifier *classifier) {
 
