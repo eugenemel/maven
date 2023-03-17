@@ -429,7 +429,10 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                     fromBlankSample int,\
                     label int, \
                     smoothedIntensity real,\
-                    smoothedPeakArea real\
+                    smoothedPeakArea real,\
+                    smoothedPeakAreaCorrected real,\
+                    smoothedPeakAreaTop real,\
+                    smoothedSignalBaselineRatio real\
                     )")) {
                             qDebug() << query2.lastError();
                         }
@@ -438,7 +441,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                         query3.prepare(
                     "insert into peaks values( \
                     NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,? \
-                    ,?,?\
+                    ,?,?,?,?,?\
                     );");
 		
 			for(int j=0; j < g->peaks.size(); j++ ) { 
@@ -494,6 +497,9 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 
                     query3.addBindValue(p.smoothedIntensity);
                     query3.addBindValue(p.smoothedPeakArea);
+                    query3.addBindValue(p.smoothedPeakAreaCorrected);
+                    query3.addBindValue(p.smoothedPeakAreaTop);
+                    query3.addBindValue(p.smoothedSignalBaselineRatio);
 
     				if(!query3.exec())  qDebug() << query3.lastError();
 		}
