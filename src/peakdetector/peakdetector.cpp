@@ -67,7 +67,7 @@ bool saveSqlLiteProject = true;
 bool searchAdductsFlag = true;
 bool saveScanData=true;
 bool WRITE_CONSENSUS_MAPPED_COMPOUNDS_ONLY = true;
-string algorithmType = "E";
+string algorithmType = "E"; //processMassSlices()
 string groupingAlgorithmType = "D"; //Issue 692: incorporate reduceGroups()
 bool isRunClustering = false;
 bool isTestResults = false;
@@ -131,6 +131,9 @@ static string mzkitchenSearchParameters = "";
 bool isQQQSearch = false;
 shared_ptr<QQQSearchParameters> QQQparams = shared_ptr<QQQSearchParameters>(new QQQSearchParameters());
 
+//parameters
+shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
+
 static map<QString, QString> searchTableData{};
 
 /**
@@ -149,7 +152,10 @@ int  eicMaxGroups = 100;
 float minFragmentMatchScore = 2;
 float productPpmTolr = 20;
 string scoringScheme = "hypergeomScore"; // ticMatch | spearmanRank
+
 void processOptions(int argc, char* argv[]);
+void fillOutPeakPickingAndGroupingParameters();
+
 void loadSamples(vector<string>&filenames);
 void printSettings();
 void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string setName, bool writeReportFlag);
@@ -842,6 +848,7 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
 
         } else if (groupingAlgorithmType == "E") {
 
+            //TODO: swap with peakPickingAndGroupingParameters
             shared_ptr<PeakPickingAndGroupingParameters> params = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
 
             params->mergedSmoothingWindow = eic_smoothingWindow;
@@ -890,6 +897,7 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                 group.groupStatistics();
             }
 
+            //TODO swap with peakPickingAndGroupingParameters->filter* fields
             if (clsf.hasModel() && group.goodPeakCount < minGoodGroupCount) continue;
             if (clsf.hasModel() && group.maxQuality < minQuality) continue;
 
@@ -1181,6 +1189,51 @@ void processOptions(int argc, char* argv[]) {
         isMzkitchenSearch = true;
     }
 }
+
+void fillOutPeakPickingAndGroupingParameters() {
+
+    // START EIC::getPeakPositionsD()
+    //peak picking
+    peakPickingAndGroupingParameters->peakSmoothingWindow = eic_smoothingWindow;
+    peakPickingAndGroupingParameters->peakRtBoundsMaxIntensityFraction = -1.0f;
+    peakPickingAndGroupingParameters->peakRtBoundsSlopeThreshold = -1.0f; // TODO
+    peakPickingAndGroupingParameters->peakBaselineSmoothingWindow = baseline_smoothingWindow;
+    peakPickingAndGroupingParameters->peakBaselineDropTopX = baseline_dropTopX;
+    peakPickingAndGroupingParameters->peakIsComputeBounds = true;
+
+    //eic
+    peakPickingAndGroupingParameters->eicBaselineEstimationType = EICBaselineEstimationType::DROP_TOP_X; // TODO
+
+    // END EIC::getPeakPositionsD()
+
+    // START EIC::groupPeaksE()
+
+    //merged EIC
+    peakPickingAndGroupingParameters->mergedSmoothingWindow = eic_smoothingWindow;
+    peakPickingAndGroupingParameters->mergedPeakRtBoundsMaxIntensityFraction = mergedPeakRtBoundsMaxIntensityFraction;
+    peakPickingAndGroupingParameters->mergedPeakRtBoundsSlopeThreshold = mergedPeakRtBoundsSlopeThreshold;
+    peakPickingAndGroupingParameters->mergedSmoothedMaxToBoundsMinRatio = mergedSmoothedMaxToBoundsMinRatio;
+    peakPickingAndGroupingParameters->mergedSmoothedMaxToBoundsIntensityPolicy = mergedSmoothedMaxToBoundsIntensityPolicy;
+    peakPickingAndGroupingParameters->mergedBaselineSmoothingWindow = baseline_smoothingWindow;
+    peakPickingAndGroupingParameters->mergedBaselineDropTopX = baseline_dropTopX;
+    if (mergedPeakRtBoundsMaxIntensityFraction > 0 || mergedPeakRtBoundsSlopeThreshold > 0 || mergedSmoothedMaxToBoundsMinRatio > 0) {
+        peakPickingAndGroupingParameters->mergedIsComputeBounds = true;
+    }
+
+    //grouping
+    peakPickingAndGroupingParameters->groupMaxRtDiff = grouping_maxRtWindow;
+    peakPickingAndGroupingParameters->groupMergeOverlap = mergeOverlap;
+
+    //post-grouping filters
+    peakPickingAndGroupingParameters->filterMinGoodGroupCount = minGoodGroupCount;
+    peakPickingAndGroupingParameters->filterMinQuality = minQuality;
+    peakPickingAndGroupingParameters->filterMinNoNoiseObs = minNoNoiseObs;
+    peakPickingAndGroupingParameters->filterMinSignalBaselineRatio = minSignalBaseLineRatio;
+    peakPickingAndGroupingParameters->filterMinGroupIntensity = minGroupIntensity;
+    peakPickingAndGroupingParameters->filterMinPrecursorCharge = minPrecursorCharge;
+
+}
+
 
 void printSettings() {
     cout << "#Ligand Database file\t" << ligandDbFilename << endl;
