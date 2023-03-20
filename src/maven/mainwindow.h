@@ -84,6 +84,8 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = 0);
     QSettings* getSettings() { return settings; }
+    shared_ptr<PeakPickingAndGroupingParameters> getPeakPickingAndGroupingParameters();
+
     vector <mzSample*> samples;		//list of loaded samples
     static mzSample* loadSampleStatic(QString filename);
     QString rumsDBDatabaseName;
@@ -313,6 +315,7 @@ private:
     QToolBar* sideBar;
     QToolButton* addDockWidgetButton( QToolBar*, QDockWidget*, QIcon, QString);
     float lastMs1ScansMz = -1.0f;
+    shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
 
 signals:
     void updatedAvailableAdducts();

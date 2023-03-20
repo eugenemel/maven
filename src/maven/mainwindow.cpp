@@ -2875,3 +2875,50 @@ void MainWindow::showPeakInCovariantsWidget(Peak *peak) {
         getCovariants(peak);
     }
 }
+
+shared_ptr<PeakPickingAndGroupingParameters> MainWindow::getPeakPickingAndGroupingParameters(){
+
+    if (!settings) return peakPickingAndGroupingParameters;
+
+    // START EIC::getPeakPositionsD()
+    //peak picking
+    peakPickingAndGroupingParameters->peakSmoothingWindow = settings->value("eic_smoothingWindow").toInt();
+    //peakPickingAndGroupingParameters->peakRtBoundsMaxIntensityFraction = peakRtBoundsMaxIntensityFraction;
+    //peakPickingAndGroupingParameters->peakRtBoundsSlopeThreshold = peakRtBoundsSlopeThreshold;
+    peakPickingAndGroupingParameters->peakBaselineSmoothingWindow = settings->value("baseline_smoothing").toInt();
+    peakPickingAndGroupingParameters->peakBaselineDropTopX = settings->value("baseline_quantile").toInt();
+    peakPickingAndGroupingParameters->peakIsComputeBounds = true;
+
+//    //eic
+//    peakPickingAndGroupingParameters->eicBaselineEstimationType = eicBaselineEstimationType;
+
+//    // END EIC::getPeakPositionsD()
+
+//    // START EIC::groupPeaksE()
+
+//    //merged EIC
+      peakPickingAndGroupingParameters->mergedSmoothingWindow = settings->value("eic_smoothingWindow").toInt();
+//    peakPickingAndGroupingParameters->mergedPeakRtBoundsMaxIntensityFraction = mergedPeakRtBoundsMaxIntensityFraction;
+//    peakPickingAndGroupingParameters->mergedPeakRtBoundsSlopeThreshold = mergedPeakRtBoundsSlopeThreshold;
+//    peakPickingAndGroupingParameters->mergedSmoothedMaxToBoundsMinRatio = mergedSmoothedMaxToBoundsMinRatio;
+//    peakPickingAndGroupingParameters->mergedSmoothedMaxToBoundsIntensityPolicy = mergedSmoothedMaxToBoundsIntensityPolicy;
+      peakPickingAndGroupingParameters->mergedBaselineSmoothingWindow = settings->value("baseline_smoothing").toInt();
+      peakPickingAndGroupingParameters->mergedBaselineDropTopX = settings->value("baseline_quantile").toInt();
+      peakPickingAndGroupingParameters->mergedIsComputeBounds = true;
+
+//    //grouping
+      peakPickingAndGroupingParameters->groupMaxRtDiff = settings->value("grouping_maxRtWindow").toFloat();
+      peakPickingAndGroupingParameters->groupMergeOverlap = settings->value("spnMergeOverlap").toFloat();
+
+//    //post-grouping filters
+//    peakPickingAndGroupingParameters->filterMinGoodGroupCount = minGoodGroupCount;
+//    peakPickingAndGroupingParameters->filterMinQuality = minQuality;
+//    peakPickingAndGroupingParameters->filterMinNoNoiseObs = minNoNoiseObs;
+//    peakPickingAndGroupingParameters->filterMinSignalBaselineRatio = minSignalBaseLineRatio;
+//    peakPickingAndGroupingParameters->filterMinGroupIntensity = minGroupIntensity;
+//    peakPickingAndGroupingParameters->filterMinPrecursorCharge = minPrecursorCharge;
+
+//    // END EIC::groupPeaksE()
+
+    return peakPickingAndGroupingParameters;
+}
