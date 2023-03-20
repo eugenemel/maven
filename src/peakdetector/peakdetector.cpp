@@ -98,9 +98,10 @@ float avgScanTime = 0.2f;
 
 //peak detection
 int eic_smoothingWindow = 5;
-int baseline_smoothingWindow = 5; //only for peakGrouping "C"
-int baseline_dropTopX = 60; //only for peakGrouping "C"
-float rtBoundsSlopeThreshold = -1.0f; // only for peakGrouping "C"
+int baseline_smoothingWindow = 5;
+int baseline_dropTopX = 60;
+float peakRtBoundsSlopeThreshold = -1.0f;
+float peakRtBoundsMaxIntensityFraction = 1.0f;
 
 //merged EIC
 float mergedPeakRtBoundsMaxIntensityFraction = -1.0f;
@@ -824,7 +825,7 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                             false, // debug
                             true, // isComputePeakBounds
                             -1.0f, // rtBoundsMaxIntensityFraction
-                            rtBoundsSlopeThreshold // rtBoundsSlopeThreshold
+                            peakRtBoundsSlopeThreshold // rtBoundsSlopeThreshold
                             );
             }
         }
@@ -1152,8 +1153,10 @@ void processOptions(int argc, char* argv[]) {
             } else if (policy == "MINIMUM") {
                 mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MINIMUM;
             }
-        } else if (strcmp(argv[i], "--rtBoundsSlopeThreshold") == 0) {
-            rtBoundsSlopeThreshold = atof(argv[i+1]);
+        } else if ((strcmp(argv[i], "--rtBoundsSlopeThreshold") == 0) || (strcmp(argv[i], "--peakRtBoundsSlopeThreshold") == 0)) {
+            peakRtBoundsSlopeThreshold = atof(argv[i+1]);
+        } else if (strcmp(argv[i], "--peakRtBoundsMaxIntensityFraction") == 0) {
+            peakRtBoundsMaxIntensityFraction = atof(argv[i+1]);
         }
 
         if (mzUtils::ends_with(optString, ".rt")) alignmentFile = optString;
@@ -1195,8 +1198,8 @@ void fillOutPeakPickingAndGroupingParameters() {
     // START EIC::getPeakPositionsD()
     //peak picking
     peakPickingAndGroupingParameters->peakSmoothingWindow = eic_smoothingWindow;
-    peakPickingAndGroupingParameters->peakRtBoundsMaxIntensityFraction = -1.0f;
-    peakPickingAndGroupingParameters->peakRtBoundsSlopeThreshold = -1.0f; // TODO
+    peakPickingAndGroupingParameters->peakRtBoundsMaxIntensityFraction = peakRtBoundsMaxIntensityFraction;
+    peakPickingAndGroupingParameters->peakRtBoundsSlopeThreshold = peakRtBoundsSlopeThreshold;
     peakPickingAndGroupingParameters->peakBaselineSmoothingWindow = baseline_smoothingWindow;
     peakPickingAndGroupingParameters->peakBaselineDropTopX = baseline_dropTopX;
     peakPickingAndGroupingParameters->peakIsComputeBounds = true;
