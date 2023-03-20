@@ -1153,7 +1153,7 @@ void processOptions(int argc, char* argv[]) {
             } else if (policy == "MINIMUM") {
                 mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MINIMUM;
             }
-        } else if ((strcmp(argv[i], "--rtBoundsSlopeThreshold") == 0) || (strcmp(argv[i], "--peakRtBoundsSlopeThreshold") == 0)) {
+        } else if (strcmp(argv[i], "--peakRtBoundsSlopeThreshold") == 0) {
             peakRtBoundsSlopeThreshold = atof(argv[i+1]);
         } else if (strcmp(argv[i], "--peakRtBoundsMaxIntensityFraction") == 0) {
             peakRtBoundsMaxIntensityFraction = atof(argv[i+1]);
