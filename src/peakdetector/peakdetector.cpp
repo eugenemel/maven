@@ -1174,6 +1174,10 @@ void processOptions(int argc, char* argv[]) {
         saveScanData = false; //override setting, saving scans for QQQ data doesn't make any sense
         isMzkitchenSearch = false; //QQQ search is vastly different from mzkitchen search, avoid accidental calling of mzkitchenSearch() function
         isRunClustering = false; //In this context, clustering is RT elution time based, doesn't make sense for SRM data
+
+        //Override any previously encoded peak picking parameters with CL options
+        QQQparams->peakPickingAndGroupingParameters = peakPickingAndGroupingParameters;
+
     } else if (mzkitchenSearchType != "") {
         isMzkitchenSearch = true;
     }
@@ -1220,7 +1224,6 @@ void fillOutPeakPickingAndGroupingParameters() {
     peakPickingAndGroupingParameters->filterMinSignalBaselineRatio = minSignalBaseLineRatio;
     peakPickingAndGroupingParameters->filterMinGroupIntensity = minGroupIntensity;
     peakPickingAndGroupingParameters->filterMinPrecursorCharge = minPrecursorCharge;
-
 }
 
 
