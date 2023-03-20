@@ -103,6 +103,9 @@ int baseline_dropTopX = 60;
 float peakRtBoundsSlopeThreshold = -1.0f;
 float peakRtBoundsMaxIntensityFraction = 1.0f;
 
+//eic
+EICBaselineEstimationType eicBaselineEstimationType = EICBaselineEstimationType::DROP_TOP_X;
+
 //merged EIC
 float mergedPeakRtBoundsMaxIntensityFraction = -1.0f;
 float mergedPeakRtBoundsSlopeThreshold = -1.0f;
@@ -818,15 +821,7 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
             //peaks are found during EIC::groupPeaksB()
 
             for(unsigned int j=0; j < eics.size(); j++ ) {
-                eics.at(j)->setBaselineDropTopX(baseline_dropTopX);
-                eics.at(j)->setBaselineSmoothingWindow(baseline_smoothingWindow);
-                eics.at(j)->getPeakPositionsC(
-                            eic_smoothingWindow,
-                            false, // debug
-                            true, // isComputePeakBounds
-                            -1.0f, // rtBoundsMaxIntensityFraction
-                            peakRtBoundsSlopeThreshold // rtBoundsSlopeThreshold
-                            );
+                eics.at(j)->getPeakPositionsD(peakPickingAndGroupingParameters, false);
             }
         }
 
@@ -849,25 +844,7 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
 
         } else if (groupingAlgorithmType == "E") {
 
-            //TODO: swap with peakPickingAndGroupingParameters
-            shared_ptr<PeakPickingAndGroupingParameters> params = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
-
-            params->mergedSmoothingWindow = eic_smoothingWindow;
-            params->groupMaxRtDiff = grouping_maxRtWindow;
-            params->mergedBaselineSmoothingWindow = baseline_smoothingWindow;
-            params->mergedBaselineDropTopX = baseline_dropTopX;
-            params->groupMergeOverlap = mergeOverlap;
-
-            if (mergedPeakRtBoundsMaxIntensityFraction > 0 || mergedPeakRtBoundsSlopeThreshold > 0 || mergedSmoothedMaxToBoundsMinRatio > 0) {
-                params->mergedIsComputeBounds = true;
-            }
-
-            params->mergedPeakRtBoundsMaxIntensityFraction = mergedPeakRtBoundsMaxIntensityFraction;
-            params->mergedPeakRtBoundsSlopeThreshold = mergedPeakRtBoundsSlopeThreshold;
-            params->mergedSmoothedMaxToBoundsMinRatio = mergedSmoothedMaxToBoundsMinRatio;
-            params->mergedSmoothedMaxToBoundsIntensityPolicy = mergedSmoothedMaxToBoundsIntensityPolicy;
-
-            peakgroups = EIC::groupPeaksE(eics, params, false);
+            peakgroups = EIC::groupPeaksE(eics, peakPickingAndGroupingParameters, false);
         }
 
         for (auto eic : eics){
@@ -1157,6 +1134,15 @@ void processOptions(int argc, char* argv[]) {
             peakRtBoundsSlopeThreshold = atof(argv[i+1]);
         } else if (strcmp(argv[i], "--peakRtBoundsMaxIntensityFraction") == 0) {
             peakRtBoundsMaxIntensityFraction = atof(argv[i+1]);
+        } else if (strcmp(argv[i], "--eicBaselineEstimationType") == 0) {
+            string estimationType = argv[i+1];
+            if (estimationType == "DROP_TOP_X") {
+                eicBaselineEstimationType = EICBaselineEstimationType::DROP_TOP_X;
+            } else if (estimationType == "EIC_NON_PEAK_MAX_SMOOTHED_INTENSITY") {
+                eicBaselineEstimationType = EICBaselineEstimationType::EIC_NON_PEAK_MAX_SMOOTHED_INTENSITY;
+            } else if (estimationType == "EIC_NON_PEAK_MEDIAN_SMOOTHED_INTENSITY") {
+                eicBaselineEstimationType = EICBaselineEstimationType::EIC_NON_PEAK_MEDIAN_SMOOTHED_INTENSITY;
+            }
         }
 
         if (mzUtils::ends_with(optString, ".rt")) alignmentFile = optString;
@@ -1205,7 +1191,7 @@ void fillOutPeakPickingAndGroupingParameters() {
     peakPickingAndGroupingParameters->peakIsComputeBounds = true;
 
     //eic
-    peakPickingAndGroupingParameters->eicBaselineEstimationType = EICBaselineEstimationType::DROP_TOP_X; // TODO
+    peakPickingAndGroupingParameters->eicBaselineEstimationType = eicBaselineEstimationType;
 
     // END EIC::getPeakPositionsD()
 
