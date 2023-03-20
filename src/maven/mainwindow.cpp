@@ -1590,6 +1590,14 @@ void MainWindow::createToolBars() {
     quantType->addItem("Area Uncorrected");
     quantType->addItem("Area Fractional");
     quantType->addItem("S/N Ratio");
+    quantType->addItem("Smoothed Height");
+    quantType->addItem("Smoothed Area");
+    quantType->addItem("Smoothed Area Uncorrected");
+    quantType->addItem("Smoothed AreaTop");
+    quantType->addItem("Smoothed S/N Ratio");
+    quantType->addItem("FWHM Area");
+    quantType->addItem("FWHM Smoothed Area");
+
     quantType->setToolTip("Peak Quantitation Type");
     connect(quantType, SIGNAL(activated(int)), eicWidget, SLOT(replot()));
     connect(quantType, SIGNAL(currentIndexChanged(int)), bookmarkedPeaks, SLOT(refreshPeakGroupQuant()));
@@ -1682,7 +1690,15 @@ void MainWindow::updateQuantTypeComboBox() {
                               "Quality",
                               "Area Uncorrected",
                               "Area Fractional",
-                              "S/N Ratio"};
+                              "S/N Ratio",
+                              "Smoothed Height",
+                              "Smoothed Area",
+                              "Smoothed Area Uncorrected",
+                              "Smoothed AreaTop",
+                              "Smoothed S/N Ratio",
+                              "FWHM Area",
+                              "FWHM Smoothed Area"
+                             };
 
     for (auto quantTypeString : quantTypes) {
         if (projectDockWidget->currentProject) {
@@ -2602,6 +2618,13 @@ PeakGroup::QType MainWindow::getUserQuantType() {
         else if (type == "Area Uncorrected") return PeakGroup::AreaNotCorrected;
         else if (type == "Area Fractional") return PeakGroup::AreaFractional;
         else if (type  == "S/N Ratio")  return PeakGroup::SNRatio;
+        else if (type == "Smoothed Height") return PeakGroup::SmoothedHeight;
+        else if (type == "Smoothed Area") return PeakGroup::SmoothedArea;
+        else if (type == "Smoothed Area Uncorrected") return PeakGroup::SmoothedAreaNotCorrected;
+        else if (type == "Smoothed AreaTop") return PeakGroup::SmoothedAreaTop;
+        else if (type == "Smoothed S/N Ratio") return PeakGroup::SmoothedSNRatio;
+        else if (type == "FWHM Area") return PeakGroup::AreaFWHM;
+        else if (type == "FWHM Smoothed Area") return PeakGroup::SmoothedAreaFWHM;
     }
     return PeakGroup::AreaTop;
 }
