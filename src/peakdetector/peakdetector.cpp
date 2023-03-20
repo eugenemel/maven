@@ -1167,6 +1167,8 @@ void processOptions(int argc, char* argv[]) {
         cout << argv[i] << " "; cout << endl;
     }
 
+    fillOutPeakPickingAndGroupingParameters();
+
     //Issue 553: handle QQQ searches
     if (mzkitchenSearchType == "qqqSearch") {
         isQQQSearch = true;
@@ -1174,6 +1176,10 @@ void processOptions(int argc, char* argv[]) {
         saveScanData = false; //override setting, saving scans for QQQ data doesn't make any sense
         isMzkitchenSearch = false; //QQQ search is vastly different from mzkitchen search, avoid accidental calling of mzkitchenSearch() function
         isRunClustering = false; //In this context, clustering is RT elution time based, doesn't make sense for SRM data
+
+        //Override any previously encoded peak picking parameters with CL options
+        QQQparams->peakPickingAndGroupingParameters = peakPickingAndGroupingParameters;
+
     } else if (mzkitchenSearchType != "") {
         isMzkitchenSearch = true;
     }
@@ -1221,13 +1227,7 @@ void fillOutPeakPickingAndGroupingParameters() {
     peakPickingAndGroupingParameters->filterMinGroupIntensity = minGroupIntensity;
     peakPickingAndGroupingParameters->filterMinPrecursorCharge = minPrecursorCharge;
 
-    if (isQQQSearch) {
-
-        //Override any previously encoded peak picking parameters with CL options
-        unordered_map<string, string> params = mzUtils::decodeParameterMap(peakPickingAndGroupingParameters->getEncodedPeakParameters());
-        QQQparams->peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
-        QQQparams->peakPickingAndGroupingParameters->fillInPeakParameters(params);
-    }
+    // END EIC::groupPeaksE()
 }
 
 
