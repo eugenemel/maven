@@ -530,7 +530,11 @@ void EicWidget::computeEICs(bool isUseSampleBoundsRT) {
                                            );
 
 	//find peaks
-    for(int i=0; i < eics.size(); i++ )  eics[i]->getPeakPositions(eic_smoothingWindow);
+    for(unsigned int i = 0; i < eics.size(); i++){
+        eics[i]->getPeakPositionsD(getMainWindow()->getPeakPickingAndGroupingParameters(), false);
+    }
+
+     //for(int i=0; i < eics.size(); i++ )  eics[i]->getPeakPositions(eic_smoothingWindow);
 
     //for(int i=0; i < eics.size(); i++ ) mzUtils::printF(eics[i]->intensity);
 
@@ -1824,19 +1828,20 @@ void EicWidget::groupPeaks() {
     //peakgroups = EIC::groupPeaksB(eics, eic_smoothingWindow, grouping_maxRtWindow, minSmoothedPeakIntensity);
     //Issue 381, 441: EIC::groupPeaksC()
 
-    //Issue 482, 513: EIC::groupPeaksD()
-    peakgroups = EIC::groupPeaksD(
-                eics,
-                static_cast<int>(eic_smoothingWindow),
-                grouping_maxRtWindow,
-                static_cast<int>(baselineSmoothing),
-                static_cast<int>(baselineDropTopX),
-                mergeOverlap
-                );
+//    //Issue 482, 513: EIC::groupPeaksD()
+//    peakgroups = EIC::groupPeaksD(
+//                eics,
+//                static_cast<int>(eic_smoothingWindow),
+//                grouping_maxRtWindow,
+//                static_cast<int>(baselineSmoothing),
+//                static_cast<int>(baselineDropTopX),
+//                mergeOverlap
+//                );
+    peakgroups = EIC::groupPeaksE(eics, getMainWindow()->getPeakPickingAndGroupingParameters(), false);
 
     //Issue 441 debugging
     if (!eics.empty()) {
-        qDebug() << "EICWidget::groupPeaks(): EIC Range =[" << eics.at(0)->rtmin << "-" << eics.at(0)->rtmax << "]: found" << peakgroups.size() << "groups";
+        qDebug() << "EICWidget::groupPeaksE(): EIC Range =[" << eics.at(0)->rtmin << "-" << eics.at(0)->rtmax << "]: found" << peakgroups.size() << "groups";
     }
 
     EIC::removeLowRankGroups(peakgroups, 50);

@@ -2938,6 +2938,7 @@ shared_ptr<PeakPickingAndGroupingParameters> MainWindow::getPeakPickingAndGroupi
      peakPickingAndGroupingParameters->peakBaselineSmoothingWindow = settings->value("baseline_smoothing").toInt();
      peakPickingAndGroupingParameters->peakBaselineDropTopX = settings->value("baseline_quantile").toInt();
      peakPickingAndGroupingParameters->peakIsComputeBounds = true;
+     peakPickingAndGroupingParameters->peakIsReassignPosToUnsmoothedMax = true;
 
      //eic
      int eicBaselineEstimationType = settings->value("eicBaselineEstimationType", EICBaselineEstimationType::DROP_TOP_X).toInt();
