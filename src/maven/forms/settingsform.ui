@@ -514,14 +514,14 @@
           <item row="3" column="0">
            <widget class="QLabel" name="lblMergedEicRatio">
             <property name="text">
-             <string>Merged EIC Ratio Threshold</string>
+             <string>Peak Group S/N Threshold</string>
             </property>
            </widget>
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="lblPeakRtSlopeThreshold">
             <property name="text">
-             <string>Peak RT Slope Threshold</string>
+             <string>Peak Boundary Slope Threshold</string>
             </property>
            </widget>
           </item>
