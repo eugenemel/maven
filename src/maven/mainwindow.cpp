@@ -2951,7 +2951,7 @@ shared_ptr<PeakPickingAndGroupingParameters> MainWindow::getPeakPickingAndGroupi
 //    //merged EIC
       peakPickingAndGroupingParameters->mergedSmoothingWindow = settings->value("eic_smoothingWindow").toInt();
 //    peakPickingAndGroupingParameters->mergedPeakRtBoundsMaxIntensityFraction = mergedPeakRtBoundsMaxIntensityFraction;
-//    peakPickingAndGroupingParameters->mergedPeakRtBoundsSlopeThreshold = mergedPeakRtBoundsSlopeThreshold;
+      peakPickingAndGroupingParameters->mergedPeakRtBoundsSlopeThreshold = settings->value("peakRtBoundsSlopeThreshold", 0.01f).toFloat();
       peakPickingAndGroupingParameters->mergedSmoothedMaxToBoundsMinRatio = settings->value("mergedSmoothedMaxToBoundsMinRatio", 1.5f).toFloat();
       peakPickingAndGroupingParameters->mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MAXIMUM;
       peakPickingAndGroupingParameters->mergedBaselineSmoothingWindow = settings->value("baseline_smoothing").toInt();
