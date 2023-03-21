@@ -207,6 +207,24 @@ void SettingsForm::setFormValues() {
     if (settings->contains("chkNotifyNewerMaven"))
         this->chkNotifyNewerMaven->setCheckState( (Qt::CheckState) settings->value("chkNotifyNewerMaven").toInt());
 
+    //peak detection
+    if (settings->contains("peakRtBoundsSlopeThreshold"))
+        this->spnPeakRtSlopeThreshold->setValue(settings->value("peakRtBoundsSlopeThreshold").toDouble());
+
+    if (settings->contains("mergedSmoothedMaxToBoundsMinRatio"))
+        this->spnMergedEicIntensityRatio->setValue(settings->value("mergedSmoothedMaxToBoundsMinRatio").toDouble());
+
+    if (settings->contains("eicBaselineEstimationType")) {
+       int baselineType = settings->value("eicBaselineEstimationType").toInt();
+       if (baselineType == EICBaselineEstimationType::DROP_TOP_X) {
+           this->cmbBaselineType->setCurrentText("Drop Top X");
+       } else if (baselineType == EICBaselineEstimationType::EIC_NON_PEAK_MEDIAN_SMOOTHED_INTENSITY) {
+           this->cmbBaselineType->setCurrentText("Non-Peak Median");
+       } else if (baselineType == EICBaselineEstimationType::EIC_NON_PEAK_MAX_SMOOTHED_INTENSITY) {
+           this->cmbBaselineType->setCurrentText("Non-Peak Max");
+       }
+    }
+
     //Issue 255: disable Savitzky-Golay smoothing
     int smoothingAlg = settings->value("eic_smoothingAlgorithm").toInt();
     if(smoothingAlg == EIC::SmootherType::AVG){
@@ -430,6 +448,7 @@ void SettingsForm::getFormValues() {
 
     const QString currentText = eic_smoothingAlgorithm->currentText();
 
+    //peak detection
     //Issue 255: disable Savitzky-Golay smoothing - fall back to Gaussian
     if(currentText == "Moving Average"){
         settings->setValue("eic_smoothingAlgorithm",EIC::SmootherType::AVG);
@@ -440,6 +459,18 @@ void SettingsForm::getFormValues() {
     settings->setValue("eic_smoothingWindow",eic_smoothingWindow->value());
     settings->setValue("grouping_maxRtWindow",grouping_maxRtWindow->value());
     settings->setValue("spnMergeOverlap",spnMergeOverlap->value());
+    settings->setValue("peakRtBoundsSlopeThreshold", this->spnPeakRtSlopeThreshold->value());
+    settings->setValue("mergedSmoothedMaxToBoundsMinRatio", this->spnMergedEicIntensityRatio->value());
+
+    const QString baselineTypeStr = this->cmbBaselineType->currentText();
+    if (baselineTypeStr == "Drop Top X") {
+        settings->setValue("eicBaselineEstimationType", EICBaselineEstimationType::DROP_TOP_X);
+    } else if (baselineTypeStr == "Non-Peak Median") {
+        settings->setValue("eicBaselineEstimationType", EICBaselineEstimationType::EIC_NON_PEAK_MEDIAN_SMOOTHED_INTENSITY);
+    } else if (baselineTypeStr == "Non-Peak Max") {
+        settings->setValue("eicBaselineEstimationType", EICBaselineEstimationType::EIC_NON_PEAK_MAX_SMOOTHED_INTENSITY);
+    }
+
     settings->setValue("maxNaturalAbundanceErr",maxNaturalAbundanceErr->value());
     settings->setValue("maxIsotopeScanDiff",maxIsotopeScanDiff->value());
 
