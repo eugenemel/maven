@@ -409,12 +409,12 @@
             </item>
             <item>
              <property name="text">
-              <string>Non-Peak Median</string>
+              <string>Non-Peak Max</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Non-Peak Max</string>
+              <string>Non-Peak Median</string>
              </property>
             </item>
            </widget>
