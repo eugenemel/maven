@@ -2953,7 +2953,7 @@ shared_ptr<PeakPickingAndGroupingParameters> MainWindow::getPeakPickingAndGroupi
 //    peakPickingAndGroupingParameters->mergedPeakRtBoundsMaxIntensityFraction = mergedPeakRtBoundsMaxIntensityFraction;
       peakPickingAndGroupingParameters->mergedPeakRtBoundsSlopeThreshold = settings->value("peakRtBoundsSlopeThreshold", 0.01f).toFloat();
       peakPickingAndGroupingParameters->mergedSmoothedMaxToBoundsMinRatio = settings->value("mergedSmoothedMaxToBoundsMinRatio", 1.5f).toFloat();
-      peakPickingAndGroupingParameters->mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MAXIMUM;
+      peakPickingAndGroupingParameters->mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MINIMUM; // loosest - use smaller intensity in denominator
       peakPickingAndGroupingParameters->mergedBaselineSmoothingWindow = settings->value("baseline_smoothing").toInt();
       peakPickingAndGroupingParameters->mergedBaselineDropTopX = settings->value("baseline_quantile").toInt();
       peakPickingAndGroupingParameters->mergedIsComputeBounds = true;
