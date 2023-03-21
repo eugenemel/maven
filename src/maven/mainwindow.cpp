@@ -727,6 +727,7 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
                 compound->srmId = srmName;
                 compound->precursorMz = compound->srmTransition->precursorMz;
                 compound->productMz = compound->srmTransition->productMz;
+                compound->cid = -1;
 
                 groupCopy->compound = compound;
                 groupCopy->displayName = srmName;

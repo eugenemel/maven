@@ -1293,7 +1293,7 @@ void Database::deleteCompoundsSQL(QString dbName, QSqlDatabase& dbConnection) {
 }
 
 
-void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& dbConnection) {
+void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& dbConnection, bool isRespectCIDs) {
     qDebug() << "Database::saveCompoundsSQL(): Saving"
              << compoundSet.size()
              << "Compounds";
@@ -1407,13 +1407,18 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
             }
 
 	    QVariant cid =  QVariant(QVariant::Int);
-        if (c->cid)cid = QVariant(c->cid);
+        if (c->cid) cid = QVariant(c->cid);
 
             QSqlQuery query1(dbConnection);
 
-            query1.prepare("replace into compounds values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?)");
+            if (isRespectCIDs) {
+                query1.prepare("replace into compounds values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?)");
+                query1.bindValue(0, cid);
+            } else {
+                query1.prepare("insert into compounds values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?)");
+                query1.bindValue(0, QVariant(QVariant::Int));
+            }
 
-            query1.bindValue( 0, cid);
             query1.bindValue( 1, QString(c->db.c_str()) );
             query1.bindValue( 2, QString(c->id.c_str()) );
             query1.bindValue( 3, QString(c->name.c_str()));
