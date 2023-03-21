@@ -710,6 +710,32 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
 
         groupCopy->searchTableName = "Bookmarks";
 
+        //Issue 617: Retrieve data from EIC widget, copy into PeakGroup
+        if (getEicWidget()->getMzSlice().isSrmTransitionSlice() && !groupCopy->compound) {
+
+            string srmName = getEicWidget()->getMzSlice().srmTransition->name;
+
+            if (srmName != "") {
+                Compound *compound = new Compound(getEicWidget()->getMzSlice().srmTransition->name,
+                                                  getEicWidget()->getMzSlice().srmTransition->name,
+                                                  "",
+                                                  0,
+                                                  0);
+                compound->db = "Unmatched SRM Transition";
+                compound->category.push_back(srmName);
+                compound->srmTransition = getEicWidget()->getMzSlice().srmTransition;
+                compound->srmId = srmName;
+                compound->precursorMz = compound->srmTransition->precursorMz;
+                compound->productMz = compound->srmTransition->productMz;
+
+                groupCopy->compound = compound;
+                groupCopy->displayName = srmName;
+            }
+
+            groupCopy->setType(PeakGroup::SRMTransitionType);
+
+        }
+
         //Issue 277: tabledockwidget retrieves data from reference, copies it, and returns reference to copied data
         PeakGroup *groupCopy2 = bookmarkedPeaks->addPeakGroup(groupCopy, true, true);
 
