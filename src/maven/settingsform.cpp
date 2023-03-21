@@ -228,7 +228,7 @@ void SettingsForm::setFormValues() {
     baseline_quantile->setValue(settings->value("baseline_quantile").toDouble());
 
     if (settings->contains("txtEICScanFilter"))
-        this->txtEICScanFilter->setPlainText(settings->value("txtEICScanFilter").toString());
+        this->lineEicScanFilter->setText(settings->value("txtEICScanFilter").toString());
 
     if (settings->contains("chkDisplayConsensusSpectrum"))
         this->chkDisplayConsensusSpectrum->setCheckState((Qt::CheckState) settings->value("chkDisplayConsensusSpectrum").toInt());
@@ -461,7 +461,7 @@ void SettingsForm::getFormValues() {
     settings->setValue("centroid_scan_flag", centroid_scan_flag->checkState());
     settings->setValue("scan_filter_min_intensity", scan_filter_min_intensity->value());
     settings->setValue("scan_filter_min_quantile", scan_filter_min_quantile->value());
-    settings->setValue("txtEICScanFilter", txtEICScanFilter->toPlainText());
+    settings->setValue("txtEICScanFilter", lineEicScanFilter->text());
     settings->setValue("chkDisplayConsensusSpectrum", chkDisplayConsensusSpectrum->checkState());
     settings->setValue("chkShowRtRange", chkShowRtRange->checkState());
 
