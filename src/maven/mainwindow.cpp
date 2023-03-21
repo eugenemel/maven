@@ -2928,19 +2928,20 @@ void MainWindow::showPeakInCovariantsWidget(Peak *peak) {
 
 shared_ptr<PeakPickingAndGroupingParameters> MainWindow::getPeakPickingAndGroupingParameters(){
 
-    if (!settings) return peakPickingAndGroupingParameters;
+     if (!settings) return peakPickingAndGroupingParameters;
 
-    // START EIC::getPeakPositionsD()
-    //peak picking
-    peakPickingAndGroupingParameters->peakSmoothingWindow = settings->value("eic_smoothingWindow").toInt();
-    //peakPickingAndGroupingParameters->peakRtBoundsMaxIntensityFraction = peakRtBoundsMaxIntensityFraction;
-    //peakPickingAndGroupingParameters->peakRtBoundsSlopeThreshold = peakRtBoundsSlopeThreshold;
-    peakPickingAndGroupingParameters->peakBaselineSmoothingWindow = settings->value("baseline_smoothing").toInt();
-    peakPickingAndGroupingParameters->peakBaselineDropTopX = settings->value("baseline_quantile").toInt();
-    peakPickingAndGroupingParameters->peakIsComputeBounds = true;
+     // START EIC::getPeakPositionsD()
+     //peak picking
+     peakPickingAndGroupingParameters->peakSmoothingWindow = settings->value("eic_smoothingWindow").toInt();
+     //peakPickingAndGroupingParameters->peakRtBoundsMaxIntensityFraction = peakRtBoundsMaxIntensityFraction;
+     peakPickingAndGroupingParameters->peakRtBoundsSlopeThreshold = settings->value("peakRtBoundsSlopeThreshold", 0.01f).toFloat();
+     peakPickingAndGroupingParameters->peakBaselineSmoothingWindow = settings->value("baseline_smoothing").toInt();
+     peakPickingAndGroupingParameters->peakBaselineDropTopX = settings->value("baseline_quantile").toInt();
+     peakPickingAndGroupingParameters->peakIsComputeBounds = true;
 
-//    //eic
-//    peakPickingAndGroupingParameters->eicBaselineEstimationType = eicBaselineEstimationType;
+     //eic
+     int eicBaselineEstimationType = settings->value("eicBaselineEstimationType", EICBaselineEstimationType::DROP_TOP_X).toInt();
+     peakPickingAndGroupingParameters->eicBaselineEstimationType = static_cast<EICBaselineEstimationType>(eicBaselineEstimationType);
 
 //    // END EIC::getPeakPositionsD()
 
@@ -2950,8 +2951,8 @@ shared_ptr<PeakPickingAndGroupingParameters> MainWindow::getPeakPickingAndGroupi
       peakPickingAndGroupingParameters->mergedSmoothingWindow = settings->value("eic_smoothingWindow").toInt();
 //    peakPickingAndGroupingParameters->mergedPeakRtBoundsMaxIntensityFraction = mergedPeakRtBoundsMaxIntensityFraction;
 //    peakPickingAndGroupingParameters->mergedPeakRtBoundsSlopeThreshold = mergedPeakRtBoundsSlopeThreshold;
-//    peakPickingAndGroupingParameters->mergedSmoothedMaxToBoundsMinRatio = mergedSmoothedMaxToBoundsMinRatio;
-//    peakPickingAndGroupingParameters->mergedSmoothedMaxToBoundsIntensityPolicy = mergedSmoothedMaxToBoundsIntensityPolicy;
+      peakPickingAndGroupingParameters->mergedSmoothedMaxToBoundsMinRatio = settings->value("mergedSmoothedMaxToBoundsMinRatio", 1.5f).toFloat();
+      peakPickingAndGroupingParameters->mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MAXIMUM;
       peakPickingAndGroupingParameters->mergedBaselineSmoothingWindow = settings->value("baseline_smoothing").toInt();
       peakPickingAndGroupingParameters->mergedBaselineDropTopX = settings->value("baseline_quantile").toInt();
       peakPickingAndGroupingParameters->mergedIsComputeBounds = true;
@@ -2970,5 +2971,5 @@ shared_ptr<PeakPickingAndGroupingParameters> MainWindow::getPeakPickingAndGroupi
 
 //    // END EIC::groupPeaksE()
 
-    return peakPickingAndGroupingParameters;
+      return peakPickingAndGroupingParameters;
 }
