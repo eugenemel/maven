@@ -120,7 +120,9 @@ public:
    shared_ptr<LCLipidSearchParameters> lipidSearchParameters = shared_ptr<LCLipidSearchParameters>(new LCLipidSearchParameters());
    shared_ptr<MzkitchenMetaboliteSearchParameters> mzkitchenMetaboliteSearchParameters = shared_ptr<MzkitchenMetaboliteSearchParameters>(new MzkitchenMetaboliteSearchParameters());
 
-//CLASS FUNCTIONS
+   shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
+
+ //CLASS FUNCTIONS
  static vector<EIC*> pullEICs(mzSlice* slice,
                               std::vector<mzSample*>&samples,
                               int peakDetect,

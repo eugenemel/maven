@@ -304,6 +304,7 @@ void PeakDetectionDialog::findPeaks() {
         //Issue 606: mzkitchen-specific parameter sets
         peakupdater->lipidSearchParameters = getLipidSearchParameters();
         peakupdater->mzkitchenMetaboliteSearchParameters = getMzkitchenMetaboliteSearchParameters();
+        peakupdater->peakPickingAndGroupingParameters = getPeakPickingAndGroupingParameters();
 
         if (peakupdater->scoringScheme == MzKitchenProcessor::LIPID_SCORING_NAME) {
             encodedParams = peakupdater->lipidSearchParameters->encodeParams();
