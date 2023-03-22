@@ -58,7 +58,7 @@
          <number>99999999</number>
         </property>
         <property name="value">
-         <number>3</number>
+         <number>1</number>
         </property>
        </widget>
       </item>
@@ -102,7 +102,7 @@
          <double>5.000000000000000</double>
         </property>
         <property name="value">
-         <double>10.000000000000000</double>
+         <double>0.000000000000000</double>
         </property>
        </widget>
       </item>
