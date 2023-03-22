@@ -2930,11 +2930,21 @@ shared_ptr<PeakPickingAndGroupingParameters> MainWindow::getPeakPickingAndGroupi
 
      if (!settings) return peakPickingAndGroupingParameters;
 
+     float peakRtBoundsSlopeThreshold = settings->value("peakRtBoundsSlopeThreshold", 0.01f).toFloat();
+     if (peakRtBoundsSlopeThreshold < 0) {
+         peakRtBoundsSlopeThreshold = -1.0f;
+     }
+
+     float mergedSmoothedMaxToBoundsMinRatio = settings->value("mergedSmoothedMaxToBoundsMinRatio", 1.0f).toFloat();
+     if (mergedSmoothedMaxToBoundsMinRatio < 0) {
+         mergedSmoothedMaxToBoundsMinRatio = -1.0f;
+     }
+
      // START EIC::getPeakPositionsD()
      //peak picking
      peakPickingAndGroupingParameters->peakSmoothingWindow = settings->value("eic_smoothingWindow").toInt();
      //peakPickingAndGroupingParameters->peakRtBoundsMaxIntensityFraction = peakRtBoundsMaxIntensityFraction;
-     peakPickingAndGroupingParameters->peakRtBoundsSlopeThreshold = settings->value("peakRtBoundsSlopeThreshold", 0.01f).toFloat();
+     peakPickingAndGroupingParameters->peakRtBoundsSlopeThreshold = peakRtBoundsSlopeThreshold;
      peakPickingAndGroupingParameters->peakBaselineSmoothingWindow = settings->value("baseline_smoothing").toInt();
      peakPickingAndGroupingParameters->peakBaselineDropTopX = settings->value("baseline_quantile").toInt();
      peakPickingAndGroupingParameters->peakIsComputeBounds = true;
@@ -2951,8 +2961,8 @@ shared_ptr<PeakPickingAndGroupingParameters> MainWindow::getPeakPickingAndGroupi
 //    //merged EIC
       peakPickingAndGroupingParameters->mergedSmoothingWindow = settings->value("eic_smoothingWindow").toInt();
 //    peakPickingAndGroupingParameters->mergedPeakRtBoundsMaxIntensityFraction = mergedPeakRtBoundsMaxIntensityFraction;
-      peakPickingAndGroupingParameters->mergedPeakRtBoundsSlopeThreshold = settings->value("peakRtBoundsSlopeThreshold", 0.01f).toFloat();
-      peakPickingAndGroupingParameters->mergedSmoothedMaxToBoundsMinRatio = settings->value("mergedSmoothedMaxToBoundsMinRatio", 1.5f).toFloat();
+      peakPickingAndGroupingParameters->mergedPeakRtBoundsSlopeThreshold = peakRtBoundsSlopeThreshold;
+      peakPickingAndGroupingParameters->mergedSmoothedMaxToBoundsMinRatio = mergedSmoothedMaxToBoundsMinRatio;
       peakPickingAndGroupingParameters->mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MINIMUM; // loosest - use smaller intensity in denominator
       peakPickingAndGroupingParameters->mergedBaselineSmoothingWindow = settings->value("baseline_smoothing").toInt();
       peakPickingAndGroupingParameters->mergedBaselineDropTopX = settings->value("baseline_quantile").toInt();

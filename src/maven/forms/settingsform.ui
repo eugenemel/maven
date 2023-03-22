@@ -490,6 +490,9 @@
           </item>
           <item row="0" column="1">
            <widget class="QDoubleSpinBox" name="spnPeakRtSlopeThreshold">
+            <property name="minimum">
+             <double>-1.000000000000000</double>
+            </property>
             <property name="maximum">
              <double>99999999.000000000000000</double>
             </property>
@@ -503,6 +506,9 @@
           </item>
           <item row="3" column="1">
            <widget class="QDoubleSpinBox" name="spnMergedEicIntensityRatio">
+            <property name="minimum">
+             <double>-1.000000000000000</double>
+            </property>
             <property name="maximum">
              <double>9999999.000000000000000</double>
             </property>
