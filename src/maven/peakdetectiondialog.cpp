@@ -579,19 +579,29 @@ shared_ptr<PeakPickingAndGroupingParameters> PeakDetectionDialog::getPeakPicking
 
     shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
 
+    float peakRtBoundsSlopeThreshold = static_cast<float>(spnPeakBoundarySlopeThreshold->value());
+    if (peakRtBoundsSlopeThreshold < 0) {
+        peakRtBoundsSlopeThreshold = -1.0f;
+    }
+
+    float mergedSmoothedMaxToBoundsMinRatio = static_cast<float>(spnPeakGroupSNThreshold->value());
+    if (mergedSmoothedMaxToBoundsMinRatio < 0) {
+        mergedSmoothedMaxToBoundsMinRatio = -1.0f;
+    }
+
     // START EIC::getPeakPositionsD()
     //peak picking
     peakPickingAndGroupingParameters->peakSmoothingWindow = this->eic_smoothingWindow->value();
     //peakPickingAndGroupingParameters->peakRtBoundsMaxIntensityFraction = peakRtBoundsMaxIntensityFraction;
-//  peakPickingAndGroupingParameters->peakRtBoundsSlopeThreshold = settings->value("peakRtBoundsSlopeThreshold", 0.01f).toFloat();
+    peakPickingAndGroupingParameters->peakRtBoundsSlopeThreshold = peakRtBoundsSlopeThreshold;
     peakPickingAndGroupingParameters->peakBaselineSmoothingWindow = this->baseline_smoothing->value();
     peakPickingAndGroupingParameters->peakBaselineDropTopX = this->baseline_quantile->value();
     peakPickingAndGroupingParameters->peakIsComputeBounds = true;
     peakPickingAndGroupingParameters->peakIsReassignPosToUnsmoothedMax = false;
 
      //eic
-//   int eicBaselineEstimationType = settings->value("eicBaselineEstimationType", EICBaselineEstimationType::DROP_TOP_X).toInt();
-//   peakPickingAndGroupingParameters->eicBaselineEstimationType = static_cast<EICBaselineEstimationType>(eicBaselineEstimationType);
+     int eicBaselineEstimationType = this->cmbEicBaselineType->currentIndex();
+     peakPickingAndGroupingParameters->eicBaselineEstimationType = static_cast<EICBaselineEstimationType>(eicBaselineEstimationType);
 
      // END EIC::getPeakPositionsD()
 
@@ -600,8 +610,8 @@ shared_ptr<PeakPickingAndGroupingParameters> PeakDetectionDialog::getPeakPicking
      //merged EIC
      peakPickingAndGroupingParameters->mergedSmoothingWindow = this->eic_smoothingWindow->value();
 //   peakPickingAndGroupingParameters->mergedPeakRtBoundsMaxIntensityFraction = mergedPeakRtBoundsMaxIntensityFraction;
-//   peakPickingAndGroupingParameters->mergedPeakRtBoundsSlopeThreshold = settings->value("peakRtBoundsSlopeThreshold", 0.01f).toFloat();
-//   peakPickingAndGroupingParameters->mergedSmoothedMaxToBoundsMinRatio = settings->value("mergedSmoothedMaxToBoundsMinRatio", 1.5f).toFloat();
+     peakPickingAndGroupingParameters->mergedPeakRtBoundsSlopeThreshold = peakRtBoundsSlopeThreshold;
+     peakPickingAndGroupingParameters->mergedSmoothedMaxToBoundsMinRatio = mergedSmoothedMaxToBoundsMinRatio;
      peakPickingAndGroupingParameters->mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MINIMUM; // loosest - use smaller intensity in denominator
      peakPickingAndGroupingParameters->mergedBaselineSmoothingWindow = this->baseline_smoothing->value();
      peakPickingAndGroupingParameters->mergedBaselineDropTopX = this->baseline_quantile->value();
