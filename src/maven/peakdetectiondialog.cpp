@@ -59,7 +59,7 @@ void PeakDetectionDialog::setFeatureDetection(FeatureDetectionType type) {
 
             featureOptions->hide();
             dbOptions->hide();
-
+            grpBaseline->hide();
             grpMatchingOptions->hide();
 
     } else if (_featureDetectionType == FullSpectrum ) {
@@ -71,21 +71,8 @@ void PeakDetectionDialog::setFeatureDetection(FeatureDetectionType type) {
             featureOptions->show();
             dbOptions->hide();
 
+            grpBaseline->show();
             grpMatchingOptions->show();
-
-            QLayout *oldLayout = tabPeakDetection->layout();
-            delete(oldLayout);
-
-            QGridLayout *gridLayout_10 = new QGridLayout(tabPeakDetection);
-            gridLayout_10->setObjectName(QString::fromUtf8("gridLayout_10"));
-            gridLayout_10->setContentsMargins(-1, -1, -1, 16);
-
-            gridLayout_10->addWidget(grpMassSlicingMethod, 0, 1, 1, 1);
-            gridLayout_10->addWidget(featureOptions, 1, 1, 2, 1);
-            gridLayout_10->addWidget(eicOptions, 3, 1, 2, 1);
-
-            tabPeakDetection->setLayout(gridLayout_10);
-
 
     } else if (_featureDetectionType == CompoundDB ) {
 
@@ -96,20 +83,8 @@ void PeakDetectionDialog::setFeatureDetection(FeatureDetectionType type) {
             featureOptions->hide();
             dbOptions->show();
 
+            grpBaseline->show();
             grpMatchingOptions->show();
-
-            QLayout *oldLayout = tabPeakDetection->layout();
-            delete(oldLayout);
-
-            QGridLayout *gridLayout_10 = new QGridLayout(tabPeakDetection);
-            gridLayout_10->setObjectName(QString::fromUtf8("gridLayout_10"));
-            gridLayout_10->setContentsMargins(-1, -1, -1, 16);
-
-            gridLayout_10->addWidget(grpMassSlicingMethod, 0, 1, 1, 1);
-            gridLayout_10->addWidget(dbOptions, 1, 1, 2, 1);
-            gridLayout_10->addWidget(eicOptions, 3, 1, 2, 1);
-
-            tabPeakDetection->setLayout(gridLayout_10);
 
     }
 
