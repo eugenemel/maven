@@ -514,7 +514,7 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
         peaksSearchParameters->eicMaxPeakGroupRtDiff = static_cast<float>(this->grouping_maxRtDiff->value());
 
         //grouping
-        peaksSearchParameters->grpVersion = "EIC::groupPeaksD()";
+        peaksSearchParameters->grpVersion = "EIC::groupPeaksE()";
         peaksSearchParameters->grpMergeOverlap = static_cast<float>(this->spnMergeOverlap->value());
 
         //quality
@@ -599,3 +599,52 @@ shared_ptr<MzkitchenMetaboliteSearchParameters> PeakDetectionDialog::getMzkitche
     return mzkitchenMetaboliteSearchParameters;
 }
 
+//Issue 620
+shared_ptr<PeakPickingAndGroupingParameters> PeakDetectionDialog::getPeakPickingAndGroupingParameters(){
+
+    shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
+
+    // START EIC::getPeakPositionsD()
+    //peak picking
+    peakPickingAndGroupingParameters->peakSmoothingWindow = this->eic_smoothingWindow->value();
+    //peakPickingAndGroupingParameters->peakRtBoundsMaxIntensityFraction = peakRtBoundsMaxIntensityFraction;
+//  peakPickingAndGroupingParameters->peakRtBoundsSlopeThreshold = settings->value("peakRtBoundsSlopeThreshold", 0.01f).toFloat();
+    peakPickingAndGroupingParameters->peakBaselineSmoothingWindow = this->baseline_smoothing->value();
+    peakPickingAndGroupingParameters->peakBaselineDropTopX = this->baseline_quantile->value();
+    peakPickingAndGroupingParameters->peakIsComputeBounds = true;
+    peakPickingAndGroupingParameters->peakIsReassignPosToUnsmoothedMax = false;
+
+     //eic
+//   int eicBaselineEstimationType = settings->value("eicBaselineEstimationType", EICBaselineEstimationType::DROP_TOP_X).toInt();
+//   peakPickingAndGroupingParameters->eicBaselineEstimationType = static_cast<EICBaselineEstimationType>(eicBaselineEstimationType);
+
+     // END EIC::getPeakPositionsD()
+
+     // START EIC::groupPeaksE()
+
+     //merged EIC
+     peakPickingAndGroupingParameters->mergedSmoothingWindow = this->eic_smoothingWindow->value();
+//   peakPickingAndGroupingParameters->mergedPeakRtBoundsMaxIntensityFraction = mergedPeakRtBoundsMaxIntensityFraction;
+//   peakPickingAndGroupingParameters->mergedPeakRtBoundsSlopeThreshold = settings->value("peakRtBoundsSlopeThreshold", 0.01f).toFloat();
+//   peakPickingAndGroupingParameters->mergedSmoothedMaxToBoundsMinRatio = settings->value("mergedSmoothedMaxToBoundsMinRatio", 1.5f).toFloat();
+     peakPickingAndGroupingParameters->mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MINIMUM; // loosest - use smaller intensity in denominator
+     peakPickingAndGroupingParameters->mergedBaselineSmoothingWindow = this->baseline_smoothing->value();
+     peakPickingAndGroupingParameters->mergedBaselineDropTopX = this->baseline_quantile->value();
+     peakPickingAndGroupingParameters->mergedIsComputeBounds = true;
+
+     //grouping
+     peakPickingAndGroupingParameters->groupMaxRtDiff = static_cast<float>(this->grouping_maxRtDiff->value());
+     peakPickingAndGroupingParameters->groupMergeOverlap = static_cast<float>(this->spnMergeOverlap->value());
+
+     //post-grouping filters
+     peakPickingAndGroupingParameters->filterMinGoodGroupCount = minGoodGroupCount->value();
+     peakPickingAndGroupingParameters->filterMinQuality = static_cast<float>(spnMinPeakQuality->value());
+     peakPickingAndGroupingParameters->filterMinNoNoiseObs = this->minNoNoiseObs->value();
+     peakPickingAndGroupingParameters->filterMinSignalBaselineRatio = static_cast<float>(this->sigBaselineRatio->value());
+     peakPickingAndGroupingParameters->filterMinGroupIntensity = static_cast<float>(this->minGroupIntensity->value());
+     //peakPickingAndGroupingParameters->filterMinPrecursorCharge = minPrecursorCharge;
+
+     // END EIC::groupPeaksE()
+
+    return peakPickingAndGroupingParameters;
+}
