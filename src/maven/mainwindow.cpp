@@ -2049,7 +2049,7 @@ vector<SRMTransition*> MainWindow::getSRMTransitions() {
     params->amuQ1 = 0.01f;//getSettings()->value("amuQ1").toFloat();
     params->amuQ3 = 0.01f;//getSettings()->value("amuQ3").toFloat();
 
-    vector<mzSample*> visibleSamples = getVisibleSamples();
+    vector<mzSample*> visibleSamples = getSamples();
 
     vector<SRMTransition*> transitions = QQQProcessor::getSRMTransitions(
                 visibleSamples,
