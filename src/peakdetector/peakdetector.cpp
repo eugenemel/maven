@@ -140,6 +140,9 @@ shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters = 
 
 static map<QString, QString> searchTableData{};
 
+string sampleIdMappingFile;
+static map<string, int> sampleIdMapping{};
+
 /**
  * @brief minSmoothedPeakIntensity
  *
@@ -161,6 +164,7 @@ void processOptions(int argc, char* argv[]);
 void fillOutPeakPickingAndGroupingParameters();
 
 void loadSamples(vector<string>&filenames);
+void setSampleIdFromFile();
 void printSettings();
 void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string setName, bool writeReportFlag);
 void processCompounds(vector<Compound*> set, string setName);
@@ -1143,6 +1147,8 @@ void processOptions(int argc, char* argv[]) {
             } else if (estimationType == "EIC_NON_PEAK_MEDIAN_SMOOTHED_INTENSITY") {
                 eicBaselineEstimationType = EICBaselineEstimationType::EIC_NON_PEAK_MEDIAN_SMOOTHED_INTENSITY;
             }
+        } else if (strcmp(argv[i], "--sampleIdMappingFile") == 0) {
+            sampleIdMappingFile = argv[i+1];
         }
 
         if (mzUtils::ends_with(optString, ".rt")) alignmentFile = optString;
@@ -1337,18 +1343,80 @@ void loadSamples(vector<string>&filenames) {
 
     cout << "loadSamples() done: loaded " << samples.size() << " samples\n";
 
-    //sort using natural sorting
-    sort(samples.begin(), samples.end(), [](const mzSample* lhs, const mzSample* rhs){
-        return strnatcmp(lhs->sampleName.c_str(), rhs->sampleName.c_str()) < 0;
-    });
+    if (sampleIdMappingFile.empty()) {
+        //sort using natural sorting
+        sort(samples.begin(), samples.end(), [](const mzSample* lhs, const mzSample* rhs){
+            return strnatcmp(lhs->sampleName.c_str(), rhs->sampleName.c_str()) < 0;
+        });
 
-    //ids match natural order
-    for (unsigned int i = 0; i < samples.size(); i++){
-        samples.at(i)->setSampleId(static_cast<int>(i));
-        samples.at(i)->setSampleOrder(static_cast<int>(i));
+        //ids match natural order
+        for (unsigned int i = 0; i < samples.size(); i++){
+            samples.at(i)->setSampleId(static_cast<int>(i));
+            samples.at(i)->setSampleOrder(static_cast<int>(i));
+        }
+    } else {
+        setSampleIdFromFile();
     }
 }
 
+void setSampleIdFromFile() {
+
+    set<int> usedIds{};
+    string line, word;
+    vector<string> row;
+    fstream sampleIdMappingFileStream(sampleIdMappingFile);
+    if (sampleIdMappingFileStream.is_open()) {
+        while(getline(sampleIdMappingFileStream, line)) {
+
+            if (line[0] == '#') { // skip commented lines
+                continue;
+            }
+
+            stringstream str(line);
+            while(getline(str, word, '\t')) {
+                row.push_back(word);
+            }
+
+            if (row.size() >= 2) {
+                string sampleName = row[0];
+                int sampleId = stoi(row[1]);
+
+                cout << "sampleName=" << sampleName << " sampleId=" << sampleId << endl;
+
+                if (sampleIdMapping.find(sampleName) != sampleIdMapping.end()) {
+                    cerr << "Duplicate sampleName '" << sampleName << "' in sampleIdMappingFile! Exiting." << endl;
+                    abort();
+                }
+
+                if (usedIds.find(sampleId) != usedIds.end()) {
+                    cerr << "Duplicate ID: " << sampleId << " in sampleMapping File! Exiting." << endl;
+                    abort();
+                }
+
+                usedIds.insert(sampleId);
+                sampleIdMapping.insert(make_pair(sampleName, sampleId));
+
+                row.clear();
+            }
+
+        }
+    }
+
+    //Every sample must receive an id and sample order number from the map
+    for (auto sample : samples){
+        if (sampleIdMapping.find(sample->sampleName) != sampleIdMapping.end()) {
+            int sampleId = sampleIdMapping[sample->sampleName];
+
+            sample->setSampleId(sampleId);
+            sample->setSampleOrder(sampleId);
+        } else {
+            cerr << "setSampleIdFromFile() Failed! sample '" << sample->sampleName << "' did not have an ID\n"
+                 << "in the sampleIdMapping file '" << sampleIdMappingFile << "'.\n"
+                 << "All samples must have an ID in the sampleMappingFile." << endl;
+            abort();
+        }
+    }
+}
 /**
  * @brief reduceGroups
  * @deprecated groupPeaksD() now incorporates this step
