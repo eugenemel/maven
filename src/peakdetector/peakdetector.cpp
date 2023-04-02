@@ -141,7 +141,7 @@ shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters = 
 static map<QString, QString> searchTableData{};
 
 string sampleIdMappingFile;
-static map<string, int> sampleIdMapping{};
+static map<string, pair<int, bool>> sampleIdMapping{};
 
 /**
  * @brief minSmoothedPeakIntensity
@@ -1377,9 +1377,10 @@ void setSampleIdFromFile() {
                 row.push_back(word);
             }
 
-            if (row.size() >= 2) {
+            if (row.size() >= 3) {
                 string sampleName = row[0];
                 int sampleId = stoi(row[1]);
+                bool isAnchorPointSample = row[2] == "1";
 
                 cout << "sampleName=" << sampleName << " sampleId=" << sampleId << endl;
 
@@ -1394,7 +1395,7 @@ void setSampleIdFromFile() {
                 }
 
                 usedIds.insert(sampleId);
-                sampleIdMapping.insert(make_pair(sampleName, sampleId));
+                sampleIdMapping.insert(make_pair(sampleName, make_pair(sampleId, isAnchorPointSample)));
 
                 row.clear();
             }
@@ -1405,10 +1406,14 @@ void setSampleIdFromFile() {
     //Every sample must receive an id and sample order number from the map
     for (auto sample : samples){
         if (sampleIdMapping.find(sample->sampleName) != sampleIdMapping.end()) {
-            int sampleId = sampleIdMapping[sample->sampleName];
+            pair<int, bool> sampleData= sampleIdMapping[sample->sampleName];
+            int sampleId = sampleData.first;
+            bool isAnchorPointSample = sampleData.second;
 
             sample->setSampleId(sampleId);
             sample->setSampleOrder(sampleId);
+            sample->isAnchorPointSample = isAnchorPointSample;
+
         } else {
             cerr << "setSampleIdFromFile() Failed! sample '" << sample->sampleName << "' did not have an ID\n"
                  << "in the sampleIdMapping file '" << sampleIdMappingFile << "'.\n"
@@ -2255,7 +2260,17 @@ void anchorPointsBasedAlignment() {
     Aligner rtAligner;
     rtAligner.setSamples(samples);
 
-    mzSample* referenceSample = samples[0];
+    mzSample* referenceSample = nullptr;
+    for (auto sample : samples) {
+        if (sample->isAnchorPointSample){
+            referenceSample = sample;
+            break;
+        }
+    }
+    if (!referenceSample) {
+        cerr << "No samples were designated as containing anchor points - unable to perform anchor point based alignment. Exiting." << endl;
+        abort();
+    }
 
     /**
      * ==================================================
