@@ -311,12 +311,16 @@ int main(int argc, char *argv[]) {
 //        for (auto compound : compounds) {
 //            bool isInternalStandard = compound->metaDataMap.at(QQQProcessor::getTransitionIsInternalStandardStringKey()) == "TRUE";
 //            string preferredQuantType = compound->metaDataMap.at(QQQProcessor::getTransitionPreferredQuantTypeStringKey());
+//            string ionType = compound->metaDataMap.at(QQQProcessor::getTransitionIonTypeFilterStringKey());
 //            cout << compound->name
-//                 << ": IS=" << (isInternalStandard ? " yes" : " no")
+//                 << ": IS=" << (isInternalStandard ? "yes " : "no ")
+//                 << " ionType=" << ionType
 //                 << " preferredQuantType="
 //                 << preferredQuantType
+//                 << " rt=" << compound->expectedRt
 //                 << endl;
 //        }
+//        exit(0);
 
         vector<Adduct*> adducts{};
 
