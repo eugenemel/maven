@@ -355,10 +355,6 @@ int main(int argc, char *argv[]) {
     processSlices(slices, groupingAlgorithmType, nameSuffix, true);
     printf("Execution time (processSlices) : %f seconds \n", ((float)getTime() - (float)functionStartTime) );
 
-    //Issue 565
-    QQQProcessor::rollUpToCompoundQuant(allgroups, QQQparams, false);
-    QQQProcessor::labelInternalStandards(allgroups, QQQparams, false);
-
     //cleanup
     delete_all(samples);
 	delete_all(slices);
@@ -1022,8 +1018,22 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
     }
 
     if (isQQQSearch) {
-        // TODO: write code to deal with many-to-many peak group <--> compound assignments,
-        // quant vs qual compounds, etc.
+
+        //Issue 565
+        QQQProcessor::rollUpToCompoundQuant(allgroups, QQQparams, true);
+        QQQProcessor::labelInternalStandards(allgroups, QQQparams, true);
+
+//        //debugging
+//        for (auto & pg : allgroups) {
+//            if (pg.compound) {
+//                cout << pg.compound->name << ": ";
+//                for (unsigned int i = 0; i < pg.labels.size(); i++) {
+//                    if (i > 0) cout << ", ";
+//                    cout << pg.labels.at(i);
+//                }
+//                cout << endl;
+//            }
+//        }
     }
 
     double startWriteReportTime = getTime();
