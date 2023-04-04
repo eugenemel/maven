@@ -355,6 +355,10 @@ int main(int argc, char *argv[]) {
     processSlices(slices, groupingAlgorithmType, nameSuffix, true);
     printf("Execution time (processSlices) : %f seconds \n", ((float)getTime() - (float)functionStartTime) );
 
+    //Issue 565
+    QQQProcessor::rollUpToCompoundQuant(allgroups, QQQparams, false);
+    QQQProcessor::labelInternalStandards(allgroups, QQQparams, false);
+
     //cleanup
     delete_all(samples);
 	delete_all(slices);
