@@ -307,6 +307,17 @@ int main(int argc, char *argv[]) {
                     false // debug
                     );
 
+//        //Issue 565: debugging
+//        for (auto compound : compounds) {
+//            bool isInternalStandard = compound->metaDataMap.at(QQQProcessor::getTransitionIsInternalStandardStringKey()) == "TRUE";
+//            string preferredQuantType = compound->metaDataMap.at(QQQProcessor::getTransitionPreferredQuantTypeStringKey());
+//            cout << compound->name
+//                 << ": IS=" << (isInternalStandard ? " yes" : " no")
+//                 << " preferredQuantType="
+//                 << preferredQuantType
+//                 << endl;
+//        }
+
         vector<Adduct*> adducts{};
 
         vector<SRMTransition*> transitions = QQQProcessor::getSRMTransitions(
