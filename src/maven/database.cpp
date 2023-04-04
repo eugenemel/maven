@@ -806,6 +806,7 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
     //assume that files are tab delimited, unless matched ".csv", then comma delimited
     char sep='\t';
     if(fileName.endsWith(".csv",Qt::CaseInsensitive)) sep = ',';
+
     QTextStream stream(&data);
 
     QString line;
@@ -891,7 +892,7 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
         float logP=0;
         int N=fields.size();
         vector<string>categorylist;
-        string transition_id, ion_type;
+        string transition_id, ion_type, isInternalStandard, preferredQuantType;
 
         if ( header.count("mz") && header["mz"]<N)  mz = fields[ header["mz"]].toDouble();
         if ( header.count("rt") && header["rt"]<N)  rt = fields[ header["rt"]].toDouble();
@@ -917,6 +918,9 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
 
         if ( header.count("transition_id") && header["transition_id"] < N) transition_id = fields [ header["transition_id"] ].toStdString();
         if ( header.count("ion_type") && header["ion_type"] < N) ion_type = fields [ header["ion_type"] ].toStdString();
+
+        if ( header.count("is_internal_standard") && header["is_internal_standard"] < N) isInternalStandard = fields[ header["is_internal_standard"]] == "TRUE";
+        if ( header.count("preferred_quant_type") && header["preferred_quant_type"] < N) preferredQuantType = fields[ header["preferred_quant_type"]].toStdString();
 
         //cerr << lineCount << " " << endl;
         //for(int i=0; i<headers.size(); i++) cerr << headers[i] << ", ";
@@ -971,6 +975,16 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
             if (!ion_type.empty()) {
                 compound->metaDataMap.insert(
                    make_pair(QQQProcessor::getTransitionIonTypeFilterStringKey(), ion_type));
+            }
+
+            if (! isInternalStandard.empty()) {
+                compound->metaDataMap.insert(
+                   make_pair(QQQProcessor::getTransitionIsInternalStandardStringKey(), isInternalStandard));
+            }
+
+            if (! preferredQuantType.empty()) {
+                compound->metaDataMap.insert(
+                   make_pair(QQQProcessor::getTransitionPreferredQuantTypeStringKey(), preferredQuantType));
             }
 
             compoundSet.push_back(compound);
