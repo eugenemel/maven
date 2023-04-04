@@ -919,7 +919,7 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
         if ( header.count("transition_id") && header["transition_id"] < N) transition_id = fields [ header["transition_id"] ].toStdString();
         if ( header.count("ion_type") && header["ion_type"] < N) ion_type = fields [ header["ion_type"] ].toStdString();
 
-        if ( header.count("is_internal_standard") && header["is_internal_standard"] < N) isInternalStandard = fields[ header["is_internal_standard"]] == "TRUE";
+        if ( header.count("is_internal_standard") && header["is_internal_standard"] < N) isInternalStandard = fields[ header["is_internal_standard"]].toStdString();
         if ( header.count("preferred_quant_type") && header["preferred_quant_type"] < N) preferredQuantType = fields[ header["preferred_quant_type"]].toStdString();
 
         //cerr << lineCount << " " << endl;
