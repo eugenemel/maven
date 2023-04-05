@@ -1020,13 +1020,13 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
     if (isQQQSearch) {
 
         //Issue 565
-        QQQProcessor::rollUpToCompoundQuant(allgroups, QQQparams, true);
-        QQQProcessor::labelInternalStandards(allgroups, QQQparams, true);
+        QQQProcessor::rollUpToCompoundQuant(allgroups, QQQparams, false);
+        QQQProcessor::labelInternalStandards(allgroups, QQQparams, false);
 
 //        //debugging
 //        for (auto & pg : allgroups) {
 //            if (pg.compound) {
-//                cout << pg.compound->name << ": ";
+//                cout << pg.compound->name << ": ";q
 //                for (unsigned int i = 0; i < pg.labels.size(); i++) {
 //                    if (i > 0) cout << ", ";
 //                    cout << pg.labels.at(i);
@@ -1039,8 +1039,6 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
     double startWriteReportTime = getTime();
     if (writeReportFlag){
         if (isQQQSearch) {
-            //Issue 596: TODO: bug in writing search parameters to mzrollDB
-            //TODO: add peakdetector parameters
             searchTableData.insert(make_pair("QQQ Peak Detection",
                                              QString(QQQparams->encodeParams().c_str())));
         }
