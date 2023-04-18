@@ -1000,6 +1000,14 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
     cout << "Number of peakgroups prior to classifier-based filtering: " << totalGroupPreFilteringCounter << endl;
     cout << "Number of peakgroups prior to eicMaxGroups filtering: " << totalGroupsToAppendCounter << endl;
 
+    //Issue 629: record group ID field, for use with subsets
+    //This gets overwritten during QQQProcessor::rollUpToCompoundQuant() for QQQ data
+    unsigned long rankCounter = 0;
+    for (auto& group : allgroups) {
+        group.groupRank = static_cast<float>(rankCounter);
+        rankCounter++;
+    }
+
     //Issue 692: peakGroupsD() and later include reduceGroups()
     if (groupingAlgorithmType == "A" || groupingAlgorithmType == "B" || groupingAlgorithmType == "C") {
         reduceGroups();
