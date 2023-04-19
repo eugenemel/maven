@@ -2493,7 +2493,7 @@ void mzkitchenSearch() {
 
         cout << "MzKitchenProcessor::matchMetabolites() --> MzKitchenProcessor::assignBestMetaboliteToGroup() for "
              << allgroups.size()
-             << " lipids."
+             << " metabolites."
              << endl;
 
         shared_ptr<MzkitchenMetaboliteSearchParameters> metaboliteSearchParams = MzkitchenMetaboliteSearchParameters::decode(mzkitchenSearchParameters);
