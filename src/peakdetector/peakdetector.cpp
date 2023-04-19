@@ -1108,8 +1108,11 @@ void processOptions(int argc, char* argv[]) {
     const char * optarg;
 
     //single character CL options are specified explicitly,
-    //long options are handled separately
+    //long options are handled separately.
     opts.ctrls(Options::OptCtrl::NOGUESSING);
+
+    //Issue 629: All single-dash arguments should be supplied before any double dash (--) arguments.
+    //any single-dash arguments are specified after any double dash argument will be ignored.
 
     while ( const char optchar = opts(iter, optarg) ) {
         switch (optchar) {
