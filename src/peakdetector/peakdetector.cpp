@@ -1109,7 +1109,7 @@ void processOptions(int argc, char* argv[]) {
 
     //single character CL options are specified explicitly,
     //long options are handled separately
-    // opts.ctrls(Options::OptCtrl::NOGUESSING);
+    opts.ctrls(Options::OptCtrl::NOGUESSING);
 
     while ( const char optchar = opts(iter, optarg) ) {
         switch (optchar) {
@@ -1274,6 +1274,8 @@ void fillOutPeakPickingAndGroupingParameters() {
     // END EIC::groupPeaksE()
 }
 
+
+// TODO: print all settings from mzkitchen here
 
 void printSettings() {
     cout << "#Ligand Database file\t" << ligandDbFilename << endl;
