@@ -1274,65 +1274,83 @@ void fillOutPeakPickingAndGroupingParameters() {
     // END EIC::groupPeaksE()
 }
 
-
-// TODO: print all settings from mzkitchen here
-
 void printSettings() {
-    cout << "#Ligand Database file\t" << ligandDbFilename << endl;
-    cout << "#Classification Model\t" << clsfModelFilename << endl;
 
-    cout << "#Output folder=" <<  outputdir << endl;
-    cout << "methodsFolder=" << methodsFolder << endl;
-    cout << "#ionizationMode=" << ionizationMode << endl;
-    cout << "#avgScanTime=" << avgScanTime << endl;
+    cout << "\n=================================================" << endl;
+    cout << "#Files (and related):" << endl;
+    cout << "#Ligand Database file:\t" << ligandDbFilename << endl;
+    cout << "#methodsFolder:\t" << methodsFolder << endl;
+    cout << "#Classification Model file\t" << clsfModelFilename << endl;
+    cout << "#Output folder:\t" <<  outputdir << endl << endl;
+    cout << "#avgScanTime (computed from sample list)=" << avgScanTime << endl;
+    cout << "#nameSuffix=" << nameSuffix << endl;
+    cout << "#anchorPointsFile=" << anchorPointsFile << endl;
 
-    cout << "=================================================" << endl;
+    cout << "\n=================================================" << endl;
     cout << "#m/z Slice Determination:" << endl;
+    cout << "#slicing algorithm code: " << algorithmType << endl;
     cout << "#rtStepSize=" << rtStepSize << endl;
-    cout << "#precursorPPM="  << precursorPPM << endl;
+    cout << "#m/z slice merge precursorPPM="  << precursorPPM << endl;
 
-    cout << endl;
-    cout << "#Grouping and Peak Picking" << endl;
+    cout << "\n=================================================" << endl;
+    cout << "#Peak Picking:" << endl;
+    cout << "#eic_smoothingWindow=" << eic_smoothingWindow << endl;
+    cout << "#ionizationMode=" << ionizationMode << endl;
     cout << "#baseline_smoothingWindow=" << baseline_smoothingWindow << endl;
     cout << "#baseline_dropTopX=" << baseline_dropTopX << endl;
-    cout << "#eic_smoothingWindow=" << eic_smoothingWindow << endl;
-    cout << "#grouping_maxRtWindow=" << grouping_maxRtWindow << endl;
-
-    cout << endl;
-    cout << "#Algorithm type=" << algorithmType << endl;
-    cout << "#nameSuffix=" << nameSuffix << endl;
-    cout << "#precursorPPM=" << precursorPPM << endl;
-
-    if (groupingAlgorithmType == "E") {
-        cout << endl;
-        cout << "#Merged EIC Grouping Settings" << endl;
-        cout << "mergedSmoothingWindow="<< eic_smoothingWindow << endl;
-        cout << "mergedPeakRtBoundsMaxIntensityFraction=" << mergedPeakRtBoundsMaxIntensityFraction << endl;
-        cout << "mergedPeakRtBoundsSlopeThreshold=" << mergedPeakRtBoundsSlopeThreshold << endl;
-        cout << "mergedSmoothedMaxToBoundsMinRatio=" << mergedSmoothedMaxToBoundsMinRatio << endl;
-        cout << "mergedSmoothedMaxToBoundsIntensityPolicy=";
-        if (mergedSmoothedMaxToBoundsIntensityPolicy == SmoothedMaxToBoundsIntensityPolicy::MEDIAN) {
-            cout << "MEDIAN" << endl;
-        } else if (mergedSmoothedMaxToBoundsIntensityPolicy == SmoothedMaxToBoundsIntensityPolicy::MAXIMUM) {
-            cout << "MAXIMUM" << endl;
-        } else if (mergedSmoothedMaxToBoundsIntensityPolicy == SmoothedMaxToBoundsIntensityPolicy::MINIMUM) {
-            cout << "MINIMUM" << endl;
-        }
-        cout << "mergedBaselineSmoothingWindow=" << baseline_smoothingWindow << endl;
-        cout << "mergedBaselineDropTopX=" << baseline_dropTopX << endl;
+    cout << "#peakRtBoundsSlopeThreshold=" << peakRtBoundsSlopeThreshold << endl;
+    cout << "#Baseline Estimation Type: ";
+    if (eicBaselineEstimationType == EICBaselineEstimationType::DROP_TOP_X) {
+        cout << "DROP_TOP_X" << endl;
+    } else if (eicBaselineEstimationType == EICBaselineEstimationType::EIC_NON_PEAK_MAX_SMOOTHED_INTENSITY) {
+        cout << "EIC_NON_PEAK_MAX_SMOOTHED_INTENSITY" << endl;
+    } else if (eicBaselineEstimationType == EICBaselineEstimationType::EIC_NON_PEAK_MEDIAN_SMOOTHED_INTENSITY) {
+        cout << "EIC_NON_PEAK_MEDIAN_SMOOTHED_INTENSITY" << endl;
     }
 
-    cout << endl;
+    cout << "\n=================================================" << endl;
+    cout << "#Peak Grouping:" << endl;
+    cout << "#Peak Grouping Algorithm:" << groupingAlgorithmType << endl;
+    cout << "#grouping_maxRtWindow=" << grouping_maxRtWindow << endl;
+    cout << "#mergeOverlap=" << mergeOverlap << endl;
+
+    cout << "\n=================================================" << endl;
+    cout << "#Merged EIC Grouping Settings" << endl;
+    cout << "mergedSmoothingWindow="<< eic_smoothingWindow << endl;
+    cout << "mergedPeakRtBoundsMaxIntensityFraction=" << mergedPeakRtBoundsMaxIntensityFraction << endl;
+    cout << "mergedPeakRtBoundsSlopeThreshold=" << mergedPeakRtBoundsSlopeThreshold << endl;
+    cout << "mergedSmoothedMaxToBoundsMinRatio=" << mergedSmoothedMaxToBoundsMinRatio << endl;
+    cout << "mergedSmoothedMaxToBoundsIntensityPolicy=";
+    if (mergedSmoothedMaxToBoundsIntensityPolicy == SmoothedMaxToBoundsIntensityPolicy::MEDIAN) {
+        cout << "MEDIAN" << endl;
+    } else if (mergedSmoothedMaxToBoundsIntensityPolicy == SmoothedMaxToBoundsIntensityPolicy::MAXIMUM) {
+        cout << "MAXIMUM" << endl;
+    } else if (mergedSmoothedMaxToBoundsIntensityPolicy == SmoothedMaxToBoundsIntensityPolicy::MINIMUM) {
+        cout << "MINIMUM" << endl;
+    }
+    cout << "mergedBaselineSmoothingWindow=" << baseline_smoothingWindow << endl;
+    cout << "mergedBaselineDropTopX=" << baseline_dropTopX << endl;
+
+    cout << "\n=================================================" << endl;
+    cout << "#Special Search Type:" << endl;
+    cout << "#isQQQSearch? " << isQQQSearch << endl;
+    if (isQQQSearch) {
+        cout << "#QQQParams: " << QQQparams->encodeParams() << endl;
+    }
+    cout << "#isMzkitchenSearch? " << isMzkitchenSearch << endl;
+    cout << "#mzkitchenSearchType=" << mzkitchenSearchType << endl;
+    cout << "#mzkitchenMspFile=" << mzkitchenMspFile << endl;
+    cout << "#mzkitchenSearchParameters: " << mzkitchenSearchParameters << endl;
+
+    cout << "\n=================================================" << endl;
     cout << "#Peak Group Cleaning and Filtering" << endl;
-    cout << "#groupingAlgorithmType=" << groupingAlgorithmType << endl;
     cout << "#minGoodGroupCount=" << minGoodGroupCount << endl;
     cout << "#minQuality=" << minQuality << endl;
     cout << "#minSignalBlankRatio=" << minSignalBlankRatio << endl;
     cout << "#minSignalBaseLineRatio=" << minSignalBaseLineRatio << endl;
-    cout << "#mergeOverlap=" << mergeOverlap << endl;
 
-    cout << "=================================================" << endl;
-
+    cout << "\n=================================================" << endl;
+    cout << "#Samples:" << endl;
 
     for (unsigned int i = 0; i < filenames.size(); i++) {
         cout << "#Sample " << i << ": " << filenames[i] << endl;
