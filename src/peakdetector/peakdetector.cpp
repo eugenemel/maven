@@ -1355,8 +1355,8 @@ void printSettings() {
     cout << "\n=================================================" << endl;
     cout << "#Samples:" << endl;
 
-    for (unsigned int i = 0; i < filenames.size(); i++) {
-        cout << "#Sample " << i << ": " << filenames[i] << endl;
+    for (unsigned int i = 0; i < samples.size(); i++) {
+        cout << "#Sample " << i << ": " << samples[i]->sampleName << endl;
     }
     cout << endl;
 }
@@ -1493,7 +1493,6 @@ void setSampleIdFromFile() {
     sort(samples.begin(), samples.end(), [](const mzSample* lhs, const mzSample* rhs){
         return lhs->sampleId < rhs->sampleId;
     });
-
 }
 /**
  * @brief reduceGroups
@@ -2409,36 +2408,37 @@ void anchorPointsBasedAlignment() {
     //debugging
     cout << "Anchor point alignments:" << endl;
 
-    for (auto &x : anchorPointSetToUpdatedRtMap) {
+    for (auto sample : samples) {
+        if (anchorPointSetToUpdatedRtMap.find(sample) != anchorPointSetToUpdatedRtMap.end()) {
+              vector<pair<float, float>> anchorPointData = anchorPointSetToUpdatedRtMap.at(sample);
 
-        mzSample* sample = x.first;
+              float observedRtStart = 0.0f;
+              float referenceRtStart = 0.0f;
 
-        float observedRtStart = 0.0f;
-        float referenceRtStart = 0.0f;
+              for (auto &pt : anchorPointData) {
 
-        for (auto &pt : x.second) {
+                  float observedRt = pt.first;
+                  float referenceRt = pt.second;
 
-            float observedRt = pt.first;
-            float referenceRt = pt.second;
+                  AlignmentSegment *alignmentSegment = new AlignmentSegment();
+                  alignmentSegment->sampleName = sample->sampleName;
+                  alignmentSegment->seg_start = observedRtStart;
+                  alignmentSegment->seg_end = observedRt;
+                  alignmentSegment->new_start = referenceRtStart;
+                  alignmentSegment->new_end = referenceRt;
 
-            AlignmentSegment *alignmentSegment = new AlignmentSegment();
-            alignmentSegment->sampleName = sample->sampleName;
-            alignmentSegment->seg_start = observedRtStart;
-            alignmentSegment->seg_end = observedRt;
-            alignmentSegment->new_start = referenceRtStart;
-            alignmentSegment->new_end = referenceRt;
+                  rtAligner.addSegment(sample->sampleName, alignmentSegment);
 
-            rtAligner.addSegment(sample->sampleName, alignmentSegment);
+                  //debugging
+                  cout << sample->sampleName << "\t" << observedRt << "\t" << referenceRt << endl;
 
-            //debugging
-            cout << sample->sampleName << "\t" << observedRt << "\t" << referenceRt << endl;
+                  observedRtStart = observedRt;
+                  referenceRtStart = referenceRt;
+              }
 
-            observedRtStart = observedRt;
-            referenceRtStart = referenceRt;
+              //debugging
+              cout << endl;
         }
-
-        //debugging
-        cout << endl;
     }
 
     rtAligner.doSegmentedAligment();
