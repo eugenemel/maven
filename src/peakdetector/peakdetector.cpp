@@ -1107,7 +1107,10 @@ void processOptions(int argc, char* argv[]) {
     OptArgvIter  iter(--argc, ++argv);
     const char * optarg;
 
-    //single character CL options
+    //single character CL options are specified explicitly,
+    //long options are handled separately
+    // opts.ctrls(Options::OptCtrl::NOGUESSING);
+
     while ( const char optchar = opts(iter, optarg) ) {
         switch (optchar) {
         case 'a' : alignSamplesFlag = atoi(optarg); break;
@@ -1277,6 +1280,7 @@ void printSettings() {
     cout << "#Classification Model\t" << clsfModelFilename << endl;
 
     cout << "#Output folder=" <<  outputdir << endl;
+    cout << "methodsFolder=" << methodsFolder << endl;
     cout << "#ionizationMode=" << ionizationMode << endl;
     cout << "#avgScanTime=" << avgScanTime << endl;
 
@@ -1291,6 +1295,11 @@ void printSettings() {
     cout << "#baseline_dropTopX=" << baseline_dropTopX << endl;
     cout << "#eic_smoothingWindow=" << eic_smoothingWindow << endl;
     cout << "#grouping_maxRtWindow=" << grouping_maxRtWindow << endl;
+
+    cout << endl;
+    cout << "#Algorithm type=" << algorithmType << endl;
+    cout << "#nameSuffix=" << nameSuffix << endl;
+    cout << "#precursorPPM=" << precursorPPM << endl;
 
     if (groupingAlgorithmType == "E") {
         cout << endl;
