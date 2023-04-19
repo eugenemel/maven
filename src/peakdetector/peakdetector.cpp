@@ -1488,6 +1488,12 @@ void setSampleIdFromFile() {
             abort();
         }
     }
+
+    //Issue 629: sort all samples based on sampleId to avoid stochasticity with different alignments
+    sort(samples.begin(), samples.end(), [](const mzSample* lhs, const mzSample* rhs){
+        return lhs->sampleId < rhs->sampleId;
+    });
+
 }
 /**
  * @brief reduceGroups
