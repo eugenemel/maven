@@ -1717,13 +1717,14 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
         QAction* z8 = menu.addAction("Edit Selected Peak Group ID");
         connect(z8, SIGNAL(triggered()), SLOT(showEditPeakGroupDialog()));
 
-        QAction *z10 = menu.addAction("Set Compound Search Selected Compound");
-        connect(z10, SIGNAL(triggered()), SLOT(setCompoundSearchSelectedCompound()));
-
         QAction *z9 = menu.addAction("Export RT Alignment from Selected");
         connect(z9, SIGNAL(triggered()), SLOT(exportAlignmentFile()));
 
     }
+
+    //Issue 641: Make compound reassignment available from peakdetector
+    QAction *z10 = menu.addAction("Set Compound Search Selected Compound");
+    connect(z10, SIGNAL(triggered()), SLOT(setCompoundSearchSelectedCompound()));
 
     QAction* actionShowLipidSummarizationColumn = menu.addAction("View Lipid Summarization Columns");
     actionShowLipidSummarizationColumn->setCheckable(true);
