@@ -200,7 +200,38 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
              Peak* highestpeak = group.getHighestIntensityPeak();
              if(!highestpeak)  continue;
 
+
              if (clsf->hasModel()) { clsf->classify(&group); group.groupStatistics(); }
+
+//             //Issue 632: Start Debugging
+//             qDebug() <<  group.meanMz << "@" << group.medianRt() << ":";
+//             if (group.compound) {
+//                 qDebug() << group.compound->name.c_str();
+//             }
+
+//             qDebug() << "group.goodPeakCount=" << group.goodPeakCount
+//                      << " <--> " << minGoodPeakCount
+//                      << " ==> " << (group.goodPeakCount < minGoodPeakCount ? "FAIL" : "PASS");
+
+//             qDebug() << "group.blankMax*minSignalBlankRatio=" << (group.blankMax*minSignalBlankRatio)
+//                      << " <--> " << minGoodPeakCount
+//                      << " ==> " << (group.blankMax*minSignalBlankRatio > group.maxIntensity ? "FAIL" : "PASS");
+
+//             qDebug() << "group.maxNoNoiseObs=" << group.maxNoNoiseObs
+//                      << " <--> " << minNoNoiseObs
+//                      << " ==> " << (group.maxNoNoiseObs < minNoNoiseObs ? "FAIL" : "PASS");
+
+//             qDebug() << "group.maxSignalBaselineRatio=" << group.maxSignalBaselineRatio
+//                      << " <--> minSignalBaseLineRatio=" << minSignalBaseLineRatio
+//                      << " ==> " << (group.maxSignalBaselineRatio < minSignalBaseLineRatio ? "FAIL" : "PASS");
+
+//             qDebug() << "group.maxIntensity=" << group.maxIntensity
+//                      << " <--> minGroupIntensity=" << minGroupIntensity
+//                      << " ==> " << (group.maxIntensity < minGroupIntensity ? "FAIL" : "PASS");
+
+//             qDebug() << endl;
+//             //Issue 632: End Debugging
+
              if (clsf->hasModel()&& group.goodPeakCount < minGoodPeakCount) continue;
              if (group.blankMax*minSignalBlankRatio > group.maxIntensity) continue;
              if (group.maxNoNoiseObs < minNoNoiseObs) continue;
