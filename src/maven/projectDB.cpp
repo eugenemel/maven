@@ -645,88 +645,88 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
     return lastInsertGroupId;
 }
 
-        //Issue 283: Read in all peaks to allow for faster retrieval later
-        map<int, vector<Peak>> ProjectDB::getAllPeaks() {
+//Issue 283: Read in all peaks to allow for faster retrieval later
+map<int, vector<Peak>> ProjectDB::getAllPeaks() {
 
-                map<int, vector<Peak>> allPeaks{};
-                unsigned long peaksCounter = 0;
+        map<int, vector<Peak>> allPeaks{};
+        unsigned long peaksCounter = 0;
 
-                QSqlQuery query(sqlDB);
-                query.prepare("select * from peaks inner join samples on peaks.sampleid = samples.sampleId;");
-                query.exec();
+        QSqlQuery query(sqlDB);
+        query.prepare("select * from peaks inner join samples on peaks.sampleid = samples.sampleId;");
+        query.exec();
 
-                while (query.next()) {
-                Peak p;
-                p.pos = query.value("pos").toString().toInt();
-                p.minpos = query.value("minpos").toString().toInt();
-                p.maxpos = query.value("maxpos").toString().toInt();
-                p.rt = query.value("rt").toString().toDouble();
-                p.rtmin = query.value("rtmin").toString().toDouble();
-                p.rtmax = query.value("rtmax").toString().toDouble();
-                p.mzmin = query.value("mzmin").toString().toDouble();
-                p.mzmax = query.value("mzmax").toString().toDouble();
-                p.scan = query.value("scan").toString().toInt();
-                p.minscan = query.value("minscan").toString().toInt();
-                p.maxscan = query.value("maxscan").toString().toInt();
-                p.peakArea = query.value("peakArea").toString().toDouble();
-                p.peakAreaCorrected = query.value("peakAreaCorrected").toString().toDouble();
-                p.peakAreaTop = query.value("peakAreaTop").toString().toDouble();
-                p.peakAreaFractional = query.value("peakAreaFractional").toString().toDouble();
-                p.peakRank = query.value("peakRank").toString().toDouble();
-                p.peakIntensity = query.value("peakIntensity").toString().toDouble();
-                p.peakBaseLineLevel = query.value("peakBaseLineLevel").toString().toDouble();
-                p.peakMz = query.value("peakMz").toString().toDouble();
-                p.medianMz = query.value("medianMz").toString().toDouble();
-                p.baseMz = query.value("baseMz").toString().toDouble();
-                p.quality = query.value("quality").toString().toDouble();
-                p.width = query.value("width").toString().toInt();
-                p.gaussFitSigma = query.value("gaussFitSigma").toString().toDouble();
-                p.gaussFitR2 = query.value("gaussFitR2").toString().toDouble();
-                p.groupNum= query.value("groupId").toString().toInt();
-                p.noNoiseObs = query.value("noNoiseObs").toString().toInt();
-                p.noNoiseFraction = query.value("noNoiseFraction").toString().toDouble();
-                p.symmetry = query.value("symmetry").toString().toDouble();
-                p.signalBaselineRatio = query.value("signalBaselineRatio").toString().toDouble();
-                p.groupOverlap = query.value("groupOverlap").toString().toDouble();
-                p.groupOverlapFrac = query.value("groupOverlapFrac").toString().toDouble();
-                p.localMaxFlag = query.value("localMaxFlag").toString().toInt();
-                p.fromBlankSample = query.value("fromBlankSample").toString().toInt();
-                p.label = query.value("label").toString().toInt();
+        while (query.next()) {
+        Peak p;
+        p.pos = query.value("pos").toString().toInt();
+        p.minpos = query.value("minpos").toString().toInt();
+        p.maxpos = query.value("maxpos").toString().toInt();
+        p.rt = query.value("rt").toString().toDouble();
+        p.rtmin = query.value("rtmin").toString().toDouble();
+        p.rtmax = query.value("rtmax").toString().toDouble();
+        p.mzmin = query.value("mzmin").toString().toDouble();
+        p.mzmax = query.value("mzmax").toString().toDouble();
+        p.scan = query.value("scan").toString().toInt();
+        p.minscan = query.value("minscan").toString().toInt();
+        p.maxscan = query.value("maxscan").toString().toInt();
+        p.peakArea = query.value("peakArea").toString().toDouble();
+        p.peakAreaCorrected = query.value("peakAreaCorrected").toString().toDouble();
+        p.peakAreaTop = query.value("peakAreaTop").toString().toDouble();
+        p.peakAreaFractional = query.value("peakAreaFractional").toString().toDouble();
+        p.peakRank = query.value("peakRank").toString().toDouble();
+        p.peakIntensity = query.value("peakIntensity").toString().toDouble();
+        p.peakBaseLineLevel = query.value("peakBaseLineLevel").toString().toDouble();
+        p.peakMz = query.value("peakMz").toString().toDouble();
+        p.medianMz = query.value("medianMz").toString().toDouble();
+        p.baseMz = query.value("baseMz").toString().toDouble();
+        p.quality = query.value("quality").toString().toDouble();
+        p.width = query.value("width").toString().toInt();
+        p.gaussFitSigma = query.value("gaussFitSigma").toString().toDouble();
+        p.gaussFitR2 = query.value("gaussFitR2").toString().toDouble();
+        p.groupNum= query.value("groupId").toString().toInt();
+        p.noNoiseObs = query.value("noNoiseObs").toString().toInt();
+        p.noNoiseFraction = query.value("noNoiseFraction").toString().toDouble();
+        p.symmetry = query.value("symmetry").toString().toDouble();
+        p.signalBaselineRatio = query.value("signalBaselineRatio").toString().toDouble();
+        p.groupOverlap = query.value("groupOverlap").toString().toDouble();
+        p.groupOverlapFrac = query.value("groupOverlapFrac").toString().toDouble();
+        p.localMaxFlag = query.value("localMaxFlag").toString().toInt();
+        p.fromBlankSample = query.value("fromBlankSample").toString().toInt();
+        p.label = query.value("label").toString().toInt();
 
-                //Issue 549: new fields
-                p.smoothedIntensity = query.value("smoothedIntensity").toFloat();
-                p.smoothedPeakArea = query.value("smoothedPeakArea").toFloat();
-                p.smoothedPeakAreaCorrected = query.value("smoothedPeakAreaCorrected").toFloat();
-                p.smoothedPeakAreaTop = query.value("smoothedPeakAreaTop").toFloat();
-                p.smoothedSignalBaselineRatio = query.value("smoothedSignalBaselineRatio").toFloat();
+        //Issue 549: new fields
+        p.smoothedIntensity = query.value("smoothedIntensity").toFloat();
+        p.smoothedPeakArea = query.value("smoothedPeakArea").toFloat();
+        p.smoothedPeakAreaCorrected = query.value("smoothedPeakAreaCorrected").toFloat();
+        p.smoothedPeakAreaTop = query.value("smoothedPeakAreaTop").toFloat();
+        p.smoothedSignalBaselineRatio = query.value("smoothedSignalBaselineRatio").toFloat();
 
-                p.minPosFWHM = static_cast<unsigned int>(query.value("minPosFWHM").toInt());
-                p.maxPosFWHM = static_cast<unsigned int>(query.value("maxPosFWHM").toInt());
-                p.minScanFWHM = static_cast<unsigned int>(query.value("minScanFWHM").toInt());
-                p.maxScanFWHM = static_cast<unsigned int>(query.value("maxScanFWHM").toInt());
+        p.minPosFWHM = static_cast<unsigned int>(query.value("minPosFWHM").toInt());
+        p.maxPosFWHM = static_cast<unsigned int>(query.value("maxPosFWHM").toInt());
+        p.minScanFWHM = static_cast<unsigned int>(query.value("minScanFWHM").toInt());
+        p.maxScanFWHM = static_cast<unsigned int>(query.value("maxScanFWHM").toInt());
 
-                p.rtminFWHM = query.value("rtminFWHM").toFloat();
-                p.rtmaxFWHM = query.value("rtmaxFWHM").toFloat();
-                p.peakAreaFWHM = query.value("peakAreaFWHM").toFloat();
-                p.smoothedPeakAreaFWHM = query.value("smoothedPeakAreaFWHM").toFloat();
+        p.rtminFWHM = query.value("rtminFWHM").toFloat();
+        p.rtmaxFWHM = query.value("rtmaxFWHM").toFloat();
+        p.peakAreaFWHM = query.value("peakAreaFWHM").toFloat();
+        p.smoothedPeakAreaFWHM = query.value("smoothedPeakAreaFWHM").toFloat();
 
-                string sampleName = query.value("name").toString().toStdString();
+        string sampleName = query.value("name").toString().toStdString();
 
-                for(int i=0; i< samples.size(); i++ ) {
-                    if (samples[i]->sampleName == sampleName ) { p.setSample(samples[i]); break;}
-                }
-
-                if (allPeaks.find(p.groupNum) == allPeaks.end()) {
-                    allPeaks.insert(make_pair(p.groupNum, vector<Peak>()));
-                }
-                allPeaks[p.groupNum].push_back(p);
-                peaksCounter++;
-            }
-
-                cerr << "ProjectDB::getAllPeaks(): loaded " << peaksCounter << " peaks for " << allPeaks.size() << " groups." << endl;
-
-                return allPeaks;
+        for(int i=0; i< samples.size(); i++ ) {
+            if (samples[i]->sampleName == sampleName ) { p.setSample(samples[i]); break;}
         }
+
+        if (allPeaks.find(p.groupNum) == allPeaks.end()) {
+            allPeaks.insert(make_pair(p.groupNum, vector<Peak>()));
+        }
+        allPeaks[p.groupNum].push_back(p);
+        peaksCounter++;
+    }
+
+        cerr << "ProjectDB::getAllPeaks(): loaded " << peaksCounter << " peaks for " << allPeaks.size() << " groups." << endl;
+
+        return allPeaks;
+}
 
 void ProjectDB::addPeaksTableColumn(QString columnName, QString columnType, QString numericDefault) {
 
