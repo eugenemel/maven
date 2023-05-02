@@ -66,14 +66,20 @@ void mzkitchenSearch() {
 
     //Issue 633: Failure to ID bug
     PeakGroup *tmaoPG = getPeakGroupFromDB(50);
+
+    cout << "TMAO: mz=" << tmaoPG->meanMz << ", rt=" << tmaoPG->medianRt() << endl;
 }
 
 #include "../maven/projectDB.h"
 
 PeakGroup* getPeakGroupFromDB(int groupId) {
-    ProjectDB pdb = ProjectDB(QString(mzrollDBFile.c_str()));
+    ProjectDB *pdb = new ProjectDB(QString(mzrollDBFile.c_str()));
 
-    //pull value from peakgroup
+    PeakGroup *pg = new PeakGroup();
+    pg->peaks = pdb->getPeaks(groupId);
+    pg->groupStatistics();
 
-    pdb.closeDatabaseConnection();
+    pdb->closeDatabaseConnection();
+
+    return(pg);
 }
