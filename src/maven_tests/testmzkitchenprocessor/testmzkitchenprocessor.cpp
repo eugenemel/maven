@@ -25,10 +25,12 @@
 //fields
 Database DB;
 static string mzkitchenMspFile = "";
+static string mzrollDBFile = "";
 
 //functions
 void processCLIArguments(int argc, char* argv[]);
 void mzkitchenSearch();
+PeakGroup* getPeakGroupFromDB(int groupId);
 
 int main(int argc, char* argv[]) {
     processCLIArguments(argc, argv);
@@ -40,6 +42,8 @@ void processCLIArguments(int argc, char* argv[]){
     for (int i = 1; i < argc ; i++) {
         if (strcmp(argv[i], "--mzkitchenMspFile") == 0) {
             mzkitchenMspFile = argv[i+1];
+        } else if (strcmp(argv[i], "--mzrollDBFile") == 0) {
+            mzrollDBFile = argv[i+1];
         }
     }
 }
@@ -55,4 +59,21 @@ void mzkitchenSearch() {
     });
 
     cout << "MSP spectral library \'" << mzkitchenMspFile << "\' contains " << mzkitchenCompounds.size() << " compounds." << endl;
+
+//    for (auto compound : mzkitchenCompounds) {
+//        cout << compound->name << ": mz=" << compound->precursorMz << endl;
+//    }
+
+    //Issue 633: Failure to ID bug
+    PeakGroup *tmaoPG = getPeakGroupFromDB(50);
+}
+
+#include "../maven/projectDB.h"
+
+PeakGroup* getPeakGroupFromDB(int groupId) {
+    ProjectDB pdb = ProjectDB(QString(mzrollDBFile.c_str()));
+
+    //pull value from peakgroup
+
+    pdb.closeDatabaseConnection();
 }
