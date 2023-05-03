@@ -86,7 +86,7 @@ void mzkitchenSearch() {
 
     double meanMzDouble = mzSumDouble/nonZeroCount;
 
-    tmaoPG->meanMz = static_cast<float>(meanMzDouble);
+    // tmaoPG->meanMz = static_cast<float>(meanMzDouble);
 
     cout << "mzSum=" << mzSum << endl;
     cout << "mzSumDouble=" << mzSumDouble << endl;
@@ -101,7 +101,7 @@ void mzkitchenSearch() {
         compoundIons[i] = CompoundIon(mzkitchenCompounds[i]);
     }
 
-    assignBestMetaboliteToGroup(tmaoPG, compoundIons, params, true);
+    MzKitchenProcessor::assignBestMetaboliteToGroup(tmaoPG, compoundIons, params, true);
 }
 
 #include "../maven/projectDB.h"
