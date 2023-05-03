@@ -733,7 +733,7 @@ vector<Peak> ProjectDB::getPeaks(int groupId) {
        QString queryStr("select * from peaks ");
        queryStr.append(" inner join samples on peaks.sampleid = samples.sampleId ");
        queryStr.append("where peaks.groupId = ");
-       queryStr.append(groupId);
+       queryStr.append(to_string(groupId).c_str());
        queryStr.append(";");
 
        QSqlQuery query(sqlDB);
