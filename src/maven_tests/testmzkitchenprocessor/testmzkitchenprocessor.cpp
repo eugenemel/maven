@@ -84,10 +84,15 @@ void mzkitchenSearch() {
     }
     float meanMz = mzSum/static_cast<float>(nonZeroCount);
 
+    double meanMzDouble = mzSumDouble/nonZeroCount;
+
+    tmaoPG->meanMz = static_cast<float>(meanMzDouble);
+
     cout << "mzSum=" << mzSum << endl;
     cout << "mzSumDouble=" << mzSumDouble << endl;
     cout << "nonZeroCount=" << nonZeroCount << endl;
     cout << "meanMz recalculated=" << meanMz << endl;
+    cout << "meanMzDouble=" << meanMzDouble << endl;
 
     shared_ptr<MzkitchenMetaboliteSearchParameters> params = MzkitchenMetaboliteSearchParameters::decode("searchVersion=mzkitchen22_metabolite_search;scanFilterMinFracIntensity=0.010000;scanFilterMinSNRatio=1.000000;scanFilterMaxNumberOfFragments=1024;scanFilterBaseLinePercentile=5;scanFilterIsRetainFragmentsAbovePrecursorMz=0;scanFilterPrecursorPurityPpm=10.000000;scanFilterMinIntensity=0.000000;scanFilterMs1MinRt=-1.000000;scanFilterMs1MaxRt=-1.000000;scanFilterMs2MinRt=-1.000000;scanFilterMs2MaxRt=-1.000000;consensusIsIntensityAvgByObserved=0;consensusIsNormalizeTo10K=1;consensusIntensityAgglomerationType=MEAN;consensusMs1PpmTolr=10.000000;consensusMinNumMs1Scans=0;consensusMinFractionMs1Scans=0.000000;consensusPpmTolr=10.000000;consensusMinNumMs2Scans=0;consensusMinFractionMs2Scans=0.000000;ms1PpmTolr=10.000000;ms2MinNumMatches=0;ms2MinNumDiagnosticMatches=0;ms2MinNumUniqueMatches=0;ms2PpmTolr=20.000000;ms2MinIntensity=0.000000;ms2IsRequirePrecursorMatch=0;IDisRequireMatchingAdduct=0;mspFilePath=;rtIsRequireRtMatch=0;rtMatchTolerance=0.500000;matchingPolicy=SINGLE_TOP_HIT;isComputeAllFragScores=1;peakSmoothingWindow=10;peakRtBoundsMaxIntensityFraction=1.000000;peakRtBoundsSlopeThreshold=0.010000;peakBaselineSmoothingWindow=10;peakBaselineDropTopX=80;peakIsComputeBounds=1;peakIsReassignPosToUnsmoothedMax=0;eicBaselineEstimationType=DROP_TOP_X;mergedSmoothingWindow=10;mergedPeakRtBoundsMaxIntensityFraction=-1.000000;mergedPeakRtBoundsSlopeThreshold=0.010000;mergedSmoothedMaxToBoundsMinRatio=2.000000;mergedSmoothedMaxToBoundsIntensityPolicy=MINIMUM;mergedBaselineSmoothingWindow=10;mergedBaselineDropTopX=80;mergedIsComputeBounds=1;groupMaxRtDiff=0.250000;groupMergeOverlap=0.800000;filterMinGoodGroupCount=1;filterMinQuality=0.500000;filterMinNoNoiseObs=5;filterMinSignalBaselineRatio=1.100000;filterMinGroupIntensity=10000.000000;filterMinPrecursorCharge=0;");
 
