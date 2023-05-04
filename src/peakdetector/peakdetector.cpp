@@ -183,6 +183,7 @@ void anchorPointsBasedAlignment();
 //special searches
 void mzkitchenSearch();
 bool isSpecialSearch();
+void traverseAndAdd(PeakGroup& group, set<Compound*>& compoundSet);
 
 int testResults(string projectFile);
 
@@ -1042,6 +1043,17 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
 //                cout << endl;
 //            }
 //        }
+
+        //Issue 635: clean up deleted flags
+        vector<PeakGroup> updated_allgroups = vector<PeakGroup>{};
+
+        for (PeakGroup pg : allgroups) {
+            if (!pg.deletedFlag){
+                updated_allgroups.push_back(pg);
+            }
+        }
+        allgroups = updated_allgroups;
+
     }
 
     double startWriteReportTime = getTime();
@@ -1620,8 +1632,8 @@ void writeReport(string setName) {
 
                 set<Compound*> compoundSet;
                 for (auto& group : allgroups){
+                    traverseAndAdd(group, compoundSet);
                     if (group.compound){
-                        compoundSet.insert(group.compound);
                         project->writeGroupSqlite(&group, 0, tblName);
                     } else {
                         project->writeGroupSqlite(&group, 0, setName.c_str());
@@ -1651,8 +1663,8 @@ void writeReport(string setName) {
                 if (isSpecialSearch()) {
                     set<Compound*> compoundSet;
                     for (auto& group : allgroups){
+                        traverseAndAdd(group, compoundSet);
                         if (group.compound){
-                            compoundSet.insert(group.compound);
                             project->writeGroupSqlite(&group, 0, tblName);
                         } else {
                             project->writeGroupSqlite(&group, 0, setName.c_str());
@@ -2527,4 +2539,11 @@ void mzkitchenSearch() {
 
 bool isSpecialSearch() {
     return (isMzkitchenSearch || isQQQSearch);
+}
+
+void traverseAndAdd(PeakGroup& group, set<Compound*>& compoundSet) {
+    if (group.compound) compoundSet.insert(group.compound);
+    for (auto& group : group.children) {
+       traverseAndAdd(group, compoundSet);
+    }
 }
