@@ -106,11 +106,13 @@ public:
     char hotkey;
     QIcon icon;
     string description;
+    unsigned int displayOrder;
 
-    PeakGroupTag(string tagName, char label, char hotKeyChar, string iconName, string description) {
+    PeakGroupTag(string tagName, char label, char hotKeyChar, unsigned int displayOrder, string iconName, string description) {
         this->tagName = tagName;
         this->label = label;
         this->hotkey = hotKeyChar;
+        this->displayOrder = displayOrder;
         QString iconPath(":/images/");
         iconPath.append(iconName.c_str());
         this->icon = QIcon(iconPath);

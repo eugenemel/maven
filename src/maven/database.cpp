@@ -689,32 +689,50 @@ void Database::loadPeakGroupTags(string filename) {
     vector<char> usedHotKeys;
 
     string line;
+    unsigned int counter = 0;
+
+    map<string, unsigned int> headers{};
+
     while ( getline(tagsFile, line) ) {
         if (line.empty()) continue;
         if (line[0] == '#') continue; //comments
+
+        if (headers.empty()) {
+            vector<string> headerVector{};
+            mzUtils::split(line, ',', headerVector);
+
+            for (unsigned int i = 0; i < headerVector.size(); i++) {
+                headers.insert(make_pair(headerVector[i], i));
+            }
+            continue;
+        }
+
+        int displayOrder = -1;
 
         vector<string> fields;
         mzUtils::split(line,',', fields);
 
         if (fields.size() < 5) continue; //skip lines with missing information
 
-        string name = fields[0];
+        string name = fields[ headers["tag_name"] ];
 
         //Use lower case characters only to fit with previous usage
-        QString labelStr = QString(fields[1].c_str()).toLower();
-        QString hotKeyStr = QString(fields[2].c_str()).toLower();
+        QString labelStr = QString(fields[ headers["label"] ].c_str()).toLower();
+        QString hotKeyStr = QString(fields[ headers["hotkey"] ].c_str()).toLower();
+
+        if (headers.find("displayOrder") != headers.end()) {
+            displayOrder = stoi(fields[ headers["displayOrder"] ]);
+        }
 
         char label = labelStr.toStdString().c_str()[0];
         char hotkey = hotKeyStr.toStdString().c_str()[0];
 
-        string icon = fields[3];
+        string icon = fields[ headers["icon"] ];
 
         QString descriptionQ;
-        for (unsigned int i = 4; i < fields.size(); i++) {
-            if (i > 4) {
-                descriptionQ.append(",");
-            }
-            descriptionQ.append(fields[i].c_str());
+
+        if (headers.find("description") != headers.end()) {
+            descriptionQ = QString(fields[headers["description"]].c_str());
         }
 
         string description = descriptionQ.toStdString();
@@ -766,12 +784,16 @@ void Database::loadPeakGroupTags(string filename) {
             }
         }
 
-        PeakGroupTag *tag = new PeakGroupTag(name, label, hotkey, icon, description);
+        unsigned int specifiedOrder = displayOrder < 0 ? counter : static_cast<unsigned int>(displayOrder);
+
+        PeakGroupTag *tag = new PeakGroupTag(name, label, hotkey, specifiedOrder, icon, description);
 
         usedLabels.push_back(label);
         usedHotKeys.push_back(hotkey);
 
         peakGroupTags.insert(make_pair(label, tag));
+
+        counter++;
     }
     tagsFile.close();
 
