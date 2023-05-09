@@ -109,5 +109,6 @@
         <file>images/padlock.png</file>
         <file>images/free_range.png</file>
         <file>images/maven_2_img.png</file>
+        <file>images/green_circle.png</file>
     </qresource>
 </RCC>
