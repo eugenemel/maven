@@ -800,6 +800,19 @@ void Database::loadPeakGroupTags(string filename) {
     qDebug() << "Database::loadPeakGroupTags():" << peakGroupTags.size() << "tags.";
 }
 
+vector<PeakGroupTag*> Database::getSupplementalPeakGroupTags() {
+    vector<PeakGroupTag*> sortedTags{};
+    for (auto &x : peakGroupTags) {
+        sortedTags.push_back(x.second);
+    }
+
+    sort(sortedTags.begin(), sortedTags.end(), [](PeakGroupTag* lhs, PeakGroupTag* rhs){
+        return lhs->displayOrder < rhs->displayOrder;
+    });
+
+    return sortedTags;
+}
+
 vector<Adduct*> Database::defaultAdducts() {
     vector<Adduct*> adducts;
     adducts.push_back( new Adduct("[M-H]+",  PROTON , 1, 1));
