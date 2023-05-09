@@ -201,6 +201,8 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
         qDebug() << "EicWidget::integrateRegion(): _integratedGroup assigned _alwaysDisplayGroup->labels and ->fragMatchScore.mergedScore.";
     }
 
+    float maxPeakRank = 0.0f;
+
 	for(int i=0; i < eics.size(); i++ ) {
 		EIC* eic = eics[i];
 		Peak peak(eic,0);
@@ -225,8 +227,15 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
 				}
 			}
 		}
-		if (peak.pos > 0) {
+        if (peak.pos > 0) {
 			eic->getPeakDetails(peak);
+
+            //Issue 637: peakArea is always the preferred quant type for manual overrides.
+            peak.peakRank = peak.peakArea;
+            if (peak.peakRank > maxPeakRank) {
+                maxPeakRank = peak.peakRank;
+            }
+
             _integratedGroup->addPeak(peak);
             qDebug() << "EicWidget::integrateRegion(): integrateRegion: " << eic->sampleName.c_str() << " " << peak.peakArea << " " << peak.peakAreaCorrected;
 			this->showPeakArea(&peak);
@@ -239,7 +248,7 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
 
     _integratedGroup->groupStatistics();
 
-    _integratedGroup->groupRank = 0.0f;
+    _integratedGroup->groupRank = maxPeakRank;
 
     //Issue 368: record fact that this group created with SRMTransition
     if (_slice.isSrmTransitionSlice()){
