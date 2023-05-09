@@ -1736,10 +1736,10 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
 
     menu.addSeparator();
 
-    if (!DB.peakGroupTags.empty()) {
+    vector<PeakGroupTag*> supplementalTags = DB.getSupplementalPeakGroupTags();
 
-        for (auto &x : DB.peakGroupTags) {
-            PeakGroupTag *peakGroupTag = x.second;
+    if (!supplementalTags.empty()) {
+        for (auto peakGroupTag : supplementalTags) {
 
             QString actionMsg("Tag Group(s): ");
             actionMsg.append(peakGroupTag->tagName.c_str());

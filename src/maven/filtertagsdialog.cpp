@@ -149,11 +149,11 @@ FilterTagsDialog::FilterTagsDialog(QWidget *parent) : QDialog(parent) {
     counter++;
 
     //Peak group tags
-    for (auto &x : DB.peakGroupTags) {
+    vector<PeakGroupTag*> supplementalTags = DB.getSupplementalPeakGroupTags();
+
+    for (auto peakGroupTag : supplementalTags) {
 
         tblTags->insertRow(counter);
-
-        PeakGroupTag *peakGroupTag = x.second;
 
         QTableWidgetItem *item0 = new QTableWidgetItem();
         item0->setCheckState(Qt::Checked);
