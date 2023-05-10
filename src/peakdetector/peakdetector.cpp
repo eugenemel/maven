@@ -2543,7 +2543,7 @@ bool isSpecialSearch() {
 
 void traverseAndAdd(PeakGroup& group, set<Compound*>& compoundSet) {
     if (group.compound) compoundSet.insert(group.compound);
-    for (auto& group : group.children) {
-       traverseAndAdd(group, compoundSet);
+    for (auto& child : group.children) {
+       traverseAndAdd(child, compoundSet);
     }
 }
