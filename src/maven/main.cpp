@@ -57,12 +57,12 @@ int main(int argc, char *argv[])
         QString currentVersion(MAVEN_VERSION);
 
         QProcess process;
-        process.start("curl https://github.com/eugenemel/maven/releases/latest/");
+        process.start("curl -L https://github.com/eugenemel/maven/releases/latest/");
         process.waitForFinished(10000); // wait for 10 seconds
 
         QString stdoutString = process.readAllStandardOutput();
 
-        QRegularExpression regex("(?<=tag/).*(?=\")");
+        QRegularExpression regex("(?<=eugenemel/maven/releases/tag/)\\d+\\.\\d+\\.\\d+");
         QRegularExpressionMatch match = regex.match(stdoutString);
         QString latestVersion = match.captured(0);
 
@@ -71,6 +71,10 @@ int main(int argc, char *argv[])
         //the latest version could be retrieved,
         //and a more recent version exists,
         //ask the user if they'd like to visit the download page
+        qDebug() << "currentVersion:" << currentVersion;
+        qDebug() << "latestVersion:" << latestVersion;
+
+        // if (!latestVersion.isEmpty() && latestVersion != currentVersion){
         if (!currentVersion.contains("-") && !latestVersion.isEmpty() && latestVersion != currentVersion){
 
             QMessageBox versionMsgBox;
