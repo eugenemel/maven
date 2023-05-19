@@ -761,8 +761,6 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
         project->saveSamples(sampleSet);
         project->saveAlignment();
 
-        set<Compound*> compoundSet;
-
         unsigned int groupCount=0;
 
         map<QString, QString> searchTableData{};
@@ -785,14 +783,16 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
             }
         });
 
+
+        //Issue 642: traverse children peaks to save compounds
+        set<Compound*> compoundSet;
+
         for(auto groupData: groupAndPeakTable) {
             PeakGroup *group = groupData.first;
             QString tableName = groupData.second;
             project->writeGroupSqlite(group, 0, tableName);
 
-            if(group->compound){
-                compoundSet.insert(group->compound);
-            }
+            Compound::traverseAndAdd(*group, compoundSet);
 
             groupCount += group->childCount() + 1;
         }
