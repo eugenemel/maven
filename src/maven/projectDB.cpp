@@ -1421,7 +1421,7 @@ void ProjectDB::doAlignment() {
     if (!sqlDB.isOpen() ) { qDebug() << "doAlignment: database is not opened"; return; }
 
 	QSqlQuery query(sqlDB);
-	query.exec("select S.name, S.sampleId, R.* from rt_update_key R, samples S where S.sampleId = R.sampleId");
+    query.exec("select S.name, S.sampleId, R.* from rt_update_key R, samples S where S.sampleId = R.sampleId ORDER BY sampleId, rt");
 
 	AlignmentSegment* lastSegment=0;
 	Aligner aligner;
@@ -1444,10 +1444,15 @@ void ProjectDB::doAlignment() {
         seg->new_start = 0;
         seg->new_end   = query.value("rt_update").toString().toDouble();
 
-		if (lastSegment and lastSegment->sampleName == seg->sampleName) { 
-			seg->seg_start = lastSegment->seg_end;
-			seg->new_start = lastSegment->new_end;
-		}
+       if (lastSegment and lastSegment->sampleName == seg->sampleName) {
+           seg->seg_start = lastSegment->seg_end;
+           seg->new_start = lastSegment->new_end;
+       } else {
+            cout << endl;
+       }
+
+        //debugging
+        cout << sample->sampleName << "\t" << seg->seg_end << "\t" << seg->new_end << endl;
 
 		aligner.addSegment(sample->sampleName,seg);
 		lastSegment = seg;
