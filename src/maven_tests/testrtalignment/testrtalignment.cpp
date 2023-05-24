@@ -33,14 +33,33 @@ static int groupIdOfInterest = -1;
 void processCLIArguments(int argc, char* argv[]);
 
 int main(int argc, char* argv[]) {
+
     processCLIArguments(argc, argv);
+
+    QString mzrollDBFileQ = QString(mzrollDBFile.c_str());
+
+    /*
+     * Get PG info
+     */
+    PeakGroup *histidineIS = ProjectDB::getPeakGroupFromDB(groupIdOfInterest, mzrollDBFileQ);
+
+    float rtmin = histidineIS->peaks.at(0).rtmin;
+    float rt = histidineIS->peaks.at(0).rt;
+    float rtmax =  histidineIS->peaks.at(0).rtmax;
+
+    cout << "PG #" << groupIdOfInterest
+         << ": mz=" << histidineIS->meanMz
+         << ": #peaks= " << histidineIS->peakCount()
+         << ", rt=" << rt
+         << ", rt range=" << rtmin << " - " << rtmax
+         << endl;
 
     cout << "Started importing mzrolldB file: '" << mzrollDBFile << "'..." << endl;
 
     /*
      * Taken from ProjectDockWidget::loadProjectSQLITE()
      */
-    QString mzrollDBFileQ = QString(mzrollDBFile.c_str());
+
     ProjectDB* selectedProject = new ProjectDB(mzrollDBFileQ);
 
     vector<mzSample*> samples{};
@@ -109,14 +128,7 @@ int main(int argc, char* argv[]) {
 
      aligner.doSegmentedAligment();
 
-    /*
-     * Get PG info
-     */
-     PeakGroup *histidineIS = ProjectDB::getPeakGroupFromDB(groupIdOfInterest, mzrollDBFileQ);
-
-
     cout << "Finished importing mzrolldB file: '" << mzrollDBFile << "'" << endl;
-
 
     cout << "Test Passed" << endl;
 }
