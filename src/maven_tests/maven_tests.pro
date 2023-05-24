@@ -5,4 +5,5 @@ SUBDIRS += \
         testqstring2 \
         testsimpleparsimony \
         testsecprocessor \
-        testmzkitchenprocessor
+        testmzkitchenprocessor \
+        testrtalignment
