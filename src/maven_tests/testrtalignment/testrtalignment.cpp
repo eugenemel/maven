@@ -40,7 +40,8 @@ int main(int argc, char* argv[]) {
     /*
      * Taken from ProjectDockWidget::loadProjectSQLITE()
      */
-    ProjectDB* selectedProject = new ProjectDB(QString(mzrollDBFile.c_str()));
+    QString mzrollDBFileQ = QString(mzrollDBFile.c_str());
+    ProjectDB* selectedProject = new ProjectDB(mzrollDBFileQ);
 
     vector<mzSample*> samples{};
     map<int, mzSample*> sampleById{};
@@ -109,8 +110,9 @@ int main(int argc, char* argv[]) {
      aligner.doSegmentedAligment();
 
     /*
-     * Taken from ProjectDockWidget::loadAllPeakTables()
+     * Get PG info
      */
+     PeakGroup *histidineIS = ProjectDB::getPeakGroupFromDB(groupIdOfInterest, mzrollDBFileQ);
 
 
     cout << "Finished importing mzrolldB file: '" << mzrollDBFile << "'" << endl;

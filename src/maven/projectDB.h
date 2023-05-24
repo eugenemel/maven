@@ -20,6 +20,9 @@ class ProjectDB {
 	public: 
             ProjectDB(QString dbfilename);
 
+            //primarily used for test code
+            static PeakGroup* getPeakGroupFromDB(int groupId, QString dbfilename);
+
             QSqlDatabase sqlDB;
 
             vector<PeakGroup> allgroups;

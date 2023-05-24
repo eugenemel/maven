@@ -1811,3 +1811,15 @@ void ProjectDB::loadUIOptions() {
         }
         }
 }
+
+PeakGroup* ProjectDB::getPeakGroupFromDB(int groupId, QString dbfilename){
+       ProjectDB *pdb = new ProjectDB(dbfilename);
+
+       PeakGroup *pg = new PeakGroup();
+       pg->peaks = pdb->getPeaks(groupId);
+       pg->groupStatistics();
+
+       pdb->closeDatabaseConnection();
+
+       return(pg);
+}
