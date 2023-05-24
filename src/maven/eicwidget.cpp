@@ -1533,6 +1533,12 @@ void EicWidget::addPeakPositions(PeakGroup* group) {
 				QPen pen(color, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
 				QBrush brush(color); brush.setStyle(Qt::NoBrush);
 
+
+//                //Issue 641: debugging
+//                qDebug() << "sample:" << peak.sample->sampleName.c_str() << "mz:" << peak.peakMz
+//                         << "aligned RT:" << peak.rt
+//                         << "original RT:" << peak.sample->originalRetentionTimes.at((peak.scan-1));
+
                 EicPoint* p  = new EicPoint(toX(peak.rt), toY(peak.peakIntensity), &peak, getMainWindow());
 				if(setZValue) p->setZValue(i);
 				p->setColor(color);
@@ -2225,9 +2231,11 @@ void EicWidget::addMS2Events(float mzmin, float mzmax) {
                 if (scan->rt < _slice.rtmin || scan->rt > _slice.rtmax) continue;
 
         		QColor color = QColor::fromRgbF( sample->color[0], sample->color[1], sample->color[2], 1 );
+
+
                 EicPoint* p  = new EicPoint(toX(scan->rt), toY(10), NULL, getMainWindow());
                 p->setPointShape(EicPoint::TRIANGLE_UP);
-                p->forceFillColor(true);;
+                p->forceFillColor(true);
                 p->setScan(scan);
                 p->setSize(30);
                 p->setColor(color);
