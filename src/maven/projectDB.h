@@ -65,6 +65,7 @@ class ProjectDB {
             void deletePeakGroup(PeakGroup* g, QString tableName);
             void assignSampleIds();
             void saveAlignment();
+            void saveAlignment(map<mzSample*, vector<pair<float, float>>>& sampleToUpdatedRts);
             QStringList getSearchTableNames();
             QStringList getProjectFileDatabaseNames();
 

@@ -1416,6 +1416,41 @@ void ProjectDB::saveAlignment() {
      query0.exec("end transaction");
 }
 
+void ProjectDB::saveAlignment(map<mzSample*, vector<pair<float, float>>>& sampleToUpdatedRts) {
+       qDebug() << "ProjectDB::saveAlignment(sampleToUpdatedRts)";
+
+       if (sampleToUpdatedRts.empty()) {
+           ProjectDB::saveAlignment();
+           return;
+       }
+
+       QSqlQuery query0(sqlDB);
+       query0.exec("begin transaction");
+       //create table if not exists
+       if(!query0.exec("CREATE TABLE IF NOT EXISTS rt_update_key(sampleId int NOT NULL, rt real NOT NULL, rt_update real NOT NULL)"))
+               qDebug() << "Ho... " << query0.lastError();
+
+       //delete current alignment
+       query0.exec("delete from rt_update_key");
+
+       //save new alignment
+      QSqlQuery query1(sqlDB);
+      query1.prepare("insert into rt_update_key values(?,?,?)");
+
+       for (auto it = sampleToUpdatedRts.begin(); it != sampleToUpdatedRts.end(); ++it) {
+           mzSample* s = it->first;
+           cerr << "Saving alignment for sample: " << s->sampleName  << " #scans=" << s->scans.size() << endl;
+
+           for (auto pair : it->second) {
+               query1.addBindValue( s->getSampleId() );
+               query1.addBindValue( pair.first);
+               query1.addBindValue( pair.second );
+           if(!query1.exec()) {
+               qDebug() << query1.lastError();}
+           }
+       }
+       query0.exec("end transaction");
+}
 
 void ProjectDB::doAlignment() {
     if (!sqlDB.isOpen() ) { qDebug() << "doAlignment: database is not opened"; return; }
