@@ -86,6 +86,19 @@ int main(int argc, char* argv[]) {
         cout << "Loaded Sample: '" << sname.toStdString() << "'" << endl;
     }
 
+    //                      index, rt
+    map<mzSample*, vector<pair<unsigned int, float>>> originalRts{};
+    for (auto sample : samples) {
+        for (unsigned int i = 0; i < sample->scans.size(); i++) {
+            auto scan = sample->scans.at(i);
+            if (scan->mslevel == 1 && scan->rt >= rtmin && scan->rt <= rtmax) {
+                if (originalRts.find(sample) == originalRts.end()) {
+                    originalRts.insert(make_pair(sample, vector<pair<unsigned int, float>>{}));
+                }
+                originalRts.at(sample).push_back(make_pair(i, scan->rt));
+            }
+        }
+    }
 
     /*
      * Taken from ProjectDockWidget::doAlignment()
@@ -129,6 +142,25 @@ int main(int argc, char* argv[]) {
      aligner.doSegmentedAligment();
 
     cout << "Finished importing mzrolldB file: '" << mzrollDBFile << "'" << endl;
+
+    //print alignment results
+    for (auto it = originalRts.begin(); it != originalRts.end(); ++it) {
+        auto sample = it->first;
+        for (auto scanData : it->second) {
+            unsigned int index =scanData.first;
+            float originalRt = scanData.second;
+            float updatedRt = sample->scans.at(index)->rt;
+
+            cout << "index=" << index << ": " << originalRt << " --> " << updatedRt << endl;
+        }
+    }
+
+    cout << "PG #" << groupIdOfInterest
+         << ": mz=" << histidineIS->meanMz
+         << ": #peaks= " << histidineIS->peakCount()
+         << ", rt=" << rt
+         << ", rt range=" << rtmin << " - " << rtmax
+         << endl;
 
     cout << "Test Passed" << endl;
 }
