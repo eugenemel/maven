@@ -28,6 +28,7 @@ Database DB;
 static string mzrollDBFile = "";
 static string sampleDir = "";
 static int groupIdOfInterest = -1;
+static float expectedRt = -1;
 
 //functions
 void processCLIArguments(int argc, char* argv[]);
@@ -42,17 +43,6 @@ int main(int argc, char* argv[]) {
      * Get PG info
      */
     PeakGroup *histidineIS = ProjectDB::getPeakGroupFromDB(groupIdOfInterest, mzrollDBFileQ);
-
-    float rtmin = histidineIS->peaks.at(0).rtmin;
-    float rt = histidineIS->peaks.at(0).rt;
-    float rtmax =  histidineIS->peaks.at(0).rtmax;
-
-    cout << "PG #" << groupIdOfInterest
-         << ": mz=" << histidineIS->meanMz
-         << ": #peaks= " << histidineIS->peakCount()
-         << ", rt=" << rt
-         << ", rt range=" << rtmin << " - " << rtmax
-         << endl;
 
     cout << "Started importing mzrolldB file: '" << mzrollDBFile << "'..." << endl;
 
@@ -86,18 +76,36 @@ int main(int argc, char* argv[]) {
         cout << "Loaded Sample: '" << sname.toStdString() << "'" << endl;
     }
 
+    float rtmin = expectedRt - 0.1f;
+    float rtmax = expectedRt + 0.1f;
+
     //                      index, rt
     map<mzSample*, vector<pair<unsigned int, float>>> originalRts{};
+    map<mzSample*, pair<unsigned int, float>> closestRt{};
+
     for (auto sample : samples) {
+
+        pair<unsigned int, float> currentClosestRt = make_pair(-1, 0);
+        float currentDiff = 0;
+
         for (unsigned int i = 0; i < sample->scans.size(); i++) {
             auto scan = sample->scans.at(i);
             if (scan->mslevel == 1 && scan->rt >= rtmin && scan->rt <= rtmax) {
                 if (originalRts.find(sample) == originalRts.end()) {
                     originalRts.insert(make_pair(sample, vector<pair<unsigned int, float>>{}));
                 }
-                originalRts.at(sample).push_back(make_pair(i, scan->rt));
+
+                auto scanData = make_pair(i, scan->rt);
+                originalRts.at(sample).push_back(scanData);
+
+                currentDiff = abs(currentClosestRt.second - expectedRt);
+                if (abs(scan->rt - expectedRt) < currentDiff) {
+                    currentClosestRt = make_pair(i, scan->rt);
+                }
             }
         }
+
+        closestRt.insert(make_pair(sample, currentClosestRt));
     }
 
     /*
@@ -143,24 +151,27 @@ int main(int argc, char* argv[]) {
 
     cout << "Finished importing mzrolldB file: '" << mzrollDBFile << "'" << endl;
 
+    cout << "PG originalRt --> mappedRt:" << endl;
+    cout << expectedRt << " --> " << histidineIS->peaks.at(0).rt << endl;
+
     //print alignment results
     for (auto it = originalRts.begin(); it != originalRts.end(); ++it) {
         auto sample = it->first;
-        for (auto scanData : it->second) {
-            unsigned int index =scanData.first;
-            float originalRt = scanData.second;
-            float updatedRt = sample->scans.at(index)->rt;
 
-            cout << "index=" << index << ": " << originalRt << " --> " << updatedRt << endl;
-        }
+        auto scanData = closestRt.at(sample);
+
+        auto closestRtVal = scanData.second;
+
+        cout << closestRtVal <<  " --> " << sample->scans.at(scanData.first)->rt  << endl;
+
+        auto diff = abs(sample->scans.at(scanData.first)->rt - histidineIS->peaks.at(0).rt);
+
+        cout << "alignment RT diff: " << diff << endl;
+
+        assert(diff < 1e-6f);
     }
 
-    cout << "PG #" << groupIdOfInterest
-         << ": mz=" << histidineIS->meanMz
-         << ": #peaks= " << histidineIS->peakCount()
-         << ", rt=" << rt
-         << ", rt range=" << rtmin << " - " << rtmax
-         << endl;
+
 
     cout << "Test Passed" << endl;
 }
@@ -173,6 +184,8 @@ void processCLIArguments(int argc, char* argv[]){
             groupIdOfInterest = stoi(argv[i+1]);
         } else if (strcmp(argv[i], "--sampleDir") == 0) {
             sampleDir = argv[i+1];
+        } else if (strcmp(argv[i], "--expectedRt") == 0) {
+            expectedRt = stof(argv[i+1]);
         }
     }
 }
