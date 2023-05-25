@@ -59,5 +59,5 @@ parallel {
         LIBS += -fopenmp
 }
 
-SOURCES= isotopeprocessor.cpp
+SOURCES= isotopeprocessor.cpp $$MAVEN/projectDB.cpp
 HEADERS= $$MAVEN/projectDB.h $$MAVEN/database.h
