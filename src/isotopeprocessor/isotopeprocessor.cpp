@@ -32,7 +32,7 @@ void processOptions(int argc, char* argv[]) {
     for (unsigned int i = 0; i < static_cast<unsigned int>(argc-1); i++) {
         if (strcmp(argv[i], "-c") == 0 || strcmp(argv[i], "--config") == 0) {
             options.setOptions(argv[i+1]);
-        } else if (strcmp(argv[i], "-m") || strcmp(argv[i], "--mzrollDB") == 0) {
+        } else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--mzrollDB") == 0) {
             project = new ProjectDB(QString(argv[i+1]));
         } else if (strcmp(argv[i], "-s") == 0 || strcmp(argv[i], "--sampleDir") == 0) {
             sampleDir = argv[i+1];
