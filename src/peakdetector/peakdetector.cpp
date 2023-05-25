@@ -140,8 +140,9 @@ shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters = 
 
 static map<QString, QString> searchTableData{};
 
-string sampleIdMappingFile;
+static string sampleIdMappingFile;
 static map<string, pair<int, bool>> sampleIdMapping{};
+static map<mzSample*, vector<pair<float, float>>> sampleToUpdatedRts{};
 
 /**
  * @brief minSmoothedPeakIntensity
@@ -609,7 +610,7 @@ void alignSamplesHIHRP() {
                 standardsAlignment_minPeakIntensity
                 );
 
-    map<mzSample*, vector<pair<float, float>>> sampleToUpdatedRts = rtAligner.anchorPointSetToUpdatedRtMap(anchorPoints, samples[0]);
+    sampleToUpdatedRts = rtAligner.anchorPointSetToUpdatedRtMap(anchorPoints, samples[0]);
 
     for (auto &x : sampleToUpdatedRts) {
 
@@ -1656,7 +1657,10 @@ void writeReport(string setName) {
                 project->saveSamples(samples);
 
                 //this is only necessary if RT alignment is actually performed
-                project->saveAlignment(); //~50% of time in writeReport() spent here
+                //Issue 641: Explicitly save anchor points
+                if (!sampleIdMapping.empty()) {
+                    project->saveAlignment(sampleToUpdatedRts);
+                }
 
                 if(saveScanData) project->saveScans(samples); //~50% of time in writeReport() spent here
 
@@ -2476,6 +2480,8 @@ void anchorPointsBasedAlignment() {
 //    }
 
     printf("Execution time (anchorPointsBasedAlignment()) : %f seconds \n", getTime() - startLoadingTime);
+
+    sampleToUpdatedRts = anchorPointSetToUpdatedRtMap;
 }
 
 //Issue 739: Handle different types of mzkitchen-driven msp searches.
