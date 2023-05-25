@@ -18,9 +18,12 @@ static vector<Adduct*> adducts{};
 //function declarations
 void processOptions(int argc, char* argv[]);
 void printUsage();
+vector<PeakGroup*> getSeedPeakGroups();
 
 int main(int argc, char *argv[]){
     processOptions(argc, argv);
+
+    vector<PeakGroup*> seedPeakGroups = getSeedPeakGroups();
 
     cout << "All Processes Completed Successfully!" << endl;
 }
@@ -64,4 +67,24 @@ void printUsage() {
          << "\t-a [--adductsFile] <adducts_file>\n"
          << "\t\tFile containing adducts information, usually ADDUCTS.csv\n"
          << endl;
+}
+
+vector<PeakGroup*> getSeedPeakGroups() {
+    vector<PeakGroup*> seedPeakGroups{};
+
+    QSqlQuery query(project->sqlDB);
+    query.exec("select groupId from peakgroups where peakgroups.compoundId != '' AND (peakgroups.label LIKE '%g%' OR peakgroups.searchTableName == 'Bookmarks');");
+
+    vector<int> groupIds{};
+
+    while(query.next()) {
+        groupIds.push_back(query.value("groupId").toInt());
+    }
+
+//    //debugging
+//    for (auto groupId : groupIds) {
+//        cout << groupId << endl;
+//    }
+
+    return seedPeakGroups;
 }
