@@ -7,6 +7,7 @@
 using namespace std;
 
 // static variables - CL inputs
+Database DB; // this declaration is necessary for ProjectDB
 static ProjectDB* project = nullptr;
 static vector<mzSample*> samples{};
 static string sampleDir = "";
@@ -14,16 +15,12 @@ static string outputDir = "";
 
 //function declarations
 void processOptions(int argc, char* argv[]);
+void printUsage();
 
 int main(int argc, char *argv[]){
+    processOptions(argc, argv);
 
-    omp_set_num_threads(4);
-    #pragma omp parallel for
-    for (unsigned int i = 0; i < 10; i++) {
-
-        #pragma omp critical
-        cout << "Hello from thread #" << omp_get_thread_num() << " (nthreads=" << omp_get_num_threads() << ")"<< endl;
-    }
+    cout << "All Processes Completed Successfully!" << endl;
 }
 
 void processOptions(int argc, char* argv[]) {
@@ -41,4 +38,23 @@ void processOptions(int argc, char* argv[]) {
             outputDir = argv[i+1];
         }
     }
+
+    if (!project) {
+        cerr << "Required --mzrollDB argument not provided. Exiting." << endl;
+        printUsage();
+        exit(-1);
+    }
+}
+
+void printUsage() {
+    cout << "Usage: isotopeprocessor <options>\n"
+         << "\t-c [--config] <config_file>\n"
+         << "\t\tConfiguration file with algorithm options.\n"
+         << "\t-m [--mzrollDB] <mzrolldb_file>\n"
+         << "\t\tmzrollDB file containing peakgroups for envelope extraction.\n"
+         << "\t-s [--sampleDir] <sample_dir>\n"
+         << "\t\tDirectory containing sample files referenced in mzrollDB file.\n"
+         << "\t-o [--outputDir] <output_dir>\n"
+         << "\t\tDirectory to write all output files to.\n"
+         << endl;
 }
