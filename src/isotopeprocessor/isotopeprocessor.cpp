@@ -12,6 +12,8 @@ static ProjectDB* project = nullptr;
 static vector<mzSample*> samples{};
 static string sampleDir = "";
 static string outputDir = "";
+static string adductsFile = "../../src/maven_core/bin/methods/ADDUCTS.csv";
+static vector<Adduct*> adducts{};
 
 //function declarations
 void processOptions(int argc, char* argv[]);
@@ -36,6 +38,9 @@ void processOptions(int argc, char* argv[]) {
             sampleDir = argv[i+1];
         } else if (strcmp(argv[i], "-o") == 0 || strcmp(argv[i], "--outputDir") == 0) {
             outputDir = argv[i+1];
+        } else if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--adductsFile") == 0) {
+            adductsFile = argv[i+1];
+            adducts = Adduct::loadAdducts(adductsFile);
         }
     }
 
@@ -56,5 +61,7 @@ void printUsage() {
          << "\t\tDirectory containing sample files referenced in mzrollDB file.\n"
          << "\t-o [--outputDir] <output_dir>\n"
          << "\t\tDirectory to write all output files to.\n"
+         << "\t-a [--adductsFile] <adducts_file>\n"
+         << "\t\tFile containing adducts information, usually ADDUCTS.csv\n"
          << endl;
 }
