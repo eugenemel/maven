@@ -64,6 +64,12 @@ void processOptions(int argc, char* argv[]) {
         printUsage();
         exit(-1);
     }
+
+    if (sampleDir == "") {
+        cerr << "Required --sampleDir argument no provided. Exiting." << endl;
+        printUsage();
+        exit(-1);
+    }
 }
 
 void printUsage() {
@@ -82,7 +88,36 @@ void printUsage() {
 }
 
 void loadSamples() {
-    //TODO
+    vector<string> filenames = mzUtils::getMzSampleFilesFromDirectory(sampleDir.c_str());
+
+    cout << "Loading " << filenames.size() << " samples..." << endl;
+
+    #pragma omp parallel for ordered num_threads(16) schedule(static)
+    for (unsigned long i = 0; i < filenames.size(); i++ ) {
+
+        #pragma omp critical
+        cout << "Thread # " << omp_get_thread_num() << ": Loading " << filenames[i] << endl;
+
+        mzSample* sample = new mzSample();
+        sample->loadSample(filenames[i].c_str());
+
+        if ( sample->scans.size() >= 1 ) {
+
+            #pragma omp critical
+            samples.push_back(sample);
+
+            #pragma omp critical
+            sample->summary();
+
+        } else {
+            if (sample) {
+                delete sample;
+                sample = nullptr;
+            }
+        }
+    }
+
+    cout << "loadSamples() done: loaded " << samples.size() << " samples\n";
 }
 
 void loadSeedPeakGroups() {
