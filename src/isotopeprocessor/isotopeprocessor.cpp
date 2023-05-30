@@ -8,12 +8,12 @@ using namespace std;
 
 // static variables - CL inputs
 Database DB; // this declaration is necessary for ProjectDB
+string projectFile = "";
 static ProjectDB* project = nullptr;
 static vector<mzSample*> samples{};
 static string sampleDir = "";
 static string outputDir = "";
 static string adductsFile = "../../src/maven_core/bin/methods/ADDUCTS.csv";
-static vector<Adduct*> adducts{};
 
 //function declarations
 void processOptions(int argc, char* argv[]);
@@ -36,14 +36,15 @@ void processOptions(int argc, char* argv[]) {
         if (strcmp(argv[i], "-c") == 0 || strcmp(argv[i], "--config") == 0) {
             options.setOptions(argv[i+1]);
         } else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--mzrollDB") == 0) {
-            project = new ProjectDB(QString(argv[i+1]));
+            projectFile = argv[i+1];
+            project = new ProjectDB(QString(projectFile.c_str()));
         } else if (strcmp(argv[i], "-s") == 0 || strcmp(argv[i], "--sampleDir") == 0) {
             sampleDir = argv[i+1];
         } else if (strcmp(argv[i], "-o") == 0 || strcmp(argv[i], "--outputDir") == 0) {
             outputDir = argv[i+1];
         } else if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--adductsFile") == 0) {
             adductsFile = argv[i+1];
-            adducts = Adduct::loadAdducts(adductsFile);
+            DB.adductsDB = Adduct::loadAdducts(adductsFile);
         }
     }
 
@@ -70,21 +71,62 @@ void printUsage() {
 }
 
 vector<PeakGroup*> getSeedPeakGroups() {
-    vector<PeakGroup*> seedPeakGroups{};
 
     QSqlQuery query(project->sqlDB);
-    query.exec("select groupId from peakgroups where peakgroups.compoundId != '' AND (peakgroups.label LIKE '%g%' OR peakgroups.searchTableName == 'Bookmarks');");
+    query.exec("select DISTINCT groupId, compoundName, adductName from peakgroups where peakgroups.compoundId != '' AND (peakgroups.label LIKE '%g%' OR peakgroups.searchTableName == 'Bookmarks');");
 
     vector<int> groupIds{};
+    vector<string> compoundNames{};
+    vector<string> adductStrings{};
 
     while(query.next()) {
         groupIds.push_back(query.value("groupId").toInt());
+        compoundNames.push_back(query.value("compoundName").toString().toStdString());
+        adductStrings.push_back(query.value("adductName").toString().toStdString());
     }
 
-//    //debugging
-//    for (auto groupId : groupIds) {
-//        cout << groupId << endl;
-//    }
+    project->alterPeaksTable();
+    map<int, vector<Peak>> peaks = project->getAllPeaks(groupIds);
+
+    DB.connect(QString(projectFile.c_str()));
+    DB.loadCompoundsSQL("ALL", project->sqlDB);
+    map<string, Compound*> compounds = DB.getCompoundsSubsetMap("ALL");
+
+    vector<PeakGroup*> seedPeakGroups = vector<PeakGroup*>(groupIds.size());
+
+    for (unsigned int i = 0; i < groupIds.size(); i++) {
+
+       int groupId = groupIds.at(i);
+       string compoundName = compoundNames.at(i);
+       string adductName = adductStrings.at(i);
+
+       vector<Peak> groupPeaks = peaks.at(groupId);
+       string compoundId = compoundName + " " + adductName;
+       Compound *compound = compounds.at(compoundId);
+       Adduct *adduct = DB.findAdductByName(adductName);
+
+//       //debugging
+//       cout << "groupId=" << groupId
+//            << ", compoundName=" << compoundName
+//            << ", adductName=" << adductName
+//            << ", # peaks=" << groupPeaks.size()
+//            << ", *Compound=" << compound
+//            << ", *Adduct=" << adduct
+//            << endl;
+
+       //check information
+       if (!adduct || !compound) {
+           cout << "groupId=" << groupId
+                << ", compoundName=" << compoundName
+                << ", adductName=" << adductName
+                << endl;
+           cerr << "Missing Compound or Adduct information! exiting." << endl;
+           abort();
+       }
+
+       //PeakGroup *group = new PeakGroup();
+
+    }
 
     return seedPeakGroups;
 }
