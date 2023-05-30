@@ -6,24 +6,35 @@
 
 using namespace std;
 
-// static variables - CL inputs
-Database DB; // this declaration is necessary for ProjectDB
-string projectFile = "";
-static ProjectDB* project = nullptr;
-static vector<mzSample*> samples{};
+// comand line inputs
+static string projectFile = "";
 static string sampleDir = "";
 static string outputDir = "";
 static string adductsFile = "../../src/maven_core/bin/methods/ADDUCTS.csv";
 
+//transient maven data structures
+Database DB; // this declaration is necessary for ProjectDB
+
+//persistent maven data structures
+static ProjectDB* project = nullptr;
+static vector<mzSample*> samples{};
+static vector<PeakGroup*> seedPeakGroups{};
+static vector<Isotope*> isotopes{};
+
 //function declarations
 void processOptions(int argc, char* argv[]);
 void printUsage();
-vector<PeakGroup*> getSeedPeakGroups();
+
+void loadSamples();
+void loadSeedPeakGroups();
+void loadIsotopes();
 
 int main(int argc, char *argv[]){
     processOptions(argc, argv);
 
-    vector<PeakGroup*> seedPeakGroups = getSeedPeakGroups();
+    loadSamples();
+    loadSeedPeakGroups();
+    loadIsotopes();
 
     cout << "All Processes Completed Successfully!" << endl;
 }
@@ -70,7 +81,11 @@ void printUsage() {
          << endl;
 }
 
-vector<PeakGroup*> getSeedPeakGroups() {
+void loadSamples() {
+    //TODO
+}
+
+void loadSeedPeakGroups() {
 
     QSqlQuery query(project->sqlDB);
     query.exec("select DISTINCT groupId, compoundName, adductName from peakgroups where peakgroups.compoundId != '' AND (peakgroups.label LIKE '%g%' OR peakgroups.searchTableName == 'Bookmarks');");
@@ -92,7 +107,7 @@ vector<PeakGroup*> getSeedPeakGroups() {
     DB.loadCompoundsSQL("ALL", project->sqlDB);
     map<string, Compound*> compounds = DB.getCompoundsSubsetMap("ALL");
 
-    vector<PeakGroup*> seedPeakGroups = vector<PeakGroup*>(groupIds.size());
+    seedPeakGroups = vector<PeakGroup*>(groupIds.size());
 
     for (unsigned int i = 0; i < groupIds.size(); i++) {
 
@@ -127,6 +142,8 @@ vector<PeakGroup*> getSeedPeakGroups() {
        //PeakGroup *group = new PeakGroup();
 
     }
+}
 
-    return seedPeakGroups;
+void loadIsotopes() {
+    //TODO
 }
