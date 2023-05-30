@@ -76,7 +76,7 @@ class ProjectDB {
             bool openDatabaseConnection(QString dbname);
             bool closeDatabaseConnection();
 
-	    string getScanSigniture(Scan* scan, int limitSize);
+        string getScanSignature(Scan* scan, int limitSize);
 	    void saveScans(vector<mzSample *> &sampleSet);
 
 	    mzSample* getSampleById( int sampleId);

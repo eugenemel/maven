@@ -70,7 +70,7 @@ void ProjectDB::assignSampleIds() {
    }
 }
 
-string ProjectDB::getScanSigniture(Scan* scan, int limitSize=200) {
+string ProjectDB::getScanSignature(Scan* scan, int limitSize=200) {
     stringstream SIG;
     map<int,bool>seen;
 
@@ -126,7 +126,7 @@ void ProjectDB::saveScans(vector<mzSample *> &sampleSet) {
 					Scan* scan = s->scans[i];
 					if (scan->mslevel == 1) continue;
 
-					string scanData = getScanSigniture(scan,2000);
+                    string scanData = getScanSignature(scan,2000);
 					ms2count++;
 
                     query1.addBindValue( s->getSampleId());
@@ -902,7 +902,7 @@ void ProjectDB::alterPeakGroupsTable(){
                }
            }
 
-           qDebug() << "ProjectDB::loadPeakGroups(): "
+           qDebug() << "ProjectDB::alterPeakGroupsTable(): "
                     << "isHasDisplayName? " << isHasDisplayName
                     << "isHasSrmPrecursorMz? " << isHasSrmPrecursorMz
                     << "isHasSrmProductMz? " << isHasSrmProductMz
