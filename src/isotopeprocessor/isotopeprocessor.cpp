@@ -19,7 +19,7 @@ Database DB; // this declaration is necessary for ProjectDB
 static ProjectDB* project = nullptr;
 static vector<mzSample*> samples{};
 static vector<PeakGroup*> seedPeakGroups{};
-static vector<Isotope*> isotopes{};
+static vector<Isotope> isotopes{};
 
 //function declarations
 void processOptions(int argc, char* argv[]);
