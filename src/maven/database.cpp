@@ -606,13 +606,24 @@ void Database::saveRetentionTime(Compound* c, float rt, QString method) {
 }
 
 vector<Compound*> Database::getCompoundsSubset(string dbname) {
-	vector<Compound*> subset;
-	for (unsigned int i=0; i < compoundsDB.size(); i++ ) {
-			if (compoundsDB[i]->db == dbname) { 
-					subset.push_back(compoundsDB[i]);
-			}
+    vector<Compound*> subset{};
+    for (unsigned int i=0; i < compoundsDB.size(); i++ ) {
+        if (dbname == "ALL" || compoundsDB[i]->db == dbname) {
+            subset.push_back(compoundsDB[i]);
+        }
 	}
 	return subset;
+}
+
+//<compoundId, compound*>
+map<string, Compound*> Database::getCompoundsSubsetMap(string dbname) {
+    map<string, Compound*> compoundIdMap{};
+    for (unsigned int i=0; i < compoundsDB.size(); i++ ) {
+        if (dbname == "ALL" || compoundsDB[i]->db == dbname) {
+            compoundIdMap.insert(make_pair(compoundsDB[i]->id, compoundsDB[i]));
+        }
+    }
+    return compoundIdMap;
 }
 
 QStringList Database::getDatabaseNames() {

@@ -58,8 +58,7 @@ class Database {
         void loadReactions(string modelName);
 
         vector<Compound*> getCompoundsSubset(string database);
-        vector<Compound*> getKnowns();
-
+        map<string, Compound*> getCompoundsSubsetMap(string dbName);
 
         QStringList getDatabaseNames();
         QStringList getLoadedDatabaseNames() { return loadedDatabase.keys(); }
