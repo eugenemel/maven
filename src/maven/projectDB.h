@@ -53,7 +53,7 @@ class ProjectDB {
 
             void loadPeakGroups(QString tableName, QString rumsDBLibrary, bool isAttemptToLoadDB=true, const map<int, vector<Peak>>& peakGroupMap={}, Classifier *classifier=nullptr);
             void loadGroupPeaks(PeakGroup* group);
-            map<int, vector<Peak>> getAllPeaks();
+            map<int, vector<Peak>> getAllPeaks(vector<int> groupIds = vector<int>(0));
             vector<Peak> getPeaks(int groupId);
             void loadMatchTable();
             void loadSearchParams();

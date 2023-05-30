@@ -646,13 +646,30 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 }
 
 //Issue 283: Read in all peaks to allow for faster retrieval later
-map<int, vector<Peak>> ProjectDB::getAllPeaks() {
+map<int, vector<Peak>> ProjectDB::getAllPeaks(vector<int> groupIds) {
 
         map<int, vector<Peak>> allPeaks{};
         unsigned long peaksCounter = 0;
 
         QSqlQuery query(sqlDB);
-        query.prepare("select * from peaks inner join samples on peaks.sampleid = samples.sampleId;");
+
+        QString queryTxt("select * from peaks inner join samples on peaks.sampleid = samples.sampleId");
+
+        if (!groupIds.empty()) {
+            queryTxt.append(" where peaks.groupId IN (");
+            for (unsigned int i = 0; i < groupIds.size(); i++) {
+                if (i > 0){
+                    queryTxt.append(", ");
+                }
+                queryTxt.append(QString::number(groupIds.at(i)));
+            }
+            queryTxt.append(")");
+        }
+        queryTxt.append(";");
+
+        qDebug() << "ProjectDB::getAllPeaks():" << queryTxt;
+
+        query.prepare(queryTxt);
         query.exec();
 
         while (query.next()) {
