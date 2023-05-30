@@ -662,32 +662,7 @@ QStringList Database::getAdductNames(QString dbName) {
 vector<Adduct*> Database::loadAdducts(string filename) {
     qDebug() << "ADDUCTS FILE=" << QString(filename.c_str());
 
-    vector<Adduct*> adducts;
-    ifstream myfile(filename.c_str());
-
-    if (! myfile.is_open()) return adducts;
-
-    string line;
-    while ( getline(myfile,line) ) {
-        if (line.empty()) continue;
-        if (line[0] == '#') continue;
-
-        vector<string>fields;
-        mzUtils::split(line,',', fields);
-
-        //ionization
-        if(fields.size() < 2 ) continue;
-        string name=fields[0];
-        int nmol=string2float(fields[1]);
-        int charge=string2float(fields[2]);
-        float mass=string2float(fields[3]);
-
-        if ( name.empty() || nmol < 0 ) continue;
-        Adduct* a = new Adduct(name,mass,charge,nmol);
-        adducts.push_back(a);
-    }
-    myfile.close();
-    return adducts;
+    return Adduct::loadAdducts(filename);
 }
 
 void Database::loadPeakGroupTags(string filename) {
