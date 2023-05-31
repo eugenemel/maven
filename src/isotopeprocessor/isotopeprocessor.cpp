@@ -17,9 +17,7 @@ Database DB; // this declaration is necessary for ProjectDB
 
 //persistent maven data structures
 static ProjectDB* project = nullptr;
-static vector<mzSample*> samples{};
 static vector<PeakGroup*> seedPeakGroups{};
-static vector<Isotope> isotopes{};
 
 //function declarations
 void processOptions(int argc, char* argv[]);
@@ -34,7 +32,35 @@ int main(int argc, char *argv[]){
 
     loadSamples();
     loadSeedPeakGroups();
-    loadIsotopes();
+
+    for (unsigned int i = 0; i < seedPeakGroups.size(); i++) {
+
+        cout << "i=" << i << ": " << endl;
+
+        PeakGroup *pg = seedPeakGroups[i];
+
+        IsotopicEnvelope envelope = IsotopicEnvelope();
+
+        envelope.source = "dummy-test";
+        envelope.group = pg;
+
+        //Fails because of [M+FA-H]- adduct
+        envelope.isotopes = MassCalculator::computeIsotopes(
+                    pg->compound->formula,
+                    pg->adduct,
+                    3, // maxNumProtons
+                    true, //isUse13C,
+                    false, // isUse15N,
+                    false, // isUse34S
+                    false // isUse2H
+                    );
+        envelope.isotopeIntensity = vector<double>{1e5, 2e5, 3e5, 4e5};
+        envelope.getIntensity();
+
+        //debugging
+        envelope.print();
+
+    }
 
     cout << "All Processes Completed Successfully!" << endl;
 }
@@ -92,7 +118,9 @@ void loadSamples() {
 
     cout << "Loading " << filenames.size() << " samples..." << endl;
 
-    #pragma omp parallel for ordered num_threads(16) schedule(static)
+    vector<mzSample*> samples{};
+
+    #pragma omp parallel for ordered num_threads(16) schedule(dynamic)
     for (unsigned long i = 0; i < filenames.size(); i++ ) {
 
         #pragma omp critical
@@ -117,7 +145,9 @@ void loadSamples() {
         }
     }
 
-    cout << "loadSamples() done: loaded " << samples.size() << " samples\n";
+    project->samples = samples;
+
+    cout << "loadSamples() done: loaded " << project->samples.size() << " samples\n";
 }
 
 void loadSeedPeakGroups() {
@@ -155,15 +185,6 @@ void loadSeedPeakGroups() {
        Compound *compound = compounds.at(compoundId);
        Adduct *adduct = DB.findAdductByName(adductName);
 
-//       //debugging
-//       cout << "groupId=" << groupId
-//            << ", compoundName=" << compoundName
-//            << ", adductName=" << adductName
-//            << ", # peaks=" << groupPeaks.size()
-//            << ", *Compound=" << compound
-//            << ", *Adduct=" << adduct
-//            << endl;
-
        //check information
        if (!adduct || !compound) {
            cout << "groupId=" << groupId
@@ -174,11 +195,23 @@ void loadSeedPeakGroups() {
            abort();
        }
 
-       //PeakGroup *group = new PeakGroup();
+       PeakGroup *group = new PeakGroup();
+       group->peaks = groupPeaks;
+       group->compound = compound;
+       group->adduct = adduct;
+       group->groupStatistics();
+
+       cout << group->compound->name << " "
+            << group->adduct->name << " "
+            << group->peakCount() << " peaks, peaks[0] *sample: "
+            << group->peaks.at(0).sample
+            << endl;
+
+       seedPeakGroups[i] = group;
 
     }
 }
 
 void loadIsotopes() {
-    //TODO
+    // TODO: think about how to refactor MassCalculator::computeIsotopes() to handle case of collapsing m/zs
 }
