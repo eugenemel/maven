@@ -35,30 +35,61 @@ int main(int argc, char *argv[]){
 
     for (unsigned int i = 0; i < seedPeakGroups.size(); i++) {
 
-        cout << "i=" << i << ": " << endl;
+        PeakGroup *group = seedPeakGroups[i];
+        Compound *compound = group->compound;
+        Adduct *adduct = group->adduct;
 
-        PeakGroup *pg = seedPeakGroups[i];
-
-        IsotopicEnvelope envelope = IsotopicEnvelope();
-
-        envelope.source = "dummy-test";
-        envelope.group = pg;
-
-        //Fails because of [M+FA-H]- adduct
-        envelope.isotopes = MassCalculator::computeIsotopes(
-                    pg->compound->formula,
-                    pg->adduct,
-                    3, // maxNumProtons
+        //dummy test: 12C, 13C*1, 13C*2, 13C*3
+        vector<Isotope> isotopes = MassCalculator::computeIsotopes(
+                    compound->formula,
+                    adduct,
+                    3,
                     true, //isUse13C,
                     false, // isUse15N,
                     false, // isUse34S
                     false // isUse2H
                     );
-        envelope.isotopeIntensity = vector<double>{1e5, 2e5, 3e5, 4e5};
-        envelope.getIntensity();
 
-        //debugging
-        envelope.print();
+        IsotopicEnvelopeGroup isotopicEnvelopeGroup;
+        isotopicEnvelopeGroup.group = group;
+        isotopicEnvelopeGroup.compound = compound;
+        isotopicEnvelopeGroup.adduct = adduct;
+        isotopicEnvelopeGroup.isotopes = isotopes;
+
+        for (auto sample : project->samples) {
+            IsotopicEnvelope envelope;
+            envelope.source = "all-bounds";
+
+            double mzTol = 0.01;
+            vector<double> intensities(isotopes.size());
+
+            //TODO: refactor as map
+            Peak* p = isotopicEnvelopeGroup.group->getPeak(sample);
+
+            if (p) {
+                for (unsigned int i = 0; i < isotopes.size(); i++) {
+
+                    Isotope isotope = isotopes.at(i);
+
+                    EIC *eic = sample->getEIC(
+                                static_cast<float>(isotope.mz - mzTol),
+                                static_cast<float>(isotope.mz + mzTol),
+                                p->rtmin,
+                                p->rtmax,
+                                1);
+
+                    intensities.at(i) = std::accumulate(eic->intensity.begin(), eic->intensity.end(), 0.0);
+                }
+
+               envelope.intensities = intensities;
+               envelope.getTotalIntensity();
+
+            }
+
+            isotopicEnvelopeGroup.envelopeBySample.insert(make_pair(sample, envelope));
+        }
+
+        isotopicEnvelopeGroup.print();
 
     }
 
