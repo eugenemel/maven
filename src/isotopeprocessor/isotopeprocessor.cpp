@@ -57,34 +57,15 @@ int main(int argc, char *argv[]){
         isotopicEnvelopeGroup.isotopes = isotopes;
 
         for (auto sample : project->samples) {
-            IsotopicEnvelope envelope;
-            envelope.source = "all-bounds";
-
-            double mzTol = 0.01;
-            vector<double> intensities(isotopes.size());
 
             //TODO: refactor as map
-            Peak* p = isotopicEnvelopeGroup.group->getPeak(sample);
+            Peak* peak = isotopicEnvelopeGroup.group->getPeak(sample);
 
-            if (p) {
-                for (unsigned int i = 0; i < isotopes.size(); i++) {
-
-                    Isotope isotope = isotopes.at(i);
-
-                    EIC *eic = sample->getEIC(
-                                static_cast<float>(isotope.mz - mzTol),
-                                static_cast<float>(isotope.mz + mzTol),
-                                p->rtmin,
-                                p->rtmax,
-                                1);
-
-                    intensities.at(i) = std::accumulate(eic->intensity.begin(), eic->intensity.end(), 0.0);
-                }
-
-               envelope.intensities = intensities;
-               envelope.getTotalIntensity();
-
-            }
+            IsotopicEnvelope envelope = IsotopicEnvelopeExtractor::extractEnvelope(
+                        sample,
+                        peak,
+                        isotopes,
+                        IsotopeProcessorOptions::instance());
 
             isotopicEnvelopeGroup.envelopeBySample.insert(make_pair(sample, envelope));
         }
