@@ -25,7 +25,6 @@ void printUsage();
 
 void loadSamples();
 void loadSeedPeakGroups();
-void loadIsotopes();
 
 int main(int argc, char *argv[]){
     processOptions(argc, argv);
@@ -65,7 +64,7 @@ int main(int argc, char *argv[]){
                         sample,
                         peak,
                         isotopes,
-                        IsotopeProcessorOptions::instance());
+                        IsotopeProcessorOptions::instance().getExtractionParameters());
 
             isotopicEnvelopeGroup.envelopeBySample.insert(make_pair(sample, envelope));
         }
@@ -222,8 +221,4 @@ void loadSeedPeakGroups() {
        seedPeakGroups[i] = group;
 
     }
-}
-
-void loadIsotopes() {
-    // TODO: think about how to refactor MassCalculator::computeIsotopes() to handle case of collapsing m/zs
 }
