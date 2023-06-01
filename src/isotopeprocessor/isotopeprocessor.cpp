@@ -73,6 +73,17 @@ int main(int argc, char *argv[]){
 
     }
 
+    // outputs
+    // mzrollDB:
+    // groupId, peakId, compoundName, adductName, isotopes, envelope
+    // isotopes: encoded string of the form {C12, C13-1, C13-2} etc
+    // envelope: encoded string of the form {1e5, 2.7e5, 3.8e4} etc
+    // on the maven gui side, need to make sure that the IDs are properly passed along (peakId, groupId)
+    //
+    // csv:
+    // compoundName, adductName, theoMz, sampleName, rt, totalIntensity, {isotope1, isotope2, ..., isotope3}, {frac1, frac2, ...}
+    //
+
     cout << "All Processes Completed Successfully!" << endl;
 }
 
