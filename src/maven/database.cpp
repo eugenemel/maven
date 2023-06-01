@@ -393,8 +393,6 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
                      << compoundsDB.size();
         }
 
-        bool isUpdatedAdducts = false;
-
         //Issue 462: add adducts
         for (QString adductName : getAdductNames(databaseName)) {
 
@@ -410,7 +408,6 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
                 for (auto adduct : availableAdducts) {
                     if (adduct->name == adductName.toStdString()) {
                         adductsDB.push_back(adduct);
-                        isUpdatedAdducts = true;
                         break;
                     }
                 }
