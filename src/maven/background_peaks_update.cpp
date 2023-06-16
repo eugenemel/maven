@@ -314,10 +314,6 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
                  peakGroupPtr->fragMatchScore = s;
                  peakGroupPtr->ms2EventCount = group.ms2EventCount;
 
-                 if (csvreports) {
-                     csvreports->addGroup(peakGroupPtr);
-                 }
-
                 isGroupRetained = true;
 
                 if (s.mergedScore > maxScore){
@@ -379,18 +375,6 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 
              for (PeakGroup *peakGroupPtr : passingPeakGroups){
 
-                 //debugging
-//                 cerr << "[BackgroundPeakUpdate::processCompoundSlices] "
-//                      << peakGroupPtr << " Id="
-//                      << peakGroupPtr->groupId << ":("
-//                      << peakGroupPtr->meanMz << ","
-//                      << peakGroupPtr->meanRt << ") <--> "
-//                      << peakGroupPtr->compound->name << ":"
-//                      << peakGroupPtr->adduct->name << ", score="
-//                      << peakGroupPtr->fragMatchScore.mergedScore << ", ms2EventCount="
-//                      << peakGroupPtr->ms2EventCount
-//                      << endl;
-
                  //Issue 197: Support isotopic extraction for compound db search.
                  if(pullIsotopesFlag && !peakGroupPtr->isIsotope()){
                      peakGroupPtr->pullIsotopes(isotopeParameters, true, false);
@@ -399,12 +383,12 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
                      grpIsotopeParameters.isotopeParametersType = IsotopeParametersType::SAVED;
                      peakGroupPtr->isotopeParameters = grpIsotopeParameters;
                  }
-                 emit(newPeakGroup(peakGroupPtr, false, true)); // note that 'isDeletePeakGroupPtr' flag is set to true
-             }
 
-             if (isGroupRetained) {
-                groups.push_back(&group); //only used for alignment
-                peakCount += group.peakCount();
+                 if (csvreports) {
+                     csvreports->addGroup(peakGroupPtr);
+                 }
+
+                 emit(newPeakGroup(peakGroupPtr, false, true)); // note that 'isDeletePeakGroupPtr' flag is set to true
              }
 
          } // end peak groups
@@ -420,21 +404,14 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 
     } //end slices
 
-    if(alignSamplesFlag) {
-        emit(updateProgressBar("Aligning Samples" ,1, 100));
-        Aligner aligner;
-        aligner.setMaxItterations(mainwindow->alignmentDialog->maxItterations->value());
-        aligner.setPolymialDegree(mainwindow->alignmentDialog->polynomialDegree->value());
-        aligner.doAlignment(groups);
-    }
-
-    //Issue 161: run clustering
-    if (isClusterPeakGroups){
-        double maxRtDiff = 0.2;
-        double minSampleCorrelation= 0.8;
-        double minPeakShapeCorrelation=0.9;
-        PeakGroup::clusterGroups(allgroups,samples,maxRtDiff,minSampleCorrelation,minPeakShapeCorrelation,compoundPPMWindow);
-    }
+    //Clustering is not enabled for library search
+//    //Issue 161: run clustering
+//    if (isClusterPeakGroups){
+//        double maxRtDiff = 0.2;
+//        double minSampleCorrelation= 0.8;
+//        double minPeakShapeCorrelation=0.9;
+//        PeakGroup::clusterGroups(allgroups,samples,maxRtDiff,minSampleCorrelation,minPeakShapeCorrelation,compoundPPMWindow);
+//    }
 
     if (csvreports){
         csvreports->closeFiles();
