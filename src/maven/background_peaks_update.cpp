@@ -377,7 +377,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
              numPassingPeakGroups += passingPeakGroups.size();
              delete_all(failingPeakGroups); //passingPeakGroups are deleted on main thread with emit() call.
 
-             for (auto peakGroupPtr : passingPeakGroups){
+             for (PeakGroup *peakGroupPtr : passingPeakGroups){
 
                  //debugging
 //                 cerr << "[BackgroundPeakUpdate::processCompoundSlices] "
@@ -392,14 +392,18 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 //                      << endl;
 
                  //Issue 197: Support isotopic extraction for compound db search.
-                 if(pullIsotopesFlag && !group.isIsotope()){
-                     group.pullIsotopes(isotopeParameters);
+                 if(pullIsotopesFlag && !peakGroupPtr->isIsotope()){
+                     peakGroupPtr->pullIsotopes(isotopeParameters, true, false);
+
+                     auto grpIsotopeParameters = isotopeParameters;
+                     grpIsotopeParameters.isotopeParametersType = IsotopeParametersType::SAVED;
+                     peakGroupPtr->isotopeParameters = grpIsotopeParameters;
                  }
                  emit(newPeakGroup(peakGroupPtr, false, true)); // note that 'isDeletePeakGroupPtr' flag is set to true
              }
 
              if (isGroupRetained) {
-                groups.push_back(&group);
+                groups.push_back(&group); //only used for alignment
                 peakCount += group.peakCount();
              }
 
