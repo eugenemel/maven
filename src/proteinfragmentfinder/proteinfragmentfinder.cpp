@@ -2,10 +2,14 @@
 #include <omp.h>
 
 #include "mzSample.h"
+#include "proteinutils.h"
 
 void processOptions(int argc, char *argv[]);
 void printUsage();
 void printArguments();
+
+//TODO: port this to Protein:: method
+vector<Protein*> fragmentProtein(Protein* protein, double tolerance);
 
 using namespace std;
 
@@ -17,6 +21,24 @@ static vector<double> masses{};
 
 int main(int argc, char *argv[]){
     processOptions(argc, argv);
+
+    vector<Protein*> proteins = Protein::loadFastaFile(inputFile);
+
+    vector<Protein*> proteinFragments{};
+
+    for (auto p : proteins) {
+        p->printSummary();
+
+        //TODO: fragment proteins
+        vector<Protein*> pFragments = fragmentProtein(p, tolerance);
+
+        //add results to all protein fragments
+        proteinFragments.reserve(proteinFragments.size() + pFragments.size());
+        proteinFragments.insert(proteinFragments.end(), pFragments.begin(), pFragments.end());
+
+    }
+
+    Protein::writeFastaFile(proteinFragments, outputFile);
 
     cout << "All Processes Completed Successfully!" << endl;
 }
@@ -81,4 +103,29 @@ void printArguments() {
          << "\tOutput Directory:" << outputFile << "\n"
          << "======================================================="
          << endl;
+}
+
+//TODO: move this to Protein::fragmentProtein(double tolerance)
+vector<Protein*> fragmentProtein(Protein* protein, double tolerance) {
+    unsigned long cut1 = 0;
+    unsigned long cut2 = protein->seq.length();
+
+    vector<Protein*> fragmentProteins{};
+
+    /**
+     * Progressively examine the pieces of a protein made by cutting at two places,
+     * 'cut1', from the C terminus, and 'cut2', from the N terminus.
+     *
+     * Once protein fragments exceed certain size ranges, stop examining possibilities
+     * for a given set of cuts.
+     *
+     *
+     **/
+    for (unsigned long i = cut1; i < protein->seq.length(); i++) {
+        for (unsigned long j = cut2; j > 0; j--) {
+            //TODO
+        }
+    }
+
+    return fragmentProteins;
 }
