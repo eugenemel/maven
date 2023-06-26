@@ -9,7 +9,7 @@ void printUsage();
 void printArguments();
 
 //TODO: port this to Protein:: method
-vector<Protein*> fragmentProtein(Protein* protein, double tolerance);
+vector<ProteinFragment*> fragmentProtein(Protein* protein, vector<double>& fragMasses, double tolerance);
 
 using namespace std;
 
@@ -24,13 +24,13 @@ int main(int argc, char *argv[]){
 
     vector<Protein*> proteins = Protein::loadFastaFile(inputFile);
 
-    vector<Protein*> proteinFragments{};
+    vector<ProteinFragment*> proteinFragments{};
 
     for (auto p : proteins) {
         p->printSummary();
 
         //TODO: fragment proteins
-        vector<Protein*> pFragments = fragmentProtein(p, tolerance);
+        vector<ProteinFragment*> pFragments = fragmentProtein(p, masses, tolerance);
 
         //add results to all protein fragments
         proteinFragments.reserve(proteinFragments.size() + pFragments.size());
@@ -38,7 +38,13 @@ int main(int argc, char *argv[]){
 
     }
 
-    Protein::writeFastaFile(proteinFragments, outputFile);
+    for (auto frag : proteinFragments) {
+        cout << frag->getHeader() << endl;
+    }
+
+    //TODO: Fix this
+    //FastaWritable::writeFastaFile(proteinFragments, outputFile);
+    //Protein::writeFastaFile(proteinFragments, outputFile);
 
     cout << "All Processes Completed Successfully!" << endl;
 }
@@ -106,11 +112,7 @@ void printArguments() {
 }
 
 //TODO: move this to Protein::fragmentProtein(double tolerance)
-vector<Protein*> fragmentProtein(Protein* protein, double tolerance) {
-    unsigned long cut1 = 0;
-    unsigned long cut2 = protein->seq.length();
-
-    vector<Protein*> fragmentProteins{};
+vector<ProteinFragment*> fragmentProtein(Protein* protein, vector<double>& fragMasses, double tolerance) {
 
     /**
      * Progressively examine the pieces of a protein made by cutting at two places,
@@ -119,13 +121,84 @@ vector<Protein*> fragmentProtein(Protein* protein, double tolerance) {
      * Once protein fragments exceed certain size ranges, stop examining possibilities
      * for a given set of cuts.
      *
+     *       M1     M2   M3
+     *  N ------|------|------------ C
+     *          cut1   cut2
      *
+     * Progression: cut1 starts at the N terminus, cut2 starts at the C terminus,
+     * cut1 progressively increases to the right while cut2 progressively increases to the left.
+     * So, M1 and M3 progressively increases, while M2 fluctuates, but tends to decrease as M1
+     * increases.
+     *
+     * The reason for all of this complexity is to know when to avoid making unnecessary comparisons
+     * (stop comparing)
      **/
-    for (unsigned long i = cut1; i < protein->seq.length(); i++) {
-        for (unsigned long j = cut2; j > 0; j--) {
-            //TODO
+
+    sort(fragMasses.begin(), fragMasses.end(), [](const double& lhs, const double& rhs){
+        return lhs < rhs;
+    });
+
+    //initialize output
+    vector<ProteinFragment*> fragmentProteins{};
+
+    //initial state
+    double m1 = 0.0;
+    double m2 = protein->mw;
+    double m2Cut2 = m2;
+    double m3 = 0.0;
+
+    for (unsigned long i = 0; i < protein->seq.length(); i++) {
+
+        //update temp variables in preparation for iteration
+        m2Cut2 = m2;
+        m3 = 0.0;
+
+//        //debugging
+//        cout << "(cut1, cut2): "
+//             << "(" << i << ", " << protein->seq.length() << "): "
+//             << "(" << m1 << ", " << m2 << ", " << m3 << ")" << endl;
+
+        for (unsigned long j = protein->seq.length()-1; j > 0; j--) {
+
+            //second cut affects m2 and m3 values
+            m2Cut2 -= aaMasses.at(protein->seq[j]);
+            m3 += aaMasses.at(protein->seq[j]);
+
+            for (double mass : fragMasses) {
+                if (abs(m2Cut2-mass) < tolerance) {
+                    ProteinFragment *fragment = new ProteinFragment(protein, mass, m2Cut2, i, j);
+                    fragmentProteins.push_back(fragment);
+                    //cout << "(" << i << ", " << j << "): mass="<< mass << ", M2=" << m2Cut2 << " Da, delta=" << abs(m2Cut2-mass) << endl;
+                }
+                if (abs(m3-mass) < tolerance) {
+                    ProteinFragment *fragment = new ProteinFragment(protein, mass, m3, i, j);
+                    fragmentProteins.push_back(fragment);
+                    //cout << "(" << i << ", " << j << "): mass="<< mass << ", M3=" << m3 << " Da, delta=" << abs(m3-mass) << endl;
+                }
+            }
+        }
+
+        //first cut affects m1 and m2 values
+        m1 += aaMasses.at(protein->seq[i]);
+        m2 -= aaMasses.at(protein->seq[i]);
+
+        for (double mass : fragMasses) {
+            if (abs(m1-mass) < tolerance) {
+                ProteinFragment *fragment = new ProteinFragment(protein, mass, m1, i, 0);
+                fragmentProteins.push_back(fragment);
+                //cout << "(" << i << ", " << 0 << "): mass=" << mass << ", M1=" << m1 << "Da, delta=" << abs(m1-mass) << endl;
+            }
+            if (abs(m2-mass) < tolerance) {
+                ProteinFragment *fragment = new ProteinFragment(protein, mass, m2, i, 0);
+                fragmentProteins.push_back(fragment);
+                // cout << "(" << i << ", " << 0 << "): mass=" << mass << ", M2=" << m2 << "Da, delta=" << abs(m2-mass) << endl;
+            }
         }
     }
+
+    sort(fragmentProteins.begin(), fragmentProteins.end(), [](ProteinFragment* lhs, ProteinFragment* rhs){
+        return lhs->deltaMw < rhs->deltaMw;
+    });
 
     return fragmentProteins;
 }
