@@ -11,7 +11,7 @@ using namespace std;
 
 static string versionNum = "0.0.1";
 static string inputFile = "";
-static string outputDir = "";
+static string outputFile = "";
 static double tolerance = 10.0; // Da
 static vector<double> masses{};
 
@@ -25,11 +25,11 @@ void processOptions(int argc, char* argv[]) {
 
     for (unsigned int i = 0; i < static_cast<unsigned int>(argc-1); i++) {
         if (strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--input") == 0) {
-            inputFile = argv[i];
+            inputFile = argv[i+1];
         } else if (strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--tolerance") == 0) {
             tolerance = stod(argv[i+1]);
-        } else if (strcmp(argv[i], "-o") == 0 || strcmp(argv[i], "--outputDir") == 0) {
-            outputDir = argv[i+1];
+        } else if (strcmp(argv[i], "-o") == 0 || strcmp(argv[i], "--outputFile") == 0) {
+            outputFile = argv[i+1];
         } else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--masses") == 0) {
             vector<string> massesStrings{};
             mzUtils::split(argv[i+1], ",", massesStrings);
@@ -44,7 +44,7 @@ void processOptions(int argc, char* argv[]) {
         }
     }
 
-    if (inputFile == "" || outputDir == "" || masses.empty()) {
+    if (inputFile == "" || outputFile == "" || masses.empty()) {
         printUsage();
         exit(-1);
     }
@@ -58,7 +58,7 @@ void printUsage() {
          << "\t\te.g. 10000,20000,3000\n"
          << "\t-i [--input] <fasta_file>\n"
          << "\t\tFasta file containing one or more protein sequences.\n"
-         << "\t-o [--outputDir] <output_dir>\n"
+         << "\t-o [--outputFile] <output_file>\n"
          << "\t\tDirectory to write all output files to.\n"
          << "\t-t [--tolerance] <mass_tolerance>\n"
          << "\t\tMass tolerance information."
@@ -67,18 +67,18 @@ void printUsage() {
 
 void printArguments() {
     cout << "=======================================================\n"
-         << "proteinfragmentfinder version " << versionNum << ":"
+         << "proteinfragmentfinder version " << versionNum << ":\n"
          << "\tInput File:" << inputFile << "\n"
-         << "\tMasses:" << endl;
+         << "\tMasses: ";
 
     for (unsigned int i = 0; i < masses.size(); i++) {
         if (i > 0) cout << ", ";
-        cout << masses[i];
+        cout << masses[i] << " Da";
     }
     cout << endl;
 
-    cout << "\tTolerance:" << tolerance << "\n"
-         << "\tOutput Directory:" << outputDir << "\n"
+    cout << "\tTolerance: " << tolerance << " Da\n"
+         << "\tOutput Directory:" << outputFile << "\n"
          << "======================================================="
          << endl;
 }
