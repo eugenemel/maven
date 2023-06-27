@@ -8,6 +8,8 @@ void processOptions(int argc, char *argv[]);
 void printUsage();
 void printArguments();
 
+void writeFastaFile(vector<FastaWritable*> entries, string outputFile, unsigned int seqLineMax, bool debug);
+
 //TODO: port this to Protein:: method
 vector<ProteinFragment*> fragmentProtein(Protein* protein, vector<double>& fragMasses, double tolerance);
 
@@ -37,14 +39,23 @@ int main(int argc, char *argv[]){
 
     }
 
-    for (auto frag : proteinFragments) {
-        cout << frag->getHeader() << endl;
-    }
+    //writeFastaFile(proteinFragments, outputFile, 87, true);
+    ProteinUtils::writeFastaFile(proteinFragments, outputFile);
 
-    FastaWritable::writeFastaFile(proteinFragments, outputFile);
+    //TODO: calculation is wrong. does not agree with the calculation printed.
+    //
+    // Tests:
+    // Ensure that all header data is correct. This includes the substrings and masses.
+    // Correctly understand mapping between "cut" points and sequence index (starting at index number 1).
+    // Ensure that the full space of cuts is being explored (check for all edge cases).
+
+    string testSeq = "EIFNPDIGMFTYDESTKLFWFNPSSFETEGQFTLIGIVLGLAIYNNCILDVHFPMVVYRKLMGKKGTFRDLGDSHPVLYQSLKDLLEYEGNVEDDMMITFQISQTDLFGNPMMYDLKENGDKIPITNENRKEFVNLYSDYILNKSVEKQFKAFRRGFHMVTNESPLKYLFRPEEIELLICGSRNLDFQALEETTEYDGGYTRDSVLIREFWEIVHSFTDEQKRLFLQFTTGTDRAPVGGLGKLKMIIAKNGPDTERLPTSHTCFNVLLLPEYSS";
+
+    cout << ProteinUtils::getProteinMass(testSeq) << " Da" << endl;
 
     cout << "All Processes Completed Successfully!" << endl;
 }
+
 
 void processOptions(int argc, char* argv[]) {
 
@@ -160,18 +171,18 @@ vector<ProteinFragment*> fragmentProtein(Protein* protein, vector<double>& fragM
                 if (abs(m1-mass) < tolerance) {
                     ProteinFragment *fragment = new ProteinFragment(protein, mass, m1, 0, i);
                     fragmentProteins.push_back(fragment);
-                    cout << "(" << i << ", " << 0 << "): mass=" << mass << ", M1=" << m1 << "Da, delta=" << abs(m1-mass) << endl;
+                    // cout << "(" << i << ", " << 0 << "): mass=" << mass << ", M1=" << m1 << "Da, delta=" << abs(m1-mass) << endl;
                 }
 
                 if (abs(m2Cut2-mass) < tolerance) {
                     ProteinFragment *fragment = new ProteinFragment(protein, mass, m2Cut2, i, j);
                     fragmentProteins.push_back(fragment);
-                    cout << "(" << i << ", " << j << "): mass="<< mass << ", M2=" << m2Cut2 << " Da, delta=" << abs(m2Cut2-mass) << endl;
+                    // cout << "(" << i << ", " << j << "): mass="<< mass << ", M2=" << m2Cut2 << " Da, delta=" << abs(m2Cut2-mass) << endl;
                 }
                 if (abs(m3-mass) < tolerance) {
                     ProteinFragment *fragment = new ProteinFragment(protein, mass, m3, j, protein->seq.length()-1);
                     fragmentProteins.push_back(fragment);
-                    cout << "(" << i << ", " << j << "): mass="<< mass << ", M3=" << m3 << " Da, delta=" << abs(m3-mass) << endl;
+                    // cout << "(" << i << ", " << j << "): mass="<< mass << ", M3=" << m3 << " Da, delta=" << abs(m3-mass) << endl;
                 }
             }
         }
@@ -191,4 +202,44 @@ vector<ProteinFragment*> fragmentProtein(Protein* protein, vector<double>& fragM
     });
 
     return fragmentProteins;
+}
+
+void writeFastaFile(vector<FastaWritable*> entries, string outputFile, unsigned int seqLineMax, bool debug) {
+    ofstream outputFileStream;
+    outputFileStream.open(outputFile);
+
+    for (FastaWritable *entry : entries) {
+        outputFileStream << ">" << entry->getHeader() << "\n";
+
+        string::size_type N = entry->getSequence().size();
+        string::size_type currentPos = 0;
+
+        while (currentPos != string::npos) {
+
+            if (debug) cout << "currentPos: " << currentPos << endl;
+
+            if (currentPos+seqLineMax < N) {
+
+                if (debug) cout << "currentPos+seqLineMax: " << (currentPos+seqLineMax) << endl;
+                if (debug) cout << "substring: " << entry->getSequence().substr(currentPos, seqLineMax) << endl;
+
+                outputFileStream << entry->getSequence().substr(currentPos, seqLineMax)
+                                 << "\n";
+
+                currentPos = currentPos + seqLineMax + 1;
+            } else {
+                string::size_type remainder = N-currentPos;
+                outputFileStream << entry->getSequence().substr(currentPos, remainder) << "\n";
+
+                if (debug) cout << "remainder: " << remainder;
+                if (debug) cout << "substring: " << entry->getSequence().substr(currentPos, remainder) << endl;
+
+                break;
+            }
+        }
+
+        outputFileStream << "\n";
+    }
+
+    outputFileStream.close();
 }
