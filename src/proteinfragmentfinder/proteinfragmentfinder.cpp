@@ -151,29 +151,30 @@ vector<ProteinFragment*> fragmentProtein(Protein* protein, vector<double>& fragM
 
         //update temp variables in preparation for iteration
         m2Cut2 = m2;
-        m3 = 0.0;
 
-//        //debugging
-//        cout << "(cut1, cut2): "
-//             << "(" << i << ", " << protein->seq.length() << "): "
-//             << "(" << m1 << ", " << m2 << ", " << m3 << ")" << endl;
-
-        for (unsigned long j = protein->seq.length()-1; j > 0; j--) {
+        for (unsigned long j = protein->seq.length()-1; j > i; j--) {
 
             //second cut affects m2 and m3 values
             m2Cut2 -= aaMasses.at(protein->seq[j]);
             m3 += aaMasses.at(protein->seq[j]);
 
             for (double mass : fragMasses) {
+
+                if (abs(m1-mass) < tolerance) {
+                    ProteinFragment *fragment = new ProteinFragment(protein, mass, m1, 0, i);
+                    fragmentProteins.push_back(fragment);
+                    cout << "(" << i << ", " << 0 << "): mass=" << mass << ", M1=" << m1 << "Da, delta=" << abs(m1-mass) << endl;
+                }
+
                 if (abs(m2Cut2-mass) < tolerance) {
                     ProteinFragment *fragment = new ProteinFragment(protein, mass, m2Cut2, i, j);
                     fragmentProteins.push_back(fragment);
-                    //cout << "(" << i << ", " << j << "): mass="<< mass << ", M2=" << m2Cut2 << " Da, delta=" << abs(m2Cut2-mass) << endl;
+                    cout << "(" << i << ", " << j << "): mass="<< mass << ", M2=" << m2Cut2 << " Da, delta=" << abs(m2Cut2-mass) << endl;
                 }
                 if (abs(m3-mass) < tolerance) {
-                    ProteinFragment *fragment = new ProteinFragment(protein, mass, m3, i, j);
+                    ProteinFragment *fragment = new ProteinFragment(protein, mass, m3, j, protein->seq.length()-1);
                     fragmentProteins.push_back(fragment);
-                    //cout << "(" << i << ", " << j << "): mass="<< mass << ", M3=" << m3 << " Da, delta=" << abs(m3-mass) << endl;
+                    cout << "(" << i << ", " << j << "): mass="<< mass << ", M3=" << m3 << " Da, delta=" << abs(m3-mass) << endl;
                 }
             }
         }
@@ -181,23 +182,15 @@ vector<ProteinFragment*> fragmentProtein(Protein* protein, vector<double>& fragM
         //first cut affects m1 and m2 values
         m1 += aaMasses.at(protein->seq[i]);
         m2 -= aaMasses.at(protein->seq[i]);
-
-        for (double mass : fragMasses) {
-            if (abs(m1-mass) < tolerance) {
-                ProteinFragment *fragment = new ProteinFragment(protein, mass, m1, i, 0);
-                fragmentProteins.push_back(fragment);
-                //cout << "(" << i << ", " << 0 << "): mass=" << mass << ", M1=" << m1 << "Da, delta=" << abs(m1-mass) << endl;
-            }
-            if (abs(m2-mass) < tolerance) {
-                ProteinFragment *fragment = new ProteinFragment(protein, mass, m2, i, 0);
-                fragmentProteins.push_back(fragment);
-                // cout << "(" << i << ", " << 0 << "): mass=" << mass << ", M2=" << m2 << "Da, delta=" << abs(m2-mass) << endl;
-            }
-        }
+        m3 = 0.0;
     }
 
     sort(fragmentProteins.begin(), fragmentProteins.end(), [](ProteinFragment* lhs, ProteinFragment* rhs){
-        return lhs->deltaMw < rhs->deltaMw;
+        if (lhs->theoreticalMw == rhs->theoreticalMw) {
+            return lhs->deltaMw < rhs->deltaMw;
+        } else {
+            return lhs->theoreticalMw < rhs->theoreticalMw;
+        }
     });
 
     return fragmentProteins;
