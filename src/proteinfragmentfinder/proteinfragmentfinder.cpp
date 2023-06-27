@@ -31,7 +31,7 @@ int main(int argc, char *argv[]){
     for (auto p : proteins) {
         p->printSummary();
 
-        vector<ProteinFragment*> pFragments = fragmentProtein(p, masses, tolerance, false);
+        vector<ProteinFragment*> pFragments = p->fragmentProtein(masses, tolerance, false);
 
         //add results to all protein fragments
         proteinFragments.reserve(proteinFragments.size() + pFragments.size());
@@ -254,7 +254,7 @@ void debuggingTestCases() {
         ProteinUtils::getProteinMass("PTIDER"), //to end
     };
 
-    vector<ProteinFragment*> fragments = fragmentProtein(protein, masses, 1, true);
+    vector<ProteinFragment*> fragments = protein->fragmentProtein(masses, 1, true);
 
     for (auto frag : fragments) {
         cout << frag->getHeader()  << ": " << frag->getSequence() << endl;
@@ -275,7 +275,7 @@ void debuggingTestCases() {
         ProteinUtils::getProteinMass("EPTIDERPEPTIDER"), //to end
     };
 
-    vector<ProteinFragment*> fragments2 = fragmentProtein(protein2, masses2, 1, true);
+    vector<ProteinFragment*> fragments2 = protein2->fragmentProtein(masses2, 1, true);
 
     for (auto frag : fragments2) {
         cout << frag->getHeader()  << ": " << frag->getSequence() << endl;
