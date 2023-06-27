@@ -1,6 +1,3 @@
-#include <iostream>
-#include <omp.h>
-
 #include "proteinutils.h"
 
 void processOptions(int argc, char *argv[]);
@@ -8,7 +5,12 @@ void printUsage();
 void printArguments();
 void debuggingTestCases();
 
-static string versionNum = "0.0.1";
+static string versionNum = "1.0.0";
+/**
+ * Version history
+ * 1.0.0  20230627  Initial version.
+ */
+
 static string inputFile = "";
 static string outputFile = "";
 static double tolerance = 10.0; // Da
