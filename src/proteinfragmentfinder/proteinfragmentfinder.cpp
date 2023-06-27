@@ -4,6 +4,7 @@ void processOptions(int argc, char *argv[]);
 void printUsage();
 void printArguments();
 void debuggingTestCases();
+void testPAWSCase();
 
 static string versionNum = "1.0.0";
 /**
@@ -149,4 +150,14 @@ void debuggingTestCases() {
         cout << frag->getHeader()  << ": " << frag->getSequence() << endl;
     }
 
+    cout << "mass of peptider: " << ProteinUtils::getProteinMass("PEPTIDER") << " Da" << endl;
+
+}
+
+void testPAWSCase() {
+
+    vector<double> pawsFragmentMasses{57820.9};
+    double pawsTolerance = 11;
+
+    //TODO: need more info
 }
