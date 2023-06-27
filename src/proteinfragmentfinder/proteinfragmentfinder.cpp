@@ -24,12 +24,11 @@ int main(int argc, char *argv[]){
 
     vector<Protein*> proteins = Protein::loadFastaFile(inputFile);
 
-    vector<ProteinFragment*> proteinFragments{};
+    vector<FastaWritable*> proteinFragments{};
 
     for (auto p : proteins) {
         p->printSummary();
 
-        //TODO: fragment proteins
         vector<ProteinFragment*> pFragments = fragmentProtein(p, masses, tolerance);
 
         //add results to all protein fragments
@@ -42,9 +41,7 @@ int main(int argc, char *argv[]){
         cout << frag->getHeader() << endl;
     }
 
-    //TODO: Fix this
-    //FastaWritable::writeFastaFile(proteinFragments, outputFile);
-    //Protein::writeFastaFile(proteinFragments, outputFile);
+    FastaWritable::writeFastaFile(proteinFragments, outputFile);
 
     cout << "All Processes Completed Successfully!" << endl;
 }
