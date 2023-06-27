@@ -1,7 +1,6 @@
 #include <iostream>
 #include <omp.h>
 
-#include "mzSample.h"
 #include "proteinutils.h"
 
 void processOptions(int argc, char *argv[]);
@@ -9,10 +8,10 @@ void printUsage();
 void printArguments();
 void debuggingTestCases();
 
-void writeFastaFile(vector<FastaWritable*> entries, string outputFile, unsigned int seqLineMax, bool debug);
+void writeFastaFile(vector<FastaWritable*> entries, string outputFile, unsigned int seqLineMax);
 
 //TODO: port this to Protein:: method
-vector<ProteinFragment*> fragmentProtein(Protein* protein, vector<double>& fragMasses, double tolerance);
+vector<ProteinFragment*> fragmentProtein(Protein* protein, vector<double>& fragMasses, double tolerance, bool debug);
 
 using namespace std;
 
@@ -25,14 +24,14 @@ static vector<double> masses{};
 int main(int argc, char *argv[]){
     processOptions(argc, argv);
 
-    vector<Protein*> proteins = Protein::loadFastaFile(inputFile);
+    vector<Protein*> proteins = ProteinUtils::loadFastaFile(inputFile);
 
     vector<FastaWritable*> proteinFragments{};
 
     for (auto p : proteins) {
         p->printSummary();
 
-        vector<ProteinFragment*> pFragments = fragmentProtein(p, masses, tolerance);
+        vector<ProteinFragment*> pFragments = fragmentProtein(p, masses, tolerance, false);
 
         //add results to all protein fragments
         proteinFragments.reserve(proteinFragments.size() + pFragments.size());
@@ -110,7 +109,7 @@ void printArguments() {
 }
 
 //TODO: move this to Protein::fragmentProtein(double tolerance)
-vector<ProteinFragment*> fragmentProtein(Protein* protein, vector<double>& fragMasses, double tolerance) {
+vector<ProteinFragment*> fragmentProtein(Protein* protein, vector<double>& fragMasses, double tolerance, bool debug) {
 
     /**
      * Progressively examine the pieces of a protein made by cutting at two places,
@@ -161,19 +160,19 @@ vector<ProteinFragment*> fragmentProtein(Protein* protein, vector<double>& fragM
                 if (abs(m1-mass) < tolerance && i == 0) {
                     ProteinFragment *fragment = new ProteinFragment(protein, mass, m1, 0, (i-1));
                     fragmentProteins.push_back(fragment);
-                    cout << "(" << (i-1) << ", " << 0 << "): mass=" << mass << ", M1=" << m1 << "Da, delta=" << abs(m1-mass) << endl;
+                    if (debug) cout << "(" << (i-1) << ", " << 0 << "): mass=" << mass << ", M1=" << m1 << "Da, delta=" << abs(m1-mass) << endl;
                 }
 
                 if (abs(m2Cut2-mass) < tolerance) {
                     ProteinFragment *fragment = new ProteinFragment(protein, mass, m2Cut2, i, (j-1));
                     fragmentProteins.push_back(fragment);
-                    cout << "(" << i << ", " << (j-1) << "): mass="<< mass << ", M2=" << m2Cut2 << " Da, delta=" << abs(m2Cut2-mass) << endl;
+                    if (debug) cout << "(" << i << ", " << (j-1) << "): mass="<< mass << ", M2=" << m2Cut2 << " Da, delta=" << abs(m2Cut2-mass) << endl;
                 }
 
                 if (abs(m3-mass) < tolerance && i == 0) {
                     ProteinFragment *fragment = new ProteinFragment(protein, mass, m3, j, protein->seq.length()-1);
                     fragmentProteins.push_back(fragment);
-                    cout << "(" << i << ", " << (protein->seq.length()-1) << "): mass="<< mass << ", M3=" << m3 << " Da, delta=" << abs(m3-mass) << endl;
+                    if (debug) cout << "(" << i << ", " << (protein->seq.length()-1) << "): mass="<< mass << ", M3=" << m3 << " Da, delta=" << abs(m3-mass) << endl;
                 }
             }
         }
@@ -255,7 +254,7 @@ void debuggingTestCases() {
         ProteinUtils::getProteinMass("PTIDER"), //to end
     };
 
-    vector<ProteinFragment*> fragments = fragmentProtein(protein, masses, 1);
+    vector<ProteinFragment*> fragments = fragmentProtein(protein, masses, 1, true);
 
     for (auto frag : fragments) {
         cout << frag->getHeader()  << ": " << frag->getSequence() << endl;
@@ -276,7 +275,7 @@ void debuggingTestCases() {
         ProteinUtils::getProteinMass("EPTIDERPEPTIDER"), //to end
     };
 
-    vector<ProteinFragment*> fragments2 = fragmentProtein(protein2, masses2, 1);
+    vector<ProteinFragment*> fragments2 = fragmentProtein(protein2, masses2, 1, true);
 
     for (auto frag : fragments2) {
         cout << frag->getHeader()  << ": " << frag->getSequence() << endl;
