@@ -8,13 +8,6 @@ void printUsage();
 void printArguments();
 void debuggingTestCases();
 
-void writeFastaFile(vector<FastaWritable*> entries, string outputFile, unsigned int seqLineMax);
-
-//TODO: port this to Protein:: method
-vector<ProteinFragment*> fragmentProtein(Protein* protein, vector<double>& fragMasses, double tolerance, bool debug);
-
-using namespace std;
-
 static string versionNum = "0.0.1";
 static string inputFile = "";
 static string outputFile = "";
@@ -39,10 +32,10 @@ int main(int argc, char *argv[]){
 
     }
 
-    //writeFastaFile(proteinFragments, outputFile, 87, true);
     ProteinUtils::writeFastaFile(proteinFragments, outputFile);
 
     // debuggingTestCases();
+
     cout << "All Processes Completed Successfully!" << endl;
 }
 
@@ -107,133 +100,6 @@ void printArguments() {
          << "======================================================="
          << endl;
 }
-
-//TODO: move this to Protein::fragmentProtein(double tolerance)
-vector<ProteinFragment*> fragmentProtein(Protein* protein, vector<double>& fragMasses, double tolerance, bool debug) {
-
-    /**
-     * Progressively examine the pieces of a protein made by cutting at two places,
-     * 'cut1', from the C terminus, and 'cut2', from the N terminus.
-     *
-     * Once protein fragments exceed certain size ranges, stop examining possibilities
-     * for a given set of cuts.
-     *
-     *       M1     M2   M3
-     *  N ------|------|------------ C
-     *          cut1   cut2
-     *
-     * Progression: cut1 starts at the N terminus, cut2 starts at the C terminus,
-     * cut1 progressively increases to the right while cut2 progressively increases to the left.
-     * So, M1 and M3 progressively increases, while M2 fluctuates, but tends to decrease as M1
-     * increases.
-     *
-     * The reason for all of this complexity is to know when to avoid making unnecessary comparisons
-     * (stop comparing)
-     **/
-
-    sort(fragMasses.begin(), fragMasses.end(), [](const double& lhs, const double& rhs){
-        return lhs < rhs;
-    });
-
-    //initialize output
-    vector<ProteinFragment*> fragmentProteins{};
-
-    //initial state
-    double m1 = 0.0;
-    double m2 = protein->mw;
-    double m2Cut2 = m2;
-    double m3 = 0.0;
-
-    for (unsigned long i = 0; i < protein->seq.length(); i++) {
-
-        //update temp variables in preparation for iteration
-        m2Cut2 = m2;
-
-        for (unsigned long j = protein->seq.length()-1; j > i; j--) {
-
-            //second cut affects m2 and m3 values
-            m2Cut2 -= aaMasses.at(protein->seq[j]);
-            m3 += aaMasses.at(protein->seq[j]);
-
-            for (double mass : fragMasses) {
-
-                if (abs(m1-mass) < tolerance && i == 0) {
-                    ProteinFragment *fragment = new ProteinFragment(protein, mass, m1, 0, (i-1));
-                    fragmentProteins.push_back(fragment);
-                    if (debug) cout << "(" << (i-1) << ", " << 0 << "): mass=" << mass << ", M1=" << m1 << "Da, delta=" << abs(m1-mass) << endl;
-                }
-
-                if (abs(m2Cut2-mass) < tolerance) {
-                    ProteinFragment *fragment = new ProteinFragment(protein, mass, m2Cut2, i, (j-1));
-                    fragmentProteins.push_back(fragment);
-                    if (debug) cout << "(" << i << ", " << (j-1) << "): mass="<< mass << ", M2=" << m2Cut2 << " Da, delta=" << abs(m2Cut2-mass) << endl;
-                }
-
-                if (abs(m3-mass) < tolerance && i == 0) {
-                    ProteinFragment *fragment = new ProteinFragment(protein, mass, m3, j, protein->seq.length()-1);
-                    fragmentProteins.push_back(fragment);
-                    if (debug) cout << "(" << i << ", " << (protein->seq.length()-1) << "): mass="<< mass << ", M3=" << m3 << " Da, delta=" << abs(m3-mass) << endl;
-                }
-            }
-        }
-
-        //first cut affects m1 and m2 values
-        m1 += aaMasses.at(protein->seq[i]);
-        m2 -= aaMasses.at(protein->seq[i]);
-        m3 = 0.0;
-    }
-
-    sort(fragmentProteins.begin(), fragmentProteins.end(), [](ProteinFragment* lhs, ProteinFragment* rhs){
-        if (lhs->theoreticalMw == rhs->theoreticalMw) {
-            return lhs->deltaMw < rhs->deltaMw;
-        } else {
-            return lhs->theoreticalMw < rhs->theoreticalMw;
-        }
-    });
-
-    return fragmentProteins;
-}
-
-void writeFastaFile(vector<FastaWritable*> entries, string outputFile, unsigned int seqLineMax, bool debug) {
-    ofstream outputFileStream;
-    outputFileStream.open(outputFile);
-
-    for (FastaWritable *entry : entries) {
-        outputFileStream << ">" << entry->getHeader() << "\n";
-
-        string::size_type N = entry->getSequence().size();
-        string::size_type currentPos = 0;
-
-        while (currentPos != string::npos) {
-
-            if (debug) cout << "currentPos: " << currentPos << endl;
-
-            if (currentPos+seqLineMax < N) {
-
-                if (debug) cout << "currentPos+seqLineMax: " << (currentPos+seqLineMax) << endl;
-                if (debug) cout << "substring: " << entry->getSequence().substr(currentPos, seqLineMax) << endl;
-
-                outputFileStream << entry->getSequence().substr(currentPos, seqLineMax)
-                                 << "\n";
-
-                currentPos = currentPos + seqLineMax + 1;
-            } else {
-                string::size_type remainder = N-currentPos;
-                outputFileStream << entry->getSequence().substr(currentPos, remainder) << "\n";
-
-                if (debug) cout << "remainder: " << remainder;
-                if (debug) cout << "substring: " << entry->getSequence().substr(currentPos, remainder) << endl;
-
-                break;
-            }
-        }
-
-        outputFileStream << "\n";
-    }
-
-    outputFileStream.close();
-}
-
 
 void debuggingTestCases() {
 
