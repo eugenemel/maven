@@ -2355,7 +2355,7 @@ void anchorPointsBasedAlignment() {
                 eic_smoothingWindow,
                 standardsAlignment_minPeakIntensity
                 );
-    experimentAnchorPoints.compute(false);
+    experimentAnchorPoints.compute(false, true); // (debug, isClean)
     sampleToUpdatedRts = experimentAnchorPoints.sampleToUpdatedRts;
 
     printf("Execution time (anchorPointsBasedAlignment()) : %f seconds \n", getTime() - startLoadingTime);
