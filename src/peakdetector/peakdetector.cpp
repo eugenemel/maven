@@ -2337,151 +2337,28 @@ int testResults(string projectFile){
 
 /**
  * @brief standardsBasedAlignment
- * Issue 317
+ * MS Issue 317
  *
  * Allow for more extreme RT swings by using standards as anchor points
+ *
+ * Issue 659: Refactor to use ExperimentAnchorPoints class.
  */
 void anchorPointsBasedAlignment() {
 
     double startLoadingTime = getTime();
 
-    Aligner rtAligner;
-    rtAligner.setSamples(samples);
-
-    mzSample* referenceSample = nullptr;
-    for (auto sample : samples) {
-        if (sample->isAnchorPointSample){
-            referenceSample = sample;
-            break;
-        }
-    }
-    if (!referenceSample) {
-        cerr << "No samples were designated as containing anchor points - unable to perform anchor point based alignment. Exiting." << endl;
-        abort();
-    }
-
-    /**
-     * ==================================================
-     * ==== GENERATE ANCHOR POINT DATA FROM FILE ========
-     * ==================================================
-     */
-
-    //read in values from file
-    string line;
-    ifstream anchorPointsFileStream(anchorPointsFile);
-
-    vector<AnchorPointSet> anchorPointSets;
-
-    while ( getline(anchorPointsFileStream, line)) {
-        if (line.empty()) continue;
-         if (line[0] == '#') continue; //comments
-
-        vector<string>fields;
-        mzUtils::split(line, ',', fields);
-
-        if (fields.size() < 2) continue;
-
-        double mz = stod(fields[0]);
-        double rt = stod(fields[1]);
-
-        string stringFilter;
-        if (fields.size() >= 3) {
-            stringFilter = fields[2];
-            stringFilter.erase(remove(stringFilter.begin(), stringFilter.end(), '\r'), stringFilter.end());
-        }
-
-        double mzmin = mz - mz * standardsAlignment_precursorPPM/1e6;
-        double mzmax = mz + mz * standardsAlignment_precursorPPM/1e6;
-        double rtmin = rt - standardsAlignment_maxRtWindow;
-        double rtmax = rt + standardsAlignment_maxRtWindow;
-
-        AnchorPointSet anchorPointSet(mzmin, mzmax, rtmin, rtmax, eic_smoothingWindow, standardsAlignment_minPeakIntensity);
-
-        if (!stringFilter.empty()){
-            anchorPointSet.setEICSamplesByFilter(samples, stringFilter);
-        }
-
-        anchorPointSet.compute(samples);
-
-        anchorPointSets.push_back(anchorPointSet);
-
-    }
-    anchorPointsFileStream.close();
-
-    AnchorPointSet lastAnchorPointSet = AnchorPointSet::lastRt(samples);
-    anchorPointSets.push_back(lastAnchorPointSet);
-
-    cout << "anchorPointsBasedAlignment(): Using " << anchorPointSets.size() << " anchor points." << endl;
-
-    /**
-     * =======================================
-     * ==== ENUMERATE ALIGNMENT SEGMENTS =====
-     * =======================================
-     */
-
-    map<mzSample*, vector<pair<float, float>>> anchorPointSetToUpdatedRtMap = rtAligner.anchorPointSetToUpdatedRtMap(anchorPointSets, referenceSample);
-
-    //debugging
-    cout << "Anchor point alignments:" << endl;
-
-    for (auto sample : samples) {
-        if (anchorPointSetToUpdatedRtMap.find(sample) != anchorPointSetToUpdatedRtMap.end()) {
-              vector<pair<float, float>> anchorPointData = anchorPointSetToUpdatedRtMap.at(sample);
-
-              float observedRtStart = 0.0f;
-              float referenceRtStart = 0.0f;
-
-              for (auto &pt : anchorPointData) {
-
-                  float observedRt = pt.first;
-                  float referenceRt = pt.second;
-
-                  AlignmentSegment *alignmentSegment = new AlignmentSegment();
-                  alignmentSegment->sampleName = sample->sampleName;
-                  alignmentSegment->seg_start = observedRtStart;
-                  alignmentSegment->seg_end = observedRt;
-                  alignmentSegment->new_start = referenceRtStart;
-                  alignmentSegment->new_end = referenceRt;
-
-                  rtAligner.addSegment(sample->sampleName, alignmentSegment);
-
-                  //debugging
-                  cout << sample->sampleName << "\t" << observedRt << "\t" << referenceRt << endl;
-
-                  observedRtStart = observedRt;
-                  referenceRtStart = referenceRt;
-              }
-
-              //debugging
-              cout << endl;
-        }
-    }
-
-    rtAligner.doSegmentedAligment();
-
-    //debugging
-//    for (mzSample* sample: samples ) {
-//        for (unsigned int i = 0; i < sample->scans.size(); i++) {
-//            cout << sample->sampleName << "\t" << sample->originalRetentionTimes[i] << "\t" << sample->scans[i]->rt << endl;
-//        }
-//    }
-
-    /**
-     * =======================================
-     * ==== CLEAN UP =========================
-     * =======================================
-     */
-
-//    for (auto &x : anchorPointSets) {
-//        if (x.slice){
-//            delete(x.slice);
-//            x.slice = nullptr;
-//        }
-//    }
+    ExperimentAnchorPoints experimentAnchorPoints = ExperimentAnchorPoints(
+                samples,
+                anchorPointsFile,
+                standardsAlignment_precursorPPM,
+                standardsAlignment_maxRtWindow,
+                eic_smoothingWindow,
+                standardsAlignment_minPeakIntensity
+                );
+    experimentAnchorPoints.compute(false);
+    sampleToUpdatedRts = experimentAnchorPoints.sampleToUpdatedRts;
 
     printf("Execution time (anchorPointsBasedAlignment()) : %f seconds \n", getTime() - startLoadingTime);
-
-    sampleToUpdatedRts = anchorPointSetToUpdatedRtMap;
 }
 
 //Issue 739: Handle different types of mzkitchen-driven msp searches.
