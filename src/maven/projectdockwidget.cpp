@@ -749,6 +749,9 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
             //ui options
             project->quantTypeMap = currentProject->quantTypeMap;
             project->quantTypeInverseMap = currentProject->quantTypeInverseMap;
+
+            //RT alignment information
+            project->sampleToUpdatedRts = currentProject->sampleToUpdatedRts;
         }
     }
 
@@ -759,7 +762,7 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
         project->deleteAll(); //extreme, but ensures that re-saving always saves data using most recent code
         project->setSamples(sampleSet);
         project->saveSamples(sampleSet);
-        project->saveAlignment();
+        project->saveAlignment(project->sampleToUpdatedRts);
 
         unsigned int groupCount=0;
 

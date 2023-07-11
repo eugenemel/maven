@@ -1465,19 +1465,27 @@ void ProjectDB::doAlignment() {
      int segCount=0;
      while (query.next()) {
         string sampleName = query.value("name").toString().toStdString();
-        //mzUtils::replace(sampleName,".mzXML",""); //bug fix.. alignment.rt files do not strore extensions.
+        //mzUtils::replace(sampleName,".mzXML",""); //bug fix.. alignment.rt files do not store extensions.
 
         int sampleId =   query.value("sampleId").toString().toInt();
         mzSample* sample = this->getSampleById(sampleId);
         if (!sample) continue;
 		segCount++;
 
+        float rt = query.value("rt").toString().toFloat();
+        float rtUpdate = query.value("rt_update").toString().toFloat();
+
+        if (sampleToUpdatedRts.find(sample) == sampleToUpdatedRts.end()) {
+            sampleToUpdatedRts.insert(make_pair(sample, vector<pair<float, float>>{}));
+        }
+        sampleToUpdatedRts.at(sample).push_back(make_pair(rt, rtUpdate));
+
         AlignmentSegment* seg = new AlignmentSegment();
         seg->sampleName   = sampleName;
         seg->seg_start = 0;
-        seg->seg_end   = query.value("rt").toString().toFloat();
+        seg->seg_end   = rt;
         seg->new_start = 0;
-        seg->new_end   = query.value("rt_update").toString().toFloat();
+        seg->new_end   = rtUpdate;
 
        if (lastSegment and lastSegment->sampleName == seg->sampleName) {
            seg->seg_start = lastSegment->seg_end;
