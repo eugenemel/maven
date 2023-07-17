@@ -118,7 +118,7 @@ float mergeOverlap = 0.8f;
 
 //peak filtering criteria
 int minGoodGroupCount = 1;
-float minSignalBlankRatio = 3;
+float minSignalBlankRatio = -1.0f;
 int minNoNoiseObs = 5;
 float minSignalBaseLineRatio = 5;
 float minGroupIntensity = 1000;
@@ -1286,6 +1286,7 @@ void fillOutPeakPickingAndGroupingParameters() {
     peakPickingAndGroupingParameters->filterMinSignalBaselineRatio = minSignalBaseLineRatio;
     peakPickingAndGroupingParameters->filterMinGroupIntensity = minGroupIntensity;
     peakPickingAndGroupingParameters->filterMinPrecursorCharge = minPrecursorCharge;
+    peakPickingAndGroupingParameters->filterMinSignalBlankRatio = minSignalBlankRatio;
 
     // END EIC::groupPeaksE()
 }
