@@ -902,21 +902,6 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
             if (group.maxNoNoiseObs < static_cast<unsigned int>(peakPickingAndGroupingParameters->filterMinNoNoiseObs)) continue;
             if (group.maxSignalBaselineRatio < peakPickingAndGroupingParameters->filterMinSignalBaselineRatio) continue;
             if (group.maxIntensity < peakPickingAndGroupingParameters->filterMinGroupIntensity ) continue;
-
-            //TODO: 'sampleMax' does not appear to be set correctly
-            //May be a problem with PeakGroup::groupStatistics()
-            //EIC::getPeakPositionsC()
-            //sample assignment to blanks, etc
-            qDebug() << group.compound->name.c_str() << " @ "
-                     << group.medianRt() << "min : peakIntensity="
-                     << group.sampleMax << " / blankMaxIntensity= " << group.blankMax << " = " << (group.sampleMax/group.blankMax) << " "
-                     << (group.blankMax*peakPickingAndGroupingParameters->filterMinSignalBlankRatio > group.maxIntensity ? "SKIP" : "PASS")
-                     << endl;
-
-            for (auto p : group.peaks) {
-                qDebug() << p.sample->sampleName.c_str() << " isBlank? "  << (p.fromBlankSample ? "yes" : "no") << endl;
-            }
-
             if (group.blankMax*peakPickingAndGroupingParameters->filterMinSignalBlankRatio > group.maxIntensity) continue;
 
             if (!isQQQSearch) {
