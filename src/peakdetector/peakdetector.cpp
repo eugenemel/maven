@@ -913,7 +913,11 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                      << (group.blankMax*peakPickingAndGroupingParameters->filterMinSignalBlankRatio > group.maxIntensity ? "SKIP" : "PASS")
                      << endl;
 
-            //if (group.blankMax*peakPickingAndGroupingParameters->filterMinSignalBlankRatio > group.maxIntensity) continue;
+            for (auto p : group.peaks) {
+                qDebug() << p.sample->sampleName.c_str() << " isBlank? "  << (p.fromBlankSample ? "yes" : "no") << endl;
+            }
+
+            if (group.blankMax*peakPickingAndGroupingParameters->filterMinSignalBlankRatio > group.maxIntensity) continue;
 
             if (!isQQQSearch) {
 
