@@ -1029,21 +1029,15 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
 
     if (isQQQSearch) {
 
+        //Issue 660: QQQ-specific blank filter handling
+        //Run this before QQQProcessor::rollUpToCompoundQuant(), as the roll-up organizes
+        //subordinate groups as children PeakGroups.
+        vector<PeakGroup> blankFilteredPeakGroups = QQQProcessor::filterPeakGroups(allgroups, QQQparams, false);
+        allgroups = blankFilteredPeakGroups;
+
         //Issue 565
         QQQProcessor::rollUpToCompoundQuant(allgroups, QQQparams, false);
         QQQProcessor::labelInternalStandards(allgroups, QQQparams, false);
-
-//        //debugging
-//        for (auto & pg : allgroups) {
-//            if (pg.compound) {
-//                cout << pg.compound->name << ": ";q
-//                for (unsigned int i = 0; i < pg.labels.size(); i++) {
-//                    if (i > 0) cout << ", ";
-//                    cout << pg.labels.at(i);
-//                }
-//                cout << endl;
-//            }
-//        }
 
         //Issue 635: clean up deleted flags
         vector<PeakGroup> updated_allgroups = vector<PeakGroup>{};
