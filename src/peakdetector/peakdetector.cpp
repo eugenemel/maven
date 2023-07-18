@@ -118,7 +118,7 @@ float mergeOverlap = 0.8f;
 
 //peak filtering criteria
 int minGoodGroupCount = 1;
-float minSignalBlankRatio = -1.0f;
+float minSignalBlankRatio = 0.0f;
 int minNoNoiseObs = 5;
 float minSignalBaseLineRatio = 5;
 float minGroupIntensity = 1000;
@@ -903,6 +903,7 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
             if (group.maxNoNoiseObs < minNoNoiseObs) continue;
             if (group.maxSignalBaselineRatio < minSignalBaseLineRatio) continue;
             if (group.maxIntensity < minGroupIntensity ) continue;
+            if (group.blankMax*minSignalBlankRatio > group.maxIntensity) continue;
 
             if (!isQQQSearch) {
 
@@ -1203,6 +1204,8 @@ void processOptions(int argc, char* argv[]) {
             }
         } else if (strcmp(argv[i], "--sampleIdMappingFile") == 0) {
             sampleIdMappingFile = argv[i+1];
+        } else if (strcmp(argv[i], "--minSignalBlankRatio") == 0) {
+            minSignalBlankRatio = stof(argv[i+1]);
         }
 
         if (mzUtils::ends_with(optString, ".rt")) alignmentFile = optString;
