@@ -896,7 +896,6 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                 group.groupStatistics();
             }
 
-            //TODO swap with peakPickingAndGroupingParameters->filter* fields
             if (clsf.hasModel() && group.goodPeakCount < peakPickingAndGroupingParameters->filterMinGoodGroupCount) continue;
             if (clsf.hasModel() && group.maxQuality < peakPickingAndGroupingParameters->filterMinQuality) continue;
 
@@ -907,7 +906,7 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
 
             if (!isQQQSearch) {
 
-                if (getChargeStateFromMS1(&group) < minPrecursorCharge) continue;
+                if (getChargeStateFromMS1(&group) < peakPickingAndGroupingParameters->filterMinPrecursorCharge) continue;
 
                 //build consensus ms2 specta
                 vector<Scan*>ms2events = group.getFragmentationEvents();
