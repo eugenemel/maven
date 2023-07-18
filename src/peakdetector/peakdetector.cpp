@@ -897,13 +897,13 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
             }
 
             //TODO swap with peakPickingAndGroupingParameters->filter* fields
-            if (clsf.hasModel() && group.goodPeakCount < minGoodGroupCount) continue;
-            if (clsf.hasModel() && group.maxQuality < minQuality) continue;
+            if (clsf.hasModel() && group.goodPeakCount < peakPickingAndGroupingParameters->filterMinGoodGroupCount) continue;
+            if (clsf.hasModel() && group.maxQuality < peakPickingAndGroupingParameters->filterMinQuality) continue;
 
-            if (group.maxNoNoiseObs < minNoNoiseObs) continue;
-            if (group.maxSignalBaselineRatio < minSignalBaseLineRatio) continue;
-            if (group.maxIntensity < minGroupIntensity ) continue;
-            if (group.blankMax*minSignalBlankRatio > group.maxIntensity) continue;
+            if (group.maxNoNoiseObs < static_cast<unsigned int>(peakPickingAndGroupingParameters->filterMinNoNoiseObs)) continue;
+            if (group.maxSignalBaselineRatio < peakPickingAndGroupingParameters->filterMinSignalBaselineRatio) continue;
+            if (group.maxIntensity < peakPickingAndGroupingParameters->filterMinGroupIntensity ) continue;
+            if (group.blankMax*peakPickingAndGroupingParameters->filterMinSignalBlankRatio > group.maxIntensity) continue;
 
             if (!isQQQSearch) {
 
