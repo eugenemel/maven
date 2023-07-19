@@ -1049,6 +1049,11 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
         }
         allgroups = updated_allgroups;
 
+        //Issue 662: pass forward pre-labels
+        for (auto& peakGroup : allgroups) {
+            peakGroup.applyLabelsFromCompoundMetadata();
+        }
+
     }
 
     double startWriteReportTime = getTime();
