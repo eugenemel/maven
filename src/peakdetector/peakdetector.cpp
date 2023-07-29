@@ -1208,8 +1208,8 @@ void processOptions(int argc, char* argv[]) {
         } else if (strcmp(argv[i], "--minSignalBlankRatio") == 0) {
             minSignalBlankRatio = stof(argv[i+1]);
         } else if (strcmp(argv[i], "--groupBackgroundType") == 0) {
-            string groupBackgroundType = argv[i+1];
-            if (groupBackgroundType == "MAX_BLANK_INTENSITY") {
+            string groupBackgroundTypeStr = argv[i+1];
+            if (groupBackgroundTypeStr == "MAX_BLANK_INTENSITY") {
                 groupBackgroundType = PeakGroupBackgroundType::MAX_BLANK_INTENSITY;
             }
         }
