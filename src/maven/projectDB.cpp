@@ -286,7 +286,9 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                         srmProductMz real,\
                         \
                         isotopicIndex integer,\
-                        isotopeParameters TEXT\
+                        isotopeParameters TEXT,\
+                        \
+                        groupBackground real\
                         )");
 
      if(!query0.exec(TABLESQL)) qDebug() << query0.lastError();
@@ -297,7 +299,8 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                                     ms2Score,adductName,compoundId,compoundName,compoundDB,\
                                     searchTableName,displayName,\
                                     srmPrecursorMz,srmProductMz,\
-                                    isotopicIndex,isotopeParameters\
+                                    isotopicIndex,isotopeParameters,\
+                                    groupBackground\
                                   )\
                                     \
                                  values\
@@ -306,7 +309,8 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                                     ?,?,?,?,?,\
                                     ?,?,\
                                     ?,?,\
-                                    ?,?\
+                                    ?,?,\
+                                    ?\
                                   )\
                                  ");
 
@@ -377,6 +381,9 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
         } else {
             query1.addBindValue(QString(""));
         }
+
+        //Issue 665
+        query1.addBindValue(g->groupBackground);
 
      if(! query1.exec() ) {
         qDebug() << query1.lastError();
@@ -887,6 +894,7 @@ void ProjectDB::alterPeakGroupsTable(){
            bool isHasSrmProductMz = false;
            bool isHasIsotopicIndex = false;
            bool isHasIsotopeParameters = false;
+           bool isHasGroupBackground = false;
 
            while (queryCheckCols.next()) {
                if ("displayName" == queryCheckCols.value(1).toString()) {
@@ -899,6 +907,8 @@ void ProjectDB::alterPeakGroupsTable(){
                    isHasIsotopicIndex = true;
                } else if ("isotopeParameters" == queryCheckCols.value(1).toString()) {
                    isHasIsotopeParameters = true;
+               } else if ("groupBackground" == queryCheckCols.value(1).toString()) {
+                   isHasGroupBackground = true;
                }
            }
 
@@ -946,6 +956,14 @@ void ProjectDB::alterPeakGroupsTable(){
                QString strAddIsotopeParameters = QString("ALTER TABLE peakgroups ADD isotopeParameters TEXT DEFAULT '';");
                if (!queryAddIsotopeParameters.exec(strAddIsotopeParameters)){
                    qDebug() << "Ho..." <<queryCheckCols.lastError();
+               }
+           }
+
+           if (!isHasGroupBackground) {
+               QSqlQuery queryAddGroupBackground(sqlDB);
+               QString strAddGroupBackground = QString("ALTER TABLE peakgroups ADD groupBackground REAL DEFAULT 0;");
+               if (!queryAddGroupBackground.exec(strAddGroupBackground)) {
+                   qDebug() << "Ho..." << queryAddGroupBackground.lastError();
                }
            }
 
