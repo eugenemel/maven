@@ -112,6 +112,9 @@ float mergedPeakRtBoundsSlopeThreshold = -1.0f;
 float mergedSmoothedMaxToBoundsMinRatio = -1.0f;
 SmoothedMaxToBoundsIntensityPolicy mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MEDIAN;
 
+//computed properties
+PeakGroupBackgroundType groupBackgroundType = PeakGroupBackgroundType::NONE;
+
 //peak grouping across samples
 float grouping_maxRtWindow = 0.25f;
 float mergeOverlap = 0.8f;
@@ -1204,6 +1207,11 @@ void processOptions(int argc, char* argv[]) {
             sampleIdMappingFile = argv[i+1];
         } else if (strcmp(argv[i], "--minSignalBlankRatio") == 0) {
             minSignalBlankRatio = stof(argv[i+1]);
+        } else if (strcmp(argv[i], "--groupBackgroundType") == 0) {
+            string groupBackgroundType = argv[i+1];
+            if (groupBackgroundType == "MAX_BLANK_INTENSITY") {
+                groupBackgroundType = PeakGroupBackgroundType::MAX_BLANK_INTENSITY;
+            }
         }
 
         if (mzUtils::ends_with(optString, ".rt")) alignmentFile = optString;
@@ -1279,6 +1287,9 @@ void fillOutPeakPickingAndGroupingParameters() {
     //grouping
     peakPickingAndGroupingParameters->groupMaxRtDiff = grouping_maxRtWindow;
     peakPickingAndGroupingParameters->groupMergeOverlap = mergeOverlap;
+
+    //computed properties
+    peakPickingAndGroupingParameters->groupBackgroundType = groupBackgroundType;
 
     //post-grouping filters
     peakPickingAndGroupingParameters->filterMinGoodGroupCount = minGoodGroupCount;
