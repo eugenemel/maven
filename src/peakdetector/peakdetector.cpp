@@ -288,7 +288,18 @@ int main(int argc, char *argv[]) {
             cout << "Aligning samples using provided alignment file:" << "\t" << alignmentFile << endl;
             Aligner aligner;
             aligner.setSamples(samples);
-            aligner.loadAlignmentFile(alignmentFile);
+            sampleToUpdatedRts = aligner.loadAlignmentFile(alignmentFile); 
+            
+            //debugging
+            qDebug() << "Using provided RT Alignment:";
+            for (auto it = sampleToUpdatedRts.begin(); it != sampleToUpdatedRts.end(); ++it) {
+            	mzSample* sample = it->first;
+            	vector<pair<float, float>> rtVals = it->second;
+            	
+            	for (auto p : rtVals) {
+            		qDebug() << sample->sampleName.c_str() << p.first << p.second;
+            	}
+            }
             aligner.doSegmentedAligment();
         } else if (isHIHRPAlignment) {
             cout << "Aligning samples using HIHRP (High Intensity High Reproducibility Peaks) algorithm." << endl;
@@ -1671,7 +1682,7 @@ void writeReport(string setName) {
 
                 //this is only necessary if RT alignment is actually performed
                 //Issue 641: Explicitly save anchor points
-                if (!sampleIdMapping.empty()) {
+                if (!sampleToUpdatedRts.empty()) {
                     project->saveAlignment(sampleToUpdatedRts);
                 }
 
