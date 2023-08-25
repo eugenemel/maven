@@ -1068,6 +1068,11 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
             peakGroup.applyLabelsFromCompoundMetadata();
         }
 
+        //Issue 668: Assign background type
+        if (peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_BASELINE) {
+            QQQProcessor::assignTransitionSpecificGroupBackground(allgroups);
+        }
+
     }
 
     double startWriteReportTime = getTime();
@@ -1222,6 +1227,8 @@ void processOptions(int argc, char* argv[]) {
             string groupBackgroundTypeStr = argv[i+1];
             if (groupBackgroundTypeStr == "MAX_BLANK_INTENSITY") {
                 groupBackgroundType = PeakGroupBackgroundType::MAX_BLANK_INTENSITY;
+            } else if (groupBackgroundTypeStr == "PREFERRED_QUANT_TYPE_BASELINE") {
+                groupBackgroundType = PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_BASELINE;
             }
         }
 
