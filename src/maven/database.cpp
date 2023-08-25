@@ -1505,3 +1505,38 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
 
     query0.exec("end transaction");
 }
+
+void Database::setDefaultSampleColors(
+    vector<mzSample*>& samples,
+    bool skipColoredSamples,
+    bool setBlanksToRed
+    ){
+    if (samples.empty()) return;
+
+    float N = samples.size();
+
+    for( unsigned int i=0; i< samples.size(); i++ ) {
+
+            //skip samples that have been colored
+            if (skipColoredSamples && (samples[i]->color[0] + samples[i]->color[1] + samples[i]->color[2] > 0)) {
+                continue;
+            }
+
+            if (setBlanksToRed && samples[i]->isBlank ) {
+                //set blank to non transparent red
+                samples[i]->color[0]=0.9;
+                samples[i]->color[1]=0.0;
+                samples[i]->color[2]=0.0;
+                samples[i]->color[3]=1.0;
+                continue;
+            }
+
+            float hue = 1-0.6*((float)(i+1)/N);
+            QColor c = QColor::fromHsvF(hue,1.0,1.0,1.0);
+
+            samples[i]->color[0] = c.redF();
+            samples[i]->color[1] = c.greenF();
+            samples[i]->color[2] = c.blueF();
+            samples[i]->color[3] = c.alphaF();
+    }
+}

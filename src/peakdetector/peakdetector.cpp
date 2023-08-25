@@ -1043,7 +1043,7 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
 
     if (isQQQSearch) {
 
-        //Issue 660: QQQ-specific blank filter handling
+        //Issue 660: QQQ-specific blank filtegit difr handling
         //Run this before QQQProcessor::rollUpToCompoundQuant(), as the roll-up organizes
         //subordinate groups as children PeakGroups.
         vector<PeakGroup> blankFilteredPeakGroups = QQQProcessor::filterPeakGroups(allgroups, QQQparams, false);
@@ -1677,6 +1677,7 @@ void writeReport(string setName) {
 
             if ( project->isOpen() ) {
                 project->deleteAll();
+                Database::setDefaultSampleColors(samples);
 				project->setSamples(samples);
                 project->saveSamples(samples);
 

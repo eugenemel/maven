@@ -24,6 +24,7 @@ contains (DEFINES,CDFPARSER) {
     LIBS +=  -lcdfread -lnetcdf
 }
 
+
 #BUILD OPENMP PARALLEL VERSION
 
 mac {
@@ -35,10 +36,11 @@ mac {
             QMAKE_LINK=/usr/local/opt/llvm/bin/clang++
             LIBS += -L/usr/local/opt/llvm/lib/
 
+	    INCLUDEPATH += /usr/local/opt/llvm/include/
             INCLUDEPATH += /usr/local/opt/llvm/lib/include/
 
             # Change this as needed for version of llvm
-            INCLUDEPATH += /usr/local/opt/llvm/lib/clang/13.0.1/include/
+            # INCLUDEPATH += /usr/local/opt/llvm/lib/clang/16/include/
 
             CONFIG += parallel
         }
