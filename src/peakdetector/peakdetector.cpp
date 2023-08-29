@@ -1044,7 +1044,7 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
     if (isQQQSearch) {
 
         //Assign background type prior to filtering to ensure that filtering works correctly.
-        QQQProcessor::setPeakGroupBackground((allgroups, params, false);
+        QQQProcessor::setPeakGroupBackground(allgroups, QQQparams, false);
 
         //Issue 660: QQQ-specific blank filtegit difr handling
         //Run this before QQQProcessor::rollUpToCompoundQuant(), as the roll-up organizes
@@ -1225,8 +1225,10 @@ void processOptions(int argc, char* argv[]) {
             string groupBackgroundTypeStr = argv[i+1];
             if (groupBackgroundTypeStr == "MAX_BLANK_INTENSITY") {
                 groupBackgroundType = PeakGroupBackgroundType::MAX_BLANK_INTENSITY;
-            } else if (groupBackgroundTypeStr == "PREFERRED_QUANT_TYPE_BASELINE") {
-                groupBackgroundType = PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_BASELINE;
+            } else if (groupBackgroundTypeStr == "PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE") {
+                groupBackgroundType = PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE;
+            } else if (groupBackgroundTypeStr == "PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL") {
+                groupBackgroundType = PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL;
             }
         }
 
