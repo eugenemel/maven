@@ -1043,6 +1043,9 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
 
     if (isQQQSearch) {
 
+        //Assign background type prior to filtering to ensure that filtering works correctly.
+        QQQProcessor::setPeakGroupBackground((allgroups, params, false);
+
         //Issue 660: QQQ-specific blank filtegit difr handling
         //Run this before QQQProcessor::rollUpToCompoundQuant(), as the roll-up organizes
         //subordinate groups as children PeakGroups.
@@ -1066,11 +1069,6 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
         //Issue 662: pass forward pre-labels
         for (auto& peakGroup : allgroups) {
             peakGroup.applyLabelsFromCompoundMetadata();
-        }
-
-        //Issue 668: Assign background type
-        if (peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_BASELINE) {
-            QQQProcessor::assignTransitionSpecificGroupBackground(allgroups);
         }
 
     }
