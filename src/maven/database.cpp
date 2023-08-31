@@ -929,6 +929,12 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
         vector<string>categorylist;
         string transition_id, ion_type, isInternalStandard, preferredQuantType, compoundLabels;
 
+        //Issue 667: Support/Respect ignore column
+        if ( header.count("ignore") && header["ignore"]<N) {
+            string ignoreVal = fields[ header["ignore"]].toStdString();
+            if (!ignoreVal.empty()) continue;
+        }
+
         if ( header.count("mz") && header["mz"]<N)  mz = fields[ header["mz"]].toDouble();
         if ( header.count("rt") && header["rt"]<N)  rt = fields[ header["rt"]].toDouble();
         if ( header.count("expectedrt") && header["expectedrt"]<N) rt = fields[ header["expectedrt"]].toDouble();
