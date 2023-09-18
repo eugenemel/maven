@@ -1,5 +1,5 @@
 #include <iostream>
-#include <omp.h>
+// #include <omp.h>
 
 #include "isotopicenvelopeutils.h"
 #include "../maven/projectDB.h"
@@ -146,7 +146,7 @@ void loadSamples() {
     for (unsigned long i = 0; i < filenames.size(); i++ ) {
 
         #pragma omp critical
-        cout << "Thread # " << omp_get_thread_num() << ": Loading " << filenames[i] << endl;
+        //cout << "Thread # " << omp_get_thread_num() << ": Loading " << filenames[i] << endl;
 
         mzSample* sample = new mzSample();
         sample->loadSample(filenames[i].c_str());
@@ -175,7 +175,9 @@ void loadSamples() {
 void loadSeedPeakGroups() {
 
     QSqlQuery query(project->sqlDB);
-    query.exec("select DISTINCT groupId, compoundName, adductName from peakgroups where peakgroups.compoundId != '' AND (peakgroups.label LIKE '%g%' OR peakgroups.searchTableName == 'Bookmarks');");
+    query.exec("select DISTINCT groupId, compoundName, adductName from peakgroups where peakgroups.compoundId != '' "
+               "AND (peakgroups.label LIKE '%g%' OR peakgroups.searchTableName == 'Bookmarks')"
+               "AND peakgroups.type == 0;"); // type == 0 is the default type. type == 4 is the isotope type, which we ignore.
 
     vector<int> groupIds{};
     vector<string> compoundNames{};
