@@ -29,7 +29,9 @@ void loadSeedPeakGroups();
 int main(int argc, char *argv[]){
     processOptions(argc, argv);
 
-    loadSamples();
+    //loadSamples(); //multithreaded. TODO: ensure that sample IDs match in DB
+    project->loadSamples(QString(sampleDir.c_str())); //single-threaded, ensure that IDs match
+
     loadSeedPeakGroups();
 
     vector<IsotopicEnvelopeGroup> isotopicEnvelopGroups{};
