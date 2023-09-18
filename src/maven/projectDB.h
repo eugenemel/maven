@@ -90,7 +90,7 @@ class ProjectDB {
 	    QString  projectName();
         static QString locateSample(QString filepath, QStringList pathlist);
 
-	    void loadSamples();
+        void loadSamples(QString sampleDir="");
 	    vector<mzSample*> getSamples() { return samples; }
 
         void addPeaksTableColumn(QString columnName, QString columnType="real", QString numericDefault="0");
