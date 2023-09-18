@@ -16,7 +16,6 @@
 #include "mzUtils.h"
 
 class PeakGroupTag;
-class IsotopicEnvelopeGroup;
 
 class Database {
 
@@ -84,12 +83,6 @@ class Database {
         void saveValidation(Peak* p);
 
         void loadPeakGroupTags(string filename);
-
-        //Issue 646
-        //WARNING: this uses group and sample IDs referenced in the mzrollDB.
-        //Do not use this function in contexts where those values might have changed
-        // (e.g., MAVEN GUI), unless the values are expliclty handled/corrected ahead of time.
-        void saveIsotopicEnvelopes(vector<IsotopicEnvelopeGroup>& envelopes);
 
         vector<Adduct*> adductsDB;
         vector<Adduct*> fragmentsDB;

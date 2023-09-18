@@ -1529,7 +1529,3 @@ void Database::setDefaultSampleColors(
             samples[i]->color[3] = c.alphaF();
     }
 }
-
-void Database::saveIsotopicEnvelopes(vector<IsotopicEnvelopeGroup>& envelopes) {
-    //TODO
-}

@@ -1901,3 +1901,7 @@ PeakGroup* ProjectDB::getPeakGroupFromDB(int groupId, QString dbfilename){
 
        return(pg);
 }
+
+void ProjectDB::saveIsotopicEnvelopes(vector<IsotopicEnvelopeGroup>& envelopes) {
+       //TODO
+}
