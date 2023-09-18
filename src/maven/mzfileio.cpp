@@ -271,11 +271,7 @@ void mzFileIO::fileImport(void) {
             if (sample) {
 
                 sample->enumerateSRMScans();
-                //set min and max values for rt
-                sample->calculateMzRtRange();
-                //check if this is a blank sample
-                sample->fileName = filename.toStdString();
-                if ( filename.contains("blan",Qt::CaseInsensitive)) sample->isBlank = true;
+
                 if (sample->scans.size()>0) _mainwindow->addSample(sample);
 
             } else {

@@ -36,6 +36,9 @@ class ProjectDB {
             map<string, shared_ptr<DirectInfusionSearchParameters>> diSearchParameters = {};
             map<string, shared_ptr<PeaksSearchParameters>> peaksSearchParameters = {};
 
+            //Issue 641: explicitly save anchor points, when they are available.
+            map<mzSample*, vector<pair<float, float>>> sampleToUpdatedRts{};
+
             //UI adjustments
             unordered_map<string, string> quantTypeMap{}; //<original, renamed>
             unordered_map<string, string> quantTypeInverseMap{}; //<renamed, original>

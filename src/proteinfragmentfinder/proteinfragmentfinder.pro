@@ -6,7 +6,7 @@ MAVEN = ../maven/
 include($$CORE/libmaven.pri)
 
 TEMPLATE = app
-TARGET = peakdetector
+TARGET = proteinfragmentfinder
 DESTDIR = $$MAVEN/bin/
 CONFIG -= network gui opengl
 CONFIG += sql qt std++14
@@ -24,7 +24,6 @@ contains (DEFINES,CDFPARSER) {
     LIBS +=  -lcdfread -lnetcdf
 }
 
-
 #BUILD OPENMP PARALLEL VERSION
 
 mac {
@@ -34,13 +33,9 @@ mac {
             #compiler and linker need to be clang-omp++
             QMAKE_CXX=/usr/local/opt/llvm/bin/clang++
             QMAKE_LINK=/usr/local/opt/llvm/bin/clang++
+            
             LIBS += -L/usr/local/opt/llvm/lib/
-
-	    INCLUDEPATH += /usr/local/opt/llvm/include/
-            INCLUDEPATH += /usr/local/opt/llvm/lib/include/
-
-            # Change this as needed for version of llvm
-            # INCLUDEPATH += /usr/local/opt/llvm/lib/clang/16/include/
+            INCLUDEPATH += /usr/local/opt/llvm/include/
 
             CONFIG += parallel
         }
@@ -57,12 +52,11 @@ win32 {
 }
 
 parallel {
-	message("Building OpenMP peakdetector_parallel")
+	message("Building OpenMP isotopeprocessor parallel")
 
         QMAKE_CXXFLAGS += -DOMP_PARALLEL -fopenmp -I/usr/local/opt/libomp/include/
         QMAKE_LFLAGS += -fopenmp
         LIBS += -fopenmp
 }
 
-SOURCES= peakdetector.cpp  options.cpp $$MAVEN/classifier.cpp $$MAVEN/classifierNeuralNet.cpp $$MAVEN/projectDB.cpp $$MAVEN/database.cpp $$NATSORT/strnatcmp.c
-HEADERS= $$MAVEN/classifierNeuralNet.h  options.h $$MAVEN/projectDB.h $$MAVEN/database.h $$NATSORT/strnatcmp.h
+SOURCES=proteinfragmentfinder.cpp

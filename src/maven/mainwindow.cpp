@@ -117,6 +117,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
     // Issue 127: Extra peak group tags
     QString tagsFile = methodsFolder + "/TAGS.csv";
+    qDebug() << "Checking for tags in file:" << tagsFile;
+
     if (QFile::exists(tagsFile)) {
         DB.loadPeakGroupTags(tagsFile.toStdString());
     }

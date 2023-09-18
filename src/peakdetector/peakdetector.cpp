@@ -112,13 +112,16 @@ float mergedPeakRtBoundsSlopeThreshold = -1.0f;
 float mergedSmoothedMaxToBoundsMinRatio = -1.0f;
 SmoothedMaxToBoundsIntensityPolicy mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MEDIAN;
 
+//computed properties
+PeakGroupBackgroundType groupBackgroundType = PeakGroupBackgroundType::NONE;
+
 //peak grouping across samples
 float grouping_maxRtWindow = 0.25f;
 float mergeOverlap = 0.8f;
 
 //peak filtering criteria
 int minGoodGroupCount = 1;
-float minSignalBlankRatio = 3;
+float minSignalBlankRatio = 0.0f;
 int minNoNoiseObs = 5;
 float minSignalBaseLineRatio = 5;
 float minGroupIntensity = 1000;
@@ -285,7 +288,18 @@ int main(int argc, char *argv[]) {
             cout << "Aligning samples using provided alignment file:" << "\t" << alignmentFile << endl;
             Aligner aligner;
             aligner.setSamples(samples);
-            aligner.loadAlignmentFile(alignmentFile);
+            sampleToUpdatedRts = aligner.loadAlignmentFile(alignmentFile); 
+            
+            //debugging
+            qDebug() << "Using provided RT Alignment:";
+            for (auto it = sampleToUpdatedRts.begin(); it != sampleToUpdatedRts.end(); ++it) {
+            	mzSample* sample = it->first;
+            	vector<pair<float, float>> rtVals = it->second;
+            	
+            	for (auto p : rtVals) {
+            		qDebug() << sample->sampleName.c_str() << p.first << p.second;
+            	}
+            }
             aligner.doSegmentedAligment();
         } else if (isHIHRPAlignment) {
             cout << "Aligning samples using HIHRP (High Intensity High Reproducibility Peaks) algorithm." << endl;
@@ -896,17 +910,17 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                 group.groupStatistics();
             }
 
-            //TODO swap with peakPickingAndGroupingParameters->filter* fields
-            if (clsf.hasModel() && group.goodPeakCount < minGoodGroupCount) continue;
-            if (clsf.hasModel() && group.maxQuality < minQuality) continue;
+            if (clsf.hasModel() && group.goodPeakCount < peakPickingAndGroupingParameters->filterMinGoodGroupCount) continue;
+            if (clsf.hasModel() && group.maxQuality < peakPickingAndGroupingParameters->filterMinQuality) continue;
 
-            if (group.maxNoNoiseObs < minNoNoiseObs) continue;
-            if (group.maxSignalBaselineRatio < minSignalBaseLineRatio) continue;
-            if (group.maxIntensity < minGroupIntensity ) continue;
+            if (group.maxNoNoiseObs < static_cast<unsigned int>(peakPickingAndGroupingParameters->filterMinNoNoiseObs)) continue;
+            if (group.maxSignalBaselineRatio < peakPickingAndGroupingParameters->filterMinSignalBaselineRatio) continue;
+            if (group.maxIntensity < peakPickingAndGroupingParameters->filterMinGroupIntensity ) continue;
+            if (group.blankMax*peakPickingAndGroupingParameters->filterMinSignalBlankRatio > group.maxIntensity) continue;
 
             if (!isQQQSearch) {
 
-                if (getChargeStateFromMS1(&group) < minPrecursorCharge) continue;
+                if (getChargeStateFromMS1(&group) < peakPickingAndGroupingParameters->filterMinPrecursorCharge) continue;
 
                 //build consensus ms2 specta
                 vector<Scan*>ms2events = group.getFragmentationEvents();
@@ -1029,21 +1043,18 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
 
     if (isQQQSearch) {
 
+        //Assign background type prior to filtering to ensure that filtering works correctly.
+        QQQProcessor::setPeakGroupBackground(allgroups, QQQparams, false);
+
+        //Issue 660: QQQ-specific blank filtegit difr handling
+        //Run this before QQQProcessor::rollUpToCompoundQuant(), as the roll-up organizes
+        //subordinate groups as children PeakGroups.
+        vector<PeakGroup> blankFilteredPeakGroups = QQQProcessor::filterPeakGroups(allgroups, QQQparams, false);
+        allgroups = blankFilteredPeakGroups;
+
         //Issue 565
         QQQProcessor::rollUpToCompoundQuant(allgroups, QQQparams, false);
         QQQProcessor::labelInternalStandards(allgroups, QQQparams, false);
-
-//        //debugging
-//        for (auto & pg : allgroups) {
-//            if (pg.compound) {
-//                cout << pg.compound->name << ": ";q
-//                for (unsigned int i = 0; i < pg.labels.size(); i++) {
-//                    if (i > 0) cout << ", ";
-//                    cout << pg.labels.at(i);
-//                }
-//                cout << endl;
-//            }
-//        }
 
         //Issue 635: clean up deleted flags
         vector<PeakGroup> updated_allgroups = vector<PeakGroup>{};
@@ -1054,6 +1065,11 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
             }
         }
         allgroups = updated_allgroups;
+
+        //Issue 662: pass forward pre-labels
+        for (auto& peakGroup : allgroups) {
+            peakGroup.applyLabelsFromCompoundMetadata();
+        }
 
     }
 
@@ -1203,6 +1219,17 @@ void processOptions(int argc, char* argv[]) {
             }
         } else if (strcmp(argv[i], "--sampleIdMappingFile") == 0) {
             sampleIdMappingFile = argv[i+1];
+        } else if (strcmp(argv[i], "--minSignalBlankRatio") == 0) {
+            minSignalBlankRatio = stof(argv[i+1]);
+        } else if (strcmp(argv[i], "--groupBackgroundType") == 0) {
+            string groupBackgroundTypeStr = argv[i+1];
+            if (groupBackgroundTypeStr == "MAX_BLANK_INTENSITY") {
+                groupBackgroundType = PeakGroupBackgroundType::MAX_BLANK_INTENSITY;
+            } else if (groupBackgroundTypeStr == "PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE") {
+                groupBackgroundType = PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE;
+            } else if (groupBackgroundTypeStr == "PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL") {
+                groupBackgroundType = PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL;
+            }
         }
 
         if (mzUtils::ends_with(optString, ".rt")) alignmentFile = optString;
@@ -1279,6 +1306,9 @@ void fillOutPeakPickingAndGroupingParameters() {
     peakPickingAndGroupingParameters->groupMaxRtDiff = grouping_maxRtWindow;
     peakPickingAndGroupingParameters->groupMergeOverlap = mergeOverlap;
 
+    //computed properties
+    peakPickingAndGroupingParameters->groupBackgroundType = groupBackgroundType;
+
     //post-grouping filters
     peakPickingAndGroupingParameters->filterMinGoodGroupCount = minGoodGroupCount;
     peakPickingAndGroupingParameters->filterMinQuality = minQuality;
@@ -1286,6 +1316,7 @@ void fillOutPeakPickingAndGroupingParameters() {
     peakPickingAndGroupingParameters->filterMinSignalBaselineRatio = minSignalBaseLineRatio;
     peakPickingAndGroupingParameters->filterMinGroupIntensity = minGroupIntensity;
     peakPickingAndGroupingParameters->filterMinPrecursorCharge = minPrecursorCharge;
+    peakPickingAndGroupingParameters->filterMinSignalBlankRatio = minSignalBlankRatio;
 
     // END EIC::groupPeaksE()
 }
@@ -1653,12 +1684,13 @@ void writeReport(string setName) {
 
             if ( project->isOpen() ) {
                 project->deleteAll();
+                Database::setDefaultSampleColors(samples);
 				project->setSamples(samples);
                 project->saveSamples(samples);
 
                 //this is only necessary if RT alignment is actually performed
                 //Issue 641: Explicitly save anchor points
-                if (!sampleIdMapping.empty()) {
+                if (!sampleToUpdatedRts.empty()) {
                     project->saveAlignment(sampleToUpdatedRts);
                 }
 
@@ -2337,151 +2369,28 @@ int testResults(string projectFile){
 
 /**
  * @brief standardsBasedAlignment
- * Issue 317
+ * MS Issue 317
  *
  * Allow for more extreme RT swings by using standards as anchor points
+ *
+ * Issue 659: Refactor to use ExperimentAnchorPoints class.
  */
 void anchorPointsBasedAlignment() {
 
     double startLoadingTime = getTime();
 
-    Aligner rtAligner;
-    rtAligner.setSamples(samples);
-
-    mzSample* referenceSample = nullptr;
-    for (auto sample : samples) {
-        if (sample->isAnchorPointSample){
-            referenceSample = sample;
-            break;
-        }
-    }
-    if (!referenceSample) {
-        cerr << "No samples were designated as containing anchor points - unable to perform anchor point based alignment. Exiting." << endl;
-        abort();
-    }
-
-    /**
-     * ==================================================
-     * ==== GENERATE ANCHOR POINT DATA FROM FILE ========
-     * ==================================================
-     */
-
-    //read in values from file
-    string line;
-    ifstream anchorPointsFileStream(anchorPointsFile);
-
-    vector<AnchorPointSet> anchorPointSets;
-
-    while ( getline(anchorPointsFileStream, line)) {
-        if (line.empty()) continue;
-         if (line[0] == '#') continue; //comments
-
-        vector<string>fields;
-        mzUtils::split(line, ',', fields);
-
-        if (fields.size() < 2) continue;
-
-        double mz = stod(fields[0]);
-        double rt = stod(fields[1]);
-
-        string stringFilter;
-        if (fields.size() >= 3) {
-            stringFilter = fields[2];
-            stringFilter.erase(remove(stringFilter.begin(), stringFilter.end(), '\r'), stringFilter.end());
-        }
-
-        double mzmin = mz - mz * standardsAlignment_precursorPPM/1e6;
-        double mzmax = mz + mz * standardsAlignment_precursorPPM/1e6;
-        double rtmin = rt - standardsAlignment_maxRtWindow;
-        double rtmax = rt + standardsAlignment_maxRtWindow;
-
-        AnchorPointSet anchorPointSet(mzmin, mzmax, rtmin, rtmax, eic_smoothingWindow, standardsAlignment_minPeakIntensity);
-
-        if (!stringFilter.empty()){
-            anchorPointSet.setEICSamplesByFilter(samples, stringFilter);
-        }
-
-        anchorPointSet.compute(samples);
-
-        anchorPointSets.push_back(anchorPointSet);
-
-    }
-    anchorPointsFileStream.close();
-
-    AnchorPointSet lastAnchorPointSet = AnchorPointSet::lastRt(samples);
-    anchorPointSets.push_back(lastAnchorPointSet);
-
-    cout << "anchorPointsBasedAlignment(): Using " << anchorPointSets.size() << " anchor points." << endl;
-
-    /**
-     * =======================================
-     * ==== ENUMERATE ALIGNMENT SEGMENTS =====
-     * =======================================
-     */
-
-    map<mzSample*, vector<pair<float, float>>> anchorPointSetToUpdatedRtMap = rtAligner.anchorPointSetToUpdatedRtMap(anchorPointSets, referenceSample);
-
-    //debugging
-    cout << "Anchor point alignments:" << endl;
-
-    for (auto sample : samples) {
-        if (anchorPointSetToUpdatedRtMap.find(sample) != anchorPointSetToUpdatedRtMap.end()) {
-              vector<pair<float, float>> anchorPointData = anchorPointSetToUpdatedRtMap.at(sample);
-
-              float observedRtStart = 0.0f;
-              float referenceRtStart = 0.0f;
-
-              for (auto &pt : anchorPointData) {
-
-                  float observedRt = pt.first;
-                  float referenceRt = pt.second;
-
-                  AlignmentSegment *alignmentSegment = new AlignmentSegment();
-                  alignmentSegment->sampleName = sample->sampleName;
-                  alignmentSegment->seg_start = observedRtStart;
-                  alignmentSegment->seg_end = observedRt;
-                  alignmentSegment->new_start = referenceRtStart;
-                  alignmentSegment->new_end = referenceRt;
-
-                  rtAligner.addSegment(sample->sampleName, alignmentSegment);
-
-                  //debugging
-                  cout << sample->sampleName << "\t" << observedRt << "\t" << referenceRt << endl;
-
-                  observedRtStart = observedRt;
-                  referenceRtStart = referenceRt;
-              }
-
-              //debugging
-              cout << endl;
-        }
-    }
-
-    rtAligner.doSegmentedAligment();
-
-    //debugging
-//    for (mzSample* sample: samples ) {
-//        for (unsigned int i = 0; i < sample->scans.size(); i++) {
-//            cout << sample->sampleName << "\t" << sample->originalRetentionTimes[i] << "\t" << sample->scans[i]->rt << endl;
-//        }
-//    }
-
-    /**
-     * =======================================
-     * ==== CLEAN UP =========================
-     * =======================================
-     */
-
-//    for (auto &x : anchorPointSets) {
-//        if (x.slice){
-//            delete(x.slice);
-//            x.slice = nullptr;
-//        }
-//    }
+    ExperimentAnchorPoints experimentAnchorPoints = ExperimentAnchorPoints(
+                samples,
+                anchorPointsFile,
+                standardsAlignment_precursorPPM,
+                standardsAlignment_maxRtWindow,
+                eic_smoothingWindow,
+                standardsAlignment_minPeakIntensity
+                );
+    experimentAnchorPoints.compute(false, true); // (debug, isClean)
+    sampleToUpdatedRts = experimentAnchorPoints.sampleToUpdatedRts;
 
     printf("Execution time (anchorPointsBasedAlignment()) : %f seconds \n", getTime() - startLoadingTime);
-
-    sampleToUpdatedRts = anchorPointSetToUpdatedRtMap;
 }
 
 //Issue 739: Handle different types of mzkitchen-driven msp searches.

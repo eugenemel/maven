@@ -910,7 +910,13 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
         float logP=0;
         int N=fields.size();
         vector<string>categorylist;
-        string transition_id, ion_type, isInternalStandard, preferredQuantType;
+        string transition_id, ion_type, isInternalStandard, preferredQuantType, compoundLabels;
+
+        //Issue 667: Support/Respect ignore column
+        if ( header.count("ignore") && header["ignore"]<N) {
+            string ignoreVal = fields[ header["ignore"]].toStdString();
+            if (!ignoreVal.empty()) continue;
+        }
 
         if ( header.count("mz") && header["mz"]<N)  mz = fields[ header["mz"]].toDouble();
         if ( header.count("rt") && header["rt"]<N)  rt = fields[ header["rt"]].toDouble();
@@ -939,6 +945,8 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
 
         if ( header.count("is_internal_standard") && header["is_internal_standard"] < N) isInternalStandard = fields[ header["is_internal_standard"]].toStdString();
         if ( header.count("preferred_quant_type") && header["preferred_quant_type"] < N) preferredQuantType = fields[ header["preferred_quant_type"]].toStdString();
+
+        if (header.count("compound_labels") && header["compound_labels"] < N) compoundLabels = fields[ header["compound_labels"]].toStdString();
 
         //cerr << lineCount << " " << endl;
         //for(int i=0; i<headers.size(); i++) cerr << headers[i] << ", ";
@@ -1003,6 +1011,11 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
             if (! preferredQuantType.empty()) {
                 compound->metaDataMap.insert(
                    make_pair(QQQProcessor::getTransitionPreferredQuantTypeStringKey(), preferredQuantType));
+            }
+
+            if (! compoundLabels.empty()) {
+                compound->metaDataMap.insert(
+                  make_pair(Compound::getCompoundLabelsStringKey(), compoundLabels));
             }
 
             compoundSet.push_back(compound);
@@ -1480,4 +1493,39 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
         }
 
     query0.exec("end transaction");
+}
+
+void Database::setDefaultSampleColors(
+    vector<mzSample*>& samples,
+    bool skipColoredSamples,
+    bool setBlanksToRed
+    ){
+    if (samples.empty()) return;
+
+    float N = samples.size();
+
+    for( unsigned int i=0; i< samples.size(); i++ ) {
+
+            //skip samples that have been colored
+            if (skipColoredSamples && (samples[i]->color[0] + samples[i]->color[1] + samples[i]->color[2] > 0)) {
+                continue;
+            }
+
+            if (setBlanksToRed && samples[i]->isBlank ) {
+                //set blank to non transparent red
+                samples[i]->color[0]=0.9;
+                samples[i]->color[1]=0.0;
+                samples[i]->color[2]=0.0;
+                samples[i]->color[3]=1.0;
+                continue;
+            }
+
+            float hue = 1-0.6*((float)(i+1)/N);
+            QColor c = QColor::fromHsvF(hue,1.0,1.0,1.0);
+
+            samples[i]->color[0] = c.redF();
+            samples[i]->color[1] = c.greenF();
+            samples[i]->color[2] = c.blueF();
+            samples[i]->color[3] = c.alphaF();
+    }
 }

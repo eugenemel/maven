@@ -93,6 +93,11 @@ class Database {
 
         vector<Adduct*> availableAdducts{}; //based on file, not activated
 
+        static void setDefaultSampleColors(
+            vector<mzSample*>& samples,
+            bool skipColoredSamples=true,
+            bool setBlanksToRed=true);
+
       private:
 		QSqlDatabase ligandDB;
         QMap<string,Compound*> compoundIdMap;

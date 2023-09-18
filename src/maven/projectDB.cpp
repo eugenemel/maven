@@ -286,7 +286,9 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                         srmProductMz real,\
                         \
                         isotopicIndex integer,\
-                        isotopeParameters TEXT\
+                        isotopeParameters TEXT,\
+                        \
+                        groupBackground real\
                         )");
 
      if(!query0.exec(TABLESQL)) qDebug() << query0.lastError();
@@ -297,7 +299,8 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                                     ms2Score,adductName,compoundId,compoundName,compoundDB,\
                                     searchTableName,displayName,\
                                     srmPrecursorMz,srmProductMz,\
-                                    isotopicIndex,isotopeParameters\
+                                    isotopicIndex,isotopeParameters,\
+                                    groupBackground\
                                   )\
                                     \
                                  values\
@@ -306,7 +309,8 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                                     ?,?,?,?,?,\
                                     ?,?,\
                                     ?,?,\
-                                    ?,?\
+                                    ?,?,\
+                                    ?\
                                   )\
                                  ");
 
@@ -377,6 +381,9 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
         } else {
             query1.addBindValue(QString(""));
         }
+
+        //Issue 665
+        query1.addBindValue(g->groupBackground);
 
      if(! query1.exec() ) {
         qDebug() << query1.lastError();
@@ -904,6 +911,7 @@ void ProjectDB::alterPeakGroupsTable(){
            bool isHasSrmProductMz = false;
            bool isHasIsotopicIndex = false;
            bool isHasIsotopeParameters = false;
+           bool isHasGroupBackground = false;
 
            while (queryCheckCols.next()) {
                if ("displayName" == queryCheckCols.value(1).toString()) {
@@ -916,6 +924,8 @@ void ProjectDB::alterPeakGroupsTable(){
                    isHasIsotopicIndex = true;
                } else if ("isotopeParameters" == queryCheckCols.value(1).toString()) {
                    isHasIsotopeParameters = true;
+               } else if ("groupBackground" == queryCheckCols.value(1).toString()) {
+                   isHasGroupBackground = true;
                }
            }
 
@@ -963,6 +973,14 @@ void ProjectDB::alterPeakGroupsTable(){
                QString strAddIsotopeParameters = QString("ALTER TABLE peakgroups ADD isotopeParameters TEXT DEFAULT '';");
                if (!queryAddIsotopeParameters.exec(strAddIsotopeParameters)){
                    qDebug() << "Ho..." <<queryCheckCols.lastError();
+               }
+           }
+
+           if (!isHasGroupBackground) {
+               QSqlQuery queryAddGroupBackground(sqlDB);
+               QString strAddGroupBackground = QString("ALTER TABLE peakgroups ADD groupBackground REAL DEFAULT 0;");
+               if (!queryAddGroupBackground.exec(strAddGroupBackground)) {
+                   qDebug() << "Ho..." << queryAddGroupBackground.lastError();
                }
            }
 
@@ -1482,19 +1500,27 @@ void ProjectDB::doAlignment() {
      int segCount=0;
      while (query.next()) {
         string sampleName = query.value("name").toString().toStdString();
-        //mzUtils::replace(sampleName,".mzXML",""); //bug fix.. alignment.rt files do not strore extensions.
+        //mzUtils::replace(sampleName,".mzXML",""); //bug fix.. alignment.rt files do not store extensions.
 
         int sampleId =   query.value("sampleId").toString().toInt();
         mzSample* sample = this->getSampleById(sampleId);
         if (!sample) continue;
 		segCount++;
 
+        float rt = query.value("rt").toString().toFloat();
+        float rtUpdate = query.value("rt_update").toString().toFloat();
+
+        if (sampleToUpdatedRts.find(sample) == sampleToUpdatedRts.end()) {
+            sampleToUpdatedRts.insert(make_pair(sample, vector<pair<float, float>>{}));
+        }
+        sampleToUpdatedRts.at(sample).push_back(make_pair(rt, rtUpdate));
+
         AlignmentSegment* seg = new AlignmentSegment();
         seg->sampleName   = sampleName;
         seg->seg_start = 0;
-        seg->seg_end   = query.value("rt").toString().toFloat();
+        seg->seg_end   = rt;
         seg->new_start = 0;
-        seg->new_end   = query.value("rt_update").toString().toFloat();
+        seg->new_end   = rtUpdate;
 
        if (lastSegment and lastSegment->sampleName == seg->sampleName) {
            seg->seg_start = lastSegment->seg_end;
