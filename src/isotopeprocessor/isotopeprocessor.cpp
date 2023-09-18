@@ -32,6 +32,8 @@ int main(int argc, char *argv[]){
     loadSamples();
     loadSeedPeakGroups();
 
+    vector<IsotopicEnvelopeGroup> isotopicEnvelopGroups{};
+
     for (unsigned int i = 0; i < seedPeakGroups.size(); i++) {
 
         PeakGroup *group = seedPeakGroups[i];
@@ -70,6 +72,7 @@ int main(int argc, char *argv[]){
         }
 
         isotopicEnvelopeGroup.print();
+        isotopicEnvelopGroups.push_back(isotopicEnvelopeGroup);
 
     }
 
