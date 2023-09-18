@@ -1963,3 +1963,9 @@ void ProjectDB::saveIsotopicEnvelopes(vector<IsotopicEnvelopeGroup>& envelopes) 
     }
     query0.exec("end transaction");
 }
+
+void ProjectDB::dropIsotopicEnvelopes() {
+    QSqlQuery query(sqlDB);
+    query.exec("drop table IF EXISTS isotopic_envelopes");
+    query.exec("vacuum;");
+}

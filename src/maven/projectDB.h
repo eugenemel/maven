@@ -103,6 +103,7 @@ class ProjectDB {
         //Do not use this function in contexts where those values might have changed
         // (e.g., MAVEN GUI), unless the values are expliclty handled/corrected ahead of time.
         void saveIsotopicEnvelopes(vector<IsotopicEnvelopeGroup>& envelopes);
+        void dropIsotopicEnvelopes();
 };
 
 struct mzrollDBMatch {

@@ -34,7 +34,7 @@ int main(int argc, char *argv[]){
 
     loadSeedPeakGroups();
 
-    vector<IsotopicEnvelopeGroup> isotopicEnvelopGroups{};
+    vector<IsotopicEnvelopeGroup> isotopicEnvelopeGroups{};
 
     for (unsigned int i = 0; i < seedPeakGroups.size(); i++) {
 
@@ -74,9 +74,13 @@ int main(int argc, char *argv[]){
         }
 
         isotopicEnvelopeGroup.print();
-        isotopicEnvelopGroups.push_back(isotopicEnvelopeGroup);
+        isotopicEnvelopeGroups.push_back(isotopicEnvelopeGroup);
 
     }
+
+    //save results
+    project->dropIsotopicEnvelopes();
+    project->saveIsotopicEnvelopes(isotopicEnvelopeGroups);
 
     // outputs
     // mzrollDB:
@@ -225,6 +229,7 @@ void loadSeedPeakGroups() {
        }
 
        PeakGroup *group = new PeakGroup();
+       group->groupId = groupId;
        group->peaks = groupPeaks;
        group->compound = compound;
        group->adduct = adduct;
