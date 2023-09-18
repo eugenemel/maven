@@ -30,15 +30,15 @@ mac {
         exists(/usr/local/opt/llvm) {
             message("mac os x: llvm found. Will build parallel.")
 
-            #compiler and linker need to be clang-omp++
-            QMAKE_CXX=/usr/local/opt/llvm/bin/clang++
-            QMAKE_LINK=/usr/local/opt/llvm/bin/clang++
-            LIBS += -L/usr/local/opt/llvm/lib/
+#            #compiler and linker need to be clang-omp++
+#            QMAKE_CXX=/usr/local/opt/llvm/bin/clang++
+#            QMAKE_LINK=/usr/local/opt/llvm/bin/clang++
+#            LIBS += -L/usr/local/opt/llvm/lib/
 
-            INCLUDEPATH += /usr/local/opt/llvm/include/
-            INCLUDEPATH += /usr/local/opt/llvm/lib/include/
+#            INCLUDEPATH += /usr/local/opt/llvm/include/
+#            INCLUDEPATH += /usr/local/opt/llvm/lib/include/
 
-            CONFIG += parallel
+#            CONFIG += parallel
         }
 }
 
