@@ -162,6 +162,12 @@ void printUsage() {
          << endl;
 }
 
+/**
+ * @brief loadSamples
+ * @deprecated
+ * this was a multi-threaded implementation, however, this doesn't make any sense if
+ * the input is always an mzrollDB file.
+ */
 void loadSamples() {
     vector<string> filenames = mzUtils::getMzSampleFilesFromDirectory(sampleDir.c_str());
 
@@ -199,6 +205,11 @@ void loadSamples() {
     cout << "loadSamples() done: loaded " << project->samples.size() << " samples\n";
 }
 
+/**
+ * @brief loadSeedPeakGroups
+ * Currently, all peak groups that are marked as 'good' or are in the Bookmarks table are slated
+ * for re-extraction.  However, this could be generalized/adjusted as needed.
+ */
 void loadSeedPeakGroups() {
 
     QSqlQuery query(project->sqlDB);
