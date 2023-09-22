@@ -7,17 +7,19 @@
 using namespace std;
 
 // comand line inputs
-static string projectFile = "";
-static string sampleDir = "";
-static string outputDir = "";
-static string adductsFile = "../../src/maven_core/bin/methods/ADDUCTS.csv";
+string projectFile = "";
+string sampleDir = "";
+string outputDir = "";
+string adductsFile = "../../src/maven_core/bin/methods/ADDUCTS.csv";
+string configInfo = ""; // can either be encoded string of parameters, or a file containing parameters.
 
 //transient maven data structures
 Database DB; // this declaration is necessary for ProjectDB
 
 //persistent maven data structures
-static ProjectDB* project = nullptr;
-static vector<PeakGroup*> seedPeakGroups{};
+ProjectDB* project = nullptr;
+vector<PeakGroup*> seedPeakGroups{};
+shared_ptr<IsotopicExtractionParameters> params = shared_ptr<IsotopicExtractionParameters>(new IsotopicExtractionParameters());
 
 //function declarations
 void processOptions(int argc, char* argv[]);
@@ -60,7 +62,7 @@ int main(int argc, char *argv[]){
         //Combine isotopes based on parameters (e.g, resolving power)
         vector<Isotope> isotopes = IsotopicEnvelopeAdjuster::condenseTheoreticalIsotopes(
             theoreticalIsotopes,
-            IsotopeProcessorOptions::instance().getExtractionParameters(),
+            params,
             false
             );
 
@@ -79,7 +81,7 @@ int main(int argc, char *argv[]){
                         sample,
                         peak,
                         isotopes,
-                        IsotopeProcessorOptions::instance().getExtractionParameters());
+                        params);
 
             isotopicEnvelopeGroup.envelopeBySample.insert(make_pair(sample, envelope));
         }
@@ -110,11 +112,14 @@ int main(int argc, char *argv[]){
 
 void processOptions(int argc, char* argv[]) {
 
-    IsotopeProcessorOptions& options = IsotopeProcessorOptions::instance();
-
     for (unsigned int i = 0; i < static_cast<unsigned int>(argc-1); i++) {
         if (strcmp(argv[i], "-c") == 0 || strcmp(argv[i], "--config") == 0) {
-            options.setOptions(argv[i+1]);
+            configInfo = argv[i+1];
+            if (configInfo.find(".ini") != std::string::npos) {
+                // TODO: parse configuration file
+            } else {
+                params = IsotopicExtractionParameters::decode(configInfo);
+            }
         } else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--mzrollDB") == 0) {
             projectFile = argv[i+1];
             project = new ProjectDB(QString(projectFile.c_str()));
