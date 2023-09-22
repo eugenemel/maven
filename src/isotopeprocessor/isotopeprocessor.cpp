@@ -23,6 +23,10 @@ static vector<PeakGroup*> seedPeakGroups{};
 void processOptions(int argc, char* argv[]);
 void printUsage();
 
+/**
+ * @brief loadSamples
+ * @deprecated
+ */
 void loadSamples();
 void loadSeedPeakGroups();
 
@@ -43,7 +47,7 @@ int main(int argc, char *argv[]){
         Adduct *adduct = group->adduct;
 
         //dummy test: 12C, 13C*1, 13C*2, 13C*3
-        vector<Isotope> isotopes = MassCalculator::computeIsotopes(
+        vector<Isotope> theoreticalIsotopes = MassCalculator::computeIsotopes(
                     compound->formula,
                     adduct,
                     3,
@@ -52,6 +56,13 @@ int main(int argc, char *argv[]){
                     false, // isUse34S
                     false // isUse2H
                     );
+
+        //Combine isotopes based on parameters (e.g, resolving power)
+        vector<Isotope> isotopes = IsotopicEnvelopeAdjuster::condenseTheoreticalIsotopes(
+            theoreticalIsotopes,
+            IsotopeProcessorOptions::instance().getExtractionParameters(),
+            false
+            );
 
         IsotopicEnvelopeGroup isotopicEnvelopeGroup;
         isotopicEnvelopeGroup.group = group;
