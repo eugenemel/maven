@@ -100,16 +100,10 @@ int main(int argc, char *argv[]){
     map<QString, QString> parametersData{make_pair(key, value)};
     project->savePeakGroupsTableData(parametersData);
 
-    // outputs
-    // mzrollDB:
-    // groupId, peakId, compoundName, adductName, isotopes, envelope
-    // isotopes: encoded string of the form {C12, C13-1, C13-2} etc
-    // envelope: encoded string of the form {1e5, 2.7e5, 3.8e4} etc
-    // on the maven gui side, need to make sure that the IDs are properly passed along (peakId, groupId)
-    //
-    // csv:
-    // compoundName, adductName, theoMz, sampleName, rt, totalIntensity, {isotope1, isotope2, ..., isotope3}, {frac1, frac2, ...}
-    //
+    // TODO: output directory is currently unused, instead, values are saved to mzrollDB.
+    if (outputDir != "") {
+        //TODO
+    }
 
     cout << "All Processes Completed Successfully!" << endl;
 }
@@ -157,6 +151,7 @@ void printUsage() {
          << "\t\tDirectory containing sample files referenced in mzrollDB file.\n"
          << "\t-o [--outputDir] <output_dir>\n"
          << "\t\tDirectory to write all output files to.\n"
+         << "\t\tWhether or not the argument is provided, envelopes will be saved into the original mzrollDB file.\n"
          << "\t-a [--adductsFile] <adducts_file>\n"
          << "\t\tFile containing adducts information, usually ADDUCTS.csv\n"
          << endl;
