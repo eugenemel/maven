@@ -96,7 +96,7 @@ int main(int argc, char *argv[]){
     project->saveIsotopicEnvelopes(isotopicEnvelopeGroups);
 
     //save parameters
-    string isotopicExtractionParameters = IsotopeProcessorOptions::instance().getExtractionParameters()->encodeParams();
+    string isotopicExtractionParameters = params->encodeParams();
     QString key = QString("isotopic_envelopes");
     QString value = QString(isotopicExtractionParameters.c_str());
     map<QString, QString> parametersData{make_pair(key, value)};
