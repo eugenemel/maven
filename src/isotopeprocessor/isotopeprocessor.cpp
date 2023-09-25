@@ -66,25 +66,15 @@ int main(int argc, char *argv[]){
             false
             );
 
-        IsotopicEnvelopeGroup isotopicEnvelopeGroup;
-        isotopicEnvelopeGroup.group = group;
-        isotopicEnvelopeGroup.compound = compound;
-        isotopicEnvelopeGroup.adduct = adduct;
-        isotopicEnvelopeGroup.isotopes = isotopes;
-
-        for (auto sample : project->samples) {
-
-            //TODO: refactor as map
-            Peak* peak = isotopicEnvelopeGroup.group->getPeak(sample);
-
-            IsotopicEnvelope envelope = IsotopicEnvelopeExtractor::extractEnvelope(
-                        sample,
-                        peak,
-                        isotopes,
-                        params);
-
-            isotopicEnvelopeGroup.envelopeBySample.insert(make_pair(sample, envelope));
-        }
+        IsotopicEnvelopeGroup isotopicEnvelopeGroup = IsotopicEnvelopeExtractor::extractEnvelopes(
+            compound,
+            adduct,
+            group,
+            theoreticalIsotopes,
+            project->samples,
+            params,
+            false
+            );
 
         isotopicEnvelopeGroup.print();
         isotopicEnvelopeGroups.push_back(isotopicEnvelopeGroup);
