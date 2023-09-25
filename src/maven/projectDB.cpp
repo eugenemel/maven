@@ -41,11 +41,11 @@ void ProjectDB::deleteAll() {
     query.exec("drop table IF EXISTS ui"); //Issue 525
 }
 
-void ProjectDB::deleteGroups() {
+void ProjectDB::deleteGroups(bool isDeleteSearchParams) {
     QSqlQuery query(sqlDB);
     query.exec("drop table peakgroups");
     query.exec("drop table peaks");
-    query.exec("drop table IF EXISTS search_params"); //Issue 197
+    if (isDeleteSearchParams) query.exec("drop table IF EXISTS search_params"); //Issue 197
 }
 
 

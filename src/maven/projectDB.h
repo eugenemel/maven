@@ -64,7 +64,7 @@ class ProjectDB {
             void loadUIOptions();
 
             void deleteAll();
-            void deleteGroups();
+            void deleteGroups(bool isDeleteSearchParams = true);
             void deleteSearchResults(QString searchTable);
             void deletePeakGroup(PeakGroup* g, QString tableName);
             void assignSampleIds();
