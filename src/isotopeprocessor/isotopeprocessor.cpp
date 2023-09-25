@@ -79,11 +79,18 @@ int main(int argc, char *argv[]){
         isotopicEnvelopeGroup.print();
         isotopicEnvelopeGroups.push_back(isotopicEnvelopeGroup);
 
+        //Update the children of the peakgroup to match this value
+        isotopicEnvelopeGroup.setIsotopesToChildrenPeakGroups();
+
     }
 
+    vector<PeakGroup> envelopeExtractedPeakGroups(seedPeakGroups.size());
+    transform(seedPeakGroups.begin(), seedPeakGroups.end(), envelopeExtractedPeakGroups.begin(), [](PeakGroup* pg){return *pg;});
+
     //save results
-    project->dropIsotopicEnvelopes();
-    project->saveIsotopicEnvelopes(isotopicEnvelopeGroups);
+    project->deleteGroups(false);
+    project->saveGroups(envelopeExtractedPeakGroups, "Isotope Processor");
+    project->saveSamples(project->samples);
 
     //save parameters
     string isotopicExtractionParameters = params->encodeParams();
