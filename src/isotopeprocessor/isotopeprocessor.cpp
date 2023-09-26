@@ -42,29 +42,10 @@ int main(int argc, char *argv[]){
         Compound *compound = group->compound;
         Adduct *adduct = group->adduct;
 
-        //dummy test: 12C, 13C*1, 13C*2, 13C*3
-        vector<Isotope> theoreticalIsotopes = MassCalculator::computeIsotopes(
-                    compound->formula,
-                    adduct,
-                    3,
-                    true, //isUse13C,
-                    false, // isUse15N,
-                    false, // isUse34S
-                    false // isUse2H
-                    );
-
-        //Combine isotopes based on parameters (e.g, resolving power)
-        vector<Isotope> isotopes = IsotopicEnvelopeAdjuster::condenseTheoreticalIsotopes(
-            theoreticalIsotopes,
-            params,
-            false
-            );
-
         IsotopicEnvelopeGroup isotopicEnvelopeGroup = IsotopicEnvelopeExtractor::extractEnvelopes(
             compound,
             adduct,
             group,
-            theoreticalIsotopes,
             project->samples,
             params,
             false
