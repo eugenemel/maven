@@ -663,60 +663,21 @@
           <string>Filter Isotopic Peaks based on these criteria</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
-          <item row="4" column="1">
-           <widget class="QSpinBox" name="spnMaxIsotopesToExtract">
-            <property name="suffix">
-             <string> isotopes</string>
-            </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <number>999999999</number>
-            </property>
-            <property name="value">
-             <number>5</number>
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="chkIgnoreNaturalAbundance">
+            <property name="text">
+             <string>Ignore isotopes based on %Error vs Natural Abundance:</string>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_11">
-            <property name="text">
-             <string>Isotope is within [X] scans of parent:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
            <widget class="QLabel" name="label">
             <property name="text">
              <string>Minimum Isotope-parent correlation:</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QSpinBox" name="maxIsotopeScanDiff">
-            <property name="suffix">
-             <string> scans</string>
-            </property>
-            <property name="minimum">
-             <number>0</number>
-            </property>
-            <property name="maximum">
-             <number>999999999</number>
-            </property>
-            <property name="value">
-             <number>5</number>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QCheckBox" name="chkExtractNIsotopes">
-            <property name="text">
-             <string>Extract only first [X] isotopes after monoisotopic:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
+          <item row="4" column="2">
            <widget class="QDoubleSpinBox" name="maxNaturalAbundanceErr">
             <property name="prefix">
              <string/>
@@ -738,14 +699,46 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QCheckBox" name="chkIgnoreNaturalAbundance">
-            <property name="text">
-             <string>Ignore isotopes based on %Error vs Natural Abundance:</string>
+          <item row="2" column="2">
+           <widget class="QSpinBox" name="maxIsotopeScanDiff">
+            <property name="suffix">
+             <string> scans</string>
+            </property>
+            <property name="minimum">
+             <number>0</number>
+            </property>
+            <property name="maximum">
+             <number>999999999</number>
+            </property>
+            <property name="value">
+             <number>5</number>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
+          <item row="5" column="2">
+           <widget class="QSpinBox" name="spnMaxIsotopesToExtract">
+            <property name="suffix">
+             <string> isotopes</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>999999999</number>
+            </property>
+            <property name="value">
+             <number>5</number>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QCheckBox" name="chkExtractNIsotopes">
+            <property name="text">
+             <string>Extract only first [X] isotopes after monoisotopic:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
            <widget class="QDoubleSpinBox" name="minIsotopicCorrelation">
             <property name="minimum">
              <double>-1.000000000000000</double>
@@ -758,6 +751,44 @@
             </property>
             <property name="value">
              <double>0.200000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_11">
+            <property name="text">
+             <string>Isotope is within [X] scans of parent:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QComboBox" name="comboBox">
+            <item>
+             <property name="text">
+              <string>Original (MAVEN 1.0)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>[M+0] Full Width Integration</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Shrinking RT Bounds from [M+0]</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>TODO: other approaches</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Isotopic Extraction Algorithm</string>
             </property>
            </widget>
           </item>
