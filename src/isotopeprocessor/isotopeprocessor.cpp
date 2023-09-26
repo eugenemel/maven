@@ -19,7 +19,7 @@ Database DB; // this declaration is necessary for ProjectDB
 //persistent maven data structures
 ProjectDB* project = nullptr;
 vector<PeakGroup*> seedPeakGroups{};
-shared_ptr<IsotopicExtractionParameters> params = shared_ptr<IsotopicExtractionParameters>(new IsotopicExtractionParameters());
+IsotopeParameters params;
 
 //function declarations
 void processOptions(int argc, char* argv[]);
@@ -87,9 +87,9 @@ int main(int argc, char *argv[]){
     project->saveSamples(project->samples);
 
     //save parameters
-    string isotopicExtractionParameters = params->encodeParams();
+    string isotopeParameters = params.encodeParams();
     QString key = QString("isotopic_envelopes");
-    QString value = QString(isotopicExtractionParameters.c_str());
+    QString value = QString(isotopeParameters.c_str());
     map<QString, QString> parametersData{make_pair(key, value)};
     project->savePeakGroupsTableData(parametersData);
 
@@ -104,7 +104,7 @@ void processOptions(int argc, char* argv[]) {
             if (configInfo.find(".ini") != std::string::npos) {
                 // TODO: parse configuration file
             } else {
-                params = IsotopicExtractionParameters::decode(configInfo);
+                params = IsotopeParameters::decode(configInfo);
             }
         } else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--mzrollDB") == 0) {
             projectFile = argv[i+1];
