@@ -2883,6 +2883,8 @@ IsotopeParameters MainWindow::getIsotopeParameters(){
 
     IsotopeParameters isotopeParameters;
 
+    isotopeParameters.peakPickingAndGroupingParameters = this->getPeakPickingAndGroupingParameters();
+
     isotopeParameters.ppm = static_cast<float>(_ppmWindow);
     isotopeParameters.clsf = clsf;
     isotopeParameters.adduct = getUserAdduct();
