@@ -2889,11 +2889,6 @@ IsotopeParameters MainWindow::getIsotopeParameters(){
     isotopeParameters.clsf = clsf;
     isotopeParameters.adduct = getUserAdduct();
 
-    vector<mzSample*> visibleSamples = getVisibleSamples();
-    if (!visibleSamples.empty()){
-        isotopeParameters.avgScanTime = visibleSamples[0]->getAverageFullScanTime();
-    }
-
     if (settings) {
         isotopeParameters.maxIsotopeScanDiff  = settings->value("maxIsotopeScanDiff", 10).toDouble();
         isotopeParameters.minIsotopicCorrelation  = settings->value("minIsotopicCorrelation", 0).toDouble();
