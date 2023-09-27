@@ -97,13 +97,6 @@ class ProjectDB {
         void alterPeaksTable();
 
         void alterPeakGroupsTable();
-
-        //Issue 646
-        //WARNING: this uses group and sample IDs referenced in the mzrollDB.
-        //Do not use this function in contexts where those values might have changed
-        // (e.g., MAVEN GUI), unless the values are expliclty handled/corrected ahead of time.
-        void saveIsotopicEnvelopes(vector<IsotopicEnvelopeGroup>& envelopes);
-        void dropIsotopicEnvelopes();
 };
 
 struct mzrollDBMatch {
