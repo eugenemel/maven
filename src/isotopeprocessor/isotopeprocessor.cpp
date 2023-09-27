@@ -3,6 +3,7 @@
 
 #include "isotopicenvelopeutils.h"
 #include "../maven/projectDB.h"
+#include "../maven/classifierNeuralNet.h"
 
 using namespace std;
 
@@ -20,6 +21,9 @@ Database DB; // this declaration is necessary for ProjectDB
 ProjectDB* project = nullptr;
 vector<PeakGroup*> seedPeakGroups{};
 IsotopeParameters params;
+
+string classifierFile = "";
+ClassifierNeuralNet classifier;
 
 //function declarations
 void processOptions(int argc, char* argv[]);
@@ -55,7 +59,12 @@ int main(int argc, char *argv[]){
         isotopicEnvelopeGroups.push_back(isotopicEnvelopeGroup);
 
         //Update the children of the peakgroup to match this value
-        isotopicEnvelopeGroup.setIsotopesToChildrenPeakGroups();
+
+        ClassifierNeuralNet *classifierPtr = nullptr;
+        if (classifier.hasModel()) {
+            classifierPtr = &classifier;
+        }
+        isotopicEnvelopeGroup.setIsotopesToChildrenPeakGroups(classifierPtr);
 
     }
 
@@ -82,11 +91,7 @@ void processOptions(int argc, char* argv[]) {
     for (unsigned int i = 0; i < static_cast<unsigned int>(argc-1); i++) {
         if (strcmp(argv[i], "-c") == 0 || strcmp(argv[i], "--config") == 0) {
             configInfo = argv[i+1];
-            if (configInfo.find(".ini") != std::string::npos) {
-                // TODO: parse configuration file
-            } else {
-                params = IsotopeParameters::decode(configInfo);
-            }
+            params = IsotopeParameters::decode(configInfo);
         } else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--mzrollDB") == 0) {
             projectFile = argv[i+1];
             project = new ProjectDB(QString(projectFile.c_str()));
@@ -95,6 +100,9 @@ void processOptions(int argc, char* argv[]) {
         } else if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--adductsFile") == 0) {
             adductsFile = argv[i+1];
             DB.adductsDB = Adduct::loadAdducts(adductsFile);
+        } else if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "--classifierFile") == 0) {
+            classifierFile = argv[i+1];
+            classifier.loadModel(classifierFile);
         }
     }
 
