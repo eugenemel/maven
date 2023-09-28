@@ -100,8 +100,7 @@ void BackgroundPeakUpdate::run(void) {
     } else if  (runFunction == "pullIsotopes" ) {
         IsotopeParameters isotopeParameters = mainwindow->getIsotopeParameters();
         isotopeParameters.ppm = compoundPPMWindow;
-        _group->pullIsotopes(isotopeParameters);
-        //pullIsotopes(_group);
+        _group->pullIsotopes(isotopeParameters, mainwindow->getSamples());
     } else if  ( runFunction == "computePeaks" ) { // database search, calibrated dialog
         computePeaks(); // DB Compound Search dialog
 	} else {
@@ -377,7 +376,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 
                  //Issue 197: Support isotopic extraction for compound db search.
                  if(pullIsotopesFlag && !peakGroupPtr->isIsotope()){
-                     peakGroupPtr->pullIsotopes(isotopeParameters, true, false);
+                     peakGroupPtr->pullIsotopes(isotopeParameters, mainwindow->getSamples(), false);
 
                      auto grpIsotopeParameters = isotopeParameters;
                      grpIsotopeParameters.isotopeParametersType = IsotopeParametersType::SAVED;
@@ -673,7 +672,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         Compound* compound = group.compound;
 
         if(pullIsotopesFlag && !group.isIsotope()){
-            group.pullIsotopes(isotopeParameters);
+            group.pullIsotopes(isotopeParameters, mainwindow->getSamples());
         }
 
         if(csvreports) csvreports->addGroup(&group);

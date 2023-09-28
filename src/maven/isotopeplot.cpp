@@ -51,7 +51,7 @@ void IsotopePlot::setPeakGroup(PeakGroup* group) {
     if (isotopeParameters.isotopeParametersType == IsotopeParametersType::INVALID) {
         isotopeParameters = _mw->getIsotopeParameters();
     }
-    _group->pullIsotopes(isotopeParameters);
+    _group->pullIsotopes(isotopeParameters, _mw->getSamples());
     _group->isotopeParameters = isotopeParameters;
 
     clear(); //Issue 408: Ensure that plot is cleared before returning to prevent dangling pointers

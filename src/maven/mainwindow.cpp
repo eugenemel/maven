@@ -704,7 +704,7 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
             }
 
             //Issue 615
-            groupCopy->pullIsotopes(isotopeParameters, true);
+            groupCopy->pullIsotopes(isotopeParameters, getSamples());
 
             isotopeParameters.isotopeParametersType = IsotopeParametersType::SAVED;
             groupCopy->isotopeParameters = isotopeParameters;
