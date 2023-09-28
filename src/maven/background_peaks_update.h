@@ -154,7 +154,6 @@ private:
   vector<Compound*>compounds;
   vector<mzSlice*> _slices;
 
-  void pullIsotopes(PeakGroup *group);
   void processSlices(void);
   void processSlices(vector<mzSlice*>&slices,string setName);
   void processSlice(mzSlice& slice);
