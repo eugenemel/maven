@@ -44,6 +44,7 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(maxNaturalAbundanceErr, SIGNAL(valueChanged(double)), SLOT(recomputeIsotopes()));
     connect(minIsotopicCorrelation, SIGNAL(valueChanged(double)), SLOT(recomputeIsotopes()));
     connect(maxIsotopeScanDiff, SIGNAL(valueChanged(int)), SLOT(recomputeIsotopes()));
+    connect(cmbIsotopicExtractionAlgorithm, SIGNAL(currentIndexChanged(int)), SLOT(getFormValues()));
 
     //remote url used to fetch compound lists, pathways, and notes
     connect(data_server_url, SIGNAL(textChanged(QString)), SLOT(getFormValues()));
@@ -265,6 +266,19 @@ void SettingsForm::setFormValues() {
     if (settings->contains("spnMaxIsotopesToExtract"))
         spnMaxIsotopesToExtract->setValue(settings->value("spnMaxIsotopesToExtract").toInt());
 
+    if (settings->contains("cmbIsotopicExtractionAlgorithm")){
+
+        QString cmbIsotopicExtractionAlgorithmStr = QString(settings->value("cmbIsotopicExtractionAlgorithm").toString());
+
+        for (int i = 0; i < cmbIsotopicExtractionAlgorithm->count(); i++){
+           QString itemString = cmbIsotopicExtractionAlgorithm->itemText(i);
+           if (itemString == cmbIsotopicExtractionAlgorithmStr){
+               cmbIsotopicExtractionAlgorithm->setCurrentIndex(i);
+               break;
+           }
+        }
+    }
+
     centroid_scan_flag->setCheckState( (Qt::CheckState) settings->value("centroid_scan_flag").toInt());
     scan_filter_min_intensity->setValue( settings->value("scan_filter_min_intensity").toInt());
     scan_filter_min_quantile->setValue(  settings->value("scan_filter_min_quantile").toInt());
@@ -473,6 +487,7 @@ void SettingsForm::getFormValues() {
 
     settings->setValue("maxNaturalAbundanceErr",maxNaturalAbundanceErr->value());
     settings->setValue("maxIsotopeScanDiff",maxIsotopeScanDiff->value());
+    settings->setValue("cmbIsotopicExtractionAlgorithm", cmbIsotopicExtractionAlgorithm->currentText());
 
     settings->setValue("minIsotopicCorrelation",minIsotopicCorrelation->value());
     settings->setValue("C13Labeled",C13Labeled->checkState() );

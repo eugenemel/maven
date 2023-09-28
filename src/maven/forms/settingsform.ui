@@ -762,7 +762,7 @@
            </widget>
           </item>
           <item row="0" column="2">
-           <widget class="QComboBox" name="comboBox">
+           <widget class="QComboBox" name="cmbIsotopicExtractionAlgorithm">
             <item>
              <property name="text">
               <string>Original (MAVEN 1.0)</string>
