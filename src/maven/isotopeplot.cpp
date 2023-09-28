@@ -225,6 +225,12 @@ void IsotopePlot::computeParameters() {
       parameters.append("FROM GUI<br>");
     }
 
+    //Isuse 652
+    parameters.append("Algorithm: ");
+    string algName = IsotopeParameters::getAlgorithmName(_group->isotopeParameters.isotopicExtractionAlgorithm);
+    parameters.append(QString(algName.c_str()));
+    parameters.append("<br>");
+
     parameters.append("Isotopes:");
     bool isHasIsotopes = false;
     if (_group->isotopeParameters.isC13Labeled){
