@@ -39,24 +39,30 @@ void IsotopePlot::setPeakGroup(PeakGroup* group) {
     if (!group) return;
     if (group->isIsotope()) return;
 
-    if (_group) {
-        delete(_group);
-        _group = nullptr;
+    // Issue 672: Assume children are isotopes
+    if (group->childCount() > 0) {
+        _group = group;
+    } else {
+        //Issue 672: TODO: memory leaks
+        //    if (_group) {
+        //        delete(_group);
+        //        _group = nullptr;
+        //    }
+
+        _group = new PeakGroup(*group);
+
+        //Issue 402: try to use saved parameters, fall back to current GUI settings
+        IsotopeParameters isotopeParameters = group->isotopeParameters;
+        if (isotopeParameters.isotopeParametersType == IsotopeParametersType::INVALID) {
+            isotopeParameters = _mw->getIsotopeParameters();
+        }
+        _group->pullIsotopes(isotopeParameters, _mw->getSamples());
+        _group->isotopeParameters = isotopeParameters;
+
+        clear(); //Issue 408: Ensure that plot is cleared before returning to prevent dangling pointers
+
+        if (_group->childCount() == 0) return; // Did not detect any isotopes
     }
-
-    _group = new PeakGroup(*group);
-
-    //Issue 402: try to use saved parameters, fall back to current GUI settings
-    IsotopeParameters isotopeParameters = group->isotopeParameters;
-    if (isotopeParameters.isotopeParametersType == IsotopeParametersType::INVALID) {
-        isotopeParameters = _mw->getIsotopeParameters();
-    }
-    _group->pullIsotopes(isotopeParameters, _mw->getSamples());
-    _group->isotopeParameters = isotopeParameters;
-
-    clear(); //Issue 408: Ensure that plot is cleared before returning to prevent dangling pointers
-
-    if (_group->childCount() == 0) return; // Did not detect any isotopes
 
 	_samples.clear();
 	_samples = _mw->getVisibleSamples();
@@ -277,7 +283,13 @@ void IsotopePlot::computeParameters() {
         parameters.append("% nat. abund. error");
     }
 
-    //if previous value of _parameter is not null, clear() call above will delete and free memory
+    //Issue 671: Some GUI issues around overwriting existing text
+    scene()->removeItem(_parameters);
+    if (_parameters) {
+        delete(_parameters);
+        _parameters = nullptr;
+    }
+
     _parameters = new QGraphicsTextItem();
 
     _parameters->setHtml(parameters);
