@@ -24,9 +24,9 @@ class IsotopeBar : public QObject, public QGraphicsRectItem
             setAcceptHoverEvents(true);
 	}
 
-        QRectF boundingRect() const {
-              return QGraphicsRectItem::boundingRect();
-        }
+    QRectF boundingRect() const {
+        return QGraphicsRectItem::boundingRect();
+    }
 
 	signals:
 		void groupSelected(PeakGroup* g);
@@ -36,9 +36,9 @@ class IsotopeBar : public QObject, public QGraphicsRectItem
         void peakSelected(Peak*);
 
 	protected:        
-                void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-                    QGraphicsRectItem::paint(painter,option,widget);
-                }
+        void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+            QGraphicsRectItem::paint(painter,option,widget);
+        }
 
 	void hoverEnterEvent (QGraphicsSceneHoverEvent*event);
 //	void mouseDoubleClickEvent (QGraphicsSceneMouseEvent*event);
@@ -72,6 +72,7 @@ protected:
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event);
 
 private:
+
     float _width;
     float _height;
     float _barheight;
