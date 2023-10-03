@@ -101,6 +101,7 @@ void BackgroundPeakUpdate::run(void) {
         IsotopeParameters isotopeParameters = mainwindow->getIsotopeParameters();
         isotopeParameters.ppm = compoundPPMWindow;
         _group->pullIsotopes(isotopeParameters, mainwindow->getSamples());
+        _group->isotopeParameters = isotopeParameters;
     } else if  ( runFunction == "computePeaks" ) { // database search, calibrated dialog
         computePeaks(); // DB Compound Search dialog
 	} else {
@@ -673,6 +674,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
         if(pullIsotopesFlag && !group.isIsotope()){
             group.pullIsotopes(isotopeParameters, mainwindow->getSamples());
+            group.isotopeParameters = isotopeParameters;
         }
 
         if(csvreports) csvreports->addGroup(&group);

@@ -65,6 +65,7 @@ int main(int argc, char *argv[]){
             classifierPtr = &classifier;
         }
         isotopicEnvelopeGroup.setIsotopesToChildrenPeakGroups(classifierPtr);
+        isotopicEnvelopeGroup.group->isotopeParameters = params;
 
     }
 
