@@ -17,18 +17,14 @@ IsotopePlot::IsotopePlot(QGraphicsItem* parent, QGraphicsScene *scene)
 
 void IsotopePlot::setMainWindow(MainWindow* mw) { _mw = mw; }
 
-void IsotopePlot::clear() { 
-    QList<QGraphicsItem *> mychildren = QGraphicsItem::childItems();
+void IsotopePlot::clear() {
+    QList<QGraphicsItem *> mychildren = this->childItems();
     if (mychildren.size() > 0 ) {
         foreach (QGraphicsItem *child, mychildren) {
             scene()->removeItem(child);
             delete(child);
+            child = nullptr;
         }
-    }
-    scene()->removeItem(_parameters);
-    if (_parameters) {
-        delete(_parameters);
-        _parameters = nullptr;
     }
 }
 
@@ -79,9 +75,22 @@ void IsotopePlot::setPeakGroup(PeakGroup* group) {
     }
     std::sort(_isotopes.begin(), _isotopes.end(), PeakGroup::compC13);
 
+    clearBars();
     showBars();
 }
 
+void IsotopePlot::clearBars() {
+    QList<QGraphicsItem *> mychildren = this->childItems();
+    if (mychildren.size() > 0 ) {
+        foreach (QGraphicsItem *child, mychildren) {
+            if (child->type() == IsotopeBar::Type) {
+                scene()->removeItem(child);
+                delete(child);
+                child = nullptr;
+            }
+        }
+    }
+}
 
 IsotopePlot::~IsotopePlot() {}
 
@@ -138,7 +147,7 @@ void IsotopePlot::showBars() {
             if(length<0 ) length=0;
             //qDebug() << length << " " << xcoord << " " << ycoord;
             QBrush brush(QColor::fromHsvF(h/20.0,1.0,1.0,1.0));
-            IsotopeBar* rect = new IsotopeBar(this,scene());
+            IsotopeBar* rect = new IsotopeBar(this);
             rect->setBrush(brush);
             rect->setRect(xcoord,ycoord,length,_barheight);
 
@@ -149,6 +158,7 @@ void IsotopePlot::showBars() {
             rect->setData(0,QVariant::fromValue(name));
             rect->setData(1,QVariant::fromValue(_isotopes[j]));
             rect->setData(2,QVariant::fromValue(_samples[i]));
+            scene()->addItem(rect);
 
             if(_mw) {
 //                connect(rect,SIGNAL(groupSelected(PeakGroup*)),_mw, SLOT(setPeakGroup(PeakGroup*)));

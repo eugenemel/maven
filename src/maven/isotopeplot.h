@@ -18,7 +18,7 @@ class IsotopeBar : public QObject, public QGraphicsRectItem
 #endif
 
 	public:
-    IsotopeBar(QGraphicsItem *parent, QGraphicsScene *scene):QGraphicsRectItem(parent){
+    IsotopeBar(QGraphicsItem *parent) : QGraphicsRectItem(parent){
 			setFlag(ItemIsSelectable);
 			setFlag(ItemIsFocusable);
             setAcceptHoverEvents(true);
@@ -87,6 +87,7 @@ private:
     vector<PeakGroup*> _isotopes;
 
     void computeParameters();
+    void clearBars();
 };
 
 #endif
