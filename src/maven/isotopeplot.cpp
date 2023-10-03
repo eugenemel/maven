@@ -225,7 +225,7 @@ void IsotopePlot::computeParameters() {
       parameters.append("FROM GUI<br>");
     }
 
-    //Isuse 652
+    //Issue 652
     parameters.append("Algorithm: ");
     string algName = IsotopeParameters::getAlgorithmName(_group->isotopeParameters.isotopicExtractionAlgorithm);
     parameters.append(QString(algName.c_str()));
