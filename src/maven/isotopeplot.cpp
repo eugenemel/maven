@@ -262,25 +262,30 @@ void IsotopePlot::computeParameters() {
 
     parameters.append("<br>M/z tol: ");
     parameters.append(QString::number(static_cast<double>(_group->isotopeParameters.ppm), 'f', 0));
-    parameters.append(" ppm, RT tol: ");
-    parameters.append(QString::number(static_cast<int>(_group->isotopeParameters.maxIsotopeScanDiff)));
-    parameters.append(" scans");
+    parameters.append(" ppm");
 
-    parameters.append("<br>Min corr: ");
-    parameters.append(QString::number(_group->isotopeParameters.minIsotopicCorrelation, 'f', 2));
-    parameters.append(", extract");
-    if (_group->isotopeParameters.isExtractNIsotopes) {
-        parameters.append(" up to ");
-        parameters.append(QString::number(_group->isotopeParameters.maxIsotopesToExtract));
-    } else {
-        parameters.append(" unlimited");
-    }
-    parameters.append(" isotopes");
+    if (_group->isotopeParameters.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::MAVEN_GUI_VERSION_ONE) {
+        parameters.append(", RT tol: ");
 
-    if (_group->isotopeParameters.isIgnoreNaturalAbundance) {
-        parameters.append("<br>Ignore if >= ");
-        parameters.append(QString::number(_group->isotopeParameters.maxNaturalAbundanceErr, 'f', 1));
-        parameters.append("% nat. abund. error");
+        parameters.append(QString::number(static_cast<int>(_group->isotopeParameters.maxIsotopeScanDiff)));
+        parameters.append(" scans");
+
+        parameters.append("<br>Min corr: ");
+        parameters.append(QString::number(_group->isotopeParameters.minIsotopicCorrelation, 'f', 2));
+        parameters.append(", extract");
+        if (_group->isotopeParameters.isExtractNIsotopes) {
+            parameters.append(" up to ");
+            parameters.append(QString::number(_group->isotopeParameters.maxIsotopesToExtract));
+        } else {
+            parameters.append(" unlimited");
+        }
+        parameters.append(" isotopes");
+
+        if (_group->isotopeParameters.isIgnoreNaturalAbundance) {
+            parameters.append("<br>Ignore if >= ");
+            parameters.append(QString::number(_group->isotopeParameters.maxNaturalAbundanceErr, 'f', 1));
+            parameters.append("% nat. abund. error");
+        }
     }
 
     //Issue 671: Some GUI issues around overwriting existing text
