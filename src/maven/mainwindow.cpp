@@ -2671,8 +2671,7 @@ void MainWindow::markGroup(PeakGroup* group, char label) {
 MatrixXf MainWindow::getIsotopicMatrix(PeakGroup* group) {
 
     PeakGroup::QType qtype = getUserQuantType();
-    //get visiable samples
-    vector <mzSample*> vsamples = getVisibleSamples();
+    vector<mzSample*> vsamples = getVisibleSamples();
     sort(vsamples.begin(), vsamples.end(), mzSample::compSampleOrder);
 
     //get isotopic groups
@@ -2694,14 +2693,15 @@ MatrixXf MainWindow::getIsotopicMatrix(PeakGroup* group) {
         for(int j=0; j < values.size(); j++ ) MM(j,i)=values[j];  //rows=samples, columns=isotopes
     }
 
-    int numberofCarbons=0;
-    if (group->compound && !group->compound->formula.empty()) {
-        MassCalculator mcalc;
-        map<string,int>composition= mcalc.getComposition(group->compound->formula);
-        numberofCarbons=composition["C"];
-    }
-
-    isotopeC13Correct(MM,numberofCarbons);
+//    //Issue 652:
+//    //disabling this call, should revisit in Issue 656
+//    int numberofCarbons=0;
+//    if (group->compound && !group->compound->formula.empty()) {
+//        MassCalculator mcalc;
+//        map<string,int>composition= mcalc.getComposition(group->compound->formula);
+//        numberofCarbons=composition["C"];
+//    }
+//    isotopeC13Correct(MM,numberofCarbons);
     return MM;
 }
 
