@@ -225,6 +225,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     barPlotWidget = new SampleBarPlotWidget(this);
     isotopeLegendWidget = new IsotopeLegendWidget(this);
 
+    //Issue 672: Does not fix the resizing issue, but does prevent the widget from disappearing completely.
+    isotopeLegendWidget->setMinimumWidth(400);
+
     bookmarkedPeaks = addPeaksTable("Bookmarks",
                                     QString("This is a reserved table containing manually curated \"bookmarked\" peak groups."),
                                     QString("This is a reserved table containing manually curated \"bookmarked\" peak groups.")
