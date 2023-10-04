@@ -23,6 +23,8 @@ class IsotopeLegendWidget : public QGraphicsView {
         MainWindow *_mw;
         IsotopePlot *_isotopePlot;
 
+
+
 };
 
 #endif // ISOTOPELEGENDWIDGET_H

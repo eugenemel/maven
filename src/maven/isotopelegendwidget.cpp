@@ -8,12 +8,9 @@ IsotopeLegendWidget::IsotopeLegendWidget(MainWindow *mw){
     setAlignment(Qt::AlignTop|Qt::AlignLeft);
 
     this->_mw = mw;
-    _isotopePlot = new IsotopePlot(nullptr, scene());
-    _isotopePlot->setMainWindow(_mw);
+    _isotopePlot = new IsotopePlot(nullptr, scene(), _mw);
 
     setDragMode(NoDrag);
-    _isotopePlot->setIsInLegendWidget(true);
-
     scene()->addItem(_isotopePlot);
 }
 
@@ -47,7 +44,7 @@ void IsotopeLegendWidget::setPeakGroup(PeakGroup *peakGroup){
 
     QRectF sceneRect(0, 0, _isotopePlot->boundingRect().width()+pixelBuffer, _isotopePlot->boundingRect().height()+pixelBuffer);
 
-//    qDebug() << "sampleBarPlotWidget::setPeakGroup(): Scene Rect: w=" << sceneRect.width() << " h=" << sceneRect.height() << endl;
+    // qDebug() << "IsotopeLegendWidget::setPeakGroup(): Scene Rect: w=" << sceneRect.width() << " h=" << sceneRect.height() << endl;
 
     setSceneRect(sceneRect);
     updateSceneRect(sceneRect);
@@ -64,4 +61,3 @@ void IsotopeLegendWidget::refresh() {
     repaint();
     scene()->update();
 }
-

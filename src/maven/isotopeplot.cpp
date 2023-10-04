@@ -15,6 +15,20 @@ IsotopePlot::IsotopePlot(QGraphicsItem* parent, QGraphicsScene *scene)
     _parameters = nullptr;
 }
 
+//Issue 672: Use this constructor when not putting the IsotopePlot widget on the EIC plot.
+IsotopePlot::IsotopePlot(QGraphicsItem* parent, QGraphicsScene *scene, MainWindow *mainWindow)
+    :QGraphicsItem(parent){
+
+    _mw = mainWindow;
+    _width = 200;
+    _height= 800;
+    _barheight = 20;
+    _group = nullptr;
+    _parameters = nullptr;
+
+    _isInLegendWidget = true;
+}
+
 void IsotopePlot::setMainWindow(MainWindow* mw) { _mw = mw; }
 
 void IsotopePlot::clear() {
@@ -235,6 +249,8 @@ void IsotopeBar::mousePressEvent(QGraphicsSceneMouseEvent *event){
 
 void IsotopePlot::computeParameters() {
 
+    if (!_group) return;
+
     QString parameters("Isotope Parameters: ");
 
     if (_group->isotopeParameters.isotopeParametersType == IsotopeParametersType::SAVED) {
@@ -314,7 +330,6 @@ void IsotopePlot::computeParameters() {
     }
 
     _parameters = new QGraphicsTextItem();
-
     _parameters->setHtml(parameters);
 
     scene()->addItem(_parameters);

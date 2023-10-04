@@ -57,6 +57,7 @@ class IsotopePlot : public QObject, public QGraphicsItem
 
 public:
     IsotopePlot(QGraphicsItem *parent, QGraphicsScene *scene);
+    IsotopePlot(QGraphicsItem *parent, QGraphicsScene *scene, MainWindow *mainWindow);
     ~IsotopePlot();
 
     void setPeakGroup(PeakGroup* group);
