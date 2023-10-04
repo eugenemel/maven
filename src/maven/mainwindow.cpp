@@ -2065,7 +2065,8 @@ vector<SRMTransition*> MainWindow::getSRMTransitions() {
 }
 
 
-//callers are setPeakGroup() and EICPoint::peakSelected signal
+//callers are setPeakGroup(), EICPoint::peakSelected signal,
+// IsotopeBar::peakSelected signal
 void MainWindow::showPeakInfo(Peak* _peak) {
     qDebug() << "MainWindow::showPeakInfo(peak)";
 
