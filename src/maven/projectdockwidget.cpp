@@ -24,7 +24,7 @@ ProjectDockWidget::ProjectDockWidget(QMainWindow *parent):
     _treeWidget->setColumnCount(4);
     _treeWidget->setObjectName("Samples");
     _treeWidget->setHeaderHidden(true);
-    connect(_treeWidget,SIGNAL(itemSelectionChanged()), SLOT(showInfo()));
+    connect(_treeWidget, SIGNAL(itemSelectionChanged()), SLOT(showInfo()));
 
     QToolBar *toolBar = new QToolBar(this);
     toolBar->setFloatable(false);
@@ -1386,4 +1386,15 @@ void ProjectDockWidget::exportSampleMetadata() {
 
     sampleMetadata.close();
 
+}
+
+//Issue 672
+void ProjectDockWidget::refreshSamplesListInOtherWidgets(){
+    qDebug() << "ProjectDockWidget::refreshSamplesListInOtherWidgets()";
+    if (_mainwindow->barPlotWidget->isVisible()) {
+        _mainwindow->barPlotWidget->refresh();
+    }
+    if (_mainwindow->isotopeLegendWidget->isVisible()) {
+        _mainwindow->isotopeLegendWidget->refresh();
+    }
 }
