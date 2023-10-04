@@ -39,6 +39,8 @@ public slots:
     void toggleSamplesVisibility(QTreeWidgetItem *item, bool isVisible);
     void toggleSelectedSampleVisibility(QTreeWidgetItem *item);
 
+    void refreshSamplesListInOtherWidgets();
+
 protected slots:
       void keyPressEvent( QKeyEvent *e );
       void contextMenuEvent ( QContextMenuEvent * event );
@@ -74,6 +76,25 @@ private:
 
     mzFileIO*  fileLoader;
 
+};
+
+class SampleTreeWidget : public QTreeWidget{
+    Q_OBJECT
+
+public:
+    SampleTreeWidget(QWidget *parent = nullptr) : QTreeWidget(parent){
+        setDragEnabled(true);
+        setDragDropMode(QAbstractItemView::InternalMove);
+    }
+
+protected:
+    void dropEvent(QDropEvent *event) {
+        QTreeWidget::dropEvent(event);
+        emit(sampleTreeWidgetDropEvent());
+    }
+
+    signals:
+        void sampleTreeWidgetDropEvent();
 };
 
 #endif // PROJECTDOCKWIDGET_H

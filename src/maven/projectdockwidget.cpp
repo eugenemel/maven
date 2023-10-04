@@ -20,11 +20,12 @@ ProjectDockWidget::ProjectDockWidget(QMainWindow *parent):
     currentProject = nullptr;
 
 
-    _treeWidget=new QTreeWidget(this);
+    _treeWidget=new SampleTreeWidget(this);
     _treeWidget->setColumnCount(4);
     _treeWidget->setObjectName("Samples");
     _treeWidget->setHeaderHidden(true);
     connect(_treeWidget, SIGNAL(itemSelectionChanged()), SLOT(showInfo()));
+    connect(_treeWidget, SIGNAL(sampleTreeWidgetDropEvent()), SLOT(changeSampleOrder()));
 
     QToolBar *toolBar = new QToolBar(this);
     toolBar->setFloatable(false);
@@ -115,11 +116,10 @@ void ProjectDockWidget::changeSampleColor(QTreeWidgetItem* item, int col) {
       setSampleColor(item,lastUsedSampleColor);
 
       _treeWidget->update();
-      _mainwindow->getEicWidget()->replot();
-      currentProject = nullptr;
+
+      refreshSamplesListInOtherWidgets();
 
 }
-
 
 void ProjectDockWidget::changeSampleSet(QTreeWidgetItem* item, int col) {
 
@@ -140,7 +140,6 @@ void ProjectDockWidget::changeSampleSet(QTreeWidgetItem* item, int col) {
     }
 }
 
-
 void ProjectDockWidget::changeNormalizationConstant(QTreeWidgetItem* item, int col) {
     if (item && item->type() == SampleType && col == 2 ) {
         QVariant v = item->data(0,Qt::UserRole);
@@ -150,10 +149,10 @@ void ProjectDockWidget::changeNormalizationConstant(QTreeWidgetItem* item, int c
         bool ok=false;
         float x = item->text(2).toFloat(&ok);
         if (ok) sample->setNormalizationConstant(x);
-        cerr <<"changeSampleSet: " << sample->sampleName << "  " << sample->getNormalizationConstant() << endl;
+
+        qDebug() <<"changeSampleSet: " << sample->sampleName.c_str() << "  " << sample->getNormalizationConstant();
     }
 }
-
 
 void ProjectDockWidget::updateSampleList() {
 
@@ -162,11 +161,8 @@ void ProjectDockWidget::updateSampleList() {
     std::sort(samples.begin(), samples.end(), mzSample::compSampleOrder);
     if ( samples.size() > 0 ) setInfo(samples);
 
-    if ( _mainwindow->getEicWidget() ) {
-        _mainwindow->getEicWidget()->replotForced();
-    }
+    refreshSamplesListInOtherWidgets();
 }
-
 
 void ProjectDockWidget::selectSample(QTreeWidgetItem* item, int col) {
     if (item && item->type() == SampleType ) {
@@ -185,7 +181,6 @@ void ProjectDockWidget::showInfo() {
     QTreeWidgetItem* item = _treeWidget->currentItem();
     if(item and item->type() == SampleType) showSample(item,0);
 }
-
 
 void ProjectDockWidget::changeSampleOrder() {
 
@@ -207,10 +202,9 @@ void ProjectDockWidget::changeSampleOrder() {
     }
 
     if (changed) {
-        _mainwindow->getEicWidget()->replot();
+        refreshSamplesListInOtherWidgets();
     }
 }
-
 
 void ProjectDockWidget::filterTreeItems(QString filterString) {
     QRegExp regexp(filterString,Qt::CaseInsensitive,QRegExp::RegExp);
@@ -247,7 +241,8 @@ void ProjectDockWidget::changeColors() {
       }
 
       _treeWidget->update();
-      _mainwindow->getEicWidget()->replot();
+
+      refreshSamplesListInOtherWidgets();
 }
 
 QIcon ProjectDockWidget::getSampleIcon(mzSample* sample) {
@@ -264,8 +259,6 @@ QColor ProjectDockWidget::getSampleColor(mzSample* sample) {
 void ProjectDockWidget::setSampleColor(QTreeWidgetItem* item, QColor color) {
     if (item == NULL) return;
     if (!color.isValid()) return;
-
-
 
     QVariant v = item->data(0,Qt::UserRole);
     mzSample*  sample =  v.value<mzSample*>();
@@ -372,12 +365,12 @@ void ProjectDockWidget::showSample(QTreeWidgetItem* item, int col) {
             sample->isSelected=checked;
 
             if(changed) {
-                cerr << "ProjectDockWidget::showSample() changed! " << checked << endl;
-                _mainwindow->getEicWidget()->replotForced();
+                refreshSamplesListInOtherWidgets();
             }
         }
     }
 }
+
 QTreeWidgetItem* ProjectDockWidget::getParentFolder(QString fileName) {
         //get parent name of the directory containg this sample
         QTreeWidgetItem* parent=NULL;
@@ -819,7 +812,6 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
     }
 }
 
-
 void ProjectDockWidget::loadProjectXML(QString fileName) {
 
     QSettings* settings = _mainwindow->getSettings();
@@ -1008,14 +1000,7 @@ void ProjectDockWidget::allSamplesVisible() {
         toggleSamplesVisibility(item, true);
     }
 
-    _mainwindow->getEicWidget()->replotForced();
-
-    if (_mainwindow->barPlotWidget->isVisible()) {
-        _mainwindow->barPlotWidget->refresh();
-    }
-    if (_mainwindow->isotopeLegendWidget->isVisible()) {
-        _mainwindow->isotopeLegendWidget->refresh();
-    }
+    refreshSamplesListInOtherWidgets();
 }
 
 void ProjectDockWidget::allSamplesInvisible() {
@@ -1026,14 +1011,7 @@ void ProjectDockWidget::allSamplesInvisible() {
         toggleSamplesVisibility(item, false);
     }
 
-    _mainwindow->getEicWidget()->replotForced();
-
-    if (_mainwindow->barPlotWidget->isVisible()) {
-        _mainwindow->barPlotWidget->refresh();
-    }
-    if (_mainwindow->isotopeLegendWidget->isVisible()) {
-        _mainwindow->isotopeLegendWidget->refresh();
-    }
+    refreshSamplesListInOtherWidgets();
 }
 
 void ProjectDockWidget::toggleSelectedSamples() {
@@ -1045,14 +1023,7 @@ void ProjectDockWidget::toggleSelectedSamples() {
         toggleSelectedSampleVisibility(item);
     }
 
-    _mainwindow->getEicWidget()->replotForced();
-
-    if (_mainwindow->barPlotWidget->isVisible()) {
-        _mainwindow->barPlotWidget->refresh();
-    }
-    if (_mainwindow->isotopeLegendWidget->isVisible()) {
-        _mainwindow->isotopeLegendWidget->refresh();
-    }
+    refreshSamplesListInOtherWidgets();
 }
 
 void ProjectDockWidget::keyPressEvent(QKeyEvent *e ) {
@@ -1062,6 +1033,8 @@ void ProjectDockWidget::keyPressEvent(QKeyEvent *e ) {
     }
 
     QDockWidget::keyPressEvent(e);
+
+    refreshSamplesListInOtherWidgets();
 }
 
 void ProjectDockWidget::toggleSelectedSampleVisibility(QTreeWidgetItem *item) {
@@ -1078,6 +1051,8 @@ void ProjectDockWidget::toggleSelectedSampleVisibility(QTreeWidgetItem *item) {
     for (int i = 0; i < item->childCount(); ++i){
         toggleSelectedSampleVisibility(item->child(i));
     }
+
+    refreshSamplesListInOtherWidgets();
 }
 
 void ProjectDockWidget::toggleSamplesVisibility(QTreeWidgetItem *item, bool isVisible) {
@@ -1094,6 +1069,8 @@ void ProjectDockWidget::toggleSamplesVisibility(QTreeWidgetItem *item, bool isVi
     for (int i = 0; i < item->childCount(); ++i){
         toggleSamplesVisibility(item->child(i), isVisible);
     }
+
+    refreshSamplesListInOtherWidgets();
 }
 
 void ProjectDockWidget::unloadAllSamples() {
@@ -1110,9 +1087,9 @@ void ProjectDockWidget::unloadAllSamples() {
         }
 
         _mainwindow->samples.clear();
-        _mainwindow->getEicWidget()->replotForced();
-}
 
+        refreshSamplesListInOtherWidgets();
+}
 
 void ProjectDockWidget::unloadSample() {
     QTreeWidgetItem *item = _treeWidget->currentItem();
@@ -1143,7 +1120,7 @@ void ProjectDockWidget::unloadSample() {
         //delete(item);
     }
 
-    _mainwindow->getEicWidget()->replotForced();
+    refreshSamplesListInOtherWidgets();
 }
 
 const string SEP = ",";
@@ -1322,9 +1299,7 @@ void ProjectDockWidget::importSampleMetadata(){
     std::sort(samples.begin(), samples.end(), mzSample::compSampleOrder);
     setInfo(samples);
 
-    if ( _mainwindow->getEicWidget() ) {
-        _mainwindow->getEicWidget()->replotForced();
-    }
+    refreshSamplesListInOtherWidgets();
 }
 
 void ProjectDockWidget::exportSampleMetadata() {
@@ -1390,11 +1365,13 @@ void ProjectDockWidget::exportSampleMetadata() {
 
 //Issue 672
 void ProjectDockWidget::refreshSamplesListInOtherWidgets(){
-    qDebug() << "ProjectDockWidget::refreshSamplesListInOtherWidgets()";
-    if (_mainwindow->barPlotWidget->isVisible()) {
+    if ( _mainwindow->getEicWidget() ) {
+        _mainwindow->getEicWidget()->replotForced();
+    }
+    if (_mainwindow->barPlotWidget && _mainwindow->barPlotWidget->isVisible()) {
         _mainwindow->barPlotWidget->refresh();
     }
-    if (_mainwindow->isotopeLegendWidget->isVisible()) {
+    if (_mainwindow->isotopeLegendWidget && _mainwindow->isotopeLegendWidget->isVisible()) {
         _mainwindow->isotopeLegendWidget->refresh();
     }
 }
