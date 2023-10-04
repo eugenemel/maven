@@ -22,6 +22,10 @@ IsotopeLegendWidget::~IsotopeLegendWidget(){
     if (_isotopePlot){
         delete(_isotopePlot);
     }
+
+    if (_scene) {
+        delete(_scene);
+    }
 }
 
 void IsotopeLegendWidget::setPeakGroup(PeakGroup *peakGroup){
@@ -30,7 +34,7 @@ void IsotopeLegendWidget::setPeakGroup(PeakGroup *peakGroup){
 
     if(!peakGroup) return;
 
-    //width is based on the dockwidget width
+    //width is based on the dockwidget width - initialization
     _isotopePlot->setWidth(100);
 
     _isotopePlot->setPeakGroup(peakGroup);
