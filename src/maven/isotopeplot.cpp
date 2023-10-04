@@ -161,7 +161,6 @@ void IsotopePlot::showBars() {
             rect->setData(0,QVariant::fromValue(name));
             rect->setData(1,QVariant::fromValue(_isotopes[j]));
             rect->setData(2,QVariant::fromValue(_samples[i]));
-            scene()->addItem(rect);
 
             if(_mw) {
 //                connect(rect,SIGNAL(groupSelected(PeakGroup*)),_mw, SLOT(setPeakGroup(PeakGroup*)));
