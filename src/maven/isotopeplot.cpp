@@ -286,6 +286,8 @@ void IsotopePlot::computeParameters() {
         parameters.append("<br>Min corr: ");
         parameters.append(QString::number(_group->isotopeParameters.minIsotopicCorrelation, 'f', 2));
         parameters.append(", ");
+    } else {
+        parameters.append("<br>");
     }
 
     parameters.append("extract");
