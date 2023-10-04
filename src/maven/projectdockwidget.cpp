@@ -417,12 +417,6 @@ void ProjectDockWidget::showSampleInfo(QTreeWidgetItem* item, int col) {
 
 }
 
-void ProjectDockWidget::dropEvent(QDropEvent* e) {
-    cerr << "ProjectDockWidget::dropEvent() " << endl;
-    QTreeWidgetItem *item = _treeWidget->currentItem();
-    if (item && item->type() == SampleType ) changeSampleOrder();
-}
-
 void ProjectDockWidget::saveProjectAs() {
 
     QSettings* settings = _mainwindow->getSettings();

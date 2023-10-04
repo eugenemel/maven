@@ -54,7 +54,6 @@ private slots:
     void selectSample(QTreeWidgetItem* item, int col);
     void changeColors();
     void setSampleColor(QTreeWidgetItem* item, QColor color);
-    void dropEvent (QDropEvent*event);
     void unloadSample();
     void unloadAllSamples();
     void filterTreeItems(QString filterString);
