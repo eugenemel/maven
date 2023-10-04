@@ -285,15 +285,19 @@ void IsotopePlot::computeParameters() {
 
         parameters.append("<br>Min corr: ");
         parameters.append(QString::number(_group->isotopeParameters.minIsotopicCorrelation, 'f', 2));
-        parameters.append(", extract");
-        if (_group->isotopeParameters.isExtractNIsotopes) {
-            parameters.append(" up to ");
-            parameters.append(QString::number(_group->isotopeParameters.maxIsotopesToExtract));
-        } else {
-            parameters.append(" unlimited");
-        }
-        parameters.append(" isotopes");
+        parameters.append(", ");
+    }
 
+    parameters.append("extract");
+    if (_group->isotopeParameters.isExtractNIsotopes) {
+        parameters.append(" up to ");
+        parameters.append(QString::number(_group->isotopeParameters.maxIsotopesToExtract));
+    } else {
+        parameters.append(" unlimited");
+    }
+    parameters.append(" isotopes");
+
+    if (_group->isotopeParameters.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::MAVEN_GUI_VERSION_ONE) {
         if (_group->isotopeParameters.isIgnoreNaturalAbundance) {
             parameters.append("<br>Ignore if >= ");
             parameters.append(QString::number(_group->isotopeParameters.maxNaturalAbundanceErr, 'f', 1));
