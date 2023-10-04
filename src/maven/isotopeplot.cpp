@@ -35,23 +35,26 @@ void IsotopePlot::setPeakGroup(PeakGroup* group) {
     if (!group) return;
     if (group->isIsotope()) return;
 
-    // Issue 672: Assume children are isotopes
-    if (group->childCount() > 0) {
-        _group = group;
-    } else {
-        //Issue 672: TODO: memory leaks
-        //    if (_group) {
-        //        delete(_group);
-        //        _group = nullptr;
-        //    }
+    //Ensure that IsotopePlot._group is a copy of a group from some other source.
+    if (_group) {
+        delete(_group);
+        _group = nullptr;
+    }
 
-        _group = new PeakGroup(*group);
+    _group = new PeakGroup(*group);
 
-        //Issue 402: try to use saved parameters, fall back to current GUI settings
-        IsotopeParameters isotopeParameters = group->isotopeParameters;
+    //Issue 402: try to use saved parameters, fall back to current GUI settings
+    IsotopeParameters isotopeParameters = group->isotopeParameters;
+
+    // childCount() == 0: From EIC widget
+    // IsotopeParametersType::INVALID: from settings form
+    if (group->childCount() == 0 || isotopeParameters.isotopeParametersType == IsotopeParametersType::INVALID) {
+
+        //from settings form
         if (isotopeParameters.isotopeParametersType == IsotopeParametersType::INVALID) {
             isotopeParameters = _mw->getIsotopeParameters();
         }
+
         _group->pullIsotopes(isotopeParameters, _mw->getSamples());
         _group->isotopeParameters = isotopeParameters;
 
