@@ -56,5 +56,12 @@ void IsotopeLegendWidget::setPeakGroup(PeakGroup *peakGroup){
     this->verticalScrollBar()->setSliderPosition(0);
     this->horizontalScrollBar()->setSliderPosition(0);
 
+    refresh();
     qDebug() << "IsotopeLegendWidget::setPeakGroup() group=" << peakGroup << "completed";
 }
+
+void IsotopeLegendWidget::refresh() {
+    repaint();
+    scene()->update();
+}
+

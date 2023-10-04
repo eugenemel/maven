@@ -1013,6 +1013,9 @@ void ProjectDockWidget::allSamplesVisible() {
     if (_mainwindow->barPlotWidget->isVisible()) {
         _mainwindow->barPlotWidget->refresh();
     }
+    if (_mainwindow->isotopeLegendWidget->isVisible()) {
+        _mainwindow->isotopeLegendWidget->refresh();
+    }
 }
 
 void ProjectDockWidget::allSamplesInvisible() {
@@ -1027,6 +1030,9 @@ void ProjectDockWidget::allSamplesInvisible() {
 
     if (_mainwindow->barPlotWidget->isVisible()) {
         _mainwindow->barPlotWidget->refresh();
+    }
+    if (_mainwindow->isotopeLegendWidget->isVisible()) {
+        _mainwindow->isotopeLegendWidget->refresh();
     }
 }
 
@@ -1043,6 +1049,9 @@ void ProjectDockWidget::toggleSelectedSamples() {
 
     if (_mainwindow->barPlotWidget->isVisible()) {
         _mainwindow->barPlotWidget->refresh();
+    }
+    if (_mainwindow->isotopeLegendWidget->isVisible()) {
+        _mainwindow->isotopeLegendWidget->refresh();
     }
 }
 
