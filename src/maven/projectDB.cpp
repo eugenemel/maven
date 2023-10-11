@@ -288,7 +288,9 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                         isotopicIndex integer,\
                         isotopeParameters TEXT,\
                         \
-                        groupBackground real\
+                        groupBackground real,\
+                        blankMaxHeight real,\
+                        blankMedianHeight real\
                         )");
 
      if(!query0.exec(TABLESQL)) qDebug() << query0.lastError();
@@ -300,7 +302,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                                     searchTableName,displayName,\
                                     srmPrecursorMz,srmProductMz,\
                                     isotopicIndex,isotopeParameters,\
-                                    groupBackground\
+                                    groupBackground,blankMaxHeight,blankMedianHeight\
                                   )\
                                     \
                                  values\
@@ -310,7 +312,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                                     ?,?,\
                                     ?,?,\
                                     ?,?,\
-                                    ?\
+                                    ?,?,?\
                                   )\
                                  ");
 
@@ -384,6 +386,10 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 
         //Issue 665
         query1.addBindValue(g->groupBackground);
+
+        //Issue 667
+        query1.addBindValue(g->blankMaxHeight);
+        query1.addBindValue(g->blankMedianHeight);
 
      if(! query1.exec() ) {
         qDebug() << query1.lastError();
@@ -912,6 +918,8 @@ void ProjectDB::alterPeakGroupsTable(){
            bool isHasIsotopicIndex = false;
            bool isHasIsotopeParameters = false;
            bool isHasGroupBackground = false;
+           bool isHasBlankMaxHeight = false;
+           bool isHasBlankMedianHeight = false;
 
            while (queryCheckCols.next()) {
                if ("displayName" == queryCheckCols.value(1).toString()) {
@@ -926,6 +934,10 @@ void ProjectDB::alterPeakGroupsTable(){
                    isHasIsotopeParameters = true;
                } else if ("groupBackground" == queryCheckCols.value(1).toString()) {
                    isHasGroupBackground = true;
+               } else if ("blankMaxHeight" == queryCheckCols.value(1).toString()) {
+                   isHasBlankMaxHeight = true;
+               } else if ("blankMedianHeight" == queryCheckCols.value(1).toString()) {
+                   isHasBlankMedianHeight = true;
                }
            }
 
@@ -934,7 +946,10 @@ void ProjectDB::alterPeakGroupsTable(){
                     << "isHasSrmPrecursorMz? " << isHasSrmPrecursorMz
                     << "isHasSrmProductMz? " << isHasSrmProductMz
                     << "isHasIsotopicIndex? " << isHasIsotopicIndex
-                    << "isHasIsotopeParameters? " << isHasIsotopeParameters;
+                    << "isHasIsotopeParameters? " << isHasIsotopeParameters
+                    << "isHasGroupBackground? " << isHasGroupBackground
+                    << "isHasBlankMaxHeight? " << isHasBlankMaxHeight
+                    << "isHasBlankMedianHeight? " << isHasBlankMedianHeight;
 
            if (!isHasDisplayName) {
                QSqlQuery queryAdjustPeakGroupsTable(sqlDB);
@@ -984,6 +999,22 @@ void ProjectDB::alterPeakGroupsTable(){
                }
            }
 
+           if (!isHasBlankMaxHeight) {
+               QSqlQuery queryAddBlankMaxHeight(sqlDB);
+               QString strAddBlankMaxHeight = QString("ALTER TABLE peakgroups ADD blankMaxHeight REAL DEFAULT 0;");
+               if (!queryAddBlankMaxHeight.exec(strAddBlankMaxHeight)) {
+                   qDebug() << "Ho..." << queryAddBlankMaxHeight.lastError();
+               }
+           }
+
+           if (!isHasBlankMedianHeight) {
+               QSqlQuery queryAddBlankMedianHeight(sqlDB);
+               QString strAddBlankMedianHeight = QString("ALTER TABLE peakgroups ADD blankMedianHeight REAL DEFAULT 0;");
+               if (!queryAddBlankMedianHeight.exec(strAddBlankMedianHeight)) {
+                   qDebug() << "Ho..." << queryAddBlankMedianHeight.lastError();
+               }
+           }
+
 }
 
 void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool isAttemptToLoadDB, const map<int, vector<Peak>>& peakGroupMap, Classifier *classifier) {
@@ -1014,6 +1045,11 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
         g.srmPrecursorMz = static_cast<float>(query.value("srmPrecursorMz").toDouble());
         g.srmProductMz = static_cast<float>(query.value("srmProductMz").toDouble());
         g.isotopicIndex = query.value("isotopicIndex").toInt();
+
+        //Issue 667
+        g.groupBackground = query.value("groupBackground").toFloat();
+        g.blankMaxHeight = query.value("blankMaxHeight").toFloat();
+        g.blankMedianHeight = query.value("blankMedianHeight").toFloat();
 
         QVariant label = query.value("label");
         if (label.toString().size() > 0) {
@@ -1109,7 +1145,6 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
             } else {
                 g.tagString = compoundName + "|" + adductName + " | id=" + compoundId;
             }
-
 
         } else if (!compoundName.empty() && !compoundDB.empty()) {
             vector<Compound*>matches = DB.findSpeciesByName(compoundName, compoundDB, isAttemptToLoadDB);
