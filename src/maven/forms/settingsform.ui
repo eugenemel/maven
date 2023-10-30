@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1094</width>
-    <height>321</height>
+    <height>344</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -351,72 +351,27 @@
        <string>Peak Detection</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_7">
-       <item row="0" column="1" rowspan="2">
-        <widget class="QGroupBox" name="boxBaseline">
+       <item row="2" column="1">
+        <widget class="QGroupBox" name="boxDisplayOptions">
          <property name="title">
-          <string>Baseline Calculation</string>
+          <string>Display Options</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_6">
+         <layout class="QGridLayout" name="gridLayout_16">
           <item row="0" column="0">
-           <widget class="QLabel" name="lblDropTopX">
+           <widget class="QCheckBox" name="chkDisplayConsensusSpectrum">
             <property name="text">
-             <string>Drop top x%  intensities from chromatogram</string>
+             <string>Display consensus spectra when browsing peak groups</string>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="lblBaselineSmoothing">
+           <widget class="QCheckBox" name="chkShowRtRange">
             <property name="text">
-             <string>Baseline Smoothing </string>
+             <string>Display peak group RT range on click</string>
             </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QSpinBox" name="baseline_quantile">
-            <property name="suffix">
-             <string> %</string>
+            <property name="checked">
+             <bool>false</bool>
             </property>
-            <property name="prefix">
-             <string/>
-            </property>
-            <property name="maximum">
-             <number>100</number>
-            </property>
-            <property name="value">
-             <number>80</number>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QSpinBox" name="baseline_smoothing">
-            <property name="suffix">
-             <string> scans</string>
-            </property>
-            <property name="maximum">
-             <number>1000000</number>
-            </property>
-            <property name="value">
-             <number>5</number>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0" colspan="2">
-           <widget class="QComboBox" name="cmbBaselineType">
-            <item>
-             <property name="text">
-              <string>Drop Top X</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Non-Peak Max</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Non-Peak Median</string>
-             </property>
-            </item>
            </widget>
           </item>
          </layout>
@@ -568,37 +523,82 @@
          </layout>
         </widget>
        </item>
-       <item row="2" column="1">
-        <widget class="QGroupBox" name="boxDisplayOptions">
-         <property name="title">
-          <string>Display Options</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_16">
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="chkDisplayConsensusSpectrum">
-            <property name="text">
-             <string>Display consensus spectra when browsing peak groups</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="chkShowRtRange">
-            <property name="text">
-             <string>Display peak group RT range on click</string>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
        <item row="3" column="1">
         <widget class="QPushButton" name="recomputeEICButton">
          <property name="text">
           <string>Recompute EIC</string>
          </property>
+        </widget>
+       </item>
+       <item row="0" column="1" rowspan="2">
+        <widget class="QGroupBox" name="boxBaseline">
+         <property name="title">
+          <string>Baseline Calculation</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_6">
+          <item row="0" column="0">
+           <widget class="QLabel" name="lblDropTopX">
+            <property name="text">
+             <string>Drop top x%  intensities from chromatogram</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="lblBaselineSmoothing">
+            <property name="text">
+             <string>Baseline Smoothing </string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="baseline_quantile">
+            <property name="suffix">
+             <string> %</string>
+            </property>
+            <property name="prefix">
+             <string/>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+            <property name="value">
+             <number>80</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="baseline_smoothing">
+            <property name="suffix">
+             <string> scans</string>
+            </property>
+            <property name="maximum">
+             <number>1000000</number>
+            </property>
+            <property name="value">
+             <number>5</number>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="2">
+           <widget class="QComboBox" name="cmbBaselineType">
+            <item>
+             <property name="text">
+              <string>Drop Top X</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Non-Peak Max</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Non-Peak Median</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>
@@ -607,37 +607,16 @@
       <attribute name="title">
        <string>Isotope Detection</string>
       </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QGroupBox" name="groupBox">
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="QGroupBox" name="grpBox_samplesLabeled">
          <property name="title">
-          <string>Samples Are Labeled? </string>
+          <string>Isotopes to enumerate </string>
          </property>
          <property name="flat">
           <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="C13Labeled">
-            <property name="text">
-             <string>C13 Labeled </string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QCheckBox" name="N15Labeled">
-            <property name="text">
-             <string>N15  Labeled</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QCheckBox" name="S34Labeled">
-            <property name="text">
-             <string>S34 Labeled</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="0">
            <widget class="QCheckBox" name="D2Labeled">
             <property name="enabled">
@@ -648,11 +627,46 @@
             </property>
            </widget>
           </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="C13Labeled">
+            <property name="text">
+             <string>C13 Labeled </string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="N15Labeled">
+            <property name="text">
+             <string>N15 Labeled</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="S34Labeled">
+            <property name="text">
+             <string>S34 Labeled</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="O18Labeled">
+            <property name="text">
+             <string>O18 Labeled</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QCheckBox" name="checkBox_2">
+            <property name="text">
+             <string>Nat Abundance</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
-       <item>
-        <widget class="QGroupBox" name="groupBox_4">
+       <item row="0" column="1">
+        <widget class="QGroupBox" name="grpBox_filteredOptions">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -663,21 +677,7 @@
           <string>Filter Isotopic Peaks based on these criteria</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
-          <item row="4" column="0">
-           <widget class="QCheckBox" name="chkIgnoreNaturalAbundance">
-            <property name="text">
-             <string>Ignore isotopes based on %Error vs Natural Abundance:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Minimum Isotope-parent correlation:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="2">
+          <item row="4" column="1">
            <widget class="QDoubleSpinBox" name="maxNaturalAbundanceErr">
             <property name="prefix">
              <string/>
@@ -699,23 +699,40 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="2">
-           <widget class="QSpinBox" name="maxIsotopeScanDiff">
-            <property name="suffix">
-             <string> scans</string>
-            </property>
-            <property name="minimum">
-             <number>0</number>
-            </property>
-            <property name="maximum">
-             <number>999999999</number>
-            </property>
-            <property name="value">
-             <number>5</number>
+          <item row="2" column="0">
+           <widget class="QLabel" name="lblIsotopeWithinScans">
+            <property name="text">
+             <string>Isotope is within [X] scans of parent:</string>
             </property>
            </widget>
           </item>
-          <item row="5" column="2">
+          <item row="1" column="0">
+           <widget class="QLabel" name="lblMinIsotopeParrentCorrelation">
+            <property name="text">
+             <string>Minimum Isotope-parent correlation:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QDoubleSpinBox" name="spnIgnoreNatIsotopesPct">
+            <property name="suffix">
+             <string>%</string>
+            </property>
+            <property name="decimals">
+             <number>6</number>
+            </property>
+            <property name="maximum">
+             <double>100.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.000001000000000</double>
+            </property>
+            <property name="value">
+             <double>0.000100000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
            <widget class="QSpinBox" name="spnMaxIsotopesToExtract">
             <property name="suffix">
              <string> isotopes</string>
@@ -731,14 +748,30 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
-           <widget class="QCheckBox" name="chkExtractNIsotopes">
-            <property name="text">
-             <string>Extract only first [X] isotopes after monoisotopic:</string>
+          <item row="2" column="1">
+           <widget class="QSpinBox" name="maxIsotopeScanDiff">
+            <property name="suffix">
+             <string> scans</string>
+            </property>
+            <property name="minimum">
+             <number>0</number>
+            </property>
+            <property name="maximum">
+             <number>999999999</number>
+            </property>
+            <property name="value">
+             <number>5</number>
             </property>
            </widget>
           </item>
-          <item row="1" column="2">
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="chkExtractNIsotopes">
+            <property name="text">
+             <string>Extract only first [X] isotopes after [M+0]:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
            <widget class="QDoubleSpinBox" name="minIsotopicCorrelation">
             <property name="minimum">
              <double>-1.000000000000000</double>
@@ -754,14 +787,21 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_11">
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="chkIgnoreNaturalAbundance">
             <property name="text">
-             <string>Isotope is within [X] scans of parent:</string>
+             <string>Ignore isotopes if above [X] % error from natural abundance:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
+          <item row="5" column="0">
+           <widget class="QLabel" name="lblIgnoreNaturalAbundance">
+            <property name="text">
+             <string>Ignore natural abundance if below [X] % of [M+0]:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
            <widget class="QComboBox" name="cmbIsotopicExtractionAlgorithm">
             <item>
              <property name="text">
@@ -776,13 +816,20 @@
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QLabel" name="label_2">
+           <widget class="QLabel" name="lblIsotopicExtractionAlgorithm">
             <property name="text">
              <string>Isotopic Extraction Algorithm</string>
             </property>
            </widget>
           </item>
          </layout>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="2">
+        <widget class="QCheckBox" name="checkBox">
+         <property name="text">
+          <string>Display natural abundance-corrected values</string>
+         </property>
         </widget>
        </item>
       </layout>
