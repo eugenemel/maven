@@ -265,7 +265,7 @@ void IsotopePlot::computeParameters() {
     parameters.append(QString(algName.c_str()));
     parameters.append("<br>");
 
-    parameters.append("Isotopes:");
+    parameters.append("Labels:");
     bool isHasIsotopes = false;
     if (_group->isotopeParameters.isC13Labeled){
         if (isHasIsotopes) parameters.append(",");
@@ -288,7 +288,20 @@ void IsotopePlot::computeParameters() {
         isHasIsotopes = true;
     }
 
-    parameters.append("<br>M/z tol: ");
+    if (_group->isotopeParameters.isO18Labeled) {
+        if (isHasIsotopes) parameters.append(",");
+        parameters.append(" 18O");
+    }
+
+    if (_group->isotopeParameters.isNatAbundance) {
+        parameters.append("<br>Natural Abundance Isotopes >= ");
+        parameters.append(QString::number(100.0f * _group->isotopeParameters.natAbundanceThreshold, 'f', 6));
+        parameters.append("% of [M+0]");
+    } else {
+        parameters.append("<br>No Natural Abundance Isotopes");
+    }
+
+    parameters.append("<br>m/z tol: ");
     parameters.append(QString::number(static_cast<double>(_group->isotopeParameters.ppm), 'f', 0));
     parameters.append(" ppm");
 

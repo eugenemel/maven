@@ -2911,7 +2911,10 @@ IsotopeParameters MainWindow::getIsotopeParameters(){
         isotopeParameters.maxIsotopesToExtract = settings->value("spnMaxIsotopesToExtract", 5).toInt();
         isotopeParameters.eic_smoothingWindow = static_cast<float>(settings->value("eic_smoothingWindow", 1).toDouble());
         isotopeParameters.eic_smoothingAlgorithm = static_cast<EIC::SmootherType>(settings->value("eic_smoothingAlgorithm", 0).toInt());
-        isotopeParameters.natAbundanceThreshold = settings->value("spnIgnoreNatIsotopesPct", .000001).toFloat();
+
+        //The stored value is a % - divide by 100 to convert to fraction
+        isotopeParameters.natAbundanceThreshold = settings->value("spnIgnoreNatIsotopesPct", .000001).toFloat() / 100.0f;
+
         isotopeParameters.isotopicExtractionAlgorithm = IsotopeParameters::getExtractionAlgorithmFromName(settings->value("cmbIsotopicExtractionAlgorithm").toString().toStdString());
         isotopeParameters.labeledIsotopeRetentionPolicy = IsotopeParameters::getLabeledIsotopeRetentionPolicyFromName(settings->value("cmbRetentionPolicy").toString().toStdString());
 
