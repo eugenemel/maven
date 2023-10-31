@@ -263,7 +263,9 @@ void SettingsForm::setFormValues() {
     N15Labeled->setCheckState( (Qt::CheckState) settings->value("N15Labeled").toInt()  );
     S34Labeled->setCheckState( (Qt::CheckState) settings->value("S34Labeled").toInt() );
     D2Labeled->setCheckState(  (Qt::CheckState) settings->value("D2Labeled").toInt()  );
-//    isotopeC13Correction->setCheckState(  (Qt::CheckState) settings->value("isotopeC13Correction").toInt()  );
+    O18Labeled->setCheckState( (Qt::CheckState) settings->value("O18Labeled").toInt());
+    chkDisplayNatAbundanceCorrectedValues->setCheckState((Qt::CheckState) settings->value("chkDisplayNatAbundanceCorrectedValues").toInt());
+    NatAbundanceLabeled->setCheckState((Qt::CheckState) settings->value("NatAbundanceLabeled").toInt());
     chkIgnoreNaturalAbundance->setCheckState(  (Qt::CheckState) settings->value("chkIgnoreNaturalAbundance").toInt()  );
     chkExtractNIsotopes->setCheckState( (Qt::CheckState) settings->value("chkExtractNIsotopes").toInt() );
 
@@ -278,6 +280,22 @@ void SettingsForm::setFormValues() {
            QString itemString = cmbIsotopicExtractionAlgorithm->itemText(i);
            if (itemString == cmbIsotopicExtractionAlgorithmStr){
                cmbIsotopicExtractionAlgorithm->setCurrentIndex(i);
+               break;
+           }
+        }
+    }
+
+    if (settings->contains("spnIgnoreNatIsotopesPct"))
+        spnIgnoreNatIsotopesPct->setValue(settings->value("spnIgnoreNatIsotopesPct").toDouble());
+
+    if (settings->contains("cmbRetentionPolicy")){
+
+        QString cmbRetentionPolicyStr = QString(settings->value("cmbRetentionPolicy").toString());
+
+        for (int i = 0; i < cmbRetentionPolicy->count(); i++){
+           QString itemString = cmbRetentionPolicy->itemText(i);
+           if (itemString == cmbRetentionPolicyStr){
+               cmbRetentionPolicy->setCurrentIndex(i);
                break;
            }
         }
