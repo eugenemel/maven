@@ -2671,12 +2671,18 @@ void MainWindow::markGroup(PeakGroup* group, char label) {
     //getPlotWidget()->scene()->update();
 }
 
+bool MainWindow::isDisplayNaturalAbundanceCorrectedValues() {
+    return this->settings->value("chkDisplayNatAbundanceCorrectedValues", false).toBool();
+}
 
 MatrixXf MainWindow::getIsotopicMatrix(PeakGroup* group) {
 
     PeakGroup::QType qtype = getUserQuantType();
     vector<mzSample*> vsamples = getVisibleSamples();
     sort(vsamples.begin(), vsamples.end(), mzSample::compSampleOrder);
+
+    double mZeroExpectedAbundance = group->expectedAbundance;
+    vector<float> mPlusZeroAbundance = group->getOrderedIntensityVector(vsamples, qtype);
 
     //get isotopic groups
     vector<PeakGroup*>isotopes;
@@ -2688,13 +2694,33 @@ MatrixXf MainWindow::getIsotopicMatrix(PeakGroup* group) {
     }
     std::sort(isotopes.begin(), isotopes.end(), PeakGroup::compC13);
 
-    MatrixXf MM((int) vsamples.size(),(int) isotopes.size());            //rows=samples, cols=isotopes
+    //rows=samples, columns=isotopes
+    MatrixXf MM((int) vsamples.size(),(int) isotopes.size());
     MM.setZero();
+
+    bool isCorrectIsotopeAbundance = isDisplayNaturalAbundanceCorrectedValues();
 
     for(int i=0; i < isotopes.size(); i++ ) {
         if (! isotopes[i] ) continue;
         vector<float> values = isotopes[i]->getOrderedIntensityVector(vsamples,qtype); //sort isotopes by sample
-        for(int j=0; j < values.size(); j++ ) MM(j,i)=values[j];  //rows=samples, columns=isotopes
+        for(int j=0; j < values.size(); j++ ) {
+
+            float isotopeObserved = values[j];
+
+            if (isCorrectIsotopeAbundance) {
+                float isotopeExpectedAbundance = isotopes[i]->expectedAbundance;
+                float mZeroObserved = mPlusZeroAbundance[j];
+
+                MM(j,i) = MassCalculator::getNaturalAbundanceCorrectedQuantValue(
+                    isotopeObserved,
+                    mZeroObserved,
+                    isotopeExpectedAbundance,
+                    mZeroExpectedAbundance);
+
+            } else {
+                MM(j,i)=isotopeObserved;
+            }
+        }
     }
 
 //    //Issue 652:

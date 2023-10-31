@@ -318,7 +318,7 @@ void IsotopePlot::computeParameters() {
         parameters.append("<br>");
     }
 
-    parameters.append("extract");
+    parameters.append("Extract");
     if (_group->isotopeParameters.isExtractNIsotopes) {
         parameters.append(" up to ");
         parameters.append(QString::number(_group->isotopeParameters.maxIsotopesToExtract));
@@ -333,6 +333,10 @@ void IsotopePlot::computeParameters() {
             parameters.append(QString::number(_group->isotopeParameters.maxNaturalAbundanceErr, 'f', 1));
             parameters.append("% nat. abund. error");
         }
+    }
+
+    if(_mw->isDisplayNaturalAbundanceCorrectedValues()) {
+        parameters.append("<br>Displaying natural abundance-corrected values.");
     }
 
     //Issue 671: Some GUI issues around overwriting existing text

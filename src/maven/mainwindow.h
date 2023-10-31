@@ -164,6 +164,7 @@ public:
 
     Classifier* getClassifier() { return clsf; }
 
+    bool isDisplayNaturalAbundanceCorrectedValues();
     MatrixXf getIsotopicMatrix(PeakGroup* group);
     void isotopeC13Correct(MatrixXf& MM, int numberofCarbons);
 
