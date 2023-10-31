@@ -2904,12 +2904,16 @@ IsotopeParameters MainWindow::getIsotopeParameters(){
         isotopeParameters.isN15Labeled   =  settings->value("N15Labeled", false).toBool();
         isotopeParameters.isS34Labeled   =  settings->value("S34Labeled", false).toBool();
         isotopeParameters.isD2Labeled   =   settings->value("D2Labeled", false).toBool();
+        isotopeParameters.isO18Labeled = settings->value("O18Labeled", false).toBool();
+        isotopeParameters.isNatAbundance = settings->value("isNatAbundance", false).toBool();
         isotopeParameters.isIgnoreNaturalAbundance = settings->value("chkIgnoreNaturalAbundance", false).toBool();
         isotopeParameters.isExtractNIsotopes = settings->value("chkExtractNIsotopes", false).toBool();
         isotopeParameters.maxIsotopesToExtract = settings->value("spnMaxIsotopesToExtract", 5).toInt();
         isotopeParameters.eic_smoothingWindow = static_cast<float>(settings->value("eic_smoothingWindow", 1).toDouble());
         isotopeParameters.eic_smoothingAlgorithm = static_cast<EIC::SmootherType>(settings->value("eic_smoothingAlgorithm", 0).toInt());
+        isotopeParameters.natAbundanceThreshold = settings->value("spnIgnoreNatIsotopesPct", .000001).toFloat();
         isotopeParameters.isotopicExtractionAlgorithm = IsotopeParameters::getExtractionAlgorithmFromName(settings->value("cmbIsotopicExtractionAlgorithm").toString().toStdString());
+        isotopeParameters.labeledIsotopeRetentionPolicy = IsotopeParameters::getLabeledIsotopeRetentionPolicyFromName(settings->value("labeledIsotopeRetentionPolicy").toString().toStdString());
 
     } else {
         qDebug() << "MainWindow::getIsotopeParameters(): Could not find saved program settings! using defaults.";
