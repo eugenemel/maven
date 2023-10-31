@@ -2913,7 +2913,7 @@ IsotopeParameters MainWindow::getIsotopeParameters(){
         isotopeParameters.eic_smoothingAlgorithm = static_cast<EIC::SmootherType>(settings->value("eic_smoothingAlgorithm", 0).toInt());
 
         //The stored value is a % - divide by 100 to convert to fraction
-        isotopeParameters.natAbundanceThreshold = settings->value("spnIgnoreNatIsotopesPct", .000001).toFloat() / 100.0f;
+        isotopeParameters.natAbundanceThreshold = settings->value("spnIgnoreNatIsotopesPct", 1.0).toFloat() / 100.0f;
 
         isotopeParameters.isotopicExtractionAlgorithm = IsotopeParameters::getExtractionAlgorithmFromName(settings->value("cmbIsotopicExtractionAlgorithm").toString().toStdString());
         isotopeParameters.labeledIsotopeRetentionPolicy = IsotopeParameters::getLabeledIsotopeRetentionPolicyFromName(settings->value("cmbRetentionPolicy").toString().toStdString());
