@@ -617,6 +617,13 @@
           <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="N15Labeled">
+            <property name="text">
+             <string>N15 Labeled</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0">
            <widget class="QCheckBox" name="D2Labeled">
             <property name="enabled">
@@ -627,17 +634,10 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="C13Labeled">
+          <item row="5" column="0">
+           <widget class="QCheckBox" name="checkBox_2">
             <property name="text">
-             <string>C13 Labeled </string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="N15Labeled">
-            <property name="text">
-             <string>N15 Labeled</string>
+             <string>Nat Abundance</string>
             </property>
            </widget>
           </item>
@@ -648,6 +648,13 @@
             </property>
            </widget>
           </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="C13Labeled">
+            <property name="text">
+             <string>C13 Labeled </string>
+            </property>
+           </widget>
+          </item>
           <item row="4" column="0">
            <widget class="QCheckBox" name="O18Labeled">
             <property name="text">
@@ -655,11 +662,23 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
-           <widget class="QCheckBox" name="checkBox_2">
-            <property name="text">
-             <string>Nat Abundance</string>
-            </property>
+          <item row="6" column="0">
+           <widget class="QComboBox" name="comboBox">
+            <item>
+             <property name="text">
+              <string>C13 mixed</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>All mixed</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>No mixed</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>

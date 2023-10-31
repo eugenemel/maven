@@ -14,6 +14,7 @@
 
 #include "mzSample.h"
 #include "mzUtils.h"
+#include "mzMassCalculator.h"
 
 class PeakGroupTag;
 
