@@ -2913,7 +2913,7 @@ IsotopeParameters MainWindow::getIsotopeParameters(){
         isotopeParameters.eic_smoothingAlgorithm = static_cast<EIC::SmootherType>(settings->value("eic_smoothingAlgorithm", 0).toInt());
         isotopeParameters.natAbundanceThreshold = settings->value("spnIgnoreNatIsotopesPct", .000001).toFloat();
         isotopeParameters.isotopicExtractionAlgorithm = IsotopeParameters::getExtractionAlgorithmFromName(settings->value("cmbIsotopicExtractionAlgorithm").toString().toStdString());
-        isotopeParameters.labeledIsotopeRetentionPolicy = IsotopeParameters::getLabeledIsotopeRetentionPolicyFromName(settings->value("labeledIsotopeRetentionPolicy").toString().toStdString());
+        isotopeParameters.labeledIsotopeRetentionPolicy = IsotopeParameters::getLabeledIsotopeRetentionPolicyFromName(settings->value("cmbRetentionPolicy").toString().toStdString());
 
     } else {
         qDebug() << "MainWindow::getIsotopeParameters(): Could not find saved program settings! using defaults.";
