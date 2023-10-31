@@ -2905,7 +2905,7 @@ IsotopeParameters MainWindow::getIsotopeParameters(){
         isotopeParameters.isS34Labeled   =  settings->value("S34Labeled", false).toBool();
         isotopeParameters.isD2Labeled   =   settings->value("D2Labeled", false).toBool();
         isotopeParameters.isO18Labeled = settings->value("O18Labeled", false).toBool();
-        isotopeParameters.isNatAbundance = settings->value("isNatAbundance", false).toBool();
+        isotopeParameters.isNatAbundance = settings->value("NatAbundanceLabeled", false).toBool();
         isotopeParameters.isIgnoreNaturalAbundance = settings->value("chkIgnoreNaturalAbundance", false).toBool();
         isotopeParameters.isExtractNIsotopes = settings->value("chkExtractNIsotopes", false).toBool();
         isotopeParameters.maxIsotopesToExtract = settings->value("spnMaxIsotopesToExtract", 5).toInt();
