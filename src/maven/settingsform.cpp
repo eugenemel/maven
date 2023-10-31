@@ -31,20 +31,23 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(amuQ1, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
     connect(amuQ3, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
 
-    //isotope detection setting
+    //isotope detection settings
+    //note that recomputeIsotopes() calls getFormValues()
     connect(C13Labeled,SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
     connect(N15Labeled,SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
     connect(S34Labeled,SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
     connect(D2Labeled, SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
-//    connect(isotopeC13Correction, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
+    connect(O18Labeled, SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
+    connect(NatAbundanceLabeled, SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
+    connect(cmbRetentionPolicy,SIGNAL(currentIndexChanged(int)),SLOT(recomputeIsotopes()));
+    connect(spnIgnoreNatIsotopesPct,SIGNAL(valueChanged(double)),SLOT(recomputeIsotopes()));
+    connect(chkDisplayNatAbundanceCorrectedValues,SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
     connect(chkIgnoreNaturalAbundance, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
     connect(chkExtractNIsotopes, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
     connect(spnMaxIsotopesToExtract, SIGNAL(valueChanged(int)), SLOT(recomputeIsotopes()));
-
     connect(maxNaturalAbundanceErr, SIGNAL(valueChanged(double)), SLOT(recomputeIsotopes()));
     connect(minIsotopicCorrelation, SIGNAL(valueChanged(double)), SLOT(recomputeIsotopes()));
     connect(maxIsotopeScanDiff, SIGNAL(valueChanged(int)), SLOT(recomputeIsotopes()));
-    connect(cmbIsotopicExtractionAlgorithm, SIGNAL(currentIndexChanged(int)), SLOT(getFormValues()));
     connect(cmbIsotopicExtractionAlgorithm, SIGNAL(currentIndexChanged(int)), SLOT(recomputeIsotopes()));
 
     //remote url used to fetch compound lists, pathways, and notes

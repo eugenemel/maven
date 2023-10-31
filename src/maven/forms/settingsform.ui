@@ -635,7 +635,7 @@
            </widget>
           </item>
           <item row="5" column="0">
-           <widget class="QCheckBox" name="checkBox_2">
+           <widget class="QCheckBox" name="NatAbundanceLabeled">
             <property name="text">
              <string>Nat Abundance</string>
             </property>
@@ -663,7 +663,7 @@
            </widget>
           </item>
           <item row="6" column="0">
-           <widget class="QComboBox" name="comboBox">
+           <widget class="QComboBox" name="cmbRetentionPolicy">
             <item>
              <property name="text">
               <string>C13 mixed</string>
@@ -845,7 +845,7 @@
         </widget>
        </item>
        <item row="1" column="0" colspan="2">
-        <widget class="QCheckBox" name="checkBox">
+        <widget class="QCheckBox" name="chkDisplayNatAbundanceCorrectedValues">
          <property name="text">
           <string>Display natural abundance-corrected values</string>
          </property>
