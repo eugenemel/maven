@@ -489,6 +489,8 @@ void SettingsForm::getFormValues() {
         settings->setValue("eicBaselineEstimationType", EICBaselineEstimationType::EIC_NON_PEAK_MAX_SMOOTHED_INTENSITY);
     }
 
+    //isotopes settings
+
     settings->setValue("maxNaturalAbundanceErr",maxNaturalAbundanceErr->value());
     settings->setValue("maxIsotopeScanDiff",maxIsotopeScanDiff->value());
     settings->setValue("cmbIsotopicExtractionAlgorithm", cmbIsotopicExtractionAlgorithm->currentText());
@@ -498,10 +500,14 @@ void SettingsForm::getFormValues() {
     settings->setValue("N15Labeled",N15Labeled->checkState() );
     settings->setValue("S34Labeled",S34Labeled->checkState() );
     settings->setValue("D2Labeled", D2Labeled->checkState()  );
-//    settings->setValue("isotopeC13Correction", isotopeC13Correction->checkState()  );
+    settings->setValue("O18Labeled", O18Labeled->checkState());
+    settings->setValue("NatAbundanceLabeled", NatAbundanceLabeled->checkState());
     settings->setValue("chkIgnoreNaturalAbundance", chkIgnoreNaturalAbundance->checkState() );
     settings->setValue("chkExtractNIsotopes", chkExtractNIsotopes->checkState() );
     settings->setValue("spnMaxIsotopesToExtract", spnMaxIsotopesToExtract->value());
+    settings->setValue("chkDisplayNatAbundanceCorrectedValues", chkDisplayNatAbundanceCorrectedValues->checkState());
+    settings->setValue("cmbRetentionPolicy", cmbRetentionPolicy->currentText());
+    settings->setValue("spnIgnoreNatIsotopesPct", spnIgnoreNatIsotopesPct->value());
 
     settings->setValue("amuQ1", amuQ1->value());
     settings->setValue("amuQ3", amuQ3->value());
