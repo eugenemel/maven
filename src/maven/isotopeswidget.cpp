@@ -127,19 +127,27 @@ void IsotopeWidget::rebuildTableFromPeakGroup(PeakGroup* group) {
 
         IsotopeParameters isotopeParameters= _mw->getIsotopeParameters();
 
-        int maxNumProtons = INT_MAX;
+        int maxNumExtraNeutrons = INT_MAX;
         if (isotopeParameters.isExtractNIsotopes) {
-            maxNumProtons = isotopeParameters.maxIsotopesToExtract;
+            maxNumExtraNeutrons = isotopeParameters.maxIsotopesToExtract;
         }
 
-        vector<Isotope> massList = MassCalculator::computeIsotopes(
-                    f,
-                    getCurrentAdduct(),
-                    maxNumProtons,
-                    isotopeParameters.isC13Labeled,
-                    isotopeParameters.isN15Labeled,
-                    isotopeParameters.isS34Labeled,
-                    isotopeParameters.isD2Labeled);
+//        //debugging
+//        qDebug() << "isotopeParameters.isNatAbundance="
+//                 << isotopeParameters.isNatAbundance
+//                 << ", isotopeParameters.natAbundanceThreshold="
+//                 << isotopeParameters.natAbundanceThreshold;
+
+        vector<Isotope> massList = MassCalculator::computeIsotopes2(
+            f,
+            getCurrentAdduct(),
+            isotopeParameters.getLabeledIsotopes(),
+            isotopeParameters.labeledIsotopeRetentionPolicy,
+            NaturalAbundanceData::defaultNaturalAbundanceData,
+            isotopeParameters.isNatAbundance,
+            maxNumExtraNeutrons,
+            isotopeParameters.natAbundanceThreshold,
+            false);
 
         if (!massList.empty()) {
 
