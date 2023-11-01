@@ -76,6 +76,10 @@ public slots:
 
       //output to csv file
       void exportGroupsToSpreadsheet();
+
+      //isotopes export
+      void showIsotopeExportSettings();
+      void hideIsotopeExportSettings();
       void exportGroupsAsIsotopes();
 
 	  void showSelectedGroup();
@@ -188,6 +192,7 @@ private:
           static map<string, int> groupViewColumnNameToNumber;
           static map<string, int> groupViewColumnNameToNumberWithLipidSummarization;
 
+          IsotopeExportSettingsDialog *isotopeExportSettingsDialog = nullptr;
           int getGroupViewColumnNumber(string key);
 };
 

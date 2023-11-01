@@ -69,6 +69,10 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QS
     connect(editPeakGroupDialog->okButton, SIGNAL(clicked(bool)), SLOT(updateSelectedPeakGroup()));
     connect(editPeakGroupDialog->cancelButton, SIGNAL(clicked(bool)), SLOT(hideEditPeakGroupDialog()));
 
+    isotopeExportSettingsDialog = new IsotopeExportSettingsDialog(this);
+    connect(isotopeExportSettingsDialog->boxBtn->button(QDialogButtonBox::Ok), SIGNAL(clicked(bool)), SLOT(exportGroupsAsIsotopes()));
+    connect(isotopeExportSettingsDialog->boxBtn->button(QDialogButtonBox::Cancel), SIGNAL(clicked(bool)), SLOT(hideIsotopeExportSettings()));
+
     QToolBar *toolBar = new QToolBar(this);
     toolBar->setFloatable(false);
     toolBar->setMovable(false);
@@ -91,7 +95,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QS
     connect(exportSelected, SIGNAL(triggered()), SLOT(exportGroupsToSpreadsheet()));
     connect(exportAll, SIGNAL(triggered()), treeWidget, SLOT(selectAll()));
     connect(exportAll, SIGNAL(triggered()), SLOT(exportGroupsToSpreadsheet()));
-    connect(exportIsotopes, SIGNAL(triggered()), SLOT(exportGroupsAsIsotopes()));
+    connect(exportIsotopes, SIGNAL(triggered()), SLOT(showIsotopeExportSettings()));
 
     QToolButton *btnGallery = new QToolButton(toolBar);
     btnGallery->setIcon(QIcon(rsrcPath + "/gallery.png"));
@@ -1251,10 +1255,22 @@ void TableDockWidget::exportGroupsToSpreadsheet() {
     qDebug() << "Finished Writing report to " << fileName << ".";
 }
 
+void TableDockWidget::showIsotopeExportSettings() {
+    qDebug() << "TableDockWidget::showIsotopeExportSettings()";
+
+    isotopeExportSettingsDialog->show();
+}
+
+void TableDockWidget::hideIsotopeExportSettings() {
+    qDebug() << "TableDockWidget::hideIsotopeExportSettings()";
+
+    isotopeExportSettingsDialog->hide();
+}
+
 void TableDockWidget::exportGroupsAsIsotopes() {
     qDebug() << "TableDockWidget::exportGroupsAsIsotopes()";
 
-    IsotopeExportSettingsDialog dialog(this);
+    // TODO: actual exporting
 }
 
 void TableDockWidget::showSelectedGroup() {
