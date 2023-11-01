@@ -2727,47 +2727,7 @@ MatrixXf MainWindow::getIsotopicMatrix(PeakGroup* group) {
             }
         }
     }
-
-//    //Issue 652:
-//    //disabling this call, should revisit in Issue 656
-//    int numberofCarbons=0;
-//    if (group->compound && !group->compound->formula.empty()) {
-//        MassCalculator mcalc;
-//        map<string,int>composition= mcalc.getComposition(group->compound->formula);
-//        numberofCarbons=composition["C"];
-//    }
-//    isotopeC13Correct(MM,numberofCarbons);
     return MM;
-}
-
-void MainWindow::isotopeC13Correct(MatrixXf& MM, int numberofCarbons) {
-    if (numberofCarbons == 0) return;
-
-    qDebug() << "IsotopePlot::isotopeC13Correct() " << MM.rows() << " " << MM.cols() << " nCarbons=" <<  numberofCarbons << endl;
-    if (settings && settings->value("isotopeC13Correction").toBool() == false ) return;
-
-    for(int i=0; i<MM.rows(); i++ ) {		//samples
-        float sum=0; vector<double>mv(MM.cols());
-        //qDebug() << "Correction for " << i;
-
-        //make a copy
-        for(int j=0; j< MM.cols(); j++) { mv[j]=MM(i,j); sum += MM(i,j); }
-
-
-        //normalize to sum=1 and correct
-        if(sum>0) {
-            for(int j=0; j< mv.size(); j++) { mv[j] /= sum; } //normalize
-            vector<double>cmv = mzUtils::naturalAbundanceCorrection(numberofCarbons,mv);
-
-            for(int j=0; j< mv.size(); j++) {
-                MM(i,j) = cmv[j];
-
-                //cerr << mv[j] << " " << cmv[j] << endl;
-            }
-        }
-    }
-    //qDebug() << "IsotopePlot::IsotopePlot() done..";
-
 }
 
 void MainWindow::updateEicSmoothingWindow(int value) {

@@ -166,7 +166,6 @@ public:
 
     bool isDisplayNaturalAbundanceCorrectedValues();
     MatrixXf getIsotopicMatrix(PeakGroup* group);
-    void isotopeC13Correct(MatrixXf& MM, int numberofCarbons);
 
     mzSample* getSample(int i) { assert(i < samples.size()); return(samples[i]);  }
     inline vector<mzSample*> getSamples() { return samples; }
