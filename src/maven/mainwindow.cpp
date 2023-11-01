@@ -2690,6 +2690,10 @@ MatrixXf MainWindow::getIsotopicMatrix(PeakGroup* group) {
         if (group->children[i].isIsotope() ) {
             PeakGroup* isotope = &(group->children[i]);
             isotopes.push_back(isotope);
+
+            if (isotope->tagString == "C12 PARENT" && mZeroExpectedAbundance <= 0.0) {
+                mZeroExpectedAbundance = isotope->expectedAbundance;
+            }
         }
     }
     std::sort(isotopes.begin(), isotopes.end(), PeakGroup::compC13);
@@ -2707,7 +2711,8 @@ MatrixXf MainWindow::getIsotopicMatrix(PeakGroup* group) {
 
             float isotopeObserved = values[j];
 
-            if (isCorrectIsotopeAbundance) {
+            //Do not correct C12 parent.
+            if (isCorrectIsotopeAbundance && isotopes[i]->tagString != "C12 PARENT") {
                 float isotopeExpectedAbundance = isotopes[i]->expectedAbundance;
                 float mZeroObserved = mPlusZeroAbundance[j];
 
