@@ -1273,8 +1273,8 @@ void TableDockWidget::exportGroupsAsIsotopes() {
     QString dir = ".";
     QSettings* settings = _mainwindow->getSettings();
 
-    if ( settings->contains("lastDir")) {
-        dir = settings->value("lastDir").value<QString>();
+    if ( settings->contains("lastIsotopesExportDir")) {
+        dir = settings->value("lastIsotopesExportDir").value<QString>();
     }
 
     QString fileName = QFileDialog::getSaveFileName(
@@ -1284,15 +1284,57 @@ void TableDockWidget::exportGroupsAsIsotopes() {
         QString(".csv"));
 
     QFileInfo fi(fileName);
-    settings->setValue("lastDir", fi.baseName());
+    settings->setValue("lastIsotopesExportDir", fi.baseName());
 
     if(fileName.isEmpty()) return;
 
     if (!fileName.endsWith(".csv")) {
         fileName.append(".csv");
     }
+    string sep = ",";
 
-    // TODO: actual exporting
+    ofstream isotopesReport;
+    isotopesReport.open(fileName.toStdString().c_str());
+
+    QStringList header;
+    header << "compound" << "adduct" << "RT" << "isotope";
+
+    vector<mzSample*> vsamples = _mainwindow->getVisibleSamples();
+    sort(vsamples.begin(), vsamples.end(), mzSample::compSampleOrder);
+
+    for (auto mzSample : vsamples) {
+        header << mzSample->sampleName.c_str();
+    }
+
+    foreach(QString h, header) isotopesReport << h.toStdString() << sep.c_str();
+    isotopesReport << endl;
+
+    for (PeakGroup *group : allgroups) {
+        if (group->compound && group->adduct) {
+
+            IsotopeMatrix matrix = this->_mainwindow->getIsotopicMatrix(
+                group,
+                isotopeExportSettingsDialog->chkCorrectIsotopes->isChecked(),
+                isotopeExportSettingsDialog->radFractional->isChecked());
+
+            for (unsigned int j = 0; j < matrix.isotopesData.cols(); j++) { // isotope
+
+                isotopesReport << group->compound->name << sep.c_str()
+                               << group->adduct->name << sep.c_str()
+                               << group->medianRt() << sep.c_str()
+                               << matrix.isotopeNames.at(j);
+
+                for (unsigned int i = 0; i < matrix.isotopesData.rows(); i++) { // sample
+
+                    isotopesReport << sep.c_str() << matrix.isotopesData(i, j);
+                }
+
+                isotopesReport << "\n";
+            }
+        }
+    }
+
+    isotopesReport.close();
 }
 
 void TableDockWidget::showSelectedGroup() {
