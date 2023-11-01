@@ -1253,6 +1253,8 @@ void TableDockWidget::exportGroupsToSpreadsheet() {
 
 void TableDockWidget::exportGroupsAsIsotopes() {
     qDebug() << "TableDockWidget::exportGroupsAsIsotopes()";
+
+    IsotopeExportSettingsDialog dialog(this);
 }
 
 void TableDockWidget::showSelectedGroup() {

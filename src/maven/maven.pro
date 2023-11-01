@@ -111,7 +111,8 @@ HEADERS +=  stable.h \
             selectadductsdialog.h \
             setrumsdbdialog.h \
             samplebarplotwidget.h \
-            msmsscoringsettings.h
+            msmsscoringsettings.h \
+            isotopeexportsettingsdialog.h
 
 SOURCES +=  mainwindow.cpp  \
             classifier.cpp \
@@ -164,7 +165,8 @@ SOURCES +=  mainwindow.cpp  \
             selectadductsdialog.cpp \
             setrumsdbdialog.cpp \
             samplebarplotwidget.cpp \
-            msmsscoringsettings.cpp
+            msmsscoringsettings.cpp \
+            isotopesexportsettings.cpp
 
 
 sources.files =  $$HEADERS \

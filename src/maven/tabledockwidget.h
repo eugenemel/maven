@@ -11,6 +11,7 @@
 #include "editpeakgroupingdialog.h"
 #include "lipidsummarizationutils.h"
 #include "filtertagsdialog.h"
+#include "isotopeexportsettingsdialog.h"
 
 class MainWindow;
 class TrainDialog;
