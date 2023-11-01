@@ -39,9 +39,10 @@ LIBS += -L. -L../maven_core/lib -L../maven_core/build/lib -L../maven_core/MSTool
 message($$LIBS)
 
 FORMS = forms/settingsform.ui  \
-		forms/masscalcwidget.ui \
-		forms/isotopeswidget.ui \
-		forms/peakdetectiondialog.ui \
+        forms/isotopesexportsettings.ui \
+        forms/masscalcwidget.ui \
+        forms/isotopeswidget.ui \
+        forms/peakdetectiondialog.ui \
         forms/comparesamplesdialog.ui \
         forms/trainingdialog.ui \
         forms/alignmentdialog.ui \
