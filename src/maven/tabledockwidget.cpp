@@ -86,15 +86,12 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QS
     btnGroupCSV->setPopupMode(QToolButton::InstantPopup);
     QAction* exportSelected = btnGroupCSV->menu()->addAction(tr("Export Selected"));
     QAction* exportAll = btnGroupCSV->menu()->addAction(tr("Export All Groups"));
+    QAction* exportIsotopes = btnGroupCSV->menu()->addAction(tr("Isotopes Export"));
+
     connect(exportSelected, SIGNAL(triggered()), SLOT(exportGroupsToSpreadsheet()));
     connect(exportAll, SIGNAL(triggered()), treeWidget, SLOT(selectAll()));
     connect(exportAll, SIGNAL(triggered()), SLOT(exportGroupsToSpreadsheet()));
-    //connect(btnGroupCSV, SIGNAL(clicked()), SLOT(exportGroupsToSpreadsheet()));
-
-    //QToolButton *btnHeatmap = new QToolButton(toolBar);
-    //btnHeatmap->setIcon(QIcon(rsrcPath + "/heatmap.png"));
-    //btnHeatmap->setToolTip("Show HeatMap");
-    //connect(btnHeatmap, SIGNAL(clicked()), SLOT(showHeatMap()));
+    connect(exportIsotopes, SIGNAL(triggered()), SLOT(exportGroupsAsIsotopes()));
 
     QToolButton *btnGallery = new QToolButton(toolBar);
     btnGallery->setIcon(QIcon(rsrcPath + "/gallery.png"));
@@ -1254,6 +1251,9 @@ void TableDockWidget::exportGroupsToSpreadsheet() {
     qDebug() << "Finished Writing report to " << fileName << ".";
 }
 
+void TableDockWidget::exportGroupsAsIsotopes() {
+    qDebug() << "TableDockWidget::exportGroupsAsIsotopes()";
+}
 
 void TableDockWidget::showSelectedGroup() {
     QTreeWidgetItem *item = treeWidget->currentItem();

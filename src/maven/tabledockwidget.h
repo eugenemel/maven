@@ -75,6 +75,8 @@ public slots:
 
       //output to csv file
       void exportGroupsToSpreadsheet();
+      void exportGroupsAsIsotopes();
+
 	  void showSelectedGroup();
 	  void setGroupLabel(char label);
 	  void showLastGroup();
