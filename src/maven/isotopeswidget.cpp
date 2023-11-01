@@ -376,7 +376,8 @@ QString IsotopeWidget::groupIsotopeMatrixExport(PeakGroup* group, bool includeSa
 		std::sort(isotopes.begin(), isotopes.end(), PeakGroup::compC13);
 
 		if (isotopes.size() > 0 ) {
-				MatrixXf MM = _mw->getIsotopicMatrix(group);
+            IsotopeMatrix isotopeMatrix = _mw->getIsotopicMatrix(group);
+            MatrixXf MM = isotopeMatrix.isotopesData;
 				///qDebug() << "MM row=" << MM.rows() << " " << MM.cols() << " " << isotopes.size() <<  " " << vsamples.size() << endl;
 				for (int i=0; i < isotopes.size(); i++ ) {
 						QStringList groupInfo;

@@ -126,7 +126,12 @@ void IsotopePlot::showBars() {
     //PeakGroup::QType qtype = PeakGroup::AreaTop;
     //if ( _mw ) qtype = _mw->getUserQuantType();
 
-    MatrixXf MM = _mw->getIsotopicMatrix(_group);
+    IsotopeMatrix isotopeMatrix= _mw->getIsotopicMatrix(
+        _group,
+        _mw->isDisplayNaturalAbundanceCorrectedValues(),
+        true); // isFractionOfSampleTotal
+
+    MatrixXf MM = isotopeMatrix.isotopesData;
 
     int parametersOffset = 0;
 
@@ -150,10 +155,7 @@ void IsotopePlot::showBars() {
 
     }
 
-    for(int i=0; i<MM.rows(); i++ ) {		//samples
-        float sum= MM.row(i).sum();
-        if (sum == 0) continue;
-        MM.row(i) /= sum;
+    for(int i=0; i<MM.rows(); i++ ) { //samples
 
         double ycoord = _barheight*i + parametersOffset;
         double xcoord = 0;

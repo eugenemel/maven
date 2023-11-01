@@ -73,9 +73,9 @@ class SampleBarPlotWidget;
 class SetRumsDBDialog;
 class SRMTransition;
 class IsotopeLegendWidget;
+class IsotopeMatrix;
 
 extern Database DB; 
-
 
 class MainWindow : public QMainWindow
 {
@@ -165,7 +165,11 @@ public:
     Classifier* getClassifier() { return clsf; }
 
     bool isDisplayNaturalAbundanceCorrectedValues();
-    MatrixXf getIsotopicMatrix(PeakGroup* group);
+    IsotopeMatrix getIsotopicMatrix(
+        PeakGroup* group,
+        bool isNaturalAbundanceCorrected = false,
+        bool isFractionOfSampleTotal = false
+        );
 
     mzSample* getSample(int i) { assert(i < samples.size()); return(samples[i]);  }
     inline vector<mzSample*> getSamples() { return samples; }
@@ -391,6 +395,14 @@ struct EicLoader {
         float eic_amuQ2;
         int eic_baselne_smoothingWindow;
         int eic_baselne_dropTopX;
+};
+
+//Issue 673: makes exporting much easier
+class IsotopeMatrix {
+public:
+    vector<string> sampleNames{};
+    vector<string> isotopeNames{};
+    MatrixXf isotopesData{}; // (rows = samples, columns = isotope names)
 };
 
 #endif

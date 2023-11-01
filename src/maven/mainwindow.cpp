@@ -2675,7 +2675,10 @@ bool MainWindow::isDisplayNaturalAbundanceCorrectedValues() {
     return this->settings->value("chkDisplayNatAbundanceCorrectedValues", false).toBool();
 }
 
-MatrixXf MainWindow::getIsotopicMatrix(PeakGroup* group) {
+IsotopeMatrix MainWindow::getIsotopicMatrix(
+    PeakGroup* group,
+    bool isNaturalAbundanceCorrected,
+    bool isFractionOfSampleTotal) {
 
     PeakGroup::QType qtype = getUserQuantType();
     vector<mzSample*> vsamples = getVisibleSamples();
@@ -2702,8 +2705,6 @@ MatrixXf MainWindow::getIsotopicMatrix(PeakGroup* group) {
     MatrixXf MM((int) vsamples.size(),(int) isotopes.size());
     MM.setZero();
 
-    bool isCorrectIsotopeAbundance = isDisplayNaturalAbundanceCorrectedValues();
-
     for(int i=0; i < isotopes.size(); i++ ) {
         if (! isotopes[i] ) continue;
         vector<float> values = isotopes[i]->getOrderedIntensityVector(vsamples,qtype); //sort isotopes by sample
@@ -2712,7 +2713,7 @@ MatrixXf MainWindow::getIsotopicMatrix(PeakGroup* group) {
             float isotopeObserved = values[j];
 
             //Do not correct C12 parent.
-            if (isCorrectIsotopeAbundance && isotopes[i]->tagString != "C12 PARENT") {
+            if (isNaturalAbundanceCorrected && isotopes[i]->tagString != "C12 PARENT") {
                 float isotopeExpectedAbundance = isotopes[i]->expectedAbundance;
                 float mZeroObserved = mPlusZeroAbundance[j];
 
@@ -2727,7 +2728,31 @@ MatrixXf MainWindow::getIsotopicMatrix(PeakGroup* group) {
             }
         }
     }
-    return MM;
+
+    if (isFractionOfSampleTotal) {
+        for (unsigned int i = 0; i < MM.rows(); i++) {
+            float sum= MM.row(i).sum();
+            if (sum == 0) continue;
+            MM.row(i) /= sum;
+        }
+    }
+
+    IsotopeMatrix isotopeMatrix;
+    vector<string> sampleNames = vector<string>(vsamples.size());
+    for (unsigned int i = 0; i < vsamples.size(); i++) {
+        sampleNames[i] = vsamples[i]->sampleName;
+    }
+
+    vector<string> isotopeNames = vector<string>(isotopes.size());
+    for (unsigned int i = 0; i < isotopes.size(); i++) {
+        isotopeNames[i] = isotopes[i]->tagString;
+    }
+
+    isotopeMatrix.isotopesData = MM;
+    isotopeMatrix.sampleNames = sampleNames;
+    isotopeMatrix.isotopeNames = isotopeNames;
+
+    return isotopeMatrix;
 }
 
 void MainWindow::updateEicSmoothingWindow(int value) {
