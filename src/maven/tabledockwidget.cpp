@@ -1270,6 +1270,28 @@ void TableDockWidget::hideIsotopeExportSettings() {
 void TableDockWidget::exportGroupsAsIsotopes() {
     qDebug() << "TableDockWidget::exportGroupsAsIsotopes()";
 
+    QString dir = ".";
+    QSettings* settings = _mainwindow->getSettings();
+
+    if ( settings->contains("lastDir")) {
+        dir = settings->value("lastDir").value<QString>();
+    }
+
+    QString fileName = QFileDialog::getSaveFileName(
+        this,
+        tr("Isotopes Export"),
+        dir,
+        QString(".csv"));
+
+    QFileInfo fi(fileName);
+    settings->setValue("lastDir", fi.baseName());
+
+    if(fileName.isEmpty()) return;
+
+    if (!fileName.endsWith(".csv")) {
+        fileName.append(".csv");
+    }
+
     // TODO: actual exporting
 }
 
