@@ -372,8 +372,8 @@ QString IsotopeWidget::groupIsotopeMatrixExport(PeakGroup* group, bool includeSa
                 PeakGroup* isotope = &(group->children[i]);
                 isotopes.push_back(isotope);
 			}
-		}
-		std::sort(isotopes.begin(), isotopes.end(), PeakGroup::compC13);
+        }
+        std::sort(isotopes.begin(), isotopes.end(), PeakGroup::compIsotopicIndex);
 
 		if (isotopes.size() > 0 ) {
             IsotopeMatrix isotopeMatrix = _mw->getIsotopicMatrix(group);

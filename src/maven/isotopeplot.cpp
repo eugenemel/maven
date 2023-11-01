@@ -90,7 +90,7 @@ void IsotopePlot::setPeakGroup(PeakGroup* group) {
             _isotopes.push_back(isotope);
         }
     }
-    std::sort(_isotopes.begin(), _isotopes.end(), PeakGroup::compC13);
+    std::sort(_isotopes.begin(), _isotopes.end(), PeakGroup::compIsotopicIndex);
 
     clearBars();
     showBars();

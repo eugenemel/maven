@@ -2699,7 +2699,7 @@ IsotopeMatrix MainWindow::getIsotopicMatrix(
             }
         }
     }
-    std::sort(isotopes.begin(), isotopes.end(), PeakGroup::compC13);
+    std::sort(isotopes.begin(), isotopes.end(), PeakGroup::compIsotopicIndex);
 
     //rows=samples, columns=isotopes
     MatrixXf MM((int) vsamples.size(),(int) isotopes.size());
