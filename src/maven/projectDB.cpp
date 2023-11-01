@@ -286,6 +286,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                         srmProductMz real,\
                         \
                         isotopicIndex integer,\
+                        expectedAbundance real,\
                         isotopeParameters TEXT,\
                         \
                         groupBackground real,\
@@ -301,7 +302,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                                     ms2Score,adductName,compoundId,compoundName,compoundDB,\
                                     searchTableName,displayName,\
                                     srmPrecursorMz,srmProductMz,\
-                                    isotopicIndex,isotopeParameters,\
+                                    isotopicIndex,expectedAbundance,isotopeParameters,\
                                     groupBackground,blankMaxHeight,blankMedianHeight\
                                   )\
                                     \
@@ -311,7 +312,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                                     ?,?,?,?,?,\
                                     ?,?,\
                                     ?,?,\
-                                    ?,?,\
+                                    ?,?,?,\
                                     ?,?,?\
                                   )\
                                  ");
@@ -376,6 +377,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 
         //Issue 380
         query1.addBindValue(g->isotopicIndex);
+        query1.addBindValue(g->expectedAbundance);
 
         //Issue 402
         if (g->isotopeParameters.isotopeParametersType != IsotopeParametersType::INVALID) {
@@ -920,6 +922,7 @@ void ProjectDB::alterPeakGroupsTable(){
            bool isHasGroupBackground = false;
            bool isHasBlankMaxHeight = false;
            bool isHasBlankMedianHeight = false;
+           bool isHasExpectedAbundance = false;
 
            while (queryCheckCols.next()) {
                if ("displayName" == queryCheckCols.value(1).toString()) {
@@ -938,6 +941,8 @@ void ProjectDB::alterPeakGroupsTable(){
                    isHasBlankMaxHeight = true;
                } else if ("blankMedianHeight" == queryCheckCols.value(1).toString()) {
                    isHasBlankMedianHeight = true;
+               } else if ("expectedAbundance" == queryCheckCols.value(1).toString()) {
+                   isHasExpectedAbundance = true;
                }
            }
 
@@ -1015,6 +1020,14 @@ void ProjectDB::alterPeakGroupsTable(){
                }
            }
 
+           if (!isHasExpectedAbundance) {
+               QSqlQuery queryAddExpectedAbundance(sqlDB);
+               QString strAddExpectedAbundance = QString("ALTER TABLE peakgroups ADD expectedAbundance REAL DEFAULT 0;");
+               if (!queryAddExpectedAbundance.exec(strAddExpectedAbundance)) {
+                   qDebug() << "Ho..." << queryAddExpectedAbundance.lastError();
+               }
+           }
+
 }
 
 void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool isAttemptToLoadDB, const map<int, vector<Peak>>& peakGroupMap, Classifier *classifier) {
@@ -1079,6 +1092,8 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
         g.compoundDb = compoundDB;
 
         g.importedCompoundName = compoundName;
+
+        g.expectedAbundance = query.value("expectedAbundance").toDouble();
 
         string srmId = query.value("srmId").toString().toStdString();
         if (!srmId.empty()) g.setSrmId(srmId);
