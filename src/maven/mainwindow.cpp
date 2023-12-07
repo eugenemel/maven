@@ -764,21 +764,8 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
 }
 
 void MainWindow::setFormulaFocus(QString formula) {
-    Adduct* adduct = getUserAdduct();
-    MassCalculator mcalc;
-    //double parentMass = mcalc.computeNeutralMass(formula.toStdString());
-    //double pmz = adduct->computeAdductMass(parentMass);
-
-    if ( eicWidget->isVisible() ) {
-        Compound *unk = new Compound(formula.toStdString(),formula.toStdString(),formula.toStdString(),0);
-        eicWidget->setCompound(unk,adduct);
-        //eicWidget->setMzSlice(pmz);
-    }
-
-    //Issue 690: User must opt in to isotopes work.
-    if (isotopeWidget->isVisible()) {
-        isotopeWidget->setFormula(formula);
-    }
+    Compound *unk = new Compound(formula.toStdString(),formula.toStdString(),formula.toStdString(),0);
+    setCompoundFocus(unk);
 }
 
 void MainWindow::setPeptideFocus(QString peptideSequence){
