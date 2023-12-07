@@ -774,7 +774,11 @@ void MainWindow::setFormulaFocus(QString formula) {
         eicWidget->setCompound(unk,adduct);
         //eicWidget->setMzSlice(pmz);
     }
-    isotopeWidget->setFormula(formula);
+
+    //Issue 690: User must opt in to isotopes work.
+    if (isotopeWidget->isVisible()) {
+        isotopeWidget->setFormula(formula);
+    }
 }
 
 void MainWindow::setPeptideFocus(QString peptideSequence){
