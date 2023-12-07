@@ -61,7 +61,6 @@ bool writeReportFlag = true;
 bool saveJsonEIC = false;
 bool mustHaveMS2 = false;
 bool writeConsensusMS2 = false;
-bool pullIsotopesFlag = true;
 bool samplesC13Labeled = true;
 bool saveSqlLiteProject = true;
 bool searchAdductsFlag = true;
@@ -177,7 +176,6 @@ void writeReport(string setName);
 void writeCSVReport(string filename);
 void writeConsensusMS2Spectra(string filename);
 void classConsensusMS2Spectra(string filename);
-void pullIsotopes(PeakGroup* parentgroup);
 void writeGroupInfoCSV(PeakGroup* group,  ofstream& groupReport);
 void loadSpectralLibraries(string methodsFolder);
 void makeImages(ParallelMassSlicer* massSlices, vector<mzSample*> sampleSubset, float rtAccur, float mzAccur);
@@ -937,10 +935,6 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
 
                 if (compound) group.compound = compound;
                 if (!slice->srmId.empty()) group.srmId = slice->srmId;
-
-                if (compound && pullIsotopesFlag && !group.isIsotope()) {
-                    pullIsotopes(&group);
-                }
 
                 group.groupRank = 1000;
                 if (matchRtFlag && compound && compound->expectedRt > 0) {
@@ -1882,166 +1876,6 @@ void writeConsensusMS2Spectra(string filename) {
         }
     }
     outstream.close();
-}
-
-void pullIsotopes(PeakGroup* parentgroup) {
-
-    if (parentgroup == NULL) return;
-    if (parentgroup->compound == NULL ) return;
-    if (parentgroup->compound->formula.empty() == true) return;
-    if ( samples.size() == 0 ) return;
-
-    float ppm = precursorPPM;
-    double maxIsotopeScanDiff = 10;
-    double maxNaturalAbundanceErr = 100;
-    double minIsotopicCorrelation = 0.1;
-    bool C13Labeled = true;
-    bool N15Labeled = false;
-    bool S34Labeled = false;
-    bool D2Labeled = false;
-    int eic_smoothingAlgorithm = 0;
-
-    string formula = parentgroup->compound->formula;
-
-    Adduct *adduct = parentgroup->adduct;
-
-    if (!adduct) {
-         if (ionizationMode > 0) {
-             adduct = MassCalculator::PlusHAdduct;
-         } else if (ionizationMode < 0) {
-             adduct = MassCalculator::MinusHAdduct;
-         } else {
-             adduct = MassCalculator::ZeroMassAdduct;
-         }
-    }
-
-    vector<Isotope> masslist = mcalc.computeIsotopes(formula, adduct);
-
-    map<string, PeakGroup>isotopes;
-    map<string, PeakGroup>::iterator itr2;
-    for ( unsigned int s = 0; s < samples.size(); s++ ) {
-        mzSample* sample = samples[s];
-        for (int k = 0; k < masslist.size(); k++) {
-            Isotope& x = masslist[k];
-            string isotopeName = x.name;
-            double isotopeMass = x.mz;
-            double expectedAbundance = x.abundance;
-            float mzmin = isotopeMass - isotopeMass / 1e6 * ppm;
-            float mzmax = isotopeMass + isotopeMass / 1e6 * ppm;
-            float rt =  parentgroup->medianRt();
-            float rtmin = parentgroup->minRt;
-            float rtmax = parentgroup->maxRt;
-
-
-            Peak* parentPeak =  parentgroup->getPeak(sample);
-            if ( parentPeak ) rt  =   parentPeak->rt;
-            if ( parentPeak ) rtmin = parentPeak->rtmin;
-            if ( parentPeak ) rtmax = parentPeak->rtmax;
-
-            float isotopePeakIntensity = 0;
-            float parentPeakIntensity = 0;
-
-            if ( parentPeak ) {
-                parentPeakIntensity = parentPeak->peakIntensity;
-                int scannum = parentPeak->getScan()->scannum;
-                for (int i = scannum - 3; i < scannum + 3; i++ ) {
-                    Scan* s = sample->getScan(i);
-
-                    //look for isotopic mass in the same spectrum
-                    vector<int> matches = s->findMatchingMzs(mzmin, mzmax);
-
-                    for (int i = 0; i < matches.size(); i++ ) {
-                        int pos = matches[i];
-                        if ( s->intensity[pos] > isotopePeakIntensity ) {
-                            isotopePeakIntensity = s->intensity[pos];
-                            rt = s->rt;
-                        }
-                    }
-                }
-            }
-            //if(isotopePeakIntensity==0) continue;
-
-            //natural abundance check
-            if (    (x.C13 > 0    && C13Labeled == false)
-                    || (x.N15 > 0 && N15Labeled == false)
-                    || (x.S34 > 0 && S34Labeled == false )
-                    || (x.H2 > 0  && D2Labeled == false )
-
-               ) {
-                if (expectedAbundance < 1e-8) continue;
-                if (expectedAbundance * parentPeakIntensity < 1) continue;
-                float observedAbundance = isotopePeakIntensity / (parentPeakIntensity + isotopePeakIntensity);
-                float naturalAbundanceError = abs(observedAbundance - expectedAbundance) / expectedAbundance * 100;
-
-                //cout << isotopeName << endl;
-                //cout << "Expected isotopeAbundance=" << expectedAbundance;
-                //cout << " Observed isotopeAbundance=" << observedAbundance;
-                //cout << " Error="     << naturalAbundanceError << endl;
-
-                if (naturalAbundanceError > maxNaturalAbundanceErr )  continue;
-            }
-
-
-            float w = maxIsotopeScanDiff * avgScanTime;
-            double c = sample->correlation(isotopeMass, parentgroup->meanMz, ppm, rtmin - w, rtmax + w);
-            if (c < minIsotopicCorrelation)  continue;
-
-            //cout << "pullIsotopes: " << isotopeMass << " " << rtmin-w << " " <<  rtmin+w << " c=" << c << endl;
-
-            EIC* eic = NULL;
-            for ( int i = 0; i < maxIsotopeScanDiff; i++ ) {
-                float window = i * avgScanTime;
-                eic = sample->getEIC(mzmin, mzmax, rtmin - window, rtmax + window, 1);
-                eic->setSmootherType((EIC::SmootherType) eic_smoothingAlgorithm);
-                eic->getPeakPositions(eic_smoothingWindow);
-                if ( eic->peaks.size() == 0 ) continue;
-                if ( eic->peaks.size() > 1 ) break;
-            }
-            if (!eic) continue;
-
-            Peak* nearestPeak = NULL; float d = FLT_MAX;
-            for (int i = 0; i < eic->peaks.size(); i++ ) {
-                Peak& x = eic->peaks[i];
-                float dist = abs(x.rt - rt);
-                if ( dist > maxIsotopeScanDiff * avgScanTime) continue;
-                if ( dist < d ) { d = dist; nearestPeak = &x; }
-            }
-
-            if (nearestPeak) {
-                if (isotopes.count(isotopeName) == 0) {
-                    PeakGroup g;
-                    g.meanMz = isotopeMass;
-                    g.tagString = isotopeName;
-                    g.expectedAbundance = expectedAbundance;
-                    g.isotopeC13count = x.C13;
-                    g.groupRank = 0;
-                    isotopes[isotopeName] = g;
-                }
-                isotopes[isotopeName].addPeak(*nearestPeak);
-            }
-            delete(eic);
-        }
-    }
-
-    parentgroup->children.clear();
-    for (itr2 = isotopes.begin(); itr2 != isotopes.end(); itr2++ ) {
-        string isotopeName = (*itr2).first;
-        PeakGroup& child = (*itr2).second;
-        child.tagString = isotopeName;
-        child.metaGroupId = parentgroup->metaGroupId;
-        //child.groupId = parentgroup->groupId;
-        child.compound = parentgroup->compound;
-        child.parent = parentgroup;
-        child.setType(PeakGroup::IsotopeType);
-        child.groupStatistics();
-        if (clsf.hasModel()) { clsf.classify(&child); child.groupStatistics(); }
-        parentgroup->addChild(child);
-        //cout << " add: " << isotopeName << " " <<  child.peaks.size() << " " << isotopes.size() << endl;
-    }
-    // cout << "pullIsotopes done..: " << parentgroup->children.size();
-    /*
-            //if ((float) isotope.maxIntensity/parentgroup->maxIntensity > 3*ab[isotopeName]/ab["C12 PARENT"]) continue;
-        */
 }
 
 void writeGroupInfoCSV(PeakGroup* group,  ofstream& groupReport) {
