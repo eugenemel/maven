@@ -132,12 +132,6 @@ void IsotopeWidget::rebuildTableFromPeakGroup(PeakGroup* group) {
             maxNumExtraNeutrons = isotopeParameters.maxIsotopesToExtract;
         }
 
-//        //debugging
-//        qDebug() << "isotopeParameters.isNatAbundance="
-//                 << isotopeParameters.isNatAbundance
-//                 << ", isotopeParameters.natAbundanceThreshold="
-//                 << isotopeParameters.natAbundanceThreshold;
-
         vector<Isotope> massList = MassCalculator::computeIsotopes2(
             f,
             getCurrentAdduct(),
