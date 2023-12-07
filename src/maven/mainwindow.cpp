@@ -764,6 +764,7 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
 }
 
 void MainWindow::setFormulaFocus(QString formula) {
+    qDebug() << "MainWindow::setFormulaFocus() formula=" << formula;
     Compound *unk = new Compound(formula.toStdString(),formula.toStdString(),formula.toStdString(),0);
     setCompoundFocus(unk);
 }
