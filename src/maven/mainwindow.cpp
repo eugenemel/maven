@@ -859,7 +859,9 @@ void MainWindow::setAdductFocus(Adduct *adduct) {
         QVariant v = adductType->itemData(i);
         Adduct*  itemAdduct =  v.value<Adduct*>();
         if (itemAdduct && itemAdduct->name == adduct->name) {
+            this->adductType->blockSignals(true);
             this->adductType->setCurrentIndex(i);
+            this->adductType->blockSignals(false);
             break;
         }
     }
@@ -872,7 +874,9 @@ void MainWindow::setAdductFocus(Adduct *adduct) {
             Adduct*  itemAdduct =  v.value<Adduct*>();
 
             if (itemAdduct && itemAdduct->name == adduct->name) {
+                isotopeWidget->adductComboBox->blockSignals(true);
                 isotopeWidget->adductComboBox->setCurrentIndex(i);
+                isotopeWidget->adductComboBox->blockSignals(false);
                 break;
             }
         }
