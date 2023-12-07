@@ -258,15 +258,17 @@ void IsotopeWidget::computeIsotopes(string f) {
         maxNumProtons = isotopeParameters.maxIsotopesToExtract;
     }
 
-    vector<Isotope> massList = MassCalculator::computeIsotopes(
-                f,
-                getCurrentAdduct(),
-                maxNumProtons,
-                isotopeParameters.isC13Labeled,
-                isotopeParameters.isN15Labeled,
-                isotopeParameters.isS34Labeled,
-                isotopeParameters.isD2Labeled);
-
+    vector<Isotope> massList = MassCalculator::computeIsotopes2(
+        f,
+        getCurrentAdduct(),
+        isotopeParameters.getLabeledIsotopes(),
+        isotopeParameters.labeledIsotopeRetentionPolicy,
+        NaturalAbundanceData::defaultNaturalAbundanceData,
+        isotopeParameters.isNatAbundance,
+        maxNumProtons,
+        isotopeParameters.natAbundanceThreshold,
+        false
+        );
 
     links.clear();
     links = vector<mzLink>(massList.size());
