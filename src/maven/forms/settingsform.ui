@@ -608,82 +608,6 @@
        <string>Isotope Detection</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="0">
-        <widget class="QGroupBox" name="grpBox_samplesLabeled">
-         <property name="title">
-          <string>Isotopes to enumerate </string>
-         </property>
-         <property name="flat">
-          <bool>false</bool>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_3">
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="N15Labeled">
-            <property name="text">
-             <string>N15 Labeled</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="D2Labeled">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="text">
-             <string>D2 Labeled</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QCheckBox" name="NatAbundanceLabeled">
-            <property name="text">
-             <string>Nat Abundance</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QCheckBox" name="S34Labeled">
-            <property name="text">
-             <string>S34 Labeled</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="C13Labeled">
-            <property name="text">
-             <string>C13 Labeled </string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QCheckBox" name="O18Labeled">
-            <property name="text">
-             <string>O18 Labeled</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="0">
-           <widget class="QComboBox" name="cmbRetentionPolicy">
-            <item>
-             <property name="text">
-              <string>C13 mixed</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>All mixed</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>No mixed</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
        <item row="0" column="1">
         <widget class="QGroupBox" name="grpBox_filteredOptions">
          <property name="sizePolicy">
@@ -844,10 +768,93 @@
          </layout>
         </widget>
        </item>
-       <item row="1" column="0" colspan="2">
+       <item row="0" column="0">
+        <widget class="QGroupBox" name="grpBox_samplesLabeled">
+         <property name="title">
+          <string>Isotopes to enumerate </string>
+         </property>
+         <property name="flat">
+          <bool>false</bool>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="N15Labeled">
+            <property name="text">
+             <string>N15 Labeled</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="D2Labeled">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>D2 Labeled</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QCheckBox" name="NatAbundanceLabeled">
+            <property name="text">
+             <string>Nat Abundance</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="S34Labeled">
+            <property name="text">
+             <string>S34 Labeled</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="C13Labeled">
+            <property name="text">
+             <string>C13 Labeled </string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="O18Labeled">
+            <property name="text">
+             <string>O18 Labeled</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QComboBox" name="cmbRetentionPolicy">
+            <item>
+             <property name="text">
+              <string>C13 mixed</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>All mixed</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>No mixed</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="1" column="0">
         <widget class="QCheckBox" name="chkDisplayNatAbundanceCorrectedValues">
          <property name="text">
-          <string>Display natural abundance-corrected values</string>
+          <string>Display Nat Abundance-corrected</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QCheckBox" name="checkBox">
+         <property name="text">
+          <string>Merge overlapping isotopes with identical quantitative values</string>
          </property>
         </widget>
        </item>
