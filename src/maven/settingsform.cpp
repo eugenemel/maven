@@ -48,6 +48,7 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(minIsotopicCorrelation, SIGNAL(valueChanged(double)), SLOT(recomputeIsotopes()));
     connect(maxIsotopeScanDiff, SIGNAL(valueChanged(int)), SLOT(recomputeIsotopes()));
     connect(cmbIsotopicExtractionAlgorithm, SIGNAL(currentIndexChanged(int)), SLOT(recomputeIsotopes()));
+    connect(chkMergeOverlappingIsotopes, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
 
     //remote url used to fetch compound lists, pathways, and notes
     connect(data_server_url, SIGNAL(textChanged(QString)), SLOT(getFormValues()));
@@ -267,6 +268,7 @@ void SettingsForm::setFormValues() {
     NatAbundanceLabeled->setCheckState((Qt::CheckState) settings->value("NatAbundanceLabeled").toInt());
     chkIgnoreNaturalAbundance->setCheckState(  (Qt::CheckState) settings->value("chkIgnoreNaturalAbundance").toInt()  );
     chkExtractNIsotopes->setCheckState( (Qt::CheckState) settings->value("chkExtractNIsotopes").toInt() );
+    chkMergeOverlappingIsotopes->setCheckState((Qt::CheckState) settings->value("chkMergeOverlappingIsotopes").toInt());
 
     if (settings->contains("spnMaxIsotopesToExtract"))
         spnMaxIsotopesToExtract->setValue(settings->value("spnMaxIsotopesToExtract").toInt());
@@ -525,6 +527,7 @@ void SettingsForm::getFormValues() {
     settings->setValue("chkDisplayNatAbundanceCorrectedValues", chkDisplayNatAbundanceCorrectedValues->checkState());
     settings->setValue("cmbRetentionPolicy", cmbRetentionPolicy->currentText());
     settings->setValue("spnIgnoreNatIsotopesPct", spnIgnoreNatIsotopesPct->value());
+    settings->setValue("chkMergeOverlappingIsotopes", chkMergeOverlappingIsotopes->checkState());
 
     settings->setValue("amuQ1", amuQ1->value());
     settings->setValue("amuQ3", amuQ3->value());
