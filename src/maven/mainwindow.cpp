@@ -2930,6 +2930,9 @@ IsotopeParameters MainWindow::getIsotopeParameters(){
         isotopeParameters.isotopicExtractionAlgorithm = IsotopeParameters::getExtractionAlgorithmFromName(settings->value("cmbIsotopicExtractionAlgorithm").toString().toStdString());
         isotopeParameters.labeledIsotopeRetentionPolicy = IsotopeParameters::getLabeledIsotopeRetentionPolicyFromName(settings->value("cmbRetentionPolicy").toString().toStdString());
 
+        //Issue 691
+        isotopeParameters.isCombineOverlappingIsotopes = settings->value("chkMergeOverlappingIsotopes", false).toBool();
+
     } else {
         qDebug() << "MainWindow::getIsotopeParameters(): Could not find saved program settings! using defaults.";
     }
