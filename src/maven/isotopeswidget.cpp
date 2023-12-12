@@ -14,12 +14,14 @@ IsotopeWidget::IsotopeWidget(MainWindow* mw) {
 
   setupUi(this);
 
-  adductComboBox->setMinimumSize(250, 0);
+  adductComboBox->setMinimumSize(200, 0);
 
   adductComboBox->clear();
   for (Adduct* a : DB.adductsDB) {
     adductComboBox->addItem(a->name.c_str(),QVariant::fromValue(a));
   }
+
+  cmbSampleName->setMinimumSize(200, 0);
 
   connect(treeWidget, SIGNAL(itemSelectionChanged()), SLOT(showInfo()));
   connect(formula, SIGNAL(textEdited(QString)), this, SLOT(userChangedFormula(QString)));
@@ -80,7 +82,13 @@ void IsotopeWidget::setPeakGroup(PeakGroup* grp) {
     }
     _group->pullIsotopes(isotopeParameters, _mw->getSamples());
 
-    rebuildTableFromPeakGroup(_group);
+   // rebuildTableFromPeakGroup(_group);
+     rebuildTableFromPeakGroup2(_group);
+}
+
+void IsotopeWidget::rebuildTableFromPeakGroup2(PeakGroup* group) {
+     qDebug() << "IsotopeWidget::rebuildTableFromPeakGroup2()";
+
 }
 
 void IsotopeWidget::rebuildTableFromPeakGroup(PeakGroup* group) {

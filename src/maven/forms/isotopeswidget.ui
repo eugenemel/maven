@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>479</width>
+    <width>508</width>
     <height>412</height>
    </rect>
   </property>
@@ -16,20 +16,23 @@
     <height>524287</height>
    </size>
   </property>
-  <property name="features">
-   <set>QDockWidget::AllDockWidgetFeatures</set>
-  </property>
   <property name="windowTitle">
    <string>Isotopes</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QGridLayout" name="gridLayout_2">
-    <item row="1" column="0">
-     <widget class="QLabel" name="label">
+    <item row="1" column="1">
+     <widget class="QLineEdit" name="formula"/>
+    </item>
+    <item row="1" column="4">
+     <widget class="QLabel" name="lblSample">
       <property name="text">
-       <string>Formula</string>
+       <string>Sample</string>
       </property>
      </widget>
+    </item>
+    <item row="1" column="3">
+     <widget class="QComboBox" name="adductComboBox"/>
     </item>
     <item row="1" column="2">
      <widget class="QLabel" name="label_2">
@@ -38,7 +41,21 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="0" colspan="5">
+    <item row="1" column="6">
+     <widget class="QPushButton" name="btnExport">
+      <property name="text">
+       <string>export</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Formula</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0" colspan="7">
      <widget class="QTreeWidget" name="treeWidget">
       <column>
        <property name="text">
@@ -47,17 +64,13 @@
       </column>
      </widget>
     </item>
-    <item row="1" column="1">
-     <widget class="QLineEdit" name="formula"/>
-    </item>
-    <item row="1" column="3">
-     <widget class="QComboBox" name="adductComboBox"/>
-    </item>
-    <item row="1" column="4">
-     <widget class="QPushButton" name="btnExport">
-      <property name="text">
-       <string>export</string>
-      </property>
+    <item row="1" column="5">
+     <widget class="QComboBox" name="cmbSampleName">
+      <item>
+       <property name="text">
+        <string>Select Sample</string>
+       </property>
+      </item>
      </widget>
     </item>
    </layout>

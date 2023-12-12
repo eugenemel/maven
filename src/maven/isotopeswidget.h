@@ -63,6 +63,9 @@ private:
      Adduct* getCurrentAdduct();
 
      void rebuildTableFromPeakGroup(PeakGroup* group);
+
+     //Issue 691
+     void rebuildTableFromPeakGroup2(PeakGroup* group);
       
 };
 
