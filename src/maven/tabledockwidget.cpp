@@ -1310,6 +1310,10 @@ void TableDockWidget::exportGroupsAsIsotopes() {
     isotopesReport << endl;
 
     for (PeakGroup *group : allgroups) {
+
+        //Issue 685
+        if (group->deletedFlag) continue;
+
         if (group->compound && group->adduct) {
 
             IsotopeMatrix matrix = this->_mainwindow->getIsotopicMatrix(
