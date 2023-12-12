@@ -969,10 +969,12 @@ void ProjectDockWidget::contextMenuEvent ( QContextMenuEvent * event )
 {
     QMenu menu;
 
-    QAction* z0 = menu.addAction("Unload Selected Sample");
-    connect(z0, SIGNAL(triggered()), this ,SLOT(unloadSample()));
 
-    menu.addSeparator();
+    //Isuse 692
+    //TODO: fix this, and reenable this option
+//    QAction* z0 = menu.addAction("Unload Selected Sample");
+//    connect(z0, SIGNAL(triggered()), this ,SLOT(unloadSample()));
+//    menu.addSeparator();
 
     QAction *z3 = menu.addAction("Toggle Visibility of Selected Samples");
     connect(z3, SIGNAL(triggered()), this, SLOT(toggleSelectedSamples()));
@@ -1103,13 +1105,19 @@ void ProjectDockWidget::unloadSample() {
         qDebug() << "Removing Sample " << sample->getSampleName().c_str();
         qDebug() << " Empting scan data #Scans=" << sample->scans.size();
 
-        //remove sample from sample list
-        for(unsigned int i=0; i<_mainwindow->samples.size(); i++) {
-            if (_mainwindow->samples[i] == sample) {
-                _mainwindow->samples.erase( _mainwindow->samples.begin()+i);
-                break;
-            }
-        }
+//        //remove sample from sample list
+//        for(unsigned int i=0; i<_mainwindow->samples.size(); i++) {
+//            if (_mainwindow->samples[i] == sample) {
+//                _mainwindow->samples.erase( _mainwindow->samples.begin()+i);
+//                break;
+//            }
+//        }
+
+        //Issue 692: use erase/remove idiom
+        _mainwindow->samples.erase(std::remove_if(_mainwindow->samples.begin(), _mainwindow->samples.end(), [sample](mzSample *val){
+            return val == sample;
+        }));
+
         qDebug() << "Number of Remaining Samples =" << _mainwindow->sampleCount();
         //delete(item);
     }
