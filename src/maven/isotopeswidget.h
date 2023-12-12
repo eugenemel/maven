@@ -64,9 +64,7 @@ private:
      Adduct* getCurrentAdduct();
      mzSample* getCurrentSample();
 
-     void rebuildTableFromPeakGroupOld(PeakGroup* group);
-
-     //Issue 691
+     //Issue 693
      void rebuildTableFromPeakGroup(PeakGroup* group);
       
 };
