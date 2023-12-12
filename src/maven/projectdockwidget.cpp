@@ -1368,4 +1368,5 @@ void ProjectDockWidget::refreshSamplesListInOtherWidgets(){
     if (_mainwindow->isotopeLegendWidget && _mainwindow->isotopeLegendWidget->isVisible()) {
         _mainwindow->isotopeLegendWidget->refresh();
     }
+    _mainwindow->updateSampleComboBoxes();
 }

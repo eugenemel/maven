@@ -37,6 +37,7 @@ public slots:
 	  void setClipboard();
 	  void setClipboard(PeakGroup* group);
       void setClipboard(QList<PeakGroup*>& groups);
+      void updateSampleComboBox();
 
 
 private slots:

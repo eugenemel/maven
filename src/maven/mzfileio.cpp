@@ -13,6 +13,7 @@ void mzFileIO::setMainWindow(MainWindow* mw) {
     connect(this,SIGNAL(finished()),_mainwindow,SLOT(setupSampleColors()));
     connect(this,SIGNAL(finished()),_mainwindow->projectDockWidget,SLOT(updateSampleList()));
     connect(this,SIGNAL(finished()),_mainwindow,SLOT(showSRMList()));
+    connect(this,SIGNAL(finished()),_mainwindow,SLOT(updateSampleComboBoxes()));
 }
 
 

@@ -261,7 +261,7 @@ public slots:
     void getCovariants(Peak* peak);
     void markGroup(PeakGroup* group,char label);
     void updateAdductsInGUI();
-
+    void updateSampleComboBoxes();
     void changeUserAdduct();
     Adduct* getUserAdduct();
 

@@ -609,6 +609,9 @@ vector<mzSample*> MainWindow::getVisibleSamples() {
             vsamples.push_back(samples[i]);
         }
     }
+
+    sort(vsamples.begin(), vsamples.end(), mzSample::compSampleOrder);
+
     return vsamples;
 }
 
@@ -2678,7 +2681,6 @@ IsotopeMatrix MainWindow::getIsotopicMatrix(
 
     PeakGroup::QType qtype = getUserQuantType();
     vector<mzSample*> vsamples = getVisibleSamples();
-    sort(vsamples.begin(), vsamples.end(), mzSample::compSampleOrder);
 
     double mZeroExpectedAbundance = group->expectedAbundance;
     vector<float> mPlusZeroAbundance = group->getOrderedIntensityVector(vsamples, qtype);
@@ -2893,6 +2895,13 @@ void MainWindow::updateAdductsInGUI() {
     selectAdductsDialog->updateGUI();
 
     emit(updatedAvailableAdducts());
+}
+
+
+void MainWindow::updateSampleComboBoxes() {
+    if (isotopeWidget) {
+        isotopeWidget->updateSampleComboBox();
+    }
 }
 
 IsotopeParameters MainWindow::getIsotopeParameters(){

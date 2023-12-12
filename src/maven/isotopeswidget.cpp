@@ -14,14 +14,15 @@ IsotopeWidget::IsotopeWidget(MainWindow* mw) {
 
   setupUi(this);
 
-  adductComboBox->setMinimumSize(200, 0);
+  formula->setMinimumSize(150, 0);
+  adductComboBox->setMinimumSize(150, 0);
 
   adductComboBox->clear();
   for (Adduct* a : DB.adductsDB) {
     adductComboBox->addItem(a->name.c_str(),QVariant::fromValue(a));
   }
 
-  cmbSampleName->setMinimumSize(200, 0);
+  cmbSampleName->setMinimumSize(150, 0);
 
   connect(treeWidget, SIGNAL(itemSelectionChanged()), SLOT(showInfo()));
   connect(formula, SIGNAL(textEdited(QString)), this, SLOT(userChangedFormula(QString)));
@@ -58,6 +59,18 @@ Adduct* IsotopeWidget::getCurrentAdduct() {
     }
 
     return nullptr;
+}
+
+void IsotopeWidget::updateSampleComboBox() {
+    cmbSampleName->blockSignals(true);
+
+    cmbSampleName->clear();
+    cmbSampleName->addItem("Select Sample", QVariant::fromValue(nullptr));
+    for (mzSample *sample : _mw->getVisibleSamples()) {
+        cmbSampleName->addItem(QString(sample->sampleName.c_str()), QVariant::fromValue(sample));
+    }
+
+    cmbSampleName->blockSignals(false);
 }
 
 void IsotopeWidget::setPeakGroup(PeakGroup* grp) {
