@@ -27,6 +27,7 @@ IsotopeWidget::IsotopeWidget(MainWindow* mw) {
   connect(treeWidget, SIGNAL(itemSelectionChanged()), SLOT(showInfo()));
   connect(formula, SIGNAL(textEdited(QString)), this, SLOT(userChangedFormula(QString)));
   connect(adductComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(updateAdduct()));
+  connect(cmbSampleName, SIGNAL(currentIndexChanged(QString)), this, SLOT(rebuildTableCurrentGroup()));
 
   QIcon icon = QIcon(rsrcPath + "/exportcsv.png");
   int btnHeight = btnExport->height();
@@ -59,6 +60,12 @@ Adduct* IsotopeWidget::getCurrentAdduct() {
     }
 
     return nullptr;
+}
+
+mzSample* IsotopeWidget::getCurrentSample() {
+    QVariant v = cmbSampleName->currentData();
+    mzSample *sample = v.value<mzSample*>();
+    return sample;
 }
 
 void IsotopeWidget::updateSampleComboBox() {
@@ -95,16 +102,68 @@ void IsotopeWidget::setPeakGroup(PeakGroup* grp) {
     }
     _group->pullIsotopes(isotopeParameters, _mw->getSamples());
 
-   // rebuildTableFromPeakGroup(_group);
-     rebuildTableFromPeakGroup2(_group);
+    rebuildTableFromPeakGroup(_group);
 }
 
-void IsotopeWidget::rebuildTableFromPeakGroup2(PeakGroup* group) {
-     qDebug() << "IsotopeWidget::rebuildTableFromPeakGroup2()";
-
+void IsotopeWidget::rebuildTableCurrentGroup() {
+    rebuildTableFromPeakGroup(_group);
 }
 
 void IsotopeWidget::rebuildTableFromPeakGroup(PeakGroup* group) {
+     qDebug() << "IsotopeWidget::rebuildTableFromPeakGroup2()";
+
+     if (!group) return;
+
+     links.clear();
+     links = vector<mzLink>(group->childCount());
+
+     mzSample* sample = getCurrentSample();
+     float sampleQuantTotal = 0.0f;
+
+     //monoisotopic abundance, sample quant total
+     float mZeroExpectedAbundance = 1.0f;
+     for (unsigned int i = 0; i < group->childCount(); i++) {
+        PeakGroup* isotope = &(group->children[i]);
+        if (isotope->tagString == "C12 PARENT") {
+            mZeroExpectedAbundance = isotope->expectedAbundance;
+        }
+        if (sample) {
+            vector<mzSample*> samples{sample};
+            float quantVal = isotope->getOrderedIntensityVector(samples, _mw->getUserQuantType()).at(0);
+            sampleQuantTotal += quantVal;
+        }
+     }
+
+     //prevent divide by zero error
+     if (sampleQuantTotal <= 0.0f) {
+        sampleQuantTotal = 1.0;
+     }
+
+     for (unsigned int i = 0; i < group->childCount(); i++) {
+        PeakGroup* isotope = &(group->children[i]);
+        float quantVal = 0.0f;
+        if (sample) {
+            vector<mzSample*> samples{sample};
+            quantVal = isotope->getOrderedIntensityVector(samples, _mw->getUserQuantType()).at(0);
+        }
+
+        mzLink link;
+
+        link.note= group->children[i].tagString;
+        link.mz2 = group->children[i].meanMz;
+        link.value2 = quantVal;
+        link.isotopeFrac = 100.0f * quantVal/sampleQuantTotal;
+        link.percentExpected = group->children[i].expectedAbundance * 100.0f;
+        link.percentRelative = group->children[i].expectedAbundance / mZeroExpectedAbundance * 100.0f;
+
+        links[i] = link;
+     }
+
+     sort(links.begin(),links.end(),mzLink::compMz);
+     showTable();
+}
+
+void IsotopeWidget::rebuildTableFromPeakGroupOld(PeakGroup* group) {
 
     if (!group) return;
     if (group->children.empty()) return; //no isotopes

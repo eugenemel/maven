@@ -38,7 +38,7 @@ public slots:
 	  void setClipboard(PeakGroup* group);
       void setClipboard(QList<PeakGroup*>& groups);
       void updateSampleComboBox();
-
+      void rebuildTableCurrentGroup();
 
 private slots:
       void showInfo();
@@ -62,11 +62,12 @@ private:
 
      QString groupIsotopeMatrixExport(PeakGroup* group, bool includeSampleHeader);
      Adduct* getCurrentAdduct();
+     mzSample* getCurrentSample();
 
-     void rebuildTableFromPeakGroup(PeakGroup* group);
+     void rebuildTableFromPeakGroupOld(PeakGroup* group);
 
      //Issue 691
-     void rebuildTableFromPeakGroup2(PeakGroup* group);
+     void rebuildTableFromPeakGroup(PeakGroup* group);
       
 };
 
