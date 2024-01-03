@@ -922,7 +922,7 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
         if ( header.count("rt") && header["rt"]<N)  rt = fields[ header["rt"]].toDouble();
         if ( header.count("expectedrt") && header["expectedrt"]<N) rt = fields[ header["expectedrt"]].toDouble();
         if ( header.count("charge") && header["charge"]<N) charge = fields[ header["charge"]].toDouble();
-        if ( header.count("formula") && header["formala"]<N) formula = fields[ header["formula"] ].toStdString();
+        if ( header.count("formula") && header["formula"]<N) formula = fields[ header["formula"] ].toStdString();
         if ( header.count("id") && header["id"]<N) 	 id = fields[ header["id"] ].toStdString();
         if ( header.count("name") && header["name"]<N) 	 name = fields[ header["name"] ].toStdString();
         if ( header.count("compound") && header["compound"]<N) 	 name = fields[ header["compound"] ].toStdString();
