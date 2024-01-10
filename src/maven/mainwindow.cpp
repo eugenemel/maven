@@ -1993,6 +1993,7 @@ void MainWindow::Align() {
     if (settings != NULL ) {
          workerThread->eic_ppmWindow = settings->value("eic_ppmWindow").toDouble();
          workerThread->eic_smoothingAlgorithm = settings->value("eic_smoothingWindow").toInt();
+         workerThread->clsf = getClassifier();
     }
 
     workerThread->minGoodPeakCount = alignmentDialog->minGoodPeakCount->value();
