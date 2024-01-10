@@ -201,7 +201,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
              if(!highestpeak)  continue;
 
 
-             if (clsf->hasModel()) { clsf->classify(&group); group.groupStatistics(); }
+             if (clsf && clsf->hasModel()) { clsf->classify(&group); group.groupStatistics(); }
 
 //             //Issue 632: Start Debugging
 //             qDebug() <<  group.meanMz << "@" << group.medianRt() << ":";
@@ -232,7 +232,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 //             qDebug() << endl;
 //             //Issue 632: End Debugging
 
-             if (clsf->hasModel()&& group.goodPeakCount < minGoodPeakCount) continue;
+             if (clsf && clsf->hasModel()&& group.goodPeakCount < minGoodPeakCount) continue;
              if (group.blankMax*minSignalBlankRatio > group.maxIntensity) continue;
              if (group.maxNoNoiseObs < minNoNoiseObs) continue;
              if (group.maxSignalBaselineRatio < minSignalBaseLineRatio) continue;
@@ -518,15 +518,15 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             Peak* highestpeak = group.getHighestIntensityPeak();
             if(!highestpeak)  continue;
 
-            if (clsf->hasModel()) {
+            if (clsf && clsf->hasModel()) {
                 clsf->classify(&group);
             }
 
             group.computeAvgBlankArea(eics);
             group.groupStatistics();
 
-            if (clsf->hasModel()&& group.goodPeakCount < minGoodPeakCount) continue;
-            if (clsf->hasModel() && group.maxQuality < minQuality) continue;
+            if (clsf && clsf->hasModel()&& group.goodPeakCount < minGoodPeakCount) continue;
+            if (clsf && clsf->hasModel() && group.maxQuality < minQuality) continue;
 
             // if (group.blankMean*minBlankRatio > group.sampleMean ) continue;
             if (group.maxNoNoiseObs < minNoNoiseObs) continue;
@@ -1144,15 +1144,15 @@ void BackgroundPeakUpdate::processSRMTransitions(vector<mzSlice*>&slices){
             Peak* highestpeak = group.getHighestIntensityPeak();
             if(!highestpeak)  continue;
 
-            if (clsf->hasModel()) {
+            if (clsf && clsf->hasModel()) {
                 clsf->classify(&group);
             }
 
             group.computeAvgBlankArea(eics);
             group.groupStatistics();
 
-            if (clsf->hasModel()&& group.goodPeakCount < minGoodPeakCount) continue;
-            if (clsf->hasModel() && group.maxQuality < minQuality) continue;
+            if (clsf && clsf->hasModel()&& group.goodPeakCount < minGoodPeakCount) continue;
+            if (clsf && clsf->hasModel() && group.maxQuality < minQuality) continue;
             if (group.maxNoNoiseObs < minNoNoiseObs) continue;
             if (group.maxSignalBaselineRatio < minSignalBaseLineRatio) continue;
             if (group.maxIntensity < minGroupIntensity ) continue;
