@@ -2023,7 +2023,7 @@ void MainWindow::Align() {
 void MainWindow::Align2(){
     if (sampleCount() < 2) return;
     if (alignmentDialog2->radFromRtFile->isChecked()) {
-
+         doGuidedAligment(alignmentDialog2->txtSelectFile->toPlainText());
     } else if (alignmentDialog2->radFromMzList->isChecked()) {
 
     } else {
@@ -2046,8 +2046,13 @@ void MainWindow::doGuidedAligment(QString alignmentFile) {
         cerr << "Aligning samples" << "\t" << alignmentFile.toStdString() << endl;
         Aligner aligner;
         aligner.setSamples(samples);
-        aligner.loadAlignmentFile(alignmentFile.toStdString().c_str());
+        map<mzSample*, vector<pair<float, float>>> sampleToUpdatedRts = aligner.loadAlignmentFile(alignmentFile.toStdString().c_str());
         aligner.doSegmentedAligment();
+
+        //Issue 698: cue up alignment information for saving later
+        if (projectDockWidget->currentProject) {
+            projectDockWidget->currentProject->sampleToUpdatedRts = sampleToUpdatedRts;
+        }
     }
 
     getEicWidget()->replotForced();
@@ -2058,6 +2063,12 @@ void MainWindow::UndoAlignment() {
         if (samples[i])
           samples[i]->restoreOriginalRetentionTimes();
     }
+
+    //Issue 698: forget previous alignment information
+    if (projectDockWidget->currentProject) {
+        projectDockWidget->currentProject->sampleToUpdatedRts.clear();
+    }
+
     getEicWidget()->replotForced();
 }
 
