@@ -1,4 +1,5 @@
 .qmake.stash
+src/maven/.qtc_clangd/
 Makefile
 src/maven/tmp
 src/maven/appdir
