@@ -1544,11 +1544,17 @@ void MainWindow::createToolBars() {
     btnFeatureDetect->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnFeatureDetect->setToolTip(tr("Feature Detection"));
 
-    QToolButton *btnDirectInfusion = new QToolButton(toolBar);
-    btnDirectInfusion->setText("Direct Infusion");
-    btnDirectInfusion->setIcon(QIcon(rsrcPath +"/averageSpectra.png"));
-    btnDirectInfusion->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnDirectInfusion->setToolTip(tr("Process Direct Infusion Samples"));
+//    QToolButton *btnDirectInfusion = new QToolButton(toolBar);
+//    btnDirectInfusion->setText("Direct Infusion");
+//    btnDirectInfusion->setIcon(QIcon(rsrcPath +"/averageSpectra.png"));
+//    btnDirectInfusion->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+//    btnDirectInfusion->setToolTip(tr("Process Direct Infusion Samples"));
+
+    QToolButton *btnAlignment = new QToolButton(toolBar);
+    btnAlignment->setText("Alignment");
+    btnAlignment->setIcon(QIcon(rsrcPath + "/textcenter.png"));
+    btnAlignment->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnAlignment->setToolTip(tr("Perform RT alignment on all loaded samples"));
 
     QToolButton *btnSettings = new QToolButton(toolBar);
     btnSettings->setText("Options");
@@ -1561,7 +1567,8 @@ void MainWindow::createToolBars() {
     connect(btnLibrary, SIGNAL(clicked()), libraryDialog, SLOT(show()));
     connect(btnAdducts, SIGNAL(clicked()), SLOT(showSelectAdductsDialog()));
     connect(btnFeatureDetect,SIGNAL(clicked()), SLOT(showMassSlices()));
-    connect(btnDirectInfusion, SIGNAL(clicked()), SLOT(showDirectInfusionDialog()));
+    //connect(btnDirectInfusion, SIGNAL(clicked()), SLOT(showDirectInfusionDialog()));
+    connect(btnAlignment, SIGNAL(clicked()), alignmentDialog2, SLOT(show()));
     connect(btnSettings,SIGNAL(clicked()),settingsForm,SLOT(bringIntoView()));
 
     toolBar->addWidget(btnOpen);
@@ -1569,7 +1576,8 @@ void MainWindow::createToolBars() {
     toolBar->addWidget(btnLibrary);
     toolBar->addWidget(btnAdducts);
     toolBar->addWidget(btnFeatureDetect);
-    toolBar->addWidget(btnDirectInfusion);
+    toolBar->addWidget(btnAlignment);
+    //toolBar->addWidget(btnDirectInfusion);
     toolBar->addWidget(btnSettings);
 
     QWidget *hBox = new QWidget(toolBar);
@@ -2020,9 +2028,16 @@ void MainWindow::Align() {
     workerThread->start();
 }
 
+//Issue 698: Alternative RT alignment approach
 void MainWindow::Align2(){
     if (sampleCount() < 2) return;
+
     if (alignmentDialog2->radFromRtFile->isChecked()) {
+
+         //Alignment should always be performed relative to the raw, measured intensities -
+         //So need to undo any alignment that might have been done previously.
+         UndoAlignment();
+
         doGuidedAligment(alignmentDialog2->txtSelectFile->toPlainText());
     } else if (alignmentDialog2->radFromMzList->isChecked()) {
         QString mzStr = alignmentDialog2->txtMzList->toPlainText();
@@ -2044,6 +2059,10 @@ void MainWindow::Align2(){
                 "Too Few Anchor Points",
                 "Fewer than 3 valid m/z values could be observed. Please check your formatting of m/z values and/or add more values to the list.");
         } else {
+
+            //Alignment should always be performed relative to the raw, measured intensities -
+            //So need to undo any alignment that might have been done previously.
+            UndoAlignment();
 
             ExperimentAnchorPoints experimentAnchorPoints(
                 getSamples(),
