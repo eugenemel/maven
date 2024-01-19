@@ -57,7 +57,8 @@ FORMS = forms/settingsform.ui  \
         forms/setrumsDBdialog.ui \
         forms/filtertagsdialog.ui \
         forms/searchparamsdialog.ui \
-        forms/msmsscoringsettings.ui
+        forms/msmsscoringsettings.ui \
+        forms/alignmentdialog2.ui
 
 HEADERS +=  stable.h \
             filtertagsdialog.h \
