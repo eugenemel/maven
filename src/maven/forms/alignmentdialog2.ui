@@ -15,7 +15,7 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0" colspan="5">
-    <widget class="QGroupBox" name="groupBox">
+    <widget class="QGroupBox" name="boxAlignmentOptions">
      <property name="title">
       <string>Align Samples</string>
      </property>
@@ -59,7 +59,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Column 3: Updated RT value.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton">
+     <widget class="QPushButton" name="btnSelectFile">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -163,7 +163,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <double>10000.000000000000000</double>
       </property>
      </widget>
-     <widget class="QLabel" name="label">
+     <widget class="QLabel" name="lblMinPeakIntensity">
       <property name="geometry">
        <rect>
         <x>10</x>

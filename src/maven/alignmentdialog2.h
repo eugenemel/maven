@@ -9,6 +9,9 @@ class AlignmentDialog2 : public QDialog, public Ui_AlignmentDialog2 {
 
 		public:
              AlignmentDialog2(QWidget *parent);
+
+        public slots:
+            void loadRtFile();
 };
 
 #endif
