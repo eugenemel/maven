@@ -11,7 +11,7 @@ class SettingsForm : public QDialog, public Ui_SettingsForm
 {
                 Q_OBJECT
 		public:
-				 SettingsForm(QSettings* s, MainWindow *w);
+                SettingsForm(QSettings* s, MainWindow *w);
                 protected:
                     void closeEvent       (QCloseEvent* e) { getFormValues(); QDialog::closeEvent(e);}
                     void keyPressEvent    (QKeyEvent* e) { QDialog::keyPressEvent(e); getFormValues(); }

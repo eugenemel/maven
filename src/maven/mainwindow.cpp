@@ -1424,7 +1424,7 @@ void MainWindow::createMenus() {
 
     QAction *actionAlign = widgetsMenu->addAction(QIcon(rsrcPath + "/textcenter.png"), "Sample Alignment");
     actionAlign->setToolTip("Align Samples");
-    connect(actionAlign, SIGNAL(triggered()), alignmentDialog2, SLOT(show()));
+    connect(actionAlign, SIGNAL(triggered()), alignmentDialog2, SLOT(bringIntoView()));
 
     QAction *actionMatch = widgetsMenu->addAction(QIcon(rsrcPath + "/spectra_search.png"), "Nearest Spectra Search");
     actionMatch->setToolTip(tr("Search Spectra for Fragmentation Patterns"));

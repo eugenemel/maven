@@ -8,10 +8,11 @@ class AlignmentDialog2 : public QDialog, public Ui_AlignmentDialog2 {
 		Q_OBJECT
 
 		public:
-             AlignmentDialog2(QWidget *parent);
+            AlignmentDialog2(QWidget *parent);
 
         public slots:
             void loadRtFile();
+            void bringIntoView();
 };
 
 #endif
