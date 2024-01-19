@@ -2020,7 +2020,18 @@ void MainWindow::Align() {
 }
 
 void MainWindow::Align2(){
-    //TODO
+    if (sampleCount() < 2) return;
+    if (alignmentDialog2->radFromRtFile->isChecked()) {
+
+    } else if (alignmentDialog2->radFromMzList->isChecked()) {
+
+    } else {
+         QMessageBox::information(
+             alignmentDialog2,
+             "No Option Selected",
+             "Please select one of the above options (From anchor point .rt file or From m/z value list) to initiate RT alignment.");
+
+    }
 }
 
 void MainWindow::doGuidedAligment(QString alignmentFile) {
