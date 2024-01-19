@@ -141,7 +141,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string extracomment="m/z values for anchor points"/>
       </property>
      </widget>
-     <widget class="QDoubleSpinBox" name="doubleSpinBox">
+     <widget class="QDoubleSpinBox" name="spnMinPeakIntensity">
       <property name="geometry">
        <rect>
         <x>210</x>

@@ -2023,14 +2023,49 @@ void MainWindow::Align() {
 void MainWindow::Align2(){
     if (sampleCount() < 2) return;
     if (alignmentDialog2->radFromRtFile->isChecked()) {
-         doGuidedAligment(alignmentDialog2->txtSelectFile->toPlainText());
+        doGuidedAligment(alignmentDialog2->txtSelectFile->toPlainText());
     } else if (alignmentDialog2->radFromMzList->isChecked()) {
+        QString mzStr = alignmentDialog2->txtExplainMzList->toPlainText();
+        QStringList mzList = mzStr.split("\n", Qt::SkipEmptyParts);
+
+        vector<double> mzs;
+        for (QString& str : mzList) {
+            try {
+                double mz = stod(str.toStdString());
+                mzs.push_back(mz);
+            } catch (const::std::exception e) {
+                qDebug() << "[MainWindow::Align2()] Skipping non-numeric m/z:" << str;
+            }
+        }
+
+        if (mzs.size() < 3) {
+            QMessageBox::information(
+                alignmentDialog2,
+                "Too Few Anchor Points",
+                "Fewer than 3 valid m/z values could be observed. Please check your formatting of m/z values and/or add more values to the list.");
+        } else {
+
+            ExperimentAnchorPoints experimentAnchorPoints(
+                getSamples(),
+                "", // anchor points file, not used in this context
+                getUserPPM(),
+                0,  // max RT window, not used in this context
+                1, // eic smoothing window - not used in this context
+                alignmentDialog2->spnMinPeakIntensity->value());
+
+            experimentAnchorPoints.computeFromMzs(false, mzs, true);
+
+            //Issue 698: cue up alignment information for saving later
+            if (projectDockWidget->currentProject) {
+                projectDockWidget->currentProject->sampleToUpdatedRts = experimentAnchorPoints.sampleToUpdatedRts;
+            }
+        }
 
     } else {
-         QMessageBox::information(
-             alignmentDialog2,
-             "No Option Selected",
-             "Please select one of the above options (From anchor point .rt file or From m/z value list) to initiate RT alignment.");
+        QMessageBox::information(
+            alignmentDialog2,
+            "No Option Selected",
+            "Please select one of the above options (From anchor point .rt file or From m/z value list) to initiate RT alignment.");
 
     }
 }
