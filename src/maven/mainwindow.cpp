@@ -2025,7 +2025,7 @@ void MainWindow::Align2(){
     if (alignmentDialog2->radFromRtFile->isChecked()) {
         doGuidedAligment(alignmentDialog2->txtSelectFile->toPlainText());
     } else if (alignmentDialog2->radFromMzList->isChecked()) {
-        QString mzStr = alignmentDialog2->txtExplainMzList->toPlainText();
+        QString mzStr = alignmentDialog2->txtMzList->toPlainText();
         QStringList mzList = mzStr.split("\n", Qt::SkipEmptyParts);
 
         vector<double> mzs;
