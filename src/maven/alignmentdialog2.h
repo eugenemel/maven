@@ -1,5 +1,5 @@
-#ifndef ALIGNDIALOG_H
-#define ALIGNDIALOG_H
+#ifndef ALIGNDIALOG2_H
+#define ALIGNDIALOG2_H
 
 #include "stable.h"
 #include "ui_alignmentdialog2.h"

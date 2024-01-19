@@ -14,14 +14,7 @@
    <string>Alignment Options</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="1">
-    <widget class="QToolButton" name="UndoAlignment">
-     <property name="text">
-      <string>Undo Aligment</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0" colspan="2">
+   <item row="0" column="0" colspan="5">
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
       <string>Align Samples</string>
@@ -183,6 +176,27 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Min Peak Intensity:</string>
       </property>
      </widget>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QToolButton" name="btnUndoAlignment">
+     <property name="text">
+      <string>Undo Sample RT Alignment</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QToolButton" name="btnAlign">
+     <property name="text">
+      <string>Perform Sample RT Alignment</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="3">
+    <widget class="QToolButton" name="btnClose">
+     <property name="text">
+      <string>Close </string>
+     </property>
     </widget>
    </item>
   </layout>

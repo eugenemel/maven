@@ -294,6 +294,10 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     connect(alignmentDialog->alignButton,SIGNAL(clicked()),SLOT(Align()));
     connect(alignmentDialog->UndoAlignment,SIGNAL(clicked()),SLOT(UndoAlignment()));
 
+    alignmentDialog2 = new AlignmentDialog2(this);
+    connect(alignmentDialog2->btnAlign,SIGNAL(clicked()),SLOT(Align2()));
+    connect(alignmentDialog2->btnUndoAlignment,SIGNAL(clicked()),SLOT(UndoAlignment()));
+
     //calibration dialog
     calibrateDialog	 =  new CalibrateDialog(this);
 
@@ -1412,9 +1416,14 @@ void MainWindow::createMenus() {
     actionCalibrate->setToolTip("Calibrate");
     connect(actionCalibrate,SIGNAL(triggered()), calibrateDialog, SLOT(show()));
 
+//    // Issue 698: Switch to new approach
+//    QAction *actionAlign = widgetsMenu->addAction(QIcon(rsrcPath + "/textcenter.png"), "Sample Alignment");
+//    actionAlign->setToolTip("Align Samples");
+//    connect(actionAlign, SIGNAL(triggered()), alignmentDialog, SLOT(show()));
+
     QAction *actionAlign = widgetsMenu->addAction(QIcon(rsrcPath + "/textcenter.png"), "Sample Alignment");
     actionAlign->setToolTip("Align Samples");
-    connect(actionAlign, SIGNAL(triggered()), alignmentDialog, SLOT(show()));
+    connect(actionAlign, SIGNAL(triggered()), alignmentDialog2, SLOT(show()));
 
     QAction *actionMatch = widgetsMenu->addAction(QIcon(rsrcPath + "/spectra_search.png"), "Nearest Spectra Search");
     actionMatch->setToolTip(tr("Search Spectra for Fragmentation Patterns"));
@@ -2008,6 +2017,10 @@ void MainWindow::Align() {
     workerThread->keepFoundGroups=false;
     workerThread->eicMaxGroups=5;
     workerThread->start();
+}
+
+void MainWindow::Align2(){
+    //TODO
 }
 
 void MainWindow::doGuidedAligment(QString alignmentFile) {

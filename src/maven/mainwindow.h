@@ -17,6 +17,7 @@
 #include "directinfusiondialog.h"
 #include "selectadductsdialog.h"
 #include "alignmentdialog.h"
+#include "alignmentdialog2.h"
 #include "calibratedialog.h"
 //#include "rconsoledialog.h"
 #include "background_peaks_update.h"
@@ -44,6 +45,7 @@ class PeakDetectionDialog;
 class DirectInfusionDialog;
 class SelectAdductsDialog;
 class AlignmentDialog;
+class AlignmentDialog2;
 class CalibrateDialog;
 class SpectraWidget;
 class LigandWidget;
@@ -148,6 +150,7 @@ public:
     DirectInfusionDialog *directInfusionDialog;
     SelectAdductsDialog *selectAdductsDialog;
     AlignmentDialog*	  alignmentDialog;
+    AlignmentDialog2* alignmentDialog2;
     CalibrateDialog*	  calibrateDialog;
     RconsoleWidget*       rconsoleDockWidget;
     LibraryMangerDialog*       libraryDialog;
@@ -218,6 +221,7 @@ public slots:
     void setFormulaFocus(QString formula);
     void setPeptideFocus(QString peptideSequence);
     void Align();
+    void Align2();
     void UndoAlignment();
     void doGuidedAligment(QString filename);
     void spectraFocused(Peak* _peak);
