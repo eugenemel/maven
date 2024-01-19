@@ -297,6 +297,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     alignmentDialog2 = new AlignmentDialog2(this);
     connect(alignmentDialog2->btnAlign,SIGNAL(clicked()),SLOT(Align2()));
     connect(alignmentDialog2->btnUndoAlignment,SIGNAL(clicked()),SLOT(UndoAlignment()));
+    connect(alignmentDialog2->btnClose, SIGNAL(clicked()), alignmentDialog2, SLOT(hide()));
 
     //calibration dialog
     calibrateDialog	 =  new CalibrateDialog(this);
