@@ -149,7 +149,7 @@ SOURCES +=  mainwindow.cpp  \
             heatmap.cpp \
             note.cpp  \
             suggest.cpp \
-            alignmentdialog.cpp\
+            alignmentdialog.cpp \
             scatterplot.cpp \
             gallerywidget.cpp \
             highlighter.cpp \
@@ -168,7 +168,8 @@ SOURCES +=  mainwindow.cpp  \
             setrumsdbdialog.cpp \
             samplebarplotwidget.cpp \
             msmsscoringsettings.cpp \
-            isotopesexportsettings.cpp
+            isotopesexportsettings.cpp \
+            alignmentdialog2.cpp
 
 
 sources.files =  $$HEADERS \
