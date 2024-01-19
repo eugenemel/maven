@@ -2059,6 +2059,8 @@ void MainWindow::Align2(){
             if (projectDockWidget->currentProject) {
                 projectDockWidget->currentProject->sampleToUpdatedRts = experimentAnchorPoints.sampleToUpdatedRts;
             }
+
+            getEicWidget()->replotForced();
         }
 
     } else {
