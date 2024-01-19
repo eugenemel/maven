@@ -113,7 +113,8 @@ HEADERS +=  stable.h \
             setrumsdbdialog.h \
             samplebarplotwidget.h \
             msmsscoringsettings.h \
-            isotopeexportsettingsdialog.h
+            isotopeexportsettingsdialog.h \
+            alignmentdialog2.h
 
 SOURCES +=  mainwindow.cpp  \
             classifier.cpp \
