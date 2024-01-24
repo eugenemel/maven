@@ -1556,6 +1556,7 @@ void MainWindow::createToolBars() {
     btnAlignment->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnAlignment->setToolTip(tr("Perform RT alignment on all loaded samples"));
 
+
     QToolButton *btnSettings = new QToolButton(toolBar);
     btnSettings->setText("Options");
     btnSettings->setIcon(QIcon(rsrcPath + "/settings.png"));
@@ -1568,7 +1569,7 @@ void MainWindow::createToolBars() {
     connect(btnAdducts, SIGNAL(clicked()), SLOT(showSelectAdductsDialog()));
     connect(btnFeatureDetect,SIGNAL(clicked()), SLOT(showMassSlices()));
     //connect(btnDirectInfusion, SIGNAL(clicked()), SLOT(showDirectInfusionDialog()));
-    connect(btnAlignment, SIGNAL(clicked()), alignmentDialog2, SLOT(show()));
+    connect(btnAlignment, SIGNAL(clicked()), alignmentDialog2, SLOT(bringIntoView()));
     connect(btnSettings,SIGNAL(clicked()),settingsForm,SLOT(bringIntoView()));
 
     toolBar->addWidget(btnOpen);
