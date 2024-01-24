@@ -169,7 +169,7 @@ private:
   vector<PeakGroup>allgroups;
   void cleanup();
   void printSettings();
-  void matchFragmentation(PeakGroup* g, vector<CompoundIon>& searchableDatabase);
+  void matchCompound(PeakGroup* g, vector<CompoundIon>& searchableDatabase);
   bool sliceHasMS2Event(mzSlice* slice);
 
   private:

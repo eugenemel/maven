@@ -566,47 +566,50 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             } else if (scoringScheme == MzKitchenProcessor::METABOLITES_SCORING_NAME) {
                 MzKitchenProcessor::assignBestMetaboliteToGroup(&group, searchableDatabase, mzkitchenMetaboliteSearchParameters);
             } else {
-                matchFragmentation(&group, searchableDatabase);
+                matchCompound(&group, searchableDatabase);
             }
 
             if (!isRetainUnmatchedCompounds && !group.compound){
                 continue;
             }
 
-            if(mustHaveMS2) {
-                if(group.ms2EventCount == 0) continue;
+//            if(mustHaveMS2) {
+//                if(group.ms2EventCount == 0) continue;
 
-                if (group.compound) {
-                    bool isValidCompound = (group.fragMatchScore.mergedScore >= this->minFragmentMatchScore &&
-                                            group.fragMatchScore.numMatches >= this->minNumFragments);
+//                if (group.compound) {
+//                    bool isValidCompound = (group.fragMatchScore.mergedScore >= this->minFragmentMatchScore &&
+//                                            group.fragMatchScore.numMatches >= this->minNumFragments);
 
-                    if (!isValidCompound ){
-                        //invalid compound - either skip this group, or replace with unmatched peak.
+//                    if (!isValidCompound ){
+//                        //invalid compound - either skip this group, or replace with unmatched peak.
 
-                        if (isRetainUnmatchedCompounds) {
-                            group.compound = nullptr;
-                            group.adduct = nullptr;
-                            group.compoundDb = "";
-                            group.compoundId = "";
-                            FragmentationMatchScore emptyScore;
-                            group.fragMatchScore = emptyScore;
-                        } else {
-                            continue;
-                        }
-                    }
-                }
-            }
+//                        if (isRetainUnmatchedCompounds) {
+//                            group.compound = nullptr;
+//                            group.adduct = nullptr;
+//                            group.compoundDb = "";
+//                            group.compoundId = "";
+//                            FragmentationMatchScore emptyScore;
+//                            group.fragMatchScore = emptyScore;
+//                        } else {
+//                            continue;
+//                        }
+//                    }
+//                }
+//            }
 
             if (!slice->srmId.empty()) group.srmId = slice->srmId;
 
-            if (featureMatchRtFlag && group.compound && group.compound->expectedRt>0) {
-                float rtDiff =  abs(group.compound->expectedRt - (group.meanRt));
-                group.expectedRtDiff = rtDiff;
-                group.groupRank = rtDiff*rtDiff*(1.1-group.maxQuality)*(1/log(group.maxIntensity+1));
-                if (group.expectedRtDiff > featureCompoundMatchRtTolerance) continue;
-            } else {
-                group.groupRank = (1.1-group.maxQuality)*(1/log(group.maxIntensity+1));
-            }
+//            if (featureMatchRtFlag && group.compound && group.compound->expectedRt>0) {
+//                float rtDiff =  abs(group.compound->expectedRt - (group.meanRt));
+//                group.expectedRtDiff = rtDiff;
+//                group.groupRank = rtDiff*rtDiff*(1.1-group.maxQuality)*(1/log(group.maxIntensity+1));
+//                if (group.expectedRtDiff > featureCompoundMatchRtTolerance) continue;
+//            } else {
+//                group.groupRank = (1.1-group.maxQuality)*(1/log(group.maxIntensity+1));
+//            }
+
+            //TODO: this is confusing, nobody is using
+//            group.groupRank = (1.1-group.maxQuality)*(1/log(group.maxIntensity+1));
 
             groupsToAppend.push_back(&group);
         }
@@ -1354,9 +1357,9 @@ void BackgroundPeakUpdate::printSettings() {
     cerr << "#compoundRTWindow=" << compoundRTWindow << endl;
 }
 
-void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g, vector<CompoundIon>& searchableDatabase) {
+void BackgroundPeakUpdate::matchCompound(PeakGroup* g, vector<CompoundIon>& searchableDatabase) {
     if(searchableDatabase.size() == 0) return;
-    if(g->ms2EventCount == 0) return;
+    if(mustHaveMS2 && g->ms2EventCount == 0) return;
 
     float minMz = g->meanMz - (g->meanMz*featureCompoundMatchMzTolerance/1000000);
     float maxMz = g->meanMz + (g->meanMz*featureCompoundMatchMzTolerance/1000000);
@@ -1381,19 +1384,34 @@ void BackgroundPeakUpdate::matchFragmentation(PeakGroup* g, vector<CompoundIon>&
         Compound *cpd = compoundIon.compound;
         Adduct *a = compoundIon.adduct;
 
+        //DISQUALIFIER: adduct agreement
         if (isRequireMatchingAdduct && cpd->adductString != a->name) {
             continue;
         }
 
-        //TODO: is searchProton flag necessary here? --> always false
+        //DISQUALIFIER: rt agreement
+        float rtDiff =  abs(cpd->expectedRt - g->meanRt);
+        if (featureMatchRtFlag && (cpd->expectedRt <= 0 || rtDiff > featureCompoundMatchRtTolerance)) {
+            continue;
+        }
+
+        if (cpd->expectedRt > 0) {
+            g->expectedRtDiff = rtDiff;
+        }
+
         FragmentationMatchScore s = cpd->scoreCompoundHit(&g->fragmentationPattern, productPpmTolr, searchProton);
 
+        //DISQUALIFIER: min MS2 matches agreement
         if (s.numMatches < minNumFragments) continue;
         if (Fragment::getNumDiagnosticFragmentsMatched("*",cpd->fragment_labels, s.ranks) < minNumDiagnosticFragments) continue;
 
         s.mergedScore = s.getScoreByName(scoringScheme.toStdString());
 
-        if (s.mergedScore > bestScore.mergedScore ) {
+        //DISQUALIFIER: min MS2 score
+        if (s.mergedScore < minFragmentMatchScore) continue;
+
+        //Issue 699: Support case with no MS2 information (match is made entirely based on precursor m/z, adduct, rt)
+        if (s.mergedScore >= bestScore.mergedScore ) {
             bestMatchingId = static_cast<int>(pos);
             bestScore = s;
         }
