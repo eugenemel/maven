@@ -2076,12 +2076,20 @@ void MainWindow::Align2(){
             bool debug = false;
             experimentAnchorPoints.computeFromMzs(debug, mzs, true);
 
-            //Issue 698: cue up alignment information for saving later
-            if (projectDockWidget->currentProject) {
-                projectDockWidget->currentProject->sampleToUpdatedRts = experimentAnchorPoints.sampleToUpdatedRts;
+            if (experimentAnchorPoints.anchorPointSets.size() < experimentAnchorPoints.minNumAnchorPointSetsForAlignment) {
+                QMessageBox::information(
+                    alignmentDialog2,
+                    "Too Few Anchor Points",
+                    "Intensity values for fewer than 3 valid m/z values could be detected. Please verify that the m/z values you have provided are correct, and have measurable intensities.");
+            } else {
+                //Issue 698: cue up alignment information for saving later
+                if (projectDockWidget->currentProject) {
+                    projectDockWidget->currentProject->sampleToUpdatedRts = experimentAnchorPoints.sampleToUpdatedRts;
+                }
+
+                getEicWidget()->replotForced();
             }
 
-            getEicWidget()->replotForced();
         }
 
     } else {
