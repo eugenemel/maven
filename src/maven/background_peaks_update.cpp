@@ -547,7 +547,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
                 }
             }
 
-           if (excludeIsotopicPeaks) {
+            if (excludeIsotopicPeaks) {
                 if (group.chargeState > 0 and not group.isMonoisotopic(isotopeMzTolr)) continue;
             }
 
@@ -558,8 +558,6 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             group.computeFragPattern(productPpmTolr);
             // BROKEN group.findHighestPurityMS2Pattern(compoundPPMWindow);
-
-            //TODO: restructuring, expect that compound is always nullptr
 
             if (scoringScheme == MzKitchenProcessor::LIPID_SCORING_NAME){
                 MzKitchenProcessor::assignBestLipidToGroup(&group, searchableDatabase, lipidSearchParameters);
@@ -573,40 +571,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
                 continue;
             }
 
-//            if(mustHaveMS2) {
-//                if(group.ms2EventCount == 0) continue;
-
-//                if (group.compound) {
-//                    bool isValidCompound = (group.fragMatchScore.mergedScore >= this->minFragmentMatchScore &&
-//                                            group.fragMatchScore.numMatches >= this->minNumFragments);
-
-//                    if (!isValidCompound ){
-//                        //invalid compound - either skip this group, or replace with unmatched peak.
-
-//                        if (isRetainUnmatchedCompounds) {
-//                            group.compound = nullptr;
-//                            group.adduct = nullptr;
-//                            group.compoundDb = "";
-//                            group.compoundId = "";
-//                            FragmentationMatchScore emptyScore;
-//                            group.fragMatchScore = emptyScore;
-//                        } else {
-//                            continue;
-//                        }
-//                    }
-//                }
-//            }
-
             if (!slice->srmId.empty()) group.srmId = slice->srmId;
-
-//            if (featureMatchRtFlag && group.compound && group.compound->expectedRt>0) {
-//                float rtDiff =  abs(group.compound->expectedRt - (group.meanRt));
-//                group.expectedRtDiff = rtDiff;
-//                group.groupRank = rtDiff*rtDiff*(1.1-group.maxQuality)*(1/log(group.maxIntensity+1));
-//                if (group.expectedRtDiff > featureCompoundMatchRtTolerance) continue;
-//            } else {
-//                group.groupRank = (1.1-group.maxQuality)*(1/log(group.maxIntensity+1));
-//            }
 
             //TODO: this is confusing, nobody is using
 //            group.groupRank = (1.1-group.maxQuality)*(1/log(group.maxIntensity+1));
