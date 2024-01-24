@@ -2069,10 +2069,11 @@ void MainWindow::Align2(){
                 "", // anchor points file, not used in this context
                 getUserPPM(),
                 0,  // max RT window, not used in this context
-                1, // eic smoothing window - not used in this context
+                0, // eic smoothing window - not used in this context
                 alignmentDialog2->spnMinPeakIntensity->value());
 
-            experimentAnchorPoints.computeFromMzs(false, mzs, true);
+            bool debug = false;
+            experimentAnchorPoints.computeFromMzs(debug, mzs, true);
 
             //Issue 698: cue up alignment information for saving later
             if (projectDockWidget->currentProject) {
