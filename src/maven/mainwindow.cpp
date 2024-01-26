@@ -2778,7 +2778,9 @@ IsotopeMatrix MainWindow::getIsotopicMatrix(
     vector<mzSample*> vsamples = getVisibleSamples();
 
     double mZeroExpectedAbundance = group->expectedAbundance;
-    vector<float> mPlusZeroAbundance = group->getOrderedIntensityVector(vsamples, qtype);
+
+    //Issue 700: quant intensity might be off
+    vector<float> mPlusZeroAbundance{};
 
     //get isotopic groups
     vector<PeakGroup*>isotopes;
@@ -2787,8 +2789,9 @@ IsotopeMatrix MainWindow::getIsotopicMatrix(
             PeakGroup* isotope = &(group->children[i]);
             isotopes.push_back(isotope);
 
-            if (isotope->tagString == "C12 PARENT" && mZeroExpectedAbundance <= 0.0) {
+            if (isotope->tagString == "C12 PARENT") {
                 mZeroExpectedAbundance = isotope->expectedAbundance;
+                mPlusZeroAbundance = isotope->getOrderedIntensityVector(vsamples, qtype);
             }
         }
     }
@@ -2800,13 +2803,13 @@ IsotopeMatrix MainWindow::getIsotopicMatrix(
 
     for(int i=0; i < isotopes.size(); i++ ) {
         if (! isotopes[i] ) continue;
-        vector<float> values = isotopes[i]->getOrderedIntensityVector(vsamples,qtype); //sort isotopes by sample
+        vector<float> values = isotopes[i]->getOrderedIntensityVector(vsamples, qtype); //sort isotopes by sample
         for(int j=0; j < values.size(); j++ ) {
 
             float isotopeObserved = values[j];
 
             //Do not correct C12 parent.
-            if (isNaturalAbundanceCorrected && isotopes[i]->tagString != "C12 PARENT") {
+            if (isNaturalAbundanceCorrected && !mPlusZeroAbundance.empty() && isotopes[i]->tagString != "C12 PARENT") {
                 float isotopeExpectedAbundance = isotopes[i]->expectedAbundance;
                 float mZeroObserved = mPlusZeroAbundance[j];
 
