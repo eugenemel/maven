@@ -8,4 +8,5 @@ SUBDIRS += src/maven_core/libneural \
 		   src/maven \
 		   src/maven_core/mzDeltas \
 		   src/peakdetector \
+		   src/isotopeprocessor \
 		   src/pulleics
