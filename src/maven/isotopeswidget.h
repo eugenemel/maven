@@ -59,6 +59,7 @@ private:
 
 	  MassCalculator mcalc;
 	  Compound* tempCompound;
+      map<string, vector<Isotope>> cachedIsotopes{};
 
      QString groupIsotopeMatrixExport(PeakGroup* group, bool includeSampleHeader);
      Adduct* getCurrentAdduct();
@@ -66,6 +67,12 @@ private:
 
      //Issue 693
      void rebuildTableFromPeakGroup(PeakGroup* group);
+
+     //Issue 715
+     string getCachedIsotopeKey(
+         string formula,
+         Adduct* adduct,
+         IsotopeParameters& parameters);
       
 };
 
