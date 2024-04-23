@@ -1323,10 +1323,11 @@ void TableDockWidget::exportGroupsAsIsotopes() {
 
             for (unsigned int j = 0; j < matrix.isotopesData.cols(); j++) { // isotope
 
-                isotopesReport << group->compound->name << sep.c_str()
-                               << group->adduct->name << sep.c_str()
+                //Issue 710: Add double-quotes around strings, if necessary
+                isotopesReport << mzUtils::doubleQuoteString(group->compound->name) << sep.c_str()
+                               << mzUtils::doubleQuoteString(group->adduct->name) << sep.c_str()
                                << group->medianRt() << sep.c_str()
-                               << matrix.isotopeNames.at(j);
+                               << mzUtils::doubleQuoteString(matrix.isotopeNames.at(j));
 
                 for (unsigned int i = 0; i < matrix.isotopesData.rows(); i++) { // sample
 
