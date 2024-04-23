@@ -407,6 +407,8 @@ QString IsotopeWidget::groupIsotopeMatrixExport(PeakGroup* group, bool includeSa
 
 void IsotopeWidget::showTable() {
 
+    treeWidget->blockSignals(true);
+
 	QTreeWidget *p = treeWidget;
 	p->clear();
     p->setColumnCount(6);
@@ -438,6 +440,8 @@ void IsotopeWidget::showTable() {
 	p->setUpdatesEnabled(true);
 
     repaint();
+
+    treeWidget->blockSignals(false);
 }
 
 void IsotopeWidget::showInfo() {
