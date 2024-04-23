@@ -110,7 +110,7 @@ void IsotopeWidget::rebuildTableCurrentGroup() {
 }
 
 void IsotopeWidget::rebuildTableFromPeakGroup(PeakGroup* group) {
-     qDebug() << "IsotopeWidget::rebuildTableFromPeakGroup2()";
+     qDebug() << "IsotopeWidget::rebuildTableFromPeakGroup()";
 
      if (!group) return;
 
@@ -160,6 +160,8 @@ void IsotopeWidget::rebuildTableFromPeakGroup(PeakGroup* group) {
      }
 
      sort(links.begin(),links.end(),mzLink::compMz);
+
+     qDebug() << "IsotopeWidget::rebuildTableFromPeakGroup(): before showTable()";
      showTable();
 }
 
@@ -290,6 +292,8 @@ void IsotopeWidget::computeIsotopes(string f) {
     }
 
     sort(links.begin(),links.end(),mzLink::compMz);
+    qDebug() << "IsotopesWidget::computeIsotopes(): before showTable()";
+
     showTable();
 }
 
