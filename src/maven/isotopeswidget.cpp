@@ -221,6 +221,7 @@ void IsotopeWidget::updateAdduct() {
 }
 
 void IsotopeWidget::computeIsotopes(string f) {
+    qDebug() << "IsotopeWidget::computeIsotopes(" << f.c_str() << ")";
 
     if (f.empty()) return;
 
