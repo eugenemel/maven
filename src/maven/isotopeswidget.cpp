@@ -222,21 +222,6 @@ void IsotopeWidget::updateAdduct() {
     computeIsotopes(_formula);
 }
 
-//Issue 711
-string IsotopeWidget::getCachedIsotopeKey(
-    string formula,
-    Adduct* adduct,
-    IsotopeParameters& parameters) {
-
-    string key = "formula=" + formula + ";";
-    if (adduct) {
-        key = key + "adduct=" + adduct->name + ";";
-    }
-    key = key + "params=" + parameters.encodeParams() + ";";
-
-    return key;
-}
-
 void IsotopeWidget::computeIsotopes(string f) {
     qDebug() << "IsotopeWidget::computeIsotopes(" << f.c_str() << ")";
 
@@ -251,28 +236,17 @@ void IsotopeWidget::computeIsotopes(string f) {
         maxNumProtons = isotopeParameters.maxIsotopesToExtract;
     }
 
-    string isotopeKey = this->getCachedIsotopeKey(f, getCurrentAdduct(), isotopeParameters);
-
-    vector<Isotope> massList{};
-    if (cachedIsotopes.find(isotopeKey) != cachedIsotopes.end()) {
-        qDebug() << "IsotopeWidget::computeIsotopes(): Retrieving isotopes from cache.";
-        massList = cachedIsotopes.at(isotopeKey);
-    } else {
-        qDebug() << "IsotopeWidget::computeIsotopes(): Did not find isotopes in cache, computing.";
-        massList = MassCalculator::computeIsotopes(
-            f,
-            getCurrentAdduct(),
-            isotopeParameters.getLabeledIsotopes(),
-            isotopeParameters.labeledIsotopeRetentionPolicy,
-            NaturalAbundanceData::defaultNaturalAbundanceData,
-            isotopeParameters.isNatAbundance,
-            maxNumProtons,
-            isotopeParameters.natAbundanceThreshold,
-            false
-            );
-
-        cachedIsotopes.insert(make_pair(isotopeKey, massList));
-    }
+    vector<Isotope> massList = MassCalculator::computeIsotopes(
+        f,
+        getCurrentAdduct(),
+        isotopeParameters.getLabeledIsotopes(),
+        isotopeParameters.labeledIsotopeRetentionPolicy,
+        NaturalAbundanceData::defaultNaturalAbundanceData,
+        isotopeParameters.isNatAbundance,
+        maxNumProtons,
+        isotopeParameters.natAbundanceThreshold,
+        false
+        );
 
     links.clear();
     links = vector<mzLink>(massList.size());

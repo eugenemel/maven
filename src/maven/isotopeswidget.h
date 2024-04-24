@@ -67,12 +67,6 @@ private:
 
      //Issue 693
      void rebuildTableFromPeakGroup(PeakGroup* group);
-
-     //Issue 715
-     string getCachedIsotopeKey(
-         string formula,
-         Adduct* adduct,
-         IsotopeParameters& parameters);
       
 };
 
