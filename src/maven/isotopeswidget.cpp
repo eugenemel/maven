@@ -259,7 +259,7 @@ void IsotopeWidget::computeIsotopes(string f) {
         massList = cachedIsotopes.at(isotopeKey);
     } else {
         qDebug() << "IsotopeWidget::computeIsotopes(): Did not find isotopes in cache, computing.";
-        massList = MassCalculator::computeIsotopes2(
+        massList = MassCalculator::computeIsotopes(
             f,
             getCurrentAdduct(),
             isotopeParameters.getLabeledIsotopes(),
