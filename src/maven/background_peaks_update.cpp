@@ -535,22 +535,6 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             if (group.blankMax*minSignalBlankRatio > group.maxIntensity) continue;
 
-            group.chargeState = group.getChargeStateFromMS1(ppmMerge);
-            vector<Isotope> isotopes = highestpeak->getScan()->getIsotopicPattern(highestpeak->peakMz,isotopeMzTolr, 6, 10);
-
-            if(isotopes.size() > 0) {
-                //group.chargeState = isotopes.front().charge;
-                for(Isotope& isotope: isotopes) {
-                    if (mzUtils::ppmDist((float) isotope.mz, (float) group.meanMz) < isotopeMzTolr) {
-                        group.isotopicIndex=isotope.C13;
-                    }
-                }
-            }
-
-            if (excludeIsotopicPeaks) {
-                if (group.chargeState > 0 and not group.isMonoisotopic(isotopeMzTolr)) continue;
-            }
-
             //if (getChargeStateFromMS1(&group) < minPrecursorCharge) continue;
                         //build consensus ms2 specta
             //vector<Scan*>ms2events = group.getFragmenationEvents();
@@ -571,10 +555,16 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
                 continue;
             }
 
-            if (!slice->srmId.empty()) group.srmId = slice->srmId;
+            //Issue 707: extract isotopic peaks (requires compound by this point)
+            group.pullIsotopes(isotopeParameters, mainwindow->getSamples());
+            group.isotopeParameters = isotopeParameters;
+            group.chargeState = group.getChargeStateFromMS1(ppmMerge);
 
-            //TODO: this is confusing, nobody is using
-//            group.groupRank = (1.1-group.maxQuality)*(1/log(group.maxIntensity+1));
+            if (excludeIsotopicPeaks) {
+                if (group.chargeState > 0 and not group.isMonoisotopic(isotopeMzTolr)) continue;
+            }
+
+            if (!slice->srmId.empty()) group.srmId = slice->srmId;
 
             groupsToAppend.push_back(&group);
         }
