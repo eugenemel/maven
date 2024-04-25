@@ -315,8 +315,13 @@ void writePeaks(EIC* eic, QCStandard qcStandard, shared_ptr<SearchDataset> searc
 }
 
 int file_unique_id(string filename) {
-		struct stat file_info;
+
+        struct stat file_info;
+#ifdef _WIN32
+        _stat(filename.c_str(), &file_info);
+#else
         lstat(filename.c_str(), &file_info);
+#endif
         return static_cast<int>(file_info.st_ino);
 }
 
