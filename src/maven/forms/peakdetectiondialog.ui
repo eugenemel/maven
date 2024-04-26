@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>813</width>
+    <width>814</width>
     <height>962</height>
    </rect>
   </property>
@@ -45,10 +45,23 @@
           <string>Isotopes</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_6">
-          <item row="0" column="0" colspan="2">
-           <widget class="QLabel" name="lblMassSlicingMethod">
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="reportIsotopes">
             <property name="text">
-             <string>Description of Mass Slicing Method.</string>
+             <string>Extract Isotopic Peaks</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QCheckBox" name="excludeIsotopicPeaks">
+            <property name="text">
+             <string>Require Monoisotopic</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -56,6 +69,13 @@
            <widget class="QLabel" name="label_7">
             <property name="text">
              <string>Isotope Detection m/z Tolerance</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" colspan="2">
+           <widget class="QLabel" name="lblMassSlicingMethod">
+            <property name="text">
+             <string>Description of Mass Slicing Method.</string>
             </property>
            </widget>
           </item>
@@ -78,23 +98,17 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="reportIsotopes">
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="chkDifferentialIsotopeSearch">
             <property name="text">
-             <string>Extract Isotopic Peaks</string>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
+             <string>Differential Abundance Isotope Search</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QCheckBox" name="excludeIsotopicPeaks">
+          <item row="3" column="1">
+           <widget class="QPushButton" name="btnConfigureDifferentialIsotopeSearch">
             <property name="text">
-             <string>Require Monoisotopic</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
+             <string>Configure Differential Abundance Isotope Search</string>
             </property>
            </widget>
           </item>
