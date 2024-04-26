@@ -58,7 +58,8 @@ FORMS = forms/settingsform.ui  \
         forms/filtertagsdialog.ui \
         forms/searchparamsdialog.ui \
         forms/msmsscoringsettings.ui \
-        forms/alignmentdialog2.ui
+        forms/alignmentdialog2.ui \
+        forms/configurediffisotopesearch.ui
 
 HEADERS +=  stable.h \
             filtertagsdialog.h \
