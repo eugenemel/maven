@@ -115,7 +115,8 @@ HEADERS +=  stable.h \
             samplebarplotwidget.h \
             msmsscoringsettings.h \
             isotopeexportsettingsdialog.h \
-            alignmentdialog2.h
+            alignmentdialog2.h \
+            configurediffisotopesearch.h
 
 SOURCES +=  mainwindow.cpp  \
             classifier.cpp \
