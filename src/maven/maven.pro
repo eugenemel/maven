@@ -171,7 +171,8 @@ SOURCES +=  mainwindow.cpp  \
             samplebarplotwidget.cpp \
             msmsscoringsettings.cpp \
             isotopesexportsettings.cpp \
-            alignmentdialog2.cpp
+            alignmentdialog2.cpp \
+            configurediffisotopesearch.cpp
 
 
 sources.files =  $$HEADERS \
