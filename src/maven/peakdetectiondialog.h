@@ -6,6 +6,7 @@
 #include "database.h"
 #include "mainwindow.h"
 #include "msmsscoringsettings.h"
+#include "configurediffisotopesearch.h"
 
 class MainWindow;
 class TableDockWidget;
@@ -52,6 +53,7 @@ class PeakDetectionDialog : public QDialog, public Ui_PeakDetectionDialog
                 shared_ptr<PeakPickingAndGroupingParameters> getPeakPickingAndGroupingParameters();
 
                 MSMSScoringSettingsDialog *scoringSettingsDialog;
+                ConfigureDiffIsotopeSearch *configureDiffIsotopeSearch;
 };
 
 #endif

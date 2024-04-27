@@ -22,8 +22,12 @@ PeakDetectionDialog::PeakDetectionDialog(QWidget *parent) :
     connect(btnFragMatchingAdvanced, SIGNAL(clicked()), scoringSettingsDialog, SLOT(bringIntoView()));
     connect(scoringSettingsDialog->btnLoadClassAdduct, SIGNAL(clicked()), scoringSettingsDialog, SLOT(setLipidClassAdductFile()));
 
-    _featureDetectionType= CompoundDB;
+    configureDiffIsotopeSearch = new ConfigureDiffIsotopeSearch(this);
+    configureDiffIsotopeSearch->setWindowFlags(configureDiffIsotopeSearch->windowFlags() | Qt::WindowStaysOnTopHint);
+    connect(configureDiffIsotopeSearch->btnOK, SIGNAL(clicked(bool)), configureDiffIsotopeSearch, SLOT(hide()));
+    connect(this->btnConfigureDifferentialIsotopeSearch, SIGNAL(clicked()), configureDiffIsotopeSearch, SLOT(bringIntoView()));
 
+    _featureDetectionType= CompoundDB;
 }
 
 void PeakDetectionDialog::setUIValuesFromSettings(){

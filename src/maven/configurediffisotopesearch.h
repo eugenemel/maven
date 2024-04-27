@@ -9,7 +9,7 @@ class ConfigureDiffIsotopeSearch : public QDialog, public Ui_ConfigureDiffIsotop
 		Q_OBJECT
 
 		public:
-             ConfigureDiffIsotopeSearch(QWidget *parent);
+            ConfigureDiffIsotopeSearch(QWidget *parent);
 
         public slots:
             void bringIntoView();
