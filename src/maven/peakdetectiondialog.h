@@ -39,6 +39,7 @@ class PeakDetectionDialog : public QDialog, public Ui_PeakDetectionDialog
                  void setFeatureDetection(FeatureDetectionType type);
                  void updateLibraryList();
                  void showLibraryDialog();
+                 void populateDiffIsotopeSampleList();
 
 		private:
                 void setUIValuesFromSettings();

@@ -15,7 +15,7 @@ class ConfigureDiffIsotopeSearch : public QDialog, public Ui_ConfigureDiffIsotop
             vector<mzSample*> labeledSamples{};
 
         public slots:
-            void populateSamples(vector<mzSample*> projectSamples);
+            void populateSamples(vector<mzSample*> loadedSamples);
             void bringIntoView();
             void resetSamples();
 };
