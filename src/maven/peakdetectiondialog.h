@@ -25,7 +25,7 @@ class PeakDetectionDialog : public QDialog, public Ui_PeakDetectionDialog
 				 PeakDetectionDialog(QWidget *parent);
 				 ~PeakDetectionDialog();
                  void setSettings(QSettings* settings) { this->settings = settings; setUIValuesFromSettings();}
-				 void setMainWindow(MainWindow* w) { this->mainwindow = w; }
+                 void setMainWindow(MainWindow* w);
 
 		public slots:
 				 void findPeaks();

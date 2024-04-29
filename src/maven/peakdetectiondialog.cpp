@@ -25,6 +25,8 @@ PeakDetectionDialog::PeakDetectionDialog(QWidget *parent) :
     configureDiffIsotopeSearch = new ConfigureDiffIsotopeSearch(this);
     configureDiffIsotopeSearch->setWindowFlags(configureDiffIsotopeSearch->windowFlags() | Qt::WindowStaysOnTopHint);
     connect(configureDiffIsotopeSearch->btnOK, SIGNAL(clicked(bool)), configureDiffIsotopeSearch, SLOT(hide()));
+    connect(configureDiffIsotopeSearch->btnCancel, SIGNAL(clicked(bool)), configureDiffIsotopeSearch, SLOT(hide()));
+    connect(configureDiffIsotopeSearch->btnReset, SIGNAL(clicked(bool)), configureDiffIsotopeSearch, SLOT(resetSamples()));
     connect(this->btnConfigureDifferentialIsotopeSearch, SIGNAL(clicked()), configureDiffIsotopeSearch, SLOT(bringIntoView()));
 
     _featureDetectionType= CompoundDB;
@@ -637,4 +639,11 @@ shared_ptr<PeakPickingAndGroupingParameters> PeakDetectionDialog::getPeakPicking
      // END EIC::groupPeaksE()
 
     return peakPickingAndGroupingParameters;
+}
+
+void PeakDetectionDialog::setMainWindow(MainWindow *w){
+    this->mainwindow = w;
+//    if (this->configureDiffIsotopeSearch) {
+//        this->configureDiffIsotopeSearch->setMainWindow(w);
+//    }
 }
