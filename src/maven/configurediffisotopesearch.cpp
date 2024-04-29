@@ -17,8 +17,12 @@ void ConfigureDiffIsotopeSearch::bringIntoView(){
     }
 }
 
-void ConfigureDiffIsotopeSearch::resetSamples() {
+void ConfigureDiffIsotopeSearch::resetSamples(vector<mzSample*> loadedSamples) {
+    this->listAvailableSamples->clear();
+    this->listLabeledSamples->clear();
+    this->listUnlabeledSamples->clear();
 
+    this->populateSamples(loadedSamples);
 }
 
 /**

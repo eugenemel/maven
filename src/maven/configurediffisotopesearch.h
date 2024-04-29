@@ -13,8 +13,8 @@ class ConfigureDiffIsotopeSearch : public QDialog, public Ui_ConfigureDiffIsotop
 
         public slots:
             void populateSamples(vector<mzSample*> loadedSamples);
+            void resetSamples(vector<mzSample*> loadedSamples);
             void bringIntoView();
-            void resetSamples();
 
         private:
             bool isSampleInListWidget(mzSample* sample, QListWidget *widget);

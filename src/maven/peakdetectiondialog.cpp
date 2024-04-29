@@ -26,7 +26,7 @@ PeakDetectionDialog::PeakDetectionDialog(QWidget *parent) :
     configureDiffIsotopeSearch->setWindowFlags(configureDiffIsotopeSearch->windowFlags() | Qt::WindowStaysOnTopHint);
     connect(configureDiffIsotopeSearch->btnOK, SIGNAL(clicked(bool)), configureDiffIsotopeSearch, SLOT(hide()));
     connect(configureDiffIsotopeSearch->btnCancel, SIGNAL(clicked(bool)), configureDiffIsotopeSearch, SLOT(hide()));
-    connect(configureDiffIsotopeSearch->btnReset, SIGNAL(clicked(bool)), configureDiffIsotopeSearch, SLOT(resetSamples()));
+    connect(configureDiffIsotopeSearch->btnReset, SIGNAL(clicked(bool)), SLOT(resetDiffIsotopeSampleList()));
 
     connect(this->btnConfigureDifferentialIsotopeSearch, SIGNAL(clicked()), SLOT(populateDiffIsotopeSampleList()));
     connect(this->btnConfigureDifferentialIsotopeSearch, SIGNAL(clicked()), configureDiffIsotopeSearch, SLOT(bringIntoView()));
@@ -645,6 +645,12 @@ shared_ptr<PeakPickingAndGroupingParameters> PeakDetectionDialog::getPeakPicking
 
 void PeakDetectionDialog::setMainWindow(MainWindow *w){
     this->mainwindow = w;
+}
+
+void PeakDetectionDialog::resetDiffIsotopeSampleList() {
+    if (this->mainwindow) {
+        this->configureDiffIsotopeSearch->resetSamples(mainwindow->getVisibleSamples());
+    }
 }
 
 void PeakDetectionDialog::populateDiffIsotopeSampleList(){
