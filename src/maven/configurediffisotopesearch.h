@@ -11,13 +11,13 @@ class ConfigureDiffIsotopeSearch : public QDialog, public Ui_ConfigureDiffIsotop
 		public:
             ConfigureDiffIsotopeSearch(QWidget *parent);
 
-            vector<mzSample*> unlabeledSamples{};
-            vector<mzSample*> labeledSamples{};
-
         public slots:
             void populateSamples(vector<mzSample*> loadedSamples);
             void bringIntoView();
             void resetSamples();
+
+        private:
+            bool isSampleInListWidget(mzSample* sample, QListWidget *widget);
 };
 
 #endif
