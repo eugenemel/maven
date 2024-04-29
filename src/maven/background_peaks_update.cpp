@@ -535,6 +535,9 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             if (group.blankMax*minSignalBlankRatio > group.maxIntensity) continue;
 
+            group.chargeState = group.getChargeStateFromMS1(ppmMerge);
+            if (excludeIsotopicPeaks && group.chargeState > 0 and not group.isMonoisotopic(isotopeMzTolr)) continue;
+
             //if (getChargeStateFromMS1(&group) < minPrecursorCharge) continue;
                         //build consensus ms2 specta
             //vector<Scan*>ms2events = group.getFragmenationEvents();
@@ -555,13 +558,15 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
                 continue;
             }
 
-            //Issue 707: extract isotopic peaks (requires compound by this point)
-            group.pullIsotopes(isotopeParameters, mainwindow->getSamples());
-            group.isotopeParameters = isotopeParameters;
-            group.chargeState = group.getChargeStateFromMS1(ppmMerge);
+            //Issue 720: Differential isotopes search
+            if (isDiffAbundanceIsotopeSearch) {
 
-            if (excludeIsotopicPeaks) {
-                if (group.chargeState > 0 and not group.isMonoisotopic(isotopeMzTolr)) continue;
+                //TODO: enumerate isotopes, overwrite MS2 score
+
+            } else if (pullIsotopesFlag) {
+                //Issue 707: extract isotopic peaks (requires compound by this point)
+                group.pullIsotopes(isotopeParameters, mainwindow->getSamples());
+                group.isotopeParameters = isotopeParameters;
             }
 
             if (!slice->srmId.empty()) group.srmId = slice->srmId;

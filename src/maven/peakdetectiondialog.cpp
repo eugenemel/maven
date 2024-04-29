@@ -264,6 +264,7 @@ void PeakDetectionDialog::findPeaks() {
         peakupdater->minNumFragments = scoringSettingsDialog->spnMinMatches->value();
         peakupdater->minNumDiagnosticFragments = scoringSettingsDialog->spnMinDiagnostic->value();
         peakupdater->excludeIsotopicPeaks = excludeIsotopicPeaks->isChecked();
+        peakupdater->isDiffAbundanceIsotopeSearch = chkDifferentialIsotopeSearch->isChecked();
 
         string policyText = peakGroupCompoundMatchPolicyBox->itemText(peakGroupCompoundMatchPolicyBox->currentIndex()).toStdString();
 

@@ -111,6 +111,9 @@ public:
    bool isRetainUnmatchedCompounds;
    bool isClusterPeakGroups;
 
+   //Issue 720
+   bool isDiffAbundanceIsotopeSearch = false;
+
    Classifier* clsf;
 
    //peaks search parameters
