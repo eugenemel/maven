@@ -10,6 +10,8 @@ class ConfigureDiffIsotopeSearch : public QDialog, public Ui_ConfigureDiffIsotop
 
 		public:
             ConfigureDiffIsotopeSearch(QWidget *parent);
+            vector<mzSample*> getUnlabeledSamples(vector<mzSample*> loadedSamples);
+            vector<mzSample*> getLabeledSamples(vector<mzSample*> loadedSamples);
 
         public slots:
             void populateSamples(vector<mzSample*> loadedSamples);

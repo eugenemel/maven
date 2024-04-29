@@ -78,3 +78,27 @@ bool ConfigureDiffIsotopeSearch::isSampleInListWidget(mzSample* sample, QListWid
 
     return isSampleInListWidget;
 }
+
+vector<mzSample*> ConfigureDiffIsotopeSearch::getUnlabeledSamples(vector<mzSample*> loadedSamples) {
+    vector<mzSample*> unlabeledSamples{};
+
+    for (mzSample * sample : loadedSamples) {
+        if (this->isSampleInListWidget(sample, this->listUnlabeledSamples)) {
+            unlabeledSamples.push_back(sample);
+        }
+    }
+
+    return unlabeledSamples;
+}
+
+vector<mzSample*> ConfigureDiffIsotopeSearch::getLabeledSamples(vector<mzSample*> loadedSamples) {
+    vector<mzSample*> labeledSamples{};
+
+    for (mzSample * sample : loadedSamples) {
+        if (this->isSampleInListWidget(sample, this->listLabeledSamples)) {
+            labeledSamples.push_back(sample);
+        }
+    }
+
+    return labeledSamples;
+}
