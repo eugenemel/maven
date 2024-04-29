@@ -561,7 +561,12 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             //Issue 720: Differential isotopes search
             if (isDiffAbundanceIsotopeSearch) {
 
-                //TODO: enumerate isotopes, overwrite MS2 score
+                group.pullIsotopesDifferentialAbundance(
+                    isotopeParameters,
+                    unlabeledSamples,
+                    labeledSamples);
+
+                group.isotopeParameters = isotopeParameters;
 
             } else if (pullIsotopesFlag) {
                 //Issue 707: extract isotopic peaks (requires compound by this point)

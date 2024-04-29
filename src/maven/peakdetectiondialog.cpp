@@ -264,7 +264,11 @@ void PeakDetectionDialog::findPeaks() {
         peakupdater->minNumFragments = scoringSettingsDialog->spnMinMatches->value();
         peakupdater->minNumDiagnosticFragments = scoringSettingsDialog->spnMinDiagnostic->value();
         peakupdater->excludeIsotopicPeaks = excludeIsotopicPeaks->isChecked();
+
+        //Issue 720
         peakupdater->isDiffAbundanceIsotopeSearch = chkDifferentialIsotopeSearch->isChecked();
+        peakupdater->labeledSamples = configureDiffIsotopeSearch->getLabeledSamples(mainwindow->getVisibleSamples());
+        peakupdater->unlabeledSamples = configureDiffIsotopeSearch->getUnlabeledSamples(mainwindow->getVisibleSamples());
 
         string policyText = peakGroupCompoundMatchPolicyBox->itemText(peakGroupCompoundMatchPolicyBox->currentIndex()).toStdString();
 

@@ -113,6 +113,8 @@ public:
 
    //Issue 720
    bool isDiffAbundanceIsotopeSearch = false;
+   vector<mzSample*> labeledSamples{};
+   vector<mzSample*> unlabeledSamples{};
 
    Classifier* clsf;
 
