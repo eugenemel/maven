@@ -558,20 +558,23 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
                 continue;
             }
 
+            //Issue 707: extract isotopes
+            //Issue 720: diff abundance isotope search implies that isotopes need to be determined
+            if (pullIsotopesFlag || isDiffAbundanceIsotopeSearch) {
+
+                //Issue 707: extract isotopic peaks (requires compound by this point)
+                group.pullIsotopes(isotopeParameters, mainwindow->getSamples());
+                group.isotopeParameters = isotopeParameters;
+            }
+
             //Issue 720: Differential isotopes search
             if (isDiffAbundanceIsotopeSearch) {
 
-                group.pullIsotopesDifferentialAbundance(
+                group.scoreIsotopesDifferentialAbundance(
                     isotopeParameters,
                     unlabeledSamples,
                     labeledSamples);
 
-                group.isotopeParameters = isotopeParameters;
-
-            } else if (pullIsotopesFlag) {
-                //Issue 707: extract isotopic peaks (requires compound by this point)
-                group.pullIsotopes(isotopeParameters, mainwindow->getSamples());
-                group.isotopeParameters = isotopeParameters;
             }
 
             if (!slice->srmId.empty()) group.srmId = slice->srmId;
