@@ -643,7 +643,4 @@ shared_ptr<PeakPickingAndGroupingParameters> PeakDetectionDialog::getPeakPicking
 
 void PeakDetectionDialog::setMainWindow(MainWindow *w){
     this->mainwindow = w;
-//    if (this->configureDiffIsotopeSearch) {
-//        this->configureDiffIsotopeSearch->setMainWindow(w);
-//    }
 }
