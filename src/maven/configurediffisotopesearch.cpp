@@ -21,11 +21,22 @@ void ConfigureDiffIsotopeSearch::resetSamples() {
 
 }
 
+/**
+ * @brief ConfigureDiffIsotopeSearch::populateSamples
+ * @param loadedSamples
+ *
+ * Note that everything is done with sample names, because attaching the samples themselves to the items
+ * would require subclassing QListWidgetItem.
+ * Instead, cross-reference the sample names to the list of samples stored in the main window.
+ */
 void ConfigureDiffIsotopeSearch::populateSamples(vector<mzSample*> loadedSamples){
 
     bool isSampleProcessed = false;
 
     for (mzSample* sample : loadedSamples) {
+
+        //should never happen, but guard against possible NPE
+        if (!sample) continue;
 
         //check unlabeled samples
         isSampleProcessed = this->isSampleInListWidget(sample, this->listUnlabeledSamples);
@@ -41,22 +52,21 @@ void ConfigureDiffIsotopeSearch::populateSamples(vector<mzSample*> loadedSamples
 
         //Add sample item to list of unassigned samples
         QListWidgetItem *item = new QListWidgetItem(sample->sampleName.c_str());
-        item->setData(SampleType, QVariant::fromValue(sample));
         this->listAvailableSamples->addItem(item);
     }
 }
 
 bool ConfigureDiffIsotopeSearch::isSampleInListWidget(mzSample* sample, QListWidget *widget){
+    if (!sample) return (false);
 
     bool isSampleInListWidget = false;
 
     for (unsigned int i = 0; i < widget->count(); i++) {
 
         QListWidgetItem *item = widget->item(i);
-        QVariant v = item->data(SampleType);
-        mzSample *labeledSample = v.value<mzSample*>();
+        string itemSampleName = item->text().toStdString();
 
-        if (labeledSample && labeledSample == sample) {
+        if (itemSampleName == sample->sampleName) {
             isSampleInListWidget = true;
             break;
         }
