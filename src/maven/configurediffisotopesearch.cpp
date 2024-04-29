@@ -7,9 +7,6 @@ ConfigureDiffIsotopeSearch::ConfigureDiffIsotopeSearch(QWidget *parent) :
 }
 
 void ConfigureDiffIsotopeSearch::bringIntoView(){
-//    if (this->mainWindow) {
-//        //TODO: populate samples
-//    }
     if (isVisible()){
         show();
         raise();
@@ -21,4 +18,8 @@ void ConfigureDiffIsotopeSearch::bringIntoView(){
 
 void ConfigureDiffIsotopeSearch::resetSamples() {
 
+}
+
+void ConfigureDiffIsotopeSearch::populateSamples(vector<mzSample*> projectSamples){
+    //TODO
 }

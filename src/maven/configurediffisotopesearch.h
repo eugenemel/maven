@@ -3,7 +3,6 @@
 
 #include "stable.h"
 #include "ui_configurediffisotopesearch.h"
-// #include "mainwindow.h"
 
 class ConfigureDiffIsotopeSearch : public QDialog, public Ui_ConfigureDiffIsotopeSearch
 {
@@ -14,11 +13,9 @@ class ConfigureDiffIsotopeSearch : public QDialog, public Ui_ConfigureDiffIsotop
 
             vector<mzSample*> unlabeledSamples{};
             vector<mzSample*> labeledSamples{};
-            //  MainWindow *mainWindow = nullptr;
-
-            // void setMainWindow(MainWindow *w){this->mainWindow = w;}
 
         public slots:
+            void populateSamples(vector<mzSample*> projectSamples);
             void bringIntoView();
             void resetSamples();
 };
