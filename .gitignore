@@ -27,6 +27,7 @@ src/build-peakdetector-Desktop_Qt_5_15_14_for_macOS_Universal-Debug/
 src/build-isotopeprocessor-Desktop_Qt_5_15_14_for_macOS_Universal-Debug/
 src/build-isotopeprocessor-llvm_Desktop_Qt_5_15_2_for_macOS_Universal-Debug/
 src/build-pulleics-Desktop_Qt_5_15_14_for_macOS_Universal-Debug/
+src/build-maven-Desktop_Qt_5_15_14_clang_64bit-Debug/
 
 src/peakdetector/peakdetector.pro.user
 src/peakdetector/tmp
