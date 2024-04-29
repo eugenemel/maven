@@ -40,7 +40,7 @@
           </widget>
          </item>
          <item row="3" column="1">
-          <widget class="QListWidget" name="listLabeleDSamples"/>
+          <widget class="QListWidget" name="listLabeledSamples"/>
          </item>
          <item row="2" column="1">
           <widget class="QLabel" name="lblLabeledSamples">
