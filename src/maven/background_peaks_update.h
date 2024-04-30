@@ -115,6 +115,10 @@ public:
    bool isDiffAbundanceIsotopeSearch = false;
    vector<mzSample*> labeledSamples{};
    vector<mzSample*> unlabeledSamples{};
+   Fragment::ConsensusIntensityAgglomerationType diffIsoAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median;
+   bool diffIsoIncludeSingleZero = false;
+   bool diffIsoIncludeDoubleZero = false;
+   int diffIsoReproducibilityThreshold = 1;
 
    Classifier* clsf;
 
@@ -179,6 +183,8 @@ private:
 
   private:
   volatile bool _stopped;
+
+  IsotopeParameters getSearchIsotopeParameters();
 
 };
 

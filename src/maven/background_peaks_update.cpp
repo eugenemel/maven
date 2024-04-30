@@ -98,8 +98,7 @@ void BackgroundPeakUpdate::run(void) {
 	} else if ( runFunction == "processMassSlices" ) { 
 		processMassSlices();
     } else if  (runFunction == "pullIsotopes" ) {
-        IsotopeParameters isotopeParameters = mainwindow->getIsotopeParameters();
-        isotopeParameters.ppm = compoundPPMWindow;
+        IsotopeParameters isotopeParameters = getSearchIsotopeParameters();
         _group->pullIsotopes(isotopeParameters, mainwindow->getSamples());
         _group->isotopeParameters = isotopeParameters;
     } else if  ( runFunction == "computePeaks" ) { // database search, calibrated dialog
@@ -152,8 +151,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
     amuQ1 = settings->value("amuQ1").toFloat();
     amuQ3 = settings->value("amuQ3").toFloat();
 
-    IsotopeParameters isotopeParameters = mainwindow->getIsotopeParameters();
-    isotopeParameters.ppm = compoundPPMWindow;
+    IsotopeParameters isotopeParameters = getSearchIsotopeParameters();
 
     unsigned int numPassingPeakGroups = 0;
     unsigned long numAllPeakGroups = 0;
@@ -458,8 +456,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
     amuQ1 = settings->value("amuQ1").toFloat();
     amuQ3 = settings->value("amuQ3").toFloat();
 
-    IsotopeParameters isotopeParameters = mainwindow->getIsotopeParameters();
-    isotopeParameters.ppm = compoundPPMWindow;
+    IsotopeParameters isotopeParameters = getSearchIsotopeParameters();
 
     for (unsigned int s=0; s < slices.size();  s++ ) {
         mzSlice* slice = slices[s];
@@ -1394,4 +1391,21 @@ void BackgroundPeakUpdate::matchCompound(PeakGroup* g, vector<CompoundIon>& sear
         g->adduct = bestMatchingCompoundIon.adduct;
         g->fragMatchScore = bestScore;
     }
+}
+
+IsotopeParameters BackgroundPeakUpdate::getSearchIsotopeParameters() {
+
+    IsotopeParameters isotopeParameters = mainwindow->getIsotopeParameters();
+    isotopeParameters.ppm = compoundPPMWindow;
+
+    // only applies to diffIso searches
+    isotopeParameters.diffIsoAgglomerationType = diffIsoAgglomerationType;
+    isotopeParameters.diffIsoIncludeSingleZero = diffIsoIncludeSingleZero;
+    isotopeParameters.diffIsoIncludeDoubleZero = diffIsoIncludeDoubleZero;
+    isotopeParameters.diffIsoReproducibilityThreshold = diffIsoReproducibilityThreshold;
+
+    //note that isotopes derived from a search
+    isotopeParameters.isotopeParametersType = IsotopeParametersType::SAVED;
+
+    return isotopeParameters;
 }
