@@ -29,47 +29,7 @@
          <string>Isotopic Label Designation</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
-         <item row="3" column="0">
-          <widget class="QListWidget" name="listUnlabeledSamples">
-           <property name="dragDropMode">
-            <enum>QAbstractItemView::DragDrop</enum>
-           </property>
-           <property name="defaultDropAction">
-            <enum>Qt::MoveAction</enum>
-           </property>
-           <property name="selectionMode">
-            <enum>QAbstractItemView::ExtendedSelection</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="lblUnlabeledSamples">
-           <property name="text">
-            <string>Unlabeled Samples</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QListWidget" name="listLabeledSamples">
-           <property name="dragDropMode">
-            <enum>QAbstractItemView::DragDrop</enum>
-           </property>
-           <property name="defaultDropAction">
-            <enum>Qt::MoveAction</enum>
-           </property>
-           <property name="selectionMode">
-            <enum>QAbstractItemView::ExtendedSelection</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLabel" name="lblLabeledSamples">
-           <property name="text">
-            <string>Isotopically Labeled Samples</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0" colspan="2">
+         <item row="2" column="0" colspan="2">
           <widget class="QListWidget" name="listAvailableSamples">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -88,10 +48,76 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="0" colspan="2">
+         <item row="3" column="1">
+          <widget class="QLabel" name="lblLabeledSamples">
+           <property name="text">
+            <string>Isotopically Labeled Samples</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="lblUnlabeledSamples">
+           <property name="text">
+            <string>Unlabeled Samples</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0" colspan="2">
           <widget class="QLabel" name="lblUnclassifiedSamples">
            <property name="text">
             <string>Unclassified Samples</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QListWidget" name="listLabeledSamples">
+           <property name="dragDropMode">
+            <enum>QAbstractItemView::DragDrop</enum>
+           </property>
+           <property name="defaultDropAction">
+            <enum>Qt::MoveAction</enum>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::ExtendedSelection</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QListWidget" name="listUnlabeledSamples">
+           <property name="dragDropMode">
+            <enum>QAbstractItemView::DragDrop</enum>
+           </property>
+           <property name="defaultDropAction">
+            <enum>Qt::MoveAction</enum>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::ExtendedSelection</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0" colspan="2">
+          <widget class="QPlainTextEdit" name="txtInstructions">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="acceptDrops">
+            <bool>false</bool>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+           <property name="plainText">
+            <string>Drag samples from 'Unclassified Samples' to either 'Unlabeled Samples' or 'Isotopically Labeled Samples' to designate samples as labeled or unlabeled.
+
+You can select a group of samples by using CMD + click or SHIFT + click, and drag and drop the entire group of samples.
+
+Samples can be freely moved among Unclassified, Unlabeled, and Labeled lists.</string>
            </property>
           </widget>
          </item>
