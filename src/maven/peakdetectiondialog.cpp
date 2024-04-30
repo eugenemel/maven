@@ -270,6 +270,23 @@ void PeakDetectionDialog::findPeaks() {
         peakupdater->labeledSamples = configureDiffIsotopeSearch->getLabeledSamples(mainwindow->getVisibleSamples());
         peakupdater->unlabeledSamples = configureDiffIsotopeSearch->getUnlabeledSamples(mainwindow->getVisibleSamples());
 
+        if (peakupdater->isDiffAbundanceIsotopeSearch && (peakupdater->labeledSamples.empty() || peakupdater->unlabeledSamples.empty())) {
+            QMessageBox::information(
+                this,
+                "Sample Groups Not Designated",
+                tr("The 'Differential Abundance Isotope Search' checkbox is currently selected, "
+                   "but the search has not been configured.<br><br>"
+
+                   "If you would like to conduct a Differential Abundance Isotope Search, "
+                   "click the 'Configure Differential Abundance Isotope Search' button and "
+                   "designate at least 1 loaded sample as 'Unlabeled' and 1 loaded sample as 'Isotopically Labeled'.<br><br>"
+
+                   "If you would not like to conduct a Differential Abundance Isotope Search, "
+                   "please un-check the 'Differential Abundance Isotope Search' checkbox.<br><br>"),
+                QMessageBox::Ok);
+            return;
+        }
+
         string policyText = peakGroupCompoundMatchPolicyBox->itemText(peakGroupCompoundMatchPolicyBox->currentIndex()).toStdString();
 
         if (policyText == "All matches"){
