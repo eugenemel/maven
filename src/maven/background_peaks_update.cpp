@@ -573,7 +573,8 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
                 group.scoreIsotopesDifferentialAbundance(
                     isotopeParameters,
                     unlabeledSamples,
-                    labeledSamples);
+                    labeledSamples,
+                    true);
 
             }
 
