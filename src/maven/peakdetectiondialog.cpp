@@ -287,6 +287,21 @@ void PeakDetectionDialog::findPeaks() {
             return;
         }
 
+        string diffIsoSampleSetAgglomerationTypeStr = this->configureDiffIsotopeSearch->cmbSampleSetAgglomeration->currentText().toStdString();
+        if (diffIsoSampleSetAgglomerationTypeStr == "Median") {
+            peakupdater->diffIsoAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median;
+        } else if (diffIsoSampleSetAgglomerationTypeStr == "Mean") {
+            peakupdater->diffIsoAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
+        } else if (diffIsoSampleSetAgglomerationTypeStr == "Max") {
+            peakupdater->diffIsoAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Max;
+        } else if (diffIsoSampleSetAgglomerationTypeStr == "Sum") {
+            peakupdater->diffIsoAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Sum;
+        }
+
+        peakupdater->diffIsoReproducibilityThreshold = this->configureDiffIsotopeSearch->spnMinNumSamples->value();
+        peakupdater->diffIsoIncludeSingleZero = this->configureDiffIsotopeSearch->chkIncludeOneMissingIsotope->isChecked();
+        peakupdater->diffIsoIncludeDoubleZero = this->configureDiffIsotopeSearch->chkIncludeTwoMissingIsotopes->isChecked();
+
         string policyText = peakGroupCompoundMatchPolicyBox->itemText(peakGroupCompoundMatchPolicyBox->currentIndex()).toStdString();
 
         if (policyText == "All matches"){
