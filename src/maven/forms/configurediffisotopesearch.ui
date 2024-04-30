@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>835</width>
-    <height>599</height>
+    <height>684</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,13 +23,164 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
+      <item row="3" column="1">
+       <widget class="QPushButton" name="btnOK">
+        <property name="text">
+         <string>OK</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="3">
+       <widget class="QGroupBox" name="grpEnvelopeParameters">
+        <property name="title">
+         <string>Isotopic Envelope Comparison Parameters</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_4">
+         <item row="1" column="0">
+          <widget class="QLabel" name="lblMinNumSamples">
+           <property name="text">
+            <string>Isotope reproducibility threshold:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QSpinBox" name="spnMinNumSamples">
+           <property name="suffix">
+            <string> sample(s) in sample set</string>
+           </property>
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>999999999</number>
+           </property>
+           <property name="value">
+            <number>1</number>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QCheckBox" name="chkIncludeOneMissingIsotope">
+           <property name="text">
+            <string>Include isotopes missing from one sample set with value 0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QCheckBox" name="chkIncludeTwoMissingIsotopes">
+           <property name="text">
+            <string>Include isotopes missing from both sample sets as double 0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="lblSampleSetAgglomeration">
+           <property name="text">
+            <string>Sample set agglomeration algorithm:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="cmbSampleSetAgglomeration">
+           <item>
+            <property name="text">
+             <string>Median</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Mean</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Max</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Sum</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QPushButton" name="btnCancel">
+        <property name="text">
+         <string>Cancel</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QPushButton" name="btnReset">
+        <property name="text">
+         <string>Reset All</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0" colspan="3">
        <widget class="QGroupBox" name="grpAssignSamples">
         <property name="title">
          <string>Isotopic Label Designation</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
-         <item row="2" column="0" colspan="2">
+         <item row="1" column="0" colspan="3">
+          <widget class="QLabel" name="lblUnclassifiedSamples">
+           <property name="text">
+            <string>Unclassified Samples</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QListWidget" name="listUnlabeledSamples">
+           <property name="dragDropMode">
+            <enum>QAbstractItemView::DragDrop</enum>
+           </property>
+           <property name="defaultDropAction">
+            <enum>Qt::MoveAction</enum>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::ExtendedSelection</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="2">
+          <widget class="QLabel" name="lblLabeledSamples">
+           <property name="text">
+            <string>Isotopically Labeled Sample Set</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0" colspan="3">
+          <widget class="QPlainTextEdit" name="txtInstructions">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="acceptDrops">
+            <bool>false</bool>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+           <property name="plainText">
+            <string>Drag samples from 'Unclassified Samples' to either 'Unlabeled Sample Set' or 'Isotopically Labeled Sample Set' to designate samples as labeled or unlabeled.
+
+You can select a group of samples by using CMD + click or SHIFT + click, and drag and drop the entire group of samples.
+
+Samples can be freely moved among Unclassified, Unlabeled, and Labeled lists.</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0" colspan="3">
           <widget class="QListWidget" name="listAvailableSamples">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -48,28 +199,14 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
-          <widget class="QLabel" name="lblLabeledSamples">
-           <property name="text">
-            <string>Isotopically Labeled Samples</string>
-           </property>
-          </widget>
-         </item>
          <item row="3" column="0">
           <widget class="QLabel" name="lblUnlabeledSamples">
            <property name="text">
-            <string>Unlabeled Samples</string>
+            <string>Unlabeled Sample Set</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="0" colspan="2">
-          <widget class="QLabel" name="lblUnclassifiedSamples">
-           <property name="text">
-            <string>Unclassified Samples</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
+         <item row="4" column="2">
           <widget class="QListWidget" name="listLabeledSamples">
            <property name="dragDropMode">
             <enum>QAbstractItemView::DragDrop</enum>
@@ -82,67 +219,7 @@
            </property>
           </widget>
          </item>
-         <item row="4" column="0">
-          <widget class="QListWidget" name="listUnlabeledSamples">
-           <property name="dragDropMode">
-            <enum>QAbstractItemView::DragDrop</enum>
-           </property>
-           <property name="defaultDropAction">
-            <enum>Qt::MoveAction</enum>
-           </property>
-           <property name="selectionMode">
-            <enum>QAbstractItemView::ExtendedSelection</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0" colspan="2">
-          <widget class="QPlainTextEdit" name="txtInstructions">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="acceptDrops">
-            <bool>false</bool>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-           <property name="plainText">
-            <string>Drag samples from 'Unclassified Samples' to either 'Unlabeled Samples' or 'Isotopically Labeled Samples' to designate samples as labeled or unlabeled.
-
-You can select a group of samples by using CMD + click or SHIFT + click, and drag and drop the entire group of samples.
-
-Samples can be freely moved among Unclassified, Unlabeled, and Labeled lists.</string>
-           </property>
-          </widget>
-         </item>
         </layout>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QPushButton" name="btnReset">
-        <property name="text">
-         <string>Reset All</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QPushButton" name="btnOK">
-        <property name="text">
-         <string>OK</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QPushButton" name="btnCancel">
-        <property name="text">
-         <string>Cancel</string>
-        </property>
        </widget>
       </item>
      </layout>
