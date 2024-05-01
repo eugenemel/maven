@@ -239,6 +239,7 @@ void IsotopeWidget::computeIsotopes(string f) {
     vector<Isotope> massList = MassCalculator::computeIsotopes(
         f,
         getCurrentAdduct(),
+        0,
         isotopeParameters.getLabeledIsotopes(),
         isotopeParameters.labeledIsotopeRetentionPolicy,
         NaturalAbundanceData::defaultNaturalAbundanceData,
