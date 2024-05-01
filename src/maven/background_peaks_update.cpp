@@ -571,7 +571,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
                     isotopeParameters,
                     unlabeledSamples,
                     labeledSamples,
-                    true);
+                    false); // debug
 
             }
 
