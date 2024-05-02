@@ -1269,7 +1269,8 @@ vector<EIC*> BackgroundPeakUpdate::pullEICs(mzSlice* slice,
         EIC* e = nullptr;
 
         if (slice->srmTransition) {
-            e = sample->getEIC(slice->srmTransition, Fragment::ConsensusIntensityAgglomerationType::Median);
+            //Issue 721: Debugging
+            e = sample->getEIC(slice->srmTransition, Fragment::ConsensusIntensityAgglomerationType::Median, true);
         } else if (mzKey.first > 0 && mzKey.second > 0) { // SRM <precursor mz, product mz>
            e = sample->getEIC(mzKey, slice);
         } else if ( ! slice->srmId.empty() ) {
