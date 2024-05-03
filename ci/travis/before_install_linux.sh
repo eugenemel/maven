@@ -1,14 +1,14 @@
 #!/bin/sh
 
-echo "Issue 723: Force qt5"
+echo "Issue 723: Do nothing"
 
-brew update
-brew install qt5
-brew link qt5 --force
-
-ENVFILE=qt-5.env
-echo Create $ENVFILE
-cat << EOF > $ENVFILE
+# brew update
+# brew install qt5
+# brew link qt5 --force
+# 
+# ENVFILE=qt-5.env
+# echo Create $ENVFILE
+# cat << EOF > $ENVFILE
 
 # Clone QTCI to assist with scripted install of QT
 # echo Cloning qtci repository
