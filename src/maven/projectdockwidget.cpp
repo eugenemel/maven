@@ -749,7 +749,11 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
         project->deleteAll(); //extreme, but ensures that re-saving always saves data using most recent code
         project->setSamples(sampleSet);
         project->saveSamples(sampleSet);
-        project->saveAlignment(project->sampleToUpdatedRts);
+
+        //Issue 721: only save alignment if there are actual anchor points to save
+        if (project->sampleToUpdatedRts.empty()) {
+            project->saveAlignment(project->sampleToUpdatedRts);
+        }
 
         unsigned int groupCount=0;
 

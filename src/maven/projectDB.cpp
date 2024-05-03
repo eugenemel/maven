@@ -257,6 +257,8 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
      if (!g) return -1;
      if (g->deletedFlag) return -1; // skip deleted groups
 
+     QString prefix = QString("[ProjectDB::writeGroupSqlite()]:");
+
      QSqlQuery query0(sqlDB);
      query0.exec("begin transaction");
 
@@ -267,7 +269,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                         metaGroupId integer,\
                         expectedRtDiff real,\
                         \
-                        groupRank int,\
+                        groupRank real,\
                         label varchar(10),\
                         type integer,\
                         srmId varchar(254),\
@@ -393,9 +395,26 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
         query1.addBindValue(g->blankMaxHeight);
         query1.addBindValue(g->blankMedianHeight);
 
+     //Issue 721: Instead of silently dropping peak groups, crash
      if(! query1.exec() ) {
-        qDebug() << query1.lastError();
+
+            qDebug() << prefix << "An error has occurred while trying to write a peak group to the SQLite file!";
+            qDebug() << prefix << "Error: " << query1.lastError();
+            qDebug() << prefix << "group=" << g;
+            qDebug() << prefix << "group->meanMz=" << g->meanMz;
+            qDebug() << prefix << "group->meanRt=" << g->meanRt;
+            if(g->compound) qDebug() << prefix << "group->compound=" << g->compound->name.c_str();
+            if(!g->compound) qDebug() << prefix << "group->compound= nullptr";
+            if(g->adduct) {
+                    qDebug() << prefix << "group->adduct=" << g->adduct->name.c_str();
+            } else {
+                    qDebug() << prefix << "group->adduct= nullptr";
+            }
+
+            //crash
+            abort();
      }
+
      int lastInsertGroupId = query1.lastInsertId().toString().toInt();
 
      if (tableName == "rumsDB" || tableName== "clamDB") {
@@ -531,7 +550,17 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                     query3.addBindValue(p.peakAreaFWHM);
                     query3.addBindValue(p.smoothedPeakAreaFWHM);
 
-    				if(!query3.exec())  qDebug() << query3.lastError();
+                     //Issue 721: Instead of silently dropping peaks, crash
+                    if(! query3.exec() ) {
+
+                        qDebug() << prefix << "An error has occurred while trying to write a peak to the SQLite file!";
+                        qDebug() << prefix << "Error: " << query3.lastError();
+                        qDebug() << prefix << "peak.sample=" << p.sample;
+                        qDebug() << prefix << "peak sampleName=" << p.sample->sampleName.c_str();
+
+                        //crash
+                        abort();
+                    }
 		}
 
      //Issue 546: featurization table
@@ -640,20 +669,20 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
         }
      }
 
-        if ( g->childCount() ) {
-           for(unsigned int i=0; i < g->children.size(); i++ ) {
-                PeakGroup* child = &(g->children[i]); 
+    if ( g->childCount() ) {
+       for(unsigned int i=0; i < g->children.size(); i++ ) {
+            PeakGroup* child = &(g->children[i]);
 
-                QString searchTableName = child->searchTableName.empty() ? tableName : QString(child->searchTableName.c_str());
+            QString searchTableName = child->searchTableName.empty() ? tableName : QString(child->searchTableName.c_str());
 
-                //Issue 143: children of a bookmarked peak group should also be bookmarked
-                if (tableName == "Bookmarks") {
-                    searchTableName = tableName;
-                }
-
-                writeGroupSqlite(child, lastInsertGroupId, searchTableName);
+            //Issue 143: children of a bookmarked peak group should also be bookmarked
+            if (tableName == "Bookmarks") {
+                searchTableName = tableName;
             }
+
+            writeGroupSqlite(child, lastInsertGroupId, searchTableName);
         }
+    }
 
     query0.exec("end transaction");
     //qDebug() << "writeGroupSQL: groupId" << lastInsertGroupId << " table=" << tableName;
@@ -1028,6 +1057,8 @@ void ProjectDB::alterPeakGroupsTable(){
                }
            }
 
+
+
 }
 
 void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool isAttemptToLoadDB, const map<int, vector<Peak>>& peakGroupMap, Classifier *classifier) {
@@ -1054,7 +1085,7 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
         g.tagString = query.value("tagString").toString().toStdString();
         g.metaGroupId = query.value("metaGroupId").toInt();
         g.expectedRtDiff = query.value("expectedRtDiff").toDouble();
-        g.groupRank = query.value("groupRank").toInt();
+        g.groupRank = query.value("groupRank").toFloat();
         g.srmPrecursorMz = static_cast<float>(query.value("srmPrecursorMz").toDouble());
         g.srmProductMz = static_cast<float>(query.value("srmProductMz").toDouble());
         g.isotopicIndex = query.value("isotopicIndex").toInt();
