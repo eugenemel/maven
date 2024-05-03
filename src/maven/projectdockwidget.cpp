@@ -751,7 +751,7 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
         project->saveSamples(sampleSet);
 
         //Issue 721: only save alignment if there are actual anchor points to save
-        if (project->sampleToUpdatedRts.empty()) {
+        if (!project->sampleToUpdatedRts.empty()) {
             project->saveAlignment(project->sampleToUpdatedRts);
         }
 
