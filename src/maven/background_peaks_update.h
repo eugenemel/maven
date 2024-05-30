@@ -178,7 +178,7 @@ private:
   vector<PeakGroup>allgroups;
   void cleanup();
   void printSettings();
-  void matchCompound(PeakGroup* g, vector<CompoundIon>& searchableDatabase);
+  void assignToGroupSimple(PeakGroup* g, vector<CompoundIon>& searchableDatabase);
   bool sliceHasMS2Event(mzSlice* slice);
 
   private:

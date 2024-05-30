@@ -548,7 +548,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             } else if (scoringScheme == MzKitchenProcessor::METABOLITES_SCORING_NAME) {
                 MzKitchenProcessor::assignBestMetaboliteToGroup(&group, searchableDatabase, mzkitchenMetaboliteSearchParameters);
             } else {
-                matchCompound(&group, searchableDatabase);
+                assignToGroupSimple(&group, searchableDatabase);
             }
 
             if (!isRetainUnmatchedCompounds && !group.compound){
@@ -1324,7 +1324,7 @@ void BackgroundPeakUpdate::printSettings() {
     cerr << "#compoundRTWindow=" << compoundRTWindow << endl;
 }
 
-void BackgroundPeakUpdate::matchCompound(PeakGroup* g, vector<CompoundIon>& searchableDatabase) {
+void BackgroundPeakUpdate::assignToGroupSimple(PeakGroup* g, vector<CompoundIon>& searchableDatabase) {
     if(searchableDatabase.size() == 0) return;
     if(mustHaveMS2 && g->ms2EventCount == 0) return;
 
