@@ -146,7 +146,7 @@ public:
                               );
 
 signals:
-	void updateProgressBar(QString,int,int);
+    void updateProgressBar(QString,int,int);
     void newPeakGroup(PeakGroup* group, bool add, bool isDeletePeakGroupPtr);
 
 protected:

@@ -415,7 +415,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
         delete(csvreports);
     }
 
-    emit(updateProgressBar("Done" ,1, 1));
+    emit(updateProgressBar(QString("Done"), 1, 1));
 
     qDebug() << "processCompoundSlices() Slices=" << slices.size();
     qDebug() << "processCompoundSlices() EICs="   << eicCount;
