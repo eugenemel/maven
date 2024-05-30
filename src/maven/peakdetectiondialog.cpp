@@ -410,6 +410,11 @@ void PeakDetectionDialog::findPeaks() {
         connect(peakupdater, SIGNAL(terminated()), peaksTable, SLOT(showAllGroupsThenSort()));
         connect(peakupdater, SIGNAL(terminated()), scoringSettingsDialog, SLOT(close()));
    		connect(peakupdater, SIGNAL(terminated()), this, SLOT(close()));
+
+        if (peakupdater->isDiffAbundanceIsotopeSearch) {
+            connect(peakupdater, SIGNAL(finished()), peaksTable->treeWidget, SLOT(collapseAll()));
+            connect(peakupdater, SIGNAL(terminated()), peaksTable->treeWidget, SLOT(collapseAll()));
+        }
 		
 		//RUN THREAD
 		if ( _featureDetectionType == QQQ ) {
