@@ -543,13 +543,8 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             group.computeFragPattern(productPpmTolr);
             // BROKEN group.findHighestPurityMS2Pattern(compoundPPMWindow);
 
-            if (scoringScheme == MzKitchenProcessor::LIPID_SCORING_NAME){
-                MzKitchenProcessor::assignBestLipidToGroup(&group, searchableDatabase, lipidSearchParameters);
-            } else if (scoringScheme == MzKitchenProcessor::METABOLITES_SCORING_NAME) {
-                MzKitchenProcessor::assignBestMetaboliteToGroup(&group, searchableDatabase, mzkitchenMetaboliteSearchParameters);
-            } else {
-                assignToGroupSimple(&group, searchableDatabase);
-            }
+            //Issue 727: unified interface for spectral matching
+            assignToGroup(&group, searchableDatabase);
 
             if (!isRetainUnmatchedCompounds && !group.compound){
                 continue;
@@ -1322,6 +1317,16 @@ void BackgroundPeakUpdate::printSettings() {
     //compound detection setting
     cerr << "#compoundPPMWindow=" << compoundPPMWindow << endl;
     cerr << "#compoundRTWindow=" << compoundRTWindow << endl;
+}
+
+void BackgroundPeakUpdate::assignToGroup(PeakGroup *g, vector<CompoundIon>& searchableDatabase, bool debug) {
+    if (scoringScheme == MzKitchenProcessor::LIPID_SCORING_NAME){
+        MzKitchenProcessor::assignBestLipidToGroup(g, searchableDatabase, lipidSearchParameters, debug);
+    } else if (scoringScheme == MzKitchenProcessor::METABOLITES_SCORING_NAME) {
+        MzKitchenProcessor::assignBestMetaboliteToGroup(g, searchableDatabase, mzkitchenMetaboliteSearchParameters, debug);
+    } else {
+        assignToGroupSimple(g, searchableDatabase);
+    }
 }
 
 void BackgroundPeakUpdate::assignToGroupSimple(PeakGroup* g, vector<CompoundIon>& searchableDatabase) {
