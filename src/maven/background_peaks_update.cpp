@@ -278,6 +278,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
 //             }
 
 
+             //TODO: Issue 722
              for (Compound *compound : slice->compoundVector){
 
                  //MS2 criteria
@@ -311,8 +312,6 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
                  peakGroupPtr->tagString = slice->adduct->name;
                  peakGroupPtr->fragMatchScore = s;
                  peakGroupPtr->ms2EventCount = group.ms2EventCount;
-
-                isGroupRetained = true;
 
                 if (s.mergedScore > maxScore){
                     maxScore = s.mergedScore;
