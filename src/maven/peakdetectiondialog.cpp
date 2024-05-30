@@ -77,7 +77,7 @@ void PeakDetectionDialog::setFeatureDetection(FeatureDetectionType type) {
             lblMassSlicingMethod->setText("Mass slices are determined based on loaded data files (samples).");
 
             featureOptions->show();
-            dbOptions->hide();
+            displayCompoundOptions(false);
 
             grpBaseline->show();
             grpMatchingOptions->show();
@@ -89,7 +89,7 @@ void PeakDetectionDialog::setFeatureDetection(FeatureDetectionType type) {
             lblMassSlicingMethod->setText("Mass slices are derived from compound theoretical m/z.");
 
             featureOptions->hide();
-            dbOptions->show();
+            displayCompoundOptions(true);
 
             grpBaseline->show();
             grpMatchingOptions->show();
@@ -97,6 +97,14 @@ void PeakDetectionDialog::setFeatureDetection(FeatureDetectionType type) {
     }
 
 	adjustSize();
+}
+
+void PeakDetectionDialog::displayCompoundOptions(bool isDisplayCompoundOptions) {
+    if (isDisplayCompoundOptions) {
+        dbOptions->show();
+    } else {
+        dbOptions->hide();
+    }
 }
 
 //Issue 430: loading model does not affect mainwindow classifier model
@@ -227,7 +235,7 @@ void PeakDetectionDialog::findPeaks() {
 		peakupdater->eic_smoothingWindow= eic_smoothingWindow->value();
 		peakupdater->grouping_maxRtWindow = grouping_maxRtDiff->value();
         peakupdater->mergeOverlap = static_cast<float>(spnMergeOverlap->value());
-		peakupdater->matchRtFlag =  matchRt->isChecked();
+        peakupdater->matchRtFlag =  compoundMatchRt->isChecked();
         peakupdater->featureMatchRtFlag = this->featureMatchRts->isChecked();
 		peakupdater->minGoodPeakCount = minGoodGroupCount->value();
         peakupdater->minQuality = static_cast<float>(spnMinPeakQuality->value());
@@ -488,7 +496,7 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
             peaksSearchParameters->ms1RtTolr = static_cast<float>(this->compoundRTWindow->value());
 
             peaksSearchParameters->ms2IsMatchMs2 = this->compoundMustHaveMS2->isChecked();
-            peaksSearchParameters->ms1IsMatchRtFlag = this->matchRt->isChecked();
+            peaksSearchParameters->ms1IsMatchRtFlag = this->compoundMatchRt->isChecked();
 
             if (compoundDatabase->currentText() != "ALL") {
                 peaksSearchParameters->matchingLibraries = compoundDatabase->currentText().toStdString();

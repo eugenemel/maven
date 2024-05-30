@@ -56,6 +56,7 @@ class PeakDetectionDialog : public QDialog, public Ui_PeakDetectionDialog
 
                 MSMSScoringSettingsDialog *scoringSettingsDialog;
                 ConfigureDiffIsotopeSearch *configureDiffIsotopeSearch;
+                void displayCompoundOptions(bool isDisplayCompoundOptions);
 };
 
 #endif
