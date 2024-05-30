@@ -695,6 +695,7 @@ shared_ptr<PeakPickingAndGroupingParameters> PeakDetectionDialog::getPeakPicking
 
 void PeakDetectionDialog::setMainWindow(MainWindow *w){
     this->mainwindow = w;
+    connect(mainwindow->libraryDialog, SIGNAL(loadLibrarySignal(QString)), SLOT(updateLibraryList()));
 }
 
 void PeakDetectionDialog::resetDiffIsotopeSampleList() {
