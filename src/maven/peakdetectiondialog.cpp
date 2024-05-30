@@ -101,9 +101,23 @@ void PeakDetectionDialog::setFeatureDetection(FeatureDetectionType type) {
 
 void PeakDetectionDialog::displayCompoundOptions(bool isDisplayCompoundOptions) {
     if (isDisplayCompoundOptions) {
-        dbOptions->show();
+        lblCpdMatchingPolicy->show();
+        peakGroupCompoundMatchPolicyBox->show();
+        lblCpdMzMatchTolerance->show();
+        compoundPPMWindow->show();
+        lblCpdRtMatchTol->show();
+        compoundRTWindow->show();
+        compoundMustHaveMS2->show();
+        compoundMatchRt->show();
     } else {
-        dbOptions->hide();
+        lblCpdMatchingPolicy->hide();
+        peakGroupCompoundMatchPolicyBox->hide();
+        lblCpdMzMatchTolerance->hide();
+        compoundPPMWindow->hide();
+        lblCpdRtMatchTol->hide();
+        compoundRTWindow->hide();
+        compoundMustHaveMS2->hide();
+        compoundMatchRt->hide();
     }
 }
 
@@ -136,15 +150,6 @@ void PeakDetectionDialog::show() {
    }
 
     updateLibraryList();
-
-    fragScoringAlgorithm->clear();
-    for(string scoringAlgorithm: FragmentationMatchScore::getScoringAlgorithmNames()) {
-        fragScoringAlgorithm->addItem(scoringAlgorithm.c_str());
-    }
-
-    //Issue 606
-    fragScoringAlgorithm->addItem(MzKitchenProcessor::METABOLITES_SCORING_NAME);
-    fragScoringAlgorithm->addItem(MzKitchenProcessor::LIPID_SCORING_NAME);
 
     compoundPPMWindow->setValue( mainwindow->getUserPPM() );  //total ppm window, not half sized.
 

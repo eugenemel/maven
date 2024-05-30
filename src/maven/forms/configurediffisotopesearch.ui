@@ -64,6 +64,9 @@
            <property name="text">
             <string>Include isotopes missing from one sample set with value 0</string>
            </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
           </widget>
          </item>
          <item row="2" column="1">
