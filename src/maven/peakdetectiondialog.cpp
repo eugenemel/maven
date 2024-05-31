@@ -31,7 +31,7 @@ PeakDetectionDialog::PeakDetectionDialog(QWidget *parent) :
     connect(this->btnConfigureDifferentialIsotopeSearch, SIGNAL(clicked()), SLOT(populateDiffIsotopeSampleList()));
     connect(this->btnConfigureDifferentialIsotopeSearch, SIGNAL(clicked()), configureDiffIsotopeSearch, SLOT(bringIntoView()));
 
-    _featureDetectionType= CompoundDB;
+    _featureDetectionType= LibrarySearch;
 }
 
 void PeakDetectionDialog::setUIValuesFromSettings(){
@@ -70,7 +70,7 @@ void PeakDetectionDialog::setFeatureDetection(FeatureDetectionType type) {
             grpBaseline->hide();
             grpMatchingOptions->hide();
 
-    } else if (_featureDetectionType == FullSpectrum ) {
+    } else if (_featureDetectionType == PeaksSearch ) {
 
             setWindowTitle("Peak Detection");
             grpMassSlicingMethod->show();
@@ -82,7 +82,7 @@ void PeakDetectionDialog::setFeatureDetection(FeatureDetectionType type) {
             grpBaseline->show();
             grpMatchingOptions->show();
 
-    } else if (_featureDetectionType == CompoundDB ) {
+    } else if (_featureDetectionType == LibrarySearch ) {
 
             setWindowTitle("Library Search");
             grpMassSlicingMethod->show();
@@ -342,8 +342,8 @@ void PeakDetectionDialog::findPeaks() {
         }
 
 		QString title;
-		if (_featureDetectionType == FullSpectrum )  title = "Detected Features";
-                else if (_featureDetectionType == CompoundDB ) title = "Library Search";
+        if (_featureDetectionType == PeaksSearch )  title = "Detected Features";
+        else if (_featureDetectionType == LibrarySearch ) title = "Library Search";
                 else if (_featureDetectionType == QQQ ) title = "QQQ Compound DB Search";
 
         //Issue 606
@@ -416,44 +416,28 @@ void PeakDetectionDialog::findPeaks() {
             connect(peakupdater, SIGNAL(finished()), peaksTable->treeWidget, SLOT(collapseAll()));
             connect(peakupdater, SIGNAL(terminated()), peaksTable->treeWidget, SLOT(collapseAll()));
         }
-		
+
+        //Set compounds (possibility of subset of all loaded compound libraries)
+        if(peakupdater->compoundDatabase == "ALL") {
+
+            vector<Compound*> allCompounds = DB.compoundsDB;
+            allCompounds.erase(std::remove_if(allCompounds.begin(), allCompounds.end(), [](Compound *compound){return (compound->db == "summarized" || compound->db == "rumsdb");}), allCompounds.end());
+
+            qDebug() << "PeakDetectionDialog::findPeaks(): Removed" << (DB.compoundsDB.size() - allCompounds.size()) << "rumsdb and summarized compounds prior to peaks search.";
+
+            peakupdater->setCompounds(allCompounds);
+
+        } else {
+            peakupdater->setCompounds( DB.getCompoundsSubset(compoundDatabase->currentText().toStdString()) );
+        }
+
 		//RUN THREAD
 		if ( _featureDetectionType == QQQ ) {
-
-            //Issue 247, 248: alternative compound search approach
-            vector<Compound*> allCompounds = DB.compoundsDB;
-            allCompounds.erase(std::remove_if(allCompounds.begin(), allCompounds.end(), [](Compound *compound){return (compound->db == "summarized" || compound->db == "rumsdb");}), allCompounds.end());
-
-            qDebug() << "PeakDetectionDialog::findPeaks(): Removed" << (DB.compoundsDB.size() - allCompounds.size()) << "rumsdb and summarized compounds prior to peaks search.";
-
-            peakupdater->setCompounds(allCompounds);
-
 			runBackgroupJob("findPeaksQQQ");
-		} else if ( _featureDetectionType == FullSpectrum ) {
-
-            //Issue 247, 248: alternative compound search approach
-            vector<Compound*> allCompounds = DB.compoundsDB;
-            allCompounds.erase(std::remove_if(allCompounds.begin(), allCompounds.end(), [](Compound *compound){return (compound->db == "summarized" || compound->db == "rumsdb");}), allCompounds.end());
-
-            qDebug() << "PeakDetectionDialog::findPeaks(): Removed" << (DB.compoundsDB.size() - allCompounds.size()) << "rumsdb and summarized compounds prior to peaks search.";
-
-            peakupdater->setCompounds(allCompounds);
-
+        } else if ( _featureDetectionType == PeaksSearch ) {
             runBackgroupJob("processMassSlices");
         }  else {
-            peakupdater->compoundDatabase = compoundDatabase->currentText();
-            if(peakupdater->compoundDatabase == "ALL") {
-
-                vector<Compound*> allCompounds = DB.compoundsDB;
-                allCompounds.erase(std::remove_if(allCompounds.begin(), allCompounds.end(), [](Compound *compound){return (compound->db == "summarized" || compound->db == "rumsdb");}), allCompounds.end());
-
-                qDebug() << "PeakDetectionDialog::findPeaks(): Removed" << (DB.compoundsDB.size() - allCompounds.size()) << "rumsdb and summarized compounds prior to peaks search.";
-
-                peakupdater->setCompounds(allCompounds);
-
-            } else {
-                peakupdater->setCompounds( DB.getCompoundsSubset(compoundDatabase->currentText().toStdString()) );
-            }
+            //Library Search
 			runBackgroupJob("computePeaks");
 		}
 }

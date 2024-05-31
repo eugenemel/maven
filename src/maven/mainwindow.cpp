@@ -1782,7 +1782,7 @@ bool MainWindow::addSample(mzSample* sample) {
 }
 
 void MainWindow::showMassSlices() {
-    peakDetectionDialog->setFeatureDetection( PeakDetectionDialog::FullSpectrum );
+    peakDetectionDialog->setFeatureDetection( PeakDetectionDialog::PeaksSearch );
     peakDetectionDialog->show();
 }
 
@@ -1804,7 +1804,7 @@ void MainWindow::showSelectAdductsDialog() {
 }
 
 void MainWindow::compoundDatabaseSearch() {
-    peakDetectionDialog->setFeatureDetection(PeakDetectionDialog::CompoundDB);
+    peakDetectionDialog->setFeatureDetection(PeakDetectionDialog::LibrarySearch);
     peakDetectionDialog->show();
 }
 
