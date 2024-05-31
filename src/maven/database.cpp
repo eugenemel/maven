@@ -1153,6 +1153,18 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
                 cpd->adductString = "[M+H]+";
                 cpd->setChargeFromAdductName();
             }
+         } else if (line.startsWith("IONMODE:", Qt::CaseInsensitive)) {
+            //Issue 653
+            QString ionmodeString = line.mid(8,line.length()).simplified().toLower();
+
+            //assume that if the first character is not an angle bracket, neither is the last or second-to-last.
+            if (ionmodeString == "positive" && cpd->adductString.at(0) != '[') {
+                cpd->adductString = "[" + cpd->adductString + "]+";
+                cpd->charge = 1;
+            } else if (ionmodeString == "negative" && cpd->adductString.at(0) != '[') {
+                cpd->adductString = "[" + cpd->adductString + "]-";
+                cpd->charge = -1;
+            }
 
          } else if (line.startsWith("FORMULA:",Qt::CaseInsensitive)) {
              QString formula = line.mid(9,line.length()).simplified();
