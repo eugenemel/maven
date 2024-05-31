@@ -85,7 +85,8 @@ void BackgroundPeakUpdate::run(void) {
     if(!mainwindow)   { quit(); return; }
 	_stopped = false;
 
-    if ( samples.size() == 0) samples = mainwindow->getSamples(); //get samples
+    //Issue 722: flexibility around which samples are included in peak groups
+    samples = mainwindow->getVisibleSamples();
 
 	if (samples.size() > 0 && samples[0]->getPolarity() > 0 ) ionizationMode = +1; 
 	else ionizationMode = -1; //set ionization mode for compound matching
@@ -99,7 +100,7 @@ void BackgroundPeakUpdate::run(void) {
 		processMassSlices();
     } else if  (runFunction == "pullIsotopes" ) {
         IsotopeParameters isotopeParameters = getSearchIsotopeParameters();
-        _group->pullIsotopes(isotopeParameters, mainwindow->getSamples());
+        _group->pullIsotopes(isotopeParameters, samples);
         _group->isotopeParameters = isotopeParameters;
     } else if  ( runFunction == "computePeaks" ) { // database search, calibrated dialog
         computePeaks(); // DB Compound Search dialog
@@ -554,7 +555,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             if (pullIsotopesFlag || isDiffAbundanceIsotopeSearch) {
 
                 //Issue 707: extract isotopic peaks (requires compound by this point)
-                group.pullIsotopes(isotopeParameters, mainwindow->getSamples());
+                group.pullIsotopes(isotopeParameters, samples);
                 group.isotopeParameters = isotopeParameters;
             }
 
@@ -618,10 +619,6 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         PeakGroup::clusterGroups(allgroups,samples,maxRtDiff,minSampleCorrelation,minPeakShapeCorrelation,ppmMerge);
     }
 
-    if (showProgressFlag && pullIsotopesFlag ) {
-        emit(updateProgressBar("Calculation Isotopes" ,1, 100));
-    }
-
     //write reports
     CSVReports* csvreports = nullptr;
     if (writeCSVFlag) {
@@ -635,17 +632,14 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         PeakGroup& group = allgroups[j];
         Compound* compound = group.compound;
 
-        if(pullIsotopesFlag && !group.isIsotope()){
-            group.pullIsotopes(isotopeParameters, mainwindow->getSamples());
-            group.isotopeParameters = isotopeParameters;
-        }
-
         if(csvreports) csvreports->addGroup(&group);
 
-        if (compound) {
-            if(!compound->hasGroup() || group.groupRank < compound->getPeakGroup()->groupRank )
-                compound->setPeakGroup(group);
-        }
+//Adds the links between compounds and peak groups - but not great if there are multiple searches
+
+//        if (compound) {
+//            if(!compound->hasGroup() || group.groupRank < compound->getPeakGroup()->groupRank )
+//                compound->setPeakGroup(group);
+//        }
 
         if(keepFoundGroups) {
 
@@ -1088,14 +1082,6 @@ void BackgroundPeakUpdate::processSRMTransitions(vector<mzSlice*>&slices){
         }
 
         //Issue 381
-//        vector<PeakGroup> peakgroups = EIC::groupPeaksD(
-//                    eics,
-//                    static_cast<int>(eic_smoothingWindow),
-//                    grouping_maxRtWindow,
-//                    baseline_smoothingWindow,
-//                    baseline_dropTopX,
-//                    mergeOverlap
-//                    );
         vector<PeakGroup> peakgroups = EIC::groupPeaksE(eics, peakPickingAndGroupingParameters);
 
         vector<PeakGroup*> groupsToAppend;
