@@ -2774,81 +2774,14 @@ IsotopeMatrix MainWindow::getIsotopicMatrix(
     bool isNaturalAbundanceCorrected,
     bool isFractionOfSampleTotal) {
 
-    PeakGroup::QType qtype = getUserQuantType();
-    vector<mzSample*> vsamples = getVisibleSamples();
-
-    double mZeroExpectedAbundance = group->expectedAbundance;
-
-    //Issue 700: quant intensity might be off
-    vector<float> mPlusZeroAbundance{};
-
-    //get isotopic groups
-    vector<PeakGroup*>isotopes;
-    for(int i=0; i < group->childCount(); i++ ) {
-        if (group->children[i].isIsotope() ) {
-            PeakGroup* isotope = &(group->children[i]);
-            isotopes.push_back(isotope);
-
-            if (isotope->tagString == "C12 PARENT") {
-                mZeroExpectedAbundance = isotope->expectedAbundance;
-                mPlusZeroAbundance = isotope->getOrderedIntensityVector(vsamples, qtype);
-            }
-        }
-    }
-    std::sort(isotopes.begin(), isotopes.end(), PeakGroup::compIsotopicIndex);
-
-    //rows=samples, columns=isotopes
-    MatrixXf MM((int) vsamples.size(),(int) isotopes.size());
-    MM.setZero();
-
-    for(int i=0; i < isotopes.size(); i++ ) {
-        if (! isotopes[i] ) continue;
-        vector<float> values = isotopes[i]->getOrderedIntensityVector(vsamples, qtype); //sort isotopes by sample
-        for(int j=0; j < values.size(); j++ ) {
-
-            float isotopeObserved = values[j];
-
-            //Do not correct C12 parent.
-            if (isNaturalAbundanceCorrected && !mPlusZeroAbundance.empty() && isotopes[i]->tagString != "C12 PARENT") {
-                float isotopeExpectedAbundance = isotopes[i]->expectedAbundance;
-                float mZeroObserved = mPlusZeroAbundance[j];
-
-                MM(j,i) = MassCalculator::getNaturalAbundanceCorrectedQuantValue(
-                    isotopeObserved,
-                    mZeroObserved,
-                    isotopeExpectedAbundance,
-                    mZeroExpectedAbundance);
-
-            } else {
-                MM(j,i)=isotopeObserved;
-            }
-        }
-    }
-
-    if (isFractionOfSampleTotal) {
-        for (unsigned int i = 0; i < MM.rows(); i++) {
-            float sum= MM.row(i).sum();
-            if (sum == 0) continue;
-            MM.row(i) /= sum;
-        }
-    }
-
-    IsotopeMatrix isotopeMatrix;
-    vector<string> sampleNames = vector<string>(vsamples.size());
-    for (unsigned int i = 0; i < vsamples.size(); i++) {
-        sampleNames[i] = vsamples[i]->sampleName;
-    }
-
-    vector<string> isotopeNames = vector<string>(isotopes.size());
-    for (unsigned int i = 0; i < isotopes.size(); i++) {
-        isotopeNames[i] = isotopes[i]->tagString;
-    }
-
-    isotopeMatrix.isotopesData = MM;
-    isotopeMatrix.sampleNames = sampleNames;
-    isotopeMatrix.isotopeNames = isotopeNames;
-
-    return isotopeMatrix;
+    return IsotopeMatrix::getIsotopeMatrix(
+        group,
+        getUserQuantType(),
+        getVisibleSamples(),
+        isNaturalAbundanceCorrected,
+        isFractionOfSampleTotal,
+        false
+        );
 }
 
 void MainWindow::updateEicSmoothingWindow(int value) {
