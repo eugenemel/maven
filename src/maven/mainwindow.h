@@ -401,12 +401,4 @@ struct EicLoader {
         int eic_baselne_dropTopX;
 };
 
-//Issue 673: makes exporting much easier
-class IsotopeMatrix {
-public:
-    vector<string> sampleNames{};
-    vector<string> isotopeNames{};
-    MatrixXf isotopesData{}; // (rows = samples, columns = isotope names)
-};
-
 #endif
