@@ -1173,6 +1173,16 @@ void TableDockWidget::showAllGroupsThenSort() {
         } else {
             treeWidget->sortByColumn(getGroupViewColumnNumber("MS2 Score"),
                                      Qt::DescendingOrder); //decreasing by score
+
+            QTreeWidgetItemIterator it(treeWidget);
+            while (*it) {
+                QTreeWidgetItem* item = *it;
+
+                if (item->childCount() > 0) {
+                    item->sortChildren(getGroupViewColumnNumber("m/z"), Qt::AscendingOrder);
+                }
+                ++it;
+            }
         }
     }
 }
