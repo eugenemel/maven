@@ -656,8 +656,7 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
         //cerr << "Add children!" << endl;
         QTreeWidgetItem *childRoot = clusterDialog->chkPGDisplay->isChecked() ? root : item;
 
-        //Issue 725: Add children in reverse for increasing m/z
-        for(unsigned int i = group->childCount()-1; i > 0; i--) {
+        for(unsigned int i=0; i < group->childCount(); i++ ){
             addRow(&(group->children[i]), childRoot);
         }
     }
