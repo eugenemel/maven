@@ -2236,7 +2236,15 @@ void mzkitchenSearch() {
     vector<Compound*> mzkitchenCompounds = DB.loadNISTLibrary(mzkitchenMspFile.c_str());
 
     sort(mzkitchenCompounds.begin(), mzkitchenCompounds.end(), [](const Compound* lhs, const Compound* rhs){
-        return lhs->precursorMz < rhs->precursorMz;
+        if (lhs->precursorMz != rhs->precursorMz) {
+            return lhs->precursorMz < rhs->precursorMz;
+        }
+
+        if (lhs->name != rhs->name){
+            return lhs->name < rhs->name;
+        }
+
+        return lhs->adductString < rhs->adductString;
     });
 
     cout << "MSP spectral library \'" << mzkitchenMspFile << "\' contains " << mzkitchenCompounds.size() << " compounds." << endl;
