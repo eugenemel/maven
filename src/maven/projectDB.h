@@ -36,6 +36,7 @@ class ProjectDB {
             map<int, int> bookmarksOldToNewGroupIDs = {};
             map<string, shared_ptr<DirectInfusionSearchParameters>> diSearchParameters = {};
             map<string, shared_ptr<PeaksSearchParameters>> peaksSearchParameters = {};
+            map<string, string> genericSearchParameters = {};
 
             //Issue 641: explicitly save anchor points, when they are available.
             map<mzSample*, vector<pair<float, float>>> sampleToUpdatedRts{};

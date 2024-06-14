@@ -640,6 +640,8 @@ void ProjectDockWidget::loadAllPeakTables() {
                 encodedParams = QString(currentProject->diSearchParameters[searchTableNameString]->encodeParams().c_str());
             } else if (currentProject->peaksSearchParameters.find(searchTableNameString) != currentProject->peaksSearchParameters.end()) {
                 encodedParams = QString(currentProject->peaksSearchParameters[searchTableNameString]->encodeParams().c_str());
+            } else if (currentProject->genericSearchParameters.find(searchTableNameString) != currentProject->genericSearchParameters.end()) {
+                encodedParams = QString(currentProject->genericSearchParameters[searchTableNameString].c_str());
             }
 
             if (!encodedParams.isEmpty()){

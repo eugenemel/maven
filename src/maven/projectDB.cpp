@@ -1885,6 +1885,9 @@ void ProjectDB::loadSearchParams(){
             QString searchTableName = queryMatches.value("searchTableName").toString();
             QString encodedSearchParams = queryMatches.value("parameters").toString();
 
+            //Issue 725: Pull search parameters out of database
+            genericSearchParameters.insert(make_pair(searchTableName.toStdString(), encodedSearchParams.toStdString()));
+
             int pos = DIexpr.indexIn(searchTableName);
 
             //Issue 226
