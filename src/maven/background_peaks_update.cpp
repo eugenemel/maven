@@ -88,9 +88,11 @@ void BackgroundPeakUpdate::run(void) {
     //Issue 722: flexibility around which samples are included in peak groups
     samples = mainwindow->getVisibleSamples();
 
-	if (samples.size() > 0 && samples[0]->getPolarity() > 0 ) ionizationMode = +1; 
-	else ionizationMode = -1; //set ionization mode for compound matching
-	if (mainwindow->getIonizationMode()) ionizationMode=mainwindow->getIonizationMode(); //user specified ionization mode
+    if (samples.size() > 0 && samples[0]->getPolarity() > 0 ) {
+        ionizationMode = +1;
+    } else {
+        ionizationMode = -1; //set ionization mode for compound matching
+    }
 
 	if ( runFunction == "findPeaksQQQ" ) {
 		findPeaksQQQ();
