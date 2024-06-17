@@ -569,7 +569,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
                     isotopeParameters,
                     unlabeledSamples,
                     labeledSamples,
-                    false); // debug
+                    true); // debug
 
             }
 
@@ -726,6 +726,12 @@ vector<CompoundIon> BackgroundPeakUpdate::prepareCompoundDatabase(vector<Compoun
                 precMz = c->getExactMass();
             }
 
+            //DISQUALIFIER: adduct agreement
+            // These compounds will be removed later
+            if (isRequireMatchingAdduct && c->adductString != a->name) {
+                precMz = -1.0f;
+            }
+
             searchableDatabase[entryCounter] = CompoundIon(c, a, precMz);
 
             emit(updateProgressBar("Preparing Libraries for Peaks Search... ", entryCounter, numEntries));
@@ -733,6 +739,13 @@ vector<CompoundIon> BackgroundPeakUpdate::prepareCompoundDatabase(vector<Compoun
             entryCounter++;
         }
     }
+
+    //erase/remove any compounds that violate search constraint.
+    searchableDatabase.erase(
+        remove_if(searchableDatabase.begin(), searchableDatabase.end(),
+                    [](const CompoundIon& obj){ return obj.precursorMz <= 0; }
+                  ), searchableDatabase.end()
+        );
 
     sort(searchableDatabase.begin(), searchableDatabase.end(), [](CompoundIon& lhs, CompoundIon& rhs){
         if (lhs.precursorMz != rhs.precursorMz) {
