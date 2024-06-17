@@ -734,11 +734,16 @@ vector<CompoundIon> BackgroundPeakUpdate::prepareCompoundDatabase(vector<Compoun
 
             searchableDatabase[entryCounter] = CompoundIon(c, a, precMz);
 
+            //Issue 725: Debugging
+            // qDebug() << c->name.c_str() << a->name.c_str() << ": " << precMz;
+
             emit(updateProgressBar("Preparing Libraries for Peaks Search... ", entryCounter, numEntries));
 
             entryCounter++;
         }
     }
+
+    qDebug() << "# CompoundIon before removing:" << searchableDatabase.size();
 
     //erase/remove any compounds that violate search constraint.
     searchableDatabase.erase(
@@ -746,6 +751,8 @@ vector<CompoundIon> BackgroundPeakUpdate::prepareCompoundDatabase(vector<Compoun
                     [](const CompoundIon& obj){ return obj.precursorMz <= 0; }
                   ), searchableDatabase.end()
         );
+
+    qDebug() << "# CompoundIon after removing:" << searchableDatabase.size();
 
     sort(searchableDatabase.begin(), searchableDatabase.end(), [](CompoundIon& lhs, CompoundIon& rhs){
         if (lhs.precursorMz != rhs.precursorMz) {
