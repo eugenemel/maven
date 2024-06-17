@@ -392,42 +392,7 @@
           <string>Peak Picking and Grouping</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_13">
-            <property name="text">
-             <string>EIC Smoothing Window</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_14">
-            <property name="text">
-             <string>Peak Group Max RT Difference</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="label_19">
-            <property name="text">
-             <string>Peak Group S/N Threshold</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QComboBox" name="cmbSmootherType">
-            <item>
-             <property name="text">
-              <string>Gaussian</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Moving Average</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="4" column="1">
+          <item row="5" column="1">
            <widget class="QDoubleSpinBox" name="spnMergeOverlap">
             <property name="decimals">
              <number>2</number>
@@ -447,29 +412,70 @@
            </widget>
           </item>
           <item row="3" column="1">
-           <widget class="QDoubleSpinBox" name="grouping_maxRtDiff">
-            <property name="suffix">
-             <string> min</string>
+           <widget class="QComboBox" name="cmbSmootherType">
+            <item>
+             <property name="text">
+              <string>Gaussian</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Moving Average</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QDoubleSpinBox" name="spnPeakGroupSNThreshold">
+            <property name="minimum">
+             <double>-1.000000000000000</double>
             </property>
             <property name="maximum">
-             <double>1000000.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
+             <double>9999999.000000000000000</double>
             </property>
             <property name="value">
-             <double>0.500000000000000</double>
+             <double>1.000000000000000</double>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item row="3" column="0">
            <widget class="QLabel" name="lblSmootherType">
             <property name="text">
              <string>EIC Smoother Type</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="4" column="0">
+           <widget class="QLabel" name="lblPeakGroupMaxRTDiff">
+            <property name="text">
+             <string>Peak Group Max RT Difference</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="spnPeakBoundarySlopeThreshold">
+            <property name="minimum">
+             <double>-1.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>99999999.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.010000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="lblPeakBoundarySlopeThreshold">
+            <property name="text">
+             <string>Peak Boundary Slope Threshold</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
            <widget class="QSpinBox" name="eic_smoothingWindow">
             <property name="suffix">
              <string> scans</string>
@@ -491,45 +497,65 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
+          <item row="2" column="0">
+           <widget class="QLabel" name="lblEICSmoothingWindow">
+            <property name="text">
+             <string>EIC Smoothing Window</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="lblPeakGroupSNThreshold">
+            <property name="text">
+             <string>Peak Group S/N Threshold</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QDoubleSpinBox" name="grouping_maxRtDiff">
+            <property name="suffix">
+             <string> min</string>
+            </property>
+            <property name="maximum">
+             <double>1000000.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.500000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
            <widget class="QLabel" name="lblMergeOverlap">
             <property name="text">
              <string>Peak Group Merge Overlap</string>
             </property>
            </widget>
           </item>
-          <item row="5" column="1">
-           <widget class="QDoubleSpinBox" name="spnPeakGroupSNThreshold">
-            <property name="minimum">
-             <double>-1.000000000000000</double>
+          <item row="1" column="0">
+           <widget class="QLabel" name="lblPeakBoundaryIntensityThreshold">
+            <property name="text">
+             <string>Peak Boundary Intensity Frac Threshold</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="spnPeakBoundaryIntensityThreshold">
+            <property name="prefix">
+             <string/>
+            </property>
+            <property name="suffix">
+             <string> of peak max intensity</string>
+            </property>
+            <property name="decimals">
+             <number>3</number>
             </property>
             <property name="maximum">
-             <double>9999999.000000000000000</double>
-            </property>
-            <property name="value">
              <double>1.000000000000000</double>
             </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_20">
-            <property name="text">
-             <string>Peak Boundary Slope Threshold</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="spnPeakBoundarySlopeThreshold">
-            <property name="minimum">
-             <double>-1.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>99999999.000000000000000</double>
-            </property>
             <property name="singleStep">
-             <double>0.010000000000000</double>
-            </property>
-            <property name="value">
              <double>0.010000000000000</double>
             </property>
            </widget>
