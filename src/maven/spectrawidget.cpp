@@ -209,8 +209,17 @@ void SpectraWidget::setTitle() {
         }
     }
 
+    int fontSize = 8.0;
+
+    //Issue 730: user override font size
+    int savedFontSize = mainwindow->getSettings()->value("spnSpectrumTitleTextSize", -1).toInt();
+    if (savedFontSize > 0) {
+        fontSize = savedFontSize;
+    }
+
 	QFont font = QApplication::font();
-    font.setPixelSize(8.0);
+    font.setPixelSize(fontSize);
+
     _title->setHtml(title);
     int titleWith = _title->boundingRect().width();
     _title->setPos(scene()->width()/2-titleWith/2, 3);
@@ -738,9 +747,18 @@ void SpectraWidget::drawGraph() {
     QString polarity;
 
     QPen blackpen(mainwindow->getBackgroundAdjustedBlack(this), 2);
+
+
     float fontSize = scene()->height()*0.05;
     if ( fontSize < 1) fontSize=1;
     if ( fontSize > 16) fontSize=16;
+
+    //Issue 730: user override font size
+    float savedFontSize = mainwindow->getSettings()->value("spnMzTextSize", -1).toFloat();
+    if (savedFontSize > 0) {
+        fontSize = savedFontSize;
+    }
+
     QFont font("Helvetica", fontSize);
     float _focusedMz = _focusCoord.x();
 

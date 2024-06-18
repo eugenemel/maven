@@ -102,13 +102,17 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(spnMs3MzMax, SIGNAL(valueChanged(double)), SLOT(replotMS3Spectrum()));
 
     //Font size
-    connect(this->spnMzTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS1Spectrum()));
-    connect(this->spnMzTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS2Spectrum()));
-    connect(this->spnMzTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS3Spectrum()));
-    connect(this->spnSpectrumTitleTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS1Spectrum()));
-    connect(this->spnSpectrumTitleTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS2Spectrum()));
-    connect(this->spnSpectrumTitleTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS3Spectrum()));
-    connect(this->spnEICTitleTextSize, SIGNAL(valueChanged(int)), SLOT(replotEIC()));
+    connect(spnMzTextSize, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
+    connect(spnSpectrumTitleTextSize, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
+    connect(spnEICTitleTextSize, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
+
+    connect(spnMzTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS1Spectrum()));
+    connect(spnMzTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS2Spectrum()));
+    connect(spnMzTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS3Spectrum()));
+    connect(spnSpectrumTitleTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS1Spectrum()));
+    connect(spnSpectrumTitleTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS2Spectrum()));
+    connect(spnSpectrumTitleTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS3Spectrum()));
+    connect(spnEICTitleTextSize, SIGNAL(valueChanged(int)), SLOT(replotEIC()));
 
     //spectral agglomeration
     connect(spnScanFilterMinIntensity, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
@@ -638,6 +642,11 @@ void SettingsForm::getFormValues() {
     settings->setValue("spnMs3MzMin", spnMs3MzMin->value());
     settings->setValue("spnMs3MzMaxOffset", spnMs3Offset->value());
     settings->setValue("spnMs3MzMax", spnMs3MzMax->value());
+
+    //font size
+    settings->setValue("spnMzTextSize", spnMzTextSize->value());
+    settings->setValue("spnSpectrumTitleTextSize", spnSpectrumTitleTextSize->value());
+    settings->setValue("spnEICTitleTextSize", spnEICTitleTextSize->value());
 
     //bookmark warn display options
     settings->setValue("chkBkmkWarnMzRt", chkBkmkWarnMzRt->checkState());

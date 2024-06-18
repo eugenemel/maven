@@ -1154,9 +1154,17 @@ void EicWidget::setTitle() {
 
     QFont font = QApplication::font();
 
+
     int pxSize = scene()->height()*0.03;
     if ( pxSize < 14 ) pxSize = 14;
     if ( pxSize > 20 ) pxSize = 20;
+
+    //Issue 730: user override font size
+    int savedFontSize = getMainWindow()->getSettings()->value("spnEICTitleTextSize", -1).toInt();
+    if (savedFontSize > 0) {
+        pxSize = savedFontSize;
+    }
+
     font.setPixelSize(pxSize);
 
     QString tagString = _selectedGroup.getName().c_str();
