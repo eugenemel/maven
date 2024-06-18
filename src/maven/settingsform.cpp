@@ -16,8 +16,17 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
 
     connect(tabWidget, SIGNAL(currentChanged(int)), SLOT(getFormValues()));
 
-    //locations
-    connect(chkNotifyNewerMaven, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+    //instrumentation
+    connect(ionizationMode, SIGNAL(currentIndexChanged(int)), SLOT(getFormValues()));
+    connect(ionizationType,SIGNAL(currentIndexChanged(int)),SLOT(getFormValues()));
+    connect(amuQ1, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+    connect(amuQ3, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
+    connect(centroid_scan_flag,SIGNAL(toggled(bool)), SLOT(getFormValues()));
+    connect(scan_filter_min_quantile, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
+    connect(scan_filter_min_intensity, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
+    connect(lineEicScanFilter, SIGNAL(textChanged(QString)), SLOT(getFormValues()));
+
+    //file import
 
     //peak detection
     connect(recomputeEICButton, SIGNAL(clicked(bool)), SLOT(recomputeEIC()));
@@ -25,10 +34,6 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(chkDisplayConsensusSpectrum, SIGNAL(toggled(bool)), mainwindow, SLOT(updateGUIWithLastSelectedPeakGroup()));
     connect(chkShowRtRange, SIGNAL(toggled(bool)), SLOT(getFormValues()));
     connect(chkShowRtRange, SIGNAL(toggled(bool)), mainwindow->getEicWidget(), SLOT(drawRtRangeLinesCurrentGroup()));
-
-    connect(ionizationMode, SIGNAL(currentIndexChanged(int)), SLOT(getFormValues()));
-    connect(amuQ1, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
-    connect(amuQ3, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
 
     //isotope detection settings
     //note that recomputeIsotopes() calls getFormValues()
@@ -50,21 +55,19 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(cmbIsotopicExtractionAlgorithm, SIGNAL(currentIndexChanged(int)), SLOT(recomputeIsotopes()));
     connect(chkMergeOverlappingIsotopes, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
 
-    //remote url used to fetch compound lists, pathways, and notes
-    connect(data_server_url, SIGNAL(textChanged(QString)), SLOT(getFormValues()));
-    connect(btnPeakQualityModel, SIGNAL(clicked()), SLOT(updateClassifierFile()));
-    connect(methodsFolderSelect, SIGNAL(clicked()), SLOT(selectMethodsFolder()));
-
-    connect(centroid_scan_flag,SIGNAL(toggled(bool)), SLOT(getFormValues()));
-    connect(scan_filter_min_quantile, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
-    connect(scan_filter_min_intensity, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
-    connect(ionizationType,SIGNAL(currentIndexChanged(int)),SLOT(getFormValues()));
-
     //bookmark options
     connect(chkBkmkWarnMz, SIGNAL(toggled(bool)), SLOT(getFormValues()));
     connect(chkBkmkWarnMzRt, SIGNAL(toggled(bool)), SLOT(getFormValues()));
 
-    //spectra widget display options
+    //locations
+    //remote url used to fetch compound lists, pathways, and notes
+    //TODO: remove this, or update it
+    connect(data_server_url, SIGNAL(textChanged(QString)), SLOT(getFormValues()));
+    connect(methodsFolderSelect, SIGNAL(clicked()), SLOT(selectMethodsFolder()));
+    connect(btnPeakQualityModel, SIGNAL(clicked()), SLOT(updateClassifierFile()));
+    connect(chkNotifyNewerMaven, SIGNAL(toggled(bool)), SLOT(getFormValues()));
+
+    //spectral display
     //ms1 options
     connect(chkMs1Autoscale, SIGNAL(toggled(bool)), SLOT(getFormValues()));
     connect(spnMs1Offset, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
@@ -98,7 +101,7 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(spnMs3MzMin, SIGNAL(valueChanged(double)), SLOT(replotMS3Spectrum()));
     connect(spnMs3MzMax, SIGNAL(valueChanged(double)), SLOT(replotMS3Spectrum()));
 
-    //spectral agglomeration settings
+    //spectral agglomeration
     connect(spnScanFilterMinIntensity, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
     connect(spnScanFilterMinIntensityFraction, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
     connect(spnScanFilterMinSN, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
@@ -215,6 +218,9 @@ void SettingsForm::setFormValues() {
     //peak detection
     if (settings->contains("peakRtBoundsSlopeThreshold"))
         this->spnPeakRtSlopeThreshold->setValue(settings->value("peakRtBoundsSlopeThreshold").toDouble());
+
+    if (settings->contains("peakRtBoundsMaxIntensityFraction"))
+        this->spnPeakBoundaryIntensityThreshold->setValue(settings->value("peakRtBoundsMaxIntensityFraction").toDouble());
 
     if (settings->contains("mergedSmoothedMaxToBoundsMinRatio"))
         this->spnMergedEicIntensityRatio->setValue(settings->value("mergedSmoothedMaxToBoundsMinRatio").toDouble());
@@ -486,6 +492,7 @@ void SettingsForm::getFormValues() {
     const QString currentText = eic_smoothingAlgorithm->currentText();
 
     //peak detection
+
     //Issue 255: disable Savitzky-Golay smoothing - fall back to Gaussian
     if(currentText == "Moving Average"){
         settings->setValue("eic_smoothingAlgorithm",EIC::SmootherType::AVG);
@@ -497,6 +504,7 @@ void SettingsForm::getFormValues() {
     settings->setValue("grouping_maxRtWindow",grouping_maxRtWindow->value());
     settings->setValue("spnMergeOverlap",spnMergeOverlap->value());
     settings->setValue("peakRtBoundsSlopeThreshold", this->spnPeakRtSlopeThreshold->value());
+    settings->setValue("peakRtBoundsMaxIntensityFraction", this->spnPeakBoundaryIntensityThreshold->value());
     settings->setValue("mergedSmoothedMaxToBoundsMinRatio", this->spnMergedEicIntensityRatio->value());
 
     const QString baselineTypeStr = this->cmbBaselineType->currentText();
@@ -509,7 +517,6 @@ void SettingsForm::getFormValues() {
     }
 
     //isotopes settings
-
     settings->setValue("maxNaturalAbundanceErr",maxNaturalAbundanceErr->value());
     settings->setValue("maxIsotopeScanDiff",maxIsotopeScanDiff->value());
     settings->setValue("cmbIsotopicExtractionAlgorithm", cmbIsotopicExtractionAlgorithm->currentText());
@@ -558,7 +565,6 @@ void SettingsForm::getFormValues() {
     */
 
     //change ionization type
-
     if (ionizationType->currentText() == "EI")  MassCalculator::ionizationType = MassCalculator::EI;
     else MassCalculator::ionizationType = MassCalculator::ESI;
 
