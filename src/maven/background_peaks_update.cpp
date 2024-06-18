@@ -567,14 +567,11 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             //Issue 720: Differential isotopes search
             if (isDiffAbundanceIsotopeSearch) {
 
-                //Issue 725: testing
-                //isotopeParameters.diffIsoScoringType = DiffIsoScoringType::F_STATISTIC;
-
                 group.scoreIsotopesDifferentialAbundance(
                     isotopeParameters,
                     unlabeledSamples,
                     labeledSamples,
-                    true); // debug
+                    false); // debug
 
             }
 
