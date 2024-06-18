@@ -1082,10 +1082,10 @@ void SpectraWidget::leaveEvent (QEvent*) {
 }
 */
 
-void SpectraWidget::addAxes() { 
+void SpectraWidget::addAxes() {
 
-	if (_drawXAxis ) {
-		Axes* x = new Axes(0,_minX, _maxX,10);
+    if (_drawXAxis ) {
+        Axes* x = new Axes(0,_minX, _maxX, 10, mainwindow);
 		scene()->addItem(x);
 		x->setZValue(998);
 		_items.push_back(x);
@@ -1099,7 +1099,7 @@ void SpectraWidget::addAxes() {
         if (isCompoundAndScan) {
 
             //scan y-axis
-            Axes* y = new Axes(1,_minY, _maxY, 5);
+            Axes* y = new Axes(1,_minY, _maxY, 5, mainwindow);
 
             y->setRenderScale((_showOverlayScale));
             y->setRenderOffset(_showOverlayOffset);
@@ -1112,7 +1112,7 @@ void SpectraWidget::addAxes() {
             _items.push_back(y);
 
             //overlay y-axis
-            Axes* yOverlay = new Axes(1, 0, 1.0, 5);
+            Axes* yOverlay = new Axes(1, 0, 1.0, 5, mainwindow);
 
             yOverlay->setRenderScale(_showOverlayScale);
 
@@ -1127,7 +1127,7 @@ void SpectraWidget::addAxes() {
 
         } else {
 
-            Axes* y = new Axes(1,_minY, _maxY, 5);
+            Axes* y = new Axes(1,_minY, _maxY, 5, mainwindow);
             y->setZValue(999);
             y->showTicLines(false);
             y->setOffset(5);

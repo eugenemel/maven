@@ -1,10 +1,11 @@
 #include "plot_axes.h"
 
-Axes::Axes( int type, float min, float max, int nticks) {
+Axes::Axes( int type, float min, float max, int nticks, MainWindow *mainwindow) {
     this->type = type;
     this->min = min;
     this->max = max;
     this->nticks = nticks;
+    this->mainwindow = mainwindow;
 	this->offset=0;
 	this->margin=0;
 	this->tickLinesFlag=false;
@@ -28,7 +29,9 @@ void Axes::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
     QPen pen(Qt::darkGray, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
     painter->setPen(pen);
 
-    double fontsize=12;
+    //Issue 730: retrieve this from settings
+    double fontsize = mainwindow->getSettings()->value("spnAxesTextSize", 12).toDouble();
+
     QFont font("Helvetica",fontsize);
     font.setBold(true);
     painter->setFont(font);

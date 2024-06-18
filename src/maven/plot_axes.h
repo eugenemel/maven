@@ -2,13 +2,13 @@
 #define PLOT_AXES_H
 
 #include "stable.h"
-
+#include "mainwindow.h"
 
 class Axes : public QGraphicsItem
 {
 public:
     Axes(QGraphicsItem* parent):QGraphicsItem(parent){}
-    Axes( int type, float min, float max, int nticks);
+    Axes( int type, float min, float max, int nticks, MainWindow *mainwindow);
     QRectF boundingRect() const;
 	void setRange(double a, double b) { min=a; max=b; } 
 	double getMin() {return min;}
@@ -32,6 +32,7 @@ protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     
 private:
+   MainWindow *mainwindow = nullptr;
    int type;
    float min;
    float max;
