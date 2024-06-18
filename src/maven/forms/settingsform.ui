@@ -41,7 +41,7 @@
          <property name="title">
           <string>Instrumentation Type</string>
          </property>
-         <layout class="QFormLayout" name="formLayout">
+         <layout class="QGridLayout" name="gridLayout_17">
           <item row="0" column="0">
            <widget class="QLabel" name="label_3">
             <property name="text">
@@ -228,6 +228,19 @@
             </property>
            </widget>
           </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="lblEICScanFilter">
+            <property name="text">
+             <string>EIC Scan Filter:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLineEdit" name="lineEicScanFilter"/>
+          </item>
          </layout>
         </widget>
        </item>
@@ -383,34 +396,17 @@
           <string>Peak Detection and Grouping Settings</string>
          </property>
          <layout class="QGridLayout">
-          <item row="4" column="1">
-           <widget class="QDoubleSpinBox" name="grouping_maxRtWindow">
-            <property name="suffix">
-             <string> min</string>
+          <item row="6" column="1">
+           <widget class="QDoubleSpinBox" name="spnMergedEicIntensityRatio">
+            <property name="minimum">
+             <double>-1.000000000000000</double>
             </property>
             <property name="maximum">
-             <double>999999999.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
+             <double>9999999.000000000000000</double>
             </property>
             <property name="value">
-             <double>0.250000000000000</double>
+             <double>1.000000000000000</double>
             </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="eic_smoothingAlgorithm">
-            <item>
-             <property name="text">
-              <string>Gaussian</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Moving Average</string>
-             </property>
-            </item>
            </widget>
           </item>
           <item row="2" column="1">
@@ -429,17 +425,10 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="lblMergeOverlap">
+          <item row="6" column="0">
+           <widget class="QLabel" name="lblMergedEicRatio">
             <property name="text">
-             <string>Peak Group Merge Overlap</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="0">
-           <widget class="QLabel" name="lblEICScanFilter">
-            <property name="text">
-             <string>EIC Scan Filter</string>
+             <string>Peak Group S/N Threshold</string>
             </property>
            </widget>
           </item>
@@ -459,23 +448,70 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
-           <widget class="QDoubleSpinBox" name="spnMergedEicIntensityRatio">
-            <property name="minimum">
-             <double>-1.000000000000000</double>
+          <item row="2" column="0">
+           <widget class="QLabel" name="lblEicSmoothingWindow">
+            <property name="text">
+             <string>EIC Smoothing Window </string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QDoubleSpinBox" name="grouping_maxRtWindow">
+            <property name="suffix">
+             <string> min</string>
             </property>
             <property name="maximum">
-             <double>9999999.000000000000000</double>
+             <double>999999999.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
             </property>
             <property name="value">
+             <double>0.250000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="spnPeakBoundaryIntensityThreshold">
+            <property name="suffix">
+             <string> of peak max intensity</string>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="maximum">
              <double>1.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="eic_smoothingAlgorithm">
+            <item>
+             <property name="text">
+              <string>Gaussian</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Moving Average</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="lblPeakGroupMaxRt">
+            <property name="text">
+             <string>Peak Group Max RT Difference</string>
             </property>
            </widget>
           </item>
           <item row="3" column="0">
-           <widget class="QLabel" name="lblMergedEicRatio">
+           <widget class="QLabel" name="lblEicSmoothingAlgorithm">
             <property name="text">
-             <string>Peak Group S/N Threshold</string>
+             <string>EIC Smoothing Algorithm</string>
             </property>
            </widget>
           </item>
@@ -487,23 +523,16 @@
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="lblEicSmoothingAlgorithm">
+           <widget class="QLabel" name="lblPeakBoundaryIntensityThreshold">
             <property name="text">
-             <string>EIC Smoothing Algorithm</string>
+             <string>Peak Boundary Intensity Frac Threshold</string>
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="lblPeakGroupMaxRt">
+          <item row="5" column="0">
+           <widget class="QLabel" name="lblMergeOverlap">
             <property name="text">
-             <string>Peak Group Max RT Difference</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="lblEicSmoothingWindow">
-            <property name="text">
-             <string>EIC Smoothing Window </string>
+             <string>Peak Group Merge Overlap</string>
             </property>
            </widget>
           </item>
@@ -516,9 +545,6 @@
              <double>0.800000000000000</double>
             </property>
            </widget>
-          </item>
-          <item row="7" column="1">
-           <widget class="QLineEdit" name="lineEicScanFilter"/>
           </item>
          </layout>
         </widget>
