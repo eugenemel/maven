@@ -374,8 +374,11 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
              for (PeakGroup *peakGroupPtr : passingPeakGroups){
 
                  //Issue 197: Support isotopic extraction for compound db search.
-                 if(pullIsotopesFlag && !peakGroupPtr->isIsotope()){
-                     peakGroupPtr->pullIsotopes(isotopeParameters, mainwindow->getSamples(), false);
+                if(pullIsotopesFlag && ((excludeIsotopicPeaks && group.isMonoisotopic(isotopeMzTolr)) || !excludeIsotopicPeaks)){
+                     peakGroupPtr->pullIsotopes(isotopeParameters,
+                                                mainwindow->getSamples(),
+                                                false //debug
+                                                );
 
                      auto grpIsotopeParameters = isotopeParameters;
                      grpIsotopeParameters.isotopeParametersType = IsotopeParametersType::SAVED;
@@ -553,8 +556,12 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             if (pullIsotopesFlag || isDiffAbundanceIsotopeSearch) {
 
                 //Issue 707: extract isotopic peaks (requires compound by this point)
-                group.pullIsotopes(isotopeParameters, samples);
+                group.pullIsotopes(isotopeParameters,
+                                   samples,
+                                   false //debug
+                                   );
                 group.isotopeParameters = isotopeParameters;
+
             }
 
             //Issue 720: Differential isotopes search
