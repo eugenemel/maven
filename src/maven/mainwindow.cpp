@@ -3004,6 +3004,7 @@ shared_ptr<PeakPickingAndGroupingParameters> MainWindow::getPeakPickingAndGroupi
      if (peakRtBoundsSlopeThreshold < 0) {
          peakRtBoundsSlopeThreshold = -1.0f;
      }
+
      float peakRtBoundsMaxIntensityFraction = settings->value("peakRtBoundsMaxIntensityFraction", 0.0f).toFloat();
      if (peakRtBoundsMaxIntensityFraction < 0) {
          peakRtBoundsMaxIntensityFraction = -1.0f;

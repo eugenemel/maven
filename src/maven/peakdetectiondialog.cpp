@@ -481,7 +481,7 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
         shared_ptr<PeaksSearchParameters> peaksSearchParameters = shared_ptr<PeaksSearchParameters>(new PeaksSearchParameters());
 
         //Issue 335
-        if(MAVEN_VERSION != "") {
+        if(strcmp(MAVEN_VERSION, "") == 0) {
             peaksSearchParameters->searchVersion = MAVEN_VERSION;
         }
 
@@ -633,6 +633,11 @@ shared_ptr<PeakPickingAndGroupingParameters> PeakDetectionDialog::getPeakPicking
         peakRtBoundsSlopeThreshold = -1.0f;
     }
 
+    float peakRtBoundsMaxIntensityFraction = static_cast<float>(spnPeakBoundaryIntensityThreshold->value());
+    if (peakRtBoundsMaxIntensityFraction < 0) {
+        peakRtBoundsMaxIntensityFraction = -1.0f;
+    }
+
     float mergedSmoothedMaxToBoundsMinRatio = static_cast<float>(spnPeakGroupSNThreshold->value());
     if (mergedSmoothedMaxToBoundsMinRatio < 0) {
         mergedSmoothedMaxToBoundsMinRatio = -1.0f;
@@ -641,7 +646,7 @@ shared_ptr<PeakPickingAndGroupingParameters> PeakDetectionDialog::getPeakPicking
     // START EIC::getPeakPositionsD()
     //peak picking
     peakPickingAndGroupingParameters->peakSmoothingWindow = this->eic_smoothingWindow->value();
-    //peakPickingAndGroupingParameters->peakRtBoundsMaxIntensityFraction = peakRtBoundsMaxIntensityFraction;
+    peakPickingAndGroupingParameters->peakRtBoundsMaxIntensityFraction = peakRtBoundsMaxIntensityFraction;
     peakPickingAndGroupingParameters->peakRtBoundsSlopeThreshold = peakRtBoundsSlopeThreshold;
     peakPickingAndGroupingParameters->peakBaselineSmoothingWindow = this->baseline_smoothing->value();
     peakPickingAndGroupingParameters->peakBaselineDropTopX = this->baseline_quantile->value();

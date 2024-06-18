@@ -185,10 +185,8 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
         eicCount += eics.size();
 
         //find peaks
-        //for(int i=0; i < eics.size(); i++ )  eics[i]->getPeakPositionsC(eic_smoothingWindow, false);
         for(int i=0; i < eics.size(); i++ )  eics[i]->getPeakPositionsD(peakPickingAndGroupingParameters, false);
 
-//        vector<PeakGroup> peakgroups = EIC::groupPeaksC(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow, baseline_smoothingWindow, baseline_dropTopX);
         vector<PeakGroup> peakgroups = EIC::groupPeaksE(eics, peakPickingAndGroupingParameters);
 
         numAllPeakGroups += peakgroups.size();
@@ -495,11 +493,9 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         if (eicMaxIntensity < minGroupIntensity) { delete_all(eics); continue; }
 
         //find peaks
-//        for(unsigned int i=0; i < eics.size(); i++ )  eics[i]->getPeakPositionsC(static_cast<int>(eic_smoothingWindow), false);
         for(unsigned int i=0; i < eics.size(); i++ )  eics[i]->getPeakPositionsD(peakPickingAndGroupingParameters, false);
 
         //Issue 381
-//        vector<PeakGroup> peakgroups = EIC::groupPeaksC(eics, static_cast<int>(eic_smoothingWindow), grouping_maxRtWindow, baseline_smoothingWindow, baseline_dropTopX);
         vector<PeakGroup> peakgroups = EIC::groupPeaksE(eics, peakPickingAndGroupingParameters);
 
         //score quality of each group
@@ -1102,7 +1098,6 @@ void BackgroundPeakUpdate::processSRMTransitions(vector<mzSlice*>&slices){
 
         //find peaks
         for(unsigned int i=0; i < eics.size(); i++ ) {
-            //eics[i]->getPeakPositionsC(static_cast<int>(eic_smoothingWindow), false);
             eics[i]->getPeakPositionsD(peakPickingAndGroupingParameters, false);
         }
 
