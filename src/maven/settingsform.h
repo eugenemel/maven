@@ -21,6 +21,7 @@ class SettingsForm : public QDialog, public Ui_SettingsForm
 				 void setFormValues();
 				 void getFormValues();
 				 void recomputeEIC();
+                 void replotEIC();
 				 void recomputeIsotopes();
                  void replotMS1Spectrum();
                  void replotMS2Spectrum();

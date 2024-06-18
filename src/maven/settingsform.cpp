@@ -101,6 +101,15 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(spnMs3MzMin, SIGNAL(valueChanged(double)), SLOT(replotMS3Spectrum()));
     connect(spnMs3MzMax, SIGNAL(valueChanged(double)), SLOT(replotMS3Spectrum()));
 
+    //Font size
+    connect(this->spnMzTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS1Spectrum()));
+    connect(this->spnMzTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS2Spectrum()));
+    connect(this->spnMzTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS3Spectrum()));
+    connect(this->spnSpectrumTitleTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS1Spectrum()));
+    connect(this->spnSpectrumTitleTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS2Spectrum()));
+    connect(this->spnSpectrumTitleTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS3Spectrum()));
+    connect(this->spnEICTitleTextSize, SIGNAL(valueChanged(int)), SLOT(replotEIC()));
+
     //spectral agglomeration
     connect(spnScanFilterMinIntensity, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
     connect(spnScanFilterMinIntensityFraction, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
@@ -163,6 +172,13 @@ void SettingsForm::recomputeEIC() {
     getFormValues();
     if (mainwindow && mainwindow->getEicWidget()) {
         mainwindow->getEicWidget()->recompute(!mainwindow->getEicWidget()->isPreservePreviousRtRange());
+        mainwindow->getEicWidget()->replot();
+    }
+}
+
+void SettingsForm::replotEIC() {
+    getFormValues();
+    if (mainwindow && mainwindow->getEicWidget()) {
         mainwindow->getEicWidget()->replot();
     }
 }
@@ -413,6 +429,16 @@ void SettingsForm::setFormValues() {
 
     if (settings->contains("spnMs3MzMax"))
         spnMs3MzMax->setValue(settings->value("spnMs3MzMax").toDouble());
+
+    //font size
+    if (settings->contains("spnMzTextSize"))
+        spnMzTextSize->setValue(settings->value("spnMzTextSize").toInt());
+
+    if (settings->contains("spnSpectrumTitleTextSize"))
+        spnSpectrumTitleTextSize->setValue(settings->value("spnSpectrumTitleTextSize").toInt());
+
+    if (settings->contains("spnEICTitleTextSize"))
+        spnEICTitleTextSize->setValue(settings->value("spnEICTitleTextSize").toInt());
 
     //bookmark warnings
     if (settings->contains("chkBkmkWarnMzRt"))
