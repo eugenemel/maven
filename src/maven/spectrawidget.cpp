@@ -211,14 +211,16 @@ void SpectraWidget::setTitle() {
 
     int fontSize = 8.0;
 
+    QFont font = QApplication::font();
+
     //Issue 730: user override font size
     int savedFontSize = mainwindow->getSettings()->value("spnSpectrumTitleTextSize", -1).toInt();
     if (savedFontSize > 0) {
         fontSize = savedFontSize;
+        font.setPixelSize(fontSize);
     }
 
-	QFont font = QApplication::font();
-    font.setPixelSize(fontSize);
+    _title->setFont(font);
 
     _title->setHtml(title);
     int titleWith = _title->boundingRect().width();
