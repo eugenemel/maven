@@ -105,6 +105,7 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(spnMzTextSize, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
     connect(spnSpectrumTitleTextSize, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
     connect(spnEICTitleTextSize, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
+    connect(spnAxesTextSize, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
 
     connect(spnMzTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS1Spectrum()));
     connect(spnMzTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS2Spectrum()));
@@ -113,6 +114,10 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(spnSpectrumTitleTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS2Spectrum()));
     connect(spnSpectrumTitleTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS3Spectrum()));
     connect(spnEICTitleTextSize, SIGNAL(valueChanged(int)), SLOT(replotEIC()));
+    connect(spnAxesTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS1Spectrum()));
+    connect(spnAxesTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS2Spectrum()));
+    connect(spnAxesTextSize, SIGNAL(valueChanged(int)), SLOT(replotMS3Spectrum()));
+    connect(spnAxesTextSize, SIGNAL(valueChanged(int)), SLOT(replotEIC()));
 
     //spectral agglomeration
     connect(spnScanFilterMinIntensity, SIGNAL(valueChanged(double)), SLOT(getFormValues()));
@@ -444,6 +449,9 @@ void SettingsForm::setFormValues() {
     if (settings->contains("spnEICTitleTextSize"))
         spnEICTitleTextSize->setValue(settings->value("spnEICTitleTextSize").toInt());
 
+    if (settings->contains("spnAxesTextSize"))
+        spnAxesTextSize->setValue(settings->value("spnAxesTextSize").toInt());
+
     //bookmark warnings
     if (settings->contains("chkBkmkWarnMzRt"))
         chkBkmkWarnMzRt->setCheckState((Qt::CheckState) settings->value("chkBkmkWarnMzRt").toInt());
@@ -647,6 +655,7 @@ void SettingsForm::getFormValues() {
     settings->setValue("spnMzTextSize", spnMzTextSize->value());
     settings->setValue("spnSpectrumTitleTextSize", spnSpectrumTitleTextSize->value());
     settings->setValue("spnEICTitleTextSize", spnEICTitleTextSize->value());
+    settings->setValue("spnAxesTextSize", spnAxesTextSize->value());
 
     //bookmark warn display options
     settings->setValue("chkBkmkWarnMzRt", chkBkmkWarnMzRt->checkState());
