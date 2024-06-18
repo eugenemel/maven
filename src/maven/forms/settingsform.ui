@@ -1299,13 +1299,13 @@
           <string>MS3 Spectrum m/z display range</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="chkMs3Autoscale">
-            <property name="text">
-             <string>Autoscale</string>
+          <item row="0" column="4">
+           <widget class="QDoubleSpinBox" name="spnMs3MzMin">
+            <property name="suffix">
+             <string> Da</string>
             </property>
-            <property name="checked">
-             <bool>true</bool>
+            <property name="maximum">
+             <double>99999999.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -1332,6 +1332,16 @@
             </property>
            </widget>
           </item>
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="chkMs3Autoscale">
+            <property name="text">
+             <string>Autoscale</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="3">
            <widget class="QLabel" name="lblMs3MzMin">
             <property name="text">
@@ -1339,16 +1349,6 @@
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="4">
-           <widget class="QDoubleSpinBox" name="spnMs3MzMin">
-            <property name="suffix">
-             <string> Da</string>
-            </property>
-            <property name="maximum">
-             <double>99999999.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -1372,6 +1372,84 @@
             </property>
             <property name="value">
              <double>1200.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string>Font Size</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_18">
+          <item row="0" column="0">
+           <widget class="QLabel" name="lblMzTextSize">
+            <property name="text">
+             <string>Annotated m/z text size:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="spnMzTextSize">
+            <property name="minimum">
+             <number>-1</number>
+            </property>
+            <property name="maximum">
+             <number>999</number>
+            </property>
+            <property name="value">
+             <number>-1</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="lblSpectrumTitleTextSize">
+            <property name="text">
+             <string>Spectrum title text size:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QSpinBox" name="spnSpectrumTitleTextSize">
+            <property name="minimum">
+             <number>-1</number>
+            </property>
+            <property name="maximum">
+             <number>999</number>
+            </property>
+            <property name="value">
+             <number>-1</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QLabel" name="lblEICTitleTextSize">
+            <property name="text">
+             <string>EIC title text size:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="5">
+           <widget class="QSpinBox" name="spnEICTitleTextSize">
+            <property name="minimum">
+             <number>-1</number>
+            </property>
+            <property name="maximum">
+             <number>999</number>
+            </property>
+            <property name="value">
+             <number>-1</number>
             </property>
            </widget>
           </item>
