@@ -55,7 +55,7 @@ mzSample* mzFileIO::loadSample(QString filename){
     //check if file exists
     QFile file(filename);
 
-    if (!file.exists() ) { 	//couldn't fine this file.. check localdirectory
+    if (!file.exists() ) { 	//couldn't find this file. check local directory
         qDebug() << "Can't find file " << filename; return 0;
     }
 
@@ -63,7 +63,7 @@ mzSample* mzFileIO::loadSample(QString filename){
         qDebug() <<  "Sample already leaded " << filename; return 0;
     }
 
-    mzSample* sample = NULL;
+    mzSample* sample = nullptr;
     QTime timer; timer.start();
 
     try {
