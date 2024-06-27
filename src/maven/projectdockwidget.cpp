@@ -484,14 +484,13 @@ void ProjectDockWidget::closeProject() {
 
 void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
 
-    if(currentProject)  closeProject();
+    if(currentProject) closeProject();
     if(currentProject) return;
 
     QSettings* settings = _mainwindow->getSettings();
     QFileInfo fileinfo(fileName);
     QString projectPath = fileinfo.path();
     QString projectName = fileinfo.fileName();
-    _mainwindow->setWindowTitle(PROGRAMNAME + "_" + QString(MAVEN_VERSION) + " " + projectName);
 
     ProjectDB* selectedProject = new ProjectDB(fileName);
 
@@ -511,6 +510,9 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
     query.exec("select * from samples");
 
     QStringList filelist;
+
+    //Issue 734: Cancel the entire load.
+    bool isCancelLoading = false;
 
     while (query.next()) {
         QString filepath   = query.value("filename").toString();
@@ -539,6 +541,12 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
             msgBox.setDefaultButton(QMessageBox::Open);
             keepLooking = msgBox.exec();
 
+            if (keepLooking != QMessageBox::Open) {
+                qDebug() << "Canceling load.";
+                isCancelLoading = true;
+                break;
+            }
+
             if (keepLooking) {
                 QString dirName = QFileDialog::getExistingDirectory( this, "Select Folder with Sample Files", projectPath);
                 if (not dirName.isEmpty()) {
@@ -549,19 +557,26 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
                         pathlist << dirName;
 
                         qDebug() << "Found!!!! " << filepath;
-                        keepLooking = QMessageBox::Cancel;
                         break;
                     }
                 }
             }
         }
+
+        if (isCancelLoading) break;
+    }
+
+    if (isCancelLoading) {
+        _mainwindow->setWindowTitle(PROGRAMNAME + "_" + QString(MAVEN_VERSION));
+        return;
+    } else {
+        _mainwindow->setWindowTitle(PROGRAMNAME + "_" + QString(MAVEN_VERSION) + " " + projectName);
     }
 
     this->lastOpennedProject = fileName;
     currentProject = selectedProject;
     fileLoader->setMainWindow(_mainwindow);
     fileLoader->loadSamples(filelist);
-
 }
 
 void ProjectDockWidget::getSampleInfoSQLITE() {
