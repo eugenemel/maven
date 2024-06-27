@@ -60,7 +60,7 @@ mzSample* mzFileIO::loadSample(QString filename){
     }
 
     if (checkSampleAlreadyLoaded(filename)) {
-        qDebug() <<  "Sample already leaded " << filename; return 0;
+        qDebug() <<  "Sample already loaded " << filename; return 0;
     }
 
     mzSample* sample = nullptr;
