@@ -1040,7 +1040,7 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
         //Assign background type prior to filtering to ensure that filtering works correctly.
         QQQProcessor::setPeakGroupBackground(allgroups, QQQparams, false);
 
-        //Issue 660: QQQ-specific blank filtegit difr handling
+        //Issue 660: QQQ-specific blank filter handling
         //Run this before QQQProcessor::rollUpToCompoundQuant(), as the roll-up organizes
         //subordinate groups as children PeakGroups.
         vector<PeakGroup> blankFilteredPeakGroups = QQQProcessor::filterPeakGroups(allgroups, QQQparams, false);
