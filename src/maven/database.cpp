@@ -834,6 +834,14 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
     do {
         line = stream.readLine().trimmed();
 
+        //Issue 734: Assume that unsupported characters are actually ± character
+        //Note that this is the only strange character that has ever appeared and caused the issue,
+        //though in theory, other weird characters as possible.
+        //trying out this band-aid fix on the basis that it is highly likely that it never comes up again.
+        //even if it doesn't work, characters that would have rendered as unkonwn will now be rendered as ±
+        //(which probably isn't any worse).
+        line.replace(QChar(0xFFFD), "±");
+
         if (debug) {
             cout << "[Database::loadCompoundCSVFile()]: " << line.toStdString() << endl;
         }
