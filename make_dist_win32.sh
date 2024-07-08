@@ -51,7 +51,7 @@ mkdir -p "${distpath}"
 windeployqt.exe "${exepath}" --dir "${distpath}/${b}"
 
 # Issue 540: Add peakdetector executable
-windeployqt.exe "src/maven/bin/peakdetector.exe" --dir "${distpath}/${b}"
+# windeployqt.exe "src/maven/bin/peakdetector.exe" --dir "${distpath}/${b}"
 
 for f in $(ldd "${exepath}" | awk '{print $3}' | grep 'mingw64'); do
     b=${f##*/}
@@ -69,10 +69,10 @@ cp -v "${exepath}" "${distpath}/"
 cp src/maven_core/bin/dll/qsqlite.dll "${distpath}"/sqldrivers
 
 #Issue 540: mzDeltas does not work with windeployqt, copy executable directly
-cp -v src/maven_core/bin/mzDeltas.exe "${distpath}"
+# cp -v src/maven_core/bin/mzDeltas.exe "${distpath}"
 
 #Issue 540: Copy peakdetector executable to final location
-cp -v "src/maven/bin/peakdetector.exe" "${distpath}/"
+# cp -v "src/maven/bin/peakdetector.exe" "${distpath}/"
 
 rm -rf "dist/${zipfn}"
 (cd "${distpath}" && 7z a -tzip "../${zipfn}" *)
