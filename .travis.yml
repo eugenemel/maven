@@ -51,4 +51,4 @@ deploy:
   on:
     repo: eugenemel/maven
     branch: master
-    tags: false
+    tags: true
