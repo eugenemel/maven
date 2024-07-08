@@ -28,13 +28,16 @@ script:
 # - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then source qt-5.env; fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source qt-5.env; fi
 - qmake -r build.pro
-- make -j2
+- make -j12
 - make INSTALL_ROOT=appdir install
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then desktop-file-validate src/maven/appdir/share/applications/maven.desktop; fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./make_dist_linux.sh "src/maven/appdir/bin/Maven";
-  fi
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./make_dist_osx.sh "src/maven/appdir/bin/Maven.app";
-  fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./make_dist_linux.sh "src/maven/appdir/bin/Maven"; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./make_dist_osx.sh "src/maven/appdir/bin/Maven.app"; fi
+
+# Issue 737: Add peakdetector executable
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./make_dist_osx.sh "src/maven/appdir/bin/peakdetector.app"; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./make_dist_osx.sh "src/maven/appdir/bin/peakdetector"; fi
+
 - ls -la dist/
 deploy:
   provider: releases
