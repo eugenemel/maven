@@ -35,8 +35,8 @@ script:
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./make_dist_osx.sh "src/maven/appdir/bin/Maven.app"; fi
 
 # Issue 737: Add peakdetector executable
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./make_dist_osx.sh "src/maven/appdir/bin/peakdetector"; fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./make_dist_osx.sh "src/maven/appdir/bin/peakdetector.app"; fi
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./make_dist_osx.sh "src/maven/appdir/bin/peakdetector"; fi
 
 - ls -la dist/
 deploy:
@@ -45,8 +45,10 @@ deploy:
     secure: "LFbeN64MAuMJ4fku6p9LeQIAE3NsW0hfHnH7tzQmvak2L8Eka+neVeu/HMqayhMK7PvUUq5Rg02EqJ/2NJyjjTBESpf0U9jFHZ9cWTVOtzWhFkzKdCFaBqRDczcRmZ+iIXnCBdrygdcKBtxOa+G3dw0GSmi6AgLCeKALs0F2+u2WNrpb8u32qgqZSQpDUmjUx1Dx97EUBSsdeqBEIzLd7AlE7OfU7tA5+90pyhoIutjGw7Xx/mn56aGfgQ9sPsbrk7NdNiPeMxnch9heie45jPJT4FQM7qDQ4lF3HZaKe3N1wheQeaTW4eC5evc86PBDq03z7RuKmviYOzxu9ofO9d0BF49zokjPXPbKnMH3PTTEamcNvDVBSS6GkF3Q5nwfizIiBss8PHg+KJDd3O//Ql+xnF2hfajNxV3L9mxXXxHttdLnhMF3xY3y4oZh65GJynjpEK8MhfX7sGDdB0aSl09LbhHW44enAIOvsWUObeGCfw4L/dHn5GuzVscbuS5LfV6TxnWzHHmb2IeRxjOAKpxivxwFeZl0rJL3NHnBOXgbXJn+Tiw4Y4T+V6IhHL44ImwxKgG8aXZ/ALYiznrio2IwDK4xZw6Us57T5u9gmW8/0Ym5sy8Pkl6w8yN8RXGjZCvoWsdrYale2Sq4GHAcma+PPis7pXnLA4azg2BAaVc="
   file_glob: true
   file:
-      - dist/Maven*.AppImage
-      - dist/Maven*.dmg
+      - dist/Maven*.AppImage # linux
+      - dist/Maven*.dmg # mac
+      - dist/peakdetector*.AppImage # linux
+      - dist/peakdetector*.dmg # mac
   skip_cleanup: true
   on:
     repo: eugenemel/maven
