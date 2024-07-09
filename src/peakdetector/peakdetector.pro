@@ -13,6 +13,7 @@ CONFIG += sql qt std++14
 
 INSTALLS += target
 linux:INSTALLS += desktop
+target.path =  $${INSTALL_PREFIX}/bin
 
 QT += sql gui
 QT -= network opengl std++14
@@ -27,6 +28,14 @@ contains (DEFINES,CDFPARSER) {
     LIBS +=  -lcdfread -lnetcdf
 }
 
+#add version information during compilation
+VERSION = $$system("git describe --tags --always")
+
+DEFINES += MAVEN_VERSION=\\\"$$VERSION\\\"
+DEFINES += "PLATFORM=\"$$QMAKE_HOST.os\""
+
+message("Peakdetector Version is:")
+message($$VERSION)
 
 #BUILD OPENMP PARALLEL VERSION
 
