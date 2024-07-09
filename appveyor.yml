@@ -32,6 +32,10 @@ build_script:
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro"
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j12"
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make INSTALL_ROOT=appdir install"
+  
+  # Print contents
+  - bash -lc "ls src/maven/appdir/bin/"
+  
 
 after_build:
     - SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
