@@ -34,7 +34,7 @@ build_script:
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make INSTALL_ROOT=appdir install"
   
   # Print contents
-  - bash -lc "ls src/maven/appdir/bin/"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ls src/maven/appdir/bin/"
   
 
 after_build:
@@ -42,11 +42,13 @@ after_build:
     #- src\maven\get_version.bat > version.txt
     #- SET /p VERSION=<version.txt
     - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/maven/appdir/bin/Maven.exe"
-    - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/maven/appdir/bin/peakdetector.exe"
+    - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh /c/projects/maven/bin/peakdetector.exe"
 
 artifacts:
     - path: 'dist/Maven*.zip'
       name: Maven
+    - path: 'dist/peakdetector*.zip'
+      name: peakdetector
 
 deploy:
   #release: myproduct-v$(appveyor_build_version)
