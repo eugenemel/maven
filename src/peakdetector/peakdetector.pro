@@ -11,6 +11,9 @@ DESTDIR = $$MAVEN/bin/
 CONFIG -= network gui opengl
 CONFIG += sql qt std++14
 
+INSTALLS += target
+linux:INSTALLS += desktop
+
 QT += sql gui
 QT -= network opengl std++14
 
