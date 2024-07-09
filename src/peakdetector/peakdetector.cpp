@@ -72,7 +72,7 @@ bool isRunClustering = false;
 bool isTestResults = false;
 bool isHIHRPAlignment = false;
 
-string csvFileFieldSeperator = "\t";
+string csvFileFieldSeperator = ",";
 PeakGroup::QType quantitationType = PeakGroup::AreaTop;
 
 string ligandDbFilename;
@@ -136,6 +136,7 @@ static string mzkitchenSearchParameters = "";
 //translation list seaches
 bool isQQQSearch = false;
 shared_ptr<QQQSearchParameters> QQQparams = shared_ptr<QQQSearchParameters>(new QQQSearchParameters());
+bool isQQQCSVExport = false;
 
 //parameters
 shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
@@ -174,6 +175,7 @@ void processCompounds(vector<Compound*> set, string setName);
 void reduceGroups();
 void writeReport(string setName);
 void writeCSVReport(string filename);
+void writeQQQReport(string filename);
 void writeConsensusMS2Spectra(string filename);
 void classConsensusMS2Spectra(string filename);
 void writeGroupInfoCSV(PeakGroup* group,  ofstream& groupReport);
@@ -1224,6 +1226,8 @@ void processOptions(int argc, char* argv[]) {
             } else if (groupBackgroundTypeStr == "PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL") {
                 groupBackgroundType = PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL;
             }
+        } else if (strcmp(argv[i], "--isQQQCSVExport") == 0) {
+            isQQQCSVExport = strcmp(argv[i], "1");
         }
 
         if (mzUtils::ends_with(optString, ".rt")) alignmentFile = optString;
@@ -1716,7 +1720,9 @@ void writeReport(string setName) {
     cout << "writeReport() " << allgroups.size() << " groups " << endl;
 
     if (!isSpecialSearch()) {
-         writeCSVReport(outputdir + setName + ".tsv");
+        writeCSVReport(outputdir + setName + ".csv");
+    } else if (isQQQCSVExport) {
+        writeQQQReport(outputdir + setName + ".csv");
     }
 
     //writeMS2SimilarityMatrix(outputdir + setName + ".fragMatrix.tsv");
@@ -1724,7 +1730,63 @@ void writeReport(string setName) {
     //if(writeConsensusMS2) classConsensusMS2Spectra(outputdir + setName + "CLASS.msp");
 }
 
-void writeCSVReport( string filename) {
+void writeQQQReport(string filename) {
+    ofstream groupReport;
+    groupReport.open(filename.c_str());
+    if (! groupReport.is_open()) return;
+
+    string SEP = csvFileFieldSeperator;
+
+    QStringList Header;
+    Header << "label" << "metaGroupId"
+           << "groupId"
+           << "goodPeakCount"
+           << "medMz"
+           << "medRt"
+           << "maxQuality"
+           << "note"
+           << "compound"
+           << "compoundId"
+           << "category"
+           << "database"
+           << "expectedRtDiff"
+           << "ppmDiff"
+           << "parent"
+           << "ms2EventCount"
+           << "fragNumIonsMatched"
+           << "fragFracMatched"
+           << "ticMatched"
+           << "weightedDotProduct"
+           << "hypergeomScore"
+           << "mzFragError"
+           << "spearmanRankCorrelation";
+
+    for (unsigned int i = 0; i < samples.size(); i++) { Header << samples[i]->sampleName.c_str(); }
+
+    foreach(QString h, Header)  groupReport << h.toStdString() << SEP;
+    groupReport << "\n";
+
+    //Only used for the report
+    quantitationType = PeakGroup::SmoothedArea;
+
+    for (int i = 0; i < allgroups.size(); i++ ) {
+
+        PeakGroup groupOriginal = allgroups[i];
+
+        PeakGroup groupCopy = groupOriginal;
+        groupCopy.children.clear();
+
+        PeakGroup* group = &groupCopy;
+
+        if (group->isGroupLabeled('q')) {
+            writeGroupInfoCSV(group, groupReport);
+        }
+    }
+
+    groupReport.close();
+}
+
+void writeCSVReport(string filename) {
     ofstream groupReport;
     groupReport.open(filename.c_str());
     if (! groupReport.is_open()) return;
@@ -1913,10 +1975,10 @@ void writeGroupInfoCSV(PeakGroup* group,  ofstream& groupReport) {
         if (c->category.size()) compoundCategory = c->category[0];
     }
 
-    groupReport << SEP << compoundName;
-    groupReport << SEP << compoundID;
-    groupReport << SEP << compoundCategory;
-    groupReport << SEP << database;
+    groupReport << SEP << mzUtils::doubleQuoteString(compoundName);
+    groupReport << SEP << mzUtils::doubleQuoteString(compoundID);
+    groupReport << SEP << mzUtils::doubleQuoteString(compoundCategory);
+    groupReport << SEP << mzUtils::doubleQuoteString(database);
     groupReport << SEP << expectedRtDiff;
     groupReport << SEP << ppmDist;
 
