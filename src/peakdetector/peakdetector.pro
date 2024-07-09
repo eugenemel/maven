@@ -65,7 +65,7 @@ unix {
 }
 
 win32 {
-
+	CONFIG -= parallel
 }
 
 parallel {
