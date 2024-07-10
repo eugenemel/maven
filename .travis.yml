@@ -10,9 +10,7 @@ addons:
     sources:
     - sourceline: ppa:beineri/opt-qt59-xenial
     packages:
-    - g++-7
-    - qtbase5-dev=5.12.5+dfsg-0ubuntu1
-    - qttools5-dev-tools=5.12.5+dfsg-0ubuntu1
+    - qt59-meta-minimal
 	- mesa-common-dev
     - libgl1-mesa-dev
     - libsqlite3-dev
@@ -23,7 +21,7 @@ before_install:
 - "./ci/travis/before_install_${TRAVIS_OS_NAME}.sh"
 install:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    sudo ln -sf /usr/bin/qmake-qt5 /usr/bin/qmake
+    sudo apt-get install -qq qt5-default qtbase5-dev qt5-qmake libqt5printsupport5;
   fi
 script:
 # - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then source qt-5.env; fi
