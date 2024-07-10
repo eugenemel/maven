@@ -48,8 +48,12 @@ distpath="dist"
 basefn="${appfn%.app}"
 dmgfn="${basefn}_${GIT_VERSION}-Mac.dmg"
 
-rm -rf "${distpath}"
-mkdir -p "${distpath}"
+# Issue 737: avoid clearing out old paths
+# rm -rf "${distpath}"
+# mkdir -p "${distpath}"
+if [ ! -d ${distpath} ]; then
+	mkdir -p "${distpath}"
+fi
 
 echo "Copying resources to ${apppath}"
 mkdir -p "${apppath}/Contents/Resources/methods"

@@ -46,8 +46,13 @@ exefn="${exepath##*/}"
 distpath="dist/${exefn%.exe}-Windows"
 zipfn="${exefn%.exe}_${GIT_VERSION}-Windows.zip"
 
-rm -rf "${distpath}"
-mkdir -p "${distpath}"
+# Issue 737: avoid clearing out old paths
+# rm -rf "${distpath}"
+# mkdir -p "${distpath}"
+if [ ! -d ${distpath} ]; then
+	mkdir -p "${distpath}"
+fi
+
 windeployqt.exe "${exepath}" --dir "${distpath}/${b}"
 
 # Issue 540: Add peakdetector executable
