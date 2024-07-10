@@ -33,6 +33,9 @@ build_script:
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j12"
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make INSTALL_ROOT=appdir install"
   
+  # Issue 737: Search for peakdetector executable
+  - bash -lc "find . -name 'peakdetector.exe'"
+
   # Print contents
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ls src/maven/appdir/bin/"
   
