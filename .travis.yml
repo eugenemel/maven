@@ -8,7 +8,7 @@ matrix:
 addons:
   apt:
     sources:
-    - ubuntu-toolchain-r-test
+    - sourceline: ppa:beineri/opt-qt59-xenial
     packages:
     - g++-7
     - qtbase5-dev=5.12.5+dfsg-0ubuntu1
