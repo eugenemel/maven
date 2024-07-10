@@ -8,21 +8,20 @@ matrix:
 addons:
   apt:
     sources:
-    - sourceline: ppa:beineri/opt-qt59-xenial
+    - ubuntu-toolchain-r-test
     packages:
-    - qt59-meta-minimal
-    - mesa-common-dev
+    - qtbase5-dev
+	- mesa-common-dev
     - libgl1-mesa-dev
     - libsqlite3-dev
     - libmysqlclient-dev
-    #- libssl1.0.0
     - libssl-dev
     - desktop-file-utils
 before_install:
 - "./ci/travis/before_install_${TRAVIS_OS_NAME}.sh"
 install:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    sudo apt-get install -qq qt5-default qtbase5-dev qt5-qmake libqt5printsupport5;
+    sudo ln -sf /usr/bin/qmake-qt5 /usr/bin/qmake
   fi
 script:
 # - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then source qt-5.env; fi
