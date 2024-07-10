@@ -10,7 +10,9 @@ addons:
     sources:
     - ubuntu-toolchain-r-test
     packages:
-    - qtbase5-dev
+    - g++-7
+    - qtbase5-dev=5.12.5+dfsg-0ubuntu1
+    - qttools5-dev-tools=5.12.5+dfsg-0ubuntu1
 	- mesa-common-dev
     - libgl1-mesa-dev
     - libsqlite3-dev
@@ -39,7 +41,7 @@ script:
   fi
 
 # Issue 737: Add peakdetector executable
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./make_dist_osx.sh "src/maven/appdir/bin/peakdetector"; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./make_dist_linux.sh "src/maven/appdir/bin/peakdetector"; fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./make_dist_osx.sh "src/maven/appdir/bin/peakdetector.app"; fi
 
 - ls -la dist/
