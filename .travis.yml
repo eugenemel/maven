@@ -11,7 +11,7 @@ addons:
     - sourceline: ppa:beineri/opt-qt59-xenial
     packages:
     - qt59-meta-minimal
-	- mesa-common-dev
+    - mesa-common-dev
     - libgl1-mesa-dev
     - libsqlite3-dev
     - libmysqlclient-dev
