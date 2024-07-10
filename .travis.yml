@@ -21,7 +21,7 @@ before_install:
 - "./ci/travis/before_install_${TRAVIS_OS_NAME}.sh"
 install:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    sudo apt-get install -qq qt5-default qtbase5-dev qt5-qmake libqt5printsupport5;
+    sudo apt-get install -qq qt5-default qtbase5-dev=5.12.5 qt5-qmake libqt5printsupport5;
   fi
 script:
 # - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then source qt-5.env; fi
