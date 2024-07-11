@@ -8,9 +8,9 @@ matrix:
 addons:
   apt:
     sources:
-    - sourceline: ppa:beineri/opt-qt-5.13.2-bionic
+    - sourceline: ppa:beineri/opt-qt-5.12.6-bionic
     packages:
-    # - qt59-meta-minimal
+    - qt512-meta-minimal
     - mesa-common-dev
     - libgl1-mesa-dev
     - libsqlite3-dev
