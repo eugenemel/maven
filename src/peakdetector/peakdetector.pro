@@ -13,7 +13,8 @@ CONFIG += sql qt std++14
 
 INSTALLS += target
 linux:INSTALLS += desktop
-target.path =  $${INSTALL_PREFIX}/bin
+target.path = $${INSTALL_PREFIX}/bin
+desktop.path = $${INSTALL_PREFIX}/share/applications
 
 QT += sql gui
 QT -= network opengl std++14
