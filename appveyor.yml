@@ -45,7 +45,7 @@ after_build:
     #- src\maven\get_version.bat > version.txt
     #- SET /p VERSION=<version.txt
     - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/maven/appdir/bin/Maven.exe"
-    - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/maven/appdir/bin/peakdetector.exe"
+    - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe"
 
 artifacts:
     - path: 'dist/Maven*.zip'

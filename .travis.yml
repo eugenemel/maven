@@ -39,8 +39,8 @@ script:
   fi
 
 # Issue 737: Add peakdetector executable
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./make_dist_linux.sh "src/maven/appdir/bin/peakdetector"; fi
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./make_dist_osx.sh "src/maven/appdir/bin/peakdetector.app"; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./make_dist_linux.sh "src/peakdetector/appdir/bin/peakdetector"; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./make_dist_osx.sh "src/peakdetector/appdir/bin/peakdetector.app"; fi
 
 - ls -la dist/
 deploy:
