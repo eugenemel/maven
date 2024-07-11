@@ -54,13 +54,22 @@ artifacts:
       name: peakdetector
 
 deploy:
-  #release: myproduct-v$(appveyor_build_version)
-  description: ''
-  provider: GitHub
-  auth_token:
-    secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn # your encrypted token from GitHub
-  artifact: /Maven.*\.zip/            # upload Maven zip archive to release assets
-  draft: false
-  prerelease: false
-  on:
-    appveyor_repo_tag: true        # deploy on tag push only
+    - provider: GitHub
+      description: 'Maven Desktop Application - Windows'
+      auth_token:
+        secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn # encrypted token from GitHub
+      artifact: /Maven.*\.zip/            # upload Maven zip archive to release assets
+      draft: false
+      prerelease: false
+      on:
+        appveyor_repo_tag: true        # deploy on tag push only
+
+    - provider: GitHub
+      description: 'Peakdetector Executable - Windows'
+      auth_token:
+        secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn # encrypted token from GitHub
+      artifact: /peakdetector.*\.zip/            # upload peakdetector zip archive to release assets
+      draft: false
+      prerelease: false
+      on:
+        appveyor_repo_tag: true        # deploy on tag push only
