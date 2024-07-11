@@ -30,7 +30,7 @@ build_script:
 
   # Build MAVEN
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro"
-  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j12"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make INSTALL_ROOT=appdir install"
   
   # Issue 737: Search for peakdetector executable
