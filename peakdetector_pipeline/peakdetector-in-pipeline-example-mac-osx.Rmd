@@ -76,14 +76,14 @@ add_params <- function(args, params) {
   is_double_dash <- grepl("^--", param_names)
   
   # add regular arguments first
-  for (i in 1:length(params_list)) {
+  for (i in 1:length(params)) {
     if (!is_double_dash[i]) {
       args <- add_argument(args, param_names[i], params[[i]]) 
     }
   }
   
   # add double dash argument list
-  for (i in 1:length(params_list)) {
+  for (i in 1:length(params)) {
     if (is_double_dash[i]) {
       args <- add_argument(args, param_names[i], params[[i]]) 
     }
