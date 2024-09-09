@@ -583,6 +583,7 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
 
 shared_ptr<LCLipidSearchParameters> PeakDetectionDialog::getLipidSearchParameters() {
     shared_ptr<LCLipidSearchParameters> lipidSearchParameters = shared_ptr<LCLipidSearchParameters>(new LCLipidSearchParameters());
+    lipidSearchParameters->peakPickingAndGroupingParameters = getPeakPickingAndGroupingParameters();
 
     shared_ptr<PeaksSearchParameters> peaksSearchParameters = getPeaksSearchParameters();
 
@@ -609,6 +610,7 @@ shared_ptr<LCLipidSearchParameters> PeakDetectionDialog::getLipidSearchParameter
 shared_ptr<MzkitchenMetaboliteSearchParameters> PeakDetectionDialog::getMzkitchenMetaboliteSearchParameters() {
 
     shared_ptr<MzkitchenMetaboliteSearchParameters> mzkitchenMetaboliteSearchParameters = shared_ptr<MzkitchenMetaboliteSearchParameters>(new MzkitchenMetaboliteSearchParameters());
+    mzkitchenMetaboliteSearchParameters->peakPickingAndGroupingParameters = getPeakPickingAndGroupingParameters();
 
     shared_ptr<PeaksSearchParameters> peaksSearchParameters = getPeaksSearchParameters();
 
