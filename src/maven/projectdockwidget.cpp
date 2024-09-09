@@ -666,6 +666,15 @@ void ProjectDockWidget::loadAllPeakTables() {
                 displayParams.replace(QRegExp(DirectInfusionSearchParameters::INTERNAL_MAP_DELIMITER, Qt::CaseSensitive, QRegExp::FixedString), ",");
                 displayParams.replace(QRegExp(",}", Qt::CaseSensitive, QRegExp::FixedString), "}");
 
+                //Issue 746: Alphabetize parameters
+                QStringList displayParamsList = QString(displayParams).split("\n");
+                displayParamsList.sort(Qt::CaseInsensitive);
+                QString singleString = displayParamsList.join("\n");
+                if (singleString.startsWith("\n")) {
+                    singleString.remove(0, 1);
+                }
+                displayParams = singleString;
+
                 encodedTableInfo = encodedParams;
                 displayTableInfo = displayParams;
             }
