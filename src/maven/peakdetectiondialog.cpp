@@ -374,6 +374,15 @@ void PeakDetectionDialog::findPeaks() {
         replace(displayParams.begin(), displayParams.end(), ';', '\n');
         replace(displayParams.begin(), displayParams.end(), '=', ' ');
 
+        //Issue 746: Alphabetize parameters
+        QStringList displayParamsList = QString(displayParams.c_str()).split("\n");
+        displayParamsList.sort(Qt::CaseInsensitive);
+        QString singleString = displayParamsList.join("\n");
+        if (singleString.startsWith("\n")) {
+            singleString.remove(0, 1);
+        }
+        displayParams = singleString.toStdString();
+
         //Issue 606: Avoid running background job or making peaks table when score threshold/type make valid results impossible
         bool isHighMs2ScoreThreshold = peakupdater->mustHaveMS2 && peakupdater->minFragmentMatchScore > 1.0f;
 
