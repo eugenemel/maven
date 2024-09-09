@@ -683,6 +683,7 @@ shared_ptr<PeakPickingAndGroupingParameters> PeakDetectionDialog::getPeakPicking
      peakPickingAndGroupingParameters->filterMinNoNoiseObs = this->minNoNoiseObs->value();
      peakPickingAndGroupingParameters->filterMinSignalBaselineRatio = static_cast<float>(this->sigBaselineRatio->value());
      peakPickingAndGroupingParameters->filterMinGroupIntensity = static_cast<float>(this->minGroupIntensity->value());
+     peakPickingAndGroupingParameters->filterMinSignalBlankRatio = static_cast<float>(this->sigBlankRatio->value());
      //peakPickingAndGroupingParameters->filterMinPrecursorCharge = minPrecursorCharge;
 
      // END EIC::groupPeaksE()
