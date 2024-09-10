@@ -613,6 +613,9 @@ shared_ptr<LCLipidSearchParameters> PeakDetectionDialog::getLipidSearchParameter
         qDebug() << "Class Adduct File '" << classAdductFile << "' Could not be read or does not exist.";
     }
 
+    // Issue 746: Note similarity to PeakParameters->matchingIsRequireAdductPrecursorMatch
+    lipidSearchParameters->IDisRequireMatchingAdduct = this->chkRequireAdductMatch->isChecked();
+
     return lipidSearchParameters;
 }
 
@@ -630,6 +633,9 @@ shared_ptr<MzkitchenMetaboliteSearchParameters> PeakDetectionDialog::getMzkitche
 
     mzkitchenMetaboliteSearchParameters->rtIsRequireRtMatch = this->featureMatchRts->isChecked();
     mzkitchenMetaboliteSearchParameters->rtMatchTolerance = static_cast<float>(this->spnFeatureToCompoundRtTolr->value());
+
+    // Issue 746: Note similarity to PeakParameters->matchingIsRequireAdductPrecursorMatch
+    mzkitchenMetaboliteSearchParameters->IDisRequireMatchingAdduct = this->chkRequireAdductMatch->isChecked();
 
     return mzkitchenMetaboliteSearchParameters;
 }
