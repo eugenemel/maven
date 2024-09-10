@@ -2319,7 +2319,7 @@ void mzkitchenSearch() {
              << endl;
 
         shared_ptr<LCLipidSearchParameters> lipidSearchParams = LCLipidSearchParameters::decode(mzkitchenSearchParameters);
-        lipidSearchParams->IDisRequireMatchingAdduct = false; //this parameter must be false in a peakdetector context
+        lipidSearchParams->IDisRequireMatchingAdduct = false;  //this parameter must be false in a peakdetector context, because no Adduct* are provided
         lipidSearchParams->searchVersion = "lipids_lclipidprocessor_v1";
         lipidSearchParams->peakPickingAndGroupingParameters = peakPickingAndGroupingParameters; //override encoded values with CL options
 
@@ -2334,6 +2334,7 @@ void mzkitchenSearch() {
              << endl;
 
         shared_ptr<MzkitchenMetaboliteSearchParameters> metaboliteSearchParams = MzkitchenMetaboliteSearchParameters::decode(mzkitchenSearchParameters);
+        metaboliteSearchParams->IDisRequireMatchingAdduct = false; //this parameter must be false in a peakdetector context, because no Adduct* are provided
         metaboliteSearchParams->searchVersion = "mzkitchen22_metabolite_search";
         metaboliteSearchParams->peakPickingAndGroupingParameters = peakPickingAndGroupingParameters; //override encoded values with CL options
 
