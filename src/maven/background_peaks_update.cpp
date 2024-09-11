@@ -552,8 +552,8 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             group.computeFragPattern(productPpmTolr);
             // BROKEN group.findHighestPurityMS2Pattern(compoundPPMWindow);
 
-			//Issue 746: MS2 required for peak group
-			if (mustHaveMS2 and group.ms2EventCount == 0) continue;
+            //Issue 746: MS2 required for peak group
+            if (mustHaveMS2 and group.ms2EventCount == 0) continue;
 
             //Issue 727: unified interface for spectral matching
             assignToGroup(&group, searchableDatabase);
@@ -992,6 +992,7 @@ void BackgroundPeakUpdate::processMassSlices() {
             avgScanTime = 0;
             for (auto sample : samples) {
                 float singleSampleAvgFullScanTime = sample->getAverageFullScanTime();
+                //qDebug() << sample->getSampleName().c_str() << ":" << singleSampleAvgFullScanTime << endl;
                 avgScanTime += singleSampleAvgFullScanTime;
             }
             avgScanTime /= samples.size();
@@ -1001,6 +1002,8 @@ void BackgroundPeakUpdate::processMassSlices() {
         ParallelMassSlicer massSlices;
         massSlices.setSamples(samples);
 
+        //qDebug() << "Average scan time:" << (60*avgScanTime) << "seconds";
+    
         if(mustHaveMS2) {
             //samples must be loaded for this to work
             massSlices.algorithmE(ppmMerge, rtStepSize*avgScanTime);
