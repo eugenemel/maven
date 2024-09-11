@@ -992,7 +992,7 @@ void BackgroundPeakUpdate::processMassSlices() {
             avgScanTime = 0;
             for (auto sample : samples) {
                 float singleSampleAvgFullScanTime = sample->getAverageFullScanTime();
-                qDebug() << sample->getSampleName().c_str() << ":" << singleSampleAvgFullScanTime << endl;
+                qDebug() << sample->getSampleName().c_str() << ":" << singleSampleAvgFullScanTime;
                 avgScanTime += singleSampleAvgFullScanTime;
             }
             avgScanTime /= samples.size();
