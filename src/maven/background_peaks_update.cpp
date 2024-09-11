@@ -185,7 +185,9 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
         eicCount += eics.size();
 
         //find peaks
-        for(int i=0; i < eics.size(); i++ )  eics[i]->getPeakPositionsD(peakPickingAndGroupingParameters, false);
+        for(int i=0; i < eics.size(); i++ )  {
+            eics[i]->getPeakPositionsD(peakPickingAndGroupingParameters, false);
+        }
 
         vector<PeakGroup> peakgroups = EIC::groupPeaksE(eics, peakPickingAndGroupingParameters);
 
@@ -194,13 +196,15 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
          for (PeakGroup group : peakgroups) {
 
              group.computeAvgBlankArea(eics);
-             group.groupStatistics();
+             //group.groupStatistics();
 
              Peak* highestpeak = group.getHighestIntensityPeak();
              if(!highestpeak)  continue;
 
-
-             if (clsf && clsf->hasModel()) { clsf->classify(&group); group.groupStatistics(); }
+             if (clsf && clsf->hasModel()) {
+                 clsf->classify(&group);
+                 group.groupStatistics();
+             }
 
 //             //Issue 632: Start Debugging
 //             qDebug() <<  group.meanMz << "@" << group.medianRt() << ":";
@@ -453,6 +457,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
     int eicCount=0;
     int groupCount=0;
     int peakCount=0;
+    long peakCountPreFilter=0;
 
     QSettings* settings = mainwindow->getSettings();
 
@@ -490,13 +495,17 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         float eicMaxIntensity=0;
 
         for ( unsigned int j=0; j < eics.size(); j++ ) {
-            eicCount++;
             if (eics[j]->maxIntensity > eicMaxIntensity) eicMaxIntensity=eics[j]->maxIntensity;
         }
         if (eicMaxIntensity < minGroupIntensity) { delete_all(eics); continue; }
 
+        eicCount += eics.size();
+
         //find peaks
-        for(unsigned int i=0; i < eics.size(); i++ )  eics[i]->getPeakPositionsD(peakPickingAndGroupingParameters, false);
+        for(unsigned int i=0; i < eics.size(); i++ ) {
+            eics[i]->getPeakPositionsD(peakPickingAndGroupingParameters, false);
+            peakCountPreFilter += eics[i]->peaks.size();
+        }
 
         //Issue 381
         vector<PeakGroup> peakgroups = EIC::groupPeaksE(eics, peakPickingAndGroupingParameters);
@@ -670,7 +679,8 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
     qDebug() << "processSlices() Slices=" << slices.size();
     qDebug() << "processSlices() EICs="   << eicCount;
-    qDebug() << "processSlices() Groups="   << groupCount;
+    qDebug() << "processSlices() Peaks before filtering=" << peakCountPreFilter;
+    qDebug() << "processSlices() Groups, after all filters ="   << groupCount;
     qDebug() << "processSlices() Peaks="   << peakCount;
     qDebug() << "BackgroundPeakUpdate:processSlices() done. " << timer.elapsed() << " sec.";
     //cleanup();
