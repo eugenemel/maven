@@ -552,6 +552,9 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             group.computeFragPattern(productPpmTolr);
             // BROKEN group.findHighestPurityMS2Pattern(compoundPPMWindow);
 
+			//Issue 746: MS2 required for peak group
+			if (mustHaveMS2 and group.ms2EventCount == 0) continue;
+
             //Issue 727: unified interface for spectral matching
             assignToGroup(&group, searchableDatabase);
 
