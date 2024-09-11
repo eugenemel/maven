@@ -455,9 +455,9 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
     int foundGroups=0;
 
     int eicCount=0;
-    int groupCount=0;
-    int peakCount=0;
     long peakCountPreFilter=0;
+    long totalGroupPreFilteringCounter=0;
+    long totalGroupsToAppendCounter=0;
 
     QSettings* settings = mainwindow->getSettings();
 
@@ -510,6 +510,8 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         //Issue 381
         vector<PeakGroup> peakgroups = EIC::groupPeaksE(eics, peakPickingAndGroupingParameters);
 
+        totalGroupPreFilteringCounter += peakgroups.size();
+
         //score quality of each group
         vector<PeakGroup*> groupsToAppend;
         for(unsigned int j=0; j < peakgroups.size(); j++ ) {
@@ -518,9 +520,6 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             //debugging
             //cout << "group= (" << group.meanMz << ", " << group.meanRt << "), #" << allgroups.size() << "/" << limitGroupCount << endl;
-
-            groupCount++;
-            peakCount += group.peakCount();
 
             Peak* highestpeak = group.getHighestIntensityPeak();
             if(!highestpeak)  continue;
@@ -590,6 +589,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
         }
 
         std::sort(groupsToAppend.begin(), groupsToAppend.end(),PeakGroup::compRankPtr);
+        totalGroupsToAppendCounter += groupsToAppend.size();
 
         for(int j=0; j<groupsToAppend.size(); j++) {
             //check for duplicates  and append group
@@ -679,9 +679,9 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
     qDebug() << "processSlices() Slices=" << slices.size();
     qDebug() << "processSlices() EICs="   << eicCount;
-    qDebug() << "processSlices() Peaks before filtering=" << peakCountPreFilter;
-    qDebug() << "processSlices() Groups, after all filters ="   << groupCount;
-    qDebug() << "processSlices() Peaks="   << peakCount;
+    qDebug() << "processSlices() Peaks, prior to EIC filtering=" << peakCountPreFilter;
+    qDebug() << "processSlices() Groups, prior to filtering="   << totalGroupPreFilteringCounter;
+    qDebug() << "processSlices() Groups, prior to eicMaxGroups filtering=" << totalGroupsToAppendCounter;
     qDebug() << "BackgroundPeakUpdate:processSlices() done. " << timer.elapsed() << " sec.";
     //cleanup();
 }
