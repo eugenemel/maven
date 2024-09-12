@@ -1453,10 +1453,18 @@ void loadSamples(vector<string>&filenames) {
     cout << "loadSamples() done: loaded " << samples.size() << " samples\n";
 
     if (sampleIdMappingFile.empty()) {
-        //sort using natural sorting
-        sort(samples.begin(), samples.end(), [](const mzSample* lhs, const mzSample* rhs){
-            return strnatcmp(lhs->sampleName.c_str(), rhs->sampleName.c_str()) < 0;
-        });
+        
+        // Issue 746: Enforce natural ordering
+    	QCollator collator;
+		collator.setNumericMode(true);
+	
+		sort(samples.begin(), samples.end(), [collator](mzSample* lhs, mzSample* rhs){
+		
+			QString leftName = QString(lhs->sampleName.c_str());
+			QString rightName = QString(rhs->sampleName.c_str());
+		
+			return collator.compare(leftName, rightName) < 0;
+		});
 
         //ids match natural order
         for (unsigned int i = 0; i < samples.size(); i++){
