@@ -984,12 +984,6 @@ bool BackgroundPeakUpdate::sliceHasMS2Event(mzSlice* slice) {
    return false;
 }
 
-void BackgroundPeakUpdate::setSamples(vector<mzSample*>& set){ 
-	samples=set;
-	
-
-}
-
 void BackgroundPeakUpdate::processMassSlices() { 
 
          qDebug() << "BackgroundPeakUpdate:processMassSlices()";

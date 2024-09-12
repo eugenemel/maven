@@ -28,7 +28,6 @@ public:
   void setCompounds(vector<Compound*>set) { compounds=set; }
   void setSlices(vector<mzSlice*>set)     { _slices=set;   }
   void setPeakGroup(PeakGroup* p)         { _group = p;     }
-  void setSamples(vector<mzSample*>&set);
   void setMainWindow(MainWindow* mw)	{ mainwindow = mw; }
   void setOutputDir(QString outdir)		{ outputdir = outdir.toStdString() + string(DIR_SEPARATOR_STR); }
   void setMaxGroupCount(int x) 			{ limitGroupCount=x; }
