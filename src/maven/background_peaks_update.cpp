@@ -87,6 +87,19 @@ void BackgroundPeakUpdate::run(void) {
 
     //Issue 722: flexibility around which samples are included in peak groups
     samples = mainwindow->getVisibleSamples();
+    
+    // Issue 746: Enforce natural ordering
+    QCollator collator;
+	collator.setNumericMode(true);
+	
+	sort(samples.begin(), samples.end(), [collator](mzSample* lhs, mzSample* rhs){
+		
+		QString leftName = QString(lhs->sampleName.c_str());
+		QString rightName = QString(rhs->sampleName.c_str());
+		
+		return collator.compare(leftName, rightName) < 0;
+	});
+	
 
     if (samples.size() > 0 && samples[0]->getPolarity() > 0 ) {
         ionizationMode = +1;
@@ -971,9 +984,10 @@ bool BackgroundPeakUpdate::sliceHasMS2Event(mzSlice* slice) {
    return false;
 }
 
-void BackgroundPeakUpdate::setSamples(vector<mzSample*>&set){ 
-	samples=set;   
-	if ( samples.size() > 0 ) avgScanTime = samples[0]->getAverageFullScanTime();
+void BackgroundPeakUpdate::setSamples(vector<mzSample*>& set){ 
+	samples=set;
+	
+
 }
 
 void BackgroundPeakUpdate::processMassSlices() { 
