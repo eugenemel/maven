@@ -530,14 +530,14 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
 
             group.computeAvgBlankArea(eics);
             group.groupStatistics();
-
-            if (clsf && clsf->hasModel()&& group.goodPeakCount < minGoodPeakCount) continue;
+            
+            if (clsf && clsf->hasModel() && group.goodPeakCount < minGoodPeakCount) continue;
             if (clsf && clsf->hasModel() && group.maxQuality < minQuality) continue;
 
             // if (group.blankMean*minBlankRatio > group.sampleMean ) continue;
             if (group.maxNoNoiseObs < minNoNoiseObs) continue;
             if (group.maxSignalBaselineRatio < minSignalBaseLineRatio) continue;
-            if (group.maxIntensity < minGroupIntensity ) continue;
+            if (group.maxIntensity < minGroupIntensity) continue;
 
             if (group.blankMax*minSignalBlankRatio > group.maxIntensity) continue;
 
