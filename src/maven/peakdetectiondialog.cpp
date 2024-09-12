@@ -561,7 +561,10 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
 
         //isotopes
         peaksSearchParameters->isotopesMzTolerance = static_cast<float>(this->ppmStep->value());
-        peaksSearchParameters->isotopesIsRequireMonoisotopicPeaks = this->excludeIsotopicPeaks->isChecked();
+        
+        //Issue 746, 748: this control isn't working - just disable for now
+        peaksSearchParameters->isotopesIsRequireMonoisotopicPeaks = false;
+        //peaksSearchParameters->isotopesIsRequireMonoisotopicPeaks = this->excludeIsotopicPeaks->isChecked();
         peaksSearchParameters->isotopesExtractIsotopicPeaks = this->reportIsotopes->isChecked();
 
         //ms1
