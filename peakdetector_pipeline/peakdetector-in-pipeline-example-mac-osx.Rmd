@@ -153,27 +153,24 @@ get_default_peakdetector_parameters <- function(spectral_library_file) {
   params[["-p"]] <- 20 # Mass Slice m/z Merge Tolerance
   params[["-r"]] <- 100 # Mass Slice RT Merge Tolerance
   
-  # Compound Database
-  # ms1PpmTolr <- 20 # ??ms1PpmTolr
-  
   # Peak Picking And Grouping
-  params[["--peakRtBoundsSlopeThreshold"]] <- 0.01 # Peak Boundary Slope Threshold (UI: peakRtBoundsSlopeThreshold)
-  params[["--mergedPeakRtBoundsSlopeThreshold"]] <- 0.01 # Peak Boundary Slope Threshold (UI: peakRtBoundsSlopeThreshold)
+  params[["--peakRtBoundsSlopeThreshold"]] <- 0.01 # Peak Boundary Slope Threshold
+  params[["--mergedPeakRtBoundsSlopeThreshold"]] <- 0.01 # Peak Boundary Slope Threshold
   params[["--peakRtBoundsMaxIntensityFraction"]] <- 0 # Peak Boundary Intensity Frac Threshold
   params[["-y"]] <- 5 # EIC Smoothing Window
-  params[["-g"]] <- 0.25 # Peak Group Max RT Difference (UI: grouping_maxRtDiff)
-  params[["-u"]] <- 0.80 # Peak Group Merge Overlap (UI: spnMergeOverap)
-  params[["--mergedSmoothedMaxToBoundsMinRatio"]] <- 1 # Peak Group S/N Threshold (UI: spnPeakGroupSNThreshold)
+  params[["-g"]] <- 0.25 # Peak Group Max RT Difference
+  params[["-u"]] <- 0.80 # Peak Group Merge Overlap
+  params[["--mergedSmoothedMaxToBoundsMinRatio"]] <- 1 # Peak Group S/N Threshold
   
   # Peak Scoring Tab
   
   # Peak Scoring
-  params[["-z"]] <- 1 # Min Signal/Noise Ratio (UI: sigBaselineRatio)
-  params[["-i"]] <- 1e4 # Min Highest Peak Intensity (UI: minGroupIntensity)
-  params[["-b"]] <- 1 # Min Good Peak/Group (UI: minGoodGroupCount)
-  params[["--minSignalBlankRatio"]] <- 2 # Min Signal/Blank Ratio (UI: sigBlankRatio)
-  params[["-w"]] <- 5 # Min Peak Width (UI: minNoNoiseObs)
-  params[["-q"]] <- 0 # Min Peak Quality (UI: spnMinPeakQuality)
+  params[["-z"]] <- 1 # Min Signal/Noise Ratio
+  params[["-i"]] <- 1e4 # Min Highest Peak Intensity
+  params[["-b"]] <- 1 # Min Good Peak/Group
+  params[["--minSignalBlankRatio"]] <- 2 # Min Signal/Blank Ratio
+  params[["-w"]] <- 5 # Min Peak Width
+  params[["-q"]] <- 0 # Min Peak Quality
   
   # Baseline Computation
   params[["-8"]] <- 80 # Drop top x% intensities from chromatogram
