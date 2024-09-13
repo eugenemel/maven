@@ -1,7 +1,7 @@
 ---
 title: "Explore parameters via multiple peakdetector runs"
 author: "Phil Seitzer"
-date:  'July 30, 2024'
+date:  'September 12, 2024'
 output: html_document
 ---
 
@@ -126,41 +126,71 @@ get_peakdetector_command_line <- function(
 }
 ```
 
-## Default Peakdetector parameters (with explanations)
+## f(x) Default Peakdetector parameters (with explanations)
 ```{r}
-params <- list(
+get_default_peakdetector_parameters <- function(spectral_library_file) {
   
-  # slices / peak picking
-  "-e" = "E", # mz slice determination algorithm (most up-to-date slicing algorithm)
-  "-r" = 10, # of scans used in RT step size computation for mass slicing.
-  "-n" = 100, # Maximum number of peak groups to pick out a single EIC.  
-  "-y" = 5, #EIC Smoothing Window size - in # scans
-  "-7" = 5, # baseline smoothing window size.
-  "-8" = 60, # percentile of observed intensity values to exclude for baseline calculation
-  "--peakRtBoundsSlopeThreshold" = 0, # Define edges of peaks based on flattening out of trace, to this slope.
-  "--peakRtBoundsMaxIntensityFraction" = 0, # Define edges of peaks based on intensity reaching this proportion of max. -1 if unused.
+  params <- list()
+
+  # Parameters always set by GUI
+  params[["-f"]] <- "E" # Peak Grouping Algorithm Type - should always be 'E'
+  params[["--mergedSmoothedMaxToBoundsIntensityPolicy"]] <- "MINIMUM" # GUI always sets this value
+  params[["--mergedPeakRtBoundsMaxIntensityFraction"]] <- -1 # GUI Always sets this value
   
-  # peak grouping
-  "-f" = "E", # peak grouping algorithm (most up-to-date peak grouping algorithm)
-  "-g" = 0.25, # Max distance in RT from sample peak to merged EIC peak to include sample peak.
-  "-b" = 1, # Minimum number of peaks in a group considered "good" to retain peak group
-  "-i" = 1000, # Minimum raw intensity for tallest peak in peak group to retain peak group.
-  "-q" = 0.5, # Minimum quality score value for highest-quality peak in peak group to retain peak group.
-  "-u" = 0.8, # Merge peak group if this proportion of RT range (or more) of two groups is shared.
-  "-z" = 5, # Minimum Signal:Baseline ratio value for highest Signal:Baseline peak in peak group to retain peak group.
-  "--mergedPeakRtBoundsSlopeThreshold" = 0, # Merged EIC peak edge detection criteria.
-  "--mergedPeakRtBoundsMaxIntensityFraction" = 0, # Criteria to determine edge of smoothed bounds.
-  "--mergedSmoothedMaxToBoundsMinRatio" = 0, # Retain peak group associated with merged EIC peak by sufficient max to bounds ratio.
-  "--mergedSmoothedMaxToBoundsIntensityPolicy" = "MEDIAN", # Approach for calculating max to bounds ratios. Either "MEDIAN", "MAXIMUM", or "MINIMUM".
+  # Parameters that can be set by GUI, but not by CL
+  # [Peak Detection -> Peak Picking And Grouping -> EIC Smoother Type] must be 'Gaussian' (peakdetector always sets to value 'Gaussian')
+  #    (UI: cmbSmootherType)
+  # [Peak Scoring -> Matching Options -> Require compound's associated adduct and searched adduct match for compound matches]
+  #    must be checked (GUI will enumerate extra compounds based on selected adducts, peakdetector uses adducts only from library)
+  #    (UI: chkRequireAdductMatch) [matchingIsRequireAdductPrecursorMatch] [matchingIsRequireAdductPrecursorMatch]
+  #
+  # -----
+  # Configurable dialog parameters
   
-  # searches
-  # "-1" = "", # MSP file for mzkitchen compound search.
-  # "-0" = "", # mzkitchen search type. "metaboliteSearch" or "lipidSearch"
-  # "-9" = "", # mzkitchen search parameters
+  # Peak Detection Tab
   
-  # other
-  "-a" = 0 # align samples flag.
-)
+  # Feature Detection
+  params[["-p"]] <- 20 # Mass Slice m/z Merge Tolerance
+  params[["-r"]] <- 100 # Mass Slice RT Merge Tolerance
+  
+  # Compound Database
+  # ms1PpmTolr <- 20 # ??ms1PpmTolr
+  
+  # Peak Picking And Grouping
+  params[["--peakRtBoundsSlopeThreshold"]] <- 0.01 # Peak Boundary Slope Threshold (UI: peakRtBoundsSlopeThreshold)
+  params[["--mergedPeakRtBoundsSlopeThreshold"]] <- 0.01 # Peak Boundary Slope Threshold (UI: peakRtBoundsSlopeThreshold)
+  params[["--peakRtBoundsMaxIntensityFraction"]] <- 0 # Peak Boundary Intensity Frac Threshold
+  params[["-y"]] <- 5 # EIC Smoothing Window
+  params[["-g"]] <- 0.25 # Peak Group Max RT Difference (UI: grouping_maxRtDiff)
+  params[["-u"]] <- 0.80 # Peak Group Merge Overlap (UI: spnMergeOverap)
+  params[["--mergedSmoothedMaxToBoundsMinRatio"]] <- 1 # Peak Group S/N Threshold (UI: spnPeakGroupSNThreshold)
+  
+  # Peak Scoring Tab
+  
+  # Peak Scoring
+  params[["-z"]] <- 1 # Min Signal/Noise Ratio (UI: sigBaselineRatio)
+  params[["-i"]] <- 1e4 # Min Highest Peak Intensity (UI: minGroupIntensity)
+  params[["-b"]] <- 1 # Min Good Peak/Group (UI: minGoodGroupCount)
+  params[["--minSignalBlankRatio"]] <- 2 # Min Signal/Blank Ratio (UI: sigBlankRatio)
+  params[["-w"]] <- 5 # Min Peak Width (UI: minNoNoiseObs)
+  params[["-q"]] <- 0 # Min Peak Quality (UI: spnMinPeakQuality)
+  
+  # Baseline Computation
+  params[["-8"]] <- 80 # Drop top x% intensities from chromatogram
+  params[["-7"]] <- 5 # Baseline Smoothing Window
+  params[["--eicBaselineEstimationType"]] <- "EIC_NON_PEAK_MEDIAN_SMOOTHED_INTENSITY" # Baseline Computation Type
+  
+  # Fragmentation Matching
+  params[["-0"]] <- "metaboliteSearch" # Scoring Algorithm
+  params[["-1"]] <- spectral_library_file # Metabolite Library
+  
+  # ms2MinNumMatches: Peak Scoring -> MS/MS Matching Scoring Settings -> Spectral Matches
+  # rtMatchTolerance: Peak Detection Tab -> Compound Database -> Compound RT Match tolerance
+  # ms1PpmTolr: Peak Detection Tab -> Compound Database -> Compound m/z Match tolerance
+  params[["-9"]] <- "ms2MinNumMatches=0;rtMatchTolerance=2;ms1PpmTolr=20;"
+
+  return(params)
+}
 
 ```
 
@@ -195,12 +225,10 @@ import_results <- function(mzrolldb_file_path) {
 ```{r}
 
 # Update parameters
-params["-0"] <- "'metaboliteSearch'"
-params["-1"] <- spectral_library_file
-params["-9"] <- 'ms2MinNumMatches=1;' # require at least 1 MS2 match
+params <- get_default_peakdetector_parameters(spectral_library_file)
+
 params["--peakRtBoundsMaxIntensityFraction"] <- 0.01 # peak reaches edge at 1% of max intensity.
 params["--peakRtBoundsSlopeThreshold"] <- 0.01 # peak reaches edge when trace flattens out to slope value of 0.01.
-
 
 intensity_thresholds <- c(1e4, 1e7)
 quality_thresholds <- c(0.4, 0.7)
