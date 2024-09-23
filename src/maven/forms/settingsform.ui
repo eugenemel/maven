@@ -792,6 +792,11 @@
               <string>[M+0] FWHM Integration with correlation</string>
              </property>
             </item>
+            <item>
+             <property name="text">
+              <string>[M+0] Group EIC FWHM Integration</string>
+             </property>
+            </item>
            </widget>
           </item>
           <item row="0" column="0">
