@@ -1319,7 +1319,10 @@ void TableDockWidget::exportGroupsAsIsotopes() {
     foreach(QString h, header) isotopesReport << h.toStdString() << sep.c_str();
     isotopesReport << endl;
 
-    for (PeakGroup *group : allgroups) {
+    //Issue 739: respect filters for this export
+    QList<PeakGroup*> visibleGroups = getGroups();
+    for (unsigned int i = 0; i < visibleGroups.size(); i++) {
+        PeakGroup *group = visibleGroups[i];
 
         //Issue 685
         if (group->deletedFlag) continue;
