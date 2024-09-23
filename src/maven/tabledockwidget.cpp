@@ -1307,7 +1307,7 @@ void TableDockWidget::exportGroupsAsIsotopes() {
     isotopesReport.open(fileName.toStdString().c_str());
 
     QStringList header;
-    header << "compound" << "adduct" << "RT" << "isotope";
+    header << "compound" << "adduct" << "label" << "RT" << "isotope";
 
     vector<mzSample*> vsamples = _mainwindow->getVisibleSamples();
     sort(vsamples.begin(), vsamples.end(), mzSample::compSampleOrder);
@@ -1333,9 +1333,13 @@ void TableDockWidget::exportGroupsAsIsotopes() {
 
             for (unsigned int j = 0; j < matrix.isotopesData.cols(); j++) { // isotope
 
+                //Issue 750: add labels
+                string labelsStr(group->labels.begin(), group->labels.end());
+
                 //Issue 710: Add double-quotes around strings, if necessary
                 isotopesReport << mzUtils::doubleQuoteString(group->compound->name) << sep.c_str()
                                << mzUtils::doubleQuoteString(group->adduct->name) << sep.c_str()
+                               << mzUtils::doubleQuoteString(labelsStr) << sep.c_str()
                                << group->medianRt() << sep.c_str()
                                << mzUtils::doubleQuoteString(matrix.isotopeNames.at(j));
 
