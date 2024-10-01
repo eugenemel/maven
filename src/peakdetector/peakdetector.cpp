@@ -133,6 +133,10 @@ static string mzkitchenSearchType = "";
 static string mzkitchenMspFile = "";
 static string mzkitchenSearchParameters = "";
 
+// Issue 751
+static bool isExtractIsotopes = false;
+static IsotopeParameters isotopeParameters;
+
 //translation list seaches
 bool isQQQSearch = false;
 shared_ptr<QQQSearchParameters> QQQparams = shared_ptr<QQQSearchParameters>(new QQQSearchParameters());
@@ -948,6 +952,15 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                     group.groupRank = (1.1 - group.maxQuality) * (1 / log(group.maxIntensity + 1));
                 }
 
+                //Issue 751: Isotopes option (only for untargeted data)
+                if (isExtractIsotopes) {
+                    group.pullIsotopes(isotopeParameters,
+                                       samples,
+                                       false //debug
+                                       );
+                    group.isotopeParameters = isotopeParameters;
+                }
+
                 groupsToAppend.push_back(&group);
 
             } else { //isQQQSearch == true
@@ -1228,6 +1241,10 @@ void processOptions(int argc, char* argv[]) {
             }
         } else if (strcmp(argv[i], "--isQQQCSVExport") == 0) {
             isQQQCSVExport = strcmp(argv[i], "1");
+        } else if (strcmp(argv[i], "--isotopeParameters") == 0) {
+            string isotopeParametersStr = argv[i+1];
+            isotopeParameters = IsotopeParameters::decode(isotopeParametersStr);
+            isExtractIsotopes = true;
         }
 
         if (mzUtils::ends_with(optString, ".rt")) alignmentFile = optString;
