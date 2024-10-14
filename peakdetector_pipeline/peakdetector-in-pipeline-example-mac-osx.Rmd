@@ -101,6 +101,7 @@ add_samples <- function(args, sample_directory) {
 
 get_peakdetector_command_line <- function(
     peakdetector_executable,
+    peakdetector_methods_folder,
     sample_directory,
     output_directory,
     params) {
@@ -248,6 +249,7 @@ for (intensity_threshold in intensity_thresholds) {
     # execute search
     cmd <- get_peakdetector_command_line(
       peakdetector_executable,
+      peakdetector_methods_folder,
       sample_directory,
       output_directory,
       params)
