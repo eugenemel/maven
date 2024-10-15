@@ -133,9 +133,10 @@ static string mzkitchenSearchType = "";
 static string mzkitchenMspFile = "";
 static string mzkitchenSearchParameters = "";
 
-// Issue 751
+// Issue 751: Isotopes, Need adducts for proper isotope extraction
 static bool isExtractIsotopes = false;
 static IsotopeParameters isotopeParameters;
+static map<string, Adduct*> loadedAdducts{};
 
 //translation list seaches
 bool isQQQSearch = false;
@@ -1245,6 +1246,11 @@ void processOptions(int argc, char* argv[]) {
             string isotopeParametersStr = argv[i+1];
             isotopeParameters = IsotopeParameters::decode(isotopeParametersStr);
             isExtractIsotopes = true;
+        } else if (strcmp(argv[i], "--adductFile") == 0) {
+            vector<Adduct*> adducts = Adduct::loadAdducts(argv[i+1]);
+            for (Adduct* adduct : adducts) {
+                loadedAdducts.insert(make_pair(adduct->name, adduct));
+            }
         }
 
         if (mzUtils::ends_with(optString, ".rt")) alignmentFile = optString;
