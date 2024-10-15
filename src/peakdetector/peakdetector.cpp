@@ -1257,7 +1257,7 @@ void processOptions(int argc, char* argv[]) {
             string isotopeParametersStr = argv[i+1];
             isotopeParameters = IsotopeParameters::decode(isotopeParametersStr);
             isExtractIsotopes = true;
-        } else if (strcmp(argv[i], "--adductFile") == 0) {
+        } else if (strcmp(argv[i], "--adductsFile") == 0) {
             vector<Adduct*> adducts = Adduct::loadAdducts(argv[i+1]);
             for (Adduct* adduct : adducts) {
                 loadedAdducts.insert(make_pair(adduct->name, adduct));
