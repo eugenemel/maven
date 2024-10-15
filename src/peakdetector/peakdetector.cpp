@@ -2368,6 +2368,12 @@ void mzkitchenSearch() {
         abort();
     }
 
+    if (isExtractIsotopes) {
+        cout << "Extracting isotopes for peak groups." << endl;
+    } else {
+        cout << "Isotopes will not be extracted for peak groups." << endl;
+    }
+
     unsigned int identifiedGroups = 0;
     for (auto& group : allgroups) {
 
