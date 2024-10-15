@@ -940,7 +940,18 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
 
                 if (mustHaveMS2 and group.ms2EventCount == 0 ) continue;
 
-                if (compound) group.compound = compound;
+                //Issue 751: If a compound matches, try to match the corresponding adduct (if loaded)
+                //Note that this approach is OK b/c compounds are directly loaded from library files,
+                //i.e. the associated adduct from the library is always used
+                //(do not search existing library data against alternative adduct forms).
+                if (compound) {
+                    group.compound = compound;
+                    if (loadedAdducts.find(compound->adductString) != loadedAdducts.end()) {
+                        Adduct *adduct = loadedAdducts.at(compound->adductString);
+                        group.adduct = adduct;
+                    }
+                }
+
                 if (!slice->srmId.empty()) group.srmId = slice->srmId;
 
                 group.groupRank = 1000;
