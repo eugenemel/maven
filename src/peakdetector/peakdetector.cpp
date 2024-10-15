@@ -939,19 +939,7 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                 }
 
                 if (mustHaveMS2 and group.ms2EventCount == 0 ) continue;
-
-                //Issue 751: If a compound matches, try to match the corresponding adduct (if loaded)
-                //Note that this approach is OK b/c compounds are directly loaded from library files,
-                //i.e. the associated adduct from the library is always used
-                //(do not search existing library data against alternative adduct forms).
-                if (compound) {
-                    group.compound = compound;
-                    if (loadedAdducts.find(compound->adductString) != loadedAdducts.end()) {
-                        Adduct *adduct = loadedAdducts.at(compound->adductString);
-                        group.adduct = adduct;
-                    }
-                }
-
+                if (compound) group.compound = compound;
                 if (!slice->srmId.empty()) group.srmId = slice->srmId;
 
                 group.groupRank = 1000;
@@ -962,15 +950,6 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                     if (group.expectedRtDiff > rtWindow ) continue;
                 } else {
                     group.groupRank = (1.1 - group.maxQuality) * (1 / log(group.maxIntensity + 1));
-                }
-
-                //Issue 751: Isotopes option (only for untargeted data)
-                if (isExtractIsotopes) {
-                    group.pullIsotopes(isotopeParameters,
-                                       samples,
-                                       false //debug
-                                       );
-                    group.isotopeParameters = isotopeParameters;
                 }
 
                 groupsToAppend.push_back(&group);
@@ -1261,6 +1240,7 @@ void processOptions(int argc, char* argv[]) {
             vector<Adduct*> adducts = Adduct::loadAdducts(argv[i+1]);
             for (Adduct* adduct : adducts) {
                 loadedAdducts.insert(make_pair(adduct->name, adduct));
+                cout << "Adduct Loaded: " << adduct->name << endl;
             }
         }
 
@@ -2390,9 +2370,27 @@ void mzkitchenSearch() {
 
     unsigned int identifiedGroups = 0;
     for (auto& group : allgroups) {
+
+        //Issue 751: If a compound matches, try to match the corresponding adduct (if loaded)
+        //Note that this approach is OK b/c compounds are directly loaded from library files,
+        //i.e. the associated adduct from the library is always used
+        //(do not search existing library data against alternative adduct forms).
         if (group.compound) {
             group.searchTableName = "clamDB";
             identifiedGroups++;
+            if (loadedAdducts.find(group.compound->adductString) != loadedAdducts.end()) {
+                Adduct *adduct = loadedAdducts.at(group.compound->adductString);
+                group.adduct = adduct;
+            }
+        }
+
+        //Issue 751: Isotopes option (only for untargeted data)
+        if (isExtractIsotopes) {
+            group.pullIsotopes(isotopeParameters,
+                               samples,
+                               false //debug
+                               );
+            group.isotopeParameters = isotopeParameters;
         }
     }
 
