@@ -1435,6 +1435,10 @@ void BackgroundPeakUpdate::assignToGroupSimple(PeakGroup* g, vector<CompoundIon>
 IsotopeParameters BackgroundPeakUpdate::getSearchIsotopeParameters() {
 
     IsotopeParameters isotopeParameters = mainwindow->getIsotopeParameters();
+
+    //Issue 751: override main window peakPickingAndGroupingParameters with search-specific parameters.
+    isotopeParameters.peakPickingAndGroupingParameters = this->peakPickingAndGroupingParameters;
+
     isotopeParameters.ppm = compoundPPMWindow;
 
     // only applies to diffIso searches
