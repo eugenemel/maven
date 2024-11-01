@@ -307,6 +307,10 @@ void IsotopePlot::computeParameters() {
     parameters.append(QString::number(static_cast<double>(_group->isotopeParameters.ppm), 'f', 0));
     parameters.append(" ppm");
 
+    if (_group->isotopeParameters.isApplyMZeroMzOffset) {
+        parameters.append(" (after [M+0] m/z offset)");
+    }
+
     if (_group->isotopeParameters.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::MAVEN_GUI_VERSION_ONE) {
         parameters.append(", RT tol: ");
 
