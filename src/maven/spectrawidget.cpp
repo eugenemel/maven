@@ -741,6 +741,7 @@ void SpectraWidget::drawGraph() {
     bool isDrawCompound = _showOverlay && !_spectralHit.compoundId.isEmpty();
     bool isDrawGraph = (scan || isDrawCompound);
     bool isDrawCompoundOnly = !scan && isDrawCompound;
+    bool isMissingMs2s = !_currentFragment && scan && !scan->sample && scan->scannum == 0 && scan->mz.empty() && this->_msLevel == 2;
 
     if (!isDrawGraph) return;
 
@@ -915,6 +916,29 @@ void SpectraWidget::drawGraph() {
     }
 
     addAxes();
+
+    if (isMissingMs2s) {
+
+        QFont font = QApplication::font();
+
+        int pxSize = scene()->height()*0.03;
+        if ( pxSize < 14 ) pxSize = 14;
+        if ( pxSize > 20 ) pxSize = 20;
+
+        //Issue 730: user override font size
+        int savedFontSize = mainwindow->getSettings()->value("spnEICTitleTextSize", -1).toInt();
+        if (savedFontSize > 0) {
+             pxSize = savedFontSize;
+        }
+
+        font.setPixelSize(pxSize);
+
+        QGraphicsTextItem* text = scene()->addText("NO MS2 SCANS", font);
+        int textWith = text->boundingRect().width();
+        text->setPos(scene()->width()/2-textWith/2, 0.1*scene()->height());
+
+        _items.push_back(text);
+    }
 }
 
 void SpectraWidget::findBounds(bool checkX, bool checkY) {
