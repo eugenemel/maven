@@ -54,6 +54,7 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(maxIsotopeScanDiff, SIGNAL(valueChanged(int)), SLOT(recomputeIsotopes()));
     connect(cmbIsotopicExtractionAlgorithm, SIGNAL(currentIndexChanged(int)), SLOT(recomputeIsotopes()));
     connect(chkMergeOverlappingIsotopes, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
+    connect(chkIsApplyMZeroMzOffset, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
 
     //bookmark options
     connect(chkBkmkWarnMz, SIGNAL(toggled(bool)), SLOT(getFormValues()));
