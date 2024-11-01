@@ -115,7 +115,7 @@ void CSVReports::openPeakReport(string outputfile) {
 
 //Feng note: CSVReports::addGroup modified to (1) output only C12 data without labeling or wen compound is unknown, (2) output all related isotopic forms with labeling, 
 //even when peak height is zero
-void CSVReports::writeGroupInfo(PeakGroup* group) {
+void CSVReports::writeGroupInfo(PeakGroup* group, bool isAddChildren) {
     if(! groupReport.is_open()) {
         cerr << "CSVReports::writeGroupInfo(): group Report is closed" << endl;
         return;
@@ -126,7 +126,7 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
     if (writtenIds.find(idString) != writtenIds.end()) {
         return; // peakgroup already written
     }
-    writtenIds.insert(idString);
+    //writtenIds.insert(idString);
 
     //get ionization mode
 	/* this is not used for now
@@ -275,8 +275,10 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
 
     groupReport << endl;
 
-    for (unsigned int k=0; k < group->children.size(); k++) {
-        addGroup(&group->children[k]);
+    if (isAddChildren) {
+        for (unsigned int k=0; k < group->children.size(); k++) {
+            addGroup(&group->children[k], isAddChildren);
+        }
     }
 }
 
@@ -302,7 +304,7 @@ string CSVReports::doubleQuoteString(std::string& in) {
     }
 }
 
-void CSVReports::addGroup(PeakGroup* group) { 
+void CSVReports::addGroup(PeakGroup* group, bool isAddChildren) {
     qDebug() << "CSVReports::addGroup():";
 
     qDebug() << "CSVReports::addGroup() group->meanMz=" << group->meanMz;
@@ -320,7 +322,7 @@ void CSVReports::addGroup(PeakGroup* group) {
         qDebug() << "CSVReports::addGroup() group->adduct= nullptr";
     }
 
-    writeGroupInfo(group);
+    writeGroupInfo(group, isAddChildren);
     writePeakInfo(group);
 }
 

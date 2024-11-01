@@ -1253,8 +1253,11 @@ void TableDockWidget::exportGroupsToSpreadsheet() {
         QVariant v = item->data(0, PeakGroupType);
         PeakGroup *peakGroup = v.value<PeakGroup*>();
 
+        //Issue 760: Check if item is expanded. Only add children if it isn't.
+        //This avoids a bug where children peak groups were added twice when tree widget items
+        //are already expanded and 'select all' is chosen.
         if (peakGroup) {
-            csvreports->addGroup(peakGroup);
+            csvreports->addGroup(peakGroup, !item->isExpanded());
         }
     }
 

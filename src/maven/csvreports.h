@@ -25,7 +25,7 @@ class CSVReports {
         void openPeakReport(string filename);
         void openMzLinkReport(string filename);
 
-        void addGroup(PeakGroup* group);
+        void addGroup(PeakGroup* group, bool isAddChildren=true);
         void writeIsotopeTableMzLink(mzLink* link);
 
 		void closeFiles();
@@ -36,7 +36,7 @@ class CSVReports {
 
 
 	private:
-		void writeGroupInfo(PeakGroup* group);
+        void writeGroupInfo(PeakGroup* group, bool isAddChildren=true);
         void writePeakInfo(PeakGroup* group);
         string doubleQuoteString(std::string& in);
 
