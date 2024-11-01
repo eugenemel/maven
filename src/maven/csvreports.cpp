@@ -113,27 +113,12 @@ void CSVReports::openPeakReport(string outputfile) {
     }
 }
 
-//Feng note: CSVReports::addGroup modified to (1) output only C12 data without labeling or wen compound is unknown, (2) output all related isotopic forms with labeling, 
-//even when peak height is zero
 void CSVReports::writeGroupInfo(PeakGroup* group, bool isAddChildren) {
+
     if(! groupReport.is_open()) {
         cerr << "CSVReports::writeGroupInfo(): group Report is closed" << endl;
         return;
     }
-
-    //Issue 615: Avoid duplicates by checking that ID string not already written
-    string idString = TableDockWidget::groupTagString(group).toStdString();
-    if (writtenIds.find(idString) != writtenIds.end()) {
-        return; // peakgroup already written
-    }
-    //writtenIds.insert(idString);
-
-    //get ionization mode
-	/* this is not used for now
-    int ionizationMode; 
-    if( samples.size()>0 && samples[0]->getPolarity()>0 ) ionizationMode=+1;
-    else ionizationMode = -1;
-	*/
 
     vector<float> yvalues = group->getOrderedIntensityVector(samples,qtype);
 
@@ -150,6 +135,8 @@ void CSVReports::writeGroupInfo(PeakGroup* group, bool isAddChildren) {
             peakWidths.at(i) = sampleToPeak.at(sample).rtmax - sampleToPeak.at(sample).rtmin;
         }
     }
+
+    string idString = TableDockWidget::groupTagString(group).toStdString();
 
     groupReport << group->getPeakGroupLabel() << SEP << setprecision(7)
                 << group->metaGroupId << SEP
