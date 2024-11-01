@@ -100,10 +100,27 @@ void CSVReports::openPeakReport(string outputfile) {
     if(QString(outputfile.c_str()).endsWith(".csv",Qt::CaseInsensitive) ) setCommaDelimited();
 
     QStringList colnames;
-    colnames    <<"groupId" <<"compound"<<"compoundId"<<"sample"<<"peakMz"
-                <<"medianMz"<<"baseMz"<<"rt"<<"rtmin"<<"rtmax"<<"quality"
-                <<"peakIntensity"<<"peakArea"<<"peakAreaTop"<<"peakAreaCorrected"
-                <<"noNoiseObs"<<"signalBaseLineRatio"<<"fromBlankSample";
+    colnames <<"groupId"
+             <<"compound"
+             <<"compoundId"
+             <<"ID"
+
+             //peak-specific data
+             <<"sample"
+             <<"peakMz"
+             <<"medianMz"
+             <<"baseMz"
+             <<"rt"
+             <<"rtmin"
+             <<"rtmax"
+             <<"quality"
+             <<"peakIntensity"
+             <<"peakArea"
+             <<"peakAreaTop"
+             <<"peakAreaCorrected"
+             <<"noNoiseObs"
+             <<"signalBaseLineRatio"
+             <<"fromBlankSample";
 
 
     peakReport.open(outputfile.c_str());
@@ -339,6 +356,8 @@ void CSVReports::writePeakInfo(PeakGroup* group, bool isAddChildren) {
         compoundName = group->importedCompoundName;
     }
 
+    string idString = TableDockWidget::groupTagString(group).toStdString();
+
     for(unsigned int j=0; j<group->peaks.size(); j++ ) {
         Peak& peak = group->peaks[j];
         mzSample* sample = peak.getSample();
@@ -349,6 +368,7 @@ void CSVReports::writePeakInfo(PeakGroup* group, bool isAddChildren) {
                 << groupId << SEP
                 << doubleQuoteString(compoundName) << SEP
                 << doubleQuoteString(compoundID) << SEP
+                << doubleQuoteString(idString) << SEP //header is titled 'ID'
                 << sampleName << SEP
                 << peak.peakMz <<  SEP
                 << peak.medianMz <<  SEP
