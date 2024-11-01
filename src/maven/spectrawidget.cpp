@@ -68,9 +68,12 @@ void SpectraWidget::initPlot() {
 void SpectraWidget::setCurrentScan(Scan* scan) {
     qDebug() << "SpectraWidget::setCurrentScan(scan)";
 
-    if (!_currentScan) {
-        _currentScan = new Scan(nullptr,0,0,0,0,0); //empty scan
+    //to prevent memory leaks
+    if (_currentScan) {
+        delete(_currentScan);
     }
+
+    _currentScan = new Scan(nullptr,0,0,0,0,0); //re-initialize to empty scan
 
     if (scan ) {
         //if (_currentScan and scan->mslevel != _currentScan->mslevel) {
@@ -230,7 +233,7 @@ void SpectraWidget::setTitle() {
 }
 
 void SpectraWidget::setScan(Scan* scan) {
-    if (!scan) return;
+    //Issue 754: Replace graph with empty data instead of leaving previous scan/fragment data
 
     _currentFragment = nullptr;
     _sampleScanMap = {};
