@@ -37,7 +37,7 @@ class CSVReports {
 
 	private:
         void writeGroupInfo(PeakGroup* group, bool isAddChildren=true);
-        void writePeakInfo(PeakGroup* group);
+        void writePeakInfo(PeakGroup* group, bool isAddChildren=true);
         string doubleQuoteString(std::string& in);
 
 		int groupId;	//sequential group numbering

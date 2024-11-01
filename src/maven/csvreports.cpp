@@ -116,7 +116,7 @@ void CSVReports::openPeakReport(string outputfile) {
 void CSVReports::writeGroupInfo(PeakGroup* group, bool isAddChildren) {
 
     if(! groupReport.is_open()) {
-        cerr << "CSVReports::writeGroupInfo(): group Report is closed" << endl;
+//        cerr << "CSVReports::writeGroupInfo(): group Report is closed" << endl;
         return;
     }
 
@@ -271,7 +271,7 @@ void CSVReports::writeGroupInfo(PeakGroup* group, bool isAddChildren) {
 
 void CSVReports::writeIsotopeTableMzLink(mzLink* link){
     if(!mzLinkReport.is_open()) {
-        cerr << "CSVReports::writeMzLink(): mzLink report is closed" << endl;
+//        cerr << "CSVReports::writeMzLink(): mzLink report is closed" << endl;
         return;
     }
 
@@ -310,7 +310,7 @@ void CSVReports::addGroup(PeakGroup* group, bool isAddChildren) {
     }
 
     writeGroupInfo(group, isAddChildren);
-    writePeakInfo(group);
+    writePeakInfo(group, isAddChildren);
 }
 
 void CSVReports::closeFiles() { 
@@ -319,16 +319,25 @@ void CSVReports::closeFiles() {
     if(mzLinkReport.is_open() ) mzLinkReport.close();
 }
 
-void CSVReports::writePeakInfo(PeakGroup* group) {
-    if(! peakReport.is_open()) return;
+void CSVReports::writePeakInfo(PeakGroup* group, bool isAddChildren) {
+
+    if(! peakReport.is_open()) {
+//        cerr << "CSVReports::writePeakInfo(): peaks Report is closed" << endl;
+        return;
+    }
+
     string compoundName = "";
     string compoundID = "";
 
-    if (group->compound != NULL) {
+    if (group->compound) {
         compoundName = group->compound->name;
         compoundID   = group->compound->id;
     }
 
+    //Issue 142: imported compound name always takes precedence
+    if (!group->importedCompoundName.empty()){
+        compoundName = group->importedCompoundName;
+    }
 
     for(unsigned int j=0; j<group->peaks.size(); j++ ) {
         Peak& peak = group->peaks[j];
@@ -357,6 +366,12 @@ void CSVReports::writePeakInfo(PeakGroup* group) {
                 << peak.signalBaselineRatio <<  SEP
                 << peak.fromBlankSample << SEP
                 << endl;
+    }
+
+    if (isAddChildren) {
+        for (unsigned int k=0; k < group->children.size(); k++) {
+            addGroup(&group->children[k], isAddChildren);
+        }
     }
 }
 
