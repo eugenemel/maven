@@ -320,6 +320,10 @@ void SettingsForm::setFormValues() {
     if (settings->contains("spnIgnoreNatIsotopesPct"))
         spnIgnoreNatIsotopesPct->setValue(settings->value("spnIgnoreNatIsotopesPct").toDouble());
 
+    if (settings->contains("chkIsApplyMZeroMzOffset")) {
+        chkIsApplyMZeroMzOffset->setCheckState((Qt::CheckState) settings->value("chkIsApplyMZeroMzOffset").toInt());
+    }
+
     if (settings->contains("cmbRetentionPolicy")){
 
         QString cmbRetentionPolicyStr = QString(settings->value("cmbRetentionPolicy").toString());
@@ -573,6 +577,7 @@ void SettingsForm::getFormValues() {
     settings->setValue("cmbRetentionPolicy", cmbRetentionPolicy->currentText());
     settings->setValue("spnIgnoreNatIsotopesPct", spnIgnoreNatIsotopesPct->value());
     settings->setValue("chkMergeOverlappingIsotopes", chkMergeOverlappingIsotopes->checkState());
+    settings->setValue("chkIsApplyMZeroMzOffset", chkIsApplyMZeroMzOffset->checkState());
 
     settings->setValue("amuQ1", amuQ1->value());
     settings->setValue("amuQ3", amuQ3->value());

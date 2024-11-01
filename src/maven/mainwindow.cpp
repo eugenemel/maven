@@ -2973,6 +2973,9 @@ IsotopeParameters MainWindow::getIsotopeParameters(){
         //Issue 691
         isotopeParameters.isCombineOverlappingIsotopes = settings->value("chkMergeOverlappingIsotopes", false).toBool();
 
+        //Issue 760
+        isotopeParameters.isApplyMZeroMzOffset = settings->value("chkIsApplyMZeroMzOffset", false).toBool();
+
     } else {
         qDebug() << "MainWindow::getIsotopeParameters(): Could not find saved program settings! using defaults.";
     }

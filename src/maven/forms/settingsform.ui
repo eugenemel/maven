@@ -634,6 +634,13 @@
        <string>Isotope Detection</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
+       <item row="1" column="0">
+        <widget class="QCheckBox" name="chkDisplayNatAbundanceCorrectedValues">
+         <property name="text">
+          <string>Display Nat Abundance-corrected</string>
+         </property>
+        </widget>
+       </item>
        <item row="0" column="1">
         <widget class="QGroupBox" name="grpBox_filteredOptions">
          <property name="sizePolicy">
@@ -646,25 +653,10 @@
           <string>Filter Isotopic Peaks based on these criteria</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
-          <item row="4" column="1">
-           <widget class="QDoubleSpinBox" name="maxNaturalAbundanceErr">
-            <property name="prefix">
-             <string/>
-            </property>
-            <property name="suffix">
-             <string>%</string>
-            </property>
-            <property name="decimals">
-             <number>2</number>
-            </property>
-            <property name="minimum">
-             <double>0.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>999999999.000000000000000</double>
-            </property>
-            <property name="value">
-             <double>100.000000000000000</double>
+          <item row="5" column="0">
+           <widget class="QLabel" name="lblIgnoreNaturalAbundance">
+            <property name="text">
+             <string>Ignore natural abundance if below [X] % of [M+0]:</string>
             </property>
            </widget>
           </item>
@@ -675,10 +667,10 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="lblMinIsotopeParrentCorrelation">
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="chkIgnoreNaturalAbundance">
             <property name="text">
-             <string>Minimum Isotope-parent correlation:</string>
+             <string>Ignore isotopes if above [X] % error from natural abundance:</string>
             </property>
            </widget>
           </item>
@@ -701,72 +693,10 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
-           <widget class="QSpinBox" name="spnMaxIsotopesToExtract">
-            <property name="suffix">
-             <string> isotopes</string>
-            </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <number>999999999</number>
-            </property>
-            <property name="value">
-             <number>5</number>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QSpinBox" name="maxIsotopeScanDiff">
-            <property name="suffix">
-             <string> scans</string>
-            </property>
-            <property name="minimum">
-             <number>0</number>
-            </property>
-            <property name="maximum">
-             <number>999999999</number>
-            </property>
-            <property name="value">
-             <number>5</number>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QCheckBox" name="chkExtractNIsotopes">
+          <item row="1" column="0">
+           <widget class="QLabel" name="lblMinIsotopeParrentCorrelation">
             <property name="text">
-             <string>Extract only first [X] isotopes after [M+0]:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QDoubleSpinBox" name="minIsotopicCorrelation">
-            <property name="minimum">
-             <double>-1.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>1.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-            <property name="value">
-             <double>0.200000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QCheckBox" name="chkIgnoreNaturalAbundance">
-            <property name="text">
-             <string>Ignore isotopes if above [X] % error from natural abundance:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="lblIgnoreNaturalAbundance">
-            <property name="text">
-             <string>Ignore natural abundance if below [X] % of [M+0]:</string>
+             <string>Minimum Isotope-parent correlation:</string>
             </property>
            </widget>
           </item>
@@ -803,6 +733,90 @@
            <widget class="QLabel" name="lblIsotopicExtractionAlgorithm">
             <property name="text">
              <string>Isotopic Extraction Algorithm</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QDoubleSpinBox" name="maxNaturalAbundanceErr">
+            <property name="prefix">
+             <string/>
+            </property>
+            <property name="suffix">
+             <string>%</string>
+            </property>
+            <property name="decimals">
+             <number>2</number>
+            </property>
+            <property name="minimum">
+             <double>0.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>999999999.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>100.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSpinBox" name="spnMaxIsotopesToExtract">
+            <property name="suffix">
+             <string> isotopes</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>999999999</number>
+            </property>
+            <property name="value">
+             <number>5</number>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QSpinBox" name="maxIsotopeScanDiff">
+            <property name="suffix">
+             <string> scans</string>
+            </property>
+            <property name="minimum">
+             <number>0</number>
+            </property>
+            <property name="maximum">
+             <number>999999999</number>
+            </property>
+            <property name="value">
+             <number>5</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="minIsotopicCorrelation">
+            <property name="minimum">
+             <double>-1.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.200000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="chkExtractNIsotopes">
+            <property name="text">
+             <string>Extract only first [X] isotopes after [M+0]:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QCheckBox" name="chkIsApplyMZeroMzOffset">
+            <property name="text">
+             <string>Apply [M+0] theoretical m/z deviation to all isotope m/z</string>
             </property>
            </widget>
           </item>
@@ -883,13 +897,6 @@
            </widget>
           </item>
          </layout>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QCheckBox" name="chkDisplayNatAbundanceCorrectedValues">
-         <property name="text">
-          <string>Display Nat Abundance-corrected</string>
-         </property>
         </widget>
        </item>
        <item row="1" column="1">
