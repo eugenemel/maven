@@ -120,7 +120,18 @@ void CSVReports::openPeakReport(string outputfile) {
              <<"peakAreaCorrected"
              <<"noNoiseObs"
              <<"signalBaseLineRatio"
-             <<"fromBlankSample";
+             <<"fromBlankSample"
+
+            //Issue 549: new fields
+            << "smoothedIntensity"
+            << "smoothedPeakArea"
+            << "smoothedPeakAreaCorrected"
+            << "smoothedPeakAreaTop"
+            << "smoothedSignalBaselineRatio"
+            << "rtminFWHM"
+            << "rtmaxFWHM"
+            << "peakAreaFWHM"
+            << "smoothedPeakAreaFWHM";
 
 
     peakReport.open(outputfile.c_str());
@@ -385,6 +396,17 @@ void CSVReports::writePeakInfo(PeakGroup* group, bool isAddChildren) {
                 << peak.noNoiseObs <<  SEP
                 << peak.signalBaselineRatio <<  SEP
                 << peak.fromBlankSample << SEP
+
+                //Issue 549: new fields
+                << peak.smoothedIntensity << SEP
+                << peak.smoothedPeakArea << SEP
+                << peak.smoothedPeakAreaCorrected << SEP
+                << peak.smoothedPeakAreaTop << SEP
+                << peak.smoothedSignalBaselineRatio << SEP
+                << peak.rtminFWHM << SEP
+                << peak.rtmaxFWHM << SEP
+                << peak.peakAreaFWHM << SEP
+                << peak.smoothedPeakAreaFWHM << SEP
                 << endl;
     }
 
@@ -394,4 +416,3 @@ void CSVReports::writePeakInfo(PeakGroup* group, bool isAddChildren) {
         }
     }
 }
-
