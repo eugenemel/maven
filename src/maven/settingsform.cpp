@@ -29,6 +29,7 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     //file import
 
     //peak detection
+    connect(chkIsAutoLoadLibraries, SIGNAL(toggled(bool)), SLOT(getFormValues()));
     connect(recomputeEICButton, SIGNAL(clicked(bool)), SLOT(recomputeEIC()));
     connect(chkDisplayConsensusSpectrum, SIGNAL(toggled(bool)), SLOT(getFormValues()));
     connect(chkDisplayConsensusSpectrum, SIGNAL(toggled(bool)), mainwindow, SLOT(updateGUIWithLastSelectedPeakGroup()));
@@ -240,6 +241,9 @@ void SettingsForm::setFormValues() {
 
     if (settings->contains("chkNotifyNewerMaven"))
         this->chkNotifyNewerMaven->setCheckState( (Qt::CheckState) settings->value("chkNotifyNewerMaven").toInt());
+
+    if (settings->contains("chkIsAutoLoadLibraries"))
+        this->chkIsAutoLoadLibraries->setCheckState( (Qt::CheckState) settings->value("chkIsAutoLoadLibraries").toInt());
 
     //peak detection
     if (settings->contains("peakRtBoundsSlopeThreshold"))
@@ -528,6 +532,8 @@ void SettingsForm::getFormValues() {
     if (!settings) return;
     //qDebug() << "SettingsForm::getFormValues() ";
 
+    //file loading
+    settings->setValue("chkIsAutoLoadLibraries", chkIsAutoLoadLibraries->checkState());
     settings->setValue("chkNotifyNewerMaven", chkNotifyNewerMaven->checkState());
 
     settings->setValue("eic_smoothingAlgorithm",eic_smoothingAlgorithm->currentIndex());

@@ -1099,7 +1099,10 @@ void MainWindow::open(){
                 projectDB->closeDatabaseConnection();
                 delete(projectDB);
 
-                if (isMzkitchenFile) {
+                //always auto-load libraries, even for mzkitchen files
+                bool chkIsAutoLoadLibraries = getSettings()->value("chkIsAutoLoadLibraries", false).toBool();
+
+                if (isMzkitchenFile && !chkIsAutoLoadLibraries) {
                     setRumsDBDialog  = new SetRumsDBDialog(this);
                     setRumsDBDialog->exec();
 
@@ -1108,6 +1111,10 @@ void MainWindow::open(){
                         projectDockWidget->loadProjectSQLITE(filename);
                     }
                 } else {
+                    //Displaying the dialog allows for some options.
+                    //Unless the dialog is displayed, loading the library is a regular part of
+                    //opening a file.
+                    this->isAttemptToLoadDB = true;
                     projectDockWidget->loadProjectSQLITE(filename);
                 }
 
