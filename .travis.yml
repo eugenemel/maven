@@ -18,6 +18,9 @@ addons:
     - libssl-dev
     - desktop-file-utils
 before_install:
+ - travis_wait 30 brew update
+ - travis_wait 60 brew install qt@5
+ - brew link qt5 --force
  - "./ci/travis/before_install_${TRAVIS_OS_NAME}.sh"
 install:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then

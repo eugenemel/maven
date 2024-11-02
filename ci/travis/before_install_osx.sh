@@ -2,9 +2,9 @@
 
 #echo "Maven debugging: try doing nothing for mac os x"
 
-travis_wait 30 brew update
-travis_wait 60 brew install qt@5
-brew link qt5 --force
+# travis_wait 30 brew update
+# travis_wait 60 brew install qt@5
+# brew link qt5 --force
 
 ENVFILE=qt-5.env
 echo Create $ENVFILE
