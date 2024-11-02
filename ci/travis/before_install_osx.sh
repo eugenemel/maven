@@ -5,7 +5,7 @@
 # brew update
 # brew install cmake
 # brew install qt@5
-# brew link qt5 --force
+brew link qt5 --force
 
 ENVFILE=qt-5.env
 echo Create $ENVFILE
