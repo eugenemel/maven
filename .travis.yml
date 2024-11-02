@@ -6,11 +6,6 @@ matrix:
   - os: osx
     osx_image: xcode14.2
 addons:
-  homebrew:
-    packages:
-    - cmake
-    - qt@5
-    update: true
   apt:
     sources:
     - sourceline: ppa:beineri/opt-qt-5.12.6-bionic
@@ -23,7 +18,7 @@ addons:
     - libssl-dev
     - desktop-file-utils
 before_install:
-# - "./ci/travis/before_install_${TRAVIS_OS_NAME}.sh"
+ - "./ci/travis/before_install_${TRAVIS_OS_NAME}.sh"
 install:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
     sudo apt-get install -qq qt5-default qtbase5-dev qt5-qmake libqt5printsupport5;
