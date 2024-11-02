@@ -2,9 +2,9 @@
 
 #echo "Maven debugging: try doing nothing for mac os x"
 
-brew update
-brew install qt5
-brew link qt5 --force
+# brew update
+# brew install qt5
+# brew link qt5 --force
 
 ENVFILE=qt-5.env
 echo Create $ENVFILE
