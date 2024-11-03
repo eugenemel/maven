@@ -16,7 +16,8 @@ environment:
 # Issue 529: Added install block
 install:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macOS') { brew update; brew install qt@5; brew link qt5 --force; set PATH=/opt/homebrew/opt/qt@5/bin:$PATH }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { set QTDIR=C:\Qt\5.15.2\mingw81_64; set PATH=%PATH%;C:\Qt\5.15.2\mingw81_64\bin;C:\MinGW\bin;C:\Qt\Tools\mingw64\bin }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { set QTDIR=C:\Qt\5.15.2\mingw81_64 }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { set PATH=%PATH%;%QTDIR%\bin;C:\MinGW\bin;C:\Qt\Tools\mingw64\bin }
 
 build_script:
   # Get submodules
