@@ -47,12 +47,12 @@ after_build:
         ./make_dist_win32.sh src/maven/appdir/bin/Maven.exe
         ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe 
       }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macOS') { 
-        hdiutil create -volname Maven -srcfolder src/maven/appdir/bin/Maven.app -ov -format UDZO Maven.dmg
-        hdiutil create -volname peakdetector -srcfolder src/peakdetector/appdir/bin/peakdetector.app -ov -format UDZO peakdetector.dmg
-        7z a Maven.zip Maven.dmg
-        7z a peakdetector.zip peakdetector.dmg
-      }
+#   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macOS') { 
+#         hdiutil create -volname Maven -srcfolder src/maven/appdir/bin/Maven.app -ov -format UDZO Maven.dmg
+#         hdiutil create -volname peakdetector -srcfolder src/peakdetector/appdir/bin/peakdetector.app -ov -format UDZO peakdetector.dmg
+#         7z a Maven.zip Maven.dmg
+#         7z a peakdetector.zip peakdetector.dmg
+#       }
 
 artifacts:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { path: 'dist/Maven*.zip'; name: Maven }
