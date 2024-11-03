@@ -42,7 +42,11 @@ build_script:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ls src/maven/appdir/bin/" }
 
 after_build:
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"; ./make_dist_win32.sh src/maven/appdir/bin/Maven.exe; ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { 
+        SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
+        ./make_dist_win32.sh src/maven/appdir/bin/Maven.exe
+        ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe 
+      }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macOS') { 
         hdiutil create -volname Maven -srcfolder src/maven/appdir/bin/Maven.app -ov -format UDZO Maven.dmg
         hdiutil create -volname peakdetector -srcfolder src/peakdetector/appdir/bin/peakdetector.app -ov -format UDZO peakdetector.dmg
