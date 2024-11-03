@@ -5,7 +5,7 @@
 brew update
 which cmake
 echo $PATH
-brew install cmake
+brew pin cmake
 brew install qt@5
 brew link qt5 --force
 
