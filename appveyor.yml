@@ -21,7 +21,7 @@ install:
 
 build_script:
   # Get submodules
-  # - git submodule update --init --recursive
+  - git submodule update --init --recursive
     
   # Print qmake version (mac os)
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-sonoma') { bash -lc "ls $HOME/Qt/5.15.2/clang_64/bin/"}
