@@ -3,14 +3,14 @@ version: 1.0.{build}
 # Define build matrices for Windows and macos-ventura
 environment:
   matrix:
-    - COMPILER: cl
-      PLATFORM: x64
-      MSYS2_ARCH: x86_64
-      MSYS2_DIR: msys64
-      MSYSTEM: MINGW64
-      BIT: 64
-      PATH: 'C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%'
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022  # Windows image
+#     - COMPILER: cl
+#       PLATFORM: x64
+#       MSYS2_ARCH: x86_64
+#       MSYS2_DIR: msys64
+#       MSYSTEM: MINGW64
+#       BIT: 64
+#       PATH: 'C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%'
+#       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022  # Windows image
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-ventura             # macos-ventura image
 
 # Issue 529: Added install block
