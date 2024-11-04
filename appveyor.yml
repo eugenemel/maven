@@ -15,13 +15,17 @@ environment:
 
 # Issue 529: Added install block
 install:
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macOS') { brew update; brew install qt@5; brew link qt5 --force; set PATH=/opt/homebrew/opt/qt@5/bin:$PATH }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macOS') {set PATH=/Qt/5.15.2/clang_64/bin:$PATH}
+#  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macOS') { brew update; brew install qt@5; brew link qt5 --force; set PATH=/opt/homebrew/opt/qt@5/bin:$PATH }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { set QTDIR=C:\Qt\5.15.2\mingw81_64 }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { set PATH=%PATH%;%QTDIR%\bin;C:\MinGW\bin;C:\Qt\Tools\mingw64\bin }
 
 build_script:
   # Get submodules
   - git submodule update --init --recursive
+    
+  # Print qmake version (mac os)
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macOS') { qmake --version } 
 
   # Set path (Windows only)
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%" }
@@ -32,12 +36,15 @@ build_script:
   # Install sqlite3 (Windows only)
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3" }
 
-  # Build MAVEN
+  # Build MAVEN (Windows)
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro"; bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"; bash -lc "cd $APPVEYOR_BUILD_FOLDER; make INSTALL_ROOT=appdir install" }
+  
+  # Build MAVEN (mac os)
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macOS') { qmake CONFIG+=release -r build.pro; make -j2; make INSTALL_ROOT=appdir install }
 
-  # Issue 737: Search for peakdetector executable (Windows only)
+  # Issue 737: Search for peakdetector executables
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { bash -lc "find . -name 'peakdetector.exe'" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macOS') { bash -lc "find . -name 'peakdetector.app'" }
 
   # Print contents
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ls src/maven/appdir/bin/" }
