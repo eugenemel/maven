@@ -44,17 +44,18 @@ build_script:
   # - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%" }
 
   # Install zlib (Windows only)
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') {bash -lc "pacman -S --needed --noconfirm zlib-devel 2>/dev/null" }
+  # - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') {bash -lc "pacman -S --needed --noconfirm zlib-devel" }
+  - if [%APPVEYOR_BUILD_WORKER_IMAGE%] neq [macos-ventura] (
+      bash -lc "pacman -S --needed --noconfirm zlib-devel"
+    )
 
   # Install sqlite3 (Windows only)
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3" }
 
-  # TODO - streamline Build MAVEN steps
   # Build MAVEN (Windows)
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro"; bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j16"; bash -lc "cd $APPVEYOR_BUILD_FOLDER; make INSTALL_ROOT=appdir install" }
 
   # Print contents
-  # TODO - streamline
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ls src/maven/appdir/bin/" }
   
   # Print Results
@@ -64,6 +65,10 @@ build_script:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "find . -name 'peakdetector.app'" }
 
 after_build:
+  # Mac OS prepare artifacts
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "find . -name 'make_dist_osx.sh'" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "./make_dist_osx.sh src/maven/appdir/bin/Maven.app" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "./make_dist_osx.sh src/peakdetector/appdir/bin/peakdetector.app" }
 
   # Windows prepare artifacts
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { 
@@ -72,44 +77,17 @@ after_build:
         ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe 
       }
       
-  # Mac OS prepare artifacts
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "find . -name 'make_dist_osx.sh'" }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "./make_dist_osx.sh src/maven/appdir/bin/Maven.app" }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "./make_dist_osx.sh src/peakdetector/appdir/bin/peakdetector.app" }
-
 artifacts:
-#   - path: dist/Maven*.zip
-#     name: Maven-windows
-#   - path: dist/peakdetector*.zip
-#     name: peakdetector-windows
   - path: dist/Maven*.dmg
     name: Maven-macos
   - path: dist/peakdetector*.dmg
     name: peakdetector-macos
+#   - path: dist/Maven*.zip
+#     name: Maven-windows
+#   - path: dist/peakdetector*.zip
+#     name: peakdetector-windows
 
 deploy:
-#   - provider: GitHub
-#     description: 'Maven Desktop Application - Windows'
-#     auth_token:
-#         secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
-#     artifact: /Maven.*\.zip/
-#     draft: false
-#     prerelease: false
-#     on:
-#       APPVEYOR_REPO_TAG: true
-#       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-# 
-#   - provider: GitHub
-#     description: 'Peakdetector Executable - Windows'
-#     auth_token:
-#         secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
-#     artifact: /peakdetector.*\.zip/
-#     draft: false
-#     prerelease: false
-#     on:
-#       APPVEYOR_REPO_TAG: true
-#       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-
   - provider: GitHub
     description: 'Maven Desktop Application - Mac OS'
     auth_token:
@@ -131,3 +109,24 @@ deploy:
     on:
       APPVEYOR_REPO_TAG: true
       APPVEYOR_BUILD_WORKER_IMAGE: macos-ventura
+#   - provider: GitHub
+#     description: 'Maven Desktop Application - Windows'
+#     auth_token:
+#         secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
+#     artifact: Maven-windows
+#     draft: false
+#     prerelease: false
+#     on:
+#       APPVEYOR_REPO_TAG: true
+#       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+#
+#   - provider: GitHub
+#     description: 'Peakdetector Executable - Windows'
+#     auth_token:
+#         secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
+#     artifact: peakdetector-windows
+#     draft: false
+#     prerelease: false
+#     on:
+#       APPVEYOR_REPO_TAG: true
+#       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
