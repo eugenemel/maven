@@ -60,8 +60,9 @@ after_build:
         ./make_dist_win32.sh src/maven/appdir/bin/Maven.exe
         ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe 
       }
-
   # Mac OS prepare artifacts
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "echo $APPVEYOR_BUILD_FOLDER" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "find . -name 'make_dist_osx.sh'" }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_osx.sh src/maven/appdir/bin/Maven.app" }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_osx.sh src/peakdetector/appdir/bin/peakdetector.app" }
 
