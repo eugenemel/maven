@@ -90,7 +90,7 @@ deploy:
 #     draft: false
 #     prerelease: false
 #     on:
-#       appveyor_repo_tag: true
+#       APPVEYOR_REPO_TAG: true
 #       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
 # 
 #   - provider: GitHub
@@ -101,7 +101,7 @@ deploy:
 #     draft: false
 #     prerelease: false
 #     on:
-#       appveyor_repo_tag: true
+#       APPVEYOR_REPO_TAG: true
 #       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
 
   - provider: GitHub
@@ -112,7 +112,7 @@ deploy:
     draft: false
     prerelease: false
     on:
-      appveyor_repo_tag: true
+      APPVEYOR_REPO_TAG: true
       APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
 
   - provider: GitHub
@@ -123,5 +123,5 @@ deploy:
     draft: false
     prerelease: false
     on:
-      appveyor_repo_tag: true
+      APPVEYOR_REPO_TAG: true
       APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
