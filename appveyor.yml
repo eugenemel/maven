@@ -45,7 +45,7 @@ build_script:
 
   # Install zlib (Windows only)
   # - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') {bash -lc "pacman -S --needed --noconfirm zlib-devel" }
-  - if [%APPVEYOR_BUILD_WORKER_IMAGE%] neq [macos-ventura] (
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%" neq "macos-ventura" (
       bash -lc "pacman -S --needed --noconfirm zlib-devel"
     )
 
