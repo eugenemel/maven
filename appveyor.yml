@@ -1,6 +1,6 @@
 version: 1.0.{build}
 
-# Define build matrices for Windows and macOS
+# Define build matrices for Windows and macos-sonoma
 environment:
   matrix:
     - COMPILER: cl
@@ -11,51 +11,50 @@ environment:
       BIT: 64
       PATH: 'C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%'
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022  # Windows image
-    - APPVEYOR_BUILD_WORKER_IMAGE: macOS             # macOS image
+    - APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma             # macos-sonoma image
 
 # Issue 529: Added install block
 install:
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macOS') {set PATH=/Qt/5.15.2/clang_64/bin:$PATH}
-#  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macOS') { brew update; brew install qt@5; brew link qt5 --force; set PATH=/opt/homebrew/opt/qt@5/bin:$PATH }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { set QTDIR=C:\Qt\5.15.2\mingw81_64 }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { set PATH=%PATH%;%QTDIR%\bin;C:\MinGW\bin;C:\Qt\Tools\mingw64\bin }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-sonoma') {set PATH=$HOME/Qt/5.15.2/clang_64/bin:$PATH}
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-sonoma') { set QTDIR=C:\Qt\5.15.2\mingw81_64 }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-sonoma') { set PATH=%PATH%;%QTDIR%\bin;C:\MinGW\bin;C:\Qt\Tools\mingw64\bin }
 
 build_script:
   # Get submodules
   - git submodule update --init --recursive
     
   # Print qmake version (mac os)
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macOS') { qmake --version } 
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-sonoma') { qmake --version } 
 
   # Set path (Windows only)
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-sonoma') { SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%" }
 
   # Install zlib (Windows only)
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { bash -lc "pacman -S --needed --noconfirm zlib-devel" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-sonoma') { bash -lc "pacman -S --needed --noconfirm zlib-devel" }
 
   # Install sqlite3 (Windows only)
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-sonoma') { bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3" }
 
   # Build MAVEN (Windows)
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro"; bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"; bash -lc "cd $APPVEYOR_BUILD_FOLDER; make INSTALL_ROOT=appdir install" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-sonoma') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro"; bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"; bash -lc "cd $APPVEYOR_BUILD_FOLDER; make INSTALL_ROOT=appdir install" }
   
   # Build MAVEN (mac os)
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macOS') { qmake CONFIG+=release -r build.pro; make -j2; make INSTALL_ROOT=appdir install }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-sonoma') { qmake CONFIG+=release -r build.pro; make -j2; make INSTALL_ROOT=appdir install }
 
   # Issue 737: Search for peakdetector executables
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { bash -lc "find . -name 'peakdetector.exe'" }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macOS') { bash -lc "find . -name 'peakdetector.app'" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-sonoma') { bash -lc "find . -name 'peakdetector.exe'" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-sonoma') { bash -lc "find . -name 'peakdetector.app'" }
 
   # Print contents
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ls src/maven/appdir/bin/" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-sonoma') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ls src/maven/appdir/bin/" }
 
 after_build:
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macOS') { 
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-sonoma') { 
         SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
         ./make_dist_win32.sh src/maven/appdir/bin/Maven.exe
         ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe 
       }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macOS') { 
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-sonoma') { 
         hdiutil create -volname Maven -srcfolder src/maven/appdir/bin/Maven.app -ov -format UDZO Maven.dmg
         hdiutil create -volname peakdetector -srcfolder src/peakdetector/appdir/bin/peakdetector.app -ov -format UDZO peakdetector.dmg
         7z a Maven.zip Maven.dmg
@@ -66,11 +65,11 @@ artifacts:
   - path: dist/Maven*.zip
     name: Maven-windows
   - path: Maven.zip
-    name: Maven-macOS
+    name: Maven-macos
   - path: dist/peakdetector*.zip
     name: peakdetector-windows
   - path: peakdetector.zip
-    name: peakdetector-macOS
+    name: peakdetector-macos
 
 deploy:
   - provider: GitHub
@@ -94,7 +93,7 @@ deploy:
       appveyor_repo_tag: true          # deploy on tag push only
 
   - provider: GitHub
-    description: 'Maven Desktop Application - macOS'
+    description: 'Maven Desktop Application - macos-sonoma'
     auth_token:
         secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn # encrypted token from GitHub
     artifact: /Maven.*\.zip/           # upload Maven zip archive to release assets
@@ -104,7 +103,7 @@ deploy:
       appveyor_repo_tag: true          # deploy on tag push only
 
   - provider: GitHub
-    description: 'Peakdetector Executable - macOS'
+    description: 'Peakdetector Executable - macos-sonoma'
     auth_token:
         secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn # encrypted token from GitHub
     artifact: /peakdetector.*\.zip/     # upload peakdetector zip archive to release assets
