@@ -1,6 +1,6 @@
 version: 1.0.{build}
 
-# Define build matrices for Windows and macos-sonoma
+# Define build matrices for Windows and macos-ventura
 environment:
   matrix:
     - COMPILER: cl
@@ -11,52 +11,52 @@ environment:
       BIT: 64
       PATH: 'C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%'
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022  # Windows image
-    - APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma             # macos-sonoma image
+    - APPVEYOR_BUILD_WORKER_IMAGE: macos-ventura             # macos-ventura image
 
 # Issue 529: Added install block
 install:
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-sonoma') {$env:PATH = "$HOME/Qt/5.15.2/clang_64/bin:$env:PATH"}
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-sonoma') { set QTDIR=C:\Qt\5.15.2\mingw81_64 }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-sonoma') { set PATH=%PATH%;%QTDIR%\bin;C:\MinGW\bin;C:\Qt\Tools\mingw64\bin }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') {$env:PATH = "$HOME/Qt/5.15.2/clang_64/bin:$env:PATH"}
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') {$env:QTDIR="C:\Qt\5.15.2\mingw81_64" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') {$env:PATH += ";C:\$env:MSYS2_DIR\$env:MSYSTEM\bin;C:\$env:MSYS2_DIR\usr\bin;$env:QTDIR\bin;C:\MinGW\bin;C:\Qt\Tools\mingw64\bin"}
 
 build_script:
   # Get submodules
   - git submodule update --init --recursive
     
   # Print qmake version (mac os)
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-sonoma') { bash -lc "ls $HOME/Qt/5.15.2/clang_64/bin/"}
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-sonoma') { bash -lc "find $HOME/Qt/5.15.2/clang_64/bin/ -name 'qmake'"}
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-sonoma') { qmake --version } 
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "ls $HOME/Qt/5.15.2/clang_64/bin/"}
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "find $HOME/Qt/5.15.2/clang_64/bin/ -name 'qmake'"}
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { qmake --version } 
 
   # Set path (Windows only)
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-sonoma') { SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%" }
+  #- ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%" }
 
   # Install zlib (Windows only)
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-sonoma') { bash -lc "pacman -S --needed --noconfirm zlib-devel" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "pacman -S --needed --noconfirm zlib-devel" }
 
   # Install sqlite3 (Windows only)
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-sonoma') { bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3" }
 
   # Build MAVEN (Windows)
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-sonoma') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro"; bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"; bash -lc "cd $APPVEYOR_BUILD_FOLDER; make INSTALL_ROOT=appdir install" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro"; bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"; bash -lc "cd $APPVEYOR_BUILD_FOLDER; make INSTALL_ROOT=appdir install" }
   
   # Build MAVEN (mac os)
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-sonoma') { qmake CONFIG+=release -r build.pro; make -j2; make INSTALL_ROOT=appdir install }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { qmake CONFIG+=release -r build.pro; make -j2; make INSTALL_ROOT=appdir install }
 
   # Issue 737: Search for peakdetector executables
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-sonoma') { bash -lc "find . -name 'peakdetector.exe'" }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-sonoma') { bash -lc "find . -name 'peakdetector.app'" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "find . -name 'peakdetector.exe'" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "find . -name 'peakdetector.app'" }
 
   # Print contents
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-sonoma') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ls src/maven/appdir/bin/" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ls src/maven/appdir/bin/" }
 
 after_build:
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-sonoma') { 
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { 
         SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
         ./make_dist_win32.sh src/maven/appdir/bin/Maven.exe
         ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe 
       }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-sonoma') { 
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { 
         hdiutil create -volname Maven -srcfolder src/maven/appdir/bin/Maven.app -ov -format UDZO Maven.dmg
         hdiutil create -volname peakdetector -srcfolder src/peakdetector/appdir/bin/peakdetector.app -ov -format UDZO peakdetector.dmg
         7z a Maven.zip Maven.dmg
@@ -95,7 +95,7 @@ deploy:
       appveyor_repo_tag: true          # deploy on tag push only
 
   - provider: GitHub
-    description: 'Maven Desktop Application - macos-sonoma'
+    description: 'Maven Desktop Application - macos-ventura'
     auth_token:
         secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn # encrypted token from GitHub
     artifact: /Maven.*\.zip/           # upload Maven zip archive to release assets
@@ -105,7 +105,7 @@ deploy:
       appveyor_repo_tag: true          # deploy on tag push only
 
   - provider: GitHub
-    description: 'Peakdetector Executable - macos-sonoma'
+    description: 'Peakdetector Executable - macos-ventura'
     auth_token:
         secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn # encrypted token from GitHub
     artifact: /peakdetector.*\.zip/     # upload peakdetector zip archive to release assets
