@@ -55,7 +55,7 @@ build_script:
     )
 
   # Build MAVEN (Windows)
-    - if "%APPVEYOR_BUILD_WORKER_IMAGE%" neq "macos-ventura" (
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%" neq "macos-ventura" (
       bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro"; bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j16"; bash -lc "cd $APPVEYOR_BUILD_FOLDER; make INSTALL_ROOT=appdir install"     
     )
     
