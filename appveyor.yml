@@ -2,8 +2,6 @@ version: 1.0.{build}
 
 build:
   parallel: true  # Enable parallel builds for the matrix
-  skip_branches:
-    - '*'  # Skip all branches
   
 # Define build matrices for Windows and macos-ventura
 environment:
