@@ -108,7 +108,7 @@ deploy:
     description: 'Maven Desktop Application - Mac OS'
     auth_token:
         secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
-    artifact: dist/Maven*.dmg
+    artifact: Maven-macos
     draft: false
     prerelease: false
     on:
@@ -119,7 +119,7 @@ deploy:
     description: 'Peakdetector Executable - Mac OS'
     auth_token:
         secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
-    artifact: dist/peakdetector*.dmg
+    artifact: peakdetector-macos
     draft: false
     prerelease: false
     on:
