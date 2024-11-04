@@ -1,5 +1,8 @@
 version: 1.0.{build}
 
+build:
+  parallel: true  # Enable parallel builds for the matrix
+  
 # Define build matrices for Windows and macos-ventura
 environment:
   matrix:
@@ -62,6 +65,7 @@ after_build:
         ./make_dist_win32.sh src/maven/appdir/bin/Maven.exe
         ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe 
       }
+      
   # Mac OS prepare artifacts
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "find . -name 'make_dist_osx.sh'" }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "./make_dist_osx.sh src/maven/appdir/bin/Maven.app" }
@@ -81,39 +85,43 @@ deploy:
   - provider: GitHub
     description: 'Maven Desktop Application - Windows'
     auth_token:
-        secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn # encrypted token from GitHub
-    artifact: /Maven.*\.zip/           # upload Maven zip archive to release assets
+        secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
+    artifact: /Maven.*\.zip/
     draft: false
     prerelease: false
     on:
-      appveyor_repo_tag: true          # deploy on tag push only
+      appveyor_repo_tag: true
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
 
   - provider: GitHub
     description: 'Peakdetector Executable - Windows'
     auth_token:
-        secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn # encrypted token from GitHub
-    artifact: /peakdetector.*\.zip/     # upload peakdetector zip archive to release assets
+        secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
+    artifact: /peakdetector.*\.zip/
     draft: false
     prerelease: false
     on:
-      appveyor_repo_tag: true          # deploy on tag push only
+      appveyor_repo_tag: true
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
 
   - provider: GitHub
     description: 'Maven Desktop Application - Mac OS'
     auth_token:
-        secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn # encrypted token from GitHub
-    artifact: dist/Maven*.dmg          # upload Maven DMG to release assets
+        secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
+    artifact: dist/Maven*.dmg
     draft: false
     prerelease: false
     on:
-      appveyor_repo_tag: true          # deploy on tag push only
+      appveyor_repo_tag: true
+      APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
 
   - provider: GitHub
     description: 'Peakdetector Executable - Mac OS'
     auth_token:
-        secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn # encrypted token from GitHub
-    artifact: dist/peakdetector*.dmg     # upload peakdetector zip archive to release assets
+        secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
+    artifact: dist/peakdetector*.dmg
     draft: false
     prerelease: false
     on:
-      appveyor_repo_tag: true          # deploy on tag push only
+      appveyor_repo_tag: true
+      APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
