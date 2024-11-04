@@ -12,7 +12,6 @@ environment:
 #       PATH: 'C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%'
 #       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022  # Windows image
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-ventura             # macos-ventura image
-        XCODE: 13.4.1
 
 # Issue 529: Added install block
 install:
@@ -24,9 +23,11 @@ build_script:
   # Get submodules
   - git submodule update --init --recursive
     
+  # Specify xcode verison (mac os)
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { ls /Applications/ }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { sudo xcode-select -s /Applications/Xcode-13.4.1.app/ } 
+
   # Print qmake version (mac os)
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "ls $HOME/Qt/5.15.2/clang_64/bin/"}
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "find $HOME/Qt/5.15.2/clang_64/bin/ -name 'qmake'"}
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { qmake --version } 
 
   # Set path (Windows only)
