@@ -26,36 +26,42 @@ build_script:
   # Get submodules
   - git submodule update --init --recursive
     
-  # Specify xcode verison (mac os)
+  # Mac OS X
+  
+  # Specify xcode verison
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { ls /Applications/ }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { sudo xcode-select -s /Applications/Xcode-13.4.1.app/ } 
 
-  # Verify qmake version (mac os)
+  # Verify qmake version
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { qmake --version } 
-
+  
+  # Build MAVEN
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { qmake CONFIG+=release -r build.pro; make -j16; make INSTALL_ROOT=appdir install }
+  
+  # Windows
+  
   # Set path (Windows only)
-  #- ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%" }
 
   # Install zlib (Windows only)
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "pacman -S --needed --noconfirm zlib-devel" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') {bash -lc "pacman -S --needed --noconfirm zlib-devel" }
 
   # Install sqlite3 (Windows only)
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3" }
 
   # TODO - streamline Build MAVEN steps
   # Build MAVEN (Windows)
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro"; bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"; bash -lc "cd $APPVEYOR_BUILD_FOLDER; make INSTALL_ROOT=appdir install" }
-  
-  # Build MAVEN (mac os)
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { qmake CONFIG+=release -r build.pro; make -j16; make INSTALL_ROOT=appdir install }
-
-  # Issue 737: Search for peakdetector executables
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "find . -name 'peakdetector.exe'" }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "find . -name 'peakdetector.app'" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro"; bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j16"; bash -lc "cd $APPVEYOR_BUILD_FOLDER; make INSTALL_ROOT=appdir install" }
 
   # Print contents
   # TODO - streamline
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ls src/maven/appdir/bin/" }
+  
+  # Print Results
+  
+  # Issue 737: Search for peakdetector executables
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "find . -name 'peakdetector.exe'" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "find . -name 'peakdetector.app'" }
 
 after_build:
 
