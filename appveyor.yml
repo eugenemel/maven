@@ -15,15 +15,17 @@ environment:
 
 # Issue 529: Added install block
 install:
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-sonoma') {set PATH=$HOME/Qt/5.15.2/clang_64/bin:$PATH}
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-sonoma') {$env:PATH = "$HOME/Qt/5.15.2/clang_64/bin:$env:PATH"}
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-sonoma') { set QTDIR=C:\Qt\5.15.2\mingw81_64 }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-sonoma') { set PATH=%PATH%;%QTDIR%\bin;C:\MinGW\bin;C:\Qt\Tools\mingw64\bin }
 
 build_script:
   # Get submodules
-  - git submodule update --init --recursive
+  # - git submodule update --init --recursive
     
   # Print qmake version (mac os)
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-sonoma') { bash -lc "ls $HOME/Qt/5.15.2/clang_64/bin/"}
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-sonoma') { bash -lc "find $HOME/Qt/5.15.2/clang_64/bin/ -name 'qmake'"}
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-sonoma') { qmake --version } 
 
   # Set path (Windows only)
