@@ -39,6 +39,7 @@ build_script:
   # Install sqlite3 (Windows only)
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3" }
 
+  # TODO - streamline Build MAVEN steps
   # Build MAVEN (Windows)
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro"; bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"; bash -lc "cd $APPVEYOR_BUILD_FOLDER; make INSTALL_ROOT=appdir install" }
   
@@ -50,6 +51,7 @@ build_script:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "find . -name 'peakdetector.app'" }
 
   # Print contents
+  # TODO - streamline
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ls src/maven/appdir/bin/" }
 
 after_build:
@@ -61,10 +63,9 @@ after_build:
         ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe 
       }
   # Mac OS prepare artifacts
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "echo $APPVEYOR_BUILD_FOLDER" }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "find . -name 'make_dist_osx.sh'" }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_osx.sh src/maven/appdir/bin/Maven.app" }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_osx.sh src/peakdetector/appdir/bin/peakdetector.app" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "./make_dist_osx.sh src/maven/appdir/bin/Maven.app" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "./make_dist_osx.sh src/peakdetector/appdir/bin/peakdetector.app" }
 
 artifacts:
   - path: dist/Maven*.zip
