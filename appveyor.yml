@@ -113,7 +113,7 @@ deploy:
     prerelease: false
     on:
       APPVEYOR_REPO_TAG: true
-      APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
+      APPVEYOR_BUILD_WORKER_IMAGE: macos-ventura
 
   - provider: GitHub
     description: 'Peakdetector Executable - Mac OS'
@@ -124,4 +124,4 @@ deploy:
     prerelease: false
     on:
       APPVEYOR_REPO_TAG: true
-      APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
+      APPVEYOR_BUILD_WORKER_IMAGE: macos-ventura
