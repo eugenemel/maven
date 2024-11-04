@@ -72,37 +72,39 @@ after_build:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "./make_dist_osx.sh src/peakdetector/appdir/bin/peakdetector.app" }
 
 artifacts:
-  - path: dist/Maven*.zip
-    name: Maven-windows
+#   - path: dist/Maven*.zip
+#     name: Maven-windows
+#   - path: dist/peakdetector*.zip
+#     name: peakdetector-windows
   - path: dist/Maven*.dmg
     name: Maven-macos
-  - path: dist/peakdetector*.zip
-    name: peakdetector-windows
   - path: dist/peakdetector*.dmg
     name: peakdetector-macos
 
 deploy:
-  - provider: GitHub
-    description: 'Maven Desktop Application - Windows'
-    auth_token:
-        secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
-    artifact: /Maven.*\.zip/
-    draft: false
-    prerelease: false
-    on:
-      appveyor_repo_tag: true
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-
-  - provider: GitHub
-    description: 'Peakdetector Executable - Windows'
-    auth_token:
-        secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
-    artifact: /peakdetector.*\.zip/
-    draft: false
-    prerelease: false
-    on:
-      appveyor_repo_tag: true
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+#   - provider: GitHub
+#     description: 'Maven Desktop Application - Windows'
+#     auth_token:
+#         secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
+#     artifact: /Maven.*\.zip/
+#     draft: false
+#     prerelease: false
+#     on:
+#       appveyor_repo_tag: true
+#       matrix:
+#         - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+# 
+#   - provider: GitHub
+#     description: 'Peakdetector Executable - Windows'
+#     auth_token:
+#         secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
+#     artifact: /peakdetector.*\.zip/
+#     draft: false
+#     prerelease: false
+#     on:
+#       appveyor_repo_tag: true
+#       matrix:
+#         - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
 
   - provider: GitHub
     description: 'Maven Desktop Application - Mac OS'
@@ -113,7 +115,8 @@ deploy:
     prerelease: false
     on:
       appveyor_repo_tag: true
-      APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
+      matrix:
+        - APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
 
   - provider: GitHub
     description: 'Peakdetector Executable - Mac OS'
@@ -124,4 +127,5 @@ deploy:
     prerelease: false
     on:
       appveyor_repo_tag: true
-      APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
+      matrix:
+        - APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
