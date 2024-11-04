@@ -91,8 +91,7 @@ deploy:
 #     prerelease: false
 #     on:
 #       appveyor_repo_tag: true
-#       matrix:
-#         - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+#       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
 # 
 #   - provider: GitHub
 #     description: 'Peakdetector Executable - Windows'
@@ -103,8 +102,7 @@ deploy:
 #     prerelease: false
 #     on:
 #       appveyor_repo_tag: true
-#       matrix:
-#         - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+#       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
 
   - provider: GitHub
     description: 'Maven Desktop Application - Mac OS'
@@ -115,8 +113,7 @@ deploy:
     prerelease: false
     on:
       appveyor_repo_tag: true
-      matrix:
-        - APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
+      APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
 
   - provider: GitHub
     description: 'Peakdetector Executable - Mac OS'
@@ -127,5 +124,4 @@ deploy:
     prerelease: false
     on:
       appveyor_repo_tag: true
-      matrix:
-        - APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
+      APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
