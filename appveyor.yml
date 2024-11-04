@@ -12,6 +12,7 @@ environment:
 #       PATH: 'C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%'
 #       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022  # Windows image
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-ventura             # macos-ventura image
+        XCODE: 13.4.1
 
 # Issue 529: Added install block
 install:
