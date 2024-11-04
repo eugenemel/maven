@@ -2,7 +2,8 @@ version: 1.0.{build}
 
 build:
   parallel: true  # Enable parallel builds for the matrix
-  skip_non_tags: true # only build tagged commits
+  on:
+    APPVEYOR_REPO_TAG: true
   
 # Define build matrices for Windows and macos-ventura
 environment:
