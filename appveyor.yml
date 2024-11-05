@@ -58,7 +58,7 @@ build_script:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "pacman -S --needed --noconfirm zlib-devel" }
   
   # Install sqlite
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3" }
+  # - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3" }
   
   # MAVEN
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro; make -j16; make INSTALL_ROOT=appdir install"}
