@@ -51,7 +51,10 @@ build_script:
   - bash -lc "echo $APPVEYOR_BUILD_WORKER_IMAGE"
 
   # Install zlib (Windows only)  
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ wsl --exec bash -lc "pacman -S --needed --noconfirm zlib-devel" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){
+     $command = "pacman -S --needed --noconfirm zlib-devel"
+     wsl --exec bash -lc $command
+  }
   # - bash -lc "pacman -S --needed --noconfirm zlib-devel" # works
   
   # Install sqlite
