@@ -6,8 +6,11 @@ build:
 # Define build matrices for Windows and macos-ventura
 environment:
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: macos-ventura
-    - COMPILER: cl
+    - job_name: macOS
+      APPVEYOR_BUILD_WORKER_IMAGE: macos-ventura
+      
+    - job_name: windows
+      COMPILER: cl
       PLATFORM: x64
       MSYS2_ARCH: x86_64
       MSYS2_DIR: msys64
@@ -16,80 +19,49 @@ environment:
       PATH: 'C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%'
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022  # Windows image
 
-# Issue 529: Added install block
-install:
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') {$env:PATH = "$HOME/Qt/5.15.2/clang_64/bin:$env:PATH"}
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') {$env:QTDIR="C:\Qt\5.15.2\mingw81_64" }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') {$env:PATH += ";C:\$env:MSYS2_DIR\$env:MSYSTEM\bin;C:\$env:MSYS2_DIR\usr\bin;$env:QTDIR\bin;C:\MinGW\bin;C:\Qt\Tools\mingw64\bin"}
+for:
 
-build_script:
-  # Get submodules
-  - git submodule update --init --recursive
-    
-  #### Mac OS X ####
+# ======================================
+#      macOS
+# ======================================
+
+-
+  matrix:
+  only:
+  - job_name: macOS
   
-  # Specify xcode verison
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { ls /Applications/ }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { sudo xcode-select -s /Applications/Xcode-13.4.1.app/ } 
+  install:
+  - ps: $env:PATH = "$HOME/Qt/5.15.2/clang_64/bin:$env:PATH"
+    
+  build_script:
+  - git submodule update --init --recursive
+  
+  # update xcode version to avoid qmake / qt5 bug
+  - sudo xcode-select -s /Applications/Xcode-13.4.1.app/
 
   # Verify qmake version
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { qmake --version } 
+  - qmake --version
   
   # Build MAVEN
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { qmake CONFIG+=release -r build.pro; make -j16; make INSTALL_ROOT=appdir install }
+  - qmake CONFIG+=release -r build.pro
+  - make -j16
+  - make INSTALL_ROOT=appdir install
   
   # Print output
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "find . -name 'Maven.app'" }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "find . -name 'peakdetector.app'" }
+  - bash -lc "find . -name 'Maven.app'"
+  - bash -lc "find . -name 'peakdetector.app'"
+
+  after_build:
+  - bash -lc "./make_dist_osx.sh src/maven/appdir/bin/Maven.app"
+  - bash -lc "./make_dist_osx.sh src/peakdetector/appdir/bin/peakdetector.app"
   
-  #### Windows ####
-
-  # Install zlib (Windows only)
-  - if "%APPVEYOR_BUILD_WORKER_IMAGE%" neq "macos-ventura" (
-      bash -lc "pacman -S --needed --noconfirm zlib-devel"
-    )
-
-  # Install sqlite3 (Windows only)
-  - if "%APPVEYOR_BUILD_WORKER_IMAGE%" neq "macos-ventura" (
-      bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3"
-    )
-
-  # Build MAVEN (Windows)
-  - if "%APPVEYOR_BUILD_WORKER_IMAGE%" neq "macos-ventura" (
-      bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro; make -j16; make INSTALL_ROOT=appdir install"
-    )
-    
-  # Print contents
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ls src/maven/appdir/bin/" }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; find . -name 'Maven.exe'" }  
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; find . -name 'peakdetector.exe'" }
-
-after_build:
-
-  # Mac OS prepare artifacts
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "find . -name 'make_dist_osx.sh'" }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "./make_dist_osx.sh src/maven/appdir/bin/Maven.app" }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "./make_dist_osx.sh src/peakdetector/appdir/bin/peakdetector.app" }
-
-    # Windows prepare artifacts
-  - if "%APPVEYOR_BUILD_WORKER_IMAGE%" neq "macos-ventura" (
-      bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/maven/appdir/bin/Maven.exe"
-    )
-  - if "%APPVEYOR_BUILD_WORKER_IMAGE%" neq "macos-ventura" (
-      bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe"    
-    )
-      
-artifacts:
+  artifacts:
   - path: dist/Maven*.dmg
     name: Maven-macos
   - path: dist/peakdetector*.dmg
     name: peakdetector-macos
-  - path: dist/Maven*.zip
-    name: Maven-windows
-  - path: dist/peakdetector*.zip
-    name: peakdetector-windows
-
-deploy:
+    
+  deploy:
   - provider: GitHub
     description: 'Maven Desktop Application - Mac OS'
     auth_token:
@@ -111,6 +83,41 @@ deploy:
     on:
       APPVEYOR_REPO_TAG: true
       APPVEYOR_BUILD_WORKER_IMAGE: macos-ventura
+    
+# ======================================
+#      windows
+# ======================================
+-
+  matrix:
+  only:
+  - job_name: windows
+  
+  install:
+  - ps: $env:QTDIR="C:\Qt\5.15.2\mingw81_64"
+  - ps: $env:PATH += ";C:\$env:MSYS2_DIR\$env:MSYSTEM\bin;C:\$env:MSYS2_DIR\usr\bin;$env:QTDIR\bin;C:\MinGW\bin;C:\Qt\Tools\mingw64\bin"
+  
+  build_script:
+  - git submodule update --init --recursive
+  - bash -lc "pacman -S --needed --noconfirm zlib-devel"
+  - bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j16"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make INSTALL_ROOT=appdir install"  
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ls src/maven/appdir/bin/"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; find . -name 'Maven.exe'
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; find . -name 'peakdetector.exe'"
+  
+  after_build:
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/maven/appdir/bin/Maven.exe"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe"
+  
+  artifacts:
+  - path: dist/Maven*.zip
+    name: Maven-windows
+  - path: dist/peakdetector*.zip
+    name: peakdetector-windows
+
+  deploy:
   - provider: GitHub
     description: 'Maven Desktop Application - Windows'
     auth_token:
@@ -132,3 +139,121 @@ deploy:
     on:
       APPVEYOR_REPO_TAG: true
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+
+# # START OLD FORMATTING
+# # Issue 529: Added install block
+# install:
+#   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') {$env:PATH = "$HOME/Qt/5.15.2/clang_64/bin:$env:PATH"}
+#   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') {$env:QTDIR="C:\Qt\5.15.2\mingw81_64" }
+#   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') {$env:PATH += ";C:\$env:MSYS2_DIR\$env:MSYSTEM\bin;C:\$env:MSYS2_DIR\usr\bin;$env:QTDIR\bin;C:\MinGW\bin;C:\Qt\Tools\mingw64\bin"}
+# 
+# build_script:
+#   # Get submodules
+#   - git submodule update --init --recursive
+#     
+#   #### Mac OS X ####
+#   
+#   # Specify xcode verison
+#   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { ls /Applications/ }
+#   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { sudo xcode-select -s /Applications/Xcode-13.4.1.app/ } 
+# 
+#   # Verify qmake version
+#   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { qmake --version } 
+#   
+#   # Build MAVEN
+#   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { qmake CONFIG+=release -r build.pro; make -j16; make INSTALL_ROOT=appdir install }
+#   
+#   # Print output
+#   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "find . -name 'Maven.app'" }
+#   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "find . -name 'peakdetector.app'" }
+#   
+#   #### Windows ####
+# 
+#   # Install zlib (Windows only)
+#   - if "$APPVEYOR_BUILD_WORKER_IMAGE" neq "macos-ventura" (
+#       bash -lc "pacman -S --needed --noconfirm zlib-devel"
+#     )
+# 
+#   # Install sqlite3 (Windows only)
+#   - if "%APPVEYOR_BUILD_WORKER_IMAGE%" neq "macos-ventura" (
+#       bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3"
+#     )
+# 
+#   # Build MAVEN (Windows)
+#   - if "%APPVEYOR_BUILD_WORKER_IMAGE%" neq "macos-ventura" (
+#       bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro; make -j16; make INSTALL_ROOT=appdir install"
+#     )
+#     
+#   # Print contents
+#   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ls src/maven/appdir/bin/" }
+#   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; find . -name 'Maven.exe'" }  
+#   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; find . -name 'peakdetector.exe'" }
+# 
+# after_build:
+# 
+#   # Mac OS prepare artifacts
+#   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "find . -name 'make_dist_osx.sh'" }
+#   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "./make_dist_osx.sh src/maven/appdir/bin/Maven.app" }
+#   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "./make_dist_osx.sh src/peakdetector/appdir/bin/peakdetector.app" }
+# 
+#     # Windows prepare artifacts
+#   - if "%APPVEYOR_BUILD_WORKER_IMAGE%" neq "macos-ventura" (
+#       bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/maven/appdir/bin/Maven.exe"
+#     )
+#   - if "%APPVEYOR_BUILD_WORKER_IMAGE%" neq "macos-ventura" (
+#       bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe"    
+#     )
+#       
+# artifacts:
+#   - path: dist/Maven*.dmg
+#     name: Maven-macos
+#   - path: dist/peakdetector*.dmg
+#     name: peakdetector-macos
+#   - path: dist/Maven*.zip
+#     name: Maven-windows
+#   - path: dist/peakdetector*.zip
+#     name: peakdetector-windows
+# 
+# deploy:
+#   - provider: GitHub
+#     description: 'Maven Desktop Application - Mac OS'
+#     auth_token:
+#         secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
+#     artifact: Maven-macos
+#     draft: false
+#     prerelease: false
+#     on:
+#       APPVEYOR_REPO_TAG: true
+#       APPVEYOR_BUILD_WORKER_IMAGE: macos-ventura
+# 
+#   - provider: GitHub
+#     description: 'Peakdetector Executable - Mac OS'
+#     auth_token:
+#         secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
+#     artifact: peakdetector-macos
+#     draft: false
+#     prerelease: false
+#     on:
+#       APPVEYOR_REPO_TAG: true
+#       APPVEYOR_BUILD_WORKER_IMAGE: macos-ventura
+#   - provider: GitHub
+#     description: 'Maven Desktop Application - Windows'
+#     auth_token:
+#         secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
+#     artifact: Maven-windows
+#     draft: false
+#     prerelease: false
+#     on:
+#       APPVEYOR_REPO_TAG: true
+#       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+# 
+#   - provider: GitHub
+#     description: 'Peakdetector Executable - Windows'
+#     auth_token:
+#         secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
+#     artifact: peakdetector-windows
+#     draft: false
+#     prerelease: false
+#     on:
+#       APPVEYOR_REPO_TAG: true
+#       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
