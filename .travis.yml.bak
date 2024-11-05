@@ -1,5 +1,7 @@
 matrix:
   include:
+# badge code from README:
+# Travis: [![Build Status](https://app.travis-ci.com/eugenemel/maven.svg?branch=master)](https://app.travis-ci.com/eugenemel/maven)
 # Issue 762: linux build retired, mac os build now implemented in AppVeyor
 #   - os: linux
 #     dist: bionic
