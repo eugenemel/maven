@@ -47,16 +47,17 @@ build_script:
   
   #### Windows ####
 
-  # Install zlib (Windows only)
+  # Verify windows variable
   - bash -lc "echo $APPVEYOR_BUILD_WORKER_IMAGE"
-  
-  - sh: if [ "$APPVEYOR_BUILD_WORKER_IMAGE" == 'Visual Studio 2022' ]; then bash -lc "pacman -S --needed --noconfirm zlib-devel"; fi
-    
-  # Install sqlite3 (Windows only)
-  - sh: if [ "$APPVEYOR_BUILD_WORKER_IMAGE" == 'Visual Studio 2022' ]; then bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3"; fi
 
-  # Build MAVEN (Windows)
-  - sh: if [ "$APPVEYOR_BUILD_WORKER_IMAGE" == 'Visual Studio 2022' ]; then bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro; make -j16; make INSTALL_ROOT=appdir install"; fi
+  # Install zlib (Windows only)  
+  - bash -lc "[[ '$APPVEYOR_BUILD_WORKER_IMAGE' == 'Visual Studio 2022' ]] && pacman -S --needed --noconfirm zlib-devel"
+  
+  # Install sqlite
+  - bash -lc "[[ '$APPVEYOR_BUILD_WORKER_IMAGE' == 'Visual Studio 2022' ]] && pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3"
+  
+  # MAVEN
+  - bash -lc "[[ '$APPVEYOR_BUILD_WORKER_IMAGE' == 'Visual Studio 2022' ]] && (cd $APPVEYOR_BUILD_FOLDER && qmake CONFIG+=release -r build.pro && make -j16 && make INSTALL_ROOT=appdir install)"
     
   # Print contents
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ls src/maven/appdir/bin/" }
@@ -72,7 +73,9 @@ after_build:
 
     # Windows prepare artifacts
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/maven/appdir/bin/Maven.exe" }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe" }
+  
+  # TODO: restore this
+  #- ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe" }
       
 artifacts:
   - path: dist/Maven*.dmg
@@ -81,8 +84,8 @@ artifacts:
     name: peakdetector-macos
   - path: dist/Maven*.zip
     name: Maven-windows
-  - path: dist/peakdetector*.zip
-    name: peakdetector-windows
+#   - path: dist/peakdetector*.zip
+#     name: peakdetector-windows
 
 deploy:
   - provider: GitHub
@@ -118,13 +121,13 @@ deploy:
       APPVEYOR_REPO_TAG: true
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
 
-  - provider: GitHub
-    description: 'Peakdetector Executable - Windows'
-    auth_token:
-        secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
-    artifact: peakdetector-windows
-    draft: false
-    prerelease: false
-    on:
-      APPVEYOR_REPO_TAG: true
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+#   - provider: GitHub
+#     description: 'Peakdetector Executable - Windows'
+#     auth_token:
+#         secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
+#     artifact: peakdetector-windows
+#     draft: false
+#     prerelease: false
+#     on:
+#       APPVEYOR_REPO_TAG: true
+#       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
