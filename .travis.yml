@@ -1,10 +1,11 @@
 matrix:
   include:
+# Issue 762: linux build retired, mac os build now implemented in AppVeyor
 #   - os: linux
 #     dist: bionic
 #     sudo: required
-  - os: osx
-    osx_image: xcode14.2
+#   - os: osx
+#     osx_image: xcode14.2
 addons:
   apt:
     sources:
