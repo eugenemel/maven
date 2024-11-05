@@ -19,6 +19,9 @@ environment:
       PATH: 'C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%'
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022  # Windows image
 
+matrix:
+  fast_finish: true
+
 for:
 
 # ======================================
