@@ -48,19 +48,13 @@ build_script:
   #### Windows ####
 
   # Install zlib (Windows only)
-  - if "$env:APPVEYOR_BUILD_WORKER_IMAGE" neq "macos-ventura" (
-      bash -lc "pacman -S --needed --noconfirm zlib-devel"
-    )
-
+  - sh: if [ "$env:APPVEYOR_BUILD_WORKER_IMAGE" != "macos-ventura" ]; then bash -lc "pacman -S --needed --noconfirm zlib-devel"; fi
+    
   # Install sqlite3 (Windows only)
-  - if "$env:APPVEYOR_BUILD_WORKER_IMAGE" neq "macos-ventura" (
-      bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3"
-    )
+  - sh: if [ "$env:APPVEYOR_BUILD_WORKER_IMAGE" != "macos-ventura" ]; then bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3"; fi
 
   # Build MAVEN (Windows)
-  - if "$env:APPVEYOR_BUILD_WORKER_IMAGE" neq "macos-ventura" (
-      bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro; make -j16; make INSTALL_ROOT=appdir install"
-    )
+  - sh: if [ "$env:APPVEYOR_BUILD_WORKER_IMAGE" != "macos-ventura" ]; then bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro; make -j16; make INSTALL_ROOT=appdir install"; fi
     
   # Print contents
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ls src/maven/appdir/bin/" }
