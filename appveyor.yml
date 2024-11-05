@@ -28,7 +28,8 @@ install:
 build_script:
   # Get submodules
   - git submodule update --init --recursive
-    
+  - bash -lc "echo $APPVEYOR_BUILD_WORKER_IMAGE"
+      
   #### Mac OS X ####
   
   # Specify xcode verison
@@ -47,14 +48,12 @@ build_script:
   
   #### Windows ####
 
-  # Verify windows variable
-  - bash -lc "echo $APPVEYOR_BUILD_WORKER_IMAGE"
+  # Verify worklow image variable
+  # Create cache to avoid warning
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "mkdir /var/cache/pacman/pkg/"}
 
   # Install zlib (Windows only)  
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){
-     $command = "pacman -S --needed --noconfirm zlib-devel"
-     wsl --exec bash -lc $command
-  }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "pacman -S --needed --noconfirm zlib-devel" }
   # - bash -lc "pacman -S --needed --noconfirm zlib-devel" # works
   
   # Install sqlite
