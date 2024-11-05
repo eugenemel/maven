@@ -64,7 +64,7 @@ build_script:
   # - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "APPVEYOR_BUILD_FOLDER='/c/projects/maven/' && export APPVEYOR_BUILD_FOLDER"}
 #   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "echo APPVEYOR_BUILD_FOLDER=$APPVEYOR_BUILD_FOLDER" }
 #   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "find $APPVEYOR_BUILD_FOLDER -name 'build.pro'" }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/; qmake CONFIG+=release -r build.pro; make -j16; make INSTALL_ROOT=appdir install"}
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/; qmake CONFIG+=release -r build.pro 2>/dev/null; make -j16 2>/dev/null; make INSTALL_ROOT=appdir install 2>/dev/null"}
     
   # Print contents
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd /c/projects/maven/; ls src/maven/appdir/bin/" }
