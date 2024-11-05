@@ -48,15 +48,15 @@ build_script:
   #### Windows ####
 
   # Install zlib (Windows only)
-  - bash -lc "echo $env:APPVEYOR_BUILD_WORKER_IMAGE"
+  - bash -lc "echo $APPVEYOR_BUILD_WORKER_IMAGE"
   
-  - sh: if [ "$env:APPVEYOR_BUILD_WORKER_IMAGE" == 'Visual Studio 2022' ]; then bash -lc "pacman -S --needed --noconfirm zlib-devel"; fi
+  - sh: if [ "$APPVEYOR_BUILD_WORKER_IMAGE" == 'Visual Studio 2022' ]; then bash -lc "pacman -S --needed --noconfirm zlib-devel"; fi
     
   # Install sqlite3 (Windows only)
-  - sh: if [ "$env:APPVEYOR_BUILD_WORKER_IMAGE" == 'Visual Studio 2022' ]; then bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3"; fi
+  - sh: if [ "$APPVEYOR_BUILD_WORKER_IMAGE" == 'Visual Studio 2022' ]; then bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3"; fi
 
   # Build MAVEN (Windows)
-  - sh: if [ "$env:APPVEYOR_BUILD_WORKER_IMAGE" == 'Visual Studio 2022' ]; then bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro; make -j16; make INSTALL_ROOT=appdir install"; fi
+  - sh: if [ "$APPVEYOR_BUILD_WORKER_IMAGE" == 'Visual Studio 2022' ]; then bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro; make -j16; make INSTALL_ROOT=appdir install"; fi
     
   # Print contents
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ls src/maven/appdir/bin/" }
