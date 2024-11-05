@@ -18,7 +18,7 @@ environment:
       BIT: 64
       PATH: 'C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%'
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022  # Windows image
-      APPVEYOR_BUILD_FOLDER: 'c/projects/maven/'
+      APPVEYOR_BUILD_FOLDER: '/c/projects/maven/'
 
 # Issue 529: Added install block
 install:
