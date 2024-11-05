@@ -51,8 +51,8 @@ build_script:
   - bash -lc "echo $APPVEYOR_BUILD_WORKER_IMAGE"
 
   # Install zlib (Windows only)  
-#  - bash -lc "[[ '$APPVEYOR_BUILD_WORKER_IMAGE' == 'Visual Studio 2022' ]] && pacman -S --needed --noconfirm zlib-devel"
-  - bash -lc "pacman -S --needed --noconfirm zlib-devel"
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "pacman -S --needed --noconfirm zlib-devel" }
+  # - bash -lc "pacman -S --needed --noconfirm zlib-devel" # works
   
   # Install sqlite
   - bash -lc "[[ '$APPVEYOR_BUILD_WORKER_IMAGE' == 'Visual Studio 2022' ]] && pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3"
