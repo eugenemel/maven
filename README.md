@@ -1,9 +1,9 @@
 
 # Maven GUI: Metabolomics Analysis and Visualization Engine
 
-Appveyor: [![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/github/eugenemel/maven?branch=master&svg=true&retina=true)](https://ci.appveyor.com/project/eugenemel/maven)
+Build Status (AppVeyor): [![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/github/eugenemel/maven?branch=master&svg=true&retina=true)](https://ci.appveyor.com/project/eugenemel/maven)
 
-As of 20210703, We have switched from `travis-ci.org` to `travis-ci.com`
+As of 20241105, linux builds have been retired, and both mac os and windows executable are now produced by Appveyor.
 
 ## Download latest release
 
