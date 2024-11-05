@@ -48,13 +48,13 @@ build_script:
   #### Windows ####
 
   # Install zlib (Windows only)
-  - sh: if [ "$env:APPVEYOR_BUILD_WORKER_IMAGE" != "macos-ventura" ]; then bash -lc "pacman -S --needed --noconfirm zlib-devel"; fi
+  - sh: if [ "$env:APPVEYOR_BUILD_WORKER_IMAGE" == "Visual Studio 2022" ]; then bash -lc "pacman -S --needed --noconfirm zlib-devel"; fi
     
   # Install sqlite3 (Windows only)
-  - sh: if [ "$env:APPVEYOR_BUILD_WORKER_IMAGE" != "macos-ventura" ]; then bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3"; fi
+  - sh: if [ "$env:APPVEYOR_BUILD_WORKER_IMAGE" == "Visual Studio 2022" ]; then bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3"; fi
 
   # Build MAVEN (Windows)
-  - sh: if [ "$env:APPVEYOR_BUILD_WORKER_IMAGE" != "macos-ventura" ]; then bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro; make -j16; make INSTALL_ROOT=appdir install"; fi
+  - sh: if [ "$env:APPVEYOR_BUILD_WORKER_IMAGE" == "Visual Studio 2022" ]; then bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro; make -j16; make INSTALL_ROOT=appdir install"; fi
     
   # Print contents
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ls src/maven/appdir/bin/" }
@@ -69,12 +69,8 @@ after_build:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "./make_dist_osx.sh src/peakdetector/appdir/bin/peakdetector.app" }
 
     # Windows prepare artifacts
-  - if "%APPVEYOR_BUILD_WORKER_IMAGE%" neq "macos-ventura" (
-      bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/maven/appdir/bin/Maven.exe"
-    )
-  - if "%APPVEYOR_BUILD_WORKER_IMAGE%" neq "macos-ventura" (
-      bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe"    
-    )
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/maven/appdir/bin/Maven.exe" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe" }
       
 artifacts:
   - path: dist/Maven*.dmg
