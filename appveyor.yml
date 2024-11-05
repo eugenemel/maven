@@ -26,8 +26,11 @@ install:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') {$env:PATH += ";C:\$env:MSYS2_DIR\$env:MSYSTEM\bin;C:\$env:MSYS2_DIR\usr\bin;$env:QTDIR\bin;C:\MinGW\bin;C:\Qt\Tools\mingw64\bin"}
 
 build_script:
+
   # Get submodules
   - git submodule update --init --recursive
+  
+  # Print workflow image (for verification)
   - bash -lc "echo $APPVEYOR_BUILD_WORKER_IMAGE"
       
   #### Mac OS X ####
@@ -48,19 +51,17 @@ build_script:
   
   #### Windows ####
 
-  # Verify worklow image variable
-  # Create cache to avoid warning
+  # Create cache to avoid a warning, which powershell interprets as an error, and causes the build to fail
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "mkdir /var/cache/pacman/pkg/"}
 
   # Install zlib (Windows only)  
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "pacman -S --needed --noconfirm zlib-devel" }
-  # - bash -lc "pacman -S --needed --noconfirm zlib-devel" # works
   
   # Install sqlite
-  - bash -lc "[[ '$APPVEYOR_BUILD_WORKER_IMAGE' == 'Visual Studio 2022' ]] && pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3"
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3" }
   
   # MAVEN
-  - bash -lc "[[ '$APPVEYOR_BUILD_WORKER_IMAGE' == 'Visual Studio 2022' ]] && (cd $APPVEYOR_BUILD_FOLDER && qmake CONFIG+=release -r build.pro && make -j16 && make INSTALL_ROOT=appdir install)"
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake CONFIG+=release -r build.pro; make -j16; make INSTALL_ROOT=appdir install"}
     
   # Print contents
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd $APPVEYOR_BUILD_FOLDER; ls src/maven/appdir/bin/" }
