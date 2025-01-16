@@ -166,6 +166,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
     QSettings* settings = mainwindow->getSettings();
     amuQ1 = settings->value("amuQ1").toFloat();
     amuQ3 = settings->value("amuQ3").toFloat();
+    string txtEICScanFilter = settings->value("txtEICScanFilter", "").toString().toStdString();
 
     IsotopeParameters isotopeParameters = getSearchIsotopeParameters();
 
@@ -193,7 +194,8 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
                                     amuQ1,
                                     amuQ3,
                                     baseline_smoothingWindow,
-                                    baseline_dropTopX);
+                                    baseline_dropTopX,
+                                    txtEICScanFilter);
 
         eicCount += eics.size();
 
@@ -497,6 +499,8 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             foundGroups = allgroups.size();
         }
 
+        string txtEICScanFilter = settings->value("txtEICScanFilter", "").toString().toStdString();
+
         vector<EIC*>eics = pullEICs(slice,samples,
                                     EicLoader::PeakDetection,
                                     static_cast<int>(eic_smoothingWindow),
@@ -504,7 +508,9 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
                                     amuQ1,
                                     amuQ3,
                                     baseline_smoothingWindow,
-                                    baseline_dropTopX);
+                                    baseline_dropTopX,
+                                    txtEICScanFilter);
+
         float eicMaxIntensity=0;
 
         for ( unsigned int j=0; j < eics.size(); j++ ) {
