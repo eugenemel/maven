@@ -90,7 +90,11 @@ string ProjectDB::getScanSignature(Scan* scan, int limitSize=200) {
     return SIG.str();
 }
 
-
+/**
+ * @brief ProjectDB::saveScans
+ * @param sampleSet
+ * @deprecated
+ */
 void ProjectDB::saveScans(vector<mzSample *> &sampleSet) {
     QSqlQuery query0(sqlDB);
 
