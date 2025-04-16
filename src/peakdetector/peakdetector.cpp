@@ -67,7 +67,7 @@ bool searchAdductsFlag = true;
 bool saveScanData=true;
 bool WRITE_CONSENSUS_MAPPED_COMPOUNDS_ONLY = true;
 string algorithmType = "E"; //processMassSlices()
-string groupingAlgorithmType = "D"; //Issue 692: incorporate reduceGroups()
+string groupingAlgorithmType = "E"; //Issue 692: incorporate reduceGroups()
 bool isRunClustering = false;
 bool isTestResults = false;
 bool isHIHRPAlignment = false;
@@ -2317,7 +2317,18 @@ void mzkitchenSearch() {
     cout << "Performing mzkitchen msp search on identified peak groups." << endl;
     cout << setprecision(10);
 
-    vector<Compound*> mzkitchenCompounds = DB.loadNISTLibrary(mzkitchenMspFile.c_str());
+    QString filename(mzkitchenMspFile.c_str());
+    vector<Compound*> mzkitchenCompounds{};
+
+    if ( filename.endsWith("msp",Qt::CaseInsensitive)
+        || filename.endsWith("sptxt",Qt::CaseInsensitive)) {
+        mzkitchenCompounds = DB.loadNISTLibrary(filename);
+    } else {
+        mzkitchenCompounds = Database::loadCompoundCSVFile(filename);
+    }
+
+    // vector<Compound*> mzkitchenCompounds = DB.loadNISTLibrary(mzkitchenMspFile.c_str());
+
 
     sort(mzkitchenCompounds.begin(), mzkitchenCompounds.end(), [](const Compound* lhs, const Compound* rhs){
         if (lhs->precursorMz != rhs->precursorMz) {
