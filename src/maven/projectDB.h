@@ -47,14 +47,14 @@ class ProjectDB {
 
             void clearLoadedPeakGroups() { allgroups.clear(); }
             void saveSamples(vector<mzSample *> &sampleSet);
-            void saveGroups(vector<PeakGroup>   &allgroups, QString setName);
+            void saveGroups(vector<PeakGroup>   &allgroups, QString setName, bool isSaveMs2Scans=false);
             void saveCompounds(vector<PeakGroup> &allgroups);
             void saveCompounds(set<Compound*>&compounds);
             void saveMatchTable();
             void saveUiTable();
             void savePeakGroupsTableData(map<QString, QString> searchTableData);
             void writeSearchResultsToDB();
-            int writeGroupSqlite(PeakGroup* group, int parentGroupId, QString tableName);
+            int writeGroupSqlite(PeakGroup* group, int parentGroupId, QString tableName, bool isSaveMs2Scans=false);
 
             void loadPeakGroups(QString tableName, QString rumsDBLibrary, bool isAttemptToLoadDB=true, const map<int, vector<Peak>>& peakGroupMap={}, Classifier *classifier=nullptr);
             void loadGroupPeaks(PeakGroup* group);
@@ -83,6 +83,7 @@ class ProjectDB {
 
         string getScanSignature(Scan* scan, int limitSize);
 	    void saveScans(vector<mzSample *> &sampleSet);
+        void saveGroupScans(vector<Scan*>& scans, int groupId);
 
 	    mzSample* getSampleById( int sampleId);
 	    void doAlignment();

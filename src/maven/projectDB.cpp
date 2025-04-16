@@ -5,9 +5,9 @@
                 openDatabaseConnection(dbfilename);
             }
 
-void ProjectDB::saveGroups(vector<PeakGroup>& allgroups, QString setName) {
+void ProjectDB::saveGroups(vector<PeakGroup>& allgroups, QString setName, bool isSaveMs2Scans) {
     for(unsigned int i=0; i < allgroups.size(); i++ ) {
-        writeGroupSqlite(&allgroups[i],0,setName);
+        writeGroupSqlite(&allgroups[i],0,setName, isSaveMs2Scans);
     }
 }
 
@@ -150,6 +150,60 @@ void ProjectDB::saveScans(vector<mzSample *> &sampleSet) {
     query0.exec("end transaction");
 }
 
+void ProjectDB::saveGroupScans(vector<Scan*> &scans, int groupId) {
+
+    QSqlQuery query(sqlDB);
+
+    query.exec("begin transaction");
+
+    if(!query.exec("CREATE TABLE IF NOT EXISTS peakgroup_scans (\
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,\
+                    groupId int NOT NULL,\
+                    scan int NOT NULL,\
+                    rt real NOT NULL,\
+                    precursorMz real NOT NULL,\
+                    precursorCharge int NOT NULL,\
+                    precursorIc real NOT NULL,\
+                    precursorPurity real, \
+                    minmz real NOT NULL,\
+                    maxmz real NOT NULL,\
+                    data VARCHAR(100000))" )) {
+        qDebug() << "Error creating 'peakgroup_scans' table:" << query.lastError();
+        query.exec("rollback transaction");
+        return;
+    }
+
+    query.prepare("INSERT INTO peakgroup_scans (groupId, scan, rt, precursorMz, precursorCharge, precursorIc, precursorPurity, minmz, maxmz, data) \
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+    for(Scan* scan : scans) {
+        std::string scanData = getScanSignature(scan, 2000);
+
+        query.addBindValue(groupId);
+        query.addBindValue(scan->scannum);
+        query.addBindValue(scan->rt);
+        query.addBindValue(scan->precursorMz);
+        query.addBindValue(scan->precursorCharge);
+        query.addBindValue(scan->totalIntensity());
+        query.addBindValue(scan->getPrecursorPurity(20));
+        query.addBindValue(scan->minMz());
+        query.addBindValue(scan->maxMz());
+        query.addBindValue(scanData.c_str());
+
+        if(!query.execBatch()) {
+            qDebug() << "Error inserting data:" << query.lastError();
+            query.exec("rollback transaction");
+            return; // If even one scan cannot be written, then no scans are committed
+        }
+        query.clear();
+    }
+
+    if(!query.exec("end transaction")) {
+        qDebug() << "Error committing transaction:" << query.lastError();
+        query.exec("rollback transaction"); // Rollback on commit failure (unlikely)
+    }
+}
+
 
 void ProjectDB::saveSamples(vector<mzSample *> &sampleSet) {
     QSqlQuery query0(sqlDB);
@@ -252,7 +306,7 @@ void ProjectDB::deletePeakGroup(PeakGroup* g, QString tableName) {
     query0.exec("commit");
 }
 
-int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableName) {
+int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableName, bool isSaveMs2Scans) {
 
      if (!g) return -1;
      if (g->deletedFlag) return -1; // skip deleted groups
@@ -669,6 +723,11 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
         }
      }
 
+     //Issue 768: save MS2 scans
+     if (isSaveMs2Scans && !g->peakGroupScans.empty()) {
+        saveGroupScans(g->peakGroupScans, lastInsertGroupId);
+     }
+
     if ( g->childCount() ) {
        for(unsigned int i=0; i < g->children.size(); i++ ) {
             PeakGroup* child = &(g->children[i]);
@@ -680,7 +739,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                 searchTableName = tableName;
             }
 
-            writeGroupSqlite(child, lastInsertGroupId, searchTableName);
+            writeGroupSqlite(child, lastInsertGroupId, searchTableName, isSaveMs2Scans);
         }
     }
 
