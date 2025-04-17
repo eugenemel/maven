@@ -209,6 +209,14 @@ void ProjectDB::saveGroupScans(vector<Scan*> &scans, int groupId) {
     }
 }
 
+//Issue 768
+map<int, vector<Scan*>> ProjectDB::getAllGroupScans() {
+    map<int, vector<Scan*>> groupIdToScan{};
+
+    //TODO
+
+    return groupIdToScan;
+}
 
 void ProjectDB::saveSamples(vector<mzSample *> &sampleSet) {
     QSqlQuery query0(sqlDB);
@@ -1125,7 +1133,13 @@ void ProjectDB::alterPeakGroupsTable(){
 
 }
 
-void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool isAttemptToLoadDB, const map<int, vector<Peak>>& peakGroupMap, Classifier *classifier) {
+void ProjectDB::loadPeakGroups(
+    QString tableName,
+    QString rumsDBLibrary,
+    bool isAttemptToLoadDB,
+    const map<int, vector<Peak>>& peakGroupMap,
+    const map<int, vector<Scan*>>& ms2ScanMap,
+    Classifier *classifier) {
 
      alterPeakGroupsTable();
      alterPeaksTable();
@@ -1266,6 +1280,11 @@ void ProjectDB::loadPeakGroups(QString tableName, QString rumsDBLibrary, bool is
             loadGroupPeaks(&g);
         } else {
             g.peaks = peakGroupMap.at(g.groupId);
+        }
+
+        //Issue 758: Pre-populate peak group scans
+        if (ms2ScanMap.find(g.groupId) != ms2ScanMap.end()) {
+            g.peakGroupScans = ms2ScanMap.at(g.groupId);
         }
 
         if (parentGroupId == 0) {

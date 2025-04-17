@@ -696,8 +696,19 @@ void ProjectDockWidget::loadAllPeakTables() {
     //load all peaks
     map<int, vector<Peak>> allPeaks = currentProject->getAllPeaks();
 
+    map<int, vector<Scan*>> groupMs2Scans = currentProject->getAllGroupScans();
+    if (!groupMs2Scans.empty()) {
+        currentProject->isSaveMs2Scans = true;
+    }
+
     //load all peakgroups
-    currentProject->loadPeakGroups("peakgroups", _mainwindow->rumsDBDatabaseName, _mainwindow->isAttemptToLoadDB, allPeaks, _mainwindow->getClassifier());
+    currentProject->loadPeakGroups(
+        "peakgroups",
+        _mainwindow->rumsDBDatabaseName,
+        _mainwindow->isAttemptToLoadDB,
+        allPeaks,
+        groupMs2Scans,
+        _mainwindow->getClassifier());
 
     qDebug() << "Loaded peakgroups in" << timer->elapsed() << "msec.";
 

@@ -59,7 +59,13 @@ class ProjectDB {
             void writeSearchResultsToDB();
             int writeGroupSqlite(PeakGroup* group, int parentGroupId, QString tableName, bool isSaveMs2Scans=false);
 
-            void loadPeakGroups(QString tableName, QString rumsDBLibrary, bool isAttemptToLoadDB=true, const map<int, vector<Peak>>& peakGroupMap={}, Classifier *classifier=nullptr);
+            void loadPeakGroups(
+                QString tableName,
+                QString rumsDBLibrary,
+                bool isAttemptToLoadDB=true,
+                const map<int, vector<Peak>>& peakGroupMap={},
+                const map<int, vector<Scan*>>& ms2ScanMap={},
+                Classifier *classifier=nullptr);
             void loadGroupPeaks(PeakGroup* group);
             map<int, vector<Peak>> getAllPeaks(vector<int> groupIds = vector<int>(0));
             vector<Peak> getPeaks(int groupId);
@@ -87,6 +93,7 @@ class ProjectDB {
         string getScanSignature(Scan* scan, int limitSize);
 	    void saveScans(vector<mzSample *> &sampleSet);
         void saveGroupScans(vector<Scan*>& scans, int groupId);
+        map<int, vector<Scan*>> getAllGroupScans();
 
 	    mzSample* getSampleById( int sampleId);
 	    void doAlignment();
