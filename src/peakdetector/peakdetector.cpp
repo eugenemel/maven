@@ -1686,14 +1686,14 @@ void writeReport(string setName) {
                 for (auto& group : allgroups){
                     traverseAndAdd(group, compoundSet);
                     if (group.compound){
-                        project->writeGroupSqlite(&group, 0, tblName);
+                        project->writeGroupSqlite(&group, 0, tblName, saveScanData);
                     } else {
-                        project->writeGroupSqlite(&group, 0, setName.c_str());
+                        project->writeGroupSqlite(&group, 0, setName.c_str(), saveScanData);
                     }
                 }
                 project->saveCompounds(compoundSet);
             } else {
-                project->saveGroups(allgroups, setName.c_str());
+                project->saveGroups(allgroups, setName.c_str(), saveScanData);
             }
 
         } else {
@@ -1714,21 +1714,22 @@ void writeReport(string setName) {
                     project->saveAlignment(sampleToUpdatedRts);
                 }
 
-                if(saveScanData) project->saveScans(samples); //~50% of time in writeReport() spent here
+                //Issue 768: deprecated
+                // if(saveScanData) project->saveScans(samples); //~50% of time in writeReport() spent here
 
                 if (isSpecialSearch()) {
                     set<Compound*> compoundSet;
                     for (auto& group : allgroups){
                         traverseAndAdd(group, compoundSet);
                         if (group.compound){
-                            project->writeGroupSqlite(&group, 0, tblName);
+                            project->writeGroupSqlite(&group, 0, tblName, saveScanData);
                         } else {
-                            project->writeGroupSqlite(&group, 0, setName.c_str());
+                            project->writeGroupSqlite(&group, 0, setName.c_str(), saveScanData);
                         }
                     }
                     project->saveCompounds(compoundSet);
                 } else {
-                    project->saveGroups(allgroups, setName.c_str());
+                    project->saveGroups(allgroups, setName.c_str(), saveScanData);
                 }
 
                 project->savePeakGroupsTableData(searchTableData);

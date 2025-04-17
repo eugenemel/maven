@@ -101,10 +101,11 @@ void SpectraWidget::setCurrentFragment(Fragment *fragment, int mslevel) {
 
     if (fragment) {
 
-        mzSample *sample= nullptr;
-        if (fragment->scanNumMap.size() > 0) sample = fragment->scanNumMap.begin()->first;
+        string sampleName;
+        if (fragment->scanNumMap.size() > 0) sampleName = fragment->scanNumMap.begin()->first;
 
-        Scan *scan = new Scan(sample, fragment->scanNum, mslevel, fragment->rt, fragment->precursorMz, (fragment->precursorCharge > 0 ? 1: -1));
+        Scan *scan = new Scan(nullptr, fragment->scanNum, mslevel, fragment->rt, fragment->precursorMz, (fragment->precursorCharge > 0 ? 1: -1));
+        scan->sampleName = sampleName;
 
         scan->mz = fragment->mzs;
         scan->intensity = fragment->intensity_array;
@@ -134,8 +135,8 @@ void SpectraWidget::setTitle() {
 
     QString title;
 
-    if (_currentScan && _currentScan->sample){
-        QString sampleName = _currentScan->sample->sampleName.c_str();
+    if (_currentScan){
+        QString sampleName = _currentScan->getSampleName().c_str();
         QString polarity;
         _currentScan->getPolarity() > 0 ? polarity = "Pos" : polarity = "Neg";
 
@@ -157,7 +158,7 @@ void SpectraWidget::setTitle() {
                         scansList.push_back(QString::number(x));
                     }
 
-                    title += tr("<br><b>%1</b>").arg(QString(it->first->sampleName.c_str()));
+                    title += tr("<br><b>%1</b>").arg(QString(it->first.c_str()));
                     title += tr(" scans: <b>%1</b>").arg(scansList.join(", "));
                 }
             }

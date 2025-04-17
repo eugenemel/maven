@@ -696,8 +696,19 @@ void ProjectDockWidget::loadAllPeakTables() {
     //load all peaks
     map<int, vector<Peak>> allPeaks = currentProject->getAllPeaks();
 
+    map<int, vector<Scan*>> groupMs2Scans = currentProject->getAllGroupScans();
+    if (!groupMs2Scans.empty()) {
+        currentProject->isSaveMs2Scans = true;
+    }
+
     //load all peakgroups
-    currentProject->loadPeakGroups("peakgroups", _mainwindow->rumsDBDatabaseName, _mainwindow->isAttemptToLoadDB, allPeaks, _mainwindow->getClassifier());
+    currentProject->loadPeakGroups(
+        "peakgroups",
+        _mainwindow->rumsDBDatabaseName,
+        _mainwindow->isAttemptToLoadDB,
+        allPeaks,
+        groupMs2Scans,
+        _mainwindow->getClassifier());
 
     qDebug() << "Loaded peakgroups in" << timer->elapsed() << "msec.";
 
@@ -765,6 +776,9 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
 
             //RT alignment information
             project->sampleToUpdatedRts = currentProject->sampleToUpdatedRts;
+
+            //Explicitly save ms2 scans int DB if original DB also saved ms2 scans into DB
+            project->isSaveMs2Scans = currentProject->isSaveMs2Scans;
         }
     }
 
@@ -772,7 +786,7 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
     currentProject=project;
 
     if(project->isOpen()) {
-        project->deleteAll(); //extreme, but ensures that re-saving always saves data using most recent code
+        project->deleteAll(); //extreme, but ensures that re-saving matches only data currently in memory
         project->setSamples(sampleSet);
         project->saveSamples(sampleSet);
 
@@ -810,7 +824,7 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
         for(auto groupData: groupAndPeakTable) {
             PeakGroup *group = groupData.first;
             QString tableName = groupData.second;
-            project->writeGroupSqlite(group, 0, tableName);
+            project->writeGroupSqlite(group, 0, tableName, project->isSaveMs2Scans);
 
             Compound::traverseAndAdd(*group, compoundSet);
 

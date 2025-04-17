@@ -77,7 +77,7 @@ public slots:
                     float _ms3MatchingTolr = 0.5f;
 
                     Fragment* _currentFragment = nullptr;
-                    map<mzSample*,unordered_set<int>> _sampleScanMap = {};
+                    map<string, unordered_set<int>> _sampleScanMap = {};
                     bool _isDisplayFullTitle=false;
                     bool _isDisplayCompoundId=false;
                     bool _isDisplayHighPrecisionMz=false;
