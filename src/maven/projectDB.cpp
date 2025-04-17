@@ -71,6 +71,9 @@ void ProjectDB::assignSampleIds() {
    }
 }
 
+/**
+ * @deprecated in favor of Scan::getSignature()
+**/
 string ProjectDB::getScanSignature(Scan* scan, int limitSize=200) {
     stringstream SIG;
     map<int,bool>seen;
@@ -159,8 +162,6 @@ void ProjectDB::saveGroupScans(vector<Scan*> &scans, int groupId) {
 
     QSqlQuery query(sqlDB);
 
-    query.exec("begin transaction");
-
     if(!query.exec("CREATE TABLE IF NOT EXISTS peakgroup_scans (\
                     id INTEGER PRIMARY KEY AUTOINCREMENT,\
                     groupId int NOT NULL,\
@@ -170,38 +171,35 @@ void ProjectDB::saveGroupScans(vector<Scan*> &scans, int groupId) {
                     precursorMz real NOT NULL,\
                     polarity int NOT NULL,\
                     precursorCharge int NOT NULL,\
-                    data VARCHAR(100000))" )) {
+                    data TEXT);" )) {
         qDebug() << "Error creating 'peakgroup_scans' table:" << query.lastError();
-        query.exec("rollback transaction");
         return;
     }
 
-    query.prepare("INSERT INTO peakgroup_scans (groupId, scan, rt, precursorMz, precursorCharge, precursorIc, precursorPurity, minmz, maxmz, data) \
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    QSqlQuery query2(sqlDB);
+    query2.prepare("INSERT INTO peakgroup_scans (groupId, sampleName, scannum, rt, precursorMz, polarity, precursorCharge, data) \
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
     for(Scan* scan : scans) {
-        std::string scanData = getScanSignature(scan, 2000);
+        string scanData = scan->getSignature(-1);
 
-        query.addBindValue(groupId);
-        query.addBindValue(scan->getSampleName().c_str());
-        query.addBindValue(scan->scannum);
-        query.addBindValue(scan->rt);
-        query.addBindValue(scan->precursorMz);
-        query.addBindValue(scan->getPolarity());
-        query.addBindValue(scan->precursorCharge);
-        query.addBindValue(scanData.c_str());
+        query2.addBindValue(groupId);
+        query2.addBindValue(scan->getSampleName().c_str());
+        query2.addBindValue(scan->scannum);
+        query2.addBindValue(scan->rt);
+        query2.addBindValue(scan->precursorMz);
+        query2.addBindValue(scan->getPolarity());
+        query2.addBindValue(scan->precursorCharge);
+        query2.addBindValue(scanData.c_str());
 
-        if(!query.execBatch()) {
-            qDebug() << "Error inserting data:" << query.lastError();
-            query.exec("rollback transaction");
-            return; // If even one scan cannot be written, then no scans are committed
+        cout << "Scan: " << groupId << ": " << scan->getSampleName() << endl;
+
+        if(!query2.exec()) {
+            qDebug() << "Error inserting data:" << query2.lastError();
+
+            //crash
+            abort();
         }
-        query.clear();
-    }
-
-    if(!query.exec("end transaction")) {
-        qDebug() << "Error committing transaction:" << query.lastError();
-        query.exec("rollback transaction"); // Rollback on commit failure (unlikely)
     }
 }
 
@@ -595,7 +593,8 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                     ,?,?,?,?,?,?,?,?,?,?,?,?,?\
                     );");
 		
-			for(int j=0; j < g->peaks.size(); j++ ) { 
+            for(int j=0; j < g->peaks.size(); j++ ) {
+
 					Peak& p = g->peaks[j];
 
                     if(!p.getSample()) {
@@ -671,6 +670,10 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                         abort();
                     }
 		}
+
+        if (isSaveMs2Scans && !g->peakGroupScans.empty()) {
+            saveGroupScans(g->peakGroupScans, lastInsertGroupId);
+        }
 
      //Issue 546: featurization table
      if (!g->compounds.empty()) {
@@ -776,11 +779,6 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 
              if(!query5.exec())  qDebug() << query5.lastError();
         }
-     }
-
-     //Issue 768: save MS2 scans
-     if (isSaveMs2Scans && !g->peakGroupScans.empty()) {
-        saveGroupScans(g->peakGroupScans, lastInsertGroupId);
      }
 
     if ( g->childCount() ) {
