@@ -164,14 +164,12 @@ void ProjectDB::saveGroupScans(vector<Scan*> &scans, int groupId) {
     if(!query.exec("CREATE TABLE IF NOT EXISTS peakgroup_scans (\
                     id INTEGER PRIMARY KEY AUTOINCREMENT,\
                     groupId int NOT NULL,\
-                    scan int NOT NULL,\
+                    sampleName TEXT, \
+                    scannum int NOT NULL,\
                     rt real NOT NULL,\
                     precursorMz real NOT NULL,\
+                    polarity int NOT NULL,\
                     precursorCharge int NOT NULL,\
-                    precursorIc real NOT NULL,\
-                    precursorPurity real, \
-                    minmz real NOT NULL,\
-                    maxmz real NOT NULL,\
                     data VARCHAR(100000))" )) {
         qDebug() << "Error creating 'peakgroup_scans' table:" << query.lastError();
         query.exec("rollback transaction");
@@ -185,14 +183,12 @@ void ProjectDB::saveGroupScans(vector<Scan*> &scans, int groupId) {
         std::string scanData = getScanSignature(scan, 2000);
 
         query.addBindValue(groupId);
+        query.addBindValue(scan->getSampleName().c_str());
         query.addBindValue(scan->scannum);
         query.addBindValue(scan->rt);
         query.addBindValue(scan->precursorMz);
+        query.addBindValue(scan->getPolarity());
         query.addBindValue(scan->precursorCharge);
-        query.addBindValue(scan->totalIntensity());
-        query.addBindValue(scan->getPrecursorPurity(20));
-        query.addBindValue(scan->minMz());
-        query.addBindValue(scan->maxMz());
         query.addBindValue(scanData.c_str());
 
         if(!query.execBatch()) {
@@ -213,7 +209,53 @@ void ProjectDB::saveGroupScans(vector<Scan*> &scans, int groupId) {
 map<int, vector<Scan*>> ProjectDB::getAllGroupScans() {
     map<int, vector<Scan*>> groupIdToScan{};
 
-    //TODO
+    QSqlQuery queryCheckTable(sqlDB);
+
+    if (!queryCheckTable.exec("SELECT name FROM sqlite_master WHERE type='table' AND name='peakgroup_scans';")){
+        qDebug() << "Ho..." << queryCheckTable.lastError();
+        qDebug() << "Peakgroup MS2 scans were not explicitly re-saved in mzrollDB file. Scans will be retrieved from loaded mzSample* objects.";
+        return groupIdToScan;
+    }
+
+    QSqlQuery groupMs2scan(sqlDB);
+    groupMs2scan.exec("select * from peakgroup_scans;");
+
+    while (groupMs2scan.next()) {
+
+        /*
+         *"CREATE TABLE IF NOT EXISTS peakgroup_scans (\
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,\
+                    groupId int NOT NULL,\
+                    sampleName TEXT, \
+                    scannum int NOT NULL,\
+                    rt real NOT NULL,\
+                    precursorMz real NOT NULL,\
+                    polarity int NOT NULL,\
+                    precursorCharge int NOT NULL,\
+                    data VARCHAR(100000))"
+         */
+
+        int groupId = groupMs2scan.value("groupId").toInt();
+
+        string sampleName = groupMs2scan.value("sampleName").toString().toStdString();
+        int scannum = groupMs2scan.value("scannum").toInt();
+        float rt = groupMs2scan.value("rt").toFloat();
+        float precursorMz = groupMs2scan.value("precursorMz").toFloat();
+        int polarity = groupMs2scan.value("polarity").toInt();
+        int precursorCharge = groupMs2scan.value("precursorCharge").toInt();
+        string scanData = groupMs2scan.value("data").toString().toStdString();
+
+        Scan *scan = new Scan(nullptr, scannum, 2, rt, precursorMz, polarity);
+        mzUtils::decodeBracketEncodedString(scanData, scan->mz, scan->intensity);
+
+        scan->precursorCharge = precursorCharge;
+        scan->sampleName = sampleName;
+
+        if (groupIdToScan.find(groupId) == groupIdToScan.end()) {
+            groupIdToScan.insert(make_pair(groupId, vector<Scan*>{}));
+        }
+        groupIdToScan[groupId].push_back(scan);
+    }
 
     return groupIdToScan;
 }
