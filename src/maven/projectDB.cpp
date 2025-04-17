@@ -192,8 +192,6 @@ void ProjectDB::saveGroupScans(vector<Scan*> &scans, int groupId) {
         query2.addBindValue(scan->precursorCharge);
         query2.addBindValue(scanData.c_str());
 
-        cout << "Scan: " << groupId << ": " << scan->getSampleName() << endl;
-
         if(!query2.exec()) {
             qDebug() << "Error inserting data:" << query2.lastError();
 

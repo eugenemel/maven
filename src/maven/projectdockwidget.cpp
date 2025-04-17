@@ -776,6 +776,9 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
 
             //RT alignment information
             project->sampleToUpdatedRts = currentProject->sampleToUpdatedRts;
+
+            //Explicitly save ms2 scans int DB if original DB also saved ms2 scans into DB
+            project->isSaveMs2Scans = currentProject->isSaveMs2Scans;
         }
     }
 
@@ -783,7 +786,7 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
     currentProject=project;
 
     if(project->isOpen()) {
-        project->deleteAll(); //extreme, but ensures that re-saving always saves data using most recent code
+        project->deleteAll(); //extreme, but ensures that re-saving matches only data currently in memory
         project->setSamples(sampleSet);
         project->saveSamples(sampleSet);
 
