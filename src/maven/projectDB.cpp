@@ -39,6 +39,7 @@ void ProjectDB::deleteAll() {
     query.exec("drop table IF EXISTS matches");
     query.exec("drop table IF EXISTS search_params"); //Issue 197
     query.exec("drop table IF EXISTS ui"); //Issue 525
+    query.exec("drop table if EXISTS peakgroup_scans"); //Issue 768
 }
 
 void ProjectDB::deleteGroups(bool isDeleteSearchParams) {

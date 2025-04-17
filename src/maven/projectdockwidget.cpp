@@ -810,7 +810,7 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
         for(auto groupData: groupAndPeakTable) {
             PeakGroup *group = groupData.first;
             QString tableName = groupData.second;
-            project->writeGroupSqlite(group, 0, tableName);
+            project->writeGroupSqlite(group, 0, tableName, project->isSaveMs2Scans);
 
             Compound::traverseAndAdd(*group, compoundSet);
 

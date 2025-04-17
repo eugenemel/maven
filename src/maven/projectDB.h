@@ -45,6 +45,9 @@ class ProjectDB {
             unordered_map<string, string> quantTypeMap{}; //<original, renamed>
             unordered_map<string, string> quantTypeInverseMap{}; //<renamed, original>
 
+            //Issue 768: if peakgroup-associated MS2 scans need to be explicitly saved in a dedicated table
+            bool isSaveMs2Scans = false;
+
             void clearLoadedPeakGroups() { allgroups.clear(); }
             void saveSamples(vector<mzSample *> &sampleSet);
             void saveGroups(vector<PeakGroup>   &allgroups, QString setName, bool isSaveMs2Scans=false);
