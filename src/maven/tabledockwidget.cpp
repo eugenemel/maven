@@ -549,8 +549,14 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     //cerr << "addRow" << group->groupId << " "  << group->meanMz << " " << group->meanRt << " " << group->children.size() << " " << group->tagString << endl;
 
     if (!group) return;
-    if (group->peakCount() == 0 && group->type() != PeakGroup::IsotopeType) return;
-    if (group->meanMz <= 0 ) return;
+
+    if (group->compound && group->compound->name == "Arginine-13C15N_IS") {
+        qDebug() << group->peakCount() << " " << group->meanMz << "@" << group->meanRt;
+    }
+    //Issue 768: introduce possibility of browsing saved MS2 data only, missing all actual peak data
+    bool isDisplayWithZeroPeaks = group->type() == PeakGroup::IsotopeType || !group->peakGroupScans.empty();
+    if ((group->peakCount() == 0 || group->meanMz <= 0) && !isDisplayWithZeroPeaks) return;
+
     if (group->deletedFlag || group->isGroupLabeled('x')) return; //deleted group
 
     NumericTreeWidgetItem *item = nullptr;
