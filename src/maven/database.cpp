@@ -1549,7 +1549,7 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
 
             query1.bindValue( 18, fragMz.join(";"));
             query1.bindValue( 19, fragIntensity.join(";"));
-            query1.bindValue( 29, fragLabels.join(";"));
+            query1.bindValue( 20, fragLabels.join(";"));
 
             //Issue 768: Added new columns for expectedRtMin and expectedRtMax
             query1.bindValue( 21, c->expectedRtMin);
