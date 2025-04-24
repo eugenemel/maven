@@ -1385,6 +1385,8 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
     bool isHasExistingCols = false;
     bool isHasAdductString = false;
     bool isHasFragLabelsColumn = false;
+    bool isHasExpectedRtMinColumn = false;
+    bool isHasExpectedRtMaxColumn = false;
 
     while (queryCheckCols.next()){
         isHasExistingCols = true;
@@ -1396,6 +1398,15 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
         //Issue 159: Read and write fragment labels from msp databases.
         if ("fragment_labels" == queryCheckCols.value(1).toString()) {
             isHasFragLabelsColumn = true;
+        }
+
+        //Issue 769: Save expectedRtMin and expectedRtMax
+        if ("expectedRtMin" == queryCheckCols.value(1).toString()) {
+            isHasExpectedRtMinColumn = true;
+        }
+
+        if ("expectedRtMax" == queryCheckCols.value(1).toString()) {
+            isHasExpectedRtMaxColumn = true;
         }
 
     }
@@ -1418,6 +1429,25 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
                 abort();
             }
         }
+
+        if (!isHasExpectedRtMinColumn) {
+            QSqlQuery queryAddExpectedRtMinColumn(dbConnection);
+            if (!queryAddExpectedRtMinColumn.exec("ALTER TABLE compounds ADD expectedRtMin REAL DEFAULT -1.0;")){
+                qDebug() << "Database::saveCompoundsSQL() sql error in query queryAddExpectedRtMinColumn: " << queryAddExpectedRtMinColumn.lastError();
+                qDebug() << "Unable to adjust compounds database with expectedRtMin column! exiting program.";
+                abort();
+            }
+        }
+
+        if (!isHasExpectedRtMaxColumn) {
+            QSqlQuery queryAddExpectedRtMaxColumn(dbConnection);
+            if (!queryAddExpectedRtMaxColumn.exec("ALTER TABLE compounds ADD expectedRtMax REAL DEFAULT -1.0;")){
+                qDebug() << "Database::saveCompoundsSQL() sql error in query queryAddExpectedRtMaxColumn: " << queryAddExpectedRtMaxColumn.lastError();
+                qDebug() << "Unable to adjust compounds database with expectedRtMax column! exiting program.";
+                abort();
+            }
+        }
+
     }
 
     /*
@@ -1438,6 +1468,8 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
                     mass float,\
                     charge  int,\
                     expectedRt float, \
+                    expectedRtMin real, \
+                    expectedRtMax real, \
                     precursorMz float,\
                     productMz   float,\
                     collisionEnergy float,\
@@ -1481,10 +1513,10 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
             QSqlQuery query1(dbConnection);
 
             if (isRespectCIDs) {
-                query1.prepare("replace into compounds values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?)");
+                query1.prepare("replace into compounds values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?)");
                 query1.bindValue(0, cid);
             } else {
-                query1.prepare("insert into compounds values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?)");
+                query1.prepare("insert into compounds values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?)");
                 query1.bindValue(0, QVariant(QVariant::Int));
             }
 
@@ -1500,18 +1532,21 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
             query1.bindValue( 8, c->getExactMass() );
             query1.bindValue( 9, c->charge);
             query1.bindValue( 10, c->expectedRt);
-            query1.bindValue( 11, c->precursorMz);
-            query1.bindValue( 12, c->productMz);
+            query1.bindValue( 11, c->expectedRtMin);
+            query1.bindValue( 12, c->expectedRtMax);
 
-            query1.bindValue( 13, c->collisionEnergy);
-            query1.bindValue( 14, c->logP);
-            query1.bindValue( 15, c->virtualFragmentation);
-            query1.bindValue( 16, c->ionizationMode);
-            query1.bindValue( 17, cat.join(";"));
+            query1.bindValue( 13, c->precursorMz);
+            query1.bindValue( 14, c->productMz);
 
-            query1.bindValue( 18, fragMz.join(";"));
-            query1.bindValue( 19, fragIntensity.join(";"));
-            query1.bindValue( 20, fragLabels.join(";"));
+            query1.bindValue( 15, c->collisionEnergy);
+            query1.bindValue( 16, c->logP);
+            query1.bindValue( 17, c->virtualFragmentation);
+            query1.bindValue( 18, c->ionizationMode);
+            query1.bindValue( 19, cat.join(";"));
+
+            query1.bindValue( 20, fragMz.join(";"));
+            query1.bindValue( 21, fragIntensity.join(";"));
+            query1.bindValue( 22, fragLabels.join(";"));
 
             if(!query1.exec())  qDebug() << query1.lastError();
         }
