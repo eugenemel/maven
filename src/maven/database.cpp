@@ -1113,6 +1113,10 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
             cpd->logP = line.mid(5,line.length()).simplified().toDouble();
         } else if (line.startsWith("RT:",Qt::CaseInsensitive)) {
            cpd->expectedRt= line.mid(3,line.length()).simplified().toDouble();
+        } else if (line.startsWith("RT_min:",Qt::CaseInsensitive)) {
+           cpd->expectedRtMin = line.mid(7,line.length()).simplified().toFloat();
+        } else if (line.startsWith("RT_max:", Qt::CaseInsensitive)) {
+           cpd->expectedRtMax = line.mid(7,line.length()).simplified().toFloat();
         } else if (line.startsWith("SMILE:",Qt::CaseInsensitive)) {
             QString smileString = line.mid(7,line.length()).simplified();
             if(!smileString.isEmpty()) cpd->smileString=smileString.toStdString();
