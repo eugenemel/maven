@@ -267,7 +267,9 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             float exactMass = query.value("mass").toDouble();
             int cid  =  query.value("cid").toInt();
             string db   =  query.value("dbName").toString().toStdString();
-            double expectedRt =  query.value("expectedRt").toDouble();
+            float expectedRt =  query.value("expectedRt").toFloat();
+            float expectedRtMin = query.value("expectedRtMin").toFloat();
+            float expectedRtMax = query.value("expectedRtMax").toFloat();
             string transition_id = query.value("srmId").toString().toStdString();
 
             //skip compound if it already exists in internal database
@@ -281,6 +283,8 @@ void Database::loadCompoundsSQL(QString databaseName, QSqlDatabase &dbConnection
             compound->cid  =  cid;
             compound->db   =  db;
             compound->expectedRt =  expectedRt;
+            compound->expectedRtMin = expectedRtMin;
+            compound->expectedRtMax = expectedRtMax;
             compound->srmId = transition_id;
 
             auto boundValues = query.boundValues();
