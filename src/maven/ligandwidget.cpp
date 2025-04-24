@@ -281,6 +281,8 @@ void LigandWidget::setupHeader() {
            << "Precursor m/z"
            << "Product m/z"
            << "RT"
+           << "RT_min"
+           << "RT_max"
            << "Formula"
            << "SMILES"
            << "Category";
@@ -310,14 +312,16 @@ void LigandWidget::showTable() {
         parent->setText(2, QString::number(compound->getExactMass(), 'f', 4));
         if(compound->precursorMz > 0.0f) parent->setText(3, QString::number(compound->precursorMz, 'f', 4));
         if (compound->productMz > 0.0f) parent->setText(4,QString::number(compound->productMz, 'f', 4));
-        if(compound->expectedRt > 0) parent->setText(5,QString::number(compound->expectedRt));
-        if (compound->formula.length()) parent->setText(6,compound->formula.c_str());
-        if (compound->smileString.length()) parent->setText(7,compound->smileString.c_str());
+        if (compound->expectedRt > 0) parent->setText(5,QString::number(compound->expectedRt));
+        if (compound->expectedRtMin >= 0) parent->setText(6, QString::number(compound->expectedRtMin));
+        if (compound->expectedRtMax >= 0) parent->setText(7, QString::number(compound->expectedRtMax));
+        if (compound->formula.length()) parent->setText(8,compound->formula.c_str());
+        if (compound->smileString.length()) parent->setText(9,compound->smileString.c_str());
 
         if(compound->category.size() > 0) {
             QStringList catList;
             for(string c : compound->category) catList << c.c_str();
-            parent->setText(8, catList.join(";"));
+            parent->setText(10, catList.join(";"));
         }
 
         parent->setData(0, Qt::UserRole, QVariant::fromValue(compound));
