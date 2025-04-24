@@ -1374,8 +1374,9 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
     /*
      * START CHECK DB VERSION
      *
-     * ENSURE DB HAS CORRECT SCHEMA
-     * IF IT DOES NOT, DELETE AND START OVER PRIOR TO WRITING THIS COMPOUND SET
+     * check for columns that might be missing.
+     * If any are found to be missing, add the new columns AT THE END.
+     * This preserves the numbering of old columns from previous versions is consistent.
      *
      * APPLIES BOTH To ligand.db and .mzrollDB files.
      */
@@ -1472,8 +1473,6 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
                     mass float,\
                     charge  int,\
                     expectedRt float, \
-                    expectedRtMin real, \
-                    expectedRtMax real, \
                     precursorMz float,\
                     productMz   float,\
                     collisionEnergy float,\
@@ -1483,7 +1482,9 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
                     category varchar(255),\
                     fragment_mzs text, \
                     fragment_intensity text, \
-                    fragment_labels text \
+                    fragment_labels text, \
+                    expectedRtMin real, \
+                    expectedRtMax real \
                     )"))  qDebug() << "Ho... " << query0.lastError();
 
         query0.exec("create index if not exists compound_db_idx on compounds(dbName)");
@@ -1536,21 +1537,23 @@ void Database::saveCompoundsSQL(vector<Compound*> &compoundSet, QSqlDatabase& db
             query1.bindValue( 8, c->getExactMass() );
             query1.bindValue( 9, c->charge);
             query1.bindValue( 10, c->expectedRt);
-            query1.bindValue( 11, c->expectedRtMin);
-            query1.bindValue( 12, c->expectedRtMax);
 
-            query1.bindValue( 13, c->precursorMz);
-            query1.bindValue( 14, c->productMz);
+            query1.bindValue( 11, c->precursorMz);
+            query1.bindValue( 12, c->productMz);
 
-            query1.bindValue( 15, c->collisionEnergy);
-            query1.bindValue( 16, c->logP);
-            query1.bindValue( 17, c->virtualFragmentation);
-            query1.bindValue( 18, c->ionizationMode);
-            query1.bindValue( 19, cat.join(";"));
+            query1.bindValue( 13, c->collisionEnergy);
+            query1.bindValue( 14, c->logP);
+            query1.bindValue( 15, c->virtualFragmentation);
+            query1.bindValue( 16, c->ionizationMode);
+            query1.bindValue( 17, cat.join(";"));
 
-            query1.bindValue( 20, fragMz.join(";"));
-            query1.bindValue( 21, fragIntensity.join(";"));
-            query1.bindValue( 22, fragLabels.join(";"));
+            query1.bindValue( 18, fragMz.join(";"));
+            query1.bindValue( 19, fragIntensity.join(";"));
+            query1.bindValue( 29, fragLabels.join(";"));
+
+            //Issue 768: Added new columns for expectedRtMin and expectedRtMax
+            query1.bindValue( 21, c->expectedRtMin);
+            query1.bindValue( 22, c->expectedRtMax);
 
             if(!query1.exec())  qDebug() << query1.lastError();
         }
