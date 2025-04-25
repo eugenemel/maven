@@ -52,8 +52,11 @@ mac {
 	    INCLUDEPATH += /usr/local/opt/llvm/include/
             INCLUDEPATH += /usr/local/opt/llvm/lib/include/
 
+            # Qt Creator may need this as an explicitly added header for a custom compiler
+            # INCLUDEPATH += /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
+
             # Change this as needed for version of llvm
-            # INCLUDEPATH += /usr/local/opt/llvm/lib/clang/16/include/
+            # INCLUDEPATH += /usr/local/opt/llvm/lib/clang/19/include/
 
             CONFIG += parallel
         }
