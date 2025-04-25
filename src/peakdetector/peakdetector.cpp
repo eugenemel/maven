@@ -1700,6 +1700,8 @@ void writeReport(string setName) {
 	    //create new sqlite database
             cout << "Creating new project file" << endl;
             string projectDBfilename = outputdir + setName + ".mzrollDB";
+
+            qDebug() << "new project file:" << projectDBfilename.c_str();
             project = new ProjectDB(projectDBfilename.c_str());
 
             if ( project->isOpen() ) {
@@ -1713,9 +1715,6 @@ void writeReport(string setName) {
                 if (!sampleToUpdatedRts.empty()) {
                     project->saveAlignment(sampleToUpdatedRts);
                 }
-
-                //Issue 768: deprecated
-                // if(saveScanData) project->saveScans(samples); //~50% of time in writeReport() spent here
 
                 if (isSpecialSearch()) {
                     set<Compound*> compoundSet;
