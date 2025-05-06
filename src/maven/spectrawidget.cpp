@@ -1514,13 +1514,6 @@ void SpectraWidget::contextMenuEvent(QContextMenuEvent * event) {
     QAction* a3b = menu.addAction("Find Similar Scans");
     connect(a3b, SIGNAL(triggered()), SLOT(findSimilarScans()));
 
-    QAction* a4 = menu.addAction("Profile Mode");
-    connect(a4, SIGNAL(triggered()), SLOT(setProfileMode()));
-    //connect(a4, SIGNAL(triggered()), SLOT(spectraToClipboard()));
-    
-    QAction* a5 = menu.addAction("Centroided Mode");
-    connect(a5, SIGNAL(triggered()), SLOT(setCentroidedMode()));
-
     menu.addSeparator();
 
     QAction *aHighPrecision = menu.addAction("Display High Precision m/z");
