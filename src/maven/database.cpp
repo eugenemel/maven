@@ -912,7 +912,7 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
             }
         }
 
-        string id, name, formula, smile, adductName;
+        string id, name, formula, smile, adductName, encodedMs2Spectrum;
         float rt=0;
         float mz=0;
         float charge=0;
@@ -959,6 +959,10 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
         if ( header.count("preferred_quant_type") && header["preferred_quant_type"] < N) preferredQuantType = fields[ header["preferred_quant_type"]].toStdString();
 
         if (header.count("compound_labels") && header["compound_labels"] < N) compoundLabels = fields[ header["compound_labels"]].toStdString();
+
+        if (header.count("ms2_spectrum") && header["ms2_spectrum"] < N) {
+            encodedMs2Spectrum = fields[ header["ms2_spectrum"] ].toStdString();
+        }
 
         //cerr << lineCount << " " << endl;
         //for(int i=0; i<headers.size(); i++) cerr << headers[i] << ", ";
@@ -1028,6 +1032,17 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
             if (! compoundLabels.empty()) {
                 compound->metaDataMap.insert(
                   make_pair(Compound::getCompoundLabelsStringKey(), compoundLabels));
+            }
+
+            if (! encodedMs2Spectrum.empty()) {
+                try {
+                    vector<vector<float>> msMsSpectrum = mzUtils::decodeMsMsSpectrum(encodedMs2Spectrum);
+                    compound->fragment_mzs = msMsSpectrum.at(0);
+                    compound->fragment_intensity = msMsSpectrum.at(1);
+                    compound->fragment_labels = vector<string>(msMsSpectrum.size());
+                } catch (std::exception) {
+                    qDebug() << "Unable to parse MS2 information associated with compound:" << name.c_str();
+                }
             }
 
             compoundSet.push_back(compound);
