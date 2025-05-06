@@ -1940,12 +1940,6 @@ void EicWidget::contextMenuEvent(QContextMenuEvent * event) {
     connect(o3, SIGNAL(toggled(bool)), SLOT(showTicLine(bool)));
     connect(o3, SIGNAL(toggled(bool)), SLOT(replot()));
 
-    QAction* o31 = menu.addAction("Show BIC");
-    o31->setCheckable(true);
-    o31->setChecked(_showBicLine);
-    connect(o31, SIGNAL(toggled(bool)), SLOT(showBicLine(bool)));
-    connect(o31, SIGNAL(toggled(bool)), SLOT(replot()));
-
     QAction* o33 = menu.addAction("Show Merged EIC");
     o33->setCheckable(true);
     o33->setChecked(_showMergedEIC);
