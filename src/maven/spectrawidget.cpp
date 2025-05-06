@@ -1511,12 +1511,6 @@ void SpectraWidget::contextMenuEvent(QContextMenuEvent * event) {
     QAction* a1 = menu.addAction("Go To Scan");
     connect(a1, SIGNAL(triggered()), SLOT(gotoScan()));
 
-    QAction* a6 = menu.addAction("Log10 Transform");
-    a6->setCheckable(true);
-    a6->setChecked(_log10Transform);
-    connect(a6, SIGNAL(toggled(bool)), SLOT(setLog10Transform(bool)));
-    connect(a6, SIGNAL(toggled(bool)),  SLOT(resetZoom()));
-
     QAction* a3b = menu.addAction("Find Similar Scans");
     connect(a3b, SIGNAL(triggered()), SLOT(findSimilarScans()));
 
