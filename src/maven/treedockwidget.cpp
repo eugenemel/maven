@@ -692,7 +692,7 @@ QTreeWidgetItem* TreeDockWidget::addSlice(mzSlice* s, QTreeWidgetItem* parent) {
         return item;
 }
 
-void TreeDockWidget::setInfo(vector<mzLink>& links, QString rootNote) {
+void TreeDockWidget::setInfo(vector<mzLink>& links, float rootRt, QString rootNote) {
     treeWidget->clear();
     if (links.size() == 0 ) return;
 
@@ -702,7 +702,13 @@ void TreeDockWidget::setInfo(vector<mzLink>& links, QString rootNote) {
     treeWidget->setSortingEnabled(false);
 
     QTreeWidgetItem *item0 = new QTreeWidgetItem(treeWidget,mzLinkType);
-    QString title = "Peak: m/z=" + QString::number(links[0].mz1,'f',4);
+
+    QString title;
+    if (rootRt > 0) {
+        title = "Peak: (" + QString::number(links[0].mz1,'f',4) +", " +  QString::number(rootRt,'f',2) + ")";
+    } else {
+        title = "Peak: m/z=" + QString::number(links[0].mz1,'f',4);
+    }
 
     item0->setText(0, title);
 
@@ -715,6 +721,7 @@ void TreeDockWidget::setInfo(vector<mzLink>& links, QString rootNote) {
 
     treeWidget->setSortingEnabled(true);
     treeWidget->sortByColumn(1,Qt::DescendingOrder);
+    treeWidget->setColumnWidth(0, 200);
 }
 
 QTreeWidgetItem* TreeDockWidget::addLink(mzLink* s,QTreeWidgetItem* parent)  {
