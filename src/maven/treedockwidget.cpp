@@ -692,9 +692,13 @@ QTreeWidgetItem* TreeDockWidget::addSlice(mzSlice* s, QTreeWidgetItem* parent) {
         return item;
 }
 
-void TreeDockWidget::setInfo(vector<mzLink>& links, float rootRt, QString rootNote) {
+void TreeDockWidget::setInfo(
+    vector<mzLink>& peakLinks,
+    float peakRootRt,
+    QString peakRootNote) {
+
     treeWidget->clear();
-    if (links.size() == 0 ) return;
+    if (peakLinks.size() == 0 ) return;
 
     QStringList header; header << "m/z" <<  "correlation" << "note";
     treeWidget->clear();
@@ -704,20 +708,20 @@ void TreeDockWidget::setInfo(vector<mzLink>& links, float rootRt, QString rootNo
     QTreeWidgetItem *item0 = new QTreeWidgetItem(treeWidget,mzLinkType);
 
     QString title;
-    if (rootRt > 0) {
-        title = "Peak: (" + QString::number(links[0].mz1,'f',4) +", " +  QString::number(rootRt,'f',2) + ")";
+    if (peakRootRt > 0) {
+        title = "Peak: (" + QString::number(peakLinks[0].mz1,'f',4) +", " +  QString::number(peakRootRt,'f',2) + ")";
     } else {
-        title = "Peak: m/z=" + QString::number(links[0].mz1,'f',4);
+        title = "Peak: m/z=" + QString::number(peakLinks[0].mz1,'f',4);
     }
 
     item0->setText(0, title);
 
-    if (!rootNote.isEmpty()) {
-        item0->setText(2, rootNote);
+    if (!peakRootNote.isEmpty()) {
+        item0->setText(2, peakRootNote);
     }
 
     item0->setExpanded(true);
-    for(int i=0; i < links.size(); i++) addLink(&links[i],item0);
+    for(int i=0; i < peakLinks.size(); i++) addLink(&peakLinks[i],item0);
 
     treeWidget->setSortingEnabled(true);
     treeWidget->sortByColumn(1,Qt::DescendingOrder);

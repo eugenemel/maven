@@ -2712,8 +2712,8 @@ void MainWindow::getCovariants(Peak* peak, PeakGroup* group) {
     vector<mzLink> linksX = SpectraWidget::findLinks(peak->peakMz, scan, ppm, ionizationMode);
     for(unsigned int i=0; i < linksX.size(); i++ ) links.push_back(linksX[i]);
 
-    QString rootNote = QString("sample=") + sample->sampleName.c_str();
-    float rootRt = peak->rt;
+    QString peakRootNote = QString("sample=") + sample->sampleName.c_str();
+    float peakRootRt = peak->rt;
 
     //correlations
     float rtmin = peak->rtmin-1;
@@ -2728,9 +2728,11 @@ void MainWindow::getCovariants(Peak* peak, PeakGroup* group) {
         for(auto& m: matches) { links[i].note += " |" + m.name; break; }
     }
 
-    vector<mzLink>subset;
+    vector<mzLink> subset, groupSubset;
     for(int i=0; i < links.size(); i++ ) { if(links[i].correlation > 0.5)  subset.push_back(links[i]); }
-    if(subset.size())    covariantsPanel->setInfo(subset, rootRt, rootNote);
+    if(subset.size()) {
+        covariantsPanel->setInfo(subset, peakRootRt, peakRootNote);
+    }
     if(subset.size() && galleryDockWidget->isVisible()) galleryWidget->addEicPlots(subset);
 
     // Issue 776: Group covariants
