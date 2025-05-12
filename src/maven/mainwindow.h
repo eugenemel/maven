@@ -212,8 +212,6 @@ public slots:
     void setMzValue(float mz);
     void loadModel();
 
-
-
     bool addSample(mzSample* sample);
     void compoundDatabaseSearch();
     void setUrl(QString url,QString link=QString::null);
@@ -262,7 +260,7 @@ public slots:
     void addToHistory(const mzSlice& slice);
     void historyNext();
     void historyLast();
-    void getCovariants(Peak* peak);
+    void getCovariants(Peak* peak, PeakGroup *group);
     void markGroup(PeakGroup* group,char label);
     void updateAdductsInGUI();
     void updateSampleComboBoxes();
@@ -302,6 +300,9 @@ public slots:
 
     //Issue 613
     void showPeakInCovariantsWidget(Peak* peak);
+
+    //Issue 776
+    void showPeakAndGroupInCovariantsWidget(PeakAndGroup peakAndGroup);
 
 private slots:
     void createMenus();

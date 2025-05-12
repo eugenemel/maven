@@ -74,6 +74,7 @@ signals:
     void peakGroupFocus(PeakGroup*);
     void scanSelected(Scan*);
     void groupClicked(PeakGroup*);
+    void peakAndGroup(PeakAndGroup);
 
 
 };

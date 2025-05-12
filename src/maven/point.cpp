@@ -52,7 +52,7 @@ EicPoint::EicPoint(float x, float y, Peak* peak, MainWindow* mw)
          connect(this, SIGNAL(peakSelected(Peak*)), mw, SLOT(showPeakInMs1Spectrum(Peak*)));
 
          //Issue 613: Display covariates
-         connect(this, SIGNAL(peakSelected(Peak*)), mw, SLOT(showPeakInCovariantsWidget(Peak*)));
+         connect(this, SIGNAL(peakAndGroup(PeakAndGroup)), mw, SLOT(showPeakAndGroupInCovariantsWidget(PeakAndGroup)));
     }
 
     //mouse press events
@@ -133,6 +133,12 @@ void EicPoint::mousePressEvent (QGraphicsSceneMouseEvent* event) {
         if (selGroup) {
             emit(groupClicked(selGroup));
         }
+
+        PeakAndGroup myPeakAndGroup;
+        myPeakAndGroup.peak = _peak;
+        myPeakAndGroup.group = selGroup;
+
+        emit peakAndGroup(myPeakAndGroup);
     }
 
     //e.g. MS/MS event triangles

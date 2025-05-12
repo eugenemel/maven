@@ -2004,7 +2004,9 @@ void MainWindow::updateGUIWithLastSelectedPeakGroup(){
 
     Peak *_peak = &(_lastSelectedPeakGroup->peaks[0]);
 
-    showPeakInfo(_peak);
+    if (covariantsPanel->isVisible()) {
+        getCovariants(_peak, _lastSelectedPeakGroup);
+    }
 
 }
 
@@ -2203,10 +2205,6 @@ void MainWindow::showPeakInfo(Peak* _peak) {
             mz = 0.5f* (_peak->mzmin + _peak->mzmax);
         }
         showConsensusFragmentationScans(mz);
-    }
-
-    if (covariantsPanel->isVisible()) {
-        getCovariants(_peak);
     }
 }
 
@@ -2695,7 +2693,7 @@ QWidget* MainWindow::eicWidgetController() {
     return window;
 }
 
-void MainWindow::getCovariants(Peak* peak ) {
+void MainWindow::getCovariants(Peak* peak, PeakGroup* group) {
     if(!peak) return;
     if(!covariantsPanel->isVisible()) return;
 
@@ -2734,6 +2732,11 @@ void MainWindow::getCovariants(Peak* peak ) {
     for(int i=0; i < links.size(); i++ ) { if(links[i].correlation > 0.5)  subset.push_back(links[i]); }
     if(subset.size())    covariantsPanel->setInfo(subset, rootRt, rootNote);
     if(subset.size() && galleryDockWidget->isVisible()) galleryWidget->addEicPlots(subset);
+
+    // Issue 776: Group covariants
+    if (group) {
+        qDebug() << "MainWindow::getCovariants(): group received";
+    }
 }
 
 PeakGroup::QType MainWindow::getUserQuantType() {
@@ -3004,7 +3007,16 @@ void MainWindow::showPeakInMs1Spectrum(Peak* peak) {
 void MainWindow::showPeakInCovariantsWidget(Peak *peak) {
     if (!peak) return;
     if (covariantsPanel->isVisible()) {
-        getCovariants(peak);
+        getCovariants(peak, nullptr);
+    }
+}
+
+void MainWindow::showPeakAndGroupInCovariantsWidget(PeakAndGroup peakAndGroup) {
+    Peak *peak = peakAndGroup.peak;
+    PeakGroup *group = peakAndGroup.group;
+    if (!peak) return;
+    if (covariantsPanel->isVisible()) {
+        getCovariants(peak, group);
     }
 }
 
