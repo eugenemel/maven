@@ -2736,13 +2736,6 @@ void MainWindow::getCovariants(Peak* peak ) {
     if(subset.size() && galleryDockWidget->isVisible()) galleryWidget->addEicPlots(subset);
 }
 
-void MainWindow::getGroupCovariants(PeakGroup *group) {
-    if (!group) return;
-    if (!covariantsPanel->isVisible()) return;
-
-    //TODO: implement me
-}
-
 PeakGroup::QType MainWindow::getUserQuantType() {
     if (quantType) {
         QString type = quantType->currentText();
