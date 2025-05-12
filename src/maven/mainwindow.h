@@ -263,6 +263,7 @@ public slots:
     void historyNext();
     void historyLast();
     void getCovariants(Peak* peak);
+    void getGroupCovariants(PeakGroup *group);
     void markGroup(PeakGroup* group,char label);
     void updateAdductsInGUI();
     void updateSampleComboBoxes();

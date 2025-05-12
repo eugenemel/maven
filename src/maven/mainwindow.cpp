@@ -2714,6 +2714,8 @@ void MainWindow::getCovariants(Peak* peak ) {
     vector<mzLink> linksX = SpectraWidget::findLinks(peak->peakMz, scan, ppm, ionizationMode);
     for(unsigned int i=0; i < linksX.size(); i++ ) links.push_back(linksX[i]);
 
+    QString title = "Peak: m/z=" + QString::number(links[0].mz1,'f',4) + " sample=" + sample->sampleName.c_str();
+
     //correlations
     float rtmin = peak->rtmin-1;
     float rtmax=  peak->rtmax+1;
@@ -2729,10 +2731,16 @@ void MainWindow::getCovariants(Peak* peak ) {
 
     vector<mzLink>subset;
     for(int i=0; i < links.size(); i++ ) { if(links[i].correlation > 0.5)  subset.push_back(links[i]); }
-    if(subset.size())    covariantsPanel->setInfo(subset);
+    if(subset.size())    covariantsPanel->setInfo(subset, title);
     if(subset.size() && galleryDockWidget->isVisible()) galleryWidget->addEicPlots(subset);
 }
 
+void MainWindow::getGroupCovariants(PeakGroup *group) {
+    if (!group) return;
+    if (!covariantsPanel->isVisible()) return;
+
+    //TODO: implement me
+}
 
 PeakGroup::QType MainWindow::getUserQuantType() {
     if (quantType) {
