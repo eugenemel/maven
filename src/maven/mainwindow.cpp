@@ -2728,17 +2728,49 @@ void MainWindow::getCovariants(Peak* peak, PeakGroup* group) {
         for(auto& m: matches) { links[i].note += " |" + m.name; break; }
     }
 
-    vector<mzLink> subset, groupSubset;
-    for(int i=0; i < links.size(); i++ ) { if(links[i].correlation > 0.5)  subset.push_back(links[i]); }
-    if(subset.size()) {
-        covariantsPanel->setInfo(subset, peakRootRt, peakRootNote);
+    vector<mzLink> peakLinks, groupLinks;
+    for(int i=0; i < links.size(); i++ ) {
+        if(links[i].correlation > 0.5) {
+            peakLinks.push_back(links[i]);
+        }
     }
-    if(subset.size() && galleryDockWidget->isVisible()) galleryWidget->addEicPlots(subset);
 
     // Issue 776: Group covariants
     if (group) {
-        qDebug() << "MainWindow::getCovariants(): group received";
+        vector<mzSample*> samples = this->getVisibleSamples();
+        vector<float> thisGroupQuant = group->getOrderedIntensityVector(samples, this->getUserQuantType());
+
+        for (TableDockWidget *table : this->getAllPeakTables()) {
+            for (PeakGroup * comparisonGroup : table->getAllGroups()) {
+                if (comparisonGroup != group) {
+
+                    // RT filtering
+                    float rtDiff = abs(group->meanRt - comparisonGroup->meanRt);
+
+                    if (rtDiff >= 0.5) continue; //note half-minute threshold
+
+                    vector<float> comparisonGroupQuant =  group->getOrderedIntensityVector(samples, this->getUserQuantType());
+                    float corr = mzUtils::correlation(thisGroupQuant, comparisonGroupQuant);
+
+                    if (corr < 0.50) continue; //note correlation of 0.50 threshold
+
+                    mzLink link;
+                    link.mz1 = group->meanMz;
+                    link.mz2 = comparisonGroup->meanMz;
+                    link.correlation = corr;
+                    link.note = table->title.toStdString();
+
+                    groupLinks.push_back(link);
+                }
+            }
+        }
+
     }
+
+    if(peakLinks.size()) {
+        covariantsPanel->setInfo(peakLinks, peakRootRt, peakRootNote);
+    }
+    if(peakLinks.size() && galleryDockWidget->isVisible()) galleryWidget->addEicPlots(peakLinks);
 }
 
 PeakGroup::QType MainWindow::getUserQuantType() {

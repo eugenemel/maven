@@ -27,6 +27,7 @@ class TableDockWidget: public QDockWidget {
       Q_OBJECT
 
 public:
+    QString title = "";
     QWidget 	*dockWidgetContents;
     QHBoxLayout *horizontalLayout;
     QTreeWidget *treeWidget;

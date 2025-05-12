@@ -1,6 +1,7 @@
 #include "tabledockwidget.h"
 
 TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QString encodedTableInfo, QString displayTableInfo) {
+    this->title = title;
     setAllowedAreas(Qt::AllDockWidgetAreas);
     setFloating(false);
     _mainwindow = mw;
