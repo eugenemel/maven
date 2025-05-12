@@ -692,7 +692,7 @@ QTreeWidgetItem* TreeDockWidget::addSlice(mzSlice* s, QTreeWidgetItem* parent) {
         return item;
 }
 
-void TreeDockWidget::setInfo(vector<mzLink>& links, QString title) {
+void TreeDockWidget::setInfo(vector<mzLink>& links, QString rootNote) {
     treeWidget->clear();
     if (links.size() == 0 ) return;
 
@@ -702,13 +702,12 @@ void TreeDockWidget::setInfo(vector<mzLink>& links, QString title) {
     treeWidget->setSortingEnabled(false);
 
     QTreeWidgetItem *item0 = new QTreeWidgetItem(treeWidget,mzLinkType);
-    QString altTitle = "Peak: m/z=" + QString::number(links[0].mz1,'f',4);
+    QString title = "Peak: m/z=" + QString::number(links[0].mz1,'f',4);
 
-    if (title.isEmpty()) {
-        QString altTitle = "Peak: m/z=" + QString::number(links[0].mz1,'f',4);
-        item0->setText(0, altTitle);
-    } else {
-        item0->setText(0, title);
+    item0->setText(0, title);
+
+    if (!rootNote.isEmpty()) {
+        item0->setText(2, rootNote);
     }
 
     item0->setExpanded(true);
@@ -720,21 +719,23 @@ void TreeDockWidget::setInfo(vector<mzLink>& links, QString title) {
 
 QTreeWidgetItem* TreeDockWidget::addLink(mzLink* s,QTreeWidgetItem* parent)  {
 
-        if (!s) return NULL;
+    if (!s) return nullptr;
 
-        QTreeWidgetItem *item=NULL;
-    if( parent == NULL ){
-            item = new QTreeWidgetItem(treeWidget,mzLinkType);
-        } else {
-            item = new QTreeWidgetItem(parent,mzLinkType);
-        }
+    QTreeWidgetItem *item=nullptr;
+    if(!parent){
+        item = new QTreeWidgetItem(treeWidget,mzLinkType);
+        item->setText(0,QString::number(s->mz2,'f',4));
+        item->setText(2, QString(s->note.c_str()));
+    } else {
+        item = new QTreeWidgetItem(parent,mzLinkType);
+    }
 
-        if ( item ) {
-                item->setText(0,QString::number(s->mz2,'f',4));
-                item->setText(1,QString::number(s->correlation,'f',2));
-                item->setText(2,QString(s->note.c_str()));
-        }
-        return item;
+    if ( item ) {
+            item->setText(0,QString::number(s->mz2,'f',4));
+            item->setText(1,QString::number(s->correlation,'f',2));
+            item->setText(2,QString(s->note.c_str()));
+    }
+    return item;
 }
 
 

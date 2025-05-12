@@ -54,7 +54,7 @@ public slots:
       void setInfo(vector<SRMTransition*>& srmTransitions);
       void setInfo(set<string>& srmIds);
 
-      void setInfo(vector<mzLink>&links, QString title=""); // Covariants panel - Peak
+      void setInfo(vector<mzLink>&links, QString rootNote=""); // Covariants panel - Peak
 
       void setupScanListHeader();
       void setupConsensusScanListHeader();
