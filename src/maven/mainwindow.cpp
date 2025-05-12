@@ -1680,6 +1680,7 @@ void MainWindow::createToolBars() {
     QToolButton* btnMs3Spectra = addDockWidgetButton(sideBar, ms3SpectraDockWidget, QIcon(rsrcPath + "/spectra_with_3.png"), "MS3 Spectra");
     QToolButton* btnIsotopes = addDockWidgetButton(sideBar,isotopeWidget,QIcon(rsrcPath + "/isotope.png"), "Isotopes Widget (F5)");
     QToolButton* btnFindCompound = addDockWidgetButton(sideBar,massCalcWidget,QIcon(rsrcPath + "/findcompound.png"), "Compound Search (F6)");
+    QToolButton* btnCovariants = addDockWidgetButton(sideBar,covariantsPanel,QIcon(rsrcPath + "/covariants.png"), "Covariants Widget (F7)");
     QToolButton* btnBookmarks = addDockWidgetButton(sideBar,bookmarkedPeaks,QIcon(rsrcPath + "/showbookmarks.png"), "Bookmarks (F10)");
     QToolButton* btnGallery = addDockWidgetButton(sideBar,galleryDockWidget,QIcon(rsrcPath + "/gallery.png"), "Gallery");
     QToolButton* btnScatter = addDockWidgetButton(sideBar,scatterDockWidget,QIcon(rsrcPath + "/scatterplot.png"), "Scatter Plot");
@@ -1695,6 +1696,7 @@ void MainWindow::createToolBars() {
     btnSpectra->setShortcut(Qt::Key_F4);
     btnIsotopes->setShortcut(Qt::Key_F5);
     btnFindCompound->setShortcut(Qt::Key_F6);
+    btnCovariants->setShortcut(Qt::Key_F7);
     btnBookmarks->setShortcut(Qt::Key_F10);
     btnSRM->setShortcut(Qt::Key_F12);
 
@@ -1713,6 +1715,7 @@ void MainWindow::createToolBars() {
     sideBar->addWidget(btnMs3Spectra);
     sideBar->addWidget(btnIsotopes);
     sideBar->addWidget(btnFindCompound);
+    sideBar->addWidget(btnCovariants);
     sideBar->addWidget(btnSRM);
     sideBar->addWidget(btnGallery);
     sideBar->addWidget(btnScatter);
