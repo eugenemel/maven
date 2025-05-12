@@ -2334,7 +2334,8 @@ QString MainWindow::groupTextExport(PeakGroup* group ) {
 void MainWindow::findCovariants(Peak* _peak) {
     if ( covariantsPanel->isVisible() ) {
         vector<mzLink> links = _peak->findCovariants();
-        covariantsPanel->setInfo(links);
+        vector<mzLink> groupLinks{};
+        covariantsPanel->setInfo(links, 0, "", groupLinks, 0, "");
     }
 }
 
@@ -2735,10 +2736,26 @@ void MainWindow::getCovariants(Peak* peak, PeakGroup* group) {
         }
     }
 
+    float groupRootRt = 0;
+    QString groupRootNote = "";
+
     // Issue 776: Group covariants
     if (group) {
         vector<mzSample*> samples = this->getVisibleSamples();
         vector<float> thisGroupQuant = group->getOrderedIntensityVector(samples, this->getUserQuantType());
+        groupRootRt = group->meanRt;
+
+        string compoundName, adductName;
+        if (group->compound) {
+            compoundName = group->compound->name.c_str();
+            groupRootNote.append(compoundName.c_str());
+        }
+
+        if (group->adduct) {
+            adductName = group->adduct->name.c_str();
+            groupRootNote.append(" ");
+            groupRootNote.append(adductName.c_str());
+        }
 
         for (TableDockWidget *table : this->getAllPeakTables()) {
             for (PeakGroup * comparisonGroup : table->getAllGroups()) {
@@ -2749,16 +2766,29 @@ void MainWindow::getCovariants(Peak* peak, PeakGroup* group) {
 
                     if (rtDiff >= 0.5) continue; //note half-minute threshold
 
-                    vector<float> comparisonGroupQuant =  group->getOrderedIntensityVector(samples, this->getUserQuantType());
+                    vector<float> comparisonGroupQuant =  comparisonGroup->getOrderedIntensityVector(samples, this->getUserQuantType());
                     float corr = mzUtils::correlation(thisGroupQuant, comparisonGroupQuant);
 
                     if (corr < 0.50) continue; //note correlation of 0.50 threshold
+
+                    QString note;
+                    if (comparisonGroup->compound) {
+                        note.append(comparisonGroup->compound->name.c_str());
+                        note.append(" ");
+                    }
+
+                    if (comparisonGroup->adduct) {
+                        note.append(comparisonGroup->adduct->name.c_str());
+                        note.append(" ");
+                    }
+
+                    note.append(table->title);
 
                     mzLink link;
                     link.mz1 = group->meanMz;
                     link.mz2 = comparisonGroup->meanMz;
                     link.correlation = corr;
-                    link.note = table->title.toStdString();
+                    link.note = note.toStdString();
 
                     groupLinks.push_back(link);
                 }
@@ -2768,7 +2798,7 @@ void MainWindow::getCovariants(Peak* peak, PeakGroup* group) {
     }
 
     if(peakLinks.size()) {
-        covariantsPanel->setInfo(peakLinks, peakRootRt, peakRootNote);
+        covariantsPanel->setInfo(peakLinks, peakRootRt, peakRootNote, groupLinks, groupRootRt, groupRootNote);
     }
     if(peakLinks.size() && galleryDockWidget->isVisible()) galleryWidget->addEicPlots(peakLinks);
 }

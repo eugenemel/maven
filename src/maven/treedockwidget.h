@@ -55,8 +55,11 @@ public slots:
       void setInfo(set<string>& srmIds);
 
       void setInfo(vector<mzLink>& peakLinks,
-                   float peakRootRt = 0,
-                   QString peakRootNote="");
+                   float peakRootRt,
+                   QString peakRootNote,
+                   vector<mzLink>& groupLinks,
+                   float groupRootRt,
+                   QString groupRootNote);
 
       void setupScanListHeader();
       void setupConsensusScanListHeader();

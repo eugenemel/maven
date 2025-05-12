@@ -695,7 +695,10 @@ QTreeWidgetItem* TreeDockWidget::addSlice(mzSlice* s, QTreeWidgetItem* parent) {
 void TreeDockWidget::setInfo(
     vector<mzLink>& peakLinks,
     float peakRootRt,
-    QString peakRootNote) {
+    QString peakRootNote,
+    vector<mzLink>& groupLinks,
+    float groupRootRt,
+    QString groupRootNote) {
 
     treeWidget->clear();
     if (peakLinks.size() == 0 ) return;
@@ -725,12 +728,26 @@ void TreeDockWidget::setInfo(
         addLink(&peakLinks[i],item0);
     }
 
-    // group items
-    QTreeWidgetItem *itemGroup0 = new QTreeWidgetItem(treeWidget, mzLinkType);
-    itemGroup0->setText(0, "TODO: group");
+    if (!groupLinks.empty()) {
+        // group items
+        QTreeWidgetItem *itemGroup0 = new QTreeWidgetItem(treeWidget, mzLinkType);
+
+        QString groupTitle;
+        if (groupRootRt > 0) {
+            groupTitle = "Group: (" + QString::number(groupLinks[0].mz1,'f',4) +", " +  QString::number(groupRootRt,'f',2) + ")";
+        } else {
+            groupTitle = "Group: m/z=" + QString::number(groupLinks[0].mz1,'f',4);
+        }
+        itemGroup0->setText(0, groupTitle);
+
+        itemGroup0->setExpanded(true);
+        for (unsigned int i = 0; i < groupLinks.size(); i++) {
+            addLink(&groupLinks[i], itemGroup0);
+        }
+    }
 
     treeWidget->setSortingEnabled(true);
-    treeWidget->sortByColumn(1,Qt::DescendingOrder);
+    treeWidget->sortByColumn(1, Qt::DescendingOrder);
     treeWidget->setColumnWidth(0, 200);
 }
 
