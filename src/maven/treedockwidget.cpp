@@ -707,21 +707,27 @@ void TreeDockWidget::setInfo(
 
     QTreeWidgetItem *item0 = new QTreeWidgetItem(treeWidget,mzLinkType);
 
-    QString title;
+    QString peakTitle;
     if (peakRootRt > 0) {
-        title = "Peak: (" + QString::number(peakLinks[0].mz1,'f',4) +", " +  QString::number(peakRootRt,'f',2) + ")";
+        peakTitle = "Peak: (" + QString::number(peakLinks[0].mz1,'f',4) +", " +  QString::number(peakRootRt,'f',2) + ")";
     } else {
-        title = "Peak: m/z=" + QString::number(peakLinks[0].mz1,'f',4);
+        peakTitle = "Peak: m/z=" + QString::number(peakLinks[0].mz1,'f',4);
     }
 
-    item0->setText(0, title);
+    item0->setText(0, peakTitle);
 
     if (!peakRootNote.isEmpty()) {
         item0->setText(2, peakRootNote);
     }
 
     item0->setExpanded(true);
-    for(int i=0; i < peakLinks.size(); i++) addLink(&peakLinks[i],item0);
+    for(int i=0; i < peakLinks.size(); i++) {
+        addLink(&peakLinks[i],item0);
+    }
+
+    // group items
+    QTreeWidgetItem *itemGroup0 = new QTreeWidgetItem(treeWidget, mzLinkType);
+    itemGroup0->setText(0, "TODO: group");
 
     treeWidget->setSortingEnabled(true);
     treeWidget->sortByColumn(1,Qt::DescendingOrder);
