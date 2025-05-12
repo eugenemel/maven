@@ -298,9 +298,6 @@ public slots:
     //Issue 612
     void showPeakInMs1Spectrum(Peak* peak);
 
-    //Issue 613
-    void showPeakInCovariantsWidget(Peak* peak);
-
     //Issue 776
     void showPeakAndGroupInCovariantsWidget(PeakAndGroup peakAndGroup);
 

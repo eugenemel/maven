@@ -3004,13 +3004,6 @@ void MainWindow::showPeakInMs1Spectrum(Peak* peak) {
     }
 }
 
-void MainWindow::showPeakInCovariantsWidget(Peak *peak) {
-    if (!peak) return;
-    if (covariantsPanel->isVisible()) {
-        getCovariants(peak, nullptr);
-    }
-}
-
 void MainWindow::showPeakAndGroupInCovariantsWidget(PeakAndGroup peakAndGroup) {
     Peak *peak = peakAndGroup.peak;
     PeakGroup *group = peakAndGroup.group;
