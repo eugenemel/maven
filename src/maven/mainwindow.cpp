@@ -2764,7 +2764,7 @@ void MainWindow::getCovariants(Peak* peak, PeakGroup* group) {
                     // RT filtering
                     float rtDiff = abs(group->meanRt - comparisonGroup->meanRt);
 
-                    if (rtDiff >= 0.5) continue; //note half-minute threshold
+                    if (rtDiff >= 0.1) continue; //note hard-coded threshold
 
                     vector<float> comparisonGroupQuant =  comparisonGroup->getOrderedIntensityVector(samples, this->getUserQuantType());
                     float corr = mzUtils::correlation(thisGroupQuant, comparisonGroupQuant);
