@@ -69,17 +69,17 @@ build_script:
   # - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/; qmake CONFIG+=release -r build.pro 2>/dev/null; make -j16 2>/dev/null; make INSTALL_ROOT=appdir install 2>/dev/null"}
 
   # previous working version (pre-Issue 742)
-  # - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/maven_core; qmake CONFIG+=release -r build.pro 2>/dev/null; make -j16 2>/dev/null; cd /c/projects/maven/src/maven/; qmake CONFIG+=release maven.pro 2>/dev/null; make -j16 2>/dev/null; make INSTALL_ROOT=appdir install 2>/dev/null"}
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/maven_core; qmake CONFIG+=release -r build.pro 2>/dev/null; make -j16 2>/dev/null; cd /c/projects/maven/src/maven/; qmake CONFIG+=release maven.pro 2>/dev/null; make -j16 2>/dev/null; make INSTALL_ROOT=appdir install 2>/dev/null"}
     
   # Issue 742: Add peakdetector build explicitly.
   # - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/maven_core; qmake CONFIG+=release -r build.pro 2>/dev/null; make -j16 2>/dev/null; cd /c/projects/maven/src/maven/; qmake CONFIG+=release maven.pro 2>/dev/null; make -j16 2>/dev/null; make INSTALL_ROOT=appdir install 2>/dev/null; cd /c/projects/maven/src/peakdetector; qmake CONFIG+=release peakdetector.pro; make -j16; make INSTALL_ROOT=appdir install"}
   
   # START ISSUE 742 BLOCK
   # Build the core libraries first
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/maven_core; qmake CONFIG+=release -r build.pro; make -j16"}
+  # - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/maven_core; qmake CONFIG+=release -r build.pro; make -j16"}
 
   # Build Maven GUI application
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/maven/; qmake CONFIG+=release maven.pro; make -j16; make INSTALL_ROOT=appdir install"}
+  # - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/maven/; qmake CONFIG+=release maven.pro; make -j16; make INSTALL_ROOT=appdir install"}
 
   # Build peakdetector command-line tool
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/peakdetector; qmake CONFIG+=release peakdetector.pro; make -j16; make INSTALL_ROOT=appdir install"}
