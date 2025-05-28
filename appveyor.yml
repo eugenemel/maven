@@ -65,14 +65,18 @@ build_script:
 #   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "echo APPVEYOR_BUILD_FOLDER=$APPVEYOR_BUILD_FOLDER" }
 #   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "find $APPVEYOR_BUILD_FOLDER -name 'build.pro'" }
 
-# Issue 742: builds all maven executables (including peakdetector)
-#  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/; qmake CONFIG+=release -r build.pro 2>/dev/null; make -j16 2>/dev/null; make INSTALL_ROOT=appdir install 2>/dev/null"}
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/maven_core; qmake CONFIG+=release -r build.pro 2>/dev/null; make -j16 2>/dev/null; cd /c/projects/maven/src/maven/; qmake CONFIG+=release maven.pro 2>/dev/null; make -j16 2>/dev/null; make INSTALL_ROOT=appdir install 2>/dev/null"}
+  # Issue 742: builds all maven executables (including peakdetector)
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/; qmake CONFIG+=release -r build.pro 2>/dev/null; make -j16 2>/dev/null; make INSTALL_ROOT=appdir install 2>/dev/null"}
+
+  # previous working version (pre-Issue 742)
+  # - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/maven_core; qmake CONFIG+=release -r build.pro 2>/dev/null; make -j16 2>/dev/null; cd /c/projects/maven/src/maven/; qmake CONFIG+=release maven.pro 2>/dev/null; make -j16 2>/dev/null; make INSTALL_ROOT=appdir install 2>/dev/null"}
     
   # Print contents
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd /c/projects/maven/; ls src/maven/appdir/bin/" }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd /c/projects/maven/; find . -name 'Maven.exe'" }
-  # - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd /c/projects/maven/; find . -name 'peakdetector.exe'" }
+  
+  # Issue 742: Uncommented line below
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd /c/projects/maven/; find . -name 'peakdetector.exe'" }
 
 after_build:
 
@@ -85,7 +89,7 @@ after_build:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd /c/projects/maven/; ./make_dist_win32.sh src/maven/appdir/bin/Maven.exe" }
   
   # Issue 742: Deploy peakdetector
-  #- ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd /c/projects/maven/; ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd /c/projects/maven/; ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe" }
       
 artifacts:
   - path: dist/Maven*.dmg
@@ -94,8 +98,8 @@ artifacts:
     name: peakdetector-macos
   - path: dist/Maven*.zip
     name: Maven-windows
-#   - path: dist/peakdetector*.zip
-#     name: peakdetector-windows
+  - path: dist/peakdetector*.zip
+    name: peakdetector-windows
 
 deploy:
   - provider: GitHub
@@ -131,13 +135,13 @@ deploy:
       APPVEYOR_REPO_TAG: true
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
 
-#   - provider: GitHub
-#     description: 'Peakdetector Executable - Windows'
-#     auth_token:
-#         secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
-#     artifact: peakdetector-windows
-#     draft: false
-#     prerelease: false
-#     on:
-#       APPVEYOR_REPO_TAG: true
-#       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+  - provider: GitHub
+    description: 'Peakdetector Executable - Windows'
+    auth_token:
+        secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
+    artifact: peakdetector-windows
+    draft: false
+    prerelease: false
+    on:
+      APPVEYOR_REPO_TAG: true
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
