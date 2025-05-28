@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+echo "Starting maven_dist_win32.sh."
+
 #Set Script Name variable
 SCRIPT=`basename ${BASH_SOURCE[0]}`
 
@@ -39,7 +41,9 @@ done
 
 shift $((OPTIND-1))  #This tells getopts to move on to the next argument.
 
+echo "Attempting to determine version..."
 GIT_VERSION=$(src/maven/get_version.sh)
+echo "Version: "${GIT_VERSION}
 
 exepath=$1
 exefn="${exepath##*/}"
@@ -53,7 +57,9 @@ if [ ! -d ${distpath} ]; then
 	mkdir -p "${distpath}"
 fi
 
+echo "Preparing to run windeployqt.exe..."
 windeployqt.exe "${exepath}" --dir "${distpath}/${b}"
+echo "Successfully executed windeployqt.exe"
 
 # Issue 540: Add peakdetector executable
 # windeployqt.exe "src/maven/bin/peakdetector.exe" --dir "${distpath}/${b}"
@@ -70,8 +76,10 @@ mkdir -p "${distpath}/scripts"
 cp -v src/maven_core/bin/scripts/* "${distpath}/scripts"
 cp -v "${exepath}" "${distpath}/"
 
+echo "Preparing to overwrite bad qsqlite.dll file..."
 #Issue 499: Overwrite bad qsqlite.dll file with working qsqlite.dll file
 cp src/maven_core/bin/dll/qsqlite.dll "${distpath}"/sqldrivers
+echo "Successfully overwrote qsqlite.dll"
 
 #Issue 540: mzDeltas does not work with windeployqt, copy executable directly
 # cp -v src/maven_core/bin/mzDeltas.exe "${distpath}"
@@ -81,3 +89,5 @@ cp src/maven_core/bin/dll/qsqlite.dll "${distpath}"/sqldrivers
 
 rm -rf "dist/${zipfn}"
 (cd "${distpath}" && 7z a -tzip "../${zipfn}" *)
+
+echo "make_dist_win32: All Processes Succcessfully Completed!"
