@@ -1,0 +1,2 @@
+// This is an empty but valid Windows resource file for peakdetector.exe
+#include <windows.h> // Common include for RC files
