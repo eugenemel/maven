@@ -1,2 +1,37 @@
-// This is an empty but valid Windows resource file for peakdetector.exe
-#include <windows.h> // Common include for RC files
+// Minimal valid Windows resource file for peakdetector.exe
+// It provides version information to satisfy windres.exe
+
+#include <winver.h>
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS VOS__WINDOWS32
+ FILETYPE VFT_APP
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0" // Language (US English), Charset (Unicode)
+        BEGIN
+            VALUE "CompanyName", "No Company"
+            VALUE "FileDescription", "Peak Detector Command-Line Tool"
+            VALUE "FileVersion", "1.0.0.0"
+            VALUE "InternalName", "peakdetector.exe"
+            VALUE "LegalCopyright", "Copyright (C) No Company 2024"
+            VALUE "OriginalFilename", "peakdetector.exe"
+            VALUE "ProductName", "peakdetector"
+            VALUE "ProductVersion", "1.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200 // US English, Unicode
+    END
+END
