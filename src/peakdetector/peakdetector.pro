@@ -70,6 +70,7 @@ unix {
 
 win32 {
 	CONFIG -= parallel
+        CONFIG += console
 }
 
 parallel {
