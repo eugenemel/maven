@@ -71,6 +71,7 @@ unix {
 win32 {
 	CONFIG -= parallel
         CONFIG += console
+        RC_FILE =
 }
 
 parallel {
