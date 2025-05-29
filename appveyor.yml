@@ -71,20 +71,14 @@ build_script:
   # previous working version (pre-Issue 742)
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/maven_core; qmake CONFIG+=release -r build.pro 2>/dev/null; make -j16 2>/dev/null; cd /c/projects/maven/src/maven/; qmake CONFIG+=release maven.pro 2>/dev/null; make -j16 2>/dev/null; make INSTALL_ROOT=appdir install 2>/dev/null"}
     
-  # ISSUE 742 suggestion start
-  # Build peakdetector command-line tool - Step 1: qmake
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/peakdetector && qmake CONFIG+=release peakdetector.pro"}
+  # Build peakdetector command-line tool - qmake
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/peakdetector; qmake CONFIG+=release peakdetector.pro 2>&1"}
 
-  # Build peakdetector command-line tool - Step 2: make
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/peakdetector && make -j16"}
-
-  # Build peakdetector command-line tool - Step 3: make install
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/peakdetector && make INSTALL_ROOT=appdir install"}
-
-  # Verify peakdetector.exe exists after install
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd /c/projects/maven/; find . -name 'peakdetector.exe'" }  
+  # Build peakdetector command-line tool - make
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/peakdetector; make -j16 2>&1"}
   
-  # ISSUE 742 suggestion end
+  # Build peakdetector command-line tool - make install
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/peakdetector; make INSTALL_ROOT=appdir install 2>&1"}
 
   # Print contents
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd /c/projects/maven/; ls src/maven/appdir/bin/" }
