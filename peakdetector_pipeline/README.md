@@ -4,6 +4,11 @@
 
 It is designed to be incorporated into data science pipelines written in `R` or `Python`. 
 
-See [peakdetector-in-pipeline-example-mac-osx.Rmd](https://github.com/eugenemel/maven/blob/master/peakdetector_pipeline/peakdetector-in-pipeline-example-mac-osx.Rmd) for an example of how to incorporate `peakdetector` into your mass spectrometry pipeline.  
+The examples below are designed to work in `R`, but something similar could be developed for `Python` as well. The key step is the command line that is generated, which should be executed via a system call.
 
-Currently, only `mac os x` is supported. The above example is written for an `R` pipeline, but the generated command line will also work for a `Python` pipeline.
+# Windows
+
+[peakdetector-in-pipeline-example-windows.Rmd](https://github.com/eugenemel/maven/blob/master/peakdetector_pipeline/peakdetector-in-pipeline-example-windows.Rmd)
+
+# Mac OS
+ [peakdetector-in-pipeline-example-mac-osx.Rmd](https://github.com/eugenemel/maven/blob/master/peakdetector_pipeline/peakdetector-in-pipeline-example-mac-osx.Rmd)

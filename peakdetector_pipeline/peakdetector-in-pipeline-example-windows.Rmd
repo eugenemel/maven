@@ -1,0 +1,308 @@
+---
+title: "Explore parameters via multiple peakdetector runs"
+author: "Phil Seitzer"
+date:  'September 12, 2024'
+output: html_document
+---
+
+# Setup
+
+## Files and Directories
+```{r setup}
+library(tidyverse)
+
+# Create a directory on your computer, and place everything in the directory per this section.
+# recommended structure is
+#.  sandbox_dir
+#.  spectral library file
+#.  - peakdetector_<version>_Windows
+#.       - peakdetector.exe
+#.       - methods
+#.  - output directory (suggested name: pipeline_runs)
+#.  - sample files directory (contains mzmL or mzXML files)
+
+sandbox_dir <- ""
+peakdetector_folder <- "peakdetector_2.11.3-Windows"
+
+# The peakdetector folder can be found after downloading and unzipping the peakdetector-windows zipped directory, available from the MAVEN releases page
+# for this executable to work, you will have to adjust your system security settings to permit execution
+peakdetector_executable <- file.path(sandbox_dir, peakdetector_folder, "peakdetector.exe")
+peakdetector_methods_folder <- file.path(sandbox_dir, peakdetector_folder, "methods")
+
+# 'metabolomics_neg_library.msp' is available in the supplementary data associated with the MAVEN2 manuscript
+# https://www.mdpi.com/2218-1989/12/8/684
+spectral_library_file <- file.path(sandbox_dir, "metabolomics_neg_library.msp")
+
+# samples can be retrieved from https://www.ebi.ac.uk/metabolights/editor/MTBLS3097/descriptors
+# smaller set also available at https://github.com/calico/open_CLaM/tree/main/open_CLaM_example/example_data
+sample_directory <- file.path(sandbox_dir, "/neg_yeast_samples")
+
+# create this file on your computer
+output_directory <- file.path(sandbox_dir, "/pipeline_runs")
+
+if (!file.exists(output_directory)) {
+  system(glue::glue("mkdir {output_directory}"))
+}
+
+# make sure all files exist, and that you have write permissions to these directories.
+stopifnot(file.exists(sandbox_dir))
+stopifnot(file.exists(peakdetector_executable))
+stopifnot(file.exists(peakdetector_methods_folder))
+stopifnot(file.exists(spectral_library_file))
+stopifnot(file.exists(sample_directory))
+stopifnot(file.exists(output_directory))
+```
+
+# Analysis Functions and Parameters
+
+## f(x) Generate command line
+```{r}
+add_argument <- function(args, key, val) {
+  if (!is.null(key)) {
+    if (key == "-9") {
+      key_value_pair <- paste0("-9'", val, "'")
+    } else if (stringr::str_starts(key, "--")) {
+      key_value_pair <- paste0(key, " ", val)
+    } else {
+      key_value_pair <- paste0(key, val)  
+    }
+    args <- c(args, key_value_pair)
+  }
+  return(args)
+}
+
+add_params <- function(args, params) {
+  
+  param_names <- names(params)
+  is_double_dash <- grepl("^--", param_names)
+  
+  # add regular arguments first
+  for (i in 1:length(params)) {
+    if (!is_double_dash[i]) {
+      args <- add_argument(args, param_names[i], params[[i]]) 
+    }
+  }
+  
+  # add double dash argument list
+  for (i in 1:length(params)) {
+    if (is_double_dash[i]) {
+      args <- add_argument(args, param_names[i], params[[i]]) 
+    }
+  }
+  
+  return(args)
+}
+
+add_samples <- function(args, sample_directory) {
+  samples <- list.files(sample_directory, full.names = TRUE, pattern="*.mzX?ML$")
+  sample_str <- paste0(samples, collapse = " ")
+  args <- c(args, sample_str)
+  return(args)
+}
+
+get_peakdetector_command_line <- function(
+    peakdetector_executable,
+    peakdetector_methods_folder,
+    sample_directory,
+    output_directory,
+    params) {
+  
+    # Initial arguments
+    args <- c(
+      "-2", # MS2-based peak detection
+      "-l0", # Do not save scan data
+      paste0("-o", output_directory), # output will be written to this folder
+      paste0("-m", peakdetector_methods_folder) # folder containing 'default.model' model file for peak quality scoring
+    )
+    
+    # Add params arguments
+    args <- add_params(args, params)
+    
+    # Always add samples last
+    args <- add_samples(args, sample_directory)
+  
+    # Create fully formatted string
+    cmd <- paste0(paste0(peakdetector_executable, " "), paste0(args, collapse=" "))
+  
+  return(cmd)
+}
+```
+
+## f(x) Default Peakdetector parameters (with explanations)
+```{r}
+get_default_peakdetector_parameters <- function(spectral_library_file) {
+  
+  params <- list()
+
+  # Parameters always set by GUI
+  params[["-f"]] <- "E" # Peak Grouping Algorithm Type - should always be 'E'
+  params[["--mergedSmoothedMaxToBoundsIntensityPolicy"]] <- "MINIMUM" # GUI always sets this value
+  params[["--mergedPeakRtBoundsMaxIntensityFraction"]] <- -1 # GUI Always sets this value
+  
+  # Parameters that can be set by GUI, but not by CL
+  # [Peak Detection -> Peak Picking And Grouping -> EIC Smoother Type] must be 'Gaussian' (peakdetector always sets to value 'Gaussian')
+  #    (UI: cmbSmootherType)
+  # [Peak Scoring -> Matching Options -> Require compound's associated adduct and searched adduct match for compound matches]
+  #    must be checked (GUI will enumerate extra compounds based on selected adducts, peakdetector uses adducts only from library)
+  #    (UI: chkRequireAdductMatch) [matchingIsRequireAdductPrecursorMatch] [matchingIsRequireAdductPrecursorMatch]
+  #
+  # -----
+  # Configurable dialog parameters
+  
+  # Peak Detection Tab
+  
+  # Feature Detection
+  params[["-p"]] <- 20 # Mass Slice m/z Merge Tolerance
+  params[["-r"]] <- 100 # Mass Slice RT Merge Tolerance
+  
+  # Peak Picking And Grouping
+  params[["--peakRtBoundsSlopeThreshold"]] <- 0.01 # Peak Boundary Slope Threshold
+  params[["--mergedPeakRtBoundsSlopeThreshold"]] <- 0.01 # Peak Boundary Slope Threshold
+  params[["--peakRtBoundsMaxIntensityFraction"]] <- 0 # Peak Boundary Intensity Frac Threshold
+  params[["-y"]] <- 5 # EIC Smoothing Window
+  params[["-g"]] <- 0.25 # Peak Group Max RT Difference
+  params[["-u"]] <- 0.80 # Peak Group Merge Overlap
+  params[["--mergedSmoothedMaxToBoundsMinRatio"]] <- 1 # Peak Group S/N Threshold
+  
+  # Peak Scoring Tab
+  
+  # Peak Scoring
+  params[["-z"]] <- 1 # Min Signal/Noise Ratio
+  params[["-i"]] <- 1e4 # Min Highest Peak Intensity
+  params[["-b"]] <- 1 # Min Good Peak/Group
+  params[["--minSignalBlankRatio"]] <- 2 # Min Signal/Blank Ratio
+  params[["-w"]] <- 5 # Min Peak Width
+  params[["-q"]] <- 0 # Min Peak Quality
+  
+  # Baseline Computation
+  params[["-8"]] <- 80 # Drop top x% intensities from chromatogram
+  params[["-7"]] <- 5 # Baseline Smoothing Window
+  params[["--eicBaselineEstimationType"]] <- "EIC_NON_PEAK_MEDIAN_SMOOTHED_INTENSITY" # Baseline Computation Type
+  
+  # Fragmentation Matching
+  params[["-0"]] <- "metaboliteSearch" # Scoring Algorithm
+  params[["-1"]] <- spectral_library_file # Metabolite Library
+  
+  # ms2MinNumMatches: Peak Scoring -> MS/MS Matching Scoring Settings -> Spectral Matches
+  # rtMatchTolerance: Peak Detection Tab -> Compound Database -> Compound RT Match tolerance
+  # ms1PpmTolr: Peak Detection Tab -> Compound Database -> Compound m/z Match tolerance
+  params[["-9"]] <- "ms2MinNumMatches=0;rtMatchTolerance=2;ms1PpmTolr=20;"
+
+  return(params)
+}
+
+```
+
+## f(x) Import Results
+```{r import_results}
+import_results <- function(mzrolldb_file_path) {
+  con <- DBI::dbConnect(RSQLite::SQLite(), dbname = mzrolldb_file_path)
+  
+  samples <- dplyr::tbl(con, "samples") %>% dplyr::collect()
+  peakgroups <- dplyr::tbl(con, "peakgroups") %>% dplyr::collect()
+  peaks <- dplyr::tbl(con, "peaks") %>%
+    dplyr::collect() %>%
+    dplyr::select(-label) %>%
+    dplyr::group_by(groupId) %>%
+    dplyr::mutate(groupRt = median(rt), groupMz = median(peakMz)) %>%
+    dplyr::ungroup()
+  
+  pdb <- peaks %>%
+    dplyr::inner_join(peakgroups, by = c("groupId")) %>%
+    dplyr::inner_join(samples, by =c("sampleId"))
+  
+  DBI::dbDisconnect(conn = con)
+  
+  return(pdb)
+}
+
+```
+
+# Execution
+
+## Run peakdetector
+```{r}
+
+# Update parameters
+params <- get_default_peakdetector_parameters(spectral_library_file)
+
+params["--peakRtBoundsMaxIntensityFraction"] <- 0.01 # peak reaches edge at 1% of max intensity.
+params["--peakRtBoundsSlopeThreshold"] <- 0.01 # peak reaches edge when trace flattens out to slope value of 0.01.
+
+intensity_thresholds <- c(10000, 10000000)
+quality_thresholds <- c(0.4, 0.7)
+N <- length(intensity_thresholds) * length(quality_thresholds)
+
+mzrolldb_results <- vector(mode="list", length=N)
+
+analysis_counter <- 1
+for (intensity_threshold in intensity_thresholds) {
+  for (quality_threshold in quality_thresholds) {
+    
+    params["-i"] <- intensity_threshold
+    params["-q"] <- quality_threshold
+    
+    # define set name
+    set_name <- paste0("search__intensity_", intensity_threshold, "_quality_", quality_threshold)
+    
+    cat(paste0(set_name, "\n"))
+    
+    # execute search
+    cmd <- get_peakdetector_command_line(
+      peakdetector_executable,
+      peakdetector_methods_folder,
+      sample_directory,
+      output_directory,
+      params)
+    
+    system(cmd)
+    
+    # rename files
+    extensions <- c(".mzrollDB")
+    for (extension in extensions) {
+        source_file <- file.path(output_directory, paste0("peakdetector", extension))
+        target_file <- file.path(output_directory, paste0(set_name, extension))
+        file.rename(source_file, target_file)
+    }
+    
+    
+    mzrolldb_results[[analysis_counter]] <- target_file
+    
+    analysis_counter <- analysis_counter + 1
+  }
+}
+
+mzrolldb_results_files <- purrr::reduce(mzrolldb_results, rbind)
+```
+
+## Import results and compare
+```{r}
+library(dplyr)
+
+identified_compound_list <- vector(mode="list", length = length(mzrolldb_results_files))
+
+results_counter <- 1
+for (results_file in mzrolldb_results_files) {
+  
+  search_name_val <- gsub(".mzrollDB", "", basename(results_file))
+  results_table <- import_results(results_file)
+  
+  # simple example of comparison - compare names of identified compounds between searches
+  identified_compounds <- results_table %>%
+    dplyr::filter(compoundDB == "metabolomics_neg_library" & ms2Score >= 0.7) %>%
+    dplyr::select(compoundName) %>%
+    dplyr::distinct() %>%
+    dplyr::mutate(search_name = search_name_val, is_present=TRUE)
+  
+  identified_compound_list[[results_counter]] <- identified_compounds
+  
+  results_counter <- results_counter + 1
+  
+  cat(paste0(search_name_val, ": ", nrow(identified_compounds), " Compounds.\n"))
+}
+
+combined_results <- purrr::reduce(identified_compound_list, rbind) %>%
+  tidyr::pivot_wider(names_from = search_name, values_from = is_present)
+
+combined_results[is.na(combined_results)] <- FALSE
+```
