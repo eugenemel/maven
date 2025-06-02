@@ -1,7 +1,7 @@
 ---
 title: "Explore parameters via multiple peakdetector runs"
 author: "Phil Seitzer"
-date:  'September 12, 2024'
+date:  'June 2, 2025'
 output: html_document
 ---
 
@@ -105,7 +105,26 @@ get_peakdetector_command_line <- function(
     peakdetector_methods_folder,
     sample_directory,
     output_directory,
-    params) {
+    params,
+    is_save_ms2_scans = FALSE,
+    is_ms1_search = FALSE) {
+  
+    # MS1 Search Options
+    if (is_ms1_search) {
+      params[["-e"]] <- "B"
+    } else {
+      args <- "-2"
+    }
+  
+    # Option to save MS2 scans into mzrollDB file
+    args <- c(args, ifelse(is_save_ms2_scans, "-l1", "-l0"))
+  
+    # output and method directory always added
+    args <- c(
+      args,
+      paste0("-o", output_directory), # output will be written to this folder
+      paste0("-m", peakdetector_methods_folder) # folder containing 'default.model' model file for peak quality scoring
+    )
   
     # Initial arguments
     args <- c(
