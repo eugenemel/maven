@@ -104,12 +104,23 @@ get_peakdetector_command_line <- function(
     peakdetector_methods_folder,
     sample_directory,
     output_directory,
-    params) {
+    params,
+    is_save_ms2_scans = FALSE,
+    is_ms1_search = FALSE) {
   
-    # Initial arguments
+    # MS1 Search Options
+    if (is_ms1_search) {
+      params[["-e"]] <- "B"
+    } else {
+      args <- "-2"
+    }
+  
+    # Option to save MS2 scans into mzrollDB file
+    args <- c(args, ifelse(is_save_ms2_scans, "-l1", "-l0"))
+  
+    # output and method directory always added
     args <- c(
-      "-2", # MS2-based peak detection
-      "-l0", # Do not save scan data
+      args,
       paste0("-o", output_directory), # output will be written to this folder
       paste0("-m", peakdetector_methods_folder) # folder containing 'default.model' model file for peak quality scoring
     )

@@ -125,14 +125,6 @@ get_peakdetector_command_line <- function(
       paste0("-o", output_directory), # output will be written to this folder
       paste0("-m", peakdetector_methods_folder) # folder containing 'default.model' model file for peak quality scoring
     )
-  
-    # Initial arguments
-    args <- c(
-      "-2", # MS2-based peak detection
-      "-l0", # Do not save scan data
-      paste0("-o", output_directory), # output will be written to this folder
-      paste0("-m", peakdetector_methods_folder) # folder containing 'default.model' model file for peak quality scoring
-    )
     
     # Add params arguments
     args <- add_params(args, params)
