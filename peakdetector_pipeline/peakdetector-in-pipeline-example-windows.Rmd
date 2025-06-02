@@ -44,6 +44,12 @@ if (!file.exists(output_directory)) {
   system(glue::glue("mkdir {output_directory}"))
 }
 
+# peakdetector works best with with files that contain both MS1 and MS2 data.
+# However, if you have MS1-only data, you can set this file to 'TRUE', and peakdetector
+# Can still search your files.
+# If you have MS2 data, do not modify this parameter.
+is_ms1_search <- FALSE
+
 # make sure all files exist, and that you have write permissions to these directories.
 stopifnot(file.exists(sandbox_dir))
 stopifnot(file.exists(peakdetector_executable))
@@ -266,7 +272,9 @@ for (intensity_threshold in intensity_thresholds) {
       peakdetector_methods_folder,
       sample_directory,
       output_directory,
-      params)
+      params,
+      FALSE, # Save MS2 Scans in mzrollDB files
+      is_ms1_search)
     
     system(cmd)
     
