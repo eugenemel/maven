@@ -108,7 +108,9 @@ get_peakdetector_command_line <- function(
     params,
     is_save_ms2_scans = FALSE,
     is_ms1_search = FALSE) {
-  
+    # Initialize to empty vector to avoid NA problems
+    args <- character(0)
+    
     # MS1 Search Options
     if (is_ms1_search) {
       params[["-e"]] <- "B"
