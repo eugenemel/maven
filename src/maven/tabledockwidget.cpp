@@ -608,7 +608,7 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     item->setText(getGroupViewColumnNumber("RT"),
                   QString::number(group->meanRt, 'f', 2));                          //RT
 
-    if (group->compound and group->compound->expectedRt) {
+    if (group->compound and group->compound->expectedRt and group->compound->expectedRt > 0) {
         item->setText(getGroupViewColumnNumber("RT Diff"),
                 QString::number(group->meanRt - group->compound->expectedRt, 'f', 2));//RT Diff
     }
