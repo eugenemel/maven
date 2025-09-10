@@ -1401,11 +1401,12 @@ void BackgroundPeakUpdate::assignToGroupSimple(PeakGroup* g, vector<CompoundIon>
         }
 
         //DISQUALIFIER: rt agreement
-        float rtDiff =  abs(cpd->expectedRt - g->meanRt);
-        if (featureMatchRtFlag && (cpd->expectedRt <= 0 || rtDiff > featureCompoundMatchRtTolerance)) {
+        // Issue 792: Switch to new approach
+        if (featureMatchRtFlag && !MzKitchenProcessor::isRtAgreement(g, cpd, featureCompoundMatchRtTolerance, false)) {
             continue;
         }
 
+        float rtDiff =  abs(cpd->expectedRt - g->medianRt());
         if (cpd->expectedRt > 0) {
             g->expectedRtDiff = rtDiff;
         }
