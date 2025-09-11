@@ -14,6 +14,10 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QS
         directInfusionSearchParams = DirectInfusionSearchParameters::decode(encodedTableInfo.toStdString());
     }
 
+    if (encodedTableInfo.contains("isUseGroupMaxPeakVals=1")) {
+        this->isUseGroupMaxPeakVals = true;
+    }
+
     numColms=11;
     viewType = groupView;
 
@@ -600,17 +604,26 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     if (group->_type == PeakGroup::GroupType::SRMTransitionType) {
         item->setText(getGroupViewColumnNumber("m/z"),
                       QString::number(group->srmPrecursorMz, 'f', 4));              //SRM precursor m/z
+    } else if (isUseGroupMaxPeakVals){
+        item->setText(getGroupViewColumnNumber("m/z"),
+                      QString::number(group->maxPeakMzVal, 'f', 4));
     } else {
         item->setText(getGroupViewColumnNumber("m/z"),
                       QString::number(group->meanMz, 'f', 4));                      //m/z
     }
 
+    float groupRt = group->meanRt;
+
+    if (isUseGroupMaxPeakVals) {
+        groupRt = group->maxPeakRtVal;
+    }
+
     item->setText(getGroupViewColumnNumber("RT"),
-                  QString::number(group->meanRt, 'f', 2));                          //RT
+                  QString::number(groupRt, 'f', 2));
 
     if (group->compound and group->compound->expectedRt and group->compound->expectedRt > 0) {
         item->setText(getGroupViewColumnNumber("RT Diff"),
-                QString::number(group->meanRt - group->compound->expectedRt, 'f', 2));//RT Diff
+                QString::number(groupRt - group->compound->expectedRt, 'f', 2)); //RT Diff
     }
 
     if (viewType == groupView) {

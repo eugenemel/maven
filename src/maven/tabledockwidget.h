@@ -186,6 +186,8 @@ private:
           QString displayTableInfo;
           QString encodedTableInfo;
 
+          bool isUseGroupMaxPeakVals = false;
+
           shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParams = nullptr;
 
           bool _isShowLipidSummarizationColumns = false;
