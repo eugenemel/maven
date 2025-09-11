@@ -1402,7 +1402,7 @@ void BackgroundPeakUpdate::assignToGroupSimple(PeakGroup* g, vector<CompoundIon>
 
         //DISQUALIFIER: rt agreement
         // Issue 792: Switch to new approach
-        if (featureMatchRtFlag && !MzKitchenProcessor::isRtAgreement(g, cpd, featureCompoundMatchRtTolerance, false)) {
+        if (featureMatchRtFlag && !MzKitchenProcessor::isRtAgreement(g->medianRt(), cpd, featureCompoundMatchRtTolerance, false)) {
             continue;
         }
 
