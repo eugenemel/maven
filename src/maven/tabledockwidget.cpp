@@ -1357,7 +1357,22 @@ void TableDockWidget::exportGroupsAsIsotopes() {
                 isotopeExportSettingsDialog->chkCorrectIsotopes->isChecked(),
                 isotopeExportSettingsDialog->radFractional->isChecked());
 
+            //Issue 788: Record which isotopic peak groups have already been flagged for deletion
+            set<string> deletedPeakGroups{};
+            for (PeakGroup &p : group->children) {
+                if (p.deletedFlag) {
+                    deletedPeakGroups.insert(p.tagString);
+                }
+            }
+
             for (unsigned int j = 0; j < matrix.isotopesData.cols(); j++) { // isotope
+
+                string isotopeName = matrix.isotopeNames.at(j);
+
+                //Issue 788: Skip over any peaks where the specific isotope has been deleted
+                if (deletedPeakGroups.find(isotopeName) != deletedPeakGroups.end()) {
+                    continue;
+                }
 
                 //Issue 750: add labels
                 string labelsStr(group->labels.begin(), group->labels.end());
@@ -1367,7 +1382,7 @@ void TableDockWidget::exportGroupsAsIsotopes() {
                                << mzUtils::doubleQuoteString(group->adduct->name) << sep.c_str()
                                << mzUtils::doubleQuoteString(labelsStr) << sep.c_str()
                                << group->medianRt() << sep.c_str()
-                               << mzUtils::doubleQuoteString(matrix.isotopeNames.at(j));
+                               << mzUtils::doubleQuoteString(isotopeName);
 
                 for (unsigned int i = 0; i < matrix.isotopesData.rows(); i++) { // sample
 
