@@ -31,6 +31,7 @@ public slots:
                     void replot();
 
                     void spectrumToClipboard();
+                    void mspEntryToClipboard();
                     void normalizedSpectrumToClipboard();
                     void encodedSpectrumToClipboard();
 

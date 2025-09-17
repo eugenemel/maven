@@ -1500,6 +1500,9 @@ void SpectraWidget::contextMenuEvent(QContextMenuEvent * event) {
     QAction* a3 = menu.addAction("Copy Spectrum to Clipboard");
     connect(a3, SIGNAL(triggered()), SLOT(spectrumToClipboard()));
 
+    QAction* aMspEntry = menu.addAction("Copy MSP Entry to Clipboard");
+    connect(aMspEntry, SIGNAL(triggered()), SLOT(mspEntryToClipboard()));
+
     QAction* aCopyNormSpectrum = menu.addAction("Copy Normalized Spectrum to Clipboard");
     connect(aCopyNormSpectrum, SIGNAL(triggered()), SLOT(normalizedSpectrumToClipboard()));
 
@@ -1555,6 +1558,45 @@ string SpectraWidget::getSpectrumString(string type, bool isNormalizeToMaxIntens
 
 void SpectraWidget::spectrumToClipboard() {
     QApplication::clipboard()->setText(getSpectrumString("\t", false).c_str());
+}
+
+void SpectraWidget::mspEntryToClipboard() {
+
+    stringstream mspEntry;
+    mspEntry << std::fixed << setprecision(5);
+    int numPeaks = 0;
+    string spectrum = "";
+    float precursorMz = 0.0f;
+
+    if (_currentFragment) {
+        numPeaks = _currentFragment->nobs();
+        spectrum = _currentFragment->encodeSpectrum(5, "\t", false);
+        precursorMz = _currentFragment->precursorMz;
+    } else if (_currentScan) {
+        numPeaks = _currentScan->nobs();
+        precursorMz = _currentScan->precursorMz;
+        Fragment *f = new Fragment();
+        f->mzs = _currentScan->mz;
+        f->intensity_array = _currentScan->intensity;
+        spectrum = f->encodeSpectrum(5, "\t", false);
+        delete(f);
+    }
+
+    if (_spectralHit.compoundId != "") {
+        mspEntry
+            << "Name: " << _spectralHit.compoundId.toStdString() << "\n"
+            << "ID: " << _spectralHit.originalCompoundId.toStdString() << "\n";
+    } else {
+        mspEntry
+            << "Name: " << "???" << "\n";
+    }
+
+    mspEntry
+         << "PrecursorMz: " << precursorMz << "\n"
+         << "NumPeaks: " << numPeaks << "\n"
+         << spectrum << "\n\n";
+
+    QApplication::clipboard()->setText(mspEntry.str().c_str());
 }
 
 void SpectraWidget::normalizedSpectrumToClipboard(){
