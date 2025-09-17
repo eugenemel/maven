@@ -92,6 +92,13 @@ void BarPlot::setPeakGroup(PeakGroup* group) {
         mzSample* sample = vsamples[i];
         QColor color = QColor::fromRgbF(sample->color[0], sample->color[1],sample->color[2],sample->color[3]);
         QString sampleName( sample->sampleName.c_str());
+
+        QRegularExpression regex = QRegularExpression("\\.[^.]+$");
+        bool isHideSampleSuffix = _mw->getSettings()->value("chkHideSampleSuffix", false).toBool();
+        if (isHideSampleSuffix) {
+            sampleName.replace(regex, "");
+        }
+
         if (sample->getNormalizationConstant() != 1.0 )
             sampleName = QString::number(sample->getNormalizationConstant(), 'f', 2) + "x " + sampleName;
 
