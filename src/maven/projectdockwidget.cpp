@@ -325,11 +325,18 @@ void ProjectDockWidget::setInfo(vector<mzSample*>&samples) {
         colorButton->setStyleSheet(qss);
 	*/
 
+        QString sampleName = QString(sample->sampleName.c_str());
+        QRegularExpression regex = QRegularExpression("\\.[^.]+$");
+        bool isHideSampleSuffix = _mainwindow->getSettings()->value("chkHideSampleSuffix", false).toBool();
+        if (isHideSampleSuffix) {
+            sampleName.replace(regex, "");
+        }
+
         QPixmap pixmap = QPixmap(20,20); pixmap.fill(color); QIcon coloricon = QIcon(pixmap);
 
         item->setBackgroundColor(0,color);
         item->setIcon(0,coloricon);
-        item->setText(0,QString(sample->sampleName.c_str()));
+        item->setText(0,sampleName);
         item->setData(0,Qt::UserRole,QVariant::fromValue(samples[i]));
         item->setText(1,QString(sample->getSetName().c_str()));
         item->setText(2,QString::number(sample->getNormalizationConstant(),'f',2));
