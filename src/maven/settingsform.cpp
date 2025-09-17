@@ -240,6 +240,9 @@ void SettingsForm::setFormValues() {
 
     if (!settings) return;
 
+    if (settings->contains("chkHideSampleSuffix"))
+        this->chkHideSampleSuffix->setCheckState((Qt::CheckState) settings->value("chkHideSampleSuffix").toInt());
+
     if (settings->contains("chkNotifyNewerMaven"))
         this->chkNotifyNewerMaven->setCheckState( (Qt::CheckState) settings->value("chkNotifyNewerMaven").toInt());
 
