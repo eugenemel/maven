@@ -74,7 +74,16 @@ void IsotopeWidget::updateSampleComboBox() {
     cmbSampleName->clear();
     cmbSampleName->addItem("Select Sample", QVariant::fromValue(nullptr));
     for (mzSample *sample : _mw->getVisibleSamples()) {
-        cmbSampleName->addItem(QString(sample->sampleName.c_str()), QVariant::fromValue(sample));
+
+        //Issue 780
+        QString sampleName( sample->sampleName.c_str());
+        QRegularExpression regex = QRegularExpression("\\.[^.]+$");
+        bool isHideSampleSuffix = _mw->getSettings()->value("chkHideSampleSuffix", false).toBool();
+        if (isHideSampleSuffix) {
+            sampleName.replace(regex, "");
+        }
+
+        cmbSampleName->addItem(sampleName, QVariant::fromValue(sample));
     }
 
     cmbSampleName->blockSignals(false);
