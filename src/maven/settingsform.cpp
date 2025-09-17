@@ -25,6 +25,7 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(scan_filter_min_quantile, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
     connect(scan_filter_min_intensity, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
     connect(lineEicScanFilter, SIGNAL(textChanged(QString)), SLOT(getFormValues()));
+    connect(chkHideSampleSuffix, SIGNAL(toggled(bool)), SLOT(getFormValues()));
 
     //file import
 
@@ -531,6 +532,9 @@ void SettingsForm::setFormValues() {
 void SettingsForm::getFormValues() {
     if (!settings) return;
     //qDebug() << "SettingsForm::getFormValues() ";
+
+    //instrumentation
+    settings->setValue("chkHideSampleSuffix", chkHideSampleSuffix->checkState());
 
     //file loading
     settings->setValue("chkIsAutoLoadLibraries", chkIsAutoLoadLibraries->checkState());
