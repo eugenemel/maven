@@ -56,17 +56,6 @@ build_script:
 
   # Install zlib (Windows only)  
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "pacman -S --needed --noconfirm zlib-devel" }
-  
-  # Install sqlite
-  # - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3 2>/dev/null" }
-  
-  # MAVEN
-  # - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "APPVEYOR_BUILD_FOLDER='/c/projects/maven/' && export APPVEYOR_BUILD_FOLDER"}
-#   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "echo APPVEYOR_BUILD_FOLDER=$APPVEYOR_BUILD_FOLDER" }
-#   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "find $APPVEYOR_BUILD_FOLDER -name 'build.pro'" }
-
-  # Issue 742: builds all maven executables (including peakdetector)
-  # - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/; qmake CONFIG+=release -r build.pro 2>/dev/null; make -j16 2>/dev/null; make INSTALL_ROOT=appdir install 2>/dev/null"}
 
   # previous working version (pre-Issue 742)
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/maven_core; qmake CONFIG+=release -r build.pro 2>/dev/null; make -j16 2>/dev/null; cd /c/projects/maven/src/maven/; qmake CONFIG+=release maven.pro 2>/dev/null; make -j16 2>/dev/null; make INSTALL_ROOT=appdir install 2>/dev/null"}
