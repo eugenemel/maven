@@ -27,7 +27,11 @@ install:
   # Issue 794: updated installation versions
 #  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') {$env:QTDIR="C:\Qt\5.15.2\mingw81_64" }
 #  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') {$env:PATH += ";C:\$env:MSYS2_DIR\$env:MSYSTEM\bin;C:\$env:MSYS2_DIR\usr\bin;$env:QTDIR\bin;C:\MinGW\bin;C:\Qt\Tools\mingw64\bin"}
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-qt5-base mingw-w64-x86_64-qt5-tools" }
+
+  # Create cache to avoid a warning, which powershell interprets as an error, and causes the build to fail
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "mkdir /var/cache/pacman/pkg/"}
+  
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-qt5-base mingw-w64-x86_64-qt5-tools 2>&1" }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "which qmake; qmake --version" }
   
 build_script:
@@ -45,7 +49,7 @@ build_script:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { sudo xcode-select -s /Applications/Xcode-13.4.1.app/ } 
 
   # Verify qmake version
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { qmake --version } 
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { qmake --version }
   
   # Build MAVEN
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { qmake CONFIG+=release -r build.pro; make -j16; make INSTALL_ROOT=appdir install }
@@ -55,6 +59,9 @@ build_script:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "find . -name 'peakdetector.app'" }
   
   #### Windows ####
+  
+  # Verify qmake version
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { qmake --version }
 
   # Create cache to avoid a warning, which powershell interprets as an error, and causes the build to fail
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "mkdir /var/cache/pacman/pkg/"}
