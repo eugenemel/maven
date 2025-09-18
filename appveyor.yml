@@ -22,9 +22,12 @@ environment:
 # Issue 529: Added install block
 install:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') {$env:PATH = "$HOME/Qt/5.15.2/clang_64/bin:$env:PATH"}
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') {$env:QTDIR="C:\Qt\5.15.2\mingw81_64" }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') {$env:PATH += ";C:\$env:MSYS2_DIR\$env:MSYSTEM\bin;C:\$env:MSYS2_DIR\usr\bin;$env:QTDIR\bin;C:\MinGW\bin;C:\Qt\Tools\mingw64\bin"}
-
+  
+  # Issue 794: updated installation versions
+#  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') {$env:QTDIR="C:\Qt\5.15.2\mingw81_64" }
+#  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') {$env:PATH += ";C:\$env:MSYS2_DIR\$env:MSYSTEM\bin;C:\$env:MSYS2_DIR\usr\bin;$env:QTDIR\bin;C:\MinGW\bin;C:\Qt\Tools\mingw64\bin"}
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-qt5" }
+  
 build_script:
 
   # Get submodules
