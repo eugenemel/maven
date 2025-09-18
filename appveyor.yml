@@ -34,7 +34,7 @@ install:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-qt5-base mingw-w64-x86_64-qt5-tools 2>&1" }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "which qmake; qmake --version" }
   
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "pacman -S --needed --noconfirm zlib-devel" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "pacman -S --needed --noconfirm zlib-devel" }
   
 build_script:
 
@@ -74,10 +74,10 @@ build_script:
   # - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "pacman -S --needed --noconfirm zlib-devel" }
 
   # previous working version (Issue 794)
-  # - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/maven_core; qmake CONFIG+=release -r build.pro 2>/dev/null; make -j16 2>/dev/null; cd /c/projects/maven/src/maven/; qmake CONFIG+=release maven.pro 2>/dev/null; make -j16 2>/dev/null; make INSTALL_ROOT=appdir install 2>/dev/null"}
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/maven_core; qmake CONFIG+=release -r build.pro 2>/dev/null; make -j16 2>/dev/null; cd /c/projects/maven/src/maven/; qmake CONFIG+=release maven.pro 2>/dev/null; make -j16 2>/dev/null; make INSTALL_ROOT=appdir install 2>/dev/null"}
 
   # Issue 794 testing - remove hide print statements
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/maven_core; qmake CONFIG+=release -r build.pro; make -j16; cd /c/projects/maven/src/maven/; qmake CONFIG+=release maven.pro; make -j16; make INSTALL_ROOT=appdir install 2>/dev/null"}
+  # - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/maven_core; qmake CONFIG+=release -r build.pro; make -j16; cd /c/projects/maven/src/maven/; qmake CONFIG+=release maven.pro; make -j16; make INSTALL_ROOT=appdir install 2>/dev/null"}
 
   # Build peakdetector command-line tool - qmake
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/peakdetector; qmake CONFIG+=release peakdetector.pro 2>&1"}
