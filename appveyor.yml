@@ -6,8 +6,9 @@ build:
 # Define build matrices for Windows and macos-ventura
 environment:
   matrix:
-    - job_name: macOS
-      APPVEYOR_BUILD_WORKER_IMAGE: macos-ventura
+  # Issue 794: Comment out for debugging
+#     - job_name: macOS
+#       APPVEYOR_BUILD_WORKER_IMAGE: macos-ventura
       
     - job_name: windows
       COMPILER: cl
