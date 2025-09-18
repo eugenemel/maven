@@ -34,6 +34,8 @@ install:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-qt5-base mingw-w64-x86_64-qt5-tools 2>&1" }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "which qmake; qmake --version" }
   
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "pacman -S --needed --noconfirm zlib-devel" }
+  
 build_script:
 
   # Get submodules
@@ -63,11 +65,13 @@ build_script:
   # Verify qmake version
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { qmake --version }
 
+  # Issue 794: This step is done during 'install' stage
   # Create cache to avoid a warning, which powershell interprets as an error, and causes the build to fail
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "mkdir /var/cache/pacman/pkg/"}
+  #- ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "mkdir /var/cache/pacman/pkg/"}
 
+  # Issue 794: Migrate this to install phase
   # Install zlib (Windows only)  
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "pacman -S --needed --noconfirm zlib-devel" }
+  # - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "pacman -S --needed --noconfirm zlib-devel" }
 
   # previous working version (Issue 794)
   # - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/maven_core; qmake CONFIG+=release -r build.pro 2>/dev/null; make -j16 2>/dev/null; cd /c/projects/maven/src/maven/; qmake CONFIG+=release maven.pro 2>/dev/null; make -j16 2>/dev/null; make INSTALL_ROOT=appdir install 2>/dev/null"}
