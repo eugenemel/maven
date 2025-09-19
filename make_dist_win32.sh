@@ -57,8 +57,12 @@ if [ ! -d ${distpath} ]; then
 	mkdir -p "${distpath}"
 fi
 
+# Issue 794: Try removing /${b}
+# echo "Preparing to run windeployqt.exe..."
+# windeployqt.exe "${exepath}" --dir "${distpath}/${b}"
+# echo "Successfully executed windeployqt.exe"
 echo "Preparing to run windeployqt.exe..."
-windeployqt.exe "${exepath}" --dir "${distpath}/${b}"
+windeployqt.exe "${exepath}" --dir "${distpath}"
 echo "Successfully executed windeployqt.exe"
 
 # Issue 794: Try removing this loop, as windeployqt should potentially handle this automatically.
