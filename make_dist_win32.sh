@@ -61,10 +61,12 @@ echo "Preparing to run windeployqt.exe..."
 windeployqt.exe "${exepath}" --dir "${distpath}/${b}"
 echo "Successfully executed windeployqt.exe"
 
-for f in $(ldd "${exepath}" | awk '{print $3}' | grep 'mingw64'); do
-    b=${f##*/}
-    cp -v "${f}" "${distpath}/${b}"
-done
+# Issue 794: Try removing this loop, as windeployqt should potentially handle this automatically.
+# for f in $(ldd "${exepath}" | awk '{print $3}' | grep 'mingw64'); do
+#     b=${f##*/}
+#     cp -v "${f}" "${distpath}/${b}"
+# done
+
 mkdir -p "${distpath}/methods"
 cp -v src/maven_core/bin/methods/* "${distpath}/methods"
 # mkdir -p "${distpath}/pathways"
