@@ -91,6 +91,11 @@ cp -v "${exepath}" "${distpath}/"
 # cp src/maven_core/bin/dll/qsqlite.dll "${distpath}"/sqldrivers
 # echo "Successfully overwrote qsqlite.dll"
 
+# Issue 794: Try copying from the qt build
+echo "Manually copying qsqlite.dll file..."
+cp /c/msys64/mingw64/share/qt5/plugins/sqldrivers/qsqlite.dll "${distpath}"/sqldrivers
+echo "Successfully copied qsqlite.dll"
+
 rm -rf "dist/${zipfn}"
 (cd "${distpath}" && 7z a -tzip "../${zipfn}" *)
 
