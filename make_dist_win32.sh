@@ -67,6 +67,12 @@ echo "Successfully executed windeployqt.exe"
 #     cp -v "${f}" "${distpath}/${b}"
 # done
 
+# Issue 794: Explicitly avoid qt libs and plugins, letting windeployqt handle those.
+for f in $(ldd "${exepath}" | awk '{print $3}' | grep 'mingw64' | grep -v 'Qt5' | grep -v 'plugins'); do
+    b=${f##*/}
+    cp -v "${f}" "${distpath}/${b}"
+done
+
 mkdir -p "${distpath}/methods"
 cp -v src/maven_core/bin/methods/* "${distpath}/methods"
 # mkdir -p "${distpath}/pathways"
