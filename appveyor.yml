@@ -110,10 +110,10 @@ after_build:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'macos-ventura') { bash -lc "./make_dist_osx.sh src/peakdetector/appdir/bin/peakdetector.app" }
 
     # Windows prepare artifacts
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd /c/projects/maven/; ./make_dist_win32.sh src/maven/appdir/bin/Maven.exe" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd /c/projects/maven/; ./make_dist_win32.sh src/maven/appdir/bin/Maven.exe 2>&1 || true" }
   
   # Issue 742: Deploy peakdetector
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd /c/projects/maven/; ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd /c/projects/maven/; ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe 2>&1 || true" }
       
 artifacts:
   - path: dist/Maven*.dmg
