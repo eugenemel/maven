@@ -6,9 +6,8 @@ build:
 # Define build matrices for Windows and macos-ventura
 environment:
   matrix:
-# Issue 794: Disable for testing
-#     - job_name: macOS
-#       APPVEYOR_BUILD_WORKER_IMAGE: macos-ventura
+    - job_name: macOS
+      APPVEYOR_BUILD_WORKER_IMAGE: macos-ventura
       
     - job_name: windows
       COMPILER: cl
@@ -42,7 +41,7 @@ install:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-angleproject 2>&1" }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "find /c/msys64/mingw64/bin -name 'libGLESv2.dll'" }
 
-  # debugging: find sqlite3.dll file
+  # debugging: find sqlite3.dll file. This will need to be manually copied over in the deployment (see make_dist_win32.sh)
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "find /c/msys64/mingw64/bin -name '*sqlite3*.dll'" }
   
   # Uncomment to fail build here

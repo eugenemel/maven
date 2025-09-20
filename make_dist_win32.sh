@@ -57,27 +57,29 @@ if [ ! -d ${distpath} ]; then
 	mkdir -p "${distpath}"
 fi
 
-# Issue 794: Try removing /${b}
-# echo "Preparing to run windeployqt.exe..."
-# windeployqt.exe "${exepath}" --dir "${distpath}/${b}"
-# echo "Successfully executed windeployqt.exe"
+# Issue 794: 
+# windeployqt copies all qt dependencies into the artifact bundle.
+# However, non-qt dependencies are necessary, such as zlib.
+# ldd copies all direct dependencies of the executable.
+# sqlite3 somehow slips through the cracks: windeployqt correctly copies qsqlite3.dll,
+# but misses the fact that qsqlite3.dll is only a symbolic link to libsqlite3-0.dll.
+# ldd sees that libsqlite3-0.dll is not a direct dependency of the exectuable, so skips over
+# this library.
+# The simplest solution is just to manually copy over libsqlite3-0.dll
+
+# [1] windeployqt: handles direct QT dependencies
 echo "Preparing to run windeployqt.exe..."
 windeployqt.exe "${exepath}" --dir "${distpath}"
 echo "Successfully executed windeployqt.exe"
 
-# Issue 794: Try removing this loop, as windeployqt should potentially handle this automatically.
-# for f in $(ldd "${exepath}" | awk '{print $3}' | grep 'mingw64'); do
-#     b=${f##*/}
-#     cp -v "${f}" "${distpath}/${b}"
-# done
-
+# [2] Ask the executable about non-qt dependencies, and copy them
 # Issue 794: Explicitly avoid qt libs and plugins, letting windeployqt handle those.
 for f in $(ldd "${exepath}" | awk '{print $3}' | grep 'mingw64' | grep -v 'Qt5' | grep -v 'plugins'); do
     b=${f##*/}
     cp -v "${f}" "${distpath}/${b}"
 done
 
-# Issue 794: Need to expliclitly copy sqlite3 dll, as it is an indirect dependency of qsqlite3.dll
+# [3] manually copy sqlite3, which is skipped over by both windeployqt and ldd.
 echo "Manually copying libsqlite3-0.dll"
 cp -v /c/msys64/mingw64/bin/libsqlite3-0.dll "${distpath}/"
 
@@ -88,17 +90,6 @@ cp -v src/maven_core/bin/methods/* "${distpath}/methods"
 mkdir -p "${distpath}/scripts"
 cp -v src/maven_core/bin/scripts/* "${distpath}/scripts"
 cp -v "${exepath}" "${distpath}/"
-
-# Issue 794: Try disabling qsqlite.dll overwrite when building with 5.15.17
-# echo "Preparing to overwrite bad qsqlite.dll file..."
-# Issue 499: Overwrite bad qsqlite.dll file with working qsqlite.dll file
-# cp src/maven_core/bin/dll/qsqlite.dll "${distpath}"/sqldrivers
-# echo "Successfully overwrote qsqlite.dll"
-
-# # Issue 794: Try copying from the qt build
-# echo "Manually copying qsqlite.dll file..."
-# cp /c/msys64/mingw64/share/qt5/plugins/sqldrivers/qsqlite.dll "${distpath}"/sqldrivers
-# echo "Successfully copied qsqlite.dll"
 
 rm -rf "dist/${zipfn}"
 (cd "${distpath}" && 7z a -tzip "../${zipfn}" *)
