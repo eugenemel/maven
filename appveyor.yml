@@ -41,10 +41,10 @@ install:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "pacman -S --needed --noconfirm mingw-w64-ucrt-x86_64-angleproject 2>&1" }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-angleproject 2>&1" }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "find /c/msys64/mingw64/bin -name 'libGLESv2.dll'" }
-  
-  # Issue 794: Search for sqlite3 dependency
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "ldd /c/msys64/mingw64/bin/Qt5Sql.dll 2>&1" }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "exit 0" }
+
+  # debugging
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "ls -lR /c/msys64/mingw64/share/qt5/plugins/ | grep \"^-\"" }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc " } # trigger error to fail build
   
 build_script:
 
