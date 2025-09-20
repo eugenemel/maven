@@ -77,6 +77,10 @@ for f in $(ldd "${exepath}" | awk '{print $3}' | grep 'mingw64' | grep -v 'Qt5' 
     cp -v "${f}" "${distpath}/${b}"
 done
 
+# Issue 794: Need to expliclitly copy sqlite3 dll, as it is an indirect dependency of qsqlite3.dll
+echo "Manually copying libsqlite3-0.dll"
+cp -v /c/msys64/mingw64/bin/libsqlite3-0.dll "${distpath}/"
+
 mkdir -p "${distpath}/methods"
 cp -v src/maven_core/bin/methods/* "${distpath}/methods"
 # mkdir -p "${distpath}/pathways"

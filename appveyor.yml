@@ -44,7 +44,9 @@ install:
 
   # debugging: find sqlite3.dll file
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "find /c/msys64/mingw64/bin -name '*sqlite3*.dll'" }
-  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc " } # trigger error to fail build
+  
+  # Uncomment to fail build here
+  #- ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc " } # trigger error to fail build
   
 build_script:
 
