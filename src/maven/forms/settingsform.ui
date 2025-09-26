@@ -1518,82 +1518,10 @@
           <string>Scan Filter</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_12">
-          <item row="0" column="0">
-           <widget class="QLabel" name="lblScanFilterMinIntensity">
-            <property name="text">
-             <string>Min intensity:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="spnScanFilterMinIntensity">
-            <property name="suffix">
-             <string/>
-            </property>
+          <item row="0" column="4">
+           <widget class="QDoubleSpinBox" name="spnScanFilterMinSN">
             <property name="maximum">
-             <double>999999999.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>1.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QDoubleSpinBox" name="spnScanFilterMinIntensityFraction">
-            <property name="suffix">
-             <string> %</string>
-            </property>
-            <property name="maximum">
-             <double>100.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.010000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="5" colspan="2">
-           <widget class="QCheckBox" name="chkScanFilterRetainHighMzFragments">
-            <property name="text">
-             <string>Retain fragments above precursor m/z (MS2 only)</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="4">
-           <widget class="QDoubleSpinBox" name="spnScanFilterBaseline">
-            <property name="suffix">
-             <string> %</string>
-            </property>
-            <property name="maximum">
-             <double>100.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.010000000000000</double>
-            </property>
-            <property name="value">
-             <double>5.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="lblScanFilterMinIntensityFraction">
-            <property name="text">
-             <string>Min intensity fraction of max:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2" colspan="2">
-           <widget class="QLabel" name="lblScanFilterBaseline">
-            <property name="text">
-             <string>Intensity percentile S:N equals 1:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             <double>99999999.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -1613,20 +1541,30 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="5">
-           <widget class="QLabel" name="lblScanFilterRetainTopX">
+          <item row="1" column="0">
+           <widget class="QLabel" name="lblScanFilterMinIntensityFraction">
             <property name="text">
-             <string>Retain X most intense fragments:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             <string>Min intensity fraction of max:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="4">
-           <widget class="QDoubleSpinBox" name="spnScanFilterMinSN">
-            <property name="maximum">
-             <double>99999999.000000000000000</double>
+          <item row="1" column="5" colspan="2">
+           <widget class="QCheckBox" name="chkScanFilterRetainHighMzFragments">
+            <property name="text">
+             <string>Retain fragments above precursor m/z (MS2 only)</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="lblScanFilterMinIntensity">
+            <property name="text">
+             <string>Min intensity:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
@@ -1640,6 +1578,68 @@
             </property>
            </widget>
           </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="spnScanFilterMinIntensityFraction">
+            <property name="suffix">
+             <string> %</string>
+            </property>
+            <property name="maximum">
+             <double>100.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="5">
+           <widget class="QLabel" name="lblScanFilterRetainTopX">
+            <property name="text">
+             <string>Retain X most intense fragments:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="spnScanFilterMinIntensity">
+            <property name="suffix">
+             <string/>
+            </property>
+            <property name="maximum">
+             <double>999999999.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2" colspan="2">
+           <widget class="QLabel" name="lblScanFilterBaseline">
+            <property name="text">
+             <string>Intensity percentile S:N equals 1:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="4">
+           <widget class="QDoubleSpinBox" name="spnScanFilterBaseline">
+            <property name="suffix">
+             <string> %</string>
+            </property>
+            <property name="maximum">
+             <double>100.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="value">
+             <double>5.000000000000000</double>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -1649,36 +1649,20 @@
           <string>Consensus Formation</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_13">
-          <item row="0" column="0">
-           <widget class="QLabel" name="lblConsensusTolerance">
+          <item row="0" column="4">
+           <widget class="QCheckBox" name="chkConsensusAvgOnlyObserved">
             <property name="text">
-             <string>Peak match tolerance:</string>
+             <string>Peak intensity based only on observed</string>
             </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="spnConsensusPeakMatchTolerance">
-            <property name="suffix">
-             <string> ppm</string>
-            </property>
-            <property name="maximum">
-             <double>9999999.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>1.000000000000000</double>
-            </property>
-            <property name="value">
-             <double>10.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="lblConsensusMinPeakPresence">
+          <item row="2" column="0">
+           <widget class="QLabel" name="lblMzRemoved">
             <property name="text">
-             <string>Min peak presence:</string>
+             <string>m/z removed:</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1704,20 +1688,10 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="4">
-           <widget class="QCheckBox" name="chkConsensusAvgOnlyObserved">
+          <item row="1" column="0">
+           <widget class="QLabel" name="lblConsensusAgglomerationType">
             <property name="text">
-             <string>Peak intensity based only on observed</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="lblConsensusMinPeakPresenceFraction">
-            <property name="text">
-             <string>Min % peak presence:</string>
+             <string>Intensity Agglomeration:</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1734,6 +1708,26 @@
             </property>
             <property name="singleStep">
              <double>0.010000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="lblConsensusMinPeakPresence">
+            <property name="text">
+             <string>Min peak presence:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="lblConsensusTolerance">
+            <property name="text">
+             <string>Peak match tolerance:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
@@ -1758,13 +1752,62 @@
             </item>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="lblConsensusAgglomerationType">
+          <item row="1" column="2">
+           <widget class="QLabel" name="lblConsensusMinPeakPresenceFraction">
             <property name="text">
-             <string>Intensity Agglomeration:</string>
+             <string>Min % peak presence:</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="spnConsensusPeakMatchTolerance">
+            <property name="suffix">
+             <string> ppm</string>
+            </property>
+            <property name="maximum">
+             <double>9999999.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>10.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1" colspan="2">
+           <widget class="QLineEdit" name="txtMzRemoved">
+            <property name="toolTip">
+             <string/>
+            </property>
+            <property name="placeholderText">
+             <string>202.07770,203.08412</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QLabel" name="lblMzRemovedTol">
+            <property name="text">
+             <string>m/z removal tolerance:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="4">
+           <widget class="QDoubleSpinBox" name="spnMzRemovedTol">
+            <property name="suffix">
+             <string> ppm</string>
+            </property>
+            <property name="maximum">
+             <double>999999.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>10.000000000000000</double>
             </property>
            </widget>
           </item>
