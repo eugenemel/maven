@@ -148,6 +148,8 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(chkConsensusAvgOnlyObserved, SIGNAL(toggled(bool)), SLOT(recomputeConsensusSpectrum()));
     connect(chkConsensusNormalizeTo10K, SIGNAL(toggled(bool)), SLOT(recomputeConsensusSpectrum()));
     connect(cmbConsensusAgglomerationType, SIGNAL(currentIndexChanged(int)), SLOT(recomputeConsensusSpectrum()));
+    connect(txtMzRemoved, SIGNAL(valueChanged(str)), SLOT(recomputeConsensusSpectrum()));
+    connect(spnMzRemovedTol, SIGNAL(valueChanged(double)), SLOT(recomputeConsensusSpectrum()));
 
 }
 
@@ -528,6 +530,12 @@ void SettingsForm::setFormValues() {
         }
     }
 
+    if (settings->contains("txtMzRemoved"))
+        this->txtMzRemoved->setText(settings->value("txtMzRemoved").toString());
+
+    if (settings->contains("spnMzRemovedTol"))
+        this->spnMzRemovedTol->setValue(settings->value("spnMzRemovedTol").toDouble());
+
 }
 
 //This method sets the settings to the current state of the GUI.
@@ -697,6 +705,8 @@ void SettingsForm::getFormValues() {
     settings->setValue("chkConsensusAvgOnlyObserved", chkConsensusAvgOnlyObserved->checkState());
     settings->setValue("chkConsensusNormalizeTo10K", chkConsensusNormalizeTo10K->checkState());
     settings->setValue("cmbConsensusAgglomerationType", cmbConsensusAgglomerationType->currentText());
+    settings->setValue("txtMzRemoved", txtMzRemoved->text());
+    settings->setValue("spnMzRemovedTol", spnMzRemovedTol->value());
 
 }
 
