@@ -372,6 +372,25 @@ void TreeDockWidget::showInfo(bool isUpdateMassCalcGUI) {
         int minNumScansForConsensus = mainwindow->getSettings()->value("spnConsensusMinPeakPresence", 0).toInt();
         float minFractionScansForConsensus = mainwindow->getSettings()->value("spnConsensusMinPeakPresenceFraction", 0).toFloat();
 
+        // Issue 797: Pass along new parameters to test out new fragment filtering approach
+        QString mzRemovedStr = mainwindow->getSettings()->value("txtMzRemoved", "").toString();
+        float mzRemovedTol = mainwindow->getSettings()->value("mzRemovedTol", 10).toFloat();
+
+        vector<float> mzRemoved{};
+        QRegularExpression regex("[;,]");
+        QStringList removeMzStrList = mzRemovedStr.split(regex, Qt::SkipEmptyParts);
+        for (QString& removeMzStr : removeMzStrList) {
+            string removeMz = removeMzStr.toStdString();
+            try {
+                float mz = stof(removeMz);
+                mzRemoved.push_back(mz);
+            } catch (const std::exception& err) {
+                //parsing fail
+            }
+        }
+
+        std::sort(mzRemoved.begin(), mzRemoved.end());
+
         //Issue 217
         Fragment::ConsensusIntensityAgglomerationType consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
         QString consensusIntensityAgglomerationTypeStr = mainwindow->getSettings()->value("cmbConsensusAgglomerationType").toString();
@@ -450,7 +469,10 @@ void TreeDockWidget::showInfo(bool isUpdateMassCalcGUI) {
                                       isIntensityAvgByObserved,
                                       isNormalizeIntensityArray,
                                       minNumScansForConsensus,
-                                      minFractionScansForConsensus);
+                                      minFractionScansForConsensus,
+                                      false, // isRetainOriginalScanIntensities
+                                      mzRemoved,
+                                      mzRemovedTol);
 
                     //Issue 550: SpectraWidget::setCurrentFragment() expects Fragment* sorted by mz
                     f->consensus->sortByMz();
