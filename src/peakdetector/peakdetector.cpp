@@ -2357,7 +2357,7 @@ void mzkitchenSearch() {
 
         shared_ptr<MzkitchenMetaboliteSearchParameters> metaboliteSearchParams = MzkitchenMetaboliteSearchParameters::decode(mzkitchenSearchParameters);
         metaboliteSearchParams->IDisRequireMatchingAdduct = false; //this parameter must be false in a peakdetector context, because no Adduct* are provided
-        metaboliteSearchParams->searchVersion = "mzkitchen30_metabolite_search";
+        metaboliteSearchParams->searchVersion = "mzkitchen32_metabolite_search";
         metaboliteSearchParams->peakPickingAndGroupingParameters = peakPickingAndGroupingParameters; //override encoded values with CL options
 
         MzKitchenProcessor::matchMetabolites(allgroups, mzkitchenCompounds, metaboliteSearchParams, false);
