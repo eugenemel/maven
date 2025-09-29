@@ -272,7 +272,7 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
                   if (group.chargeState > 0 and not group.isMonoisotopic(isotopeMzTolr)) continue;
              }
 
-             group.computeFragPattern(productPpmTolr);
+             group.computeFragPattern(peaksSearchParameters.get());
 
              if (compoundMustHaveMs2 && group.ms2EventCount == 0) continue;
 
@@ -568,7 +568,7 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             //vector<Scan*>ms2events = group.getFragmenationEvents();
             //cerr << "\tFound ms2events" << ms2events.size() << "\n";
 
-            group.computeFragPattern(productPpmTolr);
+            group.computeFragPattern(peaksSearchParameters.get());
             // BROKEN group.findHighestPurityMS2Pattern(compoundPPMWindow);
 
             //Issue 746: MS2 required for peak group

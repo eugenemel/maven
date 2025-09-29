@@ -588,6 +588,34 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
         //peaksSearchParameters->matchingLibraries = DB.getLoadedDatabaseNames().join(", ").toStdString() /  peakGroupCompoundMatchPolicyBox->currentText().toStdString()
         //peaksSearchParameters->matchingPolicy = PeakGroupCompoundMatchingPolicy::SINGLE_TOP_HIT / peakGroupCompoundMatchPolicyBox->currentText()
 
+
+        //Consensus Spectrum settings - from display options panel
+        Fragment::ConsensusIntensityAgglomerationType consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
+        QString consensusIntensityAgglomerationTypeStr = mainwindow->getSettings()->value("cmbConsensusAgglomerationType").toString();
+
+        if (consensusIntensityAgglomerationTypeStr == "Mean") {
+            consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
+        } else if (consensusIntensityAgglomerationTypeStr == "Median") {
+            consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median;
+        }
+
+        peaksSearchParameters->scanFilterMinFracIntensity = mainwindow->getSettings()->value("spnScanFilterMinIntensityFraction", 0).toFloat();
+        peaksSearchParameters->scanFilterMinSNRatio = mainwindow->getSettings()->value("spnScanFilterMinSN", 0).toFloat();
+        peaksSearchParameters->scanFilterMaxNumberOfFragments = mainwindow->getSettings()->value("spnScanFilterRetainTopX", -1).toInt();
+        peaksSearchParameters->scanFilterBaseLinePercentile = mainwindow->getSettings()->value("spnScanFilterBaseline", 5).toInt();
+        peaksSearchParameters->scanFilterIsRetainFragmentsAbovePrecursorMz = mainwindow->getSettings()->value("chkScanFilterRetainHighMzFragments", true).toBool();
+        peaksSearchParameters->scanFilterMinIntensity = mainwindow->getSettings()->value("spnScanFilterMinIntensity", 0).toFloat();
+
+        peaksSearchParameters->consensusPpmTolr = mainwindow->getSettings()->value("spnConsensusPeakMatchTolerance", 10).toFloat();
+        peaksSearchParameters->consensusIntensityAgglomerationType =  consensusIntensityAgglomerationType;
+        peaksSearchParameters->consensusIsIntensityAvgByObserved = mainwindow->getSettings()->value("chkConsensusAvgOnlyObserved", true).toBool();
+        peaksSearchParameters->consensusIsNormalizeTo10K = mainwindow->getSettings()->value("chkConsensusNormalizeTo10K", false).toBool();
+        peaksSearchParameters->consensusMinNumMs2Scans = mainwindow->getSettings()->value("spnConsensusMinPeakPresence", 0).toInt();
+        peaksSearchParameters->consensusMinFractionMs2Scans = mainwindow->getSettings()->value("spnConsensusMinPeakPresenceFraction", 0).toFloat();
+        peaksSearchParameters->consensusIsRetainOriginalScanIntensities = false;
+        peaksSearchParameters->consensusMs2MzRemovedStr = mainwindow->getSettings()->value("txtMzRemoved", "").toString().toStdString();
+        peaksSearchParameters->consensusMs2MzRemovedTol = mainwindow->getSettings()->value("mzRemovedTol", 10).toFloat();
+
         //peak group clustering is not retained, as clusters can be easily added or removed with different parameters in the GUI
 
         return peaksSearchParameters;
