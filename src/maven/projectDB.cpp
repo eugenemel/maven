@@ -2000,6 +2000,7 @@ void ProjectDB::loadSearchParams(){
         QRegExp LCMSDDAexpr("^Detected Features");
         QRegExp LibSearchExpr("^Compound DB Search");
         QRegExp QQQLibSearchExpr("^QQQ Compound DB Search");
+        QRegExp clamDBRegEx("^clamDB");
 
         while (queryMatches.next()) {
 
@@ -2033,6 +2034,10 @@ void ProjectDB::loadSearchParams(){
 
             if (pos == -1) {
                 pos = QQQLibSearchExpr.indexIn(searchTableName);
+            }
+
+            if (pos == -1) {
+                pos = clamDBRegEx.indexIn(searchTableName);
             }
 
             if (pos != -1){
