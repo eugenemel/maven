@@ -145,6 +145,8 @@ bool isQQQCSVExport = false;
 
 //parameters
 shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
+shared_ptr<MzkitchenMetaboliteSearchParameters> metaboliteSearchParams = shared_ptr<MzkitchenMetaboliteSearchParameters>(new MzkitchenMetaboliteSearchParameters());
+shared_ptr<LCLipidSearchParameters> lipidSearchParams = shared_ptr<LCLipidSearchParameters>(new LCLipidSearchParameters());
 
 static map<QString, QString> searchTableData{};
 
@@ -927,15 +929,20 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
 
                 if (getChargeStateFromMS1(&group) < peakPickingAndGroupingParameters->filterMinPrecursorCharge) continue;
 
+                //Issue 797: Respect search parameters from CLI
                 //build consensus ms2 specta
-                vector<Scan*>ms2events = group.getFragmentationEvents();
-                if (ms2events.size()) {
-                    sort(ms2events.begin(), ms2events.end(), Scan::compIntensity);
-                    Fragment f = Fragment(ms2events[0], 0.01f, 1, 1024);
-                    for (Scan* s : ms2events) {  f.addFragment(new Fragment(s, 0, 0.01f, 1024)); }
-                    f.buildConsensus(productPpmTolr);
-                    group.fragmentationPattern = f.consensus;
-                    group.ms2EventCount = static_cast<int>(ms2events.size());
+                if (isMzkitchenSearch) {
+                    group.computeFragPattern(metaboliteSearchParams.get());
+                } else {
+                    vector<Scan*>ms2events = group.getFragmentationEvents();
+                    if (ms2events.size()) {
+                        sort(ms2events.begin(), ms2events.end(), Scan::compIntensity);
+                        Fragment f = Fragment(ms2events[0], 0.01f, 1, 1024);
+                        for (Scan* s : ms2events) {  f.addFragment(new Fragment(s, 0, 0.01f, 1024)); }
+                        f.buildConsensus(productPpmTolr);
+                        group.fragmentationPattern = f.consensus;
+                        group.ms2EventCount = static_cast<int>(ms2events.size());
+                    }
                 }
 
                 if (mustHaveMS2 and group.ms2EventCount == 0 ) continue;
@@ -1279,8 +1286,19 @@ void processOptions(int argc, char* argv[]) {
         //Override any previously encoded peak picking parameters with CL options
         QQQparams->peakPickingAndGroupingParameters = peakPickingAndGroupingParameters;
 
-    } else if (mzkitchenSearchType != "") {
+    //Issue 797: define both searches here, decode silently skips over any parameters that it does not understand
+    } else if (mzkitchenSearchType == "lipidSearch" || mzkitchenSearchType == "metaboliteSearch") {
         isMzkitchenSearch = true;
+
+        lipidSearchParams = LCLipidSearchParameters::decode(mzkitchenSearchParameters);
+        lipidSearchParams->IDisRequireMatchingAdduct = false;  //this parameter must be false in a peakdetector context, because no Adduct* are provided
+        lipidSearchParams->searchVersion = "lipids_lclipidprocessor_v1";
+        lipidSearchParams->peakPickingAndGroupingParameters = peakPickingAndGroupingParameters; //override encoded values with CL options
+
+        metaboliteSearchParams = MzkitchenMetaboliteSearchParameters::decode(mzkitchenSearchParameters);
+        metaboliteSearchParams->IDisRequireMatchingAdduct = false; //this parameter must be false in a peakdetector context, because no Adduct* are provided
+        metaboliteSearchParams->searchVersion = "mzkitchen32_metabolite_search";
+        metaboliteSearchParams->peakPickingAndGroupingParameters = peakPickingAndGroupingParameters; //override encoded values with CL options
     }
 }
 
@@ -2340,11 +2358,6 @@ void mzkitchenSearch() {
              << " lipids."
              << endl;
 
-        shared_ptr<LCLipidSearchParameters> lipidSearchParams = LCLipidSearchParameters::decode(mzkitchenSearchParameters);
-        lipidSearchParams->IDisRequireMatchingAdduct = false;  //this parameter must be false in a peakdetector context, because no Adduct* are provided
-        lipidSearchParams->searchVersion = "lipids_lclipidprocessor_v1";
-        lipidSearchParams->peakPickingAndGroupingParameters = peakPickingAndGroupingParameters; //override encoded values with CL options
-
         MzKitchenProcessor::matchLipids_LC(allgroups, mzkitchenCompounds, lipidSearchParams, false);
         searchTableData.insert(make_pair("clamDB", QString(lipidSearchParams->encodeParams().c_str())));
 
@@ -2354,11 +2367,6 @@ void mzkitchenSearch() {
              << allgroups.size()
              << " metabolites."
              << endl;
-
-        shared_ptr<MzkitchenMetaboliteSearchParameters> metaboliteSearchParams = MzkitchenMetaboliteSearchParameters::decode(mzkitchenSearchParameters);
-        metaboliteSearchParams->IDisRequireMatchingAdduct = false; //this parameter must be false in a peakdetector context, because no Adduct* are provided
-        metaboliteSearchParams->searchVersion = "mzkitchen32_metabolite_search";
-        metaboliteSearchParams->peakPickingAndGroupingParameters = peakPickingAndGroupingParameters; //override encoded values with CL options
 
         MzKitchenProcessor::matchMetabolites(allgroups, mzkitchenCompounds, metaboliteSearchParams, false);
         searchTableData.insert(make_pair("clamDB", QString(metaboliteSearchParams->encodeParams().c_str())));
