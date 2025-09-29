@@ -360,7 +360,7 @@ void TreeDockWidget::showInfo(bool isUpdateMassCalcGUI) {
         float minFracIntensity = mainwindow->getSettings()->value("spnScanFilterMinIntensityFraction", 0).toFloat();
         float minSNRatio = mainwindow->getSettings()->value("spnScanFilterMinSN", 0).toFloat();
         int maxNumberOfFragments = mainwindow->getSettings()->value("spnScanFilterRetainTopX", -1).toInt();
-        int baseLinePercentile = static_cast<int>(mainwindow->getSettings()->value("spnScanFilterBaseline", 5).toDouble());
+        int baseLinePercentile = mainwindow->getSettings()->value("spnScanFilterBaseline", 5).toInt();
         bool isRetainFragmentsAbovePrecursorMz = mainwindow->getSettings()->value("chkScanFilterRetainHighMzFragments", true).toBool();
         float precursorPurityPpm = -1;
         float minIntensity = mainwindow->getSettings()->value("spnScanFilterMinIntensity", 0).toFloat();
