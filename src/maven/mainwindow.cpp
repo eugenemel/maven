@@ -1953,19 +1953,25 @@ void MainWindow::updateGUIWithLastSelectedPeakGroup(){
         //Issue 550
         qDebug() << "MainWindow::updateGUIWithLastSelectedPeakGroup(): Drawing consensus MS2 spectrum.";
 
+        //Issue 797: re-route peakdetector search parameters to clamDB search parameters, to pick up consensus spectrum parameters
+        string searchTableName = _lastSelectedPeakGroup->searchTableName;
+        if (searchTableName == "peakdetector") {
+            searchTableName = "clamDB";
+        }
+
         if (_lastSelectedPeakGroup->fragmentationPattern.nobs() == 0) {
             //if saving a loaded fragmentation file, this should all be stored from the file.
 
             if (getProjectWidget()->currentProject) {
-                if (getProjectWidget()->currentProject->diSearchParameters.find(_lastSelectedPeakGroup->searchTableName) != getProjectWidget()->currentProject->diSearchParameters.end()) {
+                if (getProjectWidget()->currentProject->diSearchParameters.find(searchTableName) != getProjectWidget()->currentProject->diSearchParameters.end()) {
 
-                    shared_ptr<DirectInfusionSearchParameters> params = getProjectWidget()->currentProject->diSearchParameters[_lastSelectedPeakGroup->searchTableName];
+                    shared_ptr<DirectInfusionSearchParameters> params = getProjectWidget()->currentProject->diSearchParameters[searchTableName];
 
                     _lastSelectedPeakGroup->computeDIFragPattern(params);
 
-                } else if (getProjectWidget()->currentProject->peaksSearchParameters.find(_lastSelectedPeakGroup->searchTableName) != getProjectWidget()->currentProject->peaksSearchParameters.end()) {
+                } else if (getProjectWidget()->currentProject->peaksSearchParameters.find(searchTableName) != getProjectWidget()->currentProject->peaksSearchParameters.end()) {
 
-                    shared_ptr<PeaksSearchParameters> params = getProjectWidget()->currentProject->peaksSearchParameters[_lastSelectedPeakGroup->searchTableName];
+                    shared_ptr<PeaksSearchParameters> params = getProjectWidget()->currentProject->peaksSearchParameters[searchTableName];
 
                     _lastSelectedPeakGroup->computePeaksSearchFragPattern(params);
                 }
