@@ -506,8 +506,11 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
          DB.loadCompoundsSQL("ALL",selectedProject->sqlDB);
     }
 
+    QString projectPathUpOne = projectPath + QDir::separator() + "..";
+
     QStringList pathlist;
     pathlist << projectPath
+             << projectPathUpOne
              << "."
              << ".."
              << settings->value("lastDir").value<QString>();
