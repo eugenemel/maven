@@ -34,7 +34,6 @@ public:
     mzSlice&   getMzSlice() 		  {	 return _slice; }
     QString eicToTextBuffer();
 
-
 public slots:
     void unsetAlwaysDisplayGroup() {_alwaysDisplayGroup = nullptr;}
     void setMzSlice(float mz);
@@ -94,7 +93,7 @@ public slots:
     void showEICLines(bool f) { _showEICLines=f; }
     void showEICFill(bool f) { _showEICLines=!f; }
     void automaticPeakGrouping(bool f) { _groupPeaks=f; }
-    void showMS2Events(bool f) { _showMS2Events=f; }
+    void showMS2Events(bool f);
     void disconnectCompounds(QString libraryName);
     void emphasizeEICPoints(bool f) { _emphasizeEICPoints=f;}
     void preservePreviousRtRange(bool f) { _isPreservePreviousRtRange=f;}
@@ -153,6 +152,14 @@ signals:
     void scanChanged(Scan*);
 
 private:
+
+    //Issue 802: offset traces/axis to avoid MS2 triangles colliding with axes
+    //When MS2s are displayed, offset some of the plot elements for cleaner visualization
+    static const int EIC_LINE_AND_POINT_VERTICAL_OFFSET = -15;
+    static const int MS2_VERTICAL_OFFSET = -13;
+
+    int _eicLineAndPointVerticalOffset = 0;
+    int _ms2VerticalOffset = 0;
 
     mzSlice _slice;						// current slice
     float _focusLineRt;					// 0

@@ -696,6 +696,8 @@ void EicWidget::addEICLines(bool showSpline) {
         if (eic->maxIntensity <= 0) continue;
         EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
 
+        line->setVerticalOffset(_eicLineAndPointVerticalOffset);
+
         //sample stacking..
         int zValue=0;
         for(int j=0; j < peaks.size(); j++ ) {
@@ -710,7 +712,7 @@ void EicWidget::addEICLines(bool showSpline) {
             if ( showSpline ) {
                 line->addPoint(QPointF( toX(eic->rt[j]), toY(eic->spline[j])));
             } else {
-                //qDebug() << "EICline:" << eic->rt[j] << " " << eic->intensity[j] << " plots to " << toY(eic->intensity[j]);
+                // qDebug() << "EICline:" << eic->rt[j] << " " << eic->intensity[j] << " plots to " << toY(eic->intensity[j]) << " --> " << (toY(eic->intensity[j]) + EicWidget::X_AXIS_VERTICAL_OFFSET);
                 line->addPoint(QPointF( toX(eic->rt[j]), toY(eic->intensity[j])));
             }
         }
@@ -1293,14 +1295,14 @@ void EicWidget::addAxes() {
  //qDebug <<" EicWidget::addAxes()";
 //	 qDebug() << "EicWidget: addAxes() " << _minY << " " << _maxY << endl;
     Axes* x = new Axes(0,_minX, _maxX, 10, getMainWindow());
-    Axes* y = new Axes(1,_minY, _maxY, 10, getMainWindow());
+    Axes* y = new Axes(1,_minY, _maxY, 10, getMainWindow()); //(type, min, max, nticks, mainwindow);
 
     x->setMargin(_xAxisPlotMargin);
 
     scene()->addItem(x);
     scene()->addItem(y);
-	y->setOffset(20);
-	y->showTicLines(true);
+    y->setOffset(20);
+    y->showTicLines(true);
     x->setZValue(0);
     y->setZValue(0);
 	return;
@@ -1548,6 +1550,7 @@ void EicWidget::addPeakPositions(PeakGroup* group) {
 //                         << "original RT:" << peak.sample->originalRetentionTimes.at((peak.scan-1));
 
                 EicPoint* p  = new EicPoint(toX(peak.rt), toY(peak.peakIntensity), &peak, getMainWindow());
+                p->setVerticalOffset(_eicLineAndPointVerticalOffset);
 				if(setZValue) p->setZValue(i);
 				p->setColor(color);
 				p->setBrush(brush);
@@ -2233,9 +2236,8 @@ void EicWidget::addMS2Events(float mzmin, float mzmax) {
                 if (scan->rt < _slice.rtmin || scan->rt > _slice.rtmax) continue;
 
         		QColor color = QColor::fromRgbF( sample->color[0], sample->color[1], sample->color[2], 1 );
-
-
                 EicPoint* p  = new EicPoint(toX(scan->rt), toY(10), NULL, getMainWindow());
+                p->setVerticalOffset(_ms2VerticalOffset);
                 p->setPointShape(EicPoint::TRIANGLE_UP);
                 p->forceFillColor(true);
                 p->setScan(scan);
@@ -2280,5 +2282,17 @@ void EicWidget::disconnectCompounds(QString libraryName){
         _slice.adduct = nullptr;
     }
 
+    replot();
+}
+
+void EicWidget::showMS2Events(bool f) {
+    _showMS2Events=f;
+    if (f) {
+        _eicLineAndPointVerticalOffset = EicWidget::EIC_LINE_AND_POINT_VERTICAL_OFFSET;
+        _ms2VerticalOffset = EicWidget::MS2_VERTICAL_OFFSET;
+    } else {
+        _eicLineAndPointVerticalOffset = 0;
+        _ms2VerticalOffset = 0;
+    }
     replot();
 }
