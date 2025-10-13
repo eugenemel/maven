@@ -30,6 +30,7 @@ public:
     void setPointShape(POINTSHAPE shape) { pointShape=shape; }
     void forceFillColor(bool flag) { _forceFill = flag; }
     void setSize(float size) { _cSize=size; }
+    void setVerticalOffset(int verticalOffset){_verticalOffset = verticalOffset;}
 
     enum {Type = UserType + 1};
 
@@ -59,6 +60,7 @@ private:
     bool _forceFill;
     float _cSize;
     QRectF _boundingRect;
+    int _verticalOffset = 0;
 
 private slots:
 	void bookmark();
