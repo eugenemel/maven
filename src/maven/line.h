@@ -13,8 +13,8 @@ class EicLine : public QGraphicsItem
 {
 public:
     EicLine(QGraphicsItem* parent, QGraphicsScene *scene, MainWindow* mainwindow=nullptr);
-    void addPoint(float x, float y)  { _line << QPointF(x,y); }
-    void addPoint(QPointF p)  { _line << p; }
+    void addPoint(float x, float y)  { _line << QPointF(x,y+_verticalOffset); }
+    void addPoint(QPointF p)  { _line << QPointF(p.x(), p.y()+_verticalOffset); }
     void setColor(QColor &c)  { _color = c; }
     void setPen(QPen &p)  { _pen = p; }
     void setBrush(QBrush &b)  { _brush = b; }
@@ -29,6 +29,7 @@ public:
     void setMainWindow(MainWindow* mainwindow){_mainwindow=mainwindow;}
     void setEmphasizePoints(bool value) {_emphasizePoints = value;}
     bool isEmphasizePoints(){return _emphasizePoints;}
+    void setVerticalOffset(int verticalOffset){_verticalOffset=verticalOffset;}
 
 protected:
     QRectF boundingRect() const;
@@ -49,6 +50,7 @@ private:
     bool _fillPath;
     bool _emphasizePoints;
     MainWindow* _mainwindow;
+    int _verticalOffset = 0;
 
 };
 

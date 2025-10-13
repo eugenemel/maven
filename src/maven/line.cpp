@@ -98,8 +98,8 @@ void EicLine::fixEnds() {
     if (! scene()) return;
     QPointF p1 = _line[0];
     QPointF p2 = _line[_line.size()-1];
-    QPointF a(p2.x(),scene()->height());
-    QPointF b(p1.x(),scene()->height());
+    QPointF a(p2.x(),scene()->height()+_verticalOffset);
+    QPointF b(p1.x(),scene()->height()+_verticalOffset);
     _line.append(a);
     _line.append(b);
     _line.append(p1);
