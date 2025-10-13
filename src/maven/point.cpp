@@ -18,7 +18,7 @@ EicPoint::EicPoint(float x, float y, Peak* peak, MainWindow* mw)
     _pen=QPen(_color);
     _brush=QBrush(_color);
     _boundingRect = QRectF(static_cast<double>(_x)-static_cast<double>(_cSize)/2.0,
-                           static_cast<double>(_y)-static_cast<double>(_cSize)/2.0,
+                           static_cast<double>(_y+_verticalOffset)-static_cast<double>(_cSize)/2.0,
                            static_cast<double>(_cSize),
                            static_cast<double>(_cSize));
 
@@ -155,7 +155,7 @@ void EicPoint::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
     if (paintDiameter<5) paintDiameter=5; if (paintDiameter>30) paintDiameter=30;
 
     _boundingRect = QRectF(static_cast<double>(_x)-static_cast<double>(paintDiameter)/2.0,
-                           static_cast<double>(_y)-static_cast<double>(paintDiameter)/2.0,
+                           static_cast<double>(_y+_verticalOffset)-static_cast<double>(paintDiameter)/2.0,
                            static_cast<double>(paintDiameter),
                            static_cast<double>(paintDiameter)
                            );
@@ -178,13 +178,13 @@ void EicPoint::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
     painter->setBrush(brush);
 
     if(pointShape == CIRCLE ) {
-        painter->drawEllipse(_x-paintDiameter/2, _y-paintDiameter/2, paintDiameter,paintDiameter);
+        painter->drawEllipse(_x-paintDiameter/2, _y+_verticalOffset-paintDiameter/2, paintDiameter,paintDiameter);
     } else if (pointShape == SQUARE) {
-        painter->drawRect(_x-paintDiameter/2, _y-paintDiameter/2, paintDiameter,paintDiameter);
+        painter->drawRect(_x-paintDiameter/2, _y+_verticalOffset-paintDiameter/2, paintDiameter,paintDiameter);
     } else if (pointShape == TRIANGLE_DOWN ) {
-        painter->drawPie(_x-paintDiameter/2,_y-paintDiameter/2,paintDiameter,paintDiameter,30*16,120*16);
+        painter->drawPie(_x-paintDiameter/2,_y+_verticalOffset-paintDiameter/2,paintDiameter,paintDiameter,30*16,120*16);
     } else if (pointShape == TRIANGLE_UP ) {
-        painter->drawPie(_x-paintDiameter/2,_y-paintDiameter/2,paintDiameter,paintDiameter,260*16,20*16);
+        painter->drawPie(_x-paintDiameter/2,_y+_verticalOffset-paintDiameter/2,paintDiameter,paintDiameter,260*16,20*16);
     }
 }
 
