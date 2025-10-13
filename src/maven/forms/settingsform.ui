@@ -718,6 +718,11 @@
            <widget class="QComboBox" name="cmbIsotopicExtractionAlgorithm">
             <item>
              <property name="text">
+              <string>Visible Samples Full RT Width</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
               <string>Original (MAVEN 1.0)</string>
              </property>
             </item>
