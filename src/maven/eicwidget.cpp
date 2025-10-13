@@ -761,6 +761,7 @@ void EicWidget::addCubicSpline() {
         if (eic->sample != NULL && eic->sample->isSelected == false) continue;
         if (eic->maxIntensity <= 0) continue;
         EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
+        line->setVerticalOffset(_eicLineAndPointVerticalOffset);
 
         //sample stacking..
         int zValue=0;
@@ -856,7 +857,9 @@ void EicWidget::addTicLine() {
 		EIC* tic = tics[i];
 		if (tic->size()==0) continue;
         if (tic->sample != NULL && tic->sample->isSelected == false) continue;
-                EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
+
+        EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
+        line->setVerticalOffset(_eicLineAndPointVerticalOffset);
 		line->setEIC(tic);
 
 		_maxY = tic->maxIntensity;
@@ -910,6 +913,7 @@ void EicWidget::addMergedEIC() {
     }
 
     EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
+    line->setVerticalOffset(_eicLineAndPointVerticalOffset);
 
     for (int j=0; j < eic->size(); j++ ){
         if ( eic->rt[j] < _slice.rtmin) continue;
@@ -939,6 +943,7 @@ void EicWidget::addBaseLine() {
         eic->computeBaseLine(baseline_smoothing,baseline_quantile);
         if (eic->size()==0) continue;
         EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
+        line->setVerticalOffset(_eicLineAndPointVerticalOffset);
         line->setEIC(eic);
 
         float baselineSum=0;
@@ -975,6 +980,7 @@ void EicWidget::addBaseline(PeakGroup* group) {
         EIC* eic = eics[i];
         if (eic->size()==0 or eic->baseline.size()==0) continue;
         EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
+        line->setVerticalOffset(_eicLineAndPointVerticalOffset);
         line->setEIC(eic);
 
         float baselineSum=0;
@@ -1018,6 +1024,7 @@ void EicWidget::showPeakArea(Peak* peak) {
 
     EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
     line->setClosePath(true);
+    line->setVerticalOffset(_eicLineAndPointVerticalOffset);
     for(int i=0; i < observed.size(); i++ ) {
         line->addPoint(QPointF( toX(observed[i].x), toY(observed[i].y)));
     }
@@ -1463,7 +1470,8 @@ void EicWidget::addFitLine(PeakGroup* group) {
 		}
 
 		//for(int i=0; i < x.size(); i++ ) x[i]=p.rtmin+(i*rtStep);
-                EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
+        EicLine* line = new EicLine(nullptr, scene(), getMainWindow());
+        line->setVerticalOffset(_eicLineAndPointVerticalOffset);
 		for(int i=0; i < y.size(); i++ ) {
 			line->addPoint(QPointF( toX(x[i]), toY(y[i])));
 		}
