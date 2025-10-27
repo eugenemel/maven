@@ -294,7 +294,7 @@ void ProjectDockWidget::setInfo(vector<mzSample*>&samples) {
     _treeWidget->clear();
 
     _treeWidget->setDragDropMode(QAbstractItemView::InternalMove);
-    QStringList header; header << "Sample" << "Set" << "Scalling";
+    QStringList header; header << "Sample" << "Set" << "Scaling";
     _treeWidget->setHeaderLabels( header );
     _treeWidget->header()->setStretchLastSection(true);
     _treeWidget->setHeaderHidden(false);
