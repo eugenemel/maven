@@ -21,7 +21,7 @@ ProjectDockWidget::ProjectDockWidget(QMainWindow *parent):
 
 
     _treeWidget=new SampleTreeWidget(this);
-    _treeWidget->setColumnCount(4);
+    _treeWidget->setColumnCount(3);
     _treeWidget->setObjectName("Samples");
     _treeWidget->setHeaderHidden(true);
     connect(_treeWidget, SIGNAL(itemSelectionChanged()), SLOT(showInfo()));
