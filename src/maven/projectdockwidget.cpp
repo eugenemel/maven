@@ -1219,6 +1219,10 @@ void ProjectDockWidget::importSampleMetadata(){
         for (unsigned int i = 0; i < headerValues.size(); i++) {
             //Issue 476: Fix encoding/decoding issue
             QString str = QString::fromUtf8(headerValues.at(i).c_str());
+
+            //Issue 807: Silently remove double-quoted string from header (if it exists).
+            str.remove(QChar('"'));
+
             string cleanedString = str.toUtf8().toStdString();
             indexOf[cleanedString] = i;
         }
@@ -1237,6 +1241,11 @@ void ProjectDockWidget::importSampleMetadata(){
         if (values.size() != indexOf.size()) {
             qDebug() << "Skipping line \"" << line.c_str() << "\" b/c of mismatch between header count and value count.";
             continue;
+        }
+
+        //Issue 807: Silently remove double-quote characters from strings
+        for (string& value : values) {
+            value.erase(std::remove(value.begin(), value.end(), '"'), value.end());
         }
 
         string sampleName;
