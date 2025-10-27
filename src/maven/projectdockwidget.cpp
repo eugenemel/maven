@@ -1218,8 +1218,8 @@ void ProjectDockWidget::importSampleMetadata(){
         split(line, ',', headerValues);
         for (unsigned int i = 0; i < headerValues.size(); i++) {
             //Issue 476: Fix encoding/decoding issue
-            QString str = QString(headerValues.at(i).c_str());
-            string cleanedString = str.toStdString();
+            QString str = QString::fromUtf8(headerValues.at(i).c_str());
+            string cleanedString = str.toUtf8().toStdString();
             indexOf[cleanedString] = i;
         }
     }
