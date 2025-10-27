@@ -35,6 +35,8 @@ src/peakdetector/tmp
 src/peakdetector/Makefile
 src/peakdetector/.DS_Store
 src/peakdetector/build/
+src/isotopeprocessor/build/
+src/pulleics/build/
 
 # tests
 src/maven_tests/testqstring/testqstring.app/
