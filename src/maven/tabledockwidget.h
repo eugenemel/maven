@@ -94,6 +94,7 @@ public slots:
 	  void updateTable();
 	  void updateItem(QTreeWidgetItem* item);
 	  void updateStatus();
+      void updateIcons();
        void runScript();
 
 	  void markGroupBad();
@@ -145,7 +146,11 @@ protected slots:
 
 private:
   private:
-         QHash<QString, QIcon> _iconCache;
+        QIcon goodIcon = QIcon(rsrcPath + "/good.png");
+        QIcon badIcon = QIcon(rsrcPath + "/bad.png");
+        QIcon reassignedIcon = QIcon(rsrcPath + "/compound_reassigned.png");
+        QHash<QString, QIcon> _iconCache;
+
          bool traverseNode(QTreeWidgetItem *item, QString needle);
          void traverseAndDeleteGroups(QTreeWidgetItem *item);
          void traverseAndCollectVisibleGroups(QTreeWidgetItem *item, QList<PeakGroup*>& groups);

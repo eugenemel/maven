@@ -285,6 +285,7 @@ void TableDockWidget::updateTable() {
         updateItem(*it);
         ++it;
     }
+    updateIcons();
     updateStatus();
 }
 
@@ -317,21 +318,23 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
     // Issue 808: Check cache
     QString iconKey = QString();
     for (char c : group->labels) {
-        iconKey + QString(c);
+        iconKey += QString(c);
     }
 
     if (!_iconCache.contains(iconKey)) {
+
+        qDebug() << "iconKey: " << iconKey;
 
         //Issue 127: gather all icons
         vector<QIcon> icons;
         for (char c : group->labels) {
 
             if (c == 'g') {
-                icons.push_back(QIcon(rsrcPath + "/good.png"));
+                icons.push_back(goodIcon);
             } else if (c == 'b') {
-                icons.push_back(QIcon(rsrcPath + "/bad.png"));
+                icons.push_back(badIcon);
             } else if (c == PeakGroup::ReservedLabel::COMPOUND_MANUALLY_CHANGED) {
-                icons.push_back(QIcon(rsrcPath + "/compound_reassigned.png"));
+                icons.push_back(reassignedIcon);
             } else if (DB.peakGroupTags.find(c) != DB.peakGroupTags.end()) {
                 icons.push_back(DB.peakGroupTags[c]->icon);
             }
@@ -349,10 +352,12 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
             QRect rect = treeWidget->visualItemRect(item);
 
             int imgWidth = 0;
-            int imgHeight = rect.height();
 
-            //Issue 127: fall back to height of images if height could not be determined from rectangle
-            if (imgHeight == 0) {
+            int imgHeight = treeWidget->iconSize().height();
+
+            if (imgHeight == 0){
+                imgHeight = rect.height();
+            } else if (imgHeight == 0) {
                 for (auto &x : icons) {
                     if (x.availableSizes().first().height() > imgHeight){
                         imgHeight = x.availableSizes().first().height();
@@ -403,16 +408,9 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
         }
     }
 
-    QIcon icon = _iconCache.take(iconKey);
+    QIcon icon = _iconCache.value(iconKey);
 
     item->setIcon(0, icon);
-
-    QSize iconSize = treeWidget->iconSize();
-
-    //enlarge sizes as needed
-    if (!icon.availableSizes().isEmpty() && icon.availableSizes().first().width() > iconSize.width()){
-        treeWidget->setIconSize(icon.availableSizes().first());
-    }
 }
 
 
@@ -1159,6 +1157,8 @@ void TableDockWidget::showAllGroups() {
     treeWidget->expandAll();
 
     updateStatus();
+    updateIcons();
+
     if (windowTitle() != "Bookmarks") {
         searchParamsDialog->txtSrchResults->setText("Total # groups: " + QString::number(allgroups.size()));
     }
@@ -1467,7 +1467,7 @@ void TableDockWidget::setGroupLabel(char label) {
 
     //The labeled group might be filtered out.
     updateTagFilter();
-
+    updateIcons();
     updateStatus();
 }
 
@@ -1546,6 +1546,7 @@ void TableDockWidget::deleteSelected() {
         //_mainwindow->getEicWidget()->replotForced();
     }
 
+    updateIcons();
     updateStatus();
 }
 
@@ -1681,6 +1682,7 @@ void TableDockWidget::keyPressEvent(QKeyEvent *e ) {
 
     QDockWidget::keyPressEvent(e);
     updateStatus();
+    updateIcons();
 }
 
 void TableDockWidget::updateStatus() {
@@ -1701,6 +1703,31 @@ void TableDockWidget::updateStatus() {
             QString::number(goodCount),
             QString::number(badCount));
     _mainwindow->setStatusText(title);
+}
+
+void TableDockWidget::updateIcons() {
+    qDebug() << "TableDockWidget::updateIcons(): Resizing icons.";
+
+    QSize maxIconSize = treeWidget->iconSize();
+
+    for (const QIcon& icon : _iconCache) {
+
+        if (icon.availableSizes().isEmpty()) continue;
+
+        QSize availableSize = icon.availableSizes().first();
+
+        //enlarge sizes as needed
+        if (availableSize.width() > maxIconSize.width()) {
+            maxIconSize.setWidth(availableSize.width());
+        }
+        if (availableSize.height() > maxIconSize.height()) {
+            maxIconSize.setHeight(availableSize.height());
+        }
+    }
+
+    if (maxIconSize != treeWidget->iconSize()) {
+        treeWidget->setIconSize(maxIconSize);
+    }
 }
 
 float TableDockWidget::showAccuracy(vector<PeakGroup*>&groups) {
@@ -2922,6 +2949,8 @@ void TableDockWidget::updateHighlightedItems(QString oldGroupTagString,  QString
     for (QTreeWidgetItem *item : itemsToUpdate) {
         updateItem(item);
     }
+
+    updateIcons();
 }
 
 map<string, int> TableDockWidget::groupViewColumnNameToNumber{
