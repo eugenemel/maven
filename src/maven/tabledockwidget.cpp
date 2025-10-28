@@ -357,7 +357,9 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
 
             if (imgHeight == 0){
                 imgHeight = rect.height();
-            } else if (imgHeight == 0) {
+            }
+
+            if (imgHeight == 0) {
                 for (auto &x : icons) {
                     if (x.availableSizes().first().height() > imgHeight){
                         imgHeight = x.availableSizes().first().height();
@@ -405,6 +407,8 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
             icon.addPixmap(comboPixmap);
 
             _iconCache.insert(iconKey, icon);
+
+            updateIcons();
         }
     }
 
