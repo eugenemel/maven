@@ -314,109 +314,107 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
         }
     }
 
-    //Issue 426: Remove highlighting on peak groups
-//    int good=0; int bad=0;
-//    int total=group->peakCount();
-//    for(int i=0; i < group->peakCount(); i++ ) {
-//        group->peaks[i].quality > 0.5 ? good++ : bad++;
-//    }
-
-//    QBrush brush=Qt::NoBrush;
-//    if (good > 0 && group->isGroupBad() ) {
-//        float incorrectFraction= ((float) good)/total;
-//        brush  = QBrush(QColor::fromRgbF(0.8,0,0,incorrectFraction));
-//    } else if(bad>0 && group->isGroupGood()) {
-//        float incorrectFraction= ((float) bad)/total;
-//        brush  = QBrush(QColor::fromRgbF(0.8,0,0,incorrectFraction));
-//    }
-//    item->setBackground(0,brush);
-
-    //Issue 127: gather all icons
-    vector<QIcon> icons;
+    // Issue 808: Check cache
+    QString iconKey = QString();
     for (char c : group->labels) {
-
-        if (c == 'g') {
-            icons.push_back(QIcon(rsrcPath + "/good.png"));
-        } else if (c == 'b') {
-            icons.push_back(QIcon(rsrcPath + "/bad.png"));
-        } else if (c == PeakGroup::ReservedLabel::COMPOUND_MANUALLY_CHANGED) {
-            icons.push_back(QIcon(rsrcPath + "/compound_reassigned.png"));
-        } else if (DB.peakGroupTags.find(c) != DB.peakGroupTags.end()) {
-            icons.push_back(DB.peakGroupTags[c]->icon);
-        }
-
+        iconKey + QString(c);
     }
 
-    if (icons.empty()) {
-        item->setIcon(0, QIcon());
-    } else if (icons.size() == 1) {
-        item->setIcon(0, icons.at(0));
-    } else {
+    if (!_iconCache.contains(iconKey)) {
 
-        QRect rect = treeWidget->visualItemRect(item);
+        //Issue 127: gather all icons
+        vector<QIcon> icons;
+        for (char c : group->labels) {
 
-        int imgWidth = 0;
-        int imgHeight = rect.height();
+            if (c == 'g') {
+                icons.push_back(QIcon(rsrcPath + "/good.png"));
+            } else if (c == 'b') {
+                icons.push_back(QIcon(rsrcPath + "/bad.png"));
+            } else if (c == PeakGroup::ReservedLabel::COMPOUND_MANUALLY_CHANGED) {
+                icons.push_back(QIcon(rsrcPath + "/compound_reassigned.png"));
+            } else if (DB.peakGroupTags.find(c) != DB.peakGroupTags.end()) {
+                icons.push_back(DB.peakGroupTags[c]->icon);
+            }
 
-        //Issue 127: fall back to height of images if height could not be determined from rectangle
-        if (imgHeight == 0) {
-            for (auto &x : icons) {
-                if (x.availableSizes().first().height() > imgHeight){
-                    imgHeight = x.availableSizes().first().height();
+        }
+
+        if (icons.empty()) {
+            _iconCache.insert(iconKey, QIcon());
+            //item->setIcon(0, QIcon());
+        } else if (icons.size() == 1) {
+            _iconCache.insert(iconKey, icons.at(0));
+            // item->setIcon(0, icons.at(0));
+        } else {
+
+            QRect rect = treeWidget->visualItemRect(item);
+
+            int imgWidth = 0;
+            int imgHeight = rect.height();
+
+            //Issue 127: fall back to height of images if height could not be determined from rectangle
+            if (imgHeight == 0) {
+                for (auto &x : icons) {
+                    if (x.availableSizes().first().height() > imgHeight){
+                        imgHeight = x.availableSizes().first().height();
+                    }
                 }
             }
-        }
 
-        vector<int> heightOffsets(icons.size());
+            vector<int> heightOffsets(icons.size());
 
-        for (unsigned int i = 0; i < icons.size(); i++) {
+            for (unsigned int i = 0; i < icons.size(); i++) {
 
-            QIcon x = icons[i];
+                QIcon x = icons[i];
 
-            int width = x.availableSizes().first().width();
-            imgWidth += width;
+                int width = x.availableSizes().first().width();
+                imgWidth += width;
 
-            int height = x.availableSizes().first().height();
-            int heightOffset = (imgHeight - height)/2;
+                int height = x.availableSizes().first().height();
+                int heightOffset = (imgHeight - height)/2;
 
-            if (heightOffset > 0) {
-                heightOffsets[i] = heightOffset;
-            }  else {
-                heightOffsets[i] = 0;
+                if (heightOffset > 0) {
+                    heightOffsets[i] = heightOffset;
+                }  else {
+                    heightOffsets[i] = 0;
+                }
             }
-        }
 
-        QPixmap comboPixmap(imgWidth, imgHeight);
-        QPainter painter(&comboPixmap);
+            QPixmap comboPixmap(imgWidth, imgHeight);
+            QPainter painter(&comboPixmap);
 
-        //always set a white background color, otherwise the images are hard to see
-        painter.fillRect(0, 0, imgWidth, imgHeight, Qt::white);
+            //always set a white background color, otherwise the images are hard to see
+            painter.fillRect(0, 0, imgWidth, imgHeight, Qt::white);
 
-        int leftEdge = 0;
-        for (unsigned int i = 0; i < icons.size(); i++) {
+            int leftEdge = 0;
+            for (unsigned int i = 0; i < icons.size(); i++) {
 
-            int heightCoord = heightOffsets[i];
-            QIcon x = icons[i];
+                int heightCoord = heightOffsets[i];
+                QIcon x = icons[i];
 
-            painter.drawPixmap(leftEdge, heightCoord, x.pixmap(x.availableSizes().first()));
+                painter.drawPixmap(leftEdge, heightCoord, x.pixmap(x.availableSizes().first()));
 
-            leftEdge += x.availableSizes().first().width();
-        }
+                leftEdge += x.availableSizes().first().width();
+            }
 
-        QIcon icon;
-        icon.addPixmap(comboPixmap);
+            QIcon icon;
+            icon.addPixmap(comboPixmap);
 
-        item->setIcon(0, icon);
-
-        QSize iconSize = treeWidget->iconSize();
-
-        //enlarge sizes as needed
-        if (!icon.availableSizes().isEmpty() && icon.availableSizes().first().width() > iconSize.width()){
-            treeWidget->setIconSize(icon.availableSizes().first());
+            _iconCache.insert(iconKey, icon);
         }
     }
 
+    QIcon icon = _iconCache.take(iconKey);
+
+    item->setIcon(0, icon);
+
+    QSize iconSize = treeWidget->iconSize();
+
+    //enlarge sizes as needed
+    if (!icon.availableSizes().isEmpty() && icon.availableSizes().first().width() > iconSize.width()){
+        treeWidget->setIconSize(icon.availableSizes().first());
+    }
 }
+
 
 void TableDockWidget::heatmapBackground(QTreeWidgetItem* item) {
     if(viewType != peakView) return;

@@ -144,6 +144,8 @@ protected slots:
 	  void contextMenuEvent ( QContextMenuEvent * event );
 
 private:
+  private:
+         QHash<QString, QIcon> _iconCache;
          bool traverseNode(QTreeWidgetItem *item, QString needle);
          void traverseAndDeleteGroups(QTreeWidgetItem *item);
          void traverseAndCollectVisibleGroups(QTreeWidgetItem *item, QList<PeakGroup*>& groups);
