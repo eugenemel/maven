@@ -291,6 +291,11 @@ void TableDockWidget::updateTable() {
 
 void TableDockWidget::updateItem(QTreeWidgetItem* item) {
 
+    //assume that all possible icons that will be combined are squares
+    const int SINGLE_ICON_WIDTH = 12;
+    const int SINGLE_ICON_HEIGHT = 12;
+    const int ICON_SPACE_OFFSET = 1;
+
     QVariant v = item->data(0,PeakGroupType);
     PeakGroup*  group =  v.value<PeakGroup*>();
 
@@ -349,71 +354,35 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
             // item->setIcon(0, icons.at(0));
         } else {
 
-            QRect rect = treeWidget->visualItemRect(item);
-
-            int imgWidth = 0;
-
-            int imgHeight = treeWidget->iconSize().height();
-
-            if (imgHeight == 0){
-                imgHeight = rect.height();
-            }
-
-            if (imgHeight == 0) {
-                for (auto &x : icons) {
-                    if (x.availableSizes().first().height() > imgHeight){
-                        imgHeight = x.availableSizes().first().height();
-                    }
-                }
-            }
-
-            vector<int> heightOffsets(icons.size());
-
-            for (unsigned int i = 0; i < icons.size(); i++) {
-
-                QIcon x = icons[i];
-
-                int width = x.availableSizes().first().width();
-                imgWidth += width;
-
-                int height = x.availableSizes().first().height();
-                int heightOffset = (imgHeight - height)/2;
-
-                if (heightOffset > 0) {
-                    heightOffsets[i] = heightOffset;
-                }  else {
-                    heightOffsets[i] = 0;
-                }
-            }
+            int N = icons.size();
+            int imgWidth = N * SINGLE_ICON_WIDTH + (N-1) * ICON_SPACE_OFFSET;
+            int imgHeight = SINGLE_ICON_HEIGHT;
 
             QPixmap comboPixmap(imgWidth, imgHeight);
             QPainter painter(&comboPixmap);
 
-            //always set a white background color, otherwise the images are hard to see
+            // Set a white background color
             painter.fillRect(0, 0, imgWidth, imgHeight, Qt::white);
 
             int leftEdge = 0;
-            for (unsigned int i = 0; i < icons.size(); i++) {
+            for (const QIcon &icon : icons) {
+                // Get the pixmap at the fixed size. QIcon will scale it if necessary.
+                QPixmap pixmap = icon.pixmap(SINGLE_ICON_WIDTH, SINGLE_ICON_HEIGHT);
 
-                int heightCoord = heightOffsets[i];
-                QIcon x = icons[i];
+                // Draw at leftEdge. Vertical alignment is not needed since height is fixed.
+                painter.drawPixmap(leftEdge, 0, pixmap);
 
-                painter.drawPixmap(leftEdge, heightCoord, x.pixmap(x.availableSizes().first()));
-
-                leftEdge += x.availableSizes().first().width();
+                leftEdge += (SINGLE_ICON_WIDTH + ICON_SPACE_OFFSET);
             }
 
             QIcon icon;
             icon.addPixmap(comboPixmap);
 
             _iconCache.insert(iconKey, icon);
-
-            updateIcons();
         }
     }
 
     QIcon icon = _iconCache.value(iconKey);
-
     item->setIcon(0, icon);
 }
 
@@ -2620,6 +2589,9 @@ bool TableDockWidget::traverseNode(QTreeWidgetItem *item, QString needle) {
 
 bool TableDockWidget::isPassesTextFilter(QTreeWidgetItem *item, QString needle) {
     if (!item) return false;
+
+    // Issue 810: all valid items pass on an empty string.
+    if (item && needle.isEmpty()) return true;
 
     bool isPassesID = item->text(getGroupViewColumnNumber("ID")).contains(needle, Qt::CaseInsensitive);
     bool isPassesAdduct = item->text(getGroupViewColumnNumber("Adduct")).contains(needle, Qt::CaseInsensitive);
