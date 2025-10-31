@@ -143,6 +143,9 @@ bool isQQQSearch = false;
 shared_ptr<QQQSearchParameters> QQQparams = shared_ptr<QQQSearchParameters>(new QQQSearchParameters());
 bool isQQQCSVExport = false;
 
+// Issue 798: use provided anchor point RT as reference RT (instead of random sample)
+bool rtAlignmentAnchorPointReference = false;
+
 //parameters
 shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
 shared_ptr<MzkitchenMetaboliteSearchParameters> metaboliteSearchParams = shared_ptr<MzkitchenMetaboliteSearchParameters>(new MzkitchenMetaboliteSearchParameters());
@@ -1249,6 +1252,8 @@ void processOptions(int argc, char* argv[]) {
                 loadedAdducts.insert(make_pair(adduct->name, adduct));
                 cout << "Adduct Loaded: " << adduct->name << endl;
             }
+        } else if (strcmp(argv[i], "--rtAlignmentAnchorPointReference") == 0) {
+            rtAlignmentAnchorPointReference = strcmp(argv[i], "1");
         }
 
         if (mzUtils::ends_with(optString, ".rt")) alignmentFile = optString;
@@ -2321,7 +2326,8 @@ void anchorPointsBasedAlignment() {
                 standardsAlignment_precursorPPM,
                 standardsAlignment_maxRtWindow,
                 eic_smoothingWindow,
-                standardsAlignment_minPeakIntensity
+                standardsAlignment_minPeakIntensity,
+                rtAlignmentAnchorPointReference
                 );
     experimentAnchorPoints.compute(false, true); // (debug, isClean)
     sampleToUpdatedRts = experimentAnchorPoints.sampleToUpdatedRts;
