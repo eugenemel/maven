@@ -2329,7 +2329,7 @@ void anchorPointsBasedAlignment() {
                 standardsAlignment_minPeakIntensity,
                 rtAlignmentAnchorPointReference
                 );
-    experimentAnchorPoints.compute(false, true); // (debug, isClean)
+    experimentAnchorPoints.compute(true, true); // (debug, isClean)
     sampleToUpdatedRts = experimentAnchorPoints.sampleToUpdatedRts;
 
     printf("Execution time (anchorPointsBasedAlignment()) : %f seconds \n", getTime() - startLoadingTime);
