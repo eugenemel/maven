@@ -221,34 +221,6 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
                  group.groupStatistics();
              }
 
-//             //Issue 632: Start Debugging
-//             qDebug() <<  group.meanMz << "@" << group.medianRt() << ":";
-//             if (group.compound) {
-//                 qDebug() << group.compound->name.c_str();
-//             }
-
-//             qDebug() << "group.goodPeakCount=" << group.goodPeakCount
-//                      << " <--> " << minGoodPeakCount
-//                      << " ==> " << (group.goodPeakCount < minGoodPeakCount ? "FAIL" : "PASS");
-
-//             qDebug() << "group.blankMax*minSignalBlankRatio=" << (group.blankMax*minSignalBlankRatio)
-//                      << " <--> " << minGoodPeakCount
-//                      << " ==> " << (group.blankMax*minSignalBlankRatio > group.maxIntensity ? "FAIL" : "PASS");
-
-//             qDebug() << "group.maxNoNoiseObs=" << group.maxNoNoiseObs
-//                      << " <--> " << minNoNoiseObs
-//                      << " ==> " << (group.maxNoNoiseObs < minNoNoiseObs ? "FAIL" : "PASS");
-
-//             qDebug() << "group.maxSignalBaselineRatio=" << group.maxSignalBaselineRatio
-//                      << " <--> minSignalBaseLineRatio=" << minSignalBaseLineRatio
-//                      << " ==> " << (group.maxSignalBaselineRatio < minSignalBaseLineRatio ? "FAIL" : "PASS");
-
-//             qDebug() << "group.maxIntensity=" << group.maxIntensity
-//                      << " <--> minGroupIntensity=" << minGroupIntensity
-//                      << " ==> " << (group.maxIntensity < minGroupIntensity ? "FAIL" : "PASS");
-
-//             qDebug() << endl;
-//             //Issue 632: End Debugging
 
              if (clsf && clsf->hasModel()&& group.goodPeakCount < minGoodPeakCount) continue;
              if (group.blankMax*minSignalBlankRatio > group.maxIntensity) continue;
@@ -283,19 +255,6 @@ void BackgroundPeakUpdate::processCompoundSlices(vector<mzSlice*>&slices, string
              double maxScore = -1;
 
              vector<pair<Compound*, Adduct*>> compoundAdductMatches;
-
-             //TODO: an effort towards unifying Peaks Dialog and Compounds Dialog
-             //If slices are not pre-associated with compounds, search for them in the database.
-//             if (!slice->compound) {
-//                 vector<MassCalculator::Match> compoundMatches = DB.findMatchingCompounds(group.meanMz, compoundPPMWindow, ionizationMode);
-//                 for (auto match : compoundMatches) {
-//                     compoundAdductMatches.push_back(make_pair(match.compoundLink, match.adductLink));
-//                 }
-//             } else {
-//                 for (auto compound : slice->compoundVector) {
-//                     compoundAdductMatches.push_back(make_pair(compound, slice->adduct));
-//                 }
-//             }
 
 
              //TODO: Issue 722
