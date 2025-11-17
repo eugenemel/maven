@@ -213,7 +213,6 @@ bool isMonoisotope(PeakGroup* grp);
 vector<mzSlice*> getSrmSlices();
 
 void matchFragmentation();
-void writeMS2SimilarityMatrix(string filename);
 
 double get_wall_time();
 double get_cpu_time();
@@ -1770,7 +1769,6 @@ void writeReport(string setName) {
         writeQQQReport(outputdir + setName + ".csv");
     }
 
-    //writeMS2SimilarityMatrix(outputdir + setName + ".fragMatrix.tsv");
     //if(writeConsensusMS2) writeConsensusMS2Spectra(outputdir + setName + ".msp");
     //if(writeConsensusMS2) classConsensusMS2Spectra(outputdir + setName + "CLASS.msp");
 }
@@ -2078,46 +2076,6 @@ string possibleClasses(set<Compound*>matches) {
         classes += p.first + "[matched=" + integer2string(p.second) + " ] ";
     }
     return classes;
-}
-
-void writeMS2SimilarityMatrix(string filename) {
-    vector<Fragment> allFragments;
-
-    ofstream groupReport;
-    groupReport.open(filename.c_str());
-    if (! groupReport.is_open()) return;
-
-    for (int i = 0; i < allgroups.size(); i++) {
-        PeakGroup* g = &allgroups[i];
-        if (g->fragmentationPattern.nobs() == 0) continue;
-        Fragment f = g->fragmentationPattern;
-        f.addNeutralLosses();
-        allFragments.push_back(f);
-    }
-
-    for (int i = 0; i < allFragments.size(); i++) {
-        Fragment& f1 = allFragments[i];
-        for (int j = i; j < allFragments.size(); j++) {
-            Fragment& f2 = allFragments[j];
-            FragmentationMatchScore score = f1.scoreMatch( &f2, productPpmTolr);
-
-            //print matrix
-            if (score.numMatches > 2 ) {
-                string id1, id2;
-                if (f1.group->hasCompoundLink()) id1 = f1.group->compound->name;
-                if (f2.group->hasCompoundLink()) id2 = f2.group->compound->name;
-
-                groupReport
-                        << f1.group->groupId  << "\t" << f2.group->groupId << "\t"
-                        << abs(f1.group->meanMz - f2.group->meanMz) << "\t"
-                        << abs(f1.group->meanRt - f2.group->meanRt) << "\t"
-                        << score.numMatches <<  "\t"
-                        << score.ticMatched << "\t"
-                        << score.spearmanRankCorrelation << "\t"
-                        << id1 << "\t" << id2 << endl;
-            }
-        }
-    }
 }
 
 void matchFragmentation() {
