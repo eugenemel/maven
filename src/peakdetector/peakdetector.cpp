@@ -146,6 +146,10 @@ bool isQQQCSVExport = false;
 // Issue 798: use provided anchor point RT as reference RT (instead of random sample)
 bool rtAlignmentAnchorPointReference = false;
 
+// Issue 815: New search type
+bool isCompoundLibrarySearch = false;
+string compoundLibraryFile = "";
+
 //parameters
 shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
 shared_ptr<MzkitchenMetaboliteSearchParameters> metaboliteSearchParams = shared_ptr<MzkitchenMetaboliteSearchParameters>(new MzkitchenMetaboliteSearchParameters());
@@ -371,6 +375,13 @@ int main(int argc, char *argv[]) {
 
         cout << "Identified " << transitions.size() << " SRM transitions, generating " << slices.size() << " mz slices." << endl;
 
+    // Issue 815: Compound-library specific search
+    } else if (isCompoundLibrarySearch && !compoundLibraryFile.empty() ) {
+        //slices = compoundLibrarySlices()
+        //
+        // Refer to BackgroundPeaksUpdate::processCompounds() to generate slices,
+        // then BackgroundPeaksUpdate::processCompoundSlices() to process them
+        //
     } else {
         slices = processMassSlices(-1, algorithmType, nameSuffix);
     }
