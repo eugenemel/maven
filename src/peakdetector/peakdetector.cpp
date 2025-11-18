@@ -147,8 +147,7 @@ bool isQQQCSVExport = false;
 bool rtAlignmentAnchorPointReference = false;
 
 // Issue 815: New search type
-bool isCompoundLibrarySearch = false;
-string compoundLibraryFile = "";
+string compoundLibraryFile = ""; // if this string is not empty, this is a compound library search.
 
 //parameters
 shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
@@ -379,12 +378,8 @@ int main(int argc, char *argv[]) {
         cout << "Identified " << transitions.size() << " SRM transitions, generating " << slices.size() << " mz slices." << endl;
 
     // Issue 815: Compound-library specific search
-    } else if (isCompoundLibrarySearch && !compoundLibraryFile.empty() ) {
-        //slices = compoundLibrarySlices(compoundLibraryFile)
-        //
-        // Refer to BackgroundPeaksUpdate::processCompounds() to generate slices,
-        // then BackgroundPeaksUpdate::processCompoundSlices() to process them
-        //
+    } else if (!compoundLibraryFile.empty() ) {
+        slices = compoundLibrarySlices(compoundLibraryFile, false); // debug
     } else {
         slices = processMassSlices(-1, algorithmType, nameSuffix);
     }
@@ -827,6 +822,7 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
         float rtmin = slices[i]->rtmin;
         float rtmax = slices[i]->rtmax;
         Compound* compound = slices[i]->compound;
+        Adduct* adduct = slices[i]->adduct;
 
         if (i % 1000 == 0) {
             if (isQQQSearch) {
@@ -924,8 +920,11 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
 
         for (PeakGroup& group: peakgroups) {
 
-            if ( compound ) {
+            if (compound) {
                 group.compound = compound;
+            }
+            if (adduct) {
+                group.adduct = adduct;
             }
 
             if (clsf.hasModel()) {
@@ -962,18 +961,8 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
                 }
 
                 if (mustHaveMS2 and group.ms2EventCount == 0 ) continue;
-                if (compound) group.compound = compound;
-                if (!slice->srmId.empty()) group.srmId = slice->srmId;
 
-                group.groupRank = 1000;
-                if (matchRtFlag && compound && compound->expectedRt > 0) {
-                    float rtDiff =  abs(compound->expectedRt - (group.meanRt));
-                    group.expectedRtDiff = rtDiff;
-                    group.groupRank = rtDiff * rtDiff * (1.1 - group.maxQuality) * (1 / log(group.maxIntensity + 1));
-                    if (group.expectedRtDiff > rtWindow ) continue;
-                } else {
-                    group.groupRank = (1.1 - group.maxQuality) * (1 / log(group.maxIntensity + 1));
-                }
+                if (!slice->srmId.empty()) group.srmId = slice->srmId;
 
                 groupsToAppend.push_back(&group);
 
@@ -2400,14 +2389,15 @@ void traverseAndAdd(PeakGroup& group, set<Compound*>& compoundSet) {
     }
 }
 
-vector <mzSlice*> compoundLibrarySlices(string compoundLibraryFile, bool debug) {
+// Issue 815: Support compound-based approach
+vector<mzSlice*> compoundLibrarySlices(string compoundLibraryFile, bool debug) {
 
     //initialize output
     vector<mzSlice*> slices{};
 
     QString fileName = QString(compoundLibraryFile.c_str());
 
-    // [1] Generate compounds / compound ions from slices
+    // [1] Generate compounds and compound ions from compoundLibraryFile
     vector<Compound*> compounds{};
     vector<CompoundIon*> compoundIons{};
 
@@ -2416,7 +2406,8 @@ vector <mzSlice*> compoundLibrarySlices(string compoundLibraryFile, bool debug) 
     } else if ( fileName.endsWith("csv", Qt::CaseInsensitive)) {
         compounds = Database::loadCompoundCSVFile(fileName, debug);
     } else {
-        //parse from string
+        //not actually a compound library - single compound in encoded string
+        compounds = CompoundUtils::fromExactMassAdducts(compoundLibraryFile, debug);
     }
 
     for (Compound* compound : compounds) {
@@ -2449,6 +2440,35 @@ vector <mzSlice*> compoundLibrarySlices(string compoundLibraryFile, bool debug) 
     }
 
     // [2] convert compound Ions to slices
+    for (CompoundIon *compoundIon : compoundIons) {
+
+        //by default, slices will span the entire gradient
+        float rtmin = 0.0f;
+        float rtmax = 1e38f;
+
+        bool isHasExpectedRt = compoundIon->compound->expectedRt > 0;
+        bool isHasRtRange = compoundIon->compound->expectedRtMin >= 0 && compoundIon->compound->expectedRtMax >= 0 && compoundIon->compound->expectedRtMax > compoundIon->compound->expectedRtMin;
+
+        //only bind RT constraints when the compound has some RT information associated with it.
+        if (isHasRtRange) {
+            rtmin = compoundIon->compound->expectedRtMin;
+            rtmax = compoundIon->compound->expectedRtMax;
+        } else if (isHasExpectedRt){
+            rtmin = compoundIon->compound->expectedRt - rtWindow;
+            rtmax = compoundIon->compound->expectedRt + rtWindow;
+        }
+
+        float mzmin = compoundIon->compound->precursorMz - precursorPPM * compoundIon->compound->precursorMz / 1e6;
+        float mzmax = compoundIon->compound->precursorMz + precursorPPM * compoundIon->compound->precursorMz / 1e6;
+
+        mzSlice *slice = new mzSlice(mzmin, mzmax, rtmin, rtmax);
+        slice->compound = compoundIon->compound;
+        slice->adduct = compoundIon->adduct;
+        slice->compoundVector = vector<Compound*>{};
+        slice->compoundVector.push_back(compoundIon->compound);
+
+        slices.push_back(slice);
+    }
 
     return slices;
 }
