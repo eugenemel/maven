@@ -69,7 +69,6 @@ bool WRITE_CONSENSUS_MAPPED_COMPOUNDS_ONLY = true;
 string algorithmType = "E"; //processMassSlices()
 string groupingAlgorithmType = "D"; //Issue 692: incorporate reduceGroups()
 bool isRunClustering = false;
-bool isTestResults = false;
 bool isHIHRPAlignment = false;
 
 string csvFileFieldSeperator = ",";
@@ -202,8 +201,6 @@ void mzkitchenSearch();
 bool isSpecialSearch();
 void traverseAndAdd(PeakGroup& group, set<Compound*>& compoundSet);
 
-int testResults(string projectFile);
-
 vector<string> removeDuplicateFilenames(vector<string>& filenames);
 vector<mzSlice*> processMassSlices(int limit = -1, string algorithmType = "D", string setName = "peakdetector");
 void alignSamples();
@@ -232,23 +229,6 @@ int main(int argc, char *argv[]) {
     processOptions(argc, argv);
 
     cout << "peakdetector ver=" << majorVersion << "." << minorVersion << "." << modVersion << endl;
-
-    if (isTestResults){
-        cout << "Testing results of previous peakdetector run." << endl;
-        if (!projectFile.empty()) {
-            int testResult = testResults(projectFile);
-            cout << "Testing finished with test result=" << testResult << endl;
-            if (testResult != 0) {
-                cout << "Test result had code " << testResult << ", indicating a test failure!" << endl;
-            } else {
-                cout << "ALL TESTS PASSED" << endl;
-            }
-            exit(testResult);
-        } else {
-            cout << "No project file supplied! Exiting with error" << endl;
-            exit(1);
-        }
-    }
 
     //load classification model
     cout << "Loading classification model: " << methodsFolder + "/" + clsfModelFilename << endl;
@@ -1133,7 +1113,7 @@ void processOptions(int argc, char* argv[]) {
         "1?mzkitchenMspFile <string>",
         "2?mustHaveMS2",
         "3?runClustering",
-        "4?testResults",
+        "4?compoundLibraryFile <string>",
         "5?standardsAlignment_maxRtWindow <float>",
         "6?standardsAlignment_precursorPPM <float>",
         "7?baselineSmoothingWindow <int>",
@@ -1186,7 +1166,7 @@ void processOptions(int argc, char* argv[]) {
         case '1' : mzkitchenMspFile = string(optarg); break;
         case '2' : mustHaveMS2 = true; writeConsensusMS2 = true; break;
         case '3' : isRunClustering = true; break;
-        case '4' : isTestResults = true; break;
+        case '4' : compoundLibraryFile = string(optarg); break;
         case '5' : standardsAlignment_maxRtWindow = atof(optarg); break;
         case '6' : standardsAlignment_precursorPPM = atof(optarg); break;
         case '7' : baseline_smoothingWindow = atoi(optarg); break;
@@ -2161,112 +2141,6 @@ void loadSpectralLibraries(string methodsFolder) {
         }
     }
     sort(DB.compoundsDB.begin(), DB.compoundsDB.end(), Compound::compMass);
-}
-
-int testResults(string projectFile){
-
-    int errorCode = 0;
-
-    //import data
-    project = new ProjectDB(projectFile.c_str());
-    project->loadSamples(); //TODO: no fallback in case this fails, samples must be in paths referenced
-    project->loadPeakGroups("peakgroups","");
-
-    cout << "Loaded " << project->allgroups.size() << " PeakGroups." << endl;
-
-    //organize data in sorted map
-    map<mzSample*, vector<Peak>> peaksBySample = {};
-    vector<mzSample*> samples = project->getSamples();
-    typedef map<mzSample*, vector<Peak>>::iterator peakIterator;
-
-    for (auto sample : samples) {
-        peaksBySample.insert(make_pair(sample, vector<Peak>()));
-    }
-
-    int totalPeakCount = 0;
-    for (auto pg : project->allgroups){
-        for (auto peak : pg.getPeaks()) {
-            peaksBySample.at(peak.sample).push_back(peak);
-            totalPeakCount++;
-        }
-    }
-    cout << "Loaded " << totalPeakCount << " Peaks." << endl;
-
-    int numFailures= 0;
-
-    //sort map contents
-    for (peakIterator it = peaksBySample.begin(); it != peaksBySample.end(); ++it){
-
-        cout << "Evaluating " << it->first->sampleName << endl;
-        cout << "Started sorting " << it->first->sampleName << endl;
-
-        vector<Peak> peaks = it->second;
-
-        sort(peaks.begin(), peaks.end(), [](const Peak& lhs, const Peak& rhs){
-            if (abs(lhs.mzmin - rhs.mzmin) < 1e-8f){
-                return lhs.rt < rhs.rt;
-            } else {
-                return lhs.mzmin < rhs.mzmin;
-            }
-        });
-
-        cout << "Finished sorting, starting peak overlap check for " << it->first->sampleName << endl;
-
-        for (unsigned int i = 0; i < peaks.size(); i++){
-            Peak peakI = peaks.at(i);
-            for (unsigned int j = i+1; j < peaks.size(); j++){
-                Peak peakJ = peaks.at(j);
-
-                //catastrophic failure - crashes program
-                if (peakI.groupNum == peakJ.groupNum) {
-                    cout << "TWO DIFFERENT PEAKS FROM SAME SAMPLE HAVE SAME GROUP NUMBER!" << endl;
-                    abort();
-                }
-
-                if (peakJ.mzmin > peakI.mzmax + 0.5f) { //generous margin of 0.5f
-                    //exceeded mz bounds
-                    break;
-                } else {
-                    float mzOverlap = mzUtils::checkOverlap(peakI.mzmin, peakI.mzmax, peakJ.mzmin, peakJ.mzmax);
-
-                    if (mzOverlap != 0.0) {
-                        float rtOverlap = mzUtils::checkOverlap(peakI.rtmin, peakI.rtmax, peakJ.rtmin, peakJ.rtmax);
-
-                        if (rtOverlap != 0.0) {
-                            errorCode = -1;
-                            cout << "OVERLAP FOUND:"
-                                 << "sample=" << peakI.getSample()->sampleName << " "
-                                 << "(" << peakI.peakMz << " [" << peakI.mzmin << "-" << peakI.mzmax << "], " << peakI.rt << " [" << peakI.rtmin << "-" << peakI.rtmax << "]) <--> "
-                                 << "(" << peakJ.peakMz << " [" << peakJ.mzmin << "-" << peakJ.mzmax << "], " << peakJ.rt << " [" << peakJ.rtmin << "-" << peakJ.rtmax << "])"
-                                 << endl;
-                            numFailures++;
-                        } else {
-                            //debugging
-//                            cout << "NO OVERLAP FOUND:"
-//                                 << "sample=" << peakI.getSample()->sampleName << " "
-//                                 << "(" << peakI.peakMz << ", " << peakI.rt << ") <--> "
-//                                 << "(" << peakJ.peakMz << ", " << peakJ.rt << ")"
-//                                 << endl;
-                        }
-                    }
-
-                }
-            }
-        }
-
-        cout << "Finished checked for peak overlaps in " << it->first->sampleName << endl;
-
-    }
-
-    if (numFailures > 0) {
-        cout
-                << "==================================================================\n"
-                << "Found a total of " << numFailures << " test failures.\n"
-                << "==================================================================\n"
-                << endl;
-    }
-
-    return errorCode;
 }
 
 /**
