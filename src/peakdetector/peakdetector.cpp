@@ -1699,6 +1699,12 @@ void writeReport(string setName) {
                 project->saveCompounds(compoundSet);
             } else {
                 project->saveGroups(allgroups, setName.c_str(), saveScanData);
+
+                set<Compound*> compoundSet;
+                for (auto & group : allgroups) {
+                    traverseAndAdd(group, compoundSet);
+                }
+                project->saveCompounds(compoundSet);
             }
 
         } else {
@@ -1734,6 +1740,12 @@ void writeReport(string setName) {
                     project->saveCompounds(compoundSet);
                 } else {
                     project->saveGroups(allgroups, setName.c_str(), saveScanData);
+
+                    set<Compound*> compoundSet;
+                    for (auto & group : allgroups) {
+                        traverseAndAdd(group, compoundSet);
+                    }
+                    project->saveCompounds(compoundSet);
                 }
 
                 project->savePeakGroupsTableData(searchTableData);
