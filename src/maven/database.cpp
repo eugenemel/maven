@@ -72,7 +72,7 @@ int Database::loadCompoundsFile(QString filename) {
 
     if ( filename.endsWith("msp",Qt::CaseInsensitive)
          || filename.endsWith("sptxt",Qt::CaseInsensitive)) {
-        compounds = loadNISTLibrary(filename);
+        compounds = Database::loadNISTLibrary(filename);
     } else {
         compounds = Database::loadCompoundCSVFile(filename);
     }

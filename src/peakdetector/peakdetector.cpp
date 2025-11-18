@@ -216,6 +216,9 @@ bool isMonoisotope(PeakGroup* grp);
 
 vector<mzSlice*> getSrmSlices();
 
+//Issue 815: new slice generation approach
+vector <mzSlice*> compoundLibrarySlices(string compoundLibraryFile, bool debug=false);
+
 void matchFragmentation();
 
 double get_wall_time();
@@ -377,7 +380,7 @@ int main(int argc, char *argv[]) {
 
     // Issue 815: Compound-library specific search
     } else if (isCompoundLibrarySearch && !compoundLibraryFile.empty() ) {
-        //slices = compoundLibrarySlices()
+        //slices = compoundLibrarySlices(compoundLibraryFile)
         //
         // Refer to BackgroundPeaksUpdate::processCompounds() to generate slices,
         // then BackgroundPeaksUpdate::processCompoundSlices() to process them
@@ -2395,4 +2398,57 @@ void traverseAndAdd(PeakGroup& group, set<Compound*>& compoundSet) {
     for (auto& child : group.children) {
        traverseAndAdd(child, compoundSet);
     }
+}
+
+vector <mzSlice*> compoundLibrarySlices(string compoundLibraryFile, bool debug) {
+
+    //initialize output
+    vector<mzSlice*> slices{};
+
+    QString fileName = QString(compoundLibraryFile.c_str());
+
+    // [1] Generate compounds / compound ions from slices
+    vector<Compound*> compounds{};
+    vector<CompoundIon*> compoundIons{};
+
+    if ( fileName.endsWith("msp", Qt::CaseInsensitive) || fileName.endsWith("sptxt", Qt::CaseInsensitive)) {
+        compounds = Database::loadNISTLibrary(fileName);
+    } else if ( fileName.endsWith("csv", Qt::CaseInsensitive)) {
+        compounds = Database::loadCompoundCSVFile(fileName, debug);
+    } else {
+        //parse from string
+    }
+
+    for (Compound* compound : compounds) {
+
+        string adductString = compound->adductString;
+
+        //skip over any compounds where adduct is not specified
+        if (adductString.empty()) {
+            continue;
+        }
+
+        Adduct *adduct = nullptr;
+        if (loadedAdducts.find(adductString) == loadedAdducts.end()) {
+            Adduct val = MassCalculator::parseAdductFromName(adductString);
+
+            adduct = new Adduct();
+            adduct->name = val.name;
+            adduct->mass = val.mass;
+            adduct->charge = val.charge;
+            adduct->nmol = val.nmol;
+
+            loadedAdducts.insert(make_pair(adductString, adduct));
+        }
+
+        adduct = loadedAdducts.at(adductString);
+
+        CompoundIon *compoundIon = new CompoundIon(compound, adduct);
+
+        compoundIons.push_back(compoundIon);
+    }
+
+    // [2] convert compound Ions to slices
+
+    return slices;
 }
