@@ -145,13 +145,21 @@ bool isQQQCSVExport = false;
 // Issue 798: use provided anchor point RT as reference RT (instead of random sample)
 bool rtAlignmentAnchorPointReference = false;
 
-// Issue 815: New search type
-string compoundLibraryFile = ""; // if this string is not empty, this is a compound library search.
+// Issue 815: new slice protocol
+// If this string is not empty, use the compound library to define slices.
+// this is orthogonal to the search type
+string compoundLibraryFile = "";
+
+// Issue 815: New search type with two effect:
+// (1) During peak group generation, filter out peak groups based on isotope patterns
+// (2) After all peak groups have been generated, label
+bool isPeptideStabilitySearch = false;
 
 //parameters
 shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
 shared_ptr<MzkitchenMetaboliteSearchParameters> metaboliteSearchParams = shared_ptr<MzkitchenMetaboliteSearchParameters>(new MzkitchenMetaboliteSearchParameters());
 shared_ptr<LCLipidSearchParameters> lipidSearchParams = shared_ptr<LCLipidSearchParameters>(new LCLipidSearchParameters());
+shared_ptr<PeptideStabilitySearchParameters> peptideStabilitySearchParams = shared_ptr<PeptideStabilitySearchParameters>(new PeptideStabilitySearchParameters());
 
 static map<QString, QString> searchTableData{};
 
