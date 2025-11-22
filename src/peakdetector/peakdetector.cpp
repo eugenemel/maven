@@ -154,6 +154,7 @@ string compoundLibraryFile = "";
 // (1) During peak group generation, filter out peak groups based on isotope patterns
 // (2) After all peak groups have been generated, label
 bool isPeptideStabilitySearch = false;
+string peptideStabilitySearchParamsStr = "";
 
 //parameters
 shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
@@ -1244,6 +1245,9 @@ void processOptions(int argc, char* argv[]) {
             }
         } else if (strcmp(argv[i], "--rtAlignmentAnchorPointReference") == 0) {
             rtAlignmentAnchorPointReference = strcmp(argv[i], "1");
+        } else if (strcmp(argv[i], "--peptideStabilitySearchParameters") == 0) {
+            peptideStabilitySearchParamsStr = argv[i+1];
+            isPeptideStabilitySearch = true;
         }
 
         if (mzUtils::ends_with(optString, ".rt")) alignmentFile = optString;
@@ -1269,6 +1273,14 @@ void processOptions(int argc, char* argv[]) {
     }
 
     fillOutPeakPickingAndGroupingParameters();
+
+    if (isPeptideStabilitySearch) {
+        peptideStabilitySearchParams = PeptideStabilitySearchParameters::decode(peptideStabilitySearchParamsStr);
+        peptideStabilitySearchParams->peakPickingAndGroupingParameters = peakPickingAndGroupingParameters;
+        if (isExtractIsotopes) {
+            peptideStabilitySearchParams->isotopeParameters = isotopeParameters;
+        }
+    }
 
     //Issue 553: handle QQQ searches
     if (mzkitchenSearchType == "qqqSearch") {
@@ -1413,6 +1425,13 @@ void printSettings() {
     cout << "#mzkitchenSearchType=" << mzkitchenSearchType << endl;
     cout << "#mzkitchenMspFile=" << mzkitchenMspFile << endl;
     cout << "#mzkitchenSearchParameters: " << mzkitchenSearchParameters << endl;
+
+    cout << "\n=================================================" << endl;
+
+    cout << "#isPeptideStabilitySearch? " << isPeptideStabilitySearch << endl;
+    if (isPeptideStabilitySearch) {
+        cout << "#PeptideStabilitySearchParams: " << peptideStabilitySearchParams->encodeParams() << endl;
+    }
 
     cout << "\n=================================================" << endl;
     cout << "#Peak Group Cleaning and Filtering" << endl;
