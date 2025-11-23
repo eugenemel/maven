@@ -1077,12 +1077,13 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
 
     if (isPeptideStabilitySearch) {
 
-        // allgroups = PeptideStabilityProcessor::filterPeptideStabilitySet(
-        //     allgroups,
-        //     peptideStabilitySearchParams,
-        //     false);
+        allgroups = PeptideStabilityProcessor::processPeptideStabilitySet(
+            allgroups,
+            samples,
+            peptideStabilitySearchParams,
+            false);
 
-        // PeptideStabilityProcessor::labelPeptideStabilitySet(allgroups, peptideStabilitySearchParams, false);
+        PeptideStabilityProcessor::labelPeptideStabilitySet(allgroups, peptideStabilitySearchParams, false);
 
     }
 
