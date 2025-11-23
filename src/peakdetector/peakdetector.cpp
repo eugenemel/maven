@@ -1274,14 +1274,6 @@ void processOptions(int argc, char* argv[]) {
 
     fillOutPeakPickingAndGroupingParameters();
 
-    if (isPeptideStabilitySearch) {
-        peptideStabilitySearchParams = PeptideStabilitySearchParameters::decode(peptideStabilitySearchParamsStr);
-        peptideStabilitySearchParams->peakPickingAndGroupingParameters = peakPickingAndGroupingParameters;
-        if (isExtractIsotopes) {
-            peptideStabilitySearchParams->isotopeParameters = isotopeParameters;
-        }
-    }
-
     //Issue 553: handle QQQ searches
     if (mzkitchenSearchType == "qqqSearch") {
         isQQQSearch = true;
@@ -1306,6 +1298,12 @@ void processOptions(int argc, char* argv[]) {
         metaboliteSearchParams->IDisRequireMatchingAdduct = false; //this parameter must be false in a peakdetector context, because no Adduct* are provided
         metaboliteSearchParams->searchVersion = "mzkitchen32_metabolite_search";
         metaboliteSearchParams->peakPickingAndGroupingParameters = peakPickingAndGroupingParameters; //override encoded values with CL options
+    } else if (isPeptideStabilitySearch) {
+        peptideStabilitySearchParams = PeptideStabilitySearchParameters::decode(peptideStabilitySearchParamsStr);
+        peptideStabilitySearchParams->peakPickingAndGroupingParameters = peakPickingAndGroupingParameters;
+        if (isExtractIsotopes) {
+            peptideStabilitySearchParams->isotopeParameters = isotopeParameters;
+        }
     }
 }
 
