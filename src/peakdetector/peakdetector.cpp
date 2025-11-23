@@ -195,8 +195,9 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
 void processCompounds(vector<Compound*> set, string setName);
 void reduceGroups();
 void writeReport(string setName);
-void writeCSVReport(string filename);
 void writeQQQReport(string filename);
+void writePeptideStabilityReport(string filename);
+void writeCSVReport(string filename);
 void writeConsensusMS2Spectra(string filename);
 void classConsensusMS2Spectra(string filename);
 void writeGroupInfoCSV(PeakGroup* group,  ofstream& groupReport);
@@ -1074,11 +1075,26 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
 
     }
 
+    if (isPeptideStabilitySearch) {
+
+        // allgroups = PeptideStabilityProcessor::filterPeptideStabilitySet(
+        //     allgroups,
+        //     peptideStabilitySearchParams,
+        //     false);
+
+        // PeptideStabilityProcessor::labelPeptideStabilitySet(allgroups, peptideStabilitySearchParams, false);
+
+    }
+
     double startWriteReportTime = getTime();
     if (writeReportFlag){
         if (isQQQSearch) {
             searchTableData.insert(make_pair("QQQ Peak Detection",
                                              QString(QQQparams->encodeParams().c_str())));
+        }
+        if (isPeptideStabilitySearch) {
+            searchTableData.insert(make_pair("Peptide Stability Search",
+                                             QString(peptideStabilitySearchParams->encodeParams().c_str())));
         }
         writeReport(setName);
         printf("Execution time (Write report) : %f seconds \n", getTime() - startWriteReportTime);
@@ -1699,7 +1715,15 @@ void writeReport(string setName) {
 
     //5% of time writeReport() spent up to this point
 
-    QString tblName = isMzkitchenSearch ? QString("clamDB") : QString("QQQ Peak Detection");
+    QString tblName = QString(setName.c_str());
+
+    if (isMzkitchenSearch) {
+        tblName = QString("clamDB");
+    } else if (isQQQSearch) {
+        tblName = QString("QQQ Peak Detection");
+    } else if (isPeptideStabilitySearch) {
+        tblName = QString("Peptide Stability Search");
+    }
 
     if (saveSqlLiteProject)  {
 
@@ -1787,6 +1811,8 @@ void writeReport(string setName) {
         writeCSVReport(outputdir + setName + ".csv");
     } else if (isQQQCSVExport) {
         writeQQQReport(outputdir + setName + ".csv");
+    } else if (isPeptideStabilitySearch) {
+        writePeptideStabilityReport(outputdir + setName + ".csv");
     }
 
     //if(writeConsensusMS2) writeConsensusMS2Spectra(outputdir + setName + ".msp");
@@ -1794,6 +1820,66 @@ void writeReport(string setName) {
 }
 
 void writeQQQReport(string filename) {
+    ofstream groupReport;
+    groupReport.open(filename.c_str());
+    if (! groupReport.is_open()) return;
+
+    string SEP = csvFileFieldSeperator;
+
+    QStringList Header;
+    Header << "label" << "metaGroupId"
+           << "groupId"
+           << "goodPeakCount"
+           << "medMz"
+           << "medRt"
+           << "maxQuality"
+           << "note"
+           << "compound"
+           << "compoundId"
+           << "category"
+           << "database"
+           << "expectedRtDiff"
+           << "ppmDiff"
+           << "parent"
+           << "ms2EventCount"
+           << "fragNumIonsMatched"
+           << "fragFracMatched"
+           << "ticMatched"
+           << "weightedDotProduct"
+           << "hypergeomScore"
+           << "mzFragError"
+           << "spearmanRankCorrelation";
+
+    for (unsigned int i = 0; i < samples.size(); i++) { Header << samples[i]->sampleName.c_str(); }
+
+    foreach(QString h, Header)  groupReport << h.toStdString() << SEP;
+    groupReport << "\n";
+
+    //Only used for the report
+    quantitationType = PeakGroup::SmoothedArea;
+
+    for (int i = 0; i < allgroups.size(); i++ ) {
+
+        PeakGroup groupOriginal = allgroups[i];
+
+        PeakGroup groupCopy = groupOriginal;
+        groupCopy.children.clear();
+
+        PeakGroup* group = &groupCopy;
+
+        if (group->isGroupLabeled('q')) {
+            writeGroupInfoCSV(group, groupReport);
+        }
+    }
+
+    groupReport.close();
+}
+
+void writePeptideStabilityReport(string filename) {
+
+    //TODO: customize this report
+    //curently duplicating writeQQQReport()
+
     ofstream groupReport;
     groupReport.open(filename.c_str());
     if (! groupReport.is_open()) return;
@@ -2290,7 +2376,7 @@ void mzkitchenSearch() {
 }
 
 bool isSpecialSearch() {
-    return (isMzkitchenSearch || isQQQSearch);
+    return (isMzkitchenSearch || isQQQSearch || isPeptideStabilitySearch);
 }
 
 void traverseAndAdd(PeakGroup& group, set<Compound*>& compoundSet) {
