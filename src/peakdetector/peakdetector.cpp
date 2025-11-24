@@ -1878,9 +1878,6 @@ void writeQQQReport(string filename) {
 
 void writePeptideStabilityReport(string filename) {
 
-    //TODO: customize this report
-    //curently duplicating writeQQQReport()
-
     ofstream groupReport;
     groupReport.open(filename.c_str());
     if (! groupReport.is_open()) return;
@@ -1888,28 +1885,11 @@ void writePeptideStabilityReport(string filename) {
     string SEP = csvFileFieldSeperator;
 
     QStringList Header;
-    Header << "label" << "metaGroupId"
-           << "groupId"
-           << "goodPeakCount"
-           << "medMz"
-           << "medRt"
-           << "maxQuality"
-           << "note"
-           << "compound"
-           << "compoundId"
-           << "category"
-           << "database"
-           << "expectedRtDiff"
-           << "ppmDiff"
-           << "parent"
-           << "ms2EventCount"
-           << "fragNumIonsMatched"
-           << "fragFracMatched"
-           << "ticMatched"
-           << "weightedDotProduct"
-           << "hypergeomScore"
-           << "mzFragError"
-           << "spearmanRankCorrelation";
+    Header << "peptide"
+           << "adduct"
+           << "isotope"
+           << "mz"
+           << "rt";
 
     for (unsigned int i = 0; i < samples.size(); i++) { Header << samples[i]->sampleName.c_str(); }
 
@@ -1917,19 +1897,50 @@ void writePeptideStabilityReport(string filename) {
     groupReport << "\n";
 
     //Only used for the report
+    //corresponds to "smoothedPeakAreaCorrected" in Peak class
     quantitationType = PeakGroup::SmoothedArea;
 
     for (int i = 0; i < allgroups.size(); i++ ) {
 
-        PeakGroup groupOriginal = allgroups[i];
+        PeakGroup group = allgroups[i];
 
-        PeakGroup groupCopy = groupOriginal;
-        groupCopy.children.clear();
+        // Only export any group labeled 'e' - preferred compound (selected by PeptideStabilityProcessor)
+        if (group.isGroupLabeled('e')) {
 
-        PeakGroup* group = &groupCopy;
+            //Export children as isotopes
+            vector<PeakGroup> isotopicEnvelope = group.getChildren();
 
-        if (group->isGroupLabeled('q')) {
-            writeGroupInfoCSV(group, groupReport);
+            sort(isotopicEnvelope.begin(), isotopicEnvelope.end(), [](PeakGroup & lhs, PeakGroup & rhs){
+                return lhs.maxPeakMzVal < rhs.maxPeakMzVal;
+            });
+
+            for (PeakGroup & iso : isotopicEnvelope) {
+
+                // This should never happen, but leave guard in place to avoid bad pointer access
+                if (!iso.compound) continue;
+
+                //Assumes only collecting 13C isotopes, and that 13C isotopes are always collected
+                string isotopicString = "[M+" + to_string(iso.isotopeC13count) + "]";
+
+                groupReport << iso.compound->name << SEP
+                            << iso.compound->adductString << SEP
+                            << isotopicString << SEP
+                            << iso.maxPeakMzVal << SEP
+                            << iso.maxPeakRtVal << SEP;
+
+                for (unsigned int i = 0; i < samples.size(); i++) {
+                    if (i > 0) groupReport << SEP;
+                    Peak *peak = iso.getPeak(samples[i]);
+                    if (peak) {
+                        groupReport << peak->getQuantByName("smoothedPeakAreaCorrected"); // note hard-coded quant type here
+                    } else {
+                        groupReport << 0;
+                    }
+                }
+
+                groupReport << "\n";
+            }
+
         }
     }
 
