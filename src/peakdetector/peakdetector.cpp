@@ -1884,22 +1884,24 @@ void writePeptideStabilityReport(string filename) {
 
     string SEP = csvFileFieldSeperator;
 
-    QStringList Header;
-    Header << "peptide"
-           << "adduct"
-           << "isotope"
-           << "mz"
-           << "rt";
-
-    for (unsigned int i = 0; i < samples.size(); i++) { Header << samples[i]->sampleName.c_str(); }
-
-    foreach(QString h, Header)  groupReport << h.toStdString() << SEP;
-    groupReport << "\n";
-
     //Only used for the report
     //corresponds to "smoothedPeakAreaCorrected" in Peak class
     quantitationType = PeakGroup::SmoothedArea;
 
+    // Build header
+    groupReport << "peptide" << SEP
+                << "adduct" << SEP
+                << "isotope" << SEP
+                << "mz" << SEP
+                << "rt" << SEP;
+
+    for (unsigned int i = 0; i < samples.size(); i++) {
+        if (i > 0) groupReport << SEP;
+        groupReport << samples[i]->sampleName;
+    }
+    groupReport << "\n";
+
+    //Build contents
     for (int i = 0; i < allgroups.size(); i++ ) {
 
         PeakGroup group = allgroups[i];
