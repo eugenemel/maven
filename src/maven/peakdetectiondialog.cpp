@@ -679,6 +679,9 @@ shared_ptr<MzkitchenMetaboliteSearchParameters> PeakDetectionDialog::getMzkitche
     mzkitchenMetaboliteSearchParameters->grpMs2PurityTopNCode = 'w';
     mzkitchenMetaboliteSearchParameters->grpMs2LabelAvgPurityCode = 'z';
 
+    //debugging
+    qDebug() << "PeakDetectionDialog::getMzkitchenMetaboliteSearchParameters():" << mzkitchenMetaboliteSearchParameters->encodeParams().c_str();
+
     return mzkitchenMetaboliteSearchParameters;
 }
 
