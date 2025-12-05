@@ -1360,9 +1360,20 @@ void BackgroundPeakUpdate::assignToGroupSimple(PeakGroup* g, vector<CompoundIon>
         }
 
         //DISQUALIFIER: rt agreement
-        // Issue 792: Switch to new approach
-        if (featureMatchRtFlag && !MzKitchenProcessor::isRtAgreement(g->medianRt(), cpd, featureCompoundMatchRtTolerance, false)) {
+        //Issue 792: Altered logic around RT Agreement
+        //Issue 816: Expanded options around RT matching to more properly deal with code paths.
+        RtAgreementState RtAgreementState = MzKitchenProcessor::assessRtAgreement(g->maxPeakRtVal, cpd, featureCompoundMatchRtTolerance, false);
+
+        // matches are only skipped if there is an explicit disagreement between compound and measured RT.
+        // If insufficient information is available to make this comparison, the compound passes.
+        if (featureMatchRtFlag && (RtAgreementState == RtAgreementState::RT_DISAGREEMENT)){
             continue;
+        }
+
+        //Issue 816: Add an explicit label for RT agreement.
+        //compounds missing RT values do not receive the label
+        if (RtAgreementState == RtAgreementState::RT_AGREEMENT) {
+            g->addLabel('l');
         }
 
         float rtDiff =  abs(cpd->expectedRt - g->medianRt());
