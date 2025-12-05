@@ -668,6 +668,17 @@ shared_ptr<MzkitchenMetaboliteSearchParameters> PeakDetectionDialog::getMzkitche
     // Issue 746: Note similarity to PeakParameters->matchingIsRequireAdductPrecursorMatch
     mzkitchenMetaboliteSearchParameters->IDisRequireMatchingAdduct = this->chkRequireAdductMatch->isChecked();
 
+    // Issue 816: Update default MS2 consensus formation parameters - TODO expose these parameters in spectral agglomeration dialog
+    // mzkitchenMetaboliteSearchParameters->scanFilterMinFracIntensity --> from getPeaksSearchParameters()
+    // mzkitchenMetaboliteSearchParameters->consensusMs2MzRemovedStr --> from getPeaksSearchParameters()
+    // mzkitchenMetaboliteSearchParameters->consensusMs2MzRemovedTol --> from getPeaksSearchParameters()
+    // mzkitchenMetaboliteSearchParameters->consensusMinFractionMs2Scans --> from getPeaksSearchParameters()
+    mzkitchenMetaboliteSearchParameters->grpMs2MaxScanRtTolFromApex = 1; // TODO: pull from parameter
+    mzkitchenMetaboliteSearchParameters->grpMs2PurityTopN = 4; //TODO: pull from parameter
+    mzkitchenMetaboliteSearchParameters->grpMs2PurityThresholdAfterTopN = 0.95; // TODO: pull from parameter
+    mzkitchenMetaboliteSearchParameters->grpMs2PurityTopNCode = 'w';
+    mzkitchenMetaboliteSearchParameters->grpMs2LabelAvgPurityCode = 'z';
+
     return mzkitchenMetaboliteSearchParameters;
 }
 
