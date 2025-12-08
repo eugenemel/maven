@@ -647,6 +647,20 @@ shared_ptr<LCLipidSearchParameters> PeakDetectionDialog::getLipidSearchParameter
     // Issue 746: Note similarity to PeakParameters->matchingIsRequireAdductPrecursorMatch
     lipidSearchParameters->IDisRequireMatchingAdduct = this->chkRequireAdductMatch->isChecked();
 
+    // Issue 816: Update default MS2 consensus formation parameters - TODO expose these parameters in spectral agglomeration dialog
+    // lipidSearchParameters->scanFilterMinFracIntensity --> from getPeaksSearchParameters()
+    // lipidSearchParameters->consensusMs2MzRemovedStr --> from getPeaksSearchParameters()
+    // lipidSearchParameters->consensusMs2MzRemovedTol --> from getPeaksSearchParameters()
+    // lipidSearchParameters->consensusMinFractionMs2Scans --> from getPeaksSearchParameters()
+    lipidSearchParameters->grpMs2MaxScanRtTolFromApex = 1; // TODO: pull from parameter
+    lipidSearchParameters->grpMs2PurityTopN = 4; //TODO: pull from parameter
+    lipidSearchParameters->grpMs2PurityThresholdAfterTopN = 0.95; // TODO: pull from parameter
+    lipidSearchParameters->grpMs2PurityTopNCode = 'w';
+    lipidSearchParameters->grpMs2LabelAvgPurityCode = 'z';
+
+    //debugging
+    qDebug() << "PeakDetectionDialog::getLipidSearchParameters():" << lipidSearchParameters->encodeParams().c_str();
+
     return lipidSearchParameters;
 }
 
