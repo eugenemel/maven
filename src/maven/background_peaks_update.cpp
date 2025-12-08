@@ -522,13 +522,9 @@ void BackgroundPeakUpdate::processSlices(vector<mzSlice*>&slices, string setName
             group.chargeState = group.getChargeStateFromMS1(ppmMerge);
             if (excludeIsotopicPeaks && group.chargeState > 0 and not group.isMonoisotopic(isotopeMzTolr)) continue;
 
-            //if (getChargeStateFromMS1(&group) < minPrecursorCharge) continue;
-                        //build consensus ms2 specta
-            //vector<Scan*>ms2events = group.getFragmenationEvents();
-            //cerr << "\tFound ms2events" << ms2events.size() << "\n";
-
-            group.computeFragPattern(peaksSearchParameters.get());
-            // BROKEN group.findHighestPurityMS2Pattern(compoundPPMWindow);
+            //Issue 816: Ensure that the correct set of search parameters is returned
+            SearchParameters *searchParams = getSearchParameters();
+            group.computeFragPattern(searchParams);
 
             //Issue 746: MS2 required for peak group
             if (mustHaveMS2 and group.ms2EventCount == 0) continue;
@@ -1315,6 +1311,18 @@ void BackgroundPeakUpdate::printSettings() {
     //compound detection setting
     cerr << "#compoundPPMWindow=" << compoundPPMWindow << endl;
     cerr << "#compoundRTWindow=" << compoundRTWindow << endl;
+}
+
+//Issue 816: Need to get the correct search parameters, depending on the type of search specified.
+SearchParameters* BackgroundPeakUpdate::getSearchParameters() {
+    if (scoringScheme == MzKitchenProcessor::LIPID_SCORING_NAME){
+        return lipidSearchParameters.get();
+    } else if (scoringScheme == MzKitchenProcessor::METABOLITES_SCORING_NAME) {
+        return mzkitchenMetaboliteSearchParameters.get();
+    }
+
+    //default to ordinary peaks search
+    return peaksSearchParameters.get();
 }
 
 void BackgroundPeakUpdate::assignToGroup(PeakGroup *g, vector<CompoundIon>& searchableDatabase, bool debug) {
