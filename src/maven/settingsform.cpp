@@ -488,7 +488,7 @@ void SettingsForm::setFormValues() {
         spnScanFilterMinIntensity->setValue(settings->value("spnScanFilterMinIntensity").toDouble());
 
     if (settings->contains("spnScanFilterMinIntensityFraction"))
-        spnScanFilterMinIntensityFraction->setValue(100.0 * settings->value("spnScanFilterMinIntensityFraction").toDouble());
+        spnScanFilterMinIntensityFraction->setValue(settings->value("spnScanFilterMinIntensityFraction").toDouble());
 
     if (settings->contains("spnScanFilterMinSN"))
         spnScanFilterMinSN->setValue(settings->value("spnScanFilterMinSN").toDouble());
@@ -509,7 +509,7 @@ void SettingsForm::setFormValues() {
         spnConsensusMinPeakPresence->setValue(settings->value("spnConsensusMinPeakPresence").toInt());
 
     if (settings->contains("spnConsensusMinPeakPresenceFraction"))
-        spnConsensusMinPeakPresenceFraction->setValue(100.0 * settings->value("spnConsensusMinPeakPresenceFraction").toDouble());
+        spnConsensusMinPeakPresenceFraction->setValue(settings->value("spnConsensusMinPeakPresenceFraction").toDouble());
 
     if (settings->contains("chkConsensusAvgOnlyObserved"))
         chkConsensusAvgOnlyObserved->setCheckState((Qt::CheckState) settings->value("chkConsensusAvgOnlyObserved").toInt());
@@ -693,7 +693,7 @@ void SettingsForm::getFormValues() {
 
     //spectral agglomeration settings
     settings->setValue("spnScanFilterMinIntensity", spnScanFilterMinIntensity->value());
-    settings->setValue("spnScanFilterMinIntensityFraction", (0.01 * spnScanFilterMinIntensityFraction->value()));
+    settings->setValue("spnScanFilterMinIntensityFraction", spnScanFilterMinIntensityFraction->value());
     settings->setValue("spnScanFilterMinSN", spnScanFilterMinSN->value());
     settings->setValue("spnScanFilterBaseline", spnScanFilterBaseline->value());
     settings->setValue("spnScanFilterRetainTopX", spnScanFilterRetainTopX->value());
@@ -701,7 +701,7 @@ void SettingsForm::getFormValues() {
 
     settings->setValue("spnConsensusPeakMatchTolerance", spnConsensusPeakMatchTolerance->value());
     settings->setValue("spnConsensusMinPeakPresence", spnConsensusMinPeakPresence->value());
-    settings->setValue("spnConsensusMinPeakPresenceFraction", (0.01 * spnConsensusMinPeakPresenceFraction->value()));
+    settings->setValue("spnConsensusMinPeakPresenceFraction", spnConsensusMinPeakPresenceFraction->value());
     settings->setValue("chkConsensusAvgOnlyObserved", chkConsensusAvgOnlyObserved->checkState());
     settings->setValue("chkConsensusNormalizeTo10K", chkConsensusNormalizeTo10K->checkState());
     settings->setValue("cmbConsensusAgglomerationType", cmbConsensusAgglomerationType->currentText());
