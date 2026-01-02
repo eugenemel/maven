@@ -398,7 +398,9 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                         \
                         groupBackground real,\
                         blankMaxHeight real,\
-                        blankMedianHeight real\
+                        blankMedianHeight real,\
+                        \
+                        notes TEXT\
                         )");
 
      if(!query0.exec(TABLESQL)) qDebug() << query0.lastError();
@@ -410,7 +412,8 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                                     searchTableName,displayName,\
                                     srmPrecursorMz,srmProductMz,\
                                     isotopicIndex,expectedAbundance,isotopeParameters,\
-                                    groupBackground,blankMaxHeight,blankMedianHeight\
+                                    groupBackground,blankMaxHeight,blankMedianHeight,\
+                                    notes\
                                   )\
                                     \
                                  values\
@@ -420,7 +423,8 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                                     ?,?,\
                                     ?,?,\
                                     ?,?,?,\
-                                    ?,?,?\
+                                    ?,?,?,\
+                                    ?\
                                   )\
                                  ");
 
@@ -499,6 +503,9 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
         //Issue 667
         query1.addBindValue(g->blankMaxHeight);
         query1.addBindValue(g->blankMedianHeight);
+
+        //Issue 817
+        query1.addBindValue(QString(g->notes.c_str()));
 
      //Issue 721: Instead of silently dropping peak groups, crash
      if(! query1.exec() ) {
@@ -1062,6 +1069,7 @@ void ProjectDB::alterPeakGroupsTable(){
            bool isHasBlankMaxHeight = false;
            bool isHasBlankMedianHeight = false;
            bool isHasExpectedAbundance = false;
+           bool isHasNotes = false;
 
            while (queryCheckCols.next()) {
                if ("displayName" == queryCheckCols.value(1).toString()) {
@@ -1082,6 +1090,8 @@ void ProjectDB::alterPeakGroupsTable(){
                    isHasBlankMedianHeight = true;
                } else if ("expectedAbundance" == queryCheckCols.value(1).toString()) {
                    isHasExpectedAbundance = true;
+               } else if ("notes" == queryCheckCols.value(1).toString()) {
+                   isHasNotes = true;
                }
            }
 
@@ -1093,7 +1103,8 @@ void ProjectDB::alterPeakGroupsTable(){
                     << "isHasIsotopeParameters? " << isHasIsotopeParameters
                     << "isHasGroupBackground? " << isHasGroupBackground
                     << "isHasBlankMaxHeight? " << isHasBlankMaxHeight
-                    << "isHasBlankMedianHeight? " << isHasBlankMedianHeight;
+                    << "isHasBlankMedianHeight? " << isHasBlankMedianHeight
+                    << "isHasNotes? " << isHasNotes;
 
            if (!isHasDisplayName) {
                QSqlQuery queryAdjustPeakGroupsTable(sqlDB);
@@ -1167,7 +1178,13 @@ void ProjectDB::alterPeakGroupsTable(){
                }
            }
 
-
+           if (!isHasNotes) {
+               QSqlQuery queryAddNotes(sqlDB);
+               QString strAddNotes = QString("ALTER TABLE peakgroups ADD notes TEXT DEFAULT '';");
+               if (!queryAddNotes.exec(strAddNotes)){
+                   qDebug() << "Ho..." <<queryCheckCols.lastError();
+               }
+           }
 
 }
 
@@ -1210,6 +1227,9 @@ void ProjectDB::loadPeakGroups(
         g.groupBackground = query.value("groupBackground").toFloat();
         g.blankMaxHeight = query.value("blankMaxHeight").toFloat();
         g.blankMedianHeight = query.value("blankMedianHeight").toFloat();
+
+        //Issue 817
+        g.notes = query.value("notes").toString().toStdString();
 
         QVariant label = query.value("label");
         if (label.toString().size() > 0) {
