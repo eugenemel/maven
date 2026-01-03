@@ -308,6 +308,12 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
 
     item->setText(getGroupViewColumnNumber("ID"), groupTagString(group));             // ID
     item->setText(getGroupViewColumnNumber("Adduct"), adductText);                    // Adduct
+
+    //Issue 817: Always update the Notes column to keep in sync with edit dialog
+    if (viewType == groupView){
+        item->setText(getGroupViewColumnNumber("Notes"), group->notes.c_str());       // Notes
+    }
+
     heatmapBackground(item);
     duplicateEntryBackground(item);
 
