@@ -17,71 +17,35 @@
    <item row="0" column="0">
     <widget class="QGroupBox" name="grpEditID">
      <property name="title">
-      <string>Edit Peak Group ID</string>
+      <string>Update Peak Group</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="13" column="2">
-       <widget class="QPushButton" name="cancelButton">
+      <item row="15" column="0">
+       <widget class="QPushButton" name="okButton">
         <property name="text">
-         <string>Cancel</string>
+         <string>Update Peak Group</string>
         </property>
        </widget>
       </item>
-      <item row="8" column="0" colspan="3">
-       <widget class="QTextBrowser" name="brsPreviousID"/>
-      </item>
-      <item row="2" column="2">
-       <widget class="QLabel" name="lblAdduct">
+      <item row="7" column="0">
+       <widget class="QLabel" name="lblPreviousID">
         <property name="text">
-         <string>Adduct:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="QLabel" name="lblRT">
-        <property name="text">
-         <string>RT:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="2">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Select New Adduct</string>
+         <string>Previous Peak Group ID</string>
         </property>
        </widget>
       </item>
       <item row="4" column="0" colspan="2">
        <widget class="QTextBrowser" name="brsCompound"/>
       </item>
-      <item row="10" column="0" colspan="3">
-       <widget class="QTextBrowser" name="brsSuggestions"/>
-      </item>
-      <item row="4" column="2">
-       <widget class="QTextBrowser" name="brsAdduct"/>
-      </item>
-      <item row="12" column="0" colspan="3">
-       <widget class="QTextEdit" name="txtUpdateID"/>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="lblMz">
+      <item row="15" column="2">
+       <widget class="QPushButton" name="cancelButton">
         <property name="text">
-         <string>m/z:</string>
+         <string>Cancel</string>
         </property>
        </widget>
       </item>
       <item row="6" column="2">
        <widget class="QComboBox" name="cmbSelectAdduct"/>
-      </item>
-      <item row="6" column="1">
-       <widget class="QTextBrowser" name="brsRT">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
       </item>
       <item row="9" column="0">
        <widget class="QLabel" name="lblSuggestions">
@@ -90,10 +54,20 @@
         </property>
        </widget>
       </item>
-      <item row="11" column="0" colspan="3">
-       <widget class="QLabel" name="lblUpdatedID">
+      <item row="4" column="2">
+       <widget class="QTextBrowser" name="brsAdduct"/>
+      </item>
+      <item row="13" column="0">
+       <widget class="QLabel" name="lblNotes">
         <property name="text">
-         <string>New Peak Group ID</string>
+         <string>Notes</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="lblMz">
+        <property name="text">
+         <string>m/z:</string>
         </property>
        </widget>
       </item>
@@ -107,6 +81,40 @@
         </property>
        </widget>
       </item>
+      <item row="6" column="1">
+       <widget class="QTextBrowser" name="brsRT">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="0" colspan="3">
+       <widget class="QTextBrowser" name="brsSuggestions"/>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="lblAdduct">
+        <property name="text">
+         <string>Adduct:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="2">
+       <widget class="QLabel" name="lblSelectNewAdduct">
+        <property name="text">
+         <string>Select New Adduct</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QLabel" name="lblRT">
+        <property name="text">
+         <string>RT:</string>
+        </property>
+       </widget>
+      </item>
       <item row="2" column="0" colspan="2">
        <widget class="QLabel" name="lblCompound">
         <property name="text">
@@ -114,19 +122,21 @@
         </property>
        </widget>
       </item>
-      <item row="13" column="0">
-       <widget class="QPushButton" name="okButton">
+      <item row="11" column="0" colspan="3">
+       <widget class="QLabel" name="lblUpdatedID">
         <property name="text">
-         <string>Update Peak Group</string>
+         <string>New Peak Group ID</string>
         </property>
        </widget>
       </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="lblPreviousID">
-        <property name="text">
-         <string>Previous Peak Group ID</string>
-        </property>
-       </widget>
+      <item row="8" column="0" colspan="3">
+       <widget class="QTextBrowser" name="brsPreviousID"/>
+      </item>
+      <item row="12" column="0" colspan="3">
+       <widget class="QTextEdit" name="txtUpdateID"/>
+      </item>
+      <item row="14" column="0" colspan="3">
+       <widget class="QTextEdit" name="txtNotes"/>
       </item>
      </layout>
     </widget>

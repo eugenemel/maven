@@ -122,6 +122,7 @@ void EditPeakGroupDialog::setPeakGroup(PeakGroup *selectedPeakGroup) {
     brsMz->setText(QString::number(selectedPeakGroup->meanMz, 'f', 4));
     brsRT->setText(QString::number(selectedPeakGroup->meanRt, 'f', 2));
     txtUpdateID->setText(QString());
+    txtNotes->setText(QString(selectedPeakGroup->notes.c_str()));
 
     if (selectedPeakGroup->adduct) {
         for (int i = 0; i < this->cmbSelectAdduct->count(); i++) {

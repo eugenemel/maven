@@ -1843,9 +1843,11 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
 {
     QMenu menu;
 
+    //Issue 817: Always make this accessible for 'Notes' column
+    QAction* z8 = menu.addAction("Edit Selected Peak Group");
+    connect(z8, SIGNAL(triggered()), SLOT(showEditPeakGroupDialog()));
+
     if (windowTitle() == "Bookmarks" || windowTitle() == "rumsDB" || windowTitle() == "clamDB" || isDetectedFeaturesTable()) {
-        QAction* z8 = menu.addAction("Edit Selected Peak Group ID");
-        connect(z8, SIGNAL(triggered()), SLOT(showEditPeakGroupDialog()));
 
         QAction *z9 = menu.addAction("Export RT Alignment from Selected");
         connect(z9, SIGNAL(triggered()), SLOT(exportAlignmentFile()));
@@ -2673,6 +2675,16 @@ void TableDockWidget::updateSelectedPeakGroup() {
                 selectedPeakGroup->adduct = adduct;
             }
         }
+        isUpdateItem = true;
+    }
+
+    // Issue 817: look for updated notess string
+    string notesString = editPeakGroupDialog->txtNotes->toPlainText().toStdString();
+
+    if (!notesString.empty()) {
+
+        selectedPeakGroup->notes = notesString;
+
         isUpdateItem = true;
     }
 
