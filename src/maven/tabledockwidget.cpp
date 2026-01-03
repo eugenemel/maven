@@ -514,9 +514,6 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
 
     if (!group) return;
 
-    if (group->compound && group->compound->name == "Arginine-13C15N_IS") {
-        qDebug() << group->peakCount() << " " << group->meanMz << "@" << group->meanRt;
-    }
     //Issue 768: introduce possibility of browsing saved MS2 data only, missing all actual peak data
     bool isDisplayWithZeroPeaks = group->type() == PeakGroup::IsotopeType || !group->peakGroupScans.empty();
     if ((group->peakCount() == 0 || group->meanMz <= 0) && !isDisplayWithZeroPeaks) return;
@@ -543,7 +540,7 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
 
     item->setData(0, PeakGroupType,QVariant::fromValue(group));
 
-    item->setText(getGroupViewColumnNumber("ID"), groupTagString(group));     //ID
+    item->setText(getGroupViewColumnNumber("ID"), groupTagString(group));     //ID (column 1)
 
     //Issue 506
     if (viewType == groupView && _isShowLipidSummarizationColumns) {
@@ -557,8 +554,8 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
         item->setText(getGroupViewColumnNumber("Acyl Chain Length"), acylChainLengthSummarized.c_str());
     }
 
-    item->setText(getGroupViewColumnNumber("Compound"), compoundText);        //Compound
-    item->setText(getGroupViewColumnNumber("Adduct"), adductText);            //Adduct
+    item->setText(getGroupViewColumnNumber("Compound"), compoundText);        //Compound (column 2)
+    item->setText(getGroupViewColumnNumber("Adduct"), adductText);            //Adduct (column 3)
 
     if (group->_type == PeakGroup::GroupType::SRMTransitionType) {
         item->setText(getGroupViewColumnNumber("m/z"),
@@ -568,7 +565,7 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
                       QString::number(group->maxPeakMzVal, 'f', 4));
     } else {
         item->setText(getGroupViewColumnNumber("m/z"),
-                      QString::number(group->meanMz, 'f', 4));                      //m/z
+                      QString::number(group->meanMz, 'f', 4));                      //m/z (column 4)
     }
 
     float groupRt = group->meanRt;
@@ -577,24 +574,26 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
         groupRt = group->maxPeakRtVal;
     }
 
-    item->setText(getGroupViewColumnNumber("RT"),
+    item->setText(getGroupViewColumnNumber("RT"),                                   // RT (column 5)
                   QString::number(groupRt, 'f', 2));
 
     if (group->compound and group->compound->expectedRt and group->compound->expectedRt > 0) {
         item->setText(getGroupViewColumnNumber("RT Diff"),
-                QString::number(groupRt - group->compound->expectedRt, 'f', 2)); //RT Diff
+                QString::number(groupRt - group->compound->expectedRt, 'f', 2));    //RT Diff (column 6)
     }
 
     if (viewType == groupView) {
 
         if (group->_type == PeakGroup::GroupType::SRMTransitionType) {
             item->setText(getGroupViewColumnNumber("MS2 Score"),
-                          QString::number(group->srmProductMz, 'f', 4));           //SRM product m/z
+                          QString::number(group->srmProductMz, 'f', 4));            //SRM product m/z
         }  else {
             item->setText(getGroupViewColumnNumber("MS2 Score"),
-                    QString::number(group->fragMatchScore.mergedScore));           //MS2 Score
+                    QString::number(group->fragMatchScore.mergedScore));            //MS2 Score
         }
 
+        item->setText(getGroupViewColumnNumber("Notes"),                            //Notes
+                      QString(group->notes.c_str()));
         item->setText(getGroupViewColumnNumber("Rank"),
                       QString::number(group->groupRank,'f',3));                     //Rank
         item->setText(getGroupViewColumnNumber("Charge"),
@@ -2950,15 +2949,16 @@ map<string, int> TableDockWidget::groupViewColumnNameToNumber{
     {"RT", 4},
     {"RT Diff", 5},
     {"MS2 Score", 6},
-    {"Rank", 7},
-    {"Charge", 8},
-    {"Isotope #", 9},
-    {"# Peaks", 10},
-    {"# MS2s", 11},
-    {"Max Width", 12},
-    {"Max Intensity", 13},
-    {"Max S/N", 14},
-    {"Max Quality", 15}
+    {"Notes", 7},
+    {"Rank", 8},
+    {"Charge", 9},
+    {"Isotope #", 10},
+    {"# Peaks", 11},
+    {"# MS2s", 12},
+    {"Max Width", 13},
+    {"Max Intensity", 14},
+    {"Max S/N", 15},
+    {"Max Quality", 16}
 };
 
 map<string, int> TableDockWidget::groupViewColumnNameToNumberWithLipidSummarization{
@@ -2976,15 +2976,16 @@ map<string, int> TableDockWidget::groupViewColumnNameToNumberWithLipidSummarizat
     {"RT", 7},
     {"RT Diff", 8},
     {"MS2 Score", 9},
-    {"Rank", 10},
-    {"Charge", 11},
-    {"Isotope #", 12},
-    {"# Peaks", 13},
-    {"# MS2s", 14},
-    {"Max Width", 15},
-    {"Max Intensity", 16},
-    {"Max S/N", 17},
-    {"Max Quality", 18}
+    {"Notes", 10},
+    {"Rank", 11},
+    {"Charge", 12},
+    {"Isotope #", 13},
+    {"# Peaks", 14},
+    {"# MS2s", 15},
+    {"Max Width", 16},
+    {"Max Intensity", 17},
+    {"Max S/N", 18},
+    {"Max Quality", 19}
 };
 
 //Issue 506: Support different columns designs
