@@ -1068,9 +1068,9 @@ void processSlices(vector<mzSlice*>&slices, string groupingAlgorithmType, string
         }
         allgroups = updated_allgroups;
 
-        //Issue 662: pass forward pre-labels
+        //Issue 817: transfer data from compounds to peakgroups - e.g., labels and notes
         for (auto& peakGroup : allgroups) {
-            peakGroup.applyLabelsFromCompoundMetadata();
+            peakGroup.transferCompoundDataToPeakGroup();
         }
 
     }
