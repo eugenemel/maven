@@ -2620,6 +2620,12 @@ bool TableDockWidget::isPassesTextFilter(QTreeWidgetItem *item, QString needle) 
         if (isPassesLipidClass || isPassesSummedComposition || isPassesAcylChainLengths) return true;
     }
 
+    //Issue 817 check note
+    if (viewType == groupView) {
+        bool isPassesNote = item->text(getGroupViewColumnNumber("Notes")).contains(needle, Qt::CaseInsensitive);
+        if (isPassesNote) return true;
+    }
+
     return false;
 }
 
