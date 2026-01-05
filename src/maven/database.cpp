@@ -912,7 +912,7 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
             }
         }
 
-        string id, name, formula, smile, adductName, encodedMs2Spectrum;
+        string id, name, formula, smile, adductName, encodedMs2Spectrum, notes;
         float rt=0;
         float mz=0;
         float charge=0;
@@ -959,6 +959,9 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
         if ( header.count("preferred_quant_type") && header["preferred_quant_type"] < N) preferredQuantType = fields[ header["preferred_quant_type"]].toStdString();
 
         if (header.count("compound_labels") && header["compound_labels"] < N) compoundLabels = fields[ header["compound_labels"]].toStdString();
+
+        //Added Issue 817
+        if (header.count("notes") && header["notes"] < N) notes = fields[ header["notes"]].toStdString();
 
         if (header.count("ms2_spectrum") && header["ms2_spectrum"] < N) {
             encodedMs2Spectrum = fields[ header["ms2_spectrum"] ].toStdString();
@@ -1007,6 +1010,7 @@ vector<Compound*> Database::loadCompoundCSVFile(QString fileName, bool debug){
             compound->logP=logP;
             compound->adductString = adductName;
             for(int i=0; i < categorylist.size(); i++) compound->category.push_back(categorylist[i]);
+            compound->notes = notes;
 
             if (!transition_id.empty()) {
                 compound->metaDataMap.insert(
