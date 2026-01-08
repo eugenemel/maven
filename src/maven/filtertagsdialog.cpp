@@ -5,11 +5,11 @@ FilterTagsDialog::FilterTagsDialog(QWidget *parent) : QDialog(parent) {
     setModal(true);
 
     tblTags->setColumnWidth(0, 75);     // visible
-    tblTags->setColumnWidth(1, 100);    // name
+    tblTags->setColumnWidth(1, 150);    // name
     tblTags->setColumnWidth(2, 50);     // label
     tblTags->setColumnWidth(3, 50);     // hotkey
     tblTags->setColumnWidth(4, 50);     // icon
-    tblTags->setColumnWidth(5, 1000);   // description
+    tblTags->setColumnWidth(5, 600);    // description
 
     tblTags->setSortingEnabled(true);
     tblTags->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -67,7 +67,7 @@ FilterTagsDialog::FilterTagsDialog(QWidget *parent) : QDialog(parent) {
     tblTags->setItem(counter, 1, g_item1);
 
     QTableWidgetItem *g_item2 = new QTableWidgetItem();
-    g_item2->setText("g");
+    g_item2->setText(QString(PeakGroup::ReservedLabel::GOOD));
     tblTags->setItem(counter, 2, g_item2);
 
     QTableWidgetItem *g_item3 = new QTableWidgetItem();
@@ -99,7 +99,7 @@ FilterTagsDialog::FilterTagsDialog(QWidget *parent) : QDialog(parent) {
     tblTags->setItem(counter, 1, b_item1);
 
     QTableWidgetItem *b_item2 = new QTableWidgetItem();
-    b_item2->setText("b");
+    b_item2->setText(QString(PeakGroup::ReservedLabel::BAD));
     tblTags->setItem(counter, 2, b_item2);
 
     QTableWidgetItem *b_item3 = new QTableWidgetItem();
@@ -131,7 +131,7 @@ FilterTagsDialog::FilterTagsDialog(QWidget *parent) : QDialog(parent) {
     tblTags->setItem(counter, 1, c_item1);
 
     QTableWidgetItem *c_item2 = new QTableWidgetItem();
-    c_item2->setText("@");
+    c_item2->setText(QString(PeakGroup::ReservedLabel::COMPOUND_MANUALLY_CHANGED));
     tblTags->setItem(counter, 2, c_item2);
 
     QTableWidgetItem *c_item3 = new QTableWidgetItem();
@@ -163,7 +163,7 @@ FilterTagsDialog::FilterTagsDialog(QWidget *parent) : QDialog(parent) {
     tblTags->setItem(counter, 1, manual_integration_item1);
 
     QTableWidgetItem *manual_integration_item2 = new QTableWidgetItem();
-    manual_integration_item2->setText("m");
+    manual_integration_item2->setText(QString(PeakGroup::ReservedLabel::MANUALLY_INTEGRATED));
     tblTags->setItem(counter, 2, manual_integration_item2);
 
     QTableWidgetItem *manual_integration_item3 = new QTableWidgetItem();
