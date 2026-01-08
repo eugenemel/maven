@@ -148,6 +148,38 @@ FilterTagsDialog::FilterTagsDialog(QWidget *parent) : QDialog(parent) {
 
     counter++;
 
+    //Issue 818: Peak group manual integrated
+
+    tblTags->insertRow(counter);
+
+    QTableWidgetItem *manual_integration_item0 = new QTableWidgetItem();
+    manual_integration_item0->setCheckState(Qt::Checked);
+    tblTags->setItem(counter, 0, manual_integration_item0);
+
+    manualIntegrationTag = manual_integration_item0;
+
+    QTableWidgetItem *manual_integration_item1 = new QTableWidgetItem();
+    manual_integration_item1->setText("Manually Integrated");
+    tblTags->setItem(counter, 1, manual_integration_item1);
+
+    QTableWidgetItem *manual_integration_item2 = new QTableWidgetItem();
+    manual_integration_item2->setText("m");
+    tblTags->setItem(counter, 2, manual_integration_item2);
+
+    QTableWidgetItem *manual_integration_item3 = new QTableWidgetItem();
+    manual_integration_item3->setText(""); // no hotkey for this item - added automatically when peak group geneated via manual annotation
+    tblTags->setItem(counter, 3, manual_integration_item3);
+
+    QTableWidgetItem *manual_integration_item4 = new QTableWidgetItem();
+    manual_integration_item4->setIcon(QIcon(":/images/manual_integration.png"));
+    tblTags->setItem(counter, 4, manual_integration_item4);
+
+    QTableWidgetItem *manual_integration_item5 = new QTableWidgetItem();
+    manual_integration_item5->setText("Peak Group generated via manual integration (click and drag) bookmarking.");
+    tblTags->setItem(counter, 5, manual_integration_item5);
+
+    counter++;
+
     //Peak group tags
     vector<PeakGroupTag*> supplementalTags = DB.getSupplementalPeakGroupTags();
 
@@ -198,6 +230,7 @@ void FilterTagsDialog::selectAll() {
     goodTag->setCheckState(Qt::Checked);
     badTag->setCheckState(Qt::Checked);
     reAssignedCompoundTag->setCheckState(Qt::Checked);
+    manualIntegrationTag->setCheckState(Qt::Checked);
 
     for (auto it = checkBoxTag.begin(); it != checkBoxTag.end(); ++it) {
         it->first->setCheckState(Qt::Checked);
@@ -214,6 +247,7 @@ void FilterTagsDialog::deselectAll() {
     goodTag->setCheckState(Qt::Unchecked);
     badTag->setCheckState(Qt::Unchecked);
     reAssignedCompoundTag->setCheckState(Qt::Unchecked);
+    manualIntegrationTag->setCheckState(Qt::Unchecked);
 
     for (auto it = checkBoxTag.begin(); it != checkBoxTag.end(); ++it) {
         it->first->setCheckState(Qt::Unchecked);
@@ -283,6 +317,12 @@ TagFilterState FilterTagsDialog::getFilterState() {
 
     if (reAssignedCompoundTag->checkState() == Qt::Checked) {
         passingLabels.push_back(PeakGroup::ReservedLabel::COMPOUND_MANUALLY_CHANGED);
+    } else {
+        isAllPass = false;
+    }
+
+    if (manualIntegrationTag->checkState() == Qt::Checked) {
+        passingLabels.push_back(PeakGroup::ReservedLabel::MANUALLY_INTEGRATED);
     } else {
         isAllPass = false;
     }
