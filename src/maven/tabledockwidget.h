@@ -149,6 +149,8 @@ private:
         QIcon goodIcon = QIcon(rsrcPath + "/good.png");
         QIcon badIcon = QIcon(rsrcPath + "/bad.png");
         QIcon reassignedIcon = QIcon(rsrcPath + "/compound_reassigned.png");
+        QIcon manualIntegratedIcon = QIcon(rsrcPath + "/manual_integration.png");
+
         QHash<QString, QIcon> _iconCache;
 
          bool traverseNode(QTreeWidgetItem *item, QString needle);

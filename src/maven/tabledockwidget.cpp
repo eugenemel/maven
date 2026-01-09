@@ -346,6 +346,8 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
                 icons.push_back(badIcon);
             } else if (c == PeakGroup::ReservedLabel::COMPOUND_MANUALLY_CHANGED) {
                 icons.push_back(reassignedIcon);
+            } else if (c == PeakGroup::ReservedLabel::MANUALLY_INTEGRATED) {
+                icons.push_back(manualIntegratedIcon);
             } else if (DB.peakGroupTags.find(c) != DB.peakGroupTags.end()) {
                 icons.push_back(DB.peakGroupTags[c]->icon);
             }
