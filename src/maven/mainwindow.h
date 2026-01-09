@@ -231,7 +231,7 @@ public slots:
     void showMs1Scans(); //use lastMs1ScansMz value
     void showMs3Scans(float preMs1Mz, float preMs2Mz);
     QString groupTextExport(PeakGroup* group);
-    void bookmarkPeakGroup(PeakGroup* group);
+    void bookmarkPeakGroup(PeakGroup* group, bool isManuallyIntegrated=false);
     void setClipboardToGroup(PeakGroup* group);
     void bookmarkSelectedPeakGroup();
     void findCovariants(Peak* _peak);

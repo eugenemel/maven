@@ -260,7 +260,7 @@ void EicWidget::integrateRegion(float rtmin, float rtmax) {
     //select here and after bookmarking, b/c bookmarking might be canceled.
     setSelectedGroup(_integratedGroup);
 
-    getMainWindow()->bookmarkPeakGroup(_integratedGroup);
+    getMainWindow()->bookmarkPeakGroup(_integratedGroup, true);
     PeakGroup* lastBookmark = getMainWindow()->getBookmarkTable()->getLastBookmarkedGroup();
 
     if (lastBookmark) {

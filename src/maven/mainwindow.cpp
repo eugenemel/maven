@@ -641,7 +641,7 @@ void MainWindow::bookmarkSelectedPeakGroup() {
 
 
 
-void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
+void MainWindow::bookmarkPeakGroup(PeakGroup* group, bool isManuallyIntegrated) {
     qDebug() << "MainWindow::bookmarkPeakGroup(group)";
     if ( bookmarkedPeaks->isVisible() == false ) {
         bookmarkedPeaks->setVisible(true);
@@ -740,6 +740,11 @@ void MainWindow::bookmarkPeakGroup(PeakGroup* group) {
 
             groupCopy->setType(PeakGroup::SRMTransitionType);
 
+        }
+
+        // Issue 818: set manual integration label, if appropriate
+        if (isManuallyIntegrated) {
+            groupCopy->addLabel(PeakGroup::ReservedLabel::MANUALLY_INTEGRATED);
         }
 
         //Issue 277: tabledockwidget retrieves data from reference, copies it, and returns reference to copied data
