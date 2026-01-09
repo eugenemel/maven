@@ -1503,7 +1503,7 @@ void TableDockWidget::deleteSelected() {
     QMessageBox::StandardButton reply = QMessageBox::question(
         this,
         "Delete Peak Group",
-        "Are you sure you want to delete the selected peak group(s)? This action cannot be undone.",
+        "Are you sure you want to delete the selected peak group(s)?",
         QMessageBox::Yes|QMessageBox::No
         );
 
