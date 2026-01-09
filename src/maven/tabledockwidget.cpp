@@ -144,10 +144,10 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QS
     btnBad->setToolTip("Mark Group as Bad");
     connect(btnBad, SIGNAL(clicked()), SLOT(markGroupBad()));
 
-    QToolButton *btnHeatmapelete = new QToolButton(toolBar);
-    btnHeatmapelete->setIcon(QIcon(rsrcPath + "/delete.png"));
-    btnHeatmapelete->setToolTip("Delete Group");
-    connect(btnHeatmapelete, SIGNAL(clicked()), this, SLOT(deleteSelected()));
+    QToolButton *btnDeletePeakGroup = new QToolButton(toolBar);
+    btnDeletePeakGroup->setIcon(QIcon(rsrcPath + "/delete.png"));
+    btnDeletePeakGroup->setToolTip("Delete Group");
+    connect(btnDeletePeakGroup, SIGNAL(clicked()), this, SLOT(deleteSelected()));
 
     QToolButton *btnPDF = new QToolButton(toolBar);
     btnPDF->setIcon(QIcon(rsrcPath + "/PDF.png"));
@@ -191,7 +191,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QS
     toolBar->addWidget(btnGood);
     toolBar->addWidget(btnBad);
     toolBar->addWidget(btnSettings);
-    toolBar->addWidget(btnHeatmapelete);
+    toolBar->addWidget(btnDeletePeakGroup);
     toolBar->addSeparator();
 
     //toolBar->addWidget(btnHeatmap);
@@ -1499,6 +1499,15 @@ void TableDockWidget::traverseAndCollectVisibleGroups(QTreeWidgetItem *item, QLi
 }
 
 void TableDockWidget::deleteSelected() {
+
+    QMessageBox::StandardButton reply = QMessageBox::question(
+        this,
+        "Delete Peak Group",
+        "Are you sure you want to delete the selected peak group(s)? This action cannot be undone.",
+        QMessageBox::Yes|QMessageBox::No
+        );
+
+    if (reply != QMessageBox::Yes) return;
 
     qDebug() << "deleteSelected()";
     QList<PeakGroup*> selectedGroups = getSelectedGroups();
