@@ -227,6 +227,24 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, QS
     layout->addWidget(treeWidget);
     content->setLayout(layout);
     setWidget(content);
+
+    //Issue 818: manually scale reserved icons, as they are not saved as 12x12 pixels
+
+    QPixmap reassignedIconPixmapOriginal = reassignedIcon.pixmap(QSize(TableDockWidget::SINGLE_ICON_WIDTH, TableDockWidget::SINGLE_ICON_HEIGHT));
+    QPixmap reassignedIconPixmapScaled = reassignedIconPixmapOriginal.scaled(
+        TableDockWidget::SINGLE_ICON_WIDTH,
+        TableDockWidget::SINGLE_ICON_HEIGHT,
+        Qt::KeepAspectRatio,
+        Qt::SmoothTransformation);
+    reassignedIcon = QIcon(reassignedIconPixmapScaled);
+
+    QPixmap manualIntegratedIconPixmapOriginal = manualIntegratedIcon.pixmap(QSize(TableDockWidget::SINGLE_ICON_WIDTH, TableDockWidget::SINGLE_ICON_HEIGHT));
+    QPixmap manualIntegratedIconPixmapScaled = manualIntegratedIconPixmapOriginal.scaled(
+        TableDockWidget::SINGLE_ICON_WIDTH,
+        TableDockWidget::SINGLE_ICON_HEIGHT,
+        Qt::KeepAspectRatio,
+        Qt::SmoothTransformation);
+    manualIntegratedIcon = QIcon(manualIntegratedIconPixmapScaled);
 }
 
 TableDockWidget::~TableDockWidget() { 
@@ -290,11 +308,6 @@ void TableDockWidget::updateTable() {
 }
 
 void TableDockWidget::updateItem(QTreeWidgetItem* item) {
-
-    //assume that all possible icons that will be combined are squares
-    const int SINGLE_ICON_WIDTH = 12;
-    const int SINGLE_ICON_HEIGHT = 12;
-    const int ICON_SPACE_OFFSET = 1;
 
     QVariant v = item->data(0,PeakGroupType);
     PeakGroup*  group =  v.value<PeakGroup*>();
@@ -363,8 +376,8 @@ void TableDockWidget::updateItem(QTreeWidgetItem* item) {
         } else {
 
             int N = icons.size();
-            int imgWidth = N * SINGLE_ICON_WIDTH + (N-1) * ICON_SPACE_OFFSET;
-            int imgHeight = SINGLE_ICON_HEIGHT;
+            int imgWidth = N * TableDockWidget::SINGLE_ICON_WIDTH + (N-1) * TableDockWidget::ICON_SPACE_OFFSET;
+            int imgHeight = TableDockWidget::SINGLE_ICON_HEIGHT;
 
             QPixmap comboPixmap(imgWidth, imgHeight);
             QPainter painter(&comboPixmap);

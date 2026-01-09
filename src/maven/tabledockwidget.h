@@ -146,6 +146,11 @@ protected slots:
 
 private:
   private:
+        //assume that all possible icons that will be combined are squares
+        static const int SINGLE_ICON_WIDTH = 12;
+        static const int SINGLE_ICON_HEIGHT = 12;
+        static const int ICON_SPACE_OFFSET = 1;
+
         QIcon goodIcon = QIcon(rsrcPath + "/good.png");
         QIcon badIcon = QIcon(rsrcPath + "/bad.png");
         QIcon reassignedIcon = QIcon(rsrcPath + "/compound_reassigned.png");
