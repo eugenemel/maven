@@ -133,6 +133,7 @@ public slots:
       void reconnectCompounds(QString);
       void refreshPeakGroupQuant();
       void setCompoundSearchSelectedCompound();
+      void restoreDeletedPeakGroups();
       void showLipidSummarizationColumns(bool f) {_isShowLipidSummarizationColumns = f;}
       void groupCompoundsTogether(bool f) {_isGroupCompoundsTogether = f;}
 
@@ -160,6 +161,7 @@ private:
 
          bool traverseNode(QTreeWidgetItem *item, QString needle);
          void traverseAndDeleteGroups(QTreeWidgetItem *item);
+         void traverseAndUndeletePeakGroup(PeakGroup *group);
          void traverseAndCollectVisibleGroups(QTreeWidgetItem *item, QList<PeakGroup*>& groups);
          void traverseAndSetVisibleState(QTreeWidgetItem *item, bool isVisible);
 

@@ -1929,6 +1929,9 @@ void TableDockWidget::contextMenuEvent ( QContextMenuEvent * event )
 
     menu.addSeparator();
 
+    QAction* restorePeakGroups = menu.addAction("Undelete all deleted Peak Groups");
+    connect(restorePeakGroups, SIGNAL(triggered()), SLOT(restoreDeletedPeakGroups()));
+
     QAction* z5 = menu.addAction("Delete This Peak Table");
     connect(z5, SIGNAL(triggered()), SLOT(deleteAll()));
 
@@ -3040,3 +3043,31 @@ int TableDockWidget::getGroupViewColumnNumber(string key){
     return 0;
 }
 
+// Issue 818: introduce option to un-delete a peak group
+void TableDockWidget::traverseAndUndeletePeakGroup(PeakGroup *group) {
+
+    if (group) {
+        if (group->deletedFlag) {
+            group->deletedFlag = false;
+        }
+
+        bool isHasDeletedFlag = std::find(group->labels.begin(), group->labels.end(), PeakGroup::ReservedLabel::DELETED) != group->labels.end();
+        if (isHasDeletedFlag) {
+            group->toggleLabel(PeakGroup::ReservedLabel::DELETED);
+        }
+
+        for (unsigned int i = 0; i < group->childCount(); i++){
+            traverseAndUndeletePeakGroup(&(group->children.at(i)));
+        }
+    }
+}
+
+// Issue 818: introduce option to restore all deleted peak groups
+void TableDockWidget::restoreDeletedPeakGroups() {
+
+    for (PeakGroup* group : allgroups) {
+        traverseAndUndeletePeakGroup(group);
+    }
+
+    showAllGroupsThenSort();
+}
