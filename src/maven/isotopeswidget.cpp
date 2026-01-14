@@ -240,21 +240,12 @@ void IsotopeWidget::computeIsotopes(string f) {
 
     IsotopeParameters isotopeParameters= _mw->getIsotopeParameters();
 
-    int maxNumProtons = INT_MAX;
-    if (isotopeParameters.isExtractNIsotopes) {
-        maxNumProtons = isotopeParameters.maxIsotopesToExtract;
-    }
-
     vector<Isotope> massList = MassCalculator::computeIsotopes(
         f,
         getCurrentAdduct(),
         0,
-        isotopeParameters.getLabeledIsotopes(),
-        isotopeParameters.labeledIsotopeRetentionPolicy,
+        isotopeParameters,
         NaturalAbundanceData::defaultNaturalAbundanceData,
-        isotopeParameters.isNatAbundance,
-        maxNumProtons,
-        isotopeParameters.natAbundanceThreshold,
         false
         );
 
