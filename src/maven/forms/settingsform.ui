@@ -905,6 +905,11 @@
             </item>
             <item>
              <property name="text">
+              <string>C13 omni-mixed</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
               <string>All mixed</string>
              </property>
             </item>
