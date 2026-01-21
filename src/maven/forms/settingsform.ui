@@ -648,6 +648,13 @@
        <string>Isotope Detection</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
+       <item row="1" column="1">
+        <widget class="QCheckBox" name="chkMergeOverlappingIsotopes">
+         <property name="text">
+          <string>Merge overlapping isotopes with identical quantitative values</string>
+         </property>
+        </widget>
+       </item>
        <item row="1" column="0">
         <widget class="QCheckBox" name="chkDisplayNatAbundanceCorrectedValues">
          <property name="text">
@@ -851,10 +858,10 @@
           <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="N15Labeled">
+          <item row="8" column="0">
+           <widget class="QCheckBox" name="NatAbundanceLabeled">
             <property name="text">
-             <string>N15 Labeled</string>
+             <string>Nat Abundance</string>
             </property>
            </widget>
           </item>
@@ -868,35 +875,35 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
-           <widget class="QCheckBox" name="NatAbundanceLabeled">
-            <property name="text">
-             <string>Nat Abundance</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QCheckBox" name="S34Labeled">
-            <property name="text">
-             <string>S34 Labeled</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
+          <item row="4" column="0">
            <widget class="QCheckBox" name="C13Labeled">
             <property name="text">
              <string>C13 Labeled </string>
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
+          <item row="5" column="0">
+           <widget class="QCheckBox" name="N15Labeled">
+            <property name="text">
+             <string>N15 Labeled</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QCheckBox" name="S34Labeled">
+            <property name="text">
+             <string>S34 Labeled</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="0">
            <widget class="QCheckBox" name="O18Labeled">
             <property name="text">
              <string>O18 Labeled</string>
             </property>
            </widget>
           </item>
-          <item row="6" column="0">
+          <item row="9" column="0">
            <widget class="QComboBox" name="cmbRetentionPolicy">
             <item>
              <property name="text">
@@ -920,14 +927,22 @@
             </item>
            </widget>
           </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="spnD2Max"/>
+          </item>
+          <item row="4" column="1">
+           <widget class="QSpinBox" name="spnC13Max"/>
+          </item>
+          <item row="5" column="1">
+           <widget class="QSpinBox" name="spnN15Max"/>
+          </item>
+          <item row="6" column="1">
+           <widget class="QSpinBox" name="spnS34Max"/>
+          </item>
+          <item row="7" column="1">
+           <widget class="QSpinBox" name="spnO18Max"/>
+          </item>
          </layout>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QCheckBox" name="chkMergeOverlappingIsotopes">
-         <property name="text">
-          <string>Merge overlapping isotopes with identical quantitative values</string>
-         </property>
         </widget>
        </item>
       </layout>
