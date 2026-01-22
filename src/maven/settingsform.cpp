@@ -44,11 +44,11 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(S34Labeled,SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
     connect(D2Labeled, SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
     connect(O18Labeled, SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
-    connect(spnC13Max, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
-    connect(spnN15Max, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
-    connect(spnS34Max, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
-    connect(spnD2Max, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
-    connect(spnO18Max, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
+    connect(spnC13Max, SIGNAL(valueChanged(int)), SLOT(recomputeIsotopes()));
+    connect(spnN15Max, SIGNAL(valueChanged(int)), SLOT(recomputeIsotopes()));
+    connect(spnS34Max, SIGNAL(valueChanged(int)), SLOT(recomputeIsotopes()));
+    connect(spnD2Max, SIGNAL(valueChanged(int)), SLOT(recomputeIsotopes()));
+    connect(spnO18Max, SIGNAL(valueChanged(int)), SLOT(recomputeIsotopes()));
     connect(NatAbundanceLabeled, SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
     connect(cmbRetentionPolicy,SIGNAL(currentIndexChanged(int)),SLOT(recomputeIsotopes()));
     connect(spnIgnoreNatIsotopesPct,SIGNAL(valueChanged(double)),SLOT(recomputeIsotopes()));

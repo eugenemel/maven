@@ -3066,23 +3066,23 @@ IsotopeParameters MainWindow::getIsotopeParameters(){
         //Issue 820: Support label-specific maxes
         if (isotopeParameters.isC13Labeled){
             int maxNumC13Isotopes = settings->value("spnC13Max", 5).toInt();
-            isotopeParameters.atomSpecificMaxIsotopes.insert(make_pair("C", maxNumC13Isotopes));
+            isotopeParameters.atomSpecificMaxIsotopes["C"] = maxNumC13Isotopes;
         }
         if (isotopeParameters.isN15Labeled) {
             int maxNumN15Isotopes = settings->value("spnN15Max", 1).toInt();
-            isotopeParameters.atomSpecificMaxIsotopes.insert(make_pair("N", maxNumN15Isotopes));
+            isotopeParameters.atomSpecificMaxIsotopes["N"] = maxNumN15Isotopes;
         }
         if (isotopeParameters.isS34Labeled) {
             int maxNumS34Isotopes = settings->value("spnS34Max", 1).toInt();
-            isotopeParameters.atomSpecificMaxIsotopes.insert(make_pair("S", maxNumS34Isotopes));
+            isotopeParameters.atomSpecificMaxIsotopes["S"] = maxNumS34Isotopes;
         }
         if (isotopeParameters.isD2Labeled) {
             int maxNumD2Isotopes = settings->value("spnD2Max", 5).toInt();
-            isotopeParameters.atomSpecificMaxIsotopes.insert(make_pair("H", maxNumD2Isotopes));
+            isotopeParameters.atomSpecificMaxIsotopes["H"] = maxNumD2Isotopes;
         }
         if (isotopeParameters.isO18Labeled) {
             int maxNumO18Isotopes = settings->value("spnO18Max", 1).toInt();
-            isotopeParameters.atomSpecificMaxIsotopes.insert(make_pair("O", maxNumO18Isotopes));
+            isotopeParameters.atomSpecificMaxIsotopes["O"] = maxNumO18Isotopes;
         }
 
     } else {
