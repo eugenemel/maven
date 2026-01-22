@@ -585,17 +585,24 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
 
     this->lastOpennedProject = fileName;
     currentProject = selectedProject;
+
     fileLoader->setMainWindow(_mainwindow);
     fileLoader->loadSamples(filelist);
 }
 
 void ProjectDockWidget::getSampleInfoSQLITE() {
 
+    //for sample name comparisons
+    QRegularExpression regex = QRegularExpression("\\.[^.]+$");
 
     QSqlQuery query(currentProject->sqlDB);
     query.exec("select * from samples");
     qDebug() << "getSampleInfoSQLITE()" << query.numRowsAffected();
 
+    qDebug() << "getSampleInfoSQLITE(): Mapping previously saved sample metadata for" << _mainwindow->getSamples().size() << "samples.";
+
+    int numSaved = 0;
+    int numMapped = 0;
     while (query.next()) {
              QString fname   = query.value("filename").toString();
              QString sname   = query.value("name").toString();
@@ -610,11 +617,19 @@ void ProjectDockWidget::getSampleInfoSQLITE() {
              float color_alpha  = query.value("color_alpha").toDouble();
              float norml_const   = query.value("norml_const").toDouble(); if(norml_const == 0) norml_const=1.0;
 
-            foreach(mzSample* s, _mainwindow->getSamples()) {
-                if(s->sampleName != sname.toStdString()) continue;
+             QString snameNoSuffix = sname.replace(regex, "");
 
-                if (!sname.isEmpty() )  		s->sampleName = sname.toStdString();
-                if (!setname.isEmpty() )  		s->setSetName(setname.toStdString());
+            foreach(mzSample* s, _mainwindow->getSamples()) {
+
+                //Issue 820: Comparison without suffix
+                QString sampleNameNoSuffix = QString(s->sampleName.c_str()).replace(regex, "");
+                if(snameNoSuffix != sampleNameNoSuffix) continue;
+
+                //Always prefer the name as it is in the database, regardless of local GUI settings
+                s->setSampleName(sname.toStdString());
+                if (!setname.isEmpty() ){
+                    s->setSetName(setname.toStdString());
+                }
 
                 qDebug() <<  "Loading sampleId" << sampleId << sname;
                 s->setSampleId(sampleId);
@@ -626,8 +641,14 @@ void ProjectDockWidget::getSampleInfoSQLITE() {
                 s->color[3]   = color_alpha;
                 s->setNormalizationConstant(norml_const);
 
+                numMapped++;
+                break;
              }
+            numSaved++;
          }
+
+    qDebug() << "getSampleInfoSQLITE(): Mapped" << numMapped << "Samples from a table of" << numSaved << "entries.";
+
     currentProject->setSamples(_mainwindow->getSamples());
     currentProject->doAlignment();
     loadAllPeakTables();
