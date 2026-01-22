@@ -118,6 +118,11 @@ void IsotopeWidget::rebuildTableCurrentGroup() {
     rebuildTableFromPeakGroup(_group);
 }
 
+void IsotopeWidget::resetCurrentPeakGroup() {
+    if (!_group) return;
+    setPeakGroup(_group);
+}
+
 void IsotopeWidget::rebuildTableFromPeakGroup(PeakGroup* group) {
      qDebug() << "IsotopeWidget::rebuildTableFromPeakGroup()";
 

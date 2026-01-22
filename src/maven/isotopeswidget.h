@@ -39,6 +39,7 @@ public slots:
       void setClipboard(QList<PeakGroup*>& groups);
       void updateSampleComboBox();
       void rebuildTableCurrentGroup();
+      void resetCurrentPeakGroup(); //Issue 820
 
 private slots:
       void showInfo();

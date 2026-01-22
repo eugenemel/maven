@@ -44,6 +44,11 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(S34Labeled,SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
     connect(D2Labeled, SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
     connect(O18Labeled, SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
+    connect(spnC13Max, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
+    connect(spnN15Max, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
+    connect(spnS34Max, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
+    connect(spnD2Max, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
+    connect(spnO18Max, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
     connect(NatAbundanceLabeled, SIGNAL(toggled(bool)),SLOT(recomputeIsotopes()));
     connect(cmbRetentionPolicy,SIGNAL(currentIndexChanged(int)),SLOT(recomputeIsotopes()));
     connect(spnIgnoreNatIsotopesPct,SIGNAL(valueChanged(double)),SLOT(recomputeIsotopes()));
@@ -168,7 +173,6 @@ void SettingsForm::recomputeIsotopes() {
         group->isotopeParameters.isotopeParametersType = IsotopeParametersType::INVALID;
 
         mainwindow->getEicWidget()->setSelectedGroup(group);
-
     }
 }
 
@@ -301,11 +305,28 @@ void SettingsForm::setFormValues() {
     if (settings->contains("chkShowRtRange"))
         chkShowRtRange->setCheckState((Qt::CheckState) settings->value("chkShowRtRange").toInt());
 
+    // isotopes
     C13Labeled->setCheckState( (Qt::CheckState) settings->value("C13Labeled").toInt() );
     N15Labeled->setCheckState( (Qt::CheckState) settings->value("N15Labeled").toInt()  );
     S34Labeled->setCheckState( (Qt::CheckState) settings->value("S34Labeled").toInt() );
     D2Labeled->setCheckState(  (Qt::CheckState) settings->value("D2Labeled").toInt()  );
     O18Labeled->setCheckState( (Qt::CheckState) settings->value("O18Labeled").toInt());
+
+    if (settings->contains("spnC13Max"))
+        spnC13Max->setValue(settings->value("spnC13Max").toInt());
+
+    if (settings->contains("spnN15Max"))
+        spnN15Max->setValue(settings->value("spnN15Max").toInt());
+
+    if (settings->contains("spnS34Max"))
+        spnS34Max->setValue(settings->value("spnS34Max").toInt());
+
+    if (settings->contains("spnD2Max"))
+        spnD2Max->setValue(settings->value("spnD2Max").toInt());
+
+    if (settings->contains("spnO18Max"))
+        spnO18Max->setValue(settings->value("spnO18Max").toInt());
+
     chkDisplayNatAbundanceCorrectedValues->setCheckState((Qt::CheckState) settings->value("chkDisplayNatAbundanceCorrectedValues").toInt());
     NatAbundanceLabeled->setCheckState((Qt::CheckState) settings->value("NatAbundanceLabeled").toInt());
     chkIgnoreNaturalAbundance->setCheckState(  (Qt::CheckState) settings->value("chkIgnoreNaturalAbundance").toInt()  );
@@ -591,6 +612,11 @@ void SettingsForm::getFormValues() {
     settings->setValue("S34Labeled",S34Labeled->checkState() );
     settings->setValue("D2Labeled", D2Labeled->checkState()  );
     settings->setValue("O18Labeled", O18Labeled->checkState());
+    settings->setValue("spnC13Max", spnC13Max->value());
+    settings->setValue("spnN15Max", spnN15Max->value());
+    settings->setValue("spnS34Max", spnS34Max->value());
+    settings->setValue("spnD2Max", spnD2Max->value());
+    settings->setValue("spnO18Max", spnO18Max->value());
     settings->setValue("NatAbundanceLabeled", NatAbundanceLabeled->checkState());
     settings->setValue("chkIgnoreNaturalAbundance", chkIgnoreNaturalAbundance->checkState() );
     settings->setValue("chkExtractNIsotopes", chkExtractNIsotopes->checkState() );
