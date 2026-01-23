@@ -809,6 +809,8 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 //Issue 283: Read in all peaks to allow for faster retrieval later
 map<int, vector<Peak>> ProjectDB::getAllPeaks(vector<int> groupIds) {
 
+        QRegularExpression regex = QRegularExpression("\\.[^.]+$");
+
         map<int, vector<Peak>> allPeaks{};
         unsigned long peaksCounter = 0;
 
@@ -888,10 +890,16 @@ map<int, vector<Peak>> ProjectDB::getAllPeaks(vector<int> groupIds) {
         p.peakAreaFWHM = query.value("peakAreaFWHM").toFloat();
         p.smoothedPeakAreaFWHM = query.value("smoothedPeakAreaFWHM").toFloat();
 
-        string sampleName = query.value("name").toString().toStdString();
+        //Issue 824: Fix possible name compatibility issues
+        QString dbSampleNameNoExt = query.value("name").toString().replace(regex, "");
 
         for(int i=0; i< samples.size(); i++ ) {
-            if (samples[i]->sampleName == sampleName ) { p.setSample(samples[i]); break;}
+            QString fileSampleNameNoExt = QString(samples[i]->sampleName.c_str()).replace(regex, "");
+
+            if (fileSampleNameNoExt == dbSampleNameNoExt ){
+                p.setSample(samples[i]);
+                break;
+            }
         }
 
         if (allPeaks.find(p.groupNum) == allPeaks.end()) {
