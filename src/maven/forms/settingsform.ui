@@ -787,7 +787,10 @@
           <item row="3" column="1">
            <widget class="QSpinBox" name="spnMaxIsotopesToExtract">
             <property name="suffix">
-             <string> isotopes</string>
+             <string>]</string>
+            </property>
+            <property name="prefix">
+             <string>[M+</string>
             </property>
             <property name="minimum">
              <number>1</number>
@@ -835,7 +838,7 @@
           <item row="3" column="0">
            <widget class="QCheckBox" name="chkExtractNIsotopes">
             <property name="text">
-             <string>Extract only first [X] isotopes after [M+0]:</string>
+             <string>Limit to X extra neutrons (max is [M+X])</string>
             </property>
            </widget>
           </item>
