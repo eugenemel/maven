@@ -3050,6 +3050,7 @@ IsotopeParameters MainWindow::getIsotopeParameters(){
         isotopeParameters.maxIsotopesToExtract = settings->value("spnMaxIsotopesToExtract", 5).toInt();
         isotopeParameters.eic_smoothingWindow = static_cast<float>(settings->value("eic_smoothingWindow", 1).toDouble());
         isotopeParameters.eic_smoothingAlgorithm = static_cast<EIC::SmootherType>(settings->value("eic_smoothingAlgorithm", 0).toInt());
+        isotopeParameters.isCombineToSameNumberNeutrons = settings->value("chkIsCombineToSameNumberNeutrons", false).toBool();
 
         //The stored value is a % - divide by 100 to convert to fraction
         isotopeParameters.natAbundanceThreshold = settings->value("spnIgnoreNatIsotopesPct", 1.0).toFloat() / 100.0f;
