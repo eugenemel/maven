@@ -182,6 +182,7 @@ void IsotopeWidget::rebuildTableFromPeakGroup(PeakGroup* group) {
 void IsotopeWidget::setCompound(Compound* cpd ) {
 
     if (!cpd) return;
+    if (cpd == _compound) return;
 
     qDebug() << "IsotopeWidget::setCompound():" << cpd->name.c_str();
 
