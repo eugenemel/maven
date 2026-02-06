@@ -2103,8 +2103,10 @@ void EicWidget::setSelectedGroup(PeakGroup* group) {
 
     if (getMainWindow()->isotopeWidget->isVisible()) {
         if (group->type() == PeakGroup::IsotopeType && group->parent != nullptr){
+            qDebug() << "EicWidget::setSelectedGroup() send to IsotopesWidget group->parent != nullptr";
             getMainWindow()->isotopeWidget->setPeakGroup(group->parent);
         } else {
+            qDebug() << "EicWidget::setSelectedGroup() send to IsotopesWidget group->parent == nullptr";
             getMainWindow()->isotopeWidget->setPeakGroup(group);
         }
     }
