@@ -62,6 +62,7 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(cmbIsotopicExtractionAlgorithm, SIGNAL(currentIndexChanged(int)), SLOT(recomputeIsotopes()));
     connect(chkMergeOverlappingIsotopes, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
     connect(chkIsApplyMZeroMzOffset, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
+    connect(chkIsCombineToSameNumberNeutrons, SIGNAL(toggled(bool)), SLOT(recomputeIsotopes()));
 
     //bookmark options
     connect(chkBkmkWarnMz, SIGNAL(toggled(bool)), SLOT(getFormValues()));
@@ -369,6 +370,10 @@ void SettingsForm::setFormValues() {
         }
     }
 
+    if (settings->contains("chkIsCombineToSameNumberNeutrons")) {
+        chkIsCombineToSameNumberNeutrons->setCheckState((Qt::CheckState) settings->value("chkIsCombineToSameNumberNeutrons").toInt());
+    }
+
     centroid_scan_flag->setCheckState( (Qt::CheckState) settings->value("centroid_scan_flag").toInt());
     scan_filter_min_intensity->setValue( settings->value("scan_filter_min_intensity").toInt());
     scan_filter_min_quantile->setValue(  settings->value("scan_filter_min_quantile").toInt());
@@ -626,6 +631,7 @@ void SettingsForm::getFormValues() {
     settings->setValue("spnIgnoreNatIsotopesPct", spnIgnoreNatIsotopesPct->value());
     settings->setValue("chkMergeOverlappingIsotopes", chkMergeOverlappingIsotopes->checkState());
     settings->setValue("chkIsApplyMZeroMzOffset", chkIsApplyMZeroMzOffset->checkState());
+    settings->setValue("chkIsCombineToSameNumberNeutrons", this->chkIsCombineToSameNumberNeutrons->checkState());
 
     settings->setValue("amuQ1", amuQ1->value());
     settings->setValue("amuQ3", amuQ3->value());
