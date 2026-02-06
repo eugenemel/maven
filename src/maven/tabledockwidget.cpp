@@ -655,6 +655,13 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
         //cerr << "Add children!" << endl;
         QTreeWidgetItem *childRoot = clusterDialog->chkPGDisplay->isChecked() ? root : item;
 
+        // Peak groups are ordered by m/z, but the table dock widget will render based on whatever column is selected for sort order.
+        // The 'id' string can often mean that isotopes are rendered out of m/z order.
+        // qDebug() << "group " << group->meanMz << "@" << group->meanRt << "has" << group->childCount() << "children.";
+        // for(unsigned int i=0; i < group->childCount(); i++ ){
+        //     qDebug() << "child" << i << "mz=" << group->children[i].meanMz;
+        // }
+
         for(unsigned int i=0; i < group->childCount(); i++ ){
             addRow(&(group->children[i]), childRoot);
         }
