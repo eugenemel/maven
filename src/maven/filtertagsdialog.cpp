@@ -296,6 +296,8 @@ TagFilterState FilterTagsDialog::getFilterState() {
     bool isNoTagsPass = true;
     vector<char> passingLabels;
 
+    tagFilterState.multipleTagFilterProtocol = TagFilterState::getMultipleTagFilterProtocolFromName(this->cmbMultipleTagFilterProtocol->currentText());
+
     if (noTags->checkState() == Qt::Checked) {
         isNoTagsPass = true;
     } else {
@@ -347,6 +349,8 @@ TagFilterState FilterTagsDialog::getFilterState() {
 
 bool TagFilterState::isPeakGroupPasses(PeakGroup *g){
 
+    //TODO: update logic to respect MultipleTagFilterProtocol from drop-down menu
+
     if (isAllPass) return true;
     if (!g) return false; //in practice, this would be a QTreeWidgetItem that does not correspond to a PeakGroup
     if (g->labels.empty() && isNoTagsPass) return true;
@@ -359,4 +363,18 @@ bool TagFilterState::isPeakGroupPasses(PeakGroup *g){
     return false;
 }
 
+MultipleTagFilterProtocol TagFilterState::getMultipleTagFilterProtocolFromName(QString multipleTagFilterProtocol){
+    if (multipleTagFilterProtocol.startsWith("OR")) {
+        return MultipleTagFilterProtocol::OR;
+    } else if (multipleTagFilterProtocol.startsWith("AND")) {
+        return MultipleTagFilterProtocol::AND;
+    } else if (multipleTagFilterProtocol.startsWith("NOR") || multipleTagFilterProtocol.startsWith("Not OR")) {
+        return MultipleTagFilterProtocol::NOR;
+    } else if (multipleTagFilterProtocol.startsWith("NAND") || multipleTagFilterProtocol.startsWith("Not AND")) {
+        return MultipleTagFilterProtocol::NAND;
+    }
+
+    //default
+    return MultipleTagFilterProtocol::OR;
+}
 

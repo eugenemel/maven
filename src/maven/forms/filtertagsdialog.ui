@@ -96,6 +96,30 @@
      </property>
     </widget>
    </item>
+   <item row="2" column="0" colspan="2">
+    <widget class="QComboBox" name="cmbMultipleTagFilterProtocol">
+     <item>
+      <property name="text">
+       <string>OR - if any tags are present, group passes.</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>AND - if all tags are present, group passes.</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Not OR (NOR) - if any tags are present, group does not pass.</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Not AND (NAND) - if all tags are present, group does not pass.</string>
+      </property>
+     </item>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>

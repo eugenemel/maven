@@ -10,6 +10,14 @@ extern Database DB;
 
 struct TagFilterState;
 
+// Filter behavior when multiple tags are involved in filtering
+enum MultipleTagFilterProtocol {
+    OR=0, // If any tag is present, item passes.
+    AND=1, // If all tags are present, item passes. Otherwise, item does not pass.
+    NOR=2, // If even one tag is present, item does not pass. Otherwise, item passes.
+    NAND=3 // If all tags are present, item does not pass. Otherwise, item passes.
+};
+
 class FilterTagsDialog : public QDialog, public Ui_filterTagsDialog {
 
     Q_OBJECT
@@ -38,11 +46,15 @@ class FilterTagsDialog : public QDialog, public Ui_filterTagsDialog {
 };
 
 struct TagFilterState {
+
+    MultipleTagFilterProtocol multipleTagFilterProtocol = MultipleTagFilterProtocol::OR;
     bool isAllPass = true;
     bool isNoTagsPass = true;
     vector<char> passingLabels;
 
     bool isPeakGroupPasses(PeakGroup *g);
+
+    MultipleTagFilterProtocol static getMultipleTagFilterProtocolFromName(QString multipleTagFilterProtocol);
 };
 
 #endif // FILTERTAGSDIALOG_H
