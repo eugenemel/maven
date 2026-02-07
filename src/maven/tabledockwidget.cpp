@@ -2772,7 +2772,7 @@ void TableDockWidget::updateTagFilter() {
     qDebug() << "TableDockWidget::updateTagFilter()";
 
     tagFilterState = filterTagsDialog->getFilterState();
-    if (tagFilterState.isAllPass) {
+    if (tagFilterState.isAllLabelsUnselected) {
         this->btnTagsFilter->setIcon(QIcon(rsrcPath + "/icon_filter.png"));
     } else {
         this->btnTagsFilter->setIcon(QIcon(rsrcPath + "/icon_filter_selected.png"));

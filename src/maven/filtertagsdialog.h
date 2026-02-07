@@ -48,9 +48,9 @@ class FilterTagsDialog : public QDialog, public Ui_filterTagsDialog {
 struct TagFilterState {
 
     MultipleTagFilterProtocol multipleTagFilterProtocol = MultipleTagFilterProtocol::OR;
-    bool isAllPass = true;
+    bool isAllLabelsUnselected = true;
     bool isNoTagsPass = true;
-    vector<char> passingLabels;
+    vector<char> selectedLabels;
 
     bool isPeakGroupPasses(PeakGroup *g);
 

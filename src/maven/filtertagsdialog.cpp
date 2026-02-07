@@ -267,7 +267,7 @@ void FilterTagsDialog::processNewFilter() {
 
     TagFilterState tagFilterState = getFilterState();
 
-    if (!tagFilterState.isNoTagsPass && tagFilterState.passingLabels.empty()) {
+    if (!tagFilterState.isNoTagsPass && tagFilterState.selectedLabels.empty()) {
         QMessageBox msgBox;
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msgBox.setText("These filter settings will make all Peak Groups invisible, which is disallowed.");
@@ -292,9 +292,9 @@ TagFilterState FilterTagsDialog::getFilterState() {
 
     TagFilterState tagFilterState;
 
-    bool isAllPass = true;
-    bool isNoTagsPass = true;
-    vector<char> passingLabels;
+    bool isAllLabelsUnselected = true;
+    bool isNoTagsPass = true; // not having any tags operates in the same way as a specific tag
+    vector<char> selectedLabels;
 
     tagFilterState.multipleTagFilterProtocol = TagFilterState::getMultipleTagFilterProtocolFromName(this->cmbMultipleTagFilterProtocol->currentText());
 
@@ -302,31 +302,31 @@ TagFilterState FilterTagsDialog::getFilterState() {
         isNoTagsPass = true;
     } else {
         isNoTagsPass = false;
-        isAllPass = false;
+        isAllLabelsUnselected = false;
     }
 
     if (goodTag->checkState() == Qt::Checked) {
-        passingLabels.push_back(PeakGroup::ReservedLabel::GOOD);
+        selectedLabels.push_back(PeakGroup::ReservedLabel::GOOD);
     } else {
-        isAllPass = false;
+        isAllLabelsUnselected = false;
     }
 
     if (badTag->checkState() == Qt::Checked) {
-        passingLabels.push_back(PeakGroup::ReservedLabel::BAD);
+        selectedLabels.push_back(PeakGroup::ReservedLabel::BAD);
     } else {
-        isAllPass = false;
+        isAllLabelsUnselected = false;
     }
 
     if (reAssignedCompoundTag->checkState() == Qt::Checked) {
-        passingLabels.push_back(PeakGroup::ReservedLabel::COMPOUND_MANUALLY_CHANGED);
+        selectedLabels.push_back(PeakGroup::ReservedLabel::COMPOUND_MANUALLY_CHANGED);
     } else {
-        isAllPass = false;
+        isAllLabelsUnselected = false;
     }
 
     if (manualIntegrationTag->checkState() == Qt::Checked) {
-        passingLabels.push_back(PeakGroup::ReservedLabel::MANUALLY_INTEGRATED);
+        selectedLabels.push_back(PeakGroup::ReservedLabel::MANUALLY_INTEGRATED);
     } else {
-        isAllPass = false;
+        isAllLabelsUnselected = false;
     }
 
     for (auto &it : checkBoxTag) {
@@ -334,30 +334,44 @@ TagFilterState FilterTagsDialog::getFilterState() {
         PeakGroupTag *tag = it.second;
 
         if (item->checkState() == Qt::Checked) {
-            passingLabels.push_back(tag->label);
+            selectedLabels.push_back(tag->label);
         } else {
-            isAllPass = false;
+            isAllLabelsUnselected = false;
         }
     }
 
-    tagFilterState.isAllPass = isAllPass;
+    tagFilterState.isAllLabelsUnselected = isAllLabelsUnselected;
     tagFilterState.isNoTagsPass = isNoTagsPass;
-    tagFilterState.passingLabels = passingLabels;
+    tagFilterState.selectedLabels = selectedLabels;
 
     return tagFilterState;
 }
 
 bool TagFilterState::isPeakGroupPasses(PeakGroup *g){
 
-    //TODO: update logic to respect MultipleTagFilterProtocol from drop-down menu
+    //Issue 825: Even with more complicated filter type logic, just leave this
+    //as a simple way the user can avoid doing anything with labels of any kind.
+    //Essentially, if nothing is selected, ignore this filter control.
+    if (isAllLabelsUnselected) return true;
 
-    if (isAllPass) return true;
     if (!g) return false; //in practice, this would be a QTreeWidgetItem that does not correspond to a PeakGroup
     if (g->labels.empty() && isNoTagsPass) return true;
 
-    //passingLabels acts like an OR filter (if the label is found, will be retained).
-    for (auto &x : passingLabels) {
-        if(g->isGroupLabeled(x)) return true;
+    int numLabelsMatching = 0;
+    for (auto &x : selectedLabels) {
+        if(g->isGroupLabeled(x)) {
+            numLabelsMatching++;
+        }
+    }
+
+    if (multipleTagFilterProtocol == MultipleTagFilterProtocol::OR) {
+        return numLabelsMatching > 0;
+    } else if (multipleTagFilterProtocol == MultipleTagFilterProtocol::AND) {
+        return numLabelsMatching >= selectedLabels.size();
+    } else if (multipleTagFilterProtocol == MultipleTagFilterProtocol::NOR) {
+        return numLabelsMatching == 0;
+    } else if (multipleTagFilterProtocol == MultipleTagFilterProtocol::NAND) {
+        return numLabelsMatching < selectedLabels.size();
     }
 
     return false;
