@@ -68,12 +68,11 @@ void SpectraWidget::initPlot() {
 void SpectraWidget::setCurrentScan(Scan* scan) {
     qDebug() << "SpectraWidget::setCurrentScan(scan)";
 
-    //Issue 829: It's possible that the same scan might be referenced,
+    //Issue 829: It's possible that the same scan might be referenced when reviewing MS3 data,
     // try leaving this around, despite memory leaks
-    // //to prevent memory leaks
-    // if (_currentScan) {
-    //     delete(_currentScan);
-    // }
+    if (_currentScan && _currentScan->mslevel <= 2) {
+        delete(_currentScan);
+    }
 
     _currentScan = new Scan(nullptr,0,0,0,0,0); //re-initialize to empty scan
 
