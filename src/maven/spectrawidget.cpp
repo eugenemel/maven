@@ -946,8 +946,8 @@ void SpectraWidget::findBounds(bool checkX, bool checkY) {
 
     //if (_currentScan || _currentScan->nobs() == 0) return;
 
-    float minMZ;
-    float maxMZ;
+    float minMZ = 0.0f;
+    float maxMZ = 1200.0f;
 
     if (_msLevel == 2) {
 
@@ -998,9 +998,6 @@ void SpectraWidget::findBounds(bool checkX, bool checkY) {
         double mzMinVal = mainwindow->getSettings()->value("spnMs3MzMin", 0.0).toDouble();
         double mzMaxVal = mainwindow->getSettings()->value("spnMs3MzMax", 1200.0).toDouble();
 
-        minMZ = isAutoMzMin ? _currentScan->mz[0] - mzMinOffset : mzMinVal;
-        maxMZ = isAutoMzMax ? _currentScan->mz[_currentScan->mz.size()-1] + mzMaxOffset : mzMaxVal;
-
         if (_currentScan && _currentScan->mz.size()> 0){
             minMZ = isAutoMzMin ? _currentScan->mz[0] - mzMinOffset : mzMinVal;
             maxMZ = isAutoMzMax ? _currentScan->mz[_currentScan->mz.size()-1] + mzMaxOffset : mzMaxVal;
@@ -1009,9 +1006,6 @@ void SpectraWidget::findBounds(bool checkX, bool checkY) {
             maxMZ = isAutoMzMax ? _spectralHit.getMaxMz() + mzMaxOffset : mzMaxVal;
         }
 
-    } else {
-        minMZ = 0;
-        maxMZ = 1200;
     }
 
     //No enforcement is done in the GUI options panel - prevent negative range
