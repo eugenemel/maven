@@ -742,19 +742,19 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
                        ")"
                        );
 
-        for (pair<CompoundIon, FragmentationMatchScore> pair : g->compounds) {
+        for (tuple<CompoundIon, FragmentationMatchScore, RtAgreementState> score : g->compounds) {
 
-             string compoundId = pair.first.compound ? pair.first.compound->id.c_str() : "";
-             string compoundName = pair.first.compound ? pair.first.compound->name : "";
-             string compoundDb = pair.first.compound ? pair.first.compound->db : "";
-             float compoundExpectedRt = pair.first.compound ? pair.first.compound->expectedRt : -1.0f;
+             string compoundId = get<0>(score).compound ? get<0>(score).compound->id.c_str() : "";
+             string compoundName = get<0>(score).compound ? get<0>(score).compound->name : "";
+             string compoundDb = get<0>(score).compound ? get<0>(score).compound->db : "";
+             float compoundExpectedRt = get<0>(score).compound ? get<0>(score).compound->expectedRt : -1.0f;
 
              //[1] compound, m/z, and RT (6)
              query5.addBindValue(QString::number(lastInsertGroupId));
              query5.addBindValue(QString(compoundId.c_str()));
              query5.addBindValue(QString(compoundName.c_str()));
              query5.addBindValue(QString(compoundDb.c_str()));
-             query5.addBindValue(pair.second.ppmError);
+             query5.addBindValue(get<1>(score).ppmError);
              float rtError = -1.0f;
              if (compoundExpectedRt > 0) {
                 rtError = abs(compoundExpectedRt - g->medianRt());
@@ -762,25 +762,25 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
              query5.addBindValue(rtError);
 
              //[2] match counts (9)
-             query5.addBindValue(pair.second.numMatches);
-             query5.addBindValue(pair.second.numDiagnosticMatches);
-             query5.addBindValue(pair.second.numAcylChainMatches);
-             query5.addBindValue(pair.second.numSn1Matches);
-             query5.addBindValue(pair.second.numSn2Matches);
-             query5.addBindValue(pair.second.numSn3Matches);
-             query5.addBindValue(pair.second.numSn4Matches);
-             query5.addBindValue(pair.second.numOxidations);
-             query5.addBindValue(pair.second.isHasPrecursorMatch ? 1 : 0);
+             query5.addBindValue(get<1>(score).numMatches);
+             query5.addBindValue(get<1>(score).numDiagnosticMatches);
+             query5.addBindValue(get<1>(score).numAcylChainMatches);
+             query5.addBindValue(get<1>(score).numSn1Matches);
+             query5.addBindValue(get<1>(score).numSn2Matches);
+             query5.addBindValue(get<1>(score).numSn3Matches);
+             query5.addBindValue(get<1>(score).numSn4Matches);
+             query5.addBindValue(get<1>(score).numOxidations);
+             query5.addBindValue(get<1>(score).isHasPrecursorMatch ? 1 : 0);
 
              //[3] spectral similarity metrics (8)
-             query5.addBindValue(pair.second.fractionMatched);
-             query5.addBindValue(pair.second.spearmanRankCorrelation);
-             query5.addBindValue(pair.second.ticMatched);
-             query5.addBindValue(pair.second.mzFragError);
-             query5.addBindValue(pair.second.dotProduct);
-             query5.addBindValue(pair.second.hypergeomScore);
-             query5.addBindValue(pair.second.mvhScore);
-             query5.addBindValue(pair.second.weightedDotProduct);
+             query5.addBindValue(get<1>(score).fractionMatched);
+             query5.addBindValue(get<1>(score).spearmanRankCorrelation);
+             query5.addBindValue(get<1>(score).ticMatched);
+             query5.addBindValue(get<1>(score).mzFragError);
+             query5.addBindValue(get<1>(score).dotProduct);
+             query5.addBindValue(get<1>(score).hypergeomScore);
+             query5.addBindValue(get<1>(score).mvhScore);
+             query5.addBindValue(get<1>(score).weightedDotProduct);
 
              if(!query5.exec())  qDebug() << query5.lastError();
         }
