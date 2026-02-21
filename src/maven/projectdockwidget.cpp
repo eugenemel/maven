@@ -1251,6 +1251,9 @@ void ProjectDockWidget::importSampleMetadata(){
 
     vector<mzSample*>samples = _mainwindow->getSamples();
 
+    //Issue 827
+    QRegularExpression regex = QRegularExpression("\\.[^.]+$");
+
     string line;
     while (getline(sampleMetadata, line)) {
 
@@ -1270,6 +1273,7 @@ void ProjectDockWidget::importSampleMetadata(){
         }
 
         string sampleName;
+        QString sampleNameUserProvidedNoExt;
         string setName;
         int sampOrderNum = -1;
         int isSelectedInt = -1;
@@ -1281,6 +1285,10 @@ void ProjectDockWidget::importSampleMetadata(){
 
         if (indexOf.find("sampleName") != indexOf.end()) {
             sampleName = values.at(indexOf["sampleName"]);
+
+            //Issue 827: strip off extension for comparison with existing sample set
+            sampleNameUserProvidedNoExt = QString(sampleName.c_str()).replace(regex, "");
+
         }
 
         if (indexOf.find("setName") != indexOf.end()) {
@@ -1352,7 +1360,11 @@ void ProjectDockWidget::importSampleMetadata(){
 
         if (!sampleName.empty()) {
             for (auto& sample : samples) {
-                if (sample->getSampleName() == sampleName) {
+
+                //strip off extension for comparison with user-provided sample name
+                QString sampleNameNoExt = QString(sample->getSampleName().c_str()).replace(regex, "");
+
+                if (sampleNameNoExt == sampleNameUserProvidedNoExt) {
 
                     if (sampOrderNum != -1) {
                         sample->setSampleOrder(sampOrderNum);
