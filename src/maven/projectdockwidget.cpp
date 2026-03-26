@@ -560,13 +560,31 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
             if (keepLooking) {
                 QString dirName = QFileDialog::getExistingDirectory( this, "Select Folder with Sample Files", projectPath);
                 if (not dirName.isEmpty()) {
-                    QString filepath =  dirName + QDir::separator() + sname;
-                    QFileInfo checkFile(filepath);
-                    if (checkFile.exists()) {
-                        filelist << filepath;
-                        pathlist << dirName;
 
-                        qDebug() << "Found!!!! " << filepath;
+                    QString baseFilepath = dirName + QDir::separator() + sname;
+                    QStringList candidates;
+
+                    if (baseFilepath.endsWith(".mzML", Qt::CaseInsensitive) ||
+                        baseFilepath.endsWith(".mzXML", Qt::CaseInsensitive)) {
+                        candidates << baseFilepath;
+                    } else {
+                        candidates << baseFilepath + ".mzML";
+                        candidates << baseFilepath + ".mzXML";
+                    }
+
+                    bool isFoundFile = false;
+
+                    for (const QString &path : candidates) {
+                        if (QFileInfo::exists(path)) {
+                            filelist << path;
+                            pathlist << dirName;
+                            qDebug() << "Found file: " << path;
+                            isFoundFile = true;
+                            break; // Stop after finding the first valid match
+                        }
+                    }
+
+                    if (isFoundFile) {
                         break;
                     }
                 }
