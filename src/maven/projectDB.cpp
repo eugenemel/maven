@@ -809,7 +809,7 @@ int ProjectDB::writeGroupSqlite(PeakGroup* g, int parentGroupId, QString tableNa
 //Issue 283: Read in all peaks to allow for faster retrieval later
 map<int, vector<Peak>> ProjectDB::getAllPeaks(vector<int> groupIds) {
 
-        QRegularExpression regex = QRegularExpression("\\.[^.]+$");
+        QRegularExpression regex = QRegularExpression(".mzML$|.mzXML$");
 
         map<int, vector<Peak>> allPeaks{};
         unsigned long peaksCounter = 0;
