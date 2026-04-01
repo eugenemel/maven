@@ -1229,6 +1229,9 @@ vector<Compound*> Database::loadNISTLibrary(QString fileName) {
                cpd->expectedRt=retentionTimeMatch.capturedTexts().at(1).simplified().toDouble();
                  //qDebug() << "retentionTime=" << retentionTimeString;
              }
+         } else if (line.startsWith("MZKITCHENNOTES:", Qt::CaseInsensitive)) {
+             // Issue 835: Support this type
+             cpd->metaDataMap.insert(make_pair(MzKitchenProcessor::MZKITCHEN_NOTES_KEY, line.mid(16,line.length()).simplified().toStdString()));
          } else if (line.startsWith("Num Peaks:",Qt::CaseInsensitive) || line.startsWith("NumPeaks:",Qt::CaseInsensitive)) {
              capturePeaks=true;
          } else if (capturePeaks ) {
