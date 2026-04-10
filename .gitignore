@@ -47,3 +47,5 @@ src/maven_tests/testmzkitchenprocessor/testmzkitchenprocessor.app/
 Src/maven_tests/testrtalignment/testrtalignment.app/
 
 peakdetector_pipeline/.DS_Store
+.qtc_clangd/
+build/
