@@ -634,6 +634,11 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
         item->setText(getGroupViewColumnNumber("Max Quality"),
                       QString::number(group->maxQuality,'f',2));                    //Max Quality
 
+        if (group->groupId > 0) {
+            item->setText(getGroupViewColumnNumber("Internal ID"),                  //Internal ID
+                          QString::number(group->groupId));
+        }
+
     } else if ( viewType == peakView) {
 
         vector<mzSample*> vsamples = _mainwindow->getVisibleSamples();
@@ -3004,7 +3009,8 @@ map<string, int> TableDockWidget::groupViewColumnNameToNumber{
     {"Max Width", 13},
     {"Max Intensity", 14},
     {"Max S/N", 15},
-    {"Max Quality", 16}
+    {"Max Quality", 16},
+    {"Internal ID", 17}
 };
 
 map<string, int> TableDockWidget::groupViewColumnNameToNumberWithLipidSummarization{
@@ -3031,7 +3037,8 @@ map<string, int> TableDockWidget::groupViewColumnNameToNumberWithLipidSummarizat
     {"Max Width", 16},
     {"Max Intensity", 17},
     {"Max S/N", 18},
-    {"Max Quality", 19}
+    {"Max Quality", 19},
+    {"Internal ID", 20}
 };
 
 //Issue 506: Support different columns designs
