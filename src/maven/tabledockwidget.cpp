@@ -2663,6 +2663,10 @@ bool TableDockWidget::isPassesTextFilter(QTreeWidgetItem *item, QString needle) 
     if (viewType == groupView) {
         bool isPassesNote = item->text(getGroupViewColumnNumber("Notes")).contains(needle, Qt::CaseInsensitive);
         if (isPassesNote) return true;
+
+        //check internal group Id
+        bool isPassesInternalId = item->text(getGroupViewColumnNumber("Internal ID")).contains(needle, Qt::CaseInsensitive);
+        if (isPassesInternalId) return true;
     }
 
     return false;
