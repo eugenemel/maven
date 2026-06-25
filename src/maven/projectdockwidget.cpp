@@ -790,8 +790,21 @@ void ProjectDockWidget::loadAllPeakTables() {
     // Issue 839: View TG MS3 tables when peak group tables are loaded
     // iterate through open tables
     bool isSetUpMs3Windows = false;
+    string ms3CompoundDb = "";
     for (QPointer<TableDockWidget> &x : _mainwindow->getAllPeakTables()) {
         if (x->isTargetedMs3Table()) {
+            if (x->groupCount() > 0) {
+
+                // Every peak group in the table should be searched against the same compoundDb (msp file)
+                // however, some peakgroups are "targets", and so do not map directly to a compoundDb.
+                // In practice, this should never go through more than a few peak groups before finding a compoundDb value.
+                for (PeakGroup *group : x->getAllGroups()) {
+                    if (!group->compoundDb.empty()) {
+                        ms3CompoundDb = group->compoundDb;
+                        break;
+                    }
+                }
+            }
             isSetUpMs3Windows = true;
             break;
         }
@@ -806,6 +819,18 @@ void ProjectDockWidget::loadAllPeakTables() {
             _mainwindow->aMs3Events->setChecked(true);
         }
         _mainwindow->ms3SpectraDockWidget->setVisible(true);
+
+        if (!ms3CompoundDb.empty()) {
+
+            // If a DB name is provided and the DB is already available in the compound library (ligand widget) drop-down menu, select it.
+            // If not, just move on
+            QString dbNameQStr = QString(ms3CompoundDb.c_str());
+            int index = _mainwindow->ligandWidget->databaseSelect->findText(dbNameQStr,Qt::MatchExactly);
+
+            if (index != -1) {
+                _mainwindow->ligandWidget->setDatabase(dbNameQStr);
+            }
+        }
     }
 }
 
