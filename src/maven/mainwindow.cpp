@@ -1464,7 +1464,7 @@ void MainWindow::createMenus() {
     aj->setChecked(false);
     connect(aj,SIGNAL(toggled(bool)), ms2ScansListWidget,SLOT(setVisible(bool)));
 
-    QAction *aMs3Events = widgetsMenu->addAction("MS3 Scans List");
+    aMs3Events = widgetsMenu->addAction("MS3 Scans List");
     aMs3Events->setCheckable(true);
     aMs3Events->setChecked(false);
     connect(aMs3Events, SIGNAL(toggled(bool)), ms3ScansListWidget, SLOT(setVisible(bool)));

@@ -158,6 +158,9 @@ public:
 
     QProgressBar  *progressBar;
 
+    // menu options - initialize as nullptr, will be built on constructor -> MainWindow::createMenus()
+    QAction *aMs3Events = nullptr;
+
     int sampleCount() { return samples.size(); }
     EicWidget* getEicWidget() { return eicWidget; }
     SpectraWidget*  getSpectraWidget() { return spectraWidget; }

@@ -786,6 +786,27 @@ void ProjectDockWidget::loadAllPeakTables() {
             t->showAllGroups();
         }
     }
+
+    // Issue 839: View TG MS3 tables when peak group tables are loaded
+    // iterate through open tables
+    bool isSetUpMs3Windows = false;
+    for (QPointer<TableDockWidget> &x : _mainwindow->getAllPeakTables()) {
+        if (x->isTargetedMs3Table()) {
+            isSetUpMs3Windows = true;
+            break;
+        }
+    }
+
+    if (isSetUpMs3Windows) {
+
+        // programmatic check triggers the ms3ScansListWidget signal/slot,
+        // effectively calling
+        // _mainwindow->ms3ScansListWidget->setVisible(true);
+        if (_mainwindow->aMs3Events) {
+            _mainwindow->aMs3Events->setChecked(true);
+        }
+        _mainwindow->ms3SpectraDockWidget->setVisible(true);
+    }
 }
 
 //Issue 380: Need to perform this for children also
