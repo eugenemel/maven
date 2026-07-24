@@ -2064,6 +2064,8 @@ void MainWindow::Align2(){
         QString mzStr = alignmentDialog2->txtMzList->toPlainText();
         QStringList mzList = mzStr.split("\n", Qt::SkipEmptyParts);
 
+        //TODO: update code to use .apts format, instead of only mz values
+
         vector<double> mzs;
         for (QString& str : mzList) {
             try {
@@ -2086,7 +2088,7 @@ void MainWindow::Align2(){
             UndoAlignment();
 
             ExperimentAnchorPoints experimentAnchorPoints(
-                getSamples(),
+                getVisibleSamples(),
                 "", // anchor points file, not used in this context
                 getUserPPM(),
                 0,  // max RT window, not used in this context
