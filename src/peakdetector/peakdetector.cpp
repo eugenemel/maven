@@ -137,6 +137,11 @@ static bool isExtractIsotopes = false;
 static IsotopeParameters isotopeParameters;
 static map<string, Adduct*> loadedAdducts{};
 
+// Issue 851:
+// by default, we retain unannotated peak groups,
+// which get saved to a table called 'peak groups'
+static bool isMzkitchenRetainUnannotated = true;
+
 //translation list seaches
 bool isQQQSearch = false;
 shared_ptr<QQQSearchParameters> QQQparams = shared_ptr<QQQSearchParameters>(new QQQSearchParameters());
@@ -1265,6 +1270,8 @@ void processOptions(int argc, char* argv[]) {
         } else if (strcmp(argv[i], "--peptideStabilitySearchParameters") == 0) {
             peptideStabilitySearchParamsStr = argv[i+1];
             isPeptideStabilitySearch = true;
+        } else if (strcmp(argv[i], "--isMzkitchenRetainUnannotated") == 0) {
+            isMzkitchenRetainUnannotated = strcmp(argv[i+1], "1");
         }
 
         if (mzUtils::ends_with(optString, ".rt")) alignmentFile = optString;
@@ -2358,6 +2365,17 @@ void mzkitchenSearch() {
         cout << "Extracting isotopes for peak groups." << endl;
     } else {
         cout << "Isotopes will not be extracted for peak groups." << endl;
+    }
+
+    //Issue 851: option to only retain mzkitchen peak groups that are associated with a compound
+    if (isMzkitchenRetainUnannotated) {
+        vector<PeakGroup> annotatedGroups{};
+        for (auto& group : allgroups) {
+            if (group.compound) {
+                annotatedGroups.push_back(group);
+            }
+        }
+        allgroups = annotatedGroups;
     }
 
     unsigned int identifiedGroups = 0;
