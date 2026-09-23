@@ -1769,7 +1769,7 @@ void writeReport(string setName) {
             cout << "Creating new project file" << endl;
             string projectDBfilename = outputdir + setName + ".mzrollDB";
 
-            qDebug() << "new project file:" << projectDBfilename.c_str();
+            cout << "New project file: '" << projectDBfilename << "'" << endl;
             project = new ProjectDB(projectDBfilename.c_str());
 
             if ( project->isOpen() ) {
