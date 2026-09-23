@@ -2320,7 +2320,21 @@ void mzkitchenSearch() {
     cout << "Performing mzkitchen msp search on identified peak groups." << endl;
     cout << setprecision(10);
 
-    vector<Compound*> mzkitchenCompounds = DB.loadNISTLibrary(mzkitchenMspFile.c_str());
+    //Issue 853: Support multiple libraries
+    vector<Compound*> mzkitchenCompounds{};
+    vector<string> libraries{};
+    mzUtils::split(mzkitchenMspFile, ";", libraries);
+
+    cout << "Encoded mzkitchenMspFile string contains " << libraries.size() << " libraries." << endl;
+
+    for (unsigned int i = 0; i < libraries.size(); i++) {
+        string library = libraries.at(i);
+        vector<Compound*> libraryCompounds = DB.loadNISTLibrary(library.c_str());
+
+        cout << "\tLibrary '" << library << "' contains " << libraryCompounds.size() << " Compounds." << endl;
+
+        mzkitchenCompounds.insert(mzkitchenCompounds.end(), libraryCompounds.begin(), libraryCompounds.end());
+    }
 
     sort(mzkitchenCompounds.begin(), mzkitchenCompounds.end(), [](const Compound* lhs, const Compound* rhs){
         if (lhs->precursorMz != rhs->precursorMz) {
@@ -2334,7 +2348,7 @@ void mzkitchenSearch() {
         return lhs->adductString < rhs->adductString;
     });
 
-    cout << "MSP spectral library \'" << mzkitchenMspFile << "\' contains " << mzkitchenCompounds.size() << " compounds." << endl;
+    cout << "mzkitchen search will be carried out with " << mzkitchenCompounds.size() << " compounds." << endl;
 
     if (mzkitchenSearchType == "lipidSearch") {
 
