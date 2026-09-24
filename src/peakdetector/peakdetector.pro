@@ -84,3 +84,9 @@ parallel {
 
 SOURCES= peakdetector.cpp  options.cpp $$MAVEN/classifier.cpp $$MAVEN/classifierNeuralNet.cpp $$MAVEN/projectDB.cpp $$MAVEN/database.cpp $$NATSORT/strnatcmp.c
 HEADERS= $$MAVEN/classifierNeuralNet.h  options.h $$MAVEN/projectDB.h $$MAVEN/database.h $$NATSORT/strnatcmp.h
+
+mac {
+    exists(/opt/homebrew/opt/qt@5/plugins/sqldrivers/libqsqlite.dylib) {
+        QMAKE_POST_LINK += cp /opt/homebrew/opt/qt@5/plugins/sqldrivers/libqsqlite.dylib $$clean_path($$DESTDIR)/$${TARGET}.app/Contents/PlugIns/sqldrivers/libqsqlite.dylib
+    }
+}
