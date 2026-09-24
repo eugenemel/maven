@@ -1266,12 +1266,12 @@ void processOptions(int argc, char* argv[]) {
                 cout << "Adduct Loaded: " << adduct->name << endl;
             }
         } else if (strcmp(argv[i], "--rtAlignmentAnchorPointReference") == 0) {
-            rtAlignmentAnchorPointReference = strcmp(argv[i], "1");
+            rtAlignmentAnchorPointReference = strcmp(argv[i], "1") == 0;
         } else if (strcmp(argv[i], "--peptideStabilitySearchParameters") == 0) {
             peptideStabilitySearchParamsStr = argv[i+1];
             isPeptideStabilitySearch = true;
         } else if (strcmp(argv[i], "--isMzkitchenRetainUnannotated") == 0) {
-            isMzkitchenRetainUnannotated = strcmp(argv[i+1], "1");
+            isMzkitchenRetainUnannotated = strcmp(argv[i+1], "1") == 0;
         }
 
         if (mzUtils::ends_with(optString, ".rt")) alignmentFile = optString;
@@ -2382,7 +2382,10 @@ void mzkitchenSearch() {
     }
 
     //Issue 851: option to only retain mzkitchen peak groups that are associated with a compound
-    if (isMzkitchenRetainUnannotated) {
+    //If this flag is false, allgroups are replaced only by annotated groups. - 'Do not retain unannotated'
+    //If this flag is true, allgroups is unmodified  - 'Do retain unannotated' (combination of annotated and unannotated groups).
+    if (!isMzkitchenRetainUnannotated) {
+        cout << "'isMzkitchenRetainUnannotated' triggered: only compound-annotated peak groups will be retained." << endl;
         vector<PeakGroup> annotatedGroups{};
         for (auto& group : allgroups) {
             if (group.compound) {
