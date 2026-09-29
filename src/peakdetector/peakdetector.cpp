@@ -1266,7 +1266,7 @@ void processOptions(int argc, char* argv[]) {
                 cout << "Adduct Loaded: " << adduct->name << endl;
             }
         } else if (strcmp(argv[i], "--rtAlignmentAnchorPointReference") == 0) {
-            rtAlignmentAnchorPointReference = strcmp(argv[i], "1") == 0;
+            rtAlignmentAnchorPointReference = strcmp(argv[i+1], "1") == 0;
         } else if (strcmp(argv[i], "--peptideStabilitySearchParameters") == 0) {
             peptideStabilitySearchParamsStr = argv[i+1];
             isPeptideStabilitySearch = true;
