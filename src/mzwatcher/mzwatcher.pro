@@ -10,6 +10,9 @@ FORMS = mzWatcherGui.ui
 TARGET = mzwatcher
 DESTDIR = $$MAVEN/bin/
 
+INSTALLS += target
+target.path = $${INSTALL_PREFIX}/bin
+
 CONFIG += warn_off qt
 QT += sql network widgets
 
