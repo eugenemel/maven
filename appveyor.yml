@@ -129,6 +129,8 @@ artifacts:
     name: Maven-windows
   - path: dist/peakdetector*.zip
     name: peakdetector-windows
+  - path: dist/mzwatcher*.zip
+    name: mzwatcher-windows
 
 deploy:
   - provider: GitHub
@@ -169,6 +171,17 @@ deploy:
     auth_token:
         secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn 
     artifact: peakdetector-windows
+    draft: false
+    prerelease: false
+    on:
+      APPVEYOR_REPO_TAG: true
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+
+  - provider: GitHub
+    description: 'MzWatcher Executable - Windows'
+    auth_token:
+        secure: dUsKwa2HNyEycsQtwtVQ9g7tXTQNjXzpf7FEBMllM69nbd1FC0PwcsC4IMGqHdRn
+    artifact: mzwatcher-windows
     draft: false
     prerelease: false
     on:
