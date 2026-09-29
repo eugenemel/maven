@@ -33,6 +33,7 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
         guiForm->remoteServerUrl->setText(settings->value("remoteServerUrl").toString());
         guiForm->instrumentId->setText(settings->value("instrumentId").toString());
         guiForm->monitorTimeout->setValue(settings->value("monitorTimeout").toInt());
+        guiForm->dayDiffBox->setValue(maxDayDiff);
         guiForm->gcsKeyFileEdit->setText(gcsKeyFile);
         guiForm->targetBucketEdit->setText(targetBucket);
 

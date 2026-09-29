@@ -21,8 +21,8 @@ class TestMzWatcher: public QObject
 {
     Q_OBJECT
 private slots:
-    void initTestCase();
-    void cleanupTestCase();
+    void init();
+    void cleanup();
 
     void isConvertibleMatch_dotDDirectoryMatches();
     void isConvertibleMatch_nonMatchingDirectoryDoesNotMatch();
@@ -41,18 +41,24 @@ private:
     static void resetSettings();
 };
 
-void TestMzWatcher::initTestCase()
+void TestMzWatcher::init()
 {
-    // Force QSettings to a sandboxed ini file instead of the real per-user
-    // "mzWatch"/"mzWatch Settings" store (native format on mac would touch
-    // ~/Library/Preferences regardless of $HOME, ini format respects it).
-    QSettings::setDefaultFormat(QSettings::IniFormat);
+    // QSettings("mzWatch", "mzWatch Settings") always uses NativeFormat on
+    // mac (the 2-arg organization/application constructor ignores
+    // setDefaultFormat()), which is backed by CFPreferences. Redirecting
+    // $HOME is a best-effort attempt to keep this off a real user's saved
+    // preferences; note that on some macOS/CFPreferences combinations this
+    // redirection is not fully honored, so resetSettings()'s explicit
+    // clear() at the start of every settings-touching test is the load-
+    // bearing isolation, not this alone. A fresh sandbox per test (via
+    // QtTest's init()/cleanup(), called around every test slot) is still
+    // the right default even so.
     homeDir = new QTemporaryDir();
     QVERIFY(homeDir->isValid());
     qputenv("HOME", homeDir->path().toUtf8());
 }
 
-void TestMzWatcher::cleanupTestCase()
+void TestMzWatcher::cleanup()
 {
     delete homeDir;
     homeDir = nullptr;
