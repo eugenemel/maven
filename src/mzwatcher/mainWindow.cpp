@@ -445,6 +445,13 @@ void MainWindow::makeBackupCopy(QString file) {
         if (destPath.exists()) {
                 setStatus("Running conversion");
 
+                // QString::replace() mutates in place, so file/convertedFileName/
+                // destFileDir below become backslash-mangled Windows-style paths
+                // for the converter's command line. Capture the real filesystem
+                // path of the converted output *before* that mutation, since
+                // that's what needs to be handed to gsutil for the GCS upload.
+                QString localConvertedFile = convertedFileName;
+
                 QString infile = file.replace("\057", "\\"); // # not "\/"
                 QString outfile = convertedFileName.replace("\057","\\");
                 QString outputdir = destFileDir.replace("\057","\\");
@@ -465,7 +472,7 @@ void MainWindow::makeBackupCopy(QString file) {
                 guiForm->convertButton->setText("Convert");
                 markFileConverted(file);
 
-                uploadConvertedFileToGcs(convertedFileName);
+                uploadConvertedFileToGcs(localConvertedFile);
         }
 
 	//refresh destination file information
