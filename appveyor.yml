@@ -88,6 +88,15 @@ build_script:
   # Build peakdetector command-line tool - make install
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/peakdetector; make INSTALL_ROOT=appdir install 2>&1"}
 
+  # Issue 855: Build mzwatcher - qmake
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/mzwatcher; qmake CONFIG+=release mzwatcher.pro 2>&1"}
+
+  # Issue 855: Build mzwatcher - make
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/mzwatcher; make -j16 2>&1"}
+
+  # Issue 855: Build mzwatcher - make install
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura'){ bash -lc "cd /c/projects/maven/src/mzwatcher; make INSTALL_ROOT=appdir install 2>&1"}
+
   # Print contents
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd /c/projects/maven/; ls src/maven/appdir/bin/" }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd /c/projects/maven/; find . -name 'Maven.exe'" }
@@ -107,7 +116,10 @@ after_build:
   
   # Issue 742: Deploy peakdetector
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd /c/projects/maven/; ./make_dist_win32.sh src/peakdetector/appdir/bin/peakdetector.exe 2>&1 || true" }
-      
+
+  # Issue 855: Deploy mzwatcher
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -ne 'macos-ventura') { bash -lc "cd /c/projects/maven/; ./make_dist_win32.sh src/mzwatcher/appdir/bin/mzwatcher.exe 2>&1 || true" }
+
 artifacts:
   - path: dist/Maven*.dmg
     name: Maven-macos
