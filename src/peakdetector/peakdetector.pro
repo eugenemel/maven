@@ -87,6 +87,6 @@ HEADERS= $$MAVEN/classifierNeuralNet.h  options.h $$MAVEN/projectDB.h $$MAVEN/da
 
 mac {
     exists(/opt/homebrew/opt/qt@5/plugins/sqldrivers/libqsqlite.dylib) {
-        QMAKE_POST_LINK += cp /opt/homebrew/opt/qt@5/plugins/sqldrivers/libqsqlite.dylib $$clean_path($$DESTDIR)/$${TARGET}.app/Contents/PlugIns/sqldrivers/libqsqlite.dylib
+        QMAKE_POST_LINK += mkdir -p $$clean_path($$DESTDIR)/$${TARGET}.app/Contents/PlugIns/sqldrivers && cp /opt/homebrew/opt/qt@5/plugins/sqldrivers/libqsqlite.dylib $$clean_path($$DESTDIR)/$${TARGET}.app/Contents/PlugIns/sqldrivers/libqsqlite.dylib
     }
 }
