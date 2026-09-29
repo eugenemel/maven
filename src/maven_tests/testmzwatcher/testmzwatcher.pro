@@ -4,6 +4,9 @@
 # Not wired into build.pro's SUBDIRS or appveyor.yml -- exercised manually
 # via maven_tests.pro only.
 
+CORE = ../../maven_core
+include($$CORE/libmaven.pri)
+
 QT += testlib sql network widgets
 TEMPLATE = app
 TARGET = testmzwatcher
