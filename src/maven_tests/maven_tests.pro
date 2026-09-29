@@ -6,4 +6,5 @@ SUBDIRS += \
         testsimpleparsimony \
         testsecprocessor \
         testmzkitchenprocessor \
-        testrtalignment
+        testrtalignment \
+        testmzwatcher
