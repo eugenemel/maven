@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>463</width>
-    <height>496</height>
+    <width>570</width>
+    <height>558</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -35,7 +35,7 @@
       </size>
      </property>
      <property name="selectionMode">
-      <enum>QAbstractItemView::MultiSelection</enum>
+      <enum>QAbstractItemView::SelectionMode::MultiSelection</enum>
      </property>
      <property name="sortingEnabled">
       <bool>true</bool>
@@ -46,11 +46,11 @@
      <property name="headerHidden">
       <bool>false</bool>
      </property>
-     <attribute name="headerDefaultSectionSize">
-      <number>100</number>
-     </attribute>
      <attribute name="headerMinimumSectionSize">
       <number>5</number>
+     </attribute>
+     <attribute name="headerDefaultSectionSize">
+      <number>100</number>
      </attribute>
      <column>
       <property name="text">
@@ -102,10 +102,10 @@
       <string notr="true"/>
      </property>
      <property name="frameShape">
-      <enum>QFrame::Box</enum>
+      <enum>QFrame::Shape::Box</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Sunken</enum>
+      <enum>QFrame::Shadow::Sunken</enum>
      </property>
      <property name="documentTitle">
       <string>Log</string>
@@ -143,7 +143,7 @@
       </sizepolicy>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <property name="documentMode">
       <bool>false</bool>
@@ -279,7 +279,7 @@
       </attribute>
       <layout class="QFormLayout" name="formLayout">
        <property name="fieldGrowthPolicy">
-        <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+        <enum>QFormLayout::FieldGrowthPolicy::AllNonFixedFieldsGrow</enum>
        </property>
        <item row="3" column="1">
         <widget class="QSpinBox" name="monitorTimeout">
@@ -457,12 +457,12 @@
         <rect>
          <x>10</x>
          <y>10</y>
-         <width>191</width>
+         <width>511</width>
          <height>17</height>
         </rect>
        </property>
        <property name="text">
-        <string>Activate Remote Loging Service</string>
+        <string>Activate Remote Logging Service</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_11">
@@ -536,13 +536,13 @@
       </size>
      </property>
      <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
+      <enum>QFrame::Shape::NoFrame</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Sunken</enum>
+      <enum>QFrame::Shadow::Sunken</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
-      <property name="margin">
+      <property name="margin" stdset="0">
        <number>1</number>
       </property>
       <item row="0" column="0">
@@ -559,7 +559,7 @@
       <item row="0" column="3">
        <spacer name="horizontalSpacer">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -641,10 +641,10 @@
          </palette>
         </property>
         <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
+         <enum>Qt::FocusPolicy::NoFocus</enum>
         </property>
         <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
+         <enum>Qt::ContextMenuPolicy::NoContextMenu</enum>
         </property>
         <property name="statusTip">
          <string/>
