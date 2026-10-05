@@ -64,12 +64,22 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
 	connect(gcsUploader,SIGNAL(statusChanged(QString)),this,SLOT(setStatus(QString)));
 
 
-        QString dbname=QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/mzWatcher.db";
+        QString dbDir = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+        QString dbname = dbDir + "/mzWatcher.db";
 
-        setStatus("Using Database: " + dbname);
+        setStatus("Using Database: \"" + dbname + "\"");
+        // QSqlDatabase/SQLite will not create a missing parent directory on
+        // its own -- DB.open() fails silently if dbDir doesn't exist yet
+        // (e.g. the first run after an applicationName/organizationName
+        // change moves this path), and every later query then fails with a
+        // generic "Unable to fetch row" rather than a specific error, since
+        // there's no open connection to even check the schema against.
+        QDir().mkpath(dbDir);
         DB = QSqlDatabase::addDatabase("QSQLITE", dbname);
         DB.setDatabaseName(dbname);
-        DB.open();
+        if (! DB.open()) {
+            setStatus("Failed to open database \"" + dbname + "\": " + DB.lastError().text());
+        }
         createTables();
        //clearTables();
 
@@ -267,7 +277,7 @@ void MainWindow::processChangedFiles() {
             int oneday = 3600*24; // if file is too old.. don't autoconvert
 
             if (ageSec < oneday && ageSec > waitTime and fi.size() > minFileSize && fi.size() != dbFiles[file]) {
-                setStatus(tr("Processing changed file: %1 ").arg(file));
+                setStatus(tr("Processing changed file: \"%1\" ").arg(file));
                 processFile(file);
             }
         }
@@ -301,7 +311,7 @@ void MainWindow::convertFile(QString file) {
         QString tempConvertedFile = tempPathName + "/" + sourceFileName;
         tempConvertedFile.replace(extension,destFileFormat);
 
-	setStatus("TempFile=" + tempConvertedFile );
+	setStatus("TempFile=\"" + tempConvertedFile + "\"");
 	QDir tempPath(tempPathName);
 
 	if (tempPath.exists()) {
@@ -376,7 +386,7 @@ void MainWindow::uploadConvertedFileToGcs(const QString &localConvertedFile) {
     QStringList command = buildGcsUploadCommand(gcsKeyFile, targetBucket, localConvertedFile, objectPath);
     if (command.isEmpty()) return;
 
-    setStatus("Uploading to gs://" + targetBucket + "/" + objectPath);
+    setStatus("Uploading to \"gs://" + targetBucket + "/" + objectPath + "\"");
     gcsUploader->setSystemCommand(command.first(), command.mid(1));
     gcsUploader->start();
 
@@ -390,7 +400,7 @@ void MainWindow::makeBackupCopy(QString file) {
 	QFileInfo sourceFileInfo(file);
 	QString   sourceFileDir =  sourceFileInfo.absolutePath();
 	QString   sourceFileName = sourceFileInfo.fileName();
-        setStatus("\n\n\nProcessing " + sourceFileName);
+        setStatus("\n\n\nProcessing \"" + sourceFileName + "\"");
 
 	//source file is no longer available
 	if(! sourceFileInfo.exists()) return;
@@ -405,12 +415,12 @@ void MainWindow::makeBackupCopy(QString file) {
         QString	  convertedFileName = destFile;
         convertedFileName = convertedFileName.replace(extension,destFileFormat);
 
-        setStatus("Source="+sourceFolder);
-        setStatus("Dest="+destFolder);
-        setStatus("Dest Dir=" + destFileDir);
-        setStatus("Source Dir=" + sourceFileDir);
-        setStatus("Source File=" + sourceFileName);
-        setStatus("Destination File=" + destFileName);
+        setStatus("Source=\""+sourceFolder+"\"");
+        setStatus("Dest=\""+destFolder+"\"");
+        setStatus("Dest Dir=\"" + destFileDir + "\"");
+        setStatus("Source Dir=\"" + sourceFileDir + "\"");
+        setStatus("Source File=\"" + sourceFileName + "\"");
+        setStatus("Destination File=\"" + destFileName + "\"");
 
 
 	if (destFile == file) {	//path is identical..
@@ -423,7 +433,7 @@ void MainWindow::makeBackupCopy(QString file) {
 	if (! destPath.exists()) {
 		bool ok = destPath.mkpath(destFileDir);
 		if( !ok ){
-			setStatus("Failed to make path=" + destFolder);
+			setStatus("Failed to make path=\"" + destFolder + "\"");
 			return;
 		}
 	}
@@ -567,7 +577,7 @@ void MainWindow::readSettings() {
 			 settings->setValue("destFolder",QString("Y:/Metabolomics/Data/"));
 
 	 if( ! settings->contains("convertCommand") )
-			 settings->setValue("convertCommand",QString("mzWiff.exe --mzXML \"%1\" \"%2\" "));
+			 settings->setValue("convertCommand",QString("\"msconvert.exe\" --32 --filter \"peakPicking true [1,2]\" --mzML \"%1\" -o \"%2\""));
 
          if( ! settings->contains("monitorTimeout") )
                          settings->setValue("monitorTimeout", 60);
@@ -747,7 +757,7 @@ void MainWindow::readSettings() {
 
  void MainWindow::remoteLogMessage(QString infotype, QString filename, int fileSize, QString msgText) {
 
-     setStatus(infotype + "| " + filename + " | " + QString::number(fileSize) + " | " + msgText);
+     setStatus(infotype + "| \"" + filename + "\" | " + QString::number(fileSize) + " | " + msgText);
 
      if (guiForm->watchButton->isChecked() == false) return;
      if (guiForm->remoteLoging->isChecked() == false) return;
