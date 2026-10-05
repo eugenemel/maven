@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
         guiForm->instrumentId->setText(settings->value("instrumentId").toString());
         guiForm->monitorTimeout->setValue(settings->value("monitorTimeout").toInt());
         guiForm->dayDiffBox->setValue(maxDayDiff);
-        guiForm->settingsLocationEdit->setText(settings->fileName());
+        guiForm->settingsLocationEdit->setText("\"" + settings->fileName() + "\"");
         guiForm->gcsKeyFileEdit->setText(gcsKeyFile);
         guiForm->targetBucketEdit->setText(targetBucket);
 
@@ -105,9 +105,12 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
 
 void MainWindow::setStatus(QString status) {
 
-        QString nowTime = QTime::currentTime().toString("h:m:s ap");
+        // "h:m:s" has no leading zeros, so e.g. 3 seconds past the minute
+        // prints as "3" instead of "03" -- indistinguishable from "30" at a
+        // glance. Zero-pad every field so the timestamp is unambiguous.
+        QString nowTime = QTime::currentTime().toString("hh:mm:ss ap");
 	//guiForm->statusLabel->setText(status);
-        guiForm->logWidget->append(nowTime + ":" + status);
+        guiForm->logWidget->append(nowTime + ": " + status);
 }
 
 bool MainWindow::checkParameters() {
@@ -576,8 +579,19 @@ void MainWindow::readSettings() {
 	 if( ! settings->contains("destFolder") )
 			 settings->setValue("destFolder",QString("Y:/Metabolomics/Data/"));
 
-	 if( ! settings->contains("convertCommand") )
-			 settings->setValue("convertCommand",QString("\"msconvert.exe\" --32 --filter \"peakPicking true [1,2]\" --mzML \"%1\" -o \"%2\""));
+	 // Issue 858: "if not contains" alone only ever seeds a brand-new
+	 // settings file -- anyone who already launched an earlier build has
+	 // convertCommand already persisted with the old factory default, so
+	 // changing the string literal here has no effect for them. Migrate
+	 // forward only when the saved value still matches the *old* factory
+	 // default exactly, so a deliberately customized command is left alone.
+	 static const QString kOldDefaultConvertCommand = QString("mzWiff.exe --mzXML \"%1\" \"%2\" ");
+	 static const QString kDefaultConvertCommand = QString("\"msconvert.exe\" --32 --filter \"peakPicking true [1,2]\" --mzML \"%1\" -o \"%2\"");
+	 if( ! settings->contains("convertCommand") ) {
+			 settings->setValue("convertCommand", kDefaultConvertCommand);
+	 } else if( settings->value("convertCommand").toString() == kOldDefaultConvertCommand ) {
+			 settings->setValue("convertCommand", kDefaultConvertCommand);
+	 }
 
          if( ! settings->contains("monitorTimeout") )
                          settings->setValue("monitorTimeout", 60);
