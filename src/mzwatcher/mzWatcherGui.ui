@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>570</width>
-    <height>558</height>
+    <height>599</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -143,7 +143,7 @@
       </sizepolicy>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <property name="documentMode">
       <bool>false</bool>
@@ -156,16 +156,6 @@
        <string>File Converter Settings</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="1" column="2" colspan="3">
-        <widget class="QLineEdit" name="destFolderEdit">
-         <property name="text">
-          <string/>
-         </property>
-         <property name="readOnly">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
        <item row="4" column="0">
         <widget class="QLabel" name="label_4">
          <property name="text">
@@ -268,6 +258,16 @@
         <widget class="QCheckBox" name="makeCopyCheckBox">
          <property name="text">
           <string>Make a copy of original file</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2" colspan="3">
+        <widget class="QLineEdit" name="destFolderEdit">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="readOnly">
+          <bool>false</bool>
          </property>
         </widget>
        </item>
@@ -397,133 +397,89 @@
          </property>
         </widget>
        </item>
+       <item row="9" column="0">
+        <widget class="QLabel" name="label_settingsLocation">
+         <property name="text">
+          <string>Settings Location</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="1">
+        <widget class="QLineEdit" name="settingsLocationEdit">
+         <property name="toolTip">
+          <string>Where mzWatcher's saved settings live on this machine. An expert user can open this location (the Windows Registry, if this is a path starting with HKEY_CURRENT_USER) to inspect, back up, or delete these settings.</string>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tab_2">
       <attribute name="title">
        <string>Remote Server Updates</string>
       </attribute>
-      <widget class="QLabel" name="label_8">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>40</y>
-         <width>141</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Remote Server Url:</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="remoteServerUrl">
-       <property name="geometry">
-        <rect>
-         <x>150</x>
-         <y>40</y>
-         <width>271</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_9">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>60</y>
-         <width>131</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Instrument Identification:</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="instrumentId">
-       <property name="geometry">
-        <rect>
-         <x>150</x>
-         <y>60</y>
-         <width>271</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="remoteLoging">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>10</y>
-         <width>511</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Activate Remote Logging Service</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_11">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>100</y>
-         <width>131</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>GCS Service Key File:</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="gcsKeyFileEdit">
-       <property name="geometry">
-        <rect>
-         <x>150</x>
-         <y>100</y>
-         <width>191</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="gcsKeyFileButton">
-       <property name="geometry">
-        <rect>
-         <x>350</x>
-         <y>100</y>
-         <width>71</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Browse...</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_12">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>130</y>
-         <width>131</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Target GCS Bucket:</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="targetBucketEdit">
-       <property name="geometry">
-        <rect>
-         <x>150</x>
-         <y>130</y>
-         <width>271</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="0" column="0" colspan="3">
+        <widget class="QCheckBox" name="remoteLoging">
+         <property name="text">
+          <string>Activate Remote Logging Service</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>Remote Server Url:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1" colspan="2">
+        <widget class="QLineEdit" name="remoteServerUrl">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_9">
+         <property name="text">
+          <string>Instrument Identification:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1" colspan="2">
+        <widget class="QLineEdit" name="instrumentId"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_11">
+         <property name="text">
+          <string>GCS Service Key File:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="gcsKeyFileEdit"/>
+       </item>
+       <item row="3" column="2">
+        <widget class="QPushButton" name="gcsKeyFileButton">
+         <property name="text">
+          <string>Browse...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>Target GCS Bucket:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1" colspan="2">
+        <widget class="QLineEdit" name="targetBucketEdit"/>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>

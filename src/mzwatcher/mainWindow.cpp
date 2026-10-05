@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
         guiForm->instrumentId->setText(settings->value("instrumentId").toString());
         guiForm->monitorTimeout->setValue(settings->value("monitorTimeout").toInt());
         guiForm->dayDiffBox->setValue(maxDayDiff);
+        guiForm->settingsLocationEdit->setText(settings->fileName());
         guiForm->gcsKeyFileEdit->setText(gcsKeyFile);
         guiForm->targetBucketEdit->setText(targetBucket);
 
@@ -630,6 +631,35 @@ void MainWindow::readSettings() {
  void MainWindow::createTables() {
    setStatus("Creating Tables");
    QSqlQuery query(DB);
+
+   // Issue 858: QStandardPaths::DataLocation (and therefore the path to
+   // mzWatcher.db) is derived from QCoreApplication::applicationName(),
+   // which defaults to the built executable's own filename when not set
+   // explicitly. Because this program's target name has changed across
+   // versions, a datafiles table created by an older/differently-built copy
+   // of this program can already exist on disk with a column layout this
+   // build doesn't expect. "create table if not exists" silently does
+   // nothing against such a table, which then makes every later prepared
+   // statement fail ("Parameter count mismatch", "Unable to fetch row").
+   // Detect that mismatch here and rebuild the table rather than assume
+   // "if not exists" is sufficient. This table only caches which files have
+   // already been scanned/converted -- not the converted files themselves --
+   // so rebuilding it is safe; a Refresh repopulates it.
+   static const QStringList kExpectedColumns = {"filename", "fileConverted", "fileAnalyzed", "fileSize", "modTime"};
+
+   QSqlQuery schemaCheck(DB);
+   schemaCheck.exec("pragma table_info(datafiles)");
+   QStringList actualColumns;
+   while (schemaCheck.next()) {
+       actualColumns << schemaCheck.value(1).toString(); // pragma table_info: cid,name,type,notnull,dflt_value,pk
+   }
+   schemaCheck.clear();
+
+   if (!actualColumns.isEmpty() && actualColumns != kExpectedColumns) {
+       setStatus("Existing datafiles table from a previous version has an incompatible layout -- rebuilding it (this only resets the conversion-tracking cache, not your converted files)");
+       query.exec("drop table datafiles");
+   }
+
    bool ok = query.exec("create table if not exists datafiles(filename varchar(255), fileConverted int, fileAnalyzed int, fileSize int, modTime timestamp );");
    if(!ok) setStatus(query.lastError().text());
    query.clear();
