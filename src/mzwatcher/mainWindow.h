@@ -103,7 +103,8 @@ class MainWindow: public QMainWindow {
 				// SMTP_SERVER/SMTP_PORT are optional, defaulting to Gmail's
 				// (smtp.gmail.com:587) when absent, since that's the common
 				// case, not because this tool is tied to any particular
-				// provider.
+				// provider. EMAIL_RECIPIENTS is also optional: when present,
+				// it overrides the Recipients field in the GUI.
 				static QHash<QString,QString> parseMailerConfigFile(const QString &filePath);
 
 			public slots:

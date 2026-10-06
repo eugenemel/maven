@@ -624,6 +624,15 @@ void MainWindow::updateMailerConfigStatus() {
         return;
     }
     QHash<QString,QString> config = parseMailerConfigFile(mailerConfigFile);
+
+    // An EMAIL_RECIPIENTS line lets the config file ship its own recipient
+    // list alongside the mailer credentials, overriding whatever is
+    // currently in the Recipients field.
+    if (!config.value("EMAIL_RECIPIENTS").isEmpty()) {
+        warningEmailAddresses = config.value("EMAIL_RECIPIENTS");
+        guiForm->warningEmailAddressesEdit->setText(warningEmailAddresses);
+    }
+
     if (config.value("EMAIL_NAME").isEmpty() || config.value("EMAIL_PASSWORD").isEmpty()) {
         guiForm->mailerConfigStatusLabel->setText("Mail service not configured (file is missing EMAIL_NAME or EMAIL_PASSWORD)");
     } else {
@@ -799,7 +808,7 @@ void MainWindow::readSettings() {
          }
 
 	 QPoint pos = settings->value("pos", QPoint(200, 200)).toPoint();
-	 QSize size = settings->value("size", QSize(400, 400)).toSize();
+	 QSize size = settings->value("size", QSize(1000, 400)).toSize();
 	 resize(size);
 	 move(pos);
 

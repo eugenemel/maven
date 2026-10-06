@@ -53,6 +53,7 @@ private slots:
     void parseMailerConfigFile_parsesKeyValueLines();
     void parseMailerConfigFile_ignoresBlankLinesAndComments();
     void parseMailerConfigFile_missingFileYieldsEmptyHash();
+    void mailerConfigEmailRecipients_overridesRecipientsField();
     void automaticWarningsSettingsDefaults();
 
 private:
@@ -314,6 +315,38 @@ void TestMzWatcher::parseMailerConfigFile_missingFileYieldsEmptyHash()
 {
     QVERIFY(MainWindow::parseMailerConfigFile("").isEmpty());
     QVERIFY(MainWindow::parseMailerConfigFile("/path/does/not/exist.txt").isEmpty());
+}
+
+void TestMzWatcher::mailerConfigEmailRecipients_overridesRecipientsField()
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString filePath = dir.path() + "/mailer.txt";
+
+    QFile f(filePath);
+    QVERIFY(f.open(QIODevice::WriteOnly | QIODevice::Text));
+    {
+        QTextStream out(&f);
+        out << "EMAIL_NAME=mailer@example.com\n";
+        out << "EMAIL_PASSWORD=hunter2\n";
+        out << "EMAIL_RECIPIENTS=alice@example.com,bob@example.org\n";
+    }
+    f.close();
+
+    resetSettings();
+    {
+        QSettings settings("mzWatch", "mzWatch Settings");
+        settings.setValue("mailerConfigFile", filePath);
+        settings.setValue("warningEmailAddresses", QString("typed-in@example.com"));
+    }
+
+    MainWindow mw(0);
+
+    QLineEdit *emailEdit = mw.findChild<QLineEdit*>("warningEmailAddressesEdit");
+    QVERIFY(emailEdit != nullptr);
+    QCOMPARE(emailEdit->text(), QString("alice@example.com,bob@example.org"));
+
+    mw.close();
 }
 
 void TestMzWatcher::automaticWarningsSettingsDefaults()
