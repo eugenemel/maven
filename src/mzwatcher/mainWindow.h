@@ -9,6 +9,8 @@
 #include<QFileSystemWatcher>
 #include<QDebug>
 #include<QUrlQuery>
+#include<QSysInfo>
+#include<QProcessEnvironment>
 #include "ui_mzWatcherGui.h"
 
 class BackgroundThread : public QThread
@@ -16,9 +18,15 @@ class BackgroundThread : public QThread
 	Q_OBJECT
 
 public:
-	BackgroundThread(QWidget*) { _stopped=false; _useArgumentList=false; }
+	BackgroundThread(QWidget*) { _stopped=false; _useArgumentList=false; _useCustomEnvironment=false; }
 	void setSystemCommand(QString cmd) { command = cmd; arguments.clear(); _useArgumentList=false; }
 	void setSystemCommand(QString program, QStringList args) { command = program; arguments = args; _useArgumentList=true; }
+	// Issue 859: the mailer needs to pass a password to a child process
+	// without it ever appearing on that process's own command line (visible
+	// to any user via Task Manager/tasklist without special privileges) --
+	// an inherited-but-overridden environment variable is a meaningfully
+	// better (if not perfect) place for a short-lived secret than argv.
+	void setProcessEnvironment(const QProcessEnvironment &env) { environment = env; _useCustomEnvironment=true; }
 	void killProcess() { _stopped=true; }
 
 signals:
@@ -27,6 +35,9 @@ signals:
 protected:
 	void run(void) {
 		QProcess converter;
+		if (_useCustomEnvironment) {
+			converter.setProcessEnvironment(environment);
+		}
 		if (_useArgumentList) {
 			converter.start(command, arguments);
 		} else {
@@ -60,8 +71,10 @@ protected:
 private:
 	bool _stopped;
 	bool _useArgumentList;
+	bool _useCustomEnvironment;
 	QString command;
 	QStringList arguments;
+	QProcessEnvironment environment;
 
 };
 
@@ -77,6 +90,21 @@ class MainWindow: public QMainWindow {
 				static bool isConvertibleMatch(const QString &entryName, const QString &extension);
 				static QString buildGcsObjectPath(const QString &destFolder, const QString &convertedFilePath);
 				static QStringList buildGcsUploadCommand(const QString &gcsKeyFile, const QString &targetBucket, const QString &localFilePath, const QString &objectPath);
+
+				// Automatic Warnings feature: testable pure-logic helpers.
+				static qint64 totalDirectorySize(const QString &dirPath);
+				static qint64 thresholdInBytes(double threshold, const QString &unit);
+				static QStringList parseEmailRecipients(const QString &commaSeparated);
+				static QString buildWarningEmailSubject(const QString &fileName);
+				static QString buildWarningEmailBody(const QString &fileName, double fileSize, double threshold, const QString &unit, const QString &computerName);
+				// A user-supplied text file, not anything checked into this
+				// repo: lines of KEY=VALUE (# comments and blank lines
+				// ignored). EMAIL_NAME and EMAIL_PASSWORD are required;
+				// SMTP_SERVER/SMTP_PORT are optional, defaulting to Gmail's
+				// (smtp.gmail.com:587) when absent, since that's the common
+				// case, not because this tool is tied to any particular
+				// provider.
+				static QHash<QString,QString> parseMailerConfigFile(const QString &filePath);
 
 			public slots:
 				void updateFileList();
@@ -95,6 +123,7 @@ class MainWindow: public QMainWindow {
 				void selectGcsKeyFile();
                         void clearTables();
                         void updateButtonColors();
+                        void selectMailerConfigFile();
 
 			protected:
 				void timerEvent(QTimerEvent *event);
@@ -120,6 +149,32 @@ class MainWindow: public QMainWindow {
 				// path is never taken (R11).
 				QString gcsKeyFile;
 				QString targetBucket;
+
+				// Automatic Warnings settings. Both automaticWarningsCheckBox
+				// (read directly off the widget, same as remoteLoging) and a
+				// mailerConfigFile that actually parses (EMAIL_NAME and
+				// EMAIL_PASSWORD both present) must hold for the feature to
+				// do anything -- mirrors the GCS "both settings must be set"
+				// gating pattern.
+				QString warningComputerName;
+				QString warningEmailAddresses;
+				int warningThreshold;
+				QString warningThresholdUnit;
+
+				// Path to a user-supplied mailer config file (see
+				// parseMailerConfigFile()). Only the path is persisted;
+				// EMAIL_NAME/EMAIL_PASSWORD are read from the file itself
+				// each time a warning email is sent, never duplicated into
+				// QSettings -- same trust model as gcsKeyFile.
+				QString mailerConfigFile;
+
+				BackgroundThread* mailer;
+
+				// Set by readSettings() to indicate "warningComputerName" had
+				// never been persisted before this run, so the constructor
+				// knows to pre-fill the *widget* (not the stored default)
+				// with the machine's hostname.
+				bool warningComputerNameWasUnset;
 
                         int timerId;
 				unsigned int maxDayDiff;
@@ -150,6 +205,13 @@ class MainWindow: public QMainWindow {
 				void makeBackupCopy(QString filename);
 				static bool copyRecursively(const QString &sourcePath, const QString &destPath);
 				void uploadConvertedFileToGcs(const QString &localConvertedFile);
+				void checkAndSendSizeWarning(const QFileInfo &sourceFileInfo);
+				void sendWarningEmail(const QStringList &recipients, const QString &subject, const QString &body);
+				// Re-reads mailerConfigFile and updates mailerConfigStatusLabel
+				// to reflect whether it currently parses to a usable
+				// (EMAIL_NAME + EMAIL_PASSWORD present) configuration. Called
+				// on startup and whenever the user picks a new file.
+				void updateMailerConfigStatus();
 
 
                         //remote database connection

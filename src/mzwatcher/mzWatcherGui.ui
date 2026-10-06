@@ -484,6 +484,124 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tab_3">
+      <attribute name="title">
+       <string>Automatic Warnings</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_5">
+       <item row="0" column="0" colspan="4">
+        <widget class="QCheckBox" name="automaticWarningsCheckBox">
+         <property name="text">
+          <string>Enable Automatic Warnings</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_17">
+         <property name="text">
+          <string>Mailer Config File:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1" colspan="2">
+        <widget class="QLineEdit" name="mailerConfigFileEdit"/>
+       </item>
+       <item row="1" column="3">
+        <widget class="QPushButton" name="mailerConfigFileButton">
+         <property name="text">
+          <string>Browse...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="4">
+        <widget class="QLabel" name="mailerConfigStatusLabel">
+         <property name="text">
+          <string>Mail service not configured</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_13">
+         <property name="text">
+          <string>Computer Name:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1" colspan="3">
+        <widget class="QLineEdit" name="warningComputerNameEdit"/>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_14">
+         <property name="text">
+          <string>Email Address(es):</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1" colspan="3">
+        <widget class="QLineEdit" name="warningEmailAddressesEdit"/>
+       </item>
+       <item row="5" column="0" colspan="4">
+        <layout class="QHBoxLayout" name="horizontalLayout_warningThreshold">
+         <item>
+          <widget class="QLabel" name="label_15">
+           <property name="text">
+            <string>Send email on completed raw file size below:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="warningThresholdSpinBox">
+           <property name="maximum">
+            <number>1000000000</number>
+           </property>
+           <property name="value">
+            <number>70</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_16">
+           <property name="text">
+            <string>Unit</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="warningThresholdUnitBox">
+           <item>
+            <property name="text">
+             <string>kB</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>MB</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>GB</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_warningThreshold">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item row="0" column="0" colspan="3">

@@ -18,6 +18,20 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
 	gcsKeyFile = settings->value("gcs_key_file").toString();
 	targetBucket = settings->value("target_bucket").toString();
 
+	warningComputerName = settings->value("warningComputerName").toString();
+	if (warningComputerNameWasUnset) {
+	    // First time this setting has ever existed -- pre-fill the widget
+	    // (not the persisted default, which stays empty) with a sensible
+	    // guess. The user may still clear it; once writeSettings() runs
+	    // once, "contains" will be true forever after, so this only ever
+	    // fires on a brand-new settings file.
+	    warningComputerName = QSysInfo::machineHostName();
+	}
+	warningEmailAddresses = settings->value("warningEmailAddresses").toString();
+	warningThreshold = settings->value("warningThreshold").toInt();
+	warningThresholdUnit = settings->value("warningThresholdUnit").toString();
+	mailerConfigFile = settings->value("mailerConfigFile").toString();
+
 	centralWidget = new QWidget(parent);
 	guiForm = new Ui_mzWatcherGui();
 	guiForm->setupUi(centralWidget);
@@ -38,6 +52,13 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
         guiForm->gcsKeyFileEdit->setText(gcsKeyFile);
         guiForm->targetBucketEdit->setText(targetBucket);
 
+        guiForm->automaticWarningsCheckBox->setChecked(settings->value("automaticWarningsEnabled").toBool());
+        guiForm->warningComputerNameEdit->setText(warningComputerName);
+        guiForm->warningEmailAddressesEdit->setText(warningEmailAddresses);
+        guiForm->warningThresholdSpinBox->setValue(warningThreshold);
+        guiForm->warningThresholdUnitBox->setCurrentText(warningThresholdUnit);
+        guiForm->mailerConfigFileEdit->setText(mailerConfigFile);
+
         guiForm->watchButton->setCheckable(true);
         guiForm->watchButton->setChecked(settings->value("watchButtonState").toBool());
 
@@ -57,11 +78,24 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
         connect(guiForm->gcsKeyFileButton,SIGNAL(pressed()),this,SLOT(selectGcsKeyFile()));
         connect(guiForm->targetBucketEdit,SIGNAL(textEdited(QString)),this,SLOT(getFormValues()));
 
+        connect(guiForm->automaticWarningsCheckBox,SIGNAL(toggled(bool)),this,SLOT(getFormValues()));
+        connect(guiForm->warningComputerNameEdit,SIGNAL(textEdited(QString)),this,SLOT(getFormValues()));
+        connect(guiForm->warningEmailAddressesEdit,SIGNAL(textEdited(QString)),this,SLOT(getFormValues()));
+        connect(guiForm->warningThresholdSpinBox,SIGNAL(valueChanged(int)),this,SLOT(getFormValues()));
+        connect(guiForm->warningThresholdUnitBox,SIGNAL(currentIndexChanged(int)),this,SLOT(getFormValues()));
+        connect(guiForm->mailerConfigFileButton,SIGNAL(pressed()),this,SLOT(selectMailerConfigFile()));
+        connect(guiForm->mailerConfigFileEdit,SIGNAL(textEdited(QString)),this,SLOT(getFormValues()));
+
 	converter = new BackgroundThread(this);
 	connect(converter,SIGNAL(statusChanged(QString)),this,SLOT(setStatus(QString)));
 
 	gcsUploader = new BackgroundThread(this);
 	connect(gcsUploader,SIGNAL(statusChanged(QString)),this,SLOT(setStatus(QString)));
+
+	mailer = new BackgroundThread(this);
+	connect(mailer,SIGNAL(statusChanged(QString)),this,SLOT(setStatus(QString)));
+
+	updateMailerConfigStatus();
 
 
         QString dbDir = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
@@ -233,6 +267,16 @@ void MainWindow::getFormValues() {
 	gcsKeyFile = guiForm->gcsKeyFileEdit->text();
 	targetBucket = guiForm->targetBucketEdit->text();
 
+	warningComputerName = guiForm->warningComputerNameEdit->text();
+	warningEmailAddresses = guiForm->warningEmailAddressesEdit->text();
+	warningThreshold = guiForm->warningThresholdSpinBox->value();
+	warningThresholdUnit = guiForm->warningThresholdUnitBox->currentText();
+	QString newMailerConfigFile = guiForm->mailerConfigFileEdit->text();
+	if (newMailerConfigFile != mailerConfigFile) {
+	    mailerConfigFile = newMailerConfigFile;
+	    updateMailerConfigStatus();
+	}
+
         //convert windows backslash to unix forward slash
 	sourceFolder = sourceFolder.replace("\\","\057"); // not "\/"
         destFolder = destFolder.replace("\\","\057");
@@ -398,6 +442,203 @@ void MainWindow::uploadConvertedFileToGcs(const QString &localConvertedFile) {
     }
 }
 
+qint64 MainWindow::totalDirectorySize(const QString &dirPath) {
+    QFileInfo info(dirPath);
+    if (!info.exists()) return 0;
+    if (!info.isDir()) return info.size();
+
+    qint64 total = 0;
+    QDir dir(dirPath);
+    const QFileInfoList entries = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+    foreach (const QFileInfo &entry, entries) {
+        if (entry.isDir()) {
+            total += totalDirectorySize(entry.absoluteFilePath());
+        } else {
+            total += entry.size();
+        }
+    }
+    return total;
+}
+
+qint64 MainWindow::thresholdInBytes(double threshold, const QString &unit) {
+    // Decimal/SI units (kB=1000, MB=1,000,000, GB=1,000,000,000), not
+    // binary KiB/MiB/GiB -- matches what end users expect from these labels.
+    if (unit.compare("GB", Qt::CaseInsensitive) == 0) return (qint64)(threshold * 1000000000.0);
+    if (unit.compare("MB", Qt::CaseInsensitive) == 0) return (qint64)(threshold * 1000000.0);
+    return (qint64)(threshold * 1000.0); // kB (also the fallback for anything unrecognized)
+}
+
+QStringList MainWindow::parseEmailRecipients(const QString &commaSeparated) {
+    QStringList result;
+    const QStringList parts = commaSeparated.split(",");
+    foreach (const QString &part, parts) {
+        QString trimmed = part.trimmed();
+        if (!trimmed.isEmpty()) result << trimmed;
+    }
+    return result;
+}
+
+QString MainWindow::buildWarningEmailSubject(const QString &fileName) {
+    return "mzWatcher warning: " + fileName;
+}
+
+QString MainWindow::buildWarningEmailBody(const QString &fileName, double fileSize, double threshold, const QString &unit, const QString &computerName) {
+    QString text = QString("WARNING: Conversion of file %1 has size %2 %3, which is below warning level of %4 %3.")
+        .arg(fileName)
+        .arg(fileSize)
+        .arg(unit)
+        .arg(threshold);
+    if (!computerName.isEmpty()) {
+        text += QString("\n\nThis Warning was delivered from the computer named '%1'.").arg(computerName);
+    }
+    return text;
+}
+
+QHash<QString,QString> MainWindow::parseMailerConfigFile(const QString &filePath) {
+    QHash<QString,QString> result;
+    if (filePath.isEmpty()) return result;
+
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return result;
+
+    QTextStream in(&file);
+    while (!in.atEnd()) {
+        QString line = in.readLine().trimmed();
+        if (line.isEmpty() || line.startsWith("#")) continue;
+
+        int eq = line.indexOf('=');
+        if (eq <= 0) continue; // not a KEY=VALUE line -- ignore rather than fail the whole file
+
+        QString key = line.left(eq).trimmed();
+        QString value = line.mid(eq + 1).trimmed();
+        if (!key.isEmpty()) result[key] = value;
+    }
+    file.close();
+    return result;
+}
+
+void MainWindow::checkAndSendSizeWarning(const QFileInfo &sourceFileInfo) {
+    // Both settings must be set, mirroring the GCS upload gating pattern (R11).
+    if (!guiForm->automaticWarningsCheckBox->isChecked()) return;
+
+    QHash<QString,QString> config = parseMailerConfigFile(mailerConfigFile);
+    if (config.value("EMAIL_NAME").isEmpty() || config.value("EMAIL_PASSWORD").isEmpty()) return;
+
+    qint64 sourceSizeBytes = sourceFileInfo.isDir()
+        ? totalDirectorySize(sourceFileInfo.absoluteFilePath())
+        : sourceFileInfo.size();
+    qint64 thresholdBytes = thresholdInBytes(warningThreshold, warningThresholdUnit);
+
+    if (sourceSizeBytes >= thresholdBytes) return;
+
+    // Recipients are unrestricted -- any address the user configures, not
+    // limited to any particular domain.
+    QStringList recipients = parseEmailRecipients(warningEmailAddresses);
+    if (recipients.isEmpty()) {
+        setStatus("Skipping size-warning email for \"" + sourceFileInfo.fileName() + "\": no recipients configured");
+        return;
+    }
+
+    double unitDivisor = 1000.0;
+    if (warningThresholdUnit.compare("MB", Qt::CaseInsensitive) == 0) unitDivisor = 1000000.0;
+    else if (warningThresholdUnit.compare("GB", Qt::CaseInsensitive) == 0) unitDivisor = 1000000000.0;
+
+    double fileSizeInUnit = (double)sourceSizeBytes / unitDivisor;
+
+    QString subject = buildWarningEmailSubject(sourceFileInfo.fileName());
+    QString body = buildWarningEmailBody(sourceFileInfo.fileName(), fileSizeInUnit, (double)warningThreshold, warningThresholdUnit, warningComputerName);
+
+    setStatus("Sending size-warning email for \"" + sourceFileInfo.fileName() + "\" to \"" + recipients.join(", ") + "\"");
+    sendWarningEmail(recipients, subject, body);
+}
+
+void MainWindow::sendWarningEmail(const QStringList &recipients, const QString &subject, const QString &body) {
+    QHash<QString,QString> config = parseMailerConfigFile(mailerConfigFile);
+    QString emailName = config.value("EMAIL_NAME");
+    QString emailPassword = config.value("EMAIL_PASSWORD");
+    // Optional, defaulting to Gmail's: this file can point at any SMTP
+    // provider, it just assumes Gmail's when the user doesn't say otherwise.
+    QString smtpServer = config.value("SMTP_SERVER", "smtp.gmail.com");
+    QString smtpPort = config.value("SMTP_PORT", "587");
+
+    if (emailName.isEmpty() || emailPassword.isEmpty()) {
+        setStatus("Cannot send size-warning email: mailer config file \"" + mailerConfigFile + "\" is missing EMAIL_NAME or EMAIL_PASSWORD");
+        return;
+    }
+
+    // A fixed, static script: every dynamic value (recipients, subject, body
+    // -- any of which may contain arbitrary user-entered text) is passed
+    // through environment variables PowerShell reads as plain strings, never
+    // interpolated into the script's own text, so there's no shell-injection
+    // vector here. The password travels the same way specifically so it
+    // never appears on this (or any) process's own command line, which is
+    // visible to any other user on the machine via Task Manager/tasklist
+    // without special privileges -- an environment variable scoped to this
+    // one child process is a meaningfully better, if not perfect, place for
+    // a short-lived secret.
+    QString scriptContents =
+        "$ErrorActionPreference = \"Stop\"\n"
+        "try {\n"
+        "    $to = $env:MZWATCHER_MAIL_TO -split \",\"\n"
+        "    $securePwd = ConvertTo-SecureString $env:MZWATCHER_MAIL_PASSWORD -AsPlainText -Force\n"
+        "    $cred = New-Object System.Management.Automation.PSCredential($env:MZWATCHER_MAIL_FROM, $securePwd)\n"
+        "    Send-MailMessage -To $to -From $env:MZWATCHER_MAIL_FROM -Subject $env:MZWATCHER_MAIL_SUBJECT -Body $env:MZWATCHER_MAIL_BODY -SmtpServer $env:MZWATCHER_MAIL_SERVER -Port ([int]$env:MZWATCHER_MAIL_PORT) -UseSsl -Credential $cred\n"
+        "} catch {\n"
+        "    Write-Error $_.Exception.Message\n"
+        "    exit 1\n"
+        "}\n";
+
+    QString scriptPath = QDir::tempPath() + "/mzwatcher_send_mail.ps1";
+    QFile scriptFile(scriptPath);
+    if (!scriptFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+        setStatus("Cannot send size-warning email: failed to write temporary mailer script \"" + scriptPath + "\"");
+        return;
+    }
+    {
+        QTextStream out(&scriptFile);
+        out << scriptContents;
+    }
+    scriptFile.close();
+
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    env.insert("MZWATCHER_MAIL_TO", recipients.join(","));
+    env.insert("MZWATCHER_MAIL_FROM", emailName);
+    env.insert("MZWATCHER_MAIL_PASSWORD", emailPassword);
+    env.insert("MZWATCHER_MAIL_SUBJECT", subject);
+    env.insert("MZWATCHER_MAIL_BODY", body);
+    env.insert("MZWATCHER_MAIL_SERVER", smtpServer);
+    env.insert("MZWATCHER_MAIL_PORT", smtpPort);
+
+    mailer->setProcessEnvironment(env);
+    mailer->setSystemCommand("powershell.exe", QStringList() << "-ExecutionPolicy" << "Bypass" << "-NoProfile" << "-File" << scriptPath);
+    mailer->start();
+    // Fire-and-forget: BackgroundThread runs this on its own QThread, so this
+    // never blocks the conversion pipeline, and any failure just reaches the
+    // log via the existing statusChanged -> setStatus connection -- same
+    // resilience principle as the GCS upload feature (R12).
+}
+
+void MainWindow::updateMailerConfigStatus() {
+    if (mailerConfigFile.isEmpty()) {
+        guiForm->mailerConfigStatusLabel->setText("Mail service not configured");
+        return;
+    }
+    QHash<QString,QString> config = parseMailerConfigFile(mailerConfigFile);
+    if (config.value("EMAIL_NAME").isEmpty() || config.value("EMAIL_PASSWORD").isEmpty()) {
+        guiForm->mailerConfigStatusLabel->setText("Mail service not configured (file is missing EMAIL_NAME or EMAIL_PASSWORD)");
+    } else {
+        guiForm->mailerConfigStatusLabel->setText("Mail service configured (" + config.value("EMAIL_NAME") + ")");
+    }
+}
+
+void MainWindow::selectMailerConfigFile() {
+    QString file = QFileDialog::getOpenFileName(this, "Select Mailer Config File", ".", "Text Files (*.txt);;All Files (*)");
+    if (file.isEmpty()) return;
+    mailerConfigFile = file;
+    guiForm->mailerConfigFileEdit->setText(mailerConfigFile);
+    updateMailerConfigStatus();
+}
+
 void MainWindow::makeBackupCopy(QString file) {
 
 	QFileInfo sourceFileInfo(file);
@@ -408,6 +649,7 @@ void MainWindow::makeBackupCopy(QString file) {
 	//source file is no longer available
 	if(! sourceFileInfo.exists()) return;
 
+	checkAndSendSizeWarning(sourceFileInfo);
 
 	QString   destFile = file;
 	destFile.replace(sourceFolder,destFolder);
@@ -609,6 +851,29 @@ void MainWindow::readSettings() {
          if( ! settings->contains("target_bucket") )
                          settings->setValue("target_bucket", QString(""));
 
+         if( ! settings->contains("automaticWarningsEnabled") )
+                         settings->setValue("automaticWarningsEnabled", false);
+
+         // See the warningComputerNameWasUnset comment at its declaration --
+         // this flag must be captured *before* the default is seeded below,
+         // since afterward "contains" is true forever and the distinction
+         // between "never set" and "set to empty" would be lost.
+         warningComputerNameWasUnset = ! settings->contains("warningComputerName");
+         if( warningComputerNameWasUnset )
+                         settings->setValue("warningComputerName", QString(""));
+
+         if( ! settings->contains("warningEmailAddresses") )
+                         settings->setValue("warningEmailAddresses", QString(""));
+
+         if( ! settings->contains("warningThreshold") )
+                         settings->setValue("warningThreshold", 70);
+
+         if( ! settings->contains("warningThresholdUnit") )
+                         settings->setValue("warningThresholdUnit", QString("kB"));
+
+         if( ! settings->contains("mailerConfigFile") )
+                         settings->setValue("mailerConfigFile", QString(""));
+
 
  }
 
@@ -628,6 +893,13 @@ void MainWindow::readSettings() {
          settings->setValue("watchButtonState", guiForm->watchButton->isChecked());
          settings->setValue("gcs_key_file", gcsKeyFile);
          settings->setValue("target_bucket", targetBucket);
+
+         settings->setValue("automaticWarningsEnabled", guiForm->automaticWarningsCheckBox->isChecked());
+         settings->setValue("warningComputerName", warningComputerName);
+         settings->setValue("warningEmailAddresses", warningEmailAddresses);
+         settings->setValue("warningThreshold", warningThreshold);
+         settings->setValue("warningThresholdUnit", warningThresholdUnit);
+         settings->setValue("mailerConfigFile", mailerConfigFile);
 
 	 qDebug() << "Settings saved to " << settings->fileName();
  }
