@@ -12,6 +12,7 @@
 #include <QTextStream>
 #include <QTreeWidget>
 #include <QTextBrowser>
+#include <QLabel>
 #include "mainWindow.h"
 
 namespace {
@@ -58,7 +59,8 @@ private slots:
     void parseMailerConfigFile_parsesKeyValueLines();
     void parseMailerConfigFile_ignoresBlankLinesAndComments();
     void parseMailerConfigFile_missingFileYieldsEmptyHash();
-    void mailerConfigEmailRecipients_overridesRecipientsField();
+    void mailerConfigEmailRecipients_doesNotReapplyOnStartup();
+    void mailerConfigEmailRecipients_importedOnceWhenFileIsSelected();
     void findMatchingSizeWarningRule_firstMatchWinsTopDown();
     void findMatchingSizeWarningRule_blankOrInvalidRegexNeverMatches();
     void findMatchingSizeWarningRule_noMatchReturnsNegativeOne();
@@ -366,8 +368,13 @@ void TestMzWatcher::parseMailerConfigFile_missingFileYieldsEmptyHash()
     QVERIFY(MainWindow::parseMailerConfigFile("/path/does/not/exist.txt").isEmpty());
 }
 
-void TestMzWatcher::mailerConfigEmailRecipients_overridesRecipientsField()
+void TestMzWatcher::mailerConfigEmailRecipients_doesNotReapplyOnStartup()
 {
+    // Loading a mailer config file is a one-time value transfer, not a
+    // persistent sync: EMAIL_RECIPIENTS should only overwrite the Recipients
+    // field at the moment the file is freshly selected, never again just
+    // because the app restarts with the same file still selected -- that
+    // would silently discard whatever the user typed in and saved since.
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
     const QString filePath = dir.path() + "/mailer.txt";
@@ -393,9 +400,57 @@ void TestMzWatcher::mailerConfigEmailRecipients_overridesRecipientsField()
 
     QLineEdit *emailEdit = mw.findChild<QLineEdit*>("warningEmailAddressesEdit");
     QVERIFY(emailEdit != nullptr);
-    QCOMPARE(emailEdit->text(), QString("alice@example.com,bob@example.org"));
+    QCOMPARE(emailEdit->text(), QString("typed-in@example.com"));
+
+    QLabel *statusLabel = mw.findChild<QLabel*>("mailerConfigStatusLabel");
+    QVERIFY(statusLabel != nullptr);
+    QCOMPARE(statusLabel->text(), QString("Mail service configured (mailer@example.com)"));
 
     mw.close();
+}
+
+void TestMzWatcher::mailerConfigEmailRecipients_importedOnceWhenFileIsSelected()
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString filePath = dir.path() + "/mailer.txt";
+
+    QFile f(filePath);
+    QVERIFY(f.open(QIODevice::WriteOnly | QIODevice::Text));
+    {
+        QTextStream out(&f);
+        out << "EMAIL_ADDRESS=mailer@example.com\n";
+        out << "EMAIL_PASSWORD=hunter2\n";
+        out << "EMAIL_RECIPIENTS=alice@example.com,bob@example.org\n";
+    }
+    f.close();
+
+    resetSettings();
+    MainWindow mw(0);
+
+    QLineEdit *emailEdit = mw.findChild<QLineEdit*>("warningEmailAddressesEdit");
+    QLineEdit *configEdit = mw.findChild<QLineEdit*>("mailerConfigFileEdit");
+    QVERIFY(emailEdit != nullptr);
+    QVERIFY(configEdit != nullptr);
+    QCOMPARE(emailEdit->text(), QString(""));
+
+    // Simulates selecting a new mailer config file (the same code path
+    // Browse... and manually editing the field both go through).
+    configEdit->setText(filePath);
+    mw.getFormValues();
+
+    QCOMPARE(emailEdit->text(), QString("alice@example.com,bob@example.org"));
+
+    // Now the user overrides it by hand -- this must stick, not get
+    // silently reverted by anything re-reading the still-selected file.
+    emailEdit->setText("custom@example.com");
+    mw.getFormValues();
+    QCOMPARE(emailEdit->text(), QString("custom@example.com"));
+
+    mw.close();
+
+    QSettings after("mzWatch", "mzWatch Settings");
+    QCOMPARE(after.value("warningEmailAddresses").toString(), QString("custom@example.com"));
 }
 
 void TestMzWatcher::findMatchingSizeWarningRule_firstMatchWinsTopDown()
@@ -527,7 +582,7 @@ void TestMzWatcher::automaticWarningsSettingsDefaults()
     QWidget *rulesContainer = mw.findChild<QWidget*>("warningSizeRulesContainer");
 
     QVERIFY(checkBox != nullptr);
-    QCOMPARE(checkBox->isChecked(), false);
+    QCOMPARE(checkBox->isChecked(), true);
     QVERIFY(emailEdit != nullptr);
     QCOMPARE(emailEdit->text(), QString(""));
 
@@ -548,6 +603,10 @@ void TestMzWatcher::automaticWarningsSettingsDefaults()
 
     QSettings after("mzWatch", "mzWatch Settings");
     QCOMPARE(after.value("warningComputerName").toString(), QSysInfo::machineHostName());
+    // Enabled by default on a brand-new settings file -- the .ui file's own
+    // "checked" property has no effect here, since the constructor always
+    // overwrites it with this persisted value right after setupUi() runs.
+    QCOMPARE(after.value("automaticWarningsEnabled").toBool(), true);
 }
 
 void TestMzWatcher::watchFolder_convertsDotDBundleThatNeverChangesSize()

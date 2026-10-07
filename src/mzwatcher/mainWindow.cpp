@@ -279,7 +279,7 @@ void MainWindow::getFormValues() {
 	QString newMailerConfigFile = guiForm->mailerConfigFileEdit->text();
 	if (newMailerConfigFile != mailerConfigFile) {
 	    mailerConfigFile = newMailerConfigFile;
-	    updateMailerConfigStatus();
+	    importMailerConfigFileValues();
 	}
 
         //convert windows backslash to unix forward slash
@@ -710,14 +710,6 @@ void MainWindow::updateMailerConfigStatus() {
     }
     QHash<QString,QString> config = parseMailerConfigFile(mailerConfigFile);
 
-    // An EMAIL_RECIPIENTS line lets the config file ship its own recipient
-    // list alongside the mailer credentials, overriding whatever is
-    // currently in the Recipients field.
-    if (!config.value("EMAIL_RECIPIENTS").isEmpty()) {
-        warningEmailAddresses = config.value("EMAIL_RECIPIENTS");
-        guiForm->warningEmailAddressesEdit->setText(warningEmailAddresses);
-    }
-
     if (config.value("EMAIL_ADDRESS").isEmpty() || config.value("EMAIL_PASSWORD").isEmpty()) {
         guiForm->mailerConfigStatusLabel->setText("Mail service not configured (file is missing EMAIL_ADDRESS or EMAIL_PASSWORD)");
     } else {
@@ -725,12 +717,30 @@ void MainWindow::updateMailerConfigStatus() {
     }
 }
 
+void MainWindow::importMailerConfigFileValues() {
+    QHash<QString,QString> config = parseMailerConfigFile(mailerConfigFile);
+
+    // A one-time value transfer, not a persistent sync: EMAIL_RECIPIENTS (if
+    // present) is copied into warningEmailAddresses/the Recipients field
+    // right now, at the moment this file is selected. From here on it's an
+    // ordinary GUI-backed setting like any other -- the user can freely
+    // overwrite it, and whatever they leave there is what gets saved to
+    // QSettings on close. It is NOT reapplied just because the app restarts
+    // with the same file still selected (see updateMailerConfigStatus()).
+    if (!config.value("EMAIL_RECIPIENTS").isEmpty()) {
+        warningEmailAddresses = config.value("EMAIL_RECIPIENTS");
+        guiForm->warningEmailAddressesEdit->setText(warningEmailAddresses);
+    }
+
+    updateMailerConfigStatus();
+}
+
 void MainWindow::selectMailerConfigFile() {
     QString file = QFileDialog::getOpenFileName(this, "Select Mailer Config File", ".", "Text Files (*.txt);;All Files (*)");
     if (file.isEmpty()) return;
     mailerConfigFile = file;
     guiForm->mailerConfigFileEdit->setText(mailerConfigFile);
-    updateMailerConfigStatus();
+    importMailerConfigFileValues();
 }
 
 void MainWindow::addWarningSizeRuleClicked() {
@@ -1016,7 +1026,7 @@ void MainWindow::readSettings() {
                          settings->setValue("target_bucket", QString(""));
 
          if( ! settings->contains("automaticWarningsEnabled") )
-                         settings->setValue("automaticWarningsEnabled", false);
+                         settings->setValue("automaticWarningsEnabled", true);
 
          // See the warningComputerNameWasUnset comment at its declaration --
          // this flag must be captured *before* the default is seeded below,

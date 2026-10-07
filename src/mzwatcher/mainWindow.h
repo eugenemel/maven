@@ -293,9 +293,23 @@ class MainWindow: public QMainWindow {
 				void sendWarningEmail(const QStringList &recipients, const QString &subject, const QString &body);
 				// Re-reads mailerConfigFile and updates mailerConfigStatusLabel
 				// to reflect whether it currently parses to a usable
-				// (EMAIL_ADDRESS + EMAIL_PASSWORD present) configuration. Called
-				// on startup and whenever the user picks a new file.
+				// (EMAIL_ADDRESS + EMAIL_PASSWORD present) configuration. Safe
+				// to call anytime, including on every startup with the same
+				// file already selected -- never touches any other setting,
+				// so it can't clobber a value the user has since edited by
+				// hand. Only updateMailerConfigFile()'s one-time import does
+				// that, and only when the file itself is newly selected.
 				void updateMailerConfigStatus();
+				// Called only when mailerConfigFile is newly selected/changed
+				// (Browse... or typing a new path), never on ordinary
+				// startup: copies EMAIL_RECIPIENTS (if present) into
+				// warningEmailAddresses/the Recipients field as a one-time
+				// value transfer, the same way picking a value from a preset
+				// would. From that point on it's an ordinary GUI-backed
+				// setting -- freely editable, and whatever the user leaves
+				// there is what gets saved, not re-synced from the file
+				// again until it's reselected.
+				void importMailerConfigFileValues();
 
 
                         //remote database connection
