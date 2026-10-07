@@ -46,6 +46,8 @@ private slots:
 
     void totalDirectorySize_sumsNestedFiles();
     void totalDirectorySize_plainFileReturnsItsOwnSize();
+    void effectiveFileSize_directoryReturnsRecursiveSize();
+    void effectiveFileSize_plainFileReturnsOwnSize();
     void thresholdInBytes_examples();
     void parseEmailRecipients_splitsAndTrims();
     void parseEmailRecipients_emptyStringYieldsEmptyList();
@@ -228,6 +230,44 @@ void TestMzWatcher::totalDirectorySize_plainFileReturnsItsOwnSize()
     f.close();
 
     QCOMPARE(MainWindow::totalDirectorySize(filePath), (qint64)42);
+}
+
+void TestMzWatcher::effectiveFileSize_directoryReturnsRecursiveSize()
+{
+    // Regression test for the Agilent .d watch-folder bug: QFileInfo::size()
+    // on a directory reports its own near-zero metadata size, not its
+    // contents, which silently prevented .d bundles from ever being
+    // recognized as "changed" and converted.
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString bundlePath = dir.path() + "/sample1.d";
+    QVERIFY(QDir().mkpath(bundlePath));
+
+    QFile f(bundlePath + "/data.ms");
+    QVERIFY(f.open(QIODevice::WriteOnly));
+    f.write(QByteArray(1234, 'x'));
+    f.close();
+
+    QFileInfo bundleInfo(bundlePath);
+    QVERIFY(bundleInfo.isDir());
+    QCOMPARE(MainWindow::effectiveFileSize(bundleInfo), (qint64)1234);
+    // Directly demonstrates the bug this guards against: QFileInfo::size()
+    // itself does not reflect the bundle's contents.
+    QVERIFY(bundleInfo.size() != 1234);
+}
+
+void TestMzWatcher::effectiveFileSize_plainFileReturnsOwnSize()
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString filePath = dir.path() + "/run1.wiff";
+
+    QFile f(filePath);
+    QVERIFY(f.open(QIODevice::WriteOnly));
+    f.write(QByteArray(99, 'y'));
+    f.close();
+
+    QCOMPARE(MainWindow::effectiveFileSize(QFileInfo(filePath)), (qint64)99);
 }
 
 void TestMzWatcher::thresholdInBytes_examples()

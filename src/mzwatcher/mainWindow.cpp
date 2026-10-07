@@ -323,12 +323,13 @@ void MainWindow::processChangedFiles() {
 
         if ( dbFiles[file] != fileList[file]) {
             QFileInfo fi(file);
+            qint64 currentSize = effectiveFileSize(fi);
 
             QDateTime now = QDateTime::currentDateTime();
             int ageSec = now.secsTo(fi.lastModified())*-1;
             int oneday = 3600*24; // if file is too old.. don't autoconvert
 
-            if (ageSec < oneday && ageSec > waitTime and fi.size() > minFileSize && fi.size() != dbFiles[file]) {
+            if (ageSec < oneday && ageSec > waitTime and currentSize > minFileSize && currentSize != dbFiles[file]) {
                 setStatus(tr("Processing changed file: \"%1\" ").arg(file));
                 processFile(file);
             }
@@ -465,6 +466,10 @@ qint64 MainWindow::totalDirectorySize(const QString &dirPath) {
     return total;
 }
 
+qint64 MainWindow::effectiveFileSize(const QFileInfo &fi) {
+    return fi.isDir() ? totalDirectorySize(fi.absoluteFilePath()) : fi.size();
+}
+
 qint64 MainWindow::thresholdInBytes(double threshold, const QString &unit) {
     // Decimal/SI units (kB=1000, MB=1,000,000, GB=1,000,000,000), not
     // binary KiB/MiB/GiB -- matches what end users expect from these labels.
@@ -560,9 +565,7 @@ void MainWindow::checkAndSendSizeWarning(const QFileInfo &sourceFileInfo) {
     if (matchIndex < 0) return;
     const SizeWarningRule &rule = rules.at(matchIndex);
 
-    qint64 sourceSizeBytes = sourceFileInfo.isDir()
-        ? totalDirectorySize(sourceFileInfo.absoluteFilePath())
-        : sourceFileInfo.size();
+    qint64 sourceSizeBytes = effectiveFileSize(sourceFileInfo);
     qint64 thresholdBytes = thresholdInBytes(rule.threshold, rule.unit);
 
     if (sourceSizeBytes >= thresholdBytes) return;
@@ -795,7 +798,7 @@ void MainWindow::makeBackupCopy(QString file) {
         if (makeFileCopy) {
             if(! destFileInfo.exists() ||
                destFileInfo.lastModified() != sourceFileInfo.lastModified() ||
-               destFileInfo.size()         != sourceFileInfo.size() )
+               effectiveFileSize(destFileInfo) != effectiveFileSize(sourceFileInfo) )
             {
                 setStatus("Making file copy");
                 if (sourceFileInfo.isDir()) {
@@ -880,7 +883,7 @@ void MainWindow::getFileList(const QString &fromDir) {
             // Either way this is a convertible unit, not a folder to walk
             // into further (R1).
             QString absfilepath=fi.absoluteFilePath();
-            qint64 fsize = fi.size();
+            qint64 fsize = effectiveFileSize(fi);
 
             fileList[absfilepath]=fsize;
             QDateTime now = QDateTime::currentDateTime();
@@ -1064,7 +1067,13 @@ void MainWindow::readSettings() {
        query.exec("drop table datafiles");
    }
 
-   bool ok = query.exec("create table if not exists datafiles(filename varchar(255), fileConverted int, fileAnalyzed int, fileSize int, modTime timestamp );");
+   // fileSize is bigint, not int: a directory's recursive size
+   // (effectiveFileSize()) routinely exceeds what a 32-bit column could
+   // hold. SQLite's type affinity doesn't actually bound storage by this
+   // declaration, so this is for clarity; the schema self-heal above only
+   // compares column names, so this never forces a rebuild of an existing
+   // "int"-declared table.
+   bool ok = query.exec("create table if not exists datafiles(filename varchar(255), fileConverted int, fileAnalyzed int, fileSize bigint, modTime timestamp );");
    if(!ok) setStatus(query.lastError().text());
    query.clear();
  }
@@ -1076,7 +1085,7 @@ void MainWindow::readSettings() {
         QString absfilepath=fi.absoluteFilePath();
         query.prepare("insert into datafiles(filename,fileConverted,fileAnalyzed,fileSize,modTime) values(?,0,0,?,?)");
         query.addBindValue(absfilepath);
-	query.addBindValue(fi.size());
+	query.addBindValue(effectiveFileSize(fi));
 	query.addBindValue(fi.lastModified().toString("yyyy-MM-dd hh:mm:ss"));
         if(!query.exec()) setStatus("insertFileInfo: " + query.lastError().text());
 	query.clear();
@@ -1088,7 +1097,7 @@ void MainWindow::readSettings() {
          QString absfilepath=fi.absoluteFilePath();
 
          query.prepare(tr("update datafiles set fileConverted=1, fileSize=%1 where filename=\"%2\"")
-                       .arg(fi.size())
+                       .arg(effectiveFileSize(fi))
                        .arg(absfilepath));
          // .arg(fi.lastModified().toString("yyyy-MM-dd hh:mm:ss")
 
@@ -1106,7 +1115,7 @@ void MainWindow::readSettings() {
      if(!query.exec()) { setStatus("Error: showDataFilesTable:" + query.lastError().text()); return; }
      while (query.next()) {
          QString filename = query.value(0).toString();
-         int filesize = query.value(3).toInt();
+         qint64 filesize = query.value(3).toLongLong();
          QString modTime  = query.value(4).toString();
          dbFiles[filename]=filesize;
      }
@@ -1121,7 +1130,7 @@ void MainWindow::readSettings() {
 	 guiForm->treeWidget->clear();
 	 while (query.next()) {
              QString filename = query.value(0).toString();
-             int filesize = query.value(3).toInt();
+             qint64 filesize = query.value(3).toLongLong();
              QString modTime  = query.value(4).toString();
              int age = query.value(5).toInt();
 

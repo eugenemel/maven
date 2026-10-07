@@ -104,6 +104,14 @@ class MainWindow: public QMainWindow {
 
 				// Automatic Warnings feature: testable pure-logic helpers.
 				static qint64 totalDirectorySize(const QString &dirPath);
+				// QFileInfo::size() reports a directory's own (near-zero,
+				// non-growing) metadata size, not its contents -- which
+				// silently breaks any size-based check (watch-folder change
+				// detection, backup-copy staleness, size warnings) for
+				// directory-style convertible units like Agilent .d bundles.
+				// Every such check in this class should go through this
+				// instead of calling QFileInfo::size() directly.
+				static qint64 effectiveFileSize(const QFileInfo &fi);
 				static qint64 thresholdInBytes(double threshold, const QString &unit);
 				static QStringList parseEmailRecipients(const QString &commaSeparated);
 				static QString buildWarningEmailSubject(const QString &fileName);
@@ -154,8 +162,14 @@ class MainWindow: public QMainWindow {
 				QWidget* centralWidget;
 				Ui_mzWatcherGui* guiForm;
 				QSet<QString>directoryList;
-                        QHash<QString,int>dbFiles;
-                        QHash<QString,int>fileList;
+                        // qint64, not int: a directory's effectiveFileSize()
+                        // is a real recursive byte count (unlike the old
+                        // always-near-zero QFileInfo::size() for a
+                        // directory), and Agilent .d bundles routinely run
+                        // into the hundreds of MB to several GB -- well past
+                        // what a 32-bit int can hold.
+                        QHash<QString,qint64>dbFiles;
+                        QHash<QString,qint64>fileList;
 
 
 				QString extension;
