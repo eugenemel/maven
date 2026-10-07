@@ -294,6 +294,7 @@ void MainWindow::updateFileList() {
         //setStatus("Updating file list");
 	directoryList.clear();
         guiForm->monitorDial->setStyleSheet("background: yellow;");
+        guiForm->monitorDial->setToolTip("Scanning the Source Folder right now.");
 	setCursor(Qt::WaitCursor);
         getDBFileList();
         getFileList(sourceFolder);
@@ -308,8 +309,10 @@ void MainWindow::updateButtonColors() {
 
     if (timerId) {
         guiForm->monitorDial->setStyleSheet("background: green;");
+        guiForm->monitorDial->setToolTip("Watch Folder is ON: mzWatcher is actively monitoring the Source Folder and will automatically convert files once they stop changing.");
     } else {
         guiForm->monitorDial->setStyleSheet("background: red;");
+        guiForm->monitorDial->setToolTip("Watch Folder is OFF: mzWatcher is not monitoring the Source Folder. Nothing will be converted automatically until you click Watch Folder. This is not an error -- it just means automatic monitoring is currently disabled.");
     }
 }
 
@@ -318,6 +321,8 @@ void MainWindow::processChangedFiles() {
 
     int minFileSize = guiForm->minimumsFileSize->value();
     int waitTime    = guiForm->converter_waitTime->value()*60;
+    QDateTime now = QDateTime::currentDateTime();
+    int oneday = 3600*24; // if file is too old.. don't autoconvert
 
     foreach(QString file, dbFiles.keys()) {
 
@@ -325,13 +330,37 @@ void MainWindow::processChangedFiles() {
             QFileInfo fi(file);
             qint64 currentSize = effectiveFileSize(fi);
 
-            QDateTime now = QDateTime::currentDateTime();
             int ageSec = now.secsTo(fi.lastModified())*-1;
-            int oneday = 3600*24; // if file is too old.. don't autoconvert
 
             if (ageSec < oneday && ageSec > waitTime and currentSize > minFileSize && currentSize != dbFiles[file]) {
                 setStatus(tr("Processing changed file: \"%1\" ").arg(file));
                 processFile(file);
+            }
+        } else if (!convertedFiles.contains(file)) {
+            // "Never detected" and "detected, unchanging size" are different
+            // states: dbFiles[file] == fileList[file] here doesn't mean
+            // nothing is happening, it can also mean this file/.d bundle was
+            // already completely written the very first time mzWatcher's
+            // scan ever found it (size at insertFileInfo() time already
+            // equals its current size) -- the common case for an Agilent .d
+            // bundle, which is usually written in a burst rather than
+            // steadily appended to. The branch above would never catch this,
+            // since it requires having OBSERVED growth. Trigger here once
+            // enough time has passed since WE first saw the file, instead of
+            // relying on the filesystem's lastModified() (unreliable for a
+            // directory -- see firstDetectedTimes in mainWindow.h). Safe from
+            // converting something still mid-write: if the file were still
+            // growing, fileList[file] (this scan) would already differ from
+            // dbFiles[file] (first-detection size) and this branch wouldn't
+            // run at all.
+            int secsSinceFirstDetected = firstDetectedTimes.value(file).secsTo(now);
+            if (secsSinceFirstDetected > waitTime && secsSinceFirstDetected < oneday) {
+                QFileInfo fi(file);
+                qint64 currentSize = effectiveFileSize(fi);
+                if (currentSize > minFileSize) {
+                    setStatus(tr("Processing unchanged file: \"%1\" ").arg(file));
+                    processFile(file);
+                }
             }
         }
     }
@@ -832,9 +861,17 @@ void MainWindow::makeBackupCopy(QString file) {
                 // QString::replace() mutates in place, so file/convertedFileName/
                 // destFileDir below become backslash-mangled Windows-style paths
                 // for the converter's command line. Capture the real filesystem
-                // path of the converted output *before* that mutation, since
-                // that's what needs to be handed to gsutil for the GCS upload.
+                // path of the converted output, and of the source file itself,
+                // *before* that mutation: the former is what needs to be handed
+                // to gsutil for the GCS upload, and the latter is what
+                // markFileConverted() needs to match the DB's filename column
+                // (always forward-slash, per QFileInfo::absoluteFilePath()) --
+                // passing it the backslash-mangled form means its UPDATE's WHERE
+                // clause never matches any row, so fileConverted (and fileSize)
+                // never actually get persisted and the file looks never-converted
+                // forever, on every platform, not just Windows.
                 QString localConvertedFile = convertedFileName;
+                QString sourceFilePath = file;
 
                 QString infile = file.replace("\057", "\\"); // # not "\/"
                 QString outfile = convertedFileName.replace("\057","\\");
@@ -854,7 +891,7 @@ void MainWindow::makeBackupCopy(QString file) {
                         QApplication::processEvents();
                 }
                 guiForm->convertButton->setText("Convert");
-                markFileConverted(file);
+                markFileConverted(sourceFilePath);
 
                 uploadConvertedFileToGcs(localConvertedFile);
         }
@@ -1041,6 +1078,8 @@ void MainWindow::readSettings() {
      dbFiles.clear();
      fileList.clear();
      directoryList.clear();
+     firstDetectedTimes.clear();
+     convertedFiles.clear();
      showDataFilesTable();
  }
 
@@ -1069,7 +1108,7 @@ void MainWindow::readSettings() {
    // "if not exists" is sufficient. This table only caches which files have
    // already been scanned/converted -- not the converted files themselves --
    // so rebuilding it is safe; a Refresh repopulates it.
-   static const QStringList kExpectedColumns = {"filename", "fileConverted", "fileAnalyzed", "fileSize", "modTime"};
+   static const QStringList kExpectedColumns = {"filename", "fileConverted", "fileAnalyzed", "fileSize", "modTime", "firstDetected"};
 
    QSqlQuery schemaCheck(DB);
    schemaCheck.exec("pragma table_info(datafiles)");
@@ -1090,7 +1129,9 @@ void MainWindow::readSettings() {
    // declaration, so this is for clarity; the schema self-heal above only
    // compares column names, so this never forces a rebuild of an existing
    // "int"-declared table.
-   bool ok = query.exec("create table if not exists datafiles(filename varchar(255), fileConverted int, fileAnalyzed int, fileSize bigint, modTime timestamp );");
+   // firstDetected: when mzWatcher itself first saw this file, independent
+   // of the file's own modTime -- see firstDetectedTimes in mainWindow.h.
+   bool ok = query.exec("create table if not exists datafiles(filename varchar(255), fileConverted int, fileAnalyzed int, fileSize bigint, modTime timestamp, firstDetected timestamp );");
    if(!ok) setStatus(query.lastError().text());
    query.clear();
  }
@@ -1100,10 +1141,14 @@ void MainWindow::readSettings() {
 	QSqlQuery query(DB);
 	QFileInfo fi(filename);
         QString absfilepath=fi.absoluteFilePath();
-        query.prepare("insert into datafiles(filename,fileConverted,fileAnalyzed,fileSize,modTime) values(?,0,0,?,?)");
+        query.prepare("insert into datafiles(filename,fileConverted,fileAnalyzed,fileSize,modTime,firstDetected) values(?,0,0,?,?,?)");
         query.addBindValue(absfilepath);
 	query.addBindValue(effectiveFileSize(fi));
 	query.addBindValue(fi.lastModified().toString("yyyy-MM-dd hh:mm:ss"));
+	// Not fi.lastModified() -- this is when WE first noticed the file, which
+	// is the only thing the "never changed since detection" fallback in
+	// processChangedFiles() can trust for a directory (see firstDetectedTimes).
+	query.addBindValue(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
         if(!query.exec()) setStatus("insertFileInfo: " + query.lastError().text());
 	query.clear();
 }
@@ -1122,34 +1167,50 @@ void MainWindow::readSettings() {
          if(!query.exec()) setStatus("SQL ERROR: " + query.lastError().text());
          query.clear();
 
+         // Updated immediately, not left to the next getDBFileList() refresh:
+         // once converted, dbFiles[file] is rewritten above to match the
+         // current size, which also makes it equal fileList[file] -- exactly
+         // the condition the "never changed" fallback in processChangedFiles()
+         // looks for. Without this, a just-converted file would be
+         // immediately reconverted on every subsequent scan until the next
+         // DB refresh caught up.
+         convertedFiles.insert(absfilepath);
+
          //remoteLogMessage("fileconverted", absfilepath,fi.size(), "File Converted");
  }
 
 
  void MainWindow::getDBFileList() {
      QSqlQuery query(DB);
-     query.prepare("select *, strftime('%s','now') - strftime('%s',modTime) from datafiles where filename like \"%" + extension + "%\"");
+     // Explicit column list, not "select *": a positional index into "*" would
+     // silently shift (and misread fileConverted/firstDetected as something
+     // else) the next time a column is added to the table.
+     query.prepare("select filename, fileConverted, fileSize, firstDetected from datafiles where filename like \"%" + extension + "%\"");
      if(!query.exec()) { setStatus("Error: showDataFilesTable:" + query.lastError().text()); return; }
      while (query.next()) {
          QString filename = query.value(0).toString();
-         qint64 filesize = query.value(3).toLongLong();
-         QString modTime  = query.value(4).toString();
+         bool converted = query.value(1).toBool();
+         qint64 filesize = query.value(2).toLongLong();
+         QDateTime firstDetected = QDateTime::fromString(query.value(3).toString(), "yyyy-MM-dd hh:mm:ss");
+
          dbFiles[filename]=filesize;
+         firstDetectedTimes[filename]=firstDetected;
+         if (converted) convertedFiles.insert(filename);
      }
  }
 
  void MainWindow::showDataFilesTable() {
 	 QSqlQuery query(DB);
-         query.prepare("select *, strftime('%s','now') - strftime('%s',modTime) from datafiles where filename like \"%" + extension + "%\"");
-         //query.addBindValue(extension);
+         // Explicit column list, not "select *" -- see getDBFileList().
+         query.prepare("select filename, fileConverted, fileSize, modTime, strftime('%s','now') - strftime('%s',modTime) from datafiles where filename like \"%" + extension + "%\"");
          if(!query.exec()) { setStatus("Error: showDataFilesTable:" + query.lastError().text()); return; }
 
 	 guiForm->treeWidget->clear();
 	 while (query.next()) {
              QString filename = query.value(0).toString();
-             qint64 filesize = query.value(3).toLongLong();
-             QString modTime  = query.value(4).toString();
-             int age = query.value(5).toInt();
+             qint64 filesize = query.value(2).toLongLong();
+             QString modTime  = query.value(3).toString();
+             int age = query.value(4).toInt();
 
              bool fileChanged=false;
              if (fileList.contains(filename) && fileList[filename] != filesize) {
@@ -1162,7 +1223,7 @@ void MainWindow::readSettings() {
                 bool converted   = query.value(1).toBool();
 
                  QTreeWidgetItem *item = new QTreeWidgetItem(guiForm->treeWidget);
-                 item->setText(0, query.value(4).toString());
+                 item->setText(0, modTime);
                  item->setText(1, QString::number( fileList[filename]  - filesize ));
                  item->setText(2,filename);
                  if(converted) item->setBackground(0,Qt::green);

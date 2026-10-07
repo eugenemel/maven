@@ -13,6 +13,7 @@
 #include<QProcessEnvironment>
 #include<QRegularExpression>
 #include<QVector>
+#include<QDateTime>
 #include "ui_mzWatcherGui.h"
 
 class BackgroundThread : public QThread
@@ -170,6 +171,29 @@ class MainWindow: public QMainWindow {
                         // what a 32-bit int can hold.
                         QHash<QString,qint64>dbFiles;
                         QHash<QString,qint64>fileList;
+
+                        // "Never detected" and "detected, currently reporting
+                        // size N" are different states, even when N is the
+                        // same value twice in a row -- a file/.d bundle that
+                        // is already finished the very first time mzWatcher
+                        // ever sees it has dbFiles[file] == fileList[file]
+                        // from that very first scan onward, and would
+                        // otherwise never be recognized as "done" (see
+                        // processChangedFiles()). firstDetectedTimes records
+                        // when WE first saw each file, independent of the
+                        // filesystem's own lastModified() -- which for a
+                        // directory only updates on structural changes
+                        // (entries added/removed), not on writes to files
+                        // already inside it, so it can't be trusted to say
+                        // "this bundle has stopped changing."
+                        QHash<QString,QDateTime> firstDetectedTimes;
+                        // Tracked explicitly rather than inferred from the
+                        // dbFiles/fileList size comparison: a stable,
+                        // ALREADY-converted file also has dbFiles[file] ==
+                        // fileList[file], so without this the "never
+                        // changed" fallback below would try to reconvert
+                        // every old, already-converted file on every scan.
+                        QSet<QString> convertedFiles;
 
 
 				QString extension;

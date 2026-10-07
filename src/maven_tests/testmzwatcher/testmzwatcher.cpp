@@ -10,6 +10,8 @@
 #include <QDir>
 #include <QSysInfo>
 #include <QTextStream>
+#include <QTreeWidget>
+#include <QTextBrowser>
 #include "mainWindow.h"
 
 namespace {
@@ -63,6 +65,7 @@ private slots:
     void warningSizeRule_addAndDeleteUpdatesContainer();
     void warningSizeRulesSettings_roundTrip();
     void automaticWarningsSettingsDefaults();
+    void watchFolder_convertsDotDBundleThatNeverChangesSize();
 
 private:
     QTemporaryDir *homeDir = nullptr;
@@ -545,6 +548,96 @@ void TestMzWatcher::automaticWarningsSettingsDefaults()
 
     QSettings after("mzWatch", "mzWatch Settings");
     QCOMPARE(after.value("warningComputerName").toString(), QSysInfo::machineHostName());
+}
+
+void TestMzWatcher::watchFolder_convertsDotDBundleThatNeverChangesSize()
+{
+    // Regression test for the "Size Change stuck at 0, never converts" bug:
+    // an Agilent .d bundle that is already fully written the very first time
+    // mzWatcher's scan ever finds it has dbFiles[file] == fileList[file] from
+    // that first scan onward, since both are measured within the same scan.
+    // The old logic required an *observed* size change and so never
+    // converted such a bundle, no matter how long you waited.
+    resetSettings();
+
+    QTemporaryDir sourceDir;
+    QTemporaryDir destDir;
+    QVERIFY(sourceDir.isValid());
+    QVERIFY(destDir.isValid());
+
+    const QString bundlePath = sourceDir.path() + "/sample1.d";
+    QVERIFY(QDir().mkpath(bundlePath));
+    QFile f(bundlePath + "/data.ms");
+    QVERIFY(f.open(QIODevice::WriteOnly));
+    f.write(QByteArray(500, 'x'));
+    f.close();
+
+    MainWindow mw(0);
+
+    QLineEdit *sourceEdit = mw.findChild<QLineEdit*>("sourceFolderEdit");
+    QLineEdit *destEdit = mw.findChild<QLineEdit*>("destFolderEdit");
+    QLineEdit *extensionEdit = mw.findChild<QLineEdit*>("extensionEdit");
+    QLineEdit *commandEdit = mw.findChild<QLineEdit*>("commandEdit");
+    QSpinBox *minSizeSpin = mw.findChild<QSpinBox*>("minimumsFileSize");
+    QSpinBox *waitTimeSpin = mw.findChild<QSpinBox*>("converter_waitTime");
+    QPushButton *watchButton = mw.findChild<QPushButton*>("watchButton");
+    QTreeWidget *treeWidget = mw.findChild<QTreeWidget*>("treeWidget");
+    QVERIFY(sourceEdit && destEdit && extensionEdit && commandEdit && minSizeSpin && waitTimeSpin && watchButton && treeWidget);
+
+    sourceEdit->setText(sourceDir.path());
+    destEdit->setText(destDir.path());
+    extensionEdit->setText(".d");
+    // "true" ignores its arguments and exits 0 immediately -- this test only
+    // needs markFileConverted() to run, not a real conversion.
+    commandEdit->setText("true %1 %2");
+    mw.getFormValues(); // syncs sourceFolder/destFolder/extension/convertCommand
+
+    minSizeSpin->setValue(0);
+    waitTimeSpin->setValue(0); // waitTime = 0 seconds
+
+    // Set checked without going through monitor() (toggled -> startTimer()):
+    // this test drives scans manually via updateFileList(), it doesn't need
+    // a real QTimer running in the background.
+    watchButton->blockSignals(true);
+    watchButton->setChecked(true);
+    watchButton->blockSignals(false);
+
+    // Cycle 1: first discovery. insertFileInfo() records the bundle's
+    // current (already-final) size as both the DB's fileSize and
+    // firstDetected. dbFiles isn't refreshed from the DB until the *next*
+    // getDBFileList() call, so this cycle's processChangedFiles() doesn't
+    // see this file at all yet -- by design, same one-cycle lag as any
+    // newly-discovered file.
+    mw.updateFileList();
+
+    // firstDetected is stored with 1-second resolution ("yyyy-MM-dd
+    // hh:mm:ss"), so secsSinceFirstDetected needs at least a full second to
+    // read back as > 0 (> waitTime, which is 0 here).
+    QTest::qWait(1500);
+
+    // Cycle 2: dbFiles now has the bundle (size unchanged since cycle 1, so
+    // dbFiles[file] == fileList[file]) and enough time has passed since
+    // firstDetected -- this is exactly the new fallback path.
+    mw.updateFileList();
+
+    // Cycle 3: re-render the tree so it reflects the fileConverted=1 that
+    // markFileConverted() wrote to the DB during cycle 2's processChangedFiles().
+    mw.updateFileList();
+
+    bool foundConvertedRow = false;
+    for (int i = 0; i < treeWidget->topLevelItemCount(); ++i) {
+        QTreeWidgetItem *item = treeWidget->topLevelItem(i);
+        if (item->text(2) == QFileInfo(bundlePath).absoluteFilePath()) {
+            foundConvertedRow = (item->background(0).color() == QColor(Qt::green));
+        }
+    }
+    QVERIFY2(foundConvertedRow, "expected the never-changing .d bundle to be auto-converted and shown green");
+
+    watchButton->blockSignals(true);
+    watchButton->setChecked(false);
+    watchButton->blockSignals(false);
+
+    mw.close();
 }
 
 QTEST_MAIN(TestMzWatcher)
