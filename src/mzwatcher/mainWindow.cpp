@@ -556,7 +556,7 @@ void MainWindow::checkAndSendSizeWarning(const QFileInfo &sourceFileInfo) {
     if (!guiForm->automaticWarningsCheckBox->isChecked()) return;
 
     QHash<QString,QString> config = parseMailerConfigFile(mailerConfigFile);
-    if (config.value("EMAIL_NAME").isEmpty() || config.value("EMAIL_PASSWORD").isEmpty()) return;
+    if (config.value("EMAIL_ADDRESS").isEmpty() || config.value("EMAIL_PASSWORD").isEmpty()) return;
 
     // Rules are an allowlist, evaluated top-down: a file that matches no
     // rule's regex gets no size check at all, not a fallback threshold.
@@ -587,21 +587,37 @@ void MainWindow::checkAndSendSizeWarning(const QFileInfo &sourceFileInfo) {
     QString subject = buildWarningEmailSubject(sourceFileInfo.fileName());
     QString body = buildWarningEmailBody(sourceFileInfo.fileName(), fileSizeInUnit, (double)rule.threshold, rule.unit, warningComputerName);
 
+    // Logged unconditionally, independent of whether sendWarningEmail() can
+    // actually deliver it (e.g. non-Windows, where it can't) -- so the
+    // warning is always visible in the log even when no email goes out.
+    setStatus("SIZE WARNING: " + subject + " -- " + body);
+
     setStatus("Sending size-warning email for \"" + sourceFileInfo.fileName() + "\" to \"" + recipients.join(", ") + "\"");
     sendWarningEmail(recipients, subject, body);
 }
 
 void MainWindow::sendWarningEmail(const QStringList &recipients, const QString &subject, const QString &body) {
+#ifndef Q_OS_WIN
+    Q_UNUSED(recipients);
+    Q_UNUSED(subject);
+    Q_UNUSED(body);
+    // Email delivery is implemented via PowerShell's Send-MailMessage (see
+    // the #else branch below), which only exists on Windows. Rather than
+    // silently doing nothing on macOS/Linux, say so explicitly -- the
+    // warning itself was already logged unconditionally by the caller.
+    setStatus("Email not available on this platform (Windows only) -- warning was not emailed.");
+    return;
+#else
     QHash<QString,QString> config = parseMailerConfigFile(mailerConfigFile);
-    QString emailName = config.value("EMAIL_NAME");
+    QString emailAddress = config.value("EMAIL_ADDRESS");
     QString emailPassword = config.value("EMAIL_PASSWORD");
     // Optional, defaulting to Gmail's: this file can point at any SMTP
     // provider, it just assumes Gmail's when the user doesn't say otherwise.
     QString smtpServer = config.value("SMTP_SERVER", "smtp.gmail.com");
     QString smtpPort = config.value("SMTP_PORT", "587");
 
-    if (emailName.isEmpty() || emailPassword.isEmpty()) {
-        setStatus("Cannot send size-warning email: mailer config file \"" + mailerConfigFile + "\" is missing EMAIL_NAME or EMAIL_PASSWORD");
+    if (emailAddress.isEmpty() || emailPassword.isEmpty()) {
+        setStatus("Cannot send size-warning email: mailer config file \"" + mailerConfigFile + "\" is missing EMAIL_ADDRESS or EMAIL_PASSWORD");
         return;
     }
 
@@ -641,7 +657,7 @@ void MainWindow::sendWarningEmail(const QStringList &recipients, const QString &
 
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     env.insert("MZWATCHER_MAIL_TO", recipients.join(","));
-    env.insert("MZWATCHER_MAIL_FROM", emailName);
+    env.insert("MZWATCHER_MAIL_FROM", emailAddress);
     env.insert("MZWATCHER_MAIL_PASSWORD", emailPassword);
     env.insert("MZWATCHER_MAIL_SUBJECT", subject);
     env.insert("MZWATCHER_MAIL_BODY", body);
@@ -655,6 +671,7 @@ void MainWindow::sendWarningEmail(const QStringList &recipients, const QString &
     // never blocks the conversion pipeline, and any failure just reaches the
     // log via the existing statusChanged -> setStatus connection -- same
     // resilience principle as the GCS upload feature (R12).
+#endif
 }
 
 void MainWindow::updateMailerConfigStatus() {
@@ -672,10 +689,10 @@ void MainWindow::updateMailerConfigStatus() {
         guiForm->warningEmailAddressesEdit->setText(warningEmailAddresses);
     }
 
-    if (config.value("EMAIL_NAME").isEmpty() || config.value("EMAIL_PASSWORD").isEmpty()) {
-        guiForm->mailerConfigStatusLabel->setText("Mail service not configured (file is missing EMAIL_NAME or EMAIL_PASSWORD)");
+    if (config.value("EMAIL_ADDRESS").isEmpty() || config.value("EMAIL_PASSWORD").isEmpty()) {
+        guiForm->mailerConfigStatusLabel->setText("Mail service not configured (file is missing EMAIL_ADDRESS or EMAIL_PASSWORD)");
     } else {
-        guiForm->mailerConfigStatusLabel->setText("Mail service configured (" + config.value("EMAIL_NAME") + ")");
+        guiForm->mailerConfigStatusLabel->setText("Mail service configured (" + config.value("EMAIL_ADDRESS") + ")");
     }
 }
 

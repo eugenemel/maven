@@ -125,7 +125,7 @@ class MainWindow: public QMainWindow {
 				static int findMatchingSizeWarningRule(const QVector<SizeWarningRule> &rules, const QString &fileName);
 				// A user-supplied text file, not anything checked into this
 				// repo: lines of KEY=VALUE (# comments and blank lines
-				// ignored). EMAIL_NAME and EMAIL_PASSWORD are required;
+				// ignored). EMAIL_ADDRESS and EMAIL_PASSWORD are required;
 				// SMTP_SERVER/SMTP_PORT are optional, defaulting to Gmail's
 				// (smtp.gmail.com:587) when absent, since that's the common
 				// case, not because this tool is tied to any particular
@@ -186,7 +186,7 @@ class MainWindow: public QMainWindow {
 
 				// Automatic Warnings settings. Both automaticWarningsCheckBox
 				// (read directly off the widget, same as remoteLoging) and a
-				// mailerConfigFile that actually parses (EMAIL_NAME and
+				// mailerConfigFile that actually parses (EMAIL_ADDRESS and
 				// EMAIL_PASSWORD both present) must hold for the feature to
 				// do anything -- mirrors the GCS "both settings must be set"
 				// gating pattern.
@@ -210,7 +210,7 @@ class MainWindow: public QMainWindow {
 
 				// Path to a user-supplied mailer config file (see
 				// parseMailerConfigFile()). Only the path is persisted;
-				// EMAIL_NAME/EMAIL_PASSWORD are read from the file itself
+				// EMAIL_ADDRESS/EMAIL_PASSWORD are read from the file itself
 				// each time a warning email is sent, never duplicated into
 				// QSettings -- same trust model as gcsKeyFile.
 				QString mailerConfigFile;
@@ -256,7 +256,7 @@ class MainWindow: public QMainWindow {
 				void sendWarningEmail(const QStringList &recipients, const QString &subject, const QString &body);
 				// Re-reads mailerConfigFile and updates mailerConfigStatusLabel
 				// to reflect whether it currently parses to a usable
-				// (EMAIL_NAME + EMAIL_PASSWORD present) configuration. Called
+				// (EMAIL_ADDRESS + EMAIL_PASSWORD present) configuration. Called
 				// on startup and whenever the user picks a new file.
 				void updateMailerConfigStatus();
 

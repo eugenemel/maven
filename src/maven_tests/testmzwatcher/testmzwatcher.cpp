@@ -318,7 +318,7 @@ void TestMzWatcher::parseMailerConfigFile_parsesKeyValueLines()
     QVERIFY(f.open(QIODevice::WriteOnly | QIODevice::Text));
     {
         QTextStream out(&f);
-        out << "EMAIL_NAME=mailer@example.com\n";
+        out << "EMAIL_ADDRESS=mailer@example.com\n";
         out << "EMAIL_PASSWORD=hunter2\n";
         out << "SMTP_SERVER=smtp.example.com\n";
         out << "SMTP_PORT=465\n";
@@ -326,7 +326,7 @@ void TestMzWatcher::parseMailerConfigFile_parsesKeyValueLines()
     f.close();
 
     QHash<QString,QString> config = MainWindow::parseMailerConfigFile(filePath);
-    QCOMPARE(config.value("EMAIL_NAME"), QString("mailer@example.com"));
+    QCOMPARE(config.value("EMAIL_ADDRESS"), QString("mailer@example.com"));
     QCOMPARE(config.value("EMAIL_PASSWORD"), QString("hunter2"));
     QCOMPARE(config.value("SMTP_SERVER"), QString("smtp.example.com"));
     QCOMPARE(config.value("SMTP_PORT"), QString("465"));
@@ -344,7 +344,7 @@ void TestMzWatcher::parseMailerConfigFile_ignoresBlankLinesAndComments()
         QTextStream out(&f);
         out << "# this is a comment\n";
         out << "\n";
-        out << "EMAIL_NAME=mailer@example.com\n";
+        out << "EMAIL_ADDRESS=mailer@example.com\n";
         out << "   \n";
         out << "# EMAIL_PASSWORD=shouldNotBeUsed\n";
         out << "EMAIL_PASSWORD=hunter2\n";
@@ -353,7 +353,7 @@ void TestMzWatcher::parseMailerConfigFile_ignoresBlankLinesAndComments()
 
     QHash<QString,QString> config = MainWindow::parseMailerConfigFile(filePath);
     QCOMPARE(config.size(), 2);
-    QCOMPARE(config.value("EMAIL_NAME"), QString("mailer@example.com"));
+    QCOMPARE(config.value("EMAIL_ADDRESS"), QString("mailer@example.com"));
     QCOMPARE(config.value("EMAIL_PASSWORD"), QString("hunter2"));
 }
 
@@ -373,7 +373,7 @@ void TestMzWatcher::mailerConfigEmailRecipients_overridesRecipientsField()
     QVERIFY(f.open(QIODevice::WriteOnly | QIODevice::Text));
     {
         QTextStream out(&f);
-        out << "EMAIL_NAME=mailer@example.com\n";
+        out << "EMAIL_ADDRESS=mailer@example.com\n";
         out << "EMAIL_PASSWORD=hunter2\n";
         out << "EMAIL_RECIPIENTS=alice@example.com,bob@example.org\n";
     }
