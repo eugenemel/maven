@@ -3,6 +3,7 @@
 #include <QCheckBox>
 #include <QSpinBox>
 #include <QComboBox>
+#include <QPushButton>
 #include <QSettings>
 #include <QTemporaryDir>
 #include <QFile>
@@ -54,6 +55,11 @@ private slots:
     void parseMailerConfigFile_ignoresBlankLinesAndComments();
     void parseMailerConfigFile_missingFileYieldsEmptyHash();
     void mailerConfigEmailRecipients_overridesRecipientsField();
+    void findMatchingSizeWarningRule_firstMatchWinsTopDown();
+    void findMatchingSizeWarningRule_blankOrInvalidRegexNeverMatches();
+    void findMatchingSizeWarningRule_noMatchReturnsNegativeOne();
+    void warningSizeRule_addAndDeleteUpdatesContainer();
+    void warningSizeRulesSettings_roundTrip();
     void automaticWarningsSettingsDefaults();
 
 private:
@@ -349,6 +355,124 @@ void TestMzWatcher::mailerConfigEmailRecipients_overridesRecipientsField()
     mw.close();
 }
 
+void TestMzWatcher::findMatchingSizeWarningRule_firstMatchWinsTopDown()
+{
+    QVector<MainWindow::SizeWarningRule> rules;
+    rules.append({QString("\\.d$"), 70, QString("kB")});
+    rules.append({QString("sample.*"), 5, QString("MB")});
+    rules.append({QString(".*"), 1, QString("GB")});
+
+    // Matches both rule 0 and rule 2 -- rule 0 (top-down) wins.
+    QCOMPARE(MainWindow::findMatchingSizeWarningRule(rules, "sample1.d"), 0);
+    // Doesn't match rule 0, matches rule 1 and rule 2 -- rule 1 wins.
+    QCOMPARE(MainWindow::findMatchingSizeWarningRule(rules, "sample2.wiff"), 1);
+    // Matches only the catch-all last rule.
+    QCOMPARE(MainWindow::findMatchingSizeWarningRule(rules, "run3.raw"), 2);
+}
+
+void TestMzWatcher::findMatchingSizeWarningRule_blankOrInvalidRegexNeverMatches()
+{
+    QVector<MainWindow::SizeWarningRule> rules;
+    rules.append({QString(""), 70, QString("kB")});
+    rules.append({QString("["), 70, QString("kB")}); // invalid regex -- unterminated character class
+    rules.append({QString(".*"), 5, QString("MB")});
+
+    QCOMPARE(MainWindow::findMatchingSizeWarningRule(rules, "anything.d"), 2);
+}
+
+void TestMzWatcher::findMatchingSizeWarningRule_noMatchReturnsNegativeOne()
+{
+    QVector<MainWindow::SizeWarningRule> rules;
+    rules.append({QString("\\.wiff$"), 70, QString("kB")});
+
+    QCOMPARE(MainWindow::findMatchingSizeWarningRule(rules, "sample1.d"), -1);
+    QCOMPARE(MainWindow::findMatchingSizeWarningRule(QVector<MainWindow::SizeWarningRule>(), "sample1.d"), -1);
+}
+
+void TestMzWatcher::warningSizeRule_addAndDeleteUpdatesContainer()
+{
+    resetSettings();
+    MainWindow mw(0);
+
+    QWidget *rulesContainer = mw.findChild<QWidget*>("warningSizeRulesContainer");
+    QPushButton *addButton = mw.findChild<QPushButton*>("addWarningSizeRuleButton");
+    QVERIFY(rulesContainer != nullptr);
+    QVERIFY(addButton != nullptr);
+    QCOMPARE(rulesContainer->layout()->count(), 0);
+
+    addButton->click();
+    QCOMPARE(rulesContainer->layout()->count(), 1);
+
+    QWidget *row = rulesContainer->layout()->itemAt(0)->widget();
+    QVERIFY(row != nullptr);
+    QLineEdit *regexEdit = row->findChild<QLineEdit*>();
+    QSpinBox *thresholdSpin = row->findChild<QSpinBox*>();
+    QComboBox *unitBox = row->findChild<QComboBox*>();
+    QPushButton *deleteButton = row->findChild<QPushButton*>();
+
+    QVERIFY(regexEdit != nullptr);
+    QCOMPARE(regexEdit->text(), QString(""));
+    QVERIFY(thresholdSpin != nullptr);
+    QCOMPARE(thresholdSpin->value(), 70);
+    QVERIFY(unitBox != nullptr);
+    QCOMPARE(unitBox->currentText(), QString("kB"));
+    QVERIFY(deleteButton != nullptr);
+
+    deleteButton->click();
+    QCOMPARE(rulesContainer->layout()->count(), 0);
+
+    mw.close();
+}
+
+void TestMzWatcher::warningSizeRulesSettings_roundTrip()
+{
+    resetSettings();
+    {
+        QSettings settings("mzWatch", "mzWatch Settings");
+        settings.beginWriteArray("warningSizeRules");
+        settings.setArrayIndex(0);
+        settings.setValue("regex", "\\.d$");
+        settings.setValue("threshold", 42);
+        settings.setValue("unit", "MB");
+        settings.setArrayIndex(1);
+        settings.setValue("regex", ".*");
+        settings.setValue("threshold", 1);
+        settings.setValue("unit", "GB");
+        settings.endArray();
+    }
+
+    MainWindow mw(0);
+
+    QWidget *rulesContainer = mw.findChild<QWidget*>("warningSizeRulesContainer");
+    QVERIFY(rulesContainer != nullptr);
+    QCOMPARE(rulesContainer->layout()->count(), 2);
+
+    QWidget *row0 = rulesContainer->layout()->itemAt(0)->widget();
+    QCOMPARE(row0->findChild<QLineEdit*>()->text(), QString("\\.d$"));
+    QCOMPARE(row0->findChild<QSpinBox*>()->value(), 42);
+    QCOMPARE(row0->findChild<QComboBox*>()->currentText(), QString("MB"));
+
+    QWidget *row1 = rulesContainer->layout()->itemAt(1)->widget();
+    QCOMPARE(row1->findChild<QLineEdit*>()->text(), QString(".*"));
+    QCOMPARE(row1->findChild<QSpinBox*>()->value(), 1);
+    QCOMPARE(row1->findChild<QComboBox*>()->currentText(), QString("GB"));
+
+    mw.close(); // triggers writeSettings()
+
+    QSettings after("mzWatch", "mzWatch Settings");
+    int count = after.beginReadArray("warningSizeRules");
+    QCOMPARE(count, 2);
+    after.setArrayIndex(0);
+    QCOMPARE(after.value("regex").toString(), QString("\\.d$"));
+    QCOMPARE(after.value("threshold").toInt(), 42);
+    QCOMPARE(after.value("unit").toString(), QString("MB"));
+    after.setArrayIndex(1);
+    QCOMPARE(after.value("regex").toString(), QString(".*"));
+    QCOMPARE(after.value("threshold").toInt(), 1);
+    QCOMPARE(after.value("unit").toString(), QString("GB"));
+    after.endArray();
+}
+
 void TestMzWatcher::automaticWarningsSettingsDefaults()
 {
     resetSettings();
@@ -356,18 +480,18 @@ void TestMzWatcher::automaticWarningsSettingsDefaults()
 
     QCheckBox *checkBox = mw.findChild<QCheckBox*>("automaticWarningsCheckBox");
     QLineEdit *emailEdit = mw.findChild<QLineEdit*>("warningEmailAddressesEdit");
-    QSpinBox *thresholdSpin = mw.findChild<QSpinBox*>("warningThresholdSpinBox");
-    QComboBox *unitBox = mw.findChild<QComboBox*>("warningThresholdUnitBox");
     QLineEdit *computerNameEdit = mw.findChild<QLineEdit*>("warningComputerNameEdit");
+    QWidget *rulesContainer = mw.findChild<QWidget*>("warningSizeRulesContainer");
 
     QVERIFY(checkBox != nullptr);
     QCOMPARE(checkBox->isChecked(), false);
     QVERIFY(emailEdit != nullptr);
     QCOMPARE(emailEdit->text(), QString(""));
-    QVERIFY(thresholdSpin != nullptr);
-    QCOMPARE(thresholdSpin->value(), 70);
-    QVERIFY(unitBox != nullptr);
-    QCOMPARE(unitBox->currentText(), QString("kB"));
+
+    // Fresh settings: no size rules exist until the user clicks "Add Rule".
+    QVERIFY(rulesContainer != nullptr);
+    QVERIFY(rulesContainer->layout() != nullptr);
+    QCOMPARE(rulesContainer->layout()->count(), 0);
 
     // First-ever construction: the widget is pre-filled with the hostname
     // even though the persisted default stays empty.

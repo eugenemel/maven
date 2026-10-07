@@ -28,8 +28,6 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
 	    warningComputerName = QSysInfo::machineHostName();
 	}
 	warningEmailAddresses = settings->value("warningEmailAddresses").toString();
-	warningThreshold = settings->value("warningThreshold").toInt();
-	warningThresholdUnit = settings->value("warningThresholdUnit").toString();
 	mailerConfigFile = settings->value("mailerConfigFile").toString();
 
 	centralWidget = new QWidget(parent);
@@ -55,9 +53,19 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
         guiForm->automaticWarningsCheckBox->setChecked(settings->value("automaticWarningsEnabled").toBool());
         guiForm->warningComputerNameEdit->setText(warningComputerName);
         guiForm->warningEmailAddressesEdit->setText(warningEmailAddresses);
-        guiForm->warningThresholdSpinBox->setValue(warningThreshold);
-        guiForm->warningThresholdUnitBox->setCurrentText(warningThresholdUnit);
         guiForm->mailerConfigFileEdit->setText(mailerConfigFile);
+
+        {
+            int ruleCount = settings->beginReadArray("warningSizeRules");
+            for (int i = 0; i < ruleCount; ++i) {
+                settings->setArrayIndex(i);
+                QString regex = settings->value("regex").toString();
+                int threshold = settings->value("threshold", 70).toInt();
+                QString unit = settings->value("unit", "kB").toString();
+                addWarningSizeRule(regex, threshold, unit);
+            }
+            settings->endArray();
+        }
 
         guiForm->watchButton->setCheckable(true);
         guiForm->watchButton->setChecked(settings->value("watchButtonState").toBool());
@@ -81,8 +89,7 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
         connect(guiForm->automaticWarningsCheckBox,SIGNAL(toggled(bool)),this,SLOT(getFormValues()));
         connect(guiForm->warningComputerNameEdit,SIGNAL(textEdited(QString)),this,SLOT(getFormValues()));
         connect(guiForm->warningEmailAddressesEdit,SIGNAL(textEdited(QString)),this,SLOT(getFormValues()));
-        connect(guiForm->warningThresholdSpinBox,SIGNAL(valueChanged(int)),this,SLOT(getFormValues()));
-        connect(guiForm->warningThresholdUnitBox,SIGNAL(currentIndexChanged(int)),this,SLOT(getFormValues()));
+        connect(guiForm->addWarningSizeRuleButton,SIGNAL(pressed()),this,SLOT(addWarningSizeRuleClicked()));
         connect(guiForm->mailerConfigFileButton,SIGNAL(pressed()),this,SLOT(selectMailerConfigFile()));
         connect(guiForm->mailerConfigFileEdit,SIGNAL(textEdited(QString)),this,SLOT(getFormValues()));
 
@@ -269,8 +276,6 @@ void MainWindow::getFormValues() {
 
 	warningComputerName = guiForm->warningComputerNameEdit->text();
 	warningEmailAddresses = guiForm->warningEmailAddressesEdit->text();
-	warningThreshold = guiForm->warningThresholdSpinBox->value();
-	warningThresholdUnit = guiForm->warningThresholdUnitBox->currentText();
 	QString newMailerConfigFile = guiForm->mailerConfigFileEdit->text();
 	if (newMailerConfigFile != mailerConfigFile) {
 	    mailerConfigFile = newMailerConfigFile;
@@ -468,6 +473,17 @@ qint64 MainWindow::thresholdInBytes(double threshold, const QString &unit) {
     return (qint64)(threshold * 1000.0); // kB (also the fallback for anything unrecognized)
 }
 
+int MainWindow::findMatchingSizeWarningRule(const QVector<SizeWarningRule> &rules, const QString &fileName) {
+    for (int i = 0; i < rules.size(); ++i) {
+        const QString &pattern = rules.at(i).regex;
+        if (pattern.isEmpty()) continue; // a blank regex never matches, rather than matching everything
+        QRegularExpression re(pattern, QRegularExpression::CaseInsensitiveOption);
+        if (!re.isValid()) continue; // an unparsable regex is ignored, not a hard error
+        if (re.match(fileName).hasMatch()) return i;
+    }
+    return -1;
+}
+
 QStringList MainWindow::parseEmailRecipients(const QString &commaSeparated) {
     QStringList result;
     const QStringList parts = commaSeparated.split(",");
@@ -517,6 +533,19 @@ QHash<QString,QString> MainWindow::parseMailerConfigFile(const QString &filePath
     return result;
 }
 
+QVector<MainWindow::SizeWarningRule> MainWindow::collectSizeWarningRules() const {
+    QVector<SizeWarningRule> rules;
+    rules.reserve(warningSizeRuleWidgets.size());
+    foreach (const SizeWarningRuleWidgets &w, warningSizeRuleWidgets) {
+        SizeWarningRule rule;
+        rule.regex = w.regexEdit->text();
+        rule.threshold = w.thresholdSpinBox->value();
+        rule.unit = w.unitBox->currentText();
+        rules.append(rule);
+    }
+    return rules;
+}
+
 void MainWindow::checkAndSendSizeWarning(const QFileInfo &sourceFileInfo) {
     // Both settings must be set, mirroring the GCS upload gating pattern (R11).
     if (!guiForm->automaticWarningsCheckBox->isChecked()) return;
@@ -524,10 +553,17 @@ void MainWindow::checkAndSendSizeWarning(const QFileInfo &sourceFileInfo) {
     QHash<QString,QString> config = parseMailerConfigFile(mailerConfigFile);
     if (config.value("EMAIL_NAME").isEmpty() || config.value("EMAIL_PASSWORD").isEmpty()) return;
 
+    // Rules are an allowlist, evaluated top-down: a file that matches no
+    // rule's regex gets no size check at all, not a fallback threshold.
+    QVector<SizeWarningRule> rules = collectSizeWarningRules();
+    int matchIndex = findMatchingSizeWarningRule(rules, sourceFileInfo.fileName());
+    if (matchIndex < 0) return;
+    const SizeWarningRule &rule = rules.at(matchIndex);
+
     qint64 sourceSizeBytes = sourceFileInfo.isDir()
         ? totalDirectorySize(sourceFileInfo.absoluteFilePath())
         : sourceFileInfo.size();
-    qint64 thresholdBytes = thresholdInBytes(warningThreshold, warningThresholdUnit);
+    qint64 thresholdBytes = thresholdInBytes(rule.threshold, rule.unit);
 
     if (sourceSizeBytes >= thresholdBytes) return;
 
@@ -540,13 +576,13 @@ void MainWindow::checkAndSendSizeWarning(const QFileInfo &sourceFileInfo) {
     }
 
     double unitDivisor = 1000.0;
-    if (warningThresholdUnit.compare("MB", Qt::CaseInsensitive) == 0) unitDivisor = 1000000.0;
-    else if (warningThresholdUnit.compare("GB", Qt::CaseInsensitive) == 0) unitDivisor = 1000000000.0;
+    if (rule.unit.compare("MB", Qt::CaseInsensitive) == 0) unitDivisor = 1000000.0;
+    else if (rule.unit.compare("GB", Qt::CaseInsensitive) == 0) unitDivisor = 1000000000.0;
 
     double fileSizeInUnit = (double)sourceSizeBytes / unitDivisor;
 
     QString subject = buildWarningEmailSubject(sourceFileInfo.fileName());
-    QString body = buildWarningEmailBody(sourceFileInfo.fileName(), fileSizeInUnit, (double)warningThreshold, warningThresholdUnit, warningComputerName);
+    QString body = buildWarningEmailBody(sourceFileInfo.fileName(), fileSizeInUnit, (double)rule.threshold, rule.unit, warningComputerName);
 
     setStatus("Sending size-warning email for \"" + sourceFileInfo.fileName() + "\" to \"" + recipients.join(", ") + "\"");
     sendWarningEmail(recipients, subject, body);
@@ -646,6 +682,68 @@ void MainWindow::selectMailerConfigFile() {
     mailerConfigFile = file;
     guiForm->mailerConfigFileEdit->setText(mailerConfigFile);
     updateMailerConfigStatus();
+}
+
+void MainWindow::addWarningSizeRuleClicked() {
+    addWarningSizeRule(QString(), 70, "kB");
+}
+
+void MainWindow::addWarningSizeRule(const QString &regex, int threshold, const QString &unit) {
+    QWidget *row = new QWidget(guiForm->warningSizeRulesContainer);
+    QHBoxLayout *rowLayout = new QHBoxLayout(row);
+    rowLayout->setContentsMargins(0, 0, 0, 0);
+
+    QLineEdit *regexEdit = new QLineEdit(row);
+    regexEdit->setPlaceholderText("Filename regex (e.g. \\.d$)");
+    regexEdit->setText(regex);
+
+    QLabel *belowLabel = new QLabel("below:", row);
+
+    QSpinBox *thresholdSpinBox = new QSpinBox(row);
+    thresholdSpinBox->setMaximum(1000000000);
+    thresholdSpinBox->setValue(threshold);
+
+    QComboBox *unitBox = new QComboBox(row);
+    unitBox->addItem("kB");
+    unitBox->addItem("MB");
+    unitBox->addItem("GB");
+    unitBox->setCurrentText(unit);
+
+    QPushButton *deleteButton = new QPushButton("Delete", row);
+
+    rowLayout->addWidget(regexEdit, 1);
+    rowLayout->addWidget(belowLabel);
+    rowLayout->addWidget(thresholdSpinBox);
+    rowLayout->addWidget(unitBox);
+    rowLayout->addWidget(deleteButton);
+
+    guiForm->warningSizeRulesContainerLayout->addWidget(row);
+
+    SizeWarningRuleWidgets w;
+    w.rowWidget = row;
+    w.regexEdit = regexEdit;
+    w.thresholdSpinBox = thresholdSpinBox;
+    w.unitBox = unitBox;
+    warningSizeRuleWidgets.append(w);
+
+    connect(deleteButton, &QPushButton::clicked, this, [this, row]() {
+        removeWarningSizeRule(row);
+    });
+}
+
+void MainWindow::removeWarningSizeRule(QWidget *rowWidget) {
+    for (int i = 0; i < warningSizeRuleWidgets.size(); ++i) {
+        if (warningSizeRuleWidgets.at(i).rowWidget == rowWidget) {
+            warningSizeRuleWidgets.removeAt(i);
+            break;
+        }
+    }
+    // Remove from the layout immediately so the container's row count is
+    // accurate right away; the widget itself (and the Delete button whose
+    // click handler is still on the call stack) is destroyed once control
+    // returns to the event loop.
+    guiForm->warningSizeRulesContainerLayout->removeWidget(rowWidget);
+    rowWidget->deleteLater();
 }
 
 void MainWindow::makeBackupCopy(QString file) {
@@ -874,12 +972,6 @@ void MainWindow::readSettings() {
          if( ! settings->contains("warningEmailAddresses") )
                          settings->setValue("warningEmailAddresses", QString(""));
 
-         if( ! settings->contains("warningThreshold") )
-                         settings->setValue("warningThreshold", 70);
-
-         if( ! settings->contains("warningThresholdUnit") )
-                         settings->setValue("warningThresholdUnit", QString("kB"));
-
          if( ! settings->contains("mailerConfigFile") )
                          settings->setValue("mailerConfigFile", QString(""));
 
@@ -906,9 +998,16 @@ void MainWindow::readSettings() {
          settings->setValue("automaticWarningsEnabled", guiForm->automaticWarningsCheckBox->isChecked());
          settings->setValue("warningComputerName", warningComputerName);
          settings->setValue("warningEmailAddresses", warningEmailAddresses);
-         settings->setValue("warningThreshold", warningThreshold);
-         settings->setValue("warningThresholdUnit", warningThresholdUnit);
          settings->setValue("mailerConfigFile", mailerConfigFile);
+
+         settings->beginWriteArray("warningSizeRules");
+         for (int i = 0; i < warningSizeRuleWidgets.size(); ++i) {
+             settings->setArrayIndex(i);
+             settings->setValue("regex", warningSizeRuleWidgets[i].regexEdit->text());
+             settings->setValue("threshold", warningSizeRuleWidgets[i].thresholdSpinBox->value());
+             settings->setValue("unit", warningSizeRuleWidgets[i].unitBox->currentText());
+         }
+         settings->endArray();
 
 	 qDebug() << "Settings saved to " << settings->fileName();
  }

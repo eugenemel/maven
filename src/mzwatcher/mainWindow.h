@@ -11,6 +11,8 @@
 #include<QUrlQuery>
 #include<QSysInfo>
 #include<QProcessEnvironment>
+#include<QRegularExpression>
+#include<QVector>
 #include "ui_mzWatcherGui.h"
 
 class BackgroundThread : public QThread
@@ -84,6 +86,15 @@ class MainWindow: public QMainWindow {
 			public:
 				MainWindow(QWidget* parent);
 
+				// One row of the "Trigger Automatic Warning File Size Rules"
+				// list: a filename regex plus the size threshold that
+				// applies when a converted file's name matches it.
+				struct SizeWarningRule {
+					QString regex;
+					int threshold;
+					QString unit;
+				};
+
 				// Testable pure-logic helpers (item 1, R1; items 9-10, R13).
 				// These take no GUI/filesystem/network state so they can be
 				// exercised directly from QtTest.
@@ -97,6 +108,13 @@ class MainWindow: public QMainWindow {
 				static QStringList parseEmailRecipients(const QString &commaSeparated);
 				static QString buildWarningEmailSubject(const QString &fileName);
 				static QString buildWarningEmailBody(const QString &fileName, double fileSize, double threshold, const QString &unit, const QString &computerName);
+				// Rules are evaluated top-down; the first rule whose regex
+				// matches fileName wins, mirroring the order rules appear in
+				// the GUI. Returns -1 if none match (or the list is empty),
+				// in which case no size check is performed at all -- a rule
+				// list is an allowlist, not a filter with an implicit
+				// catch-all. A blank or invalid regex never matches.
+				static int findMatchingSizeWarningRule(const QVector<SizeWarningRule> &rules, const QString &fileName);
 				// A user-supplied text file, not anything checked into this
 				// repo: lines of KEY=VALUE (# comments and blank lines
 				// ignored). EMAIL_NAME and EMAIL_PASSWORD are required;
@@ -125,6 +143,7 @@ class MainWindow: public QMainWindow {
                         void clearTables();
                         void updateButtonColors();
                         void selectMailerConfigFile();
+                        void addWarningSizeRuleClicked();
 
 			protected:
 				void timerEvent(QTimerEvent *event);
@@ -159,8 +178,21 @@ class MainWindow: public QMainWindow {
 				// gating pattern.
 				QString warningComputerName;
 				QString warningEmailAddresses;
-				int warningThreshold;
-				QString warningThresholdUnit;
+
+				// One dynamically-added row of the size-rules list: the
+				// widgets themselves are the source of truth (read directly
+				// at write-settings/check time), mirroring how other
+				// QLineEdit-backed settings in this class work.
+				struct SizeWarningRuleWidgets {
+					QWidget* rowWidget;
+					QLineEdit* regexEdit;
+					QSpinBox* thresholdSpinBox;
+					QComboBox* unitBox;
+				};
+				QList<SizeWarningRuleWidgets> warningSizeRuleWidgets;
+				void addWarningSizeRule(const QString &regex, int threshold, const QString &unit);
+				void removeWarningSizeRule(QWidget *rowWidget);
+				QVector<SizeWarningRule> collectSizeWarningRules() const;
 
 				// Path to a user-supplied mailer config file (see
 				// parseMailerConfigFile()). Only the path is persisted;
