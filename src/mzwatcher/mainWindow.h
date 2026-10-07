@@ -68,7 +68,20 @@ protected:
 			sleep(1);
 		};
 
-		emit statusChanged("Conversion done!");
+		// Previously this unconditionally said "Conversion done!" regardless
+		// of whether the command actually succeeded -- a failing script (e.g.
+		// the mailer's PowerShell script hitting a blocked SMTP port, a bad
+		// TLS negotiation, or a rejected login) would exit non-zero and
+		// finish normally, but its own error output was never read, so
+		// mzWatcher's log looked identical whether the command worked or not.
+		if (converter.exitStatus() == QProcess::NormalExit && converter.exitCode() == 0) {
+			emit statusChanged("Conversion done!");
+		} else {
+			QString errOutput = QString::fromLocal8Bit(converter.readAllStandardError()).trimmed();
+			emit statusChanged(QString("Command finished with errors (exit code %1): %2")
+			                    .arg(converter.exitCode())
+			                    .arg(errOutput.isEmpty() ? QString("(no error output)") : errOutput));
+		}
 	}
 
 private:
