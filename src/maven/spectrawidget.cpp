@@ -1,4 +1,5 @@
 #include "spectrawidget.h"
+#include <QTimer>
 
 SpectraWidget::SpectraWidget(MainWindow* mw, int msLevel) {
 
@@ -20,6 +21,12 @@ SpectraWidget::SpectraWidget(MainWindow* mw, int msLevel) {
     _showOverlay=false;
 
     connect(mainwindow->libraryDialog, SIGNAL(unloadLibrarySignal(QString)), this, SLOT(clearOverlayAndReplot()));
+
+    //Issue 859: coalesce rapid-fire resize events (e.g. dragging a window edge)
+    //into a single replot once resizing has settled.
+    _resizeDebounceTimer = new QTimer(this);
+    _resizeDebounceTimer->setSingleShot(true);
+    connect(_resizeDebounceTimer, SIGNAL(timeout()), this, SLOT(handleResizeSettled()));
 }
 
 void SpectraWidget::initPlot() {
@@ -802,6 +809,15 @@ void SpectraWidget::drawGraph() {
     }
 
     if (scan) {
+        //Issue 859: a dense MS1 scan can have far more peaks than there are horizontal
+        //pixels to draw them in. Many sticks land on the same pixel column and are
+        //indistinguishable on screen, but each one still costs a QGraphicsLineItem,
+        //which thrashes the scene's BSP index on large scans. Collapse same-pixel-column
+        //sticks into one (tallest wins) instead of creating an item per data point.
+        int lastStickX = -1;
+        QGraphicsLineItem* lastStickLine = nullptr;
+        float lastStickIntensity = -1.0f;
+
         for(int j=0; j<scan->nobs(); j++ ) {
             if ( scan->mz[j] < _minX  || scan->mz[j] > _maxX ) continue;
 
@@ -816,10 +832,21 @@ void SpectraWidget::drawGraph() {
                    sline->addPoint(x,y);
             } else {
 
-                QGraphicsLineItem* line = new QGraphicsLineItem(x,y,x,yzero,0);
-                scene()->addItem(line);
-                line->setPen(blackpen);
-                _items.push_back(line);
+                if (x == lastStickX && lastStickLine) {
+                    if (scan->intensity[j] > lastStickIntensity) {
+                        lastStickLine->setLine(x,y,x,yzero);
+                        lastStickIntensity = scan->intensity[j];
+                    }
+                } else {
+                    QGraphicsLineItem* line = new QGraphicsLineItem(x,y,x,yzero,0);
+                    scene()->addItem(line);
+                    line->setPen(blackpen);
+                    _items.push_back(line);
+
+                    lastStickX = x;
+                    lastStickLine = line;
+                    lastStickIntensity = scan->intensity[j];
+                }
 
     //            cerr << "(axisCoord, intensity) = (" << yzero << ", 0)" << endl;
     //            cerr << "(axisCoord, intensity) = (" << y << ", " << scan->intensity[j] << ")" << endl;
@@ -1090,7 +1117,13 @@ void SpectraWidget::incrementScan(int increment, int msLevel=0 ) {
 
 
 void SpectraWidget::resizeEvent (QResizeEvent * event) {
+    //Issue 859: don't do a full redraw on every intermediate resize frame -
+    //wait until resizing has settled before replotting.
     isUseCachedMatches=true;
+    _resizeDebounceTimer->start(150);
+}
+
+void SpectraWidget::handleResizeSettled() {
     replot();
     isUseCachedMatches=false;
 }

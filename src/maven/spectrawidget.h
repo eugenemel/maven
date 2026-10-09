@@ -7,6 +7,8 @@
 #include "mainwindow.h"
 #include "BondBreaker.h"
 
+class QTimer;
+
 class SpectraWidget : public QGraphicsView
 {
     Q_OBJECT
@@ -65,6 +67,10 @@ public slots:
                     Scan* getCurrentScan() { return _currentScan; }
 
                     void selectObservedPeak(int peakIndex);
+
+                    //Issue 859: fires once resize events have stopped coming in rapidly,
+                    //so the plot isn't fully re-rendered on every intermediate resize frame.
+                    void handleResizeSettled();
 
                     void findBounds(bool checkX, bool checkY);
                     void lockMzRange();
@@ -149,6 +155,10 @@ public slots:
                     bool isUseCachedMatches = false;
                     vector<int> _matches{};
                     string getSpectrumString(string type, bool isNormalizeToMaxIntensity);
+
+                    //Issue 859: debounce timer so dragging a window edge doesn't trigger
+                    //a full redraw on every intermediate resize event.
+                    QTimer* _resizeDebounceTimer = nullptr;
 		protected:
                     //void leaveEvent ( QEvent * event );
                     //void enterEvent(QEvent * event);
