@@ -200,6 +200,17 @@ class MainWindow: public QMainWindow {
                         // already inside it, so it can't be trusted to say
                         // "this bundle has stopped changing."
                         QHash<QString,QDateTime> firstDetectedTimes;
+                        // When the size most recently actually changed, as
+                        // continuously re-verified on every scan (updated in
+                        // getFileList() whenever a file's size differs from
+                        // what it was on the previous scan, not just the
+                        // first one). This is what processChangedFiles() uses
+                        // to decide "stable for the full wait period" -- a
+                        // single comparison against the first-ever-seen size
+                        // is not enough, since a bursty writer can
+                        // coincidentally show no growth across one polling
+                        // gap while still mid-acquisition.
+                        QHash<QString,QDateTime> lastSizeChangeTimes;
                         // Tracked explicitly rather than inferred from the
                         // dbFiles/fileList size comparison: a stable,
                         // ALREADY-converted file also has dbFiles[file] ==

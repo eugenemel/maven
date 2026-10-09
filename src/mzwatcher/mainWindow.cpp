@@ -325,44 +325,42 @@ void MainWindow::processChangedFiles() {
     int oneday = 3600*24; // if file is too old.. don't autoconvert
 
     foreach(QString file, dbFiles.keys()) {
+        if (convertedFiles.contains(file)) continue;
 
-        if ( dbFiles[file] != fileList[file]) {
-            QFileInfo fi(file);
-            qint64 currentSize = effectiveFileSize(fi);
+        QFileInfo fi(file);
+        int ageSec = now.secsTo(fi.lastModified())*-1;
+        if (ageSec >= oneday) continue; // too old -- don't touch stale leftovers
 
-            int ageSec = now.secsTo(fi.lastModified())*-1;
+        qint64 currentSize = effectiveFileSize(fi);
+        if (currentSize <= minFileSize) continue;
 
-            if (ageSec < oneday && ageSec > waitTime and currentSize > minFileSize && currentSize != dbFiles[file]) {
-                setStatus(tr("Processing changed file: \"%1\" ").arg(file));
-                processFile(file);
-            }
-        } else if (!convertedFiles.contains(file)) {
-            // "Never detected" and "detected, unchanging size" are different
-            // states: dbFiles[file] == fileList[file] here doesn't mean
-            // nothing is happening, it can also mean this file/.d bundle was
-            // already completely written the very first time mzWatcher's
-            // scan ever found it (size at insertFileInfo() time already
-            // equals its current size) -- the common case for an Agilent .d
-            // bundle, which is usually written in a burst rather than
-            // steadily appended to. The branch above would never catch this,
-            // since it requires having OBSERVED growth. Trigger here once
-            // enough time has passed since WE first saw the file, instead of
-            // relying on the filesystem's lastModified() (unreliable for a
-            // directory -- see firstDetectedTimes in mainWindow.h). Safe from
-            // converting something still mid-write: if the file were still
-            // growing, fileList[file] (this scan) would already differ from
-            // dbFiles[file] (first-detection size) and this branch wouldn't
-            // run at all.
-            int secsSinceFirstDetected = firstDetectedTimes.value(file).secsTo(now);
-            if (secsSinceFirstDetected > waitTime && secsSinceFirstDetected < oneday) {
-                QFileInfo fi(file);
-                qint64 currentSize = effectiveFileSize(fi);
-                if (currentSize > minFileSize) {
-                    setStatus(tr("Processing unchanged file: \"%1\" ").arg(file));
-                    processFile(file);
-                }
-            }
-        }
+        // Two independent "don't rush it" floors, both must have elapsed:
+        //
+        // 1. secsSinceFirstDetected (persisted in the DB, survives restarts):
+        //    a brand-new file/.d bundle must sit for at least waitTime before
+        //    ever being eligible, regardless of what its size looks like.
+        //
+        // 2. secsSinceLastChange (in-memory, re-verified every scan): the
+        //    size must not have changed on ANY scan for the full waitTime,
+        //    not merely "be equal to what it was the very first time we saw
+        //    it." That single-snapshot comparison is what let a bursty
+        //    writer (data flushed to disk every few minutes rather than
+        //    continuously) slip through: a run that takes much longer than
+        //    waitTime can still show zero observed growth across one
+        //    particular polling gap purely by coincidence, which looked
+        //    identical to "already finished" and triggered a premature
+        //    conversion (and a false size-warning email) while the
+        //    acquisition was still very much in progress. Recorded in
+        //    getFileList() every time a size differs from the previous scan,
+        //    so any later growth resets this clock.
+        int secsSinceFirstDetected = firstDetectedTimes.value(file, now).secsTo(now);
+        if (secsSinceFirstDetected <= waitTime) continue;
+
+        int secsSinceLastChange = lastSizeChangeTimes.value(file, now).secsTo(now);
+        if (secsSinceLastChange <= waitTime) continue;
+
+        setStatus(tr("Processing stable file: \"%1\" ").arg(file));
+        processFile(file);
     }
 
 }
@@ -948,9 +946,20 @@ void MainWindow::getFileList(const QString &fromDir) {
             // into further (R1).
             QString absfilepath=fi.absoluteFilePath();
             qint64 fsize = effectiveFileSize(fi);
+            QDateTime now = QDateTime::currentDateTime();
+
+            // Recorded every scan, not just at first detection: this is what
+            // lets processChangedFiles() tell "stable for the full wait
+            // period, as continuously re-verified" from "merely happened to
+            // look unchanged between two particular polls" -- a bursty
+            // writer (data flushed to disk every few minutes rather than
+            // continuously) can coincidentally show no growth across one
+            // polling gap while still very much mid-acquisition.
+            if (!fileList.contains(absfilepath) || fileList.value(absfilepath) != fsize) {
+                lastSizeChangeTimes[absfilepath] = now;
+            }
 
             fileList[absfilepath]=fsize;
-            QDateTime now = QDateTime::currentDateTime();
 
             if((now.daysTo(fi.lastModified()))*-1 < maxDayDiff ){
                 if(!fileList.contains(absfilepath) || !dbFiles.contains(absfilepath)) {
@@ -1089,6 +1098,7 @@ void MainWindow::readSettings() {
      fileList.clear();
      directoryList.clear();
      firstDetectedTimes.clear();
+     lastSizeChangeTimes.clear();
      convertedFiles.clear();
      showDataFilesTable();
  }

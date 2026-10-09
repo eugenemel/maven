@@ -68,6 +68,7 @@ private slots:
     void warningSizeRulesSettings_roundTrip();
     void automaticWarningsSettingsDefaults();
     void watchFolder_convertsDotDBundleThatNeverChangesSize();
+    void watchFolder_doesNotConvertPrematurelyAfterLateGrowth();
 
 private:
     QTemporaryDir *homeDir = nullptr;
@@ -691,6 +692,111 @@ void TestMzWatcher::watchFolder_convertsDotDBundleThatNeverChangesSize()
         }
     }
     QVERIFY2(foundConvertedRow, "expected the never-changing .d bundle to be auto-converted and shown green");
+
+    watchButton->blockSignals(true);
+    watchButton->setChecked(false);
+    watchButton->blockSignals(false);
+
+    mw.close();
+}
+
+void TestMzWatcher::watchFolder_doesNotConvertPrematurelyAfterLateGrowth()
+{
+    // Regression test for a false size-warning / premature-conversion bug:
+    // a file whose size merely happened to match its first-detected size
+    // across one polling gap -- then grew again -- must NOT be treated as
+    // "stable," even once secsSinceFirstDetected alone would already exceed
+    // waitTime. It was only coincidentally unchanged between two particular
+    // polls while still actively being written by a bursty writer (data
+    // flushed to disk every few minutes, not continuously), observed in
+    // practice on a non-rapidfire system whose runs took far longer than the
+    // configured wait period. Growth observed on any scan must reset the
+    // stability clock.
+    resetSettings();
+
+    QTemporaryDir sourceDir;
+    QTemporaryDir destDir;
+    QVERIFY(sourceDir.isValid());
+    QVERIFY(destDir.isValid());
+
+    const QString bundlePath = sourceDir.path() + "/sample1.d";
+    QVERIFY(QDir().mkpath(bundlePath));
+    {
+        QFile f(bundlePath + "/data.ms");
+        QVERIFY(f.open(QIODevice::WriteOnly));
+        f.write(QByteArray(100, 'x'));
+    }
+
+    MainWindow mw(0);
+
+    QLineEdit *sourceEdit = mw.findChild<QLineEdit*>("sourceFolderEdit");
+    QLineEdit *destEdit = mw.findChild<QLineEdit*>("destFolderEdit");
+    QLineEdit *extensionEdit = mw.findChild<QLineEdit*>("extensionEdit");
+    QLineEdit *commandEdit = mw.findChild<QLineEdit*>("commandEdit");
+    QSpinBox *minSizeSpin = mw.findChild<QSpinBox*>("minimumsFileSize");
+    QSpinBox *waitTimeSpin = mw.findChild<QSpinBox*>("converter_waitTime");
+    QPushButton *watchButton = mw.findChild<QPushButton*>("watchButton");
+    QTreeWidget *treeWidget = mw.findChild<QTreeWidget*>("treeWidget");
+    QVERIFY(sourceEdit && destEdit && extensionEdit && commandEdit && minSizeSpin && waitTimeSpin && watchButton && treeWidget);
+
+    sourceEdit->setText(sourceDir.path());
+    destEdit->setText(destDir.path());
+    extensionEdit->setText(".d");
+    commandEdit->setText("true %1 %2");
+    mw.getFormValues();
+
+    minSizeSpin->setValue(0);
+    waitTimeSpin->setValue(0);
+
+    watchButton->blockSignals(true);
+    watchButton->setChecked(true);
+    watchButton->blockSignals(false);
+
+    auto isConvertedGreen = [&]() {
+        for (int i = 0; i < treeWidget->topLevelItemCount(); ++i) {
+            QTreeWidgetItem *item = treeWidget->topLevelItem(i);
+            if (item->text(2) == QFileInfo(bundlePath).absoluteFilePath()) {
+                return item->background(0).color() == QColor(Qt::green);
+            }
+        }
+        return false;
+    };
+
+    // Cycle 1: first discovery (one-cycle lag, same as the test above).
+    mw.updateFileList();
+
+    QTest::qWait(1500);
+
+    // Grow the bundle right before the next scan -- simulates a bursty
+    // writer still actively mid-acquisition, well past what a naive
+    // secsSinceFirstDetected-only check would already consider "old enough."
+    {
+        QFile f(bundlePath + "/data.ms");
+        QVERIFY(f.open(QIODevice::WriteOnly | QIODevice::Append));
+        f.write(QByteArray(400, 'y'));
+    }
+
+    // Cycle 2: observes the growth. The growth and this check happen within
+    // the same scan, so secsSinceLastChange reads back as 0 -- must NOT
+    // convert, even though secsSinceFirstDetected is already well past
+    // waitTime (0 here).
+    mw.updateFileList();
+    QVERIFY2(!isConvertedGreen(), "must not convert in the same cycle growth was observed");
+
+    // One more immediate cycle, no further growth, no elapsed time: still
+    // must not have converted -- confirms the previous cycle's growth
+    // observation is what's being honored, not a fluke of timing.
+    mw.updateFileList();
+    QVERIFY2(!isConvertedGreen(), "must not convert immediately after the cycle that observed growth");
+
+    QTest::qWait(1500);
+
+    // Now it has genuinely been stable (no further growth) for the full
+    // wait period since the growth was observed -- this is where it should
+    // finally convert.
+    mw.updateFileList();
+    mw.updateFileList(); // re-render to reflect this cycle's conversion
+    QVERIFY2(isConvertedGreen(), "should convert once genuinely stable after the growth settled");
 
     watchButton->blockSignals(true);
     watchButton->setChecked(false);
