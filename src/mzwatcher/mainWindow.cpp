@@ -527,17 +527,17 @@ QStringList MainWindow::parseEmailRecipients(const QString &commaSeparated) {
 }
 
 QString MainWindow::buildWarningEmailSubject(const QString &fileName) {
-    return "mzWatcher warning: " + fileName;
+    return "LOW FILE SIZE WARNING: " + fileName;
 }
 
 QString MainWindow::buildWarningEmailBody(const QString &fileName, double fileSize, double threshold, const QString &unit, const QString &computerName) {
-    QString text = QString("WARNING: Conversion of file %1 has size %2 %3, which is below warning level of %4 %3.")
+    QString text = QString("WARNING: file '%1' has size %2 %3, which is below the warning threshold of %4 %3.")
         .arg(fileName)
         .arg(fileSize)
         .arg(unit)
         .arg(threshold);
     if (!computerName.isEmpty()) {
-        text += QString("\n\nThis Warning was delivered from the computer named '%1'.").arg(computerName);
+        text += QString("\n\nThis warning was delivered from the computer named '%1'.").arg(computerName);
     }
     return text;
 }

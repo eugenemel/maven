@@ -56,6 +56,8 @@ private slots:
     void parseEmailRecipients_emptyStringYieldsEmptyList();
     void buildWarningEmailSubject_includesFileName();
     void buildWarningEmailBody_includesAllFields();
+    void buildWarningEmailSubject_matchesRequestedFormat();
+    void buildWarningEmailBody_matchesRequestedFormat();
     void parseMailerConfigFile_parsesKeyValueLines();
     void parseMailerConfigFile_ignoresBlankLinesAndComments();
     void parseMailerConfigFile_missingFileYieldsEmptyHash();
@@ -313,6 +315,21 @@ void TestMzWatcher::buildWarningEmailBody_includesAllFields()
     QVERIFY(body.contains("70"));
     QVERIFY(body.contains("kB"));
     QVERIFY(body.contains("LAB-PC-01"));
+}
+
+void TestMzWatcher::buildWarningEmailSubject_matchesRequestedFormat()
+{
+    QCOMPARE(MainWindow::buildWarningEmailSubject("run1.raw"),
+             QString("LOW FILE SIZE WARNING: run1.raw"));
+}
+
+void TestMzWatcher::buildWarningEmailBody_matchesRequestedFormat()
+{
+    QString body = MainWindow::buildWarningEmailBody("run1.raw", 0.803818, 100.0, "MB", "LAB-PC-01");
+    QCOMPARE(body, QString(
+        "WARNING: file 'run1.raw' has size 0.803818 MB, which is below the warning threshold of 100 MB.\n"
+        "\n"
+        "This warning was delivered from the computer named 'LAB-PC-01'."));
 }
 
 void TestMzWatcher::parseMailerConfigFile_parsesKeyValueLines()
