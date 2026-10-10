@@ -69,6 +69,7 @@ private slots:
     void automaticWarningsSettingsDefaults();
     void watchFolder_convertsDotDBundleThatNeverChangesSize();
     void watchFolder_doesNotConvertPrematurelyAfterLateGrowth();
+    void watchFolder_doesNotConvertWhileContinuouslyGrowing();
 
 private:
     QTemporaryDir *homeDir = nullptr;
@@ -797,6 +798,108 @@ void TestMzWatcher::watchFolder_doesNotConvertPrematurelyAfterLateGrowth()
     mw.updateFileList();
     mw.updateFileList(); // re-render to reflect this cycle's conversion
     QVERIFY2(isConvertedGreen(), "should convert once genuinely stable after the growth settled");
+
+    watchButton->blockSignals(true);
+    watchButton->setChecked(false);
+    watchButton->blockSignals(false);
+
+    mw.close();
+}
+
+void TestMzWatcher::watchFolder_doesNotConvertWhileContinuouslyGrowing()
+{
+    // The classic pre-rapidfire case: a file observed growing across several
+    // consecutive scans (not just one growth-then-stop) must never be
+    // converted while that growth is ongoing, however many times it's
+    // observed, and must still correctly convert once it genuinely settles.
+    resetSettings();
+
+    QTemporaryDir sourceDir;
+    QTemporaryDir destDir;
+    QVERIFY(sourceDir.isValid());
+    QVERIFY(destDir.isValid());
+
+    const QString filePath = sourceDir.path() + "/run1.wiff";
+    {
+        QFile f(filePath);
+        QVERIFY(f.open(QIODevice::WriteOnly));
+        f.write(QByteArray(100, 'a'));
+    }
+
+    MainWindow mw(0);
+
+    QLineEdit *sourceEdit = mw.findChild<QLineEdit*>("sourceFolderEdit");
+    QLineEdit *destEdit = mw.findChild<QLineEdit*>("destFolderEdit");
+    QLineEdit *extensionEdit = mw.findChild<QLineEdit*>("extensionEdit");
+    QLineEdit *commandEdit = mw.findChild<QLineEdit*>("commandEdit");
+    QSpinBox *minSizeSpin = mw.findChild<QSpinBox*>("minimumsFileSize");
+    QSpinBox *waitTimeSpin = mw.findChild<QSpinBox*>("converter_waitTime");
+    QPushButton *watchButton = mw.findChild<QPushButton*>("watchButton");
+    QTreeWidget *treeWidget = mw.findChild<QTreeWidget*>("treeWidget");
+    QVERIFY(sourceEdit && destEdit && extensionEdit && commandEdit && minSizeSpin && waitTimeSpin && watchButton && treeWidget);
+
+    sourceEdit->setText(sourceDir.path());
+    destEdit->setText(destDir.path());
+    extensionEdit->setText(".wiff");
+    commandEdit->setText("true %1 %2");
+    mw.getFormValues();
+
+    minSizeSpin->setValue(0);
+    waitTimeSpin->setValue(0);
+
+    watchButton->blockSignals(true);
+    watchButton->setChecked(true);
+    watchButton->blockSignals(false);
+
+    auto isConvertedGreen = [&]() {
+        for (int i = 0; i < treeWidget->topLevelItemCount(); ++i) {
+            QTreeWidgetItem *item = treeWidget->topLevelItem(i);
+            if (item->text(2) == QFileInfo(filePath).absoluteFilePath()) {
+                return item->background(0).color() == QColor(Qt::green);
+            }
+        }
+        return false;
+    };
+
+    auto appendBytes = [&](int n) {
+        QFile f(filePath);
+        QVERIFY(f.open(QIODevice::WriteOnly | QIODevice::Append));
+        f.write(QByteArray(n, 'a'));
+    };
+
+    // Cycle 1: first discovery (one-cycle lag).
+    mw.updateFileList();
+    QTest::qWait(1500);
+
+    // Several consecutive scans, each observing further growth -- simulates
+    // a long, continuously-written acquisition. Must never convert while
+    // this keeps happening, no matter how many scans go by. The short gap
+    // between bursts is well under a second, so each burst's own growth
+    // reliably reads back as "just now" (secsSinceLastChange == 0) at the
+    // scan that observes it.
+    for (int i = 0; i < 4; ++i) {
+        if (i > 0) QTest::qWait(300);
+        appendBytes(50);
+        mw.updateFileList();
+        QVERIFY2(!isConvertedGreen(), "must not convert while still being observed to grow");
+    }
+
+    // Growth stops here, checked with no elapsed time since the last scan
+    // that observed it -- must not convert yet, since no scan has confirmed
+    // stability (this is the exact bug: converting here, right after the
+    // last growth, is what a single-snapshot "equal to first detected size"
+    // check would have incorrectly allowed once secsSinceFirstDetected alone
+    // passed waitTime).
+    mw.updateFileList();
+    QVERIFY2(!isConvertedGreen(), "must not convert on the very first scan after growth stops");
+
+    QTest::qWait(1500);
+
+    // Now genuinely stable for the full wait period since the last real
+    // change -- should convert.
+    mw.updateFileList();
+    mw.updateFileList(); // re-render to reflect this cycle's conversion
+    QVERIFY2(isConvertedGreen(), "should convert once genuinely stable after growth stops");
 
     watchButton->blockSignals(true);
     watchButton->setChecked(false);
