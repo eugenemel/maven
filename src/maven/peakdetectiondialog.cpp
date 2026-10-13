@@ -490,7 +490,7 @@ shared_ptr<PeaksSearchParameters> PeakDetectionDialog::getPeaksSearchParameters(
         shared_ptr<PeaksSearchParameters> peaksSearchParameters = shared_ptr<PeaksSearchParameters>(new PeaksSearchParameters());
 
         //Issue 335
-        if(strcmp(MAVEN_VERSION, "") == 0) {
+        if(strcmp(MAVEN_VERSION, "") != 0) {
             peaksSearchParameters->searchVersion = MAVEN_VERSION;
         }
 
