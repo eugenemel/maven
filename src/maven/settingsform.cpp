@@ -195,6 +195,13 @@ void SettingsForm::recomputeEIC() {
     }
 }
 
+//Issue 841: clear the EIC Scan Filter field (keeping the dialog and settings in sync)
+//and immediately recompute the EIC, same as clicking "Recompute EIC".
+void SettingsForm::clearEicScanFilter() {
+    lineEicScanFilter->setText(""); //textChanged() -> getFormValues() persists txtEICScanFilter=""
+    recomputeEIC();
+}
+
 void SettingsForm::replotEIC() {
     getFormValues();
     if (mainwindow && mainwindow->getEicWidget()) {

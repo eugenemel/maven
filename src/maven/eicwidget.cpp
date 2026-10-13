@@ -1,4 +1,5 @@
 #include "eicwidget.h"
+#include "settingsform.h"
 
 EicWidget::EicWidget(QWidget *p) {
 
@@ -23,6 +24,8 @@ EicWidget::EicWidget(QWidget *p) {
     _integratedGroup = nullptr;
     _rtMinLine = nullptr;
     _rtMaxLine = nullptr;
+    _scanFilterChip = nullptr;
+    _scanFilterChipLabel = nullptr;
 
 	autoZoom(true);
 	showPeaks(true);
@@ -495,6 +498,69 @@ void EicWidget::cleanup() {
 	clearPlot();
 }
 
+//Issue 841: pink "chip" overlay, pinned to the top-right corner of the EIC,
+//that appears whenever an EIC Scan Filter is actively being applied.
+void EicWidget::updateScanFilterChip() {
+
+    QSettings *settings = getMainWindow()->getSettings();
+    QString scanFilterString = settings->value("txtEICScanFilter", "").toString();
+
+    if (!_scanFilterChip) {
+
+        _scanFilterChip = new QWidget(this);
+        _scanFilterChip->setObjectName("scanFilterChip");
+        _scanFilterChip->setStyleSheet(
+            "QWidget#scanFilterChip { background-color: #f6c6dc; border: 1px solid #d9568f; border-radius: 9px; }"
+            "QWidget#scanFilterChip QLabel { color: #7a1a46; background: transparent; }"
+            "QWidget#scanFilterChip QToolButton { color: #7a1a46; background: transparent; border: none; font-weight: bold; }"
+            "QWidget#scanFilterChip QToolButton:hover { color: #ffffff; background-color: #d9568f; border-radius: 7px; }"
+        );
+        _scanFilterChip->setToolTip("An EIC Scan Filter is currently being applied. "
+                                     "To modify the filter, edit the EIC Scan Filter field in the "
+                                     "Options dialog, Instrumentation tab.");
+
+        QHBoxLayout *layout = new QHBoxLayout(_scanFilterChip);
+        layout->setContentsMargins(10, 2, 4, 2);
+        layout->setSpacing(4);
+
+        _scanFilterChipLabel = new QLabel(_scanFilterChip);
+        layout->addWidget(_scanFilterChipLabel);
+
+        QToolButton *closeButton = new QToolButton(_scanFilterChip);
+        closeButton->setText(QString::fromUtf8("✕")); //Issue 841: "x" close glyph
+        closeButton->setAutoRaise(true);
+        closeButton->setCursor(Qt::PointingHandCursor);
+        closeButton->setToolTip("Remove EIC Scan Filter");
+        connect(closeButton, &QToolButton::clicked, this, &EicWidget::clearScanFilter);
+        layout->addWidget(closeButton);
+
+        _scanFilterChip->hide();
+    }
+
+    if (scanFilterString.isEmpty()) {
+        _scanFilterChip->hide();
+    } else {
+        _scanFilterChipLabel->setText("EIC Scan Filter: " + scanFilterString);
+        _scanFilterChip->adjustSize();
+        repositionScanFilterChip();
+        _scanFilterChip->show();
+        _scanFilterChip->raise();
+    }
+}
+
+void EicWidget::repositionScanFilterChip() {
+    if (!_scanFilterChip || !_scanFilterChip->isVisible()) return;
+
+    const int margin = 8;
+    _scanFilterChip->move(this->width() - _scanFilterChip->width() - margin, margin);
+}
+
+void EicWidget::clearScanFilter() {
+    //Issue 841: clears txtEICScanFilter via the Options dialog so the dialog's own
+    //field (and QSettings) stay in sync, then recomputes the EIC without the filter.
+    getMainWindow()->settingsForm->clearEicScanFilter();
+}
+
 void EicWidget::computeEICs(bool isUseSampleBoundsRT) {
  	qDebug() << " EicWidget::computeEICs()";
     QTime timerX; timerX.start();
@@ -511,6 +577,9 @@ void EicWidget::computeEICs(bool isUseSampleBoundsRT) {
     int baseline_smoothing = settings->value("baseline_smoothing").toInt();
     int baseline_quantile =  settings->value("baseline_quantile").toInt();
     string scanFilterString = settings->value("txtEICScanFilter", "").toString().toStdString();
+
+    //Issue 841: reflect whether an EIC Scan Filter is actually being applied to this EIC
+    updateScanFilterChip();
 
     //Slice adjustments
     if (isUseSampleBoundsRT) {

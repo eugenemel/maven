@@ -134,7 +134,7 @@ protected:
     void mousePressEvent(QMouseEvent * mouseEvent);
     void mouseMoveEvent(QMouseEvent * mouseEvent);
     void mouseDoubleClickEvent ( QMouseEvent * event );
-    void resizeEvent( QResizeEvent * ) { replot(nullptr); }
+    void resizeEvent( QResizeEvent * ) { repositionScanFilterChip(); replot(nullptr); }
     void contextMenuEvent(QContextMenuEvent * event);
     void keyPressEvent( QKeyEvent *e );
     void timerEvent ( QTimerEvent * event );
@@ -235,10 +235,19 @@ private:
 
     vector<EicLine*> _peakAreas{};
 
+    //Issue 841: pink "chip" overlay shown in the top-right corner of the EIC
+    //whenever an EIC Scan Filter is active, so the filter isn't silently applied.
+    QWidget* _scanFilterChip;
+    QLabel*  _scanFilterChipLabel;
+
     void showPeak(float freq, float amplitude);
     void computeEICs(bool isUseSampleBoundsRT=true);
     void cleanup();		//deallocate eics, fragments, peaks, peakgroups
     void clearPlot();	//removes non permenent graphics objects
+
+    void updateScanFilterChip();    //Issue 841: show/hide/update the scan filter chip based on current settings
+    void repositionScanFilterChip(); //Issue 841: keep the chip pinned to the top-right corner
+    void clearScanFilter();         //Issue 841: clear the EIC Scan Filter setting and recompute
 
     void findPlotBounds(); //find _minX, _maxX...etc
     void findRtBounds();
