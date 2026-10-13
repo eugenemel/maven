@@ -1996,6 +1996,29 @@ void ProjectDB::savePeakGroupsTableData(map<QString, QString> searchTableData){
         qDebug() << "ProjectDB::savePeakGroupsTableData(): Saved" << searchTableData.size() << "searches.";
 }
 
+//Issue 838: add a single, arbitrary name/value pair to the search_params table,
+//e.g. to record the MAVEN version that last saved this project.
+void ProjectDB::addSearchParam(QString name, QString value){
+
+        QSqlQuery query0(sqlDB);
+
+        //create table if not exists
+        if(!query0.exec("CREATE TABLE IF NOT EXISTS search_params("
+                        "searchTableName TEXT,"
+                        "parameters TEXT"
+                        ");")){
+
+            qDebug() << "ProjectDB::addSearchParam(): " << query0.lastError();
+        }
+
+        QSqlQuery query1(sqlDB);
+        query1.prepare("INSERT INTO search_params VALUES(?,?)");
+        query1.addBindValue(name);
+        query1.addBindValue(value);
+
+        if(!query1.exec()) qDebug() << query1.lastError();
+}
+
 void ProjectDB::loadSearchParams(){
         diSearchParameters.clear();
         peaksSearchParameters.clear();

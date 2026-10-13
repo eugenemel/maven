@@ -56,6 +56,7 @@ class ProjectDB {
             void saveMatchTable();
             void saveUiTable();
             void savePeakGroupsTableData(map<QString, QString> searchTableData);
+            void addSearchParam(QString name, QString value);
             void writeSearchResultsToDB();
             int writeGroupSqlite(PeakGroup* group, int parentGroupId, QString tableName, bool isSaveMs2Scans=false);
 

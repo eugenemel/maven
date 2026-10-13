@@ -890,6 +890,12 @@ void ProjectDockWidget::saveProjectSQLITE(QString filename) {
             project->saveAlignment(project->sampleToUpdatedRts);
         }
 
+        //Issue 838: Save last version
+        if(strcmp(MAVEN_VERSION, "") != 0) {
+            project->addSearchParam("Last Maven Save", MAVEN_VERSION);
+        }
+
+
         unsigned int groupCount=0;
 
         map<QString, QString> searchTableData{};
