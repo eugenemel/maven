@@ -13,6 +13,7 @@
 #include <QTreeWidget>
 #include <QTextBrowser>
 #include <QLabel>
+#include <QDate>
 #include "mainWindow.h"
 
 namespace {
@@ -72,6 +73,7 @@ private slots:
     void watchFolder_convertsDotDBundleThatNeverChangesSize();
     void watchFolder_doesNotConvertPrematurelyAfterLateGrowth();
     void watchFolder_doesNotConvertWhileContinuouslyGrowing();
+    void setStatus_prependsDatePrefixToLogLine();
 
 private:
     QTemporaryDir *homeDir = nullptr;
@@ -329,7 +331,9 @@ void TestMzWatcher::buildWarningEmailBody_matchesRequestedFormat()
     QCOMPARE(body, QString(
         "WARNING: file 'run1.raw' has size 0.803818 MB, which is below the warning threshold of 100 MB.\n"
         "\n"
-        "This warning was delivered from the computer named 'LAB-PC-01'."));
+        "This warning was delivered from the computer named 'LAB-PC-01'.\n"
+        "\n"
+        "Please check the instrument ASAP."));
 }
 
 void TestMzWatcher::parseMailerConfigFile_parsesKeyValueLines()
@@ -921,6 +925,24 @@ void TestMzWatcher::watchFolder_doesNotConvertWhileContinuouslyGrowing()
     watchButton->blockSignals(true);
     watchButton->setChecked(false);
     watchButton->blockSignals(false);
+
+    mw.close();
+}
+
+void TestMzWatcher::setStatus_prependsDatePrefixToLogLine()
+{
+    resetSettings();
+    MainWindow mw(0);
+
+    QTextBrowser *log = mw.findChild<QTextBrowser*>("logWidget");
+    QVERIFY(log != nullptr);
+
+    mw.setStatus("hello world");
+
+    QString today = QDate::currentDate().toString("yyyyMMdd");
+    QVERIFY2(log->toPlainText().contains("[" + today + "] "),
+             "expected log line to start with a [yyyyMMdd] date prefix");
+    QVERIFY(log->toPlainText().contains("hello world"));
 
     mw.close();
 }

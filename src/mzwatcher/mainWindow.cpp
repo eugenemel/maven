@@ -149,9 +149,10 @@ void MainWindow::setStatus(QString status) {
         // "h:m:s" has no leading zeros, so e.g. 3 seconds past the minute
         // prints as "3" instead of "03" -- indistinguishable from "30" at a
         // glance. Zero-pad every field so the timestamp is unambiguous.
+        QString nowDate = QDate::currentDate().toString("yyyyMMdd");
         QString nowTime = QTime::currentTime().toString("hh:mm:ss ap");
 	//guiForm->statusLabel->setText(status);
-        guiForm->logWidget->append(nowTime + ": " + status);
+        guiForm->logWidget->append("[" + nowDate + "] " + nowTime + ": " + status);
 }
 
 bool MainWindow::checkParameters() {
@@ -539,6 +540,7 @@ QString MainWindow::buildWarningEmailBody(const QString &fileName, double fileSi
     if (!computerName.isEmpty()) {
         text += QString("\n\nThis warning was delivered from the computer named '%1'.").arg(computerName);
     }
+    text += "\n\nPlease check the instrument ASAP.";
     return text;
 }
 
