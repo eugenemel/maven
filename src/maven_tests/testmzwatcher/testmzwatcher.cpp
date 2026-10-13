@@ -74,6 +74,7 @@ private slots:
     void watchFolder_doesNotConvertPrematurelyAfterLateGrowth();
     void watchFolder_doesNotConvertWhileContinuouslyGrowing();
     void setStatus_prependsDatePrefixToLogLine();
+    void failedConversion_doesNotMarkConvertedOrWarn_andRetriesOnSuccess();
 
 private:
     QTemporaryDir *homeDir = nullptr;
@@ -943,6 +944,133 @@ void TestMzWatcher::setStatus_prependsDatePrefixToLogLine()
     QVERIFY2(log->toPlainText().contains("[" + today + "] "),
              "expected log line to start with a [yyyyMMdd] date prefix");
     QVERIFY(log->toPlainText().contains("hello world"));
+
+    mw.close();
+}
+
+void TestMzWatcher::failedConversion_doesNotMarkConvertedOrWarn_andRetriesOnSuccess()
+{
+    // Regression test for the Athena/Thermo false-warning incident: a
+    // conversion attempt against a file caught mid-acquisition failed
+    // (msconvert can't parse an incomplete raw file), but the file was still
+    // unconditionally marked "converted" and a size-warning email was sent
+    // based on a pre-conversion read of its (still partial) size. Fixed by
+    // moving the size check to after a *confirmed successful* conversion, and
+    // only marking a file converted on success -- a failed attempt is left
+    // alone so it gets retried automatically.
+    resetSettings();
+
+    QTemporaryDir sourceDir;
+    QTemporaryDir destDir;
+    QVERIFY(sourceDir.isValid());
+    QVERIFY(destDir.isValid());
+
+    const QString filePath = sourceDir.path() + "/run1.raw";
+    {
+        QFile f(filePath);
+        QVERIFY(f.open(QIODevice::WriteOnly));
+        f.write(QByteArray(100, 'a')); // well under any realistic threshold
+    }
+
+    // Mailer config so checkAndSendSizeWarning() doesn't bail out early on
+    // "not configured" -- its actual send still no-ops on this platform
+    // (Windows-only), but the "SIZE WARNING: ..." log line is written before
+    // that attempt, which is all this test needs to observe.
+    const QString mailerConfigPath = sourceDir.path() + "/mailer.txt";
+    {
+        QFile f(mailerConfigPath);
+        QVERIFY(f.open(QIODevice::WriteOnly | QIODevice::Text));
+        QTextStream out(&f);
+        out << "EMAIL_ADDRESS=mailer@example.com\n";
+        out << "EMAIL_PASSWORD=hunter2\n";
+    }
+
+    MainWindow mw(0);
+
+    QLineEdit *sourceEdit = mw.findChild<QLineEdit*>("sourceFolderEdit");
+    QLineEdit *destEdit = mw.findChild<QLineEdit*>("destFolderEdit");
+    QLineEdit *extensionEdit = mw.findChild<QLineEdit*>("extensionEdit");
+    QLineEdit *commandEdit = mw.findChild<QLineEdit*>("commandEdit");
+    QLineEdit *configEdit = mw.findChild<QLineEdit*>("mailerConfigFileEdit");
+    QLineEdit *recipientsEdit = mw.findChild<QLineEdit*>("warningEmailAddressesEdit");
+    QCheckBox *warningsCheckBox = mw.findChild<QCheckBox*>("automaticWarningsCheckBox");
+    QSpinBox *minSizeSpin = mw.findChild<QSpinBox*>("minimumsFileSize");
+    QSpinBox *waitTimeSpin = mw.findChild<QSpinBox*>("converter_waitTime");
+    QPushButton *addRuleButton = mw.findChild<QPushButton*>("addWarningSizeRuleButton");
+    QWidget *rulesContainer = mw.findChild<QWidget*>("warningSizeRulesContainer");
+    QPushButton *watchButton = mw.findChild<QPushButton*>("watchButton");
+    QTreeWidget *treeWidget = mw.findChild<QTreeWidget*>("treeWidget");
+    QTextBrowser *log = mw.findChild<QTextBrowser*>("logWidget");
+    QVERIFY(sourceEdit && destEdit && extensionEdit && commandEdit && configEdit && recipientsEdit
+            && warningsCheckBox && minSizeSpin && waitTimeSpin && addRuleButton && rulesContainer
+            && watchButton && treeWidget && log);
+
+    sourceEdit->setText(sourceDir.path());
+    destEdit->setText(destDir.path());
+    extensionEdit->setText(".raw");
+    recipientsEdit->setText("alice@example.com");
+    warningsCheckBox->setChecked(true);
+
+    configEdit->setText(mailerConfigPath);
+    mw.getFormValues(); // triggers importMailerConfigFileValues()
+
+    addRuleButton->click();
+    QCOMPARE(rulesContainer->layout()->count(), 1);
+    QWidget *ruleRow = rulesContainer->layout()->itemAt(0)->widget();
+    QLineEdit *regexEdit = ruleRow->findChild<QLineEdit*>();
+    QSpinBox *thresholdSpin = ruleRow->findChild<QSpinBox*>();
+    QComboBox *unitBox = ruleRow->findChild<QComboBox*>();
+    QVERIFY(regexEdit && thresholdSpin && unitBox);
+    regexEdit->setText(".*");
+    thresholdSpin->setValue(1);
+    unitBox->setCurrentText("MB"); // 1 MB threshold; our 100-byte file is well under it
+
+    // First attempt: the "converter" always fails.
+    commandEdit->setText("false %1 %2");
+    mw.getFormValues();
+
+    minSizeSpin->setValue(0);
+    waitTimeSpin->setValue(0);
+
+    watchButton->blockSignals(true);
+    watchButton->setChecked(true);
+    watchButton->blockSignals(false);
+
+    auto isConvertedGreen = [&]() {
+        for (int i = 0; i < treeWidget->topLevelItemCount(); ++i) {
+            QTreeWidgetItem *item = treeWidget->topLevelItem(i);
+            if (item->text(2) == QFileInfo(filePath).absoluteFilePath()) {
+                return item->background(0).color() == QColor(Qt::green);
+            }
+        }
+        return false;
+    };
+
+    mw.updateFileList(); // cycle 1: discovery (one-cycle lag)
+    QTest::qWait(1500);
+    mw.updateFileList(); // cycle 2: looks stable, attempts conversion -- fails
+
+    QVERIFY2(!log->toPlainText().contains("SIZE WARNING"),
+             "a failed conversion must not trigger the size-warning check at all");
+    QVERIFY2(!isConvertedGreen(), "a failed conversion must not be marked converted");
+
+    // Simulate the instrument having actually finished by now -- the next
+    // attempt will succeed. The file is still sitting at the same unchanged
+    // size (never touched since creation), so it still looks "stable" and is
+    // retried on the very next cycle, with no further wait needed.
+    commandEdit->setText("true %1 %2");
+    mw.getFormValues();
+
+    mw.updateFileList(); // cycle 3: retries, this time succeeds
+    mw.updateFileList(); // cycle 4: re-render to reflect the conversion
+
+    QVERIFY2(log->toPlainText().contains("SIZE WARNING"),
+             "the size-warning check must run once the conversion actually succeeds");
+    QVERIFY2(isConvertedGreen(), "should be marked converted once conversion succeeds");
+
+    watchButton->blockSignals(true);
+    watchButton->setChecked(false);
+    watchButton->blockSignals(false);
 
     mw.close();
 }

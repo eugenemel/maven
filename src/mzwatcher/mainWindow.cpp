@@ -815,7 +815,11 @@ void MainWindow::makeBackupCopy(QString file) {
 	//source file is no longer available
 	if(! sourceFileInfo.exists()) return;
 
-	checkAndSendSizeWarning(sourceFileInfo);
+	// The size-warning check moved to after a *successful* conversion (see
+	// below) -- checking here, before conversion even runs, meant a file
+	// caught mid-acquisition (still growing, not actually small) could read
+	// as undersized and trigger a false warning, exactly when the file was
+	// least likely to convert successfully anyway.
 
 	QString   destFile = file;
 	destFile.replace(sourceFolder,destFolder);
@@ -901,9 +905,24 @@ void MainWindow::makeBackupCopy(QString file) {
                         QApplication::processEvents();
                 }
                 guiForm->convertButton->setText("Convert");
-                markFileConverted(sourceFilePath);
 
-                uploadConvertedFileToGcs(localConvertedFile);
+                if (converter->lastRunSucceeded()) {
+                    markFileConverted(sourceFilePath);
+                    uploadConvertedFileToGcs(localConvertedFile);
+
+                    // Only now, after a confirmed-successful conversion, do we
+                    // trust the source file's size enough to decide whether
+                    // it's suspiciously small. A failed conversion is the
+                    // common symptom of having caught a file still mid-
+                    // acquisition (msconvert can't parse an incomplete raw
+                    // file) -- checking size before that point risked reading
+                    // a partial file and sending a false warning for a file
+                    // that was never actually finished at that size.
+                    QFileInfo finishedSourceInfo(sourceFilePath);
+                    checkAndSendSizeWarning(finishedSourceInfo);
+                } else {
+                    setStatus("Conversion failed for \"" + sourceFilePath + "\" -- not marking as converted; will retry automatically once it looks stable again.");
+                }
         }
 
 	//refresh destination file information

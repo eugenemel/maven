@@ -21,7 +21,13 @@ class BackgroundThread : public QThread
 	Q_OBJECT
 
 public:
-	BackgroundThread(QWidget*) { _stopped=false; _useArgumentList=false; _useCustomEnvironment=false; }
+	BackgroundThread(QWidget*) { _stopped=false; _useArgumentList=false; _useCustomEnvironment=false; _lastRunSucceeded=false; }
+	// Whether the most recently completed run exited normally with code 0.
+	// False after a failed start, a non-zero/abnormal exit, or a kill -- the
+	// caller uses this to decide whether to treat the file as actually done
+	// (mark converted, upload, size-check) or leave it alone to be retried
+	// automatically the next time it looks stable.
+	bool lastRunSucceeded() const { return _lastRunSucceeded; }
 	void setSystemCommand(QString cmd) { command = cmd; arguments.clear(); _useArgumentList=false; }
 	void setSystemCommand(QString program, QStringList args) { command = program; arguments = args; _useArgumentList=true; }
 	// Issue 859: the mailer needs to pass a password to a child process
@@ -48,6 +54,7 @@ protected:
 		}
 
 		_stopped=false;
+		_lastRunSucceeded=false;
 
 		emit statusChanged("Running " + command);
 
@@ -76,6 +83,7 @@ protected:
 		// mzWatcher's log looked identical whether the command worked or not.
 		if (converter.exitStatus() == QProcess::NormalExit && converter.exitCode() == 0) {
 			emit statusChanged("Conversion done!");
+			_lastRunSucceeded=true;
 		} else {
 			QString errOutput = QString::fromLocal8Bit(converter.readAllStandardError()).trimmed();
 			emit statusChanged(QString("Command finished with errors (exit code %1): %2")
@@ -88,6 +96,7 @@ private:
 	bool _stopped;
 	bool _useArgumentList;
 	bool _useCustomEnvironment;
+	bool _lastRunSucceeded;
 	QString command;
 	QStringList arguments;
 	QProcessEnvironment environment;
