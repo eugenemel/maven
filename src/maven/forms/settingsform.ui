@@ -43,7 +43,43 @@
          </property>
          <layout class="QGridLayout" name="gridLayout_17">
           <item row="5" column="2">
-           <widget class="QLineEdit" name="lineEicScanFilter"/>
+           <layout class="QHBoxLayout" name="horizontalLayout_eicScanFilter">
+            <property name="spacing">
+             <number>4</number>
+            </property>
+            <item>
+             <widget class="QLineEdit" name="lineEicScanFilter"/>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Policy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>16</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnRecomputeEICScanFilter">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Recompute EIC</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
           <item row="0" column="2">
            <widget class="QComboBox" name="ionizationMode">

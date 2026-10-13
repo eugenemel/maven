@@ -25,6 +25,7 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(scan_filter_min_quantile, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
     connect(scan_filter_min_intensity, SIGNAL(valueChanged(int)), SLOT(getFormValues()));
     connect(lineEicScanFilter, SIGNAL(textChanged(QString)), SLOT(getFormValues()));
+    connect(btnRecomputeEICScanFilter, SIGNAL(clicked(bool)), SLOT(recomputeEIC()));
     connect(chkHideSampleSuffix, SIGNAL(toggled(bool)), SLOT(getFormValues()));
 
     //file import
