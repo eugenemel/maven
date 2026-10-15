@@ -3176,3 +3176,13 @@ shared_ptr<PeakPickingAndGroupingParameters> MainWindow::getPeakPickingAndGroupi
 
       return peakPickingAndGroupingParameters;
 }
+
+mzSample* MainWindow::getSample(string sampleName) {
+    for (mzSample *sample : samples) {
+        if (sample->sampleName == sampleName) {
+            return sample;
+        }
+    }
+
+    return nullptr;
+}

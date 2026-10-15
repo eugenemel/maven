@@ -152,6 +152,34 @@ void SpectraWidget::setTitle() {
 
             title += tr("<b>MS%1 Consensus spectrum</b>").arg(QString::number(_currentScan->mslevel));
 
+            //title needs purity
+            if (_currentScan->mslevel == 2){
+
+                //Issue 864: Show average purity on scan plot.
+                float avgPurity = 0.0f;
+                int numFound = 0;
+                for (auto it = _sampleScanMap.begin(); it != _sampleScanMap.end(); ++it){
+                    unordered_set<int> scans = it->second;
+
+                    mzSample *sample = mainwindow->getSample(sampleName.toStdString());
+                    if (sample) {
+                        for (const int scanNum : scans) {
+                            Scan *scan = sample->getScan(scanNum);
+                            if (scan) {
+                                numFound++;
+                                avgPurity += scan->getPrecursorPurity(10);
+                            }
+                        }
+                    }
+                }
+
+                if (numFound > 0) {
+                    avgPurity /= numFound;
+                    title += tr("<b> (avg. purity ");
+                    title.append(QString::number(avgPurity, 'f', 3));
+                    title += tr(")</b>");
+                }
+            }
             if (_isDisplayFullTitle) {
                 for (auto it = _sampleScanMap.begin(); it != _sampleScanMap.end(); ++it){
 

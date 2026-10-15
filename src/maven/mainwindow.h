@@ -180,6 +180,7 @@ public:
     mzSample* getSample(int i) { assert(i < samples.size()); return(samples[i]);  }
     inline vector<mzSample*> getSamples() { return samples; }
     vector<mzSample*> getVisibleSamples();
+    mzSample* getSample(string sampleName);
     float getVisibleSamplesMaxRt();
 
     PeakGroup::QType getUserQuantType();
