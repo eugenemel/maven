@@ -40,9 +40,9 @@ void TreeDockWidget::addMs1TitleBar() {
    spnRtMin = new QDoubleSpinBox();
    spnRtMin->setMinimum(0);
    spnRtMin->setMaximum(999999999);
-   spnRtMin->setSingleStep(1);
+   spnRtMin->setSingleStep(0.1);
    spnRtMin->setMinimumWidth(120);
-   spnRtMin->setDecimals(1);
+   spnRtMin->setDecimals(3);
    spnRtMin->setValue(0);
    spnRtMin->setSuffix(QString(" min"));
 
@@ -51,8 +51,8 @@ void TreeDockWidget::addMs1TitleBar() {
    spnRtMax = new QDoubleSpinBox();
    spnRtMax->setMinimum(0);
    spnRtMax->setMaximum(999999999);
-   spnRtMax->setSingleStep(1);
-   spnRtMax->setDecimals(1);
+   spnRtMax->setSingleStep(0.1);
+   spnRtMax->setDecimals(3);
    spnRtMax->setValue(100);
    spnRtMax->setSuffix(QString(" min"));
 
