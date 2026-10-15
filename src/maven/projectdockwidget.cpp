@@ -72,28 +72,33 @@ void ProjectDockWidget::warnUserEmptySampleFiles() {
 
     qDebug() << "ProjectDockWidget::warnUserEmptySampleFiles()";
 
-    if (fileLoader->getEmptyFiles().size() > 0){
-        QString msg = QString();
+    QString startDir = QFileInfo(lastOpennedProject).path();
 
-        int counter = 0;
-        msg.append("mzFileIO::loadSamples(): The samples\n\n");
-        for (auto file : fileLoader->getEmptyFiles()) {
-            msg.append(file);
-            msg.append("\n\n");
-            if (counter >= 5) {
-                msg.append("... and others...");
-                break;
-            }
-            counter++;
+    //Issue 852: a file that exists but loaded with zero scans is often a broken
+    //symlink left behind by a cloud-sync client (e.g. Google Drive). Offer the
+    //user a chance to pick an alternate file for it, same as a missing sample.
+    for (const QString &file : fileLoader->getEmptyFiles()) {
+
+        QMessageBox msgBox;
+        msgBox.setText("Sample contained no scans");
+        msgBox.setInformativeText(file + "\n\nThis file loaded but contained no scans "
+                                   "(this can happen with files synced via Google Drive). "
+                                   "Select an alternate file for this sample?");
+        msgBox.setStandardButtons(QMessageBox::Open | QMessageBox::Ignore);
+        msgBox.setDefaultButton(QMessageBox::Open);
+        if (msgBox.exec() != QMessageBox::Open) continue;
+
+        QString newPath = QFileDialog::getOpenFileName(this, "Select Alternate File for " + QFileInfo(file).fileName(), startDir);
+        if (newPath.isEmpty()) continue;
+
+        mzSample* sample = fileLoader->loadSample(newPath);
+        if (sample) {
+            sample->sampleName = QFileInfo(file).completeBaseName().toStdString(); //keep original sample name so saved metadata (color, order, group) still matches
+            _mainwindow->addSample(sample);
+        } else {
+            QMessageBox::critical(this, "Empty sample file", newPath + "\n\nThis file also contained no scans.");
         }
-        msg.append("\n\ndid not contain any scans.");
-        msg.append("\n\nPlease consider examining and reloading these file(s).");
-
-        QMessageBox messageBox;
-
-        messageBox.critical(nullptr, "Empty samples files",  msg);
     }
-
 }
 
 void ProjectDockWidget::changeSampleColor(QTreeWidgetItem* item, int col) {
