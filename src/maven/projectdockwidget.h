@@ -64,6 +64,7 @@ private slots:
     void computeGroupStatistics(PeakGroup& peakGroup);
 
 private:
+    bool confirmLocateMissingSamples(const QStringList &missingSamples); //Issue 852
     QTreeWidgetItem* getParentFolder(QString filename);
     QMap<QString,QTreeWidgetItem*> parentMap;
     MainWindow* _mainwindow;

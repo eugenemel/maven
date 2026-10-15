@@ -1,5 +1,8 @@
 #include "projectdockwidget.h"
 #include "projectDB.h"
+#include <QVBoxLayout>
+#include <QListWidget>
+#include <QDialogButtonBox>
 
 ProjectDockWidget::ProjectDockWidget(QMainWindow *parent):
     QDockWidget("Samples", parent,Qt::Widget)
@@ -72,33 +75,64 @@ void ProjectDockWidget::warnUserEmptySampleFiles() {
 
     qDebug() << "ProjectDockWidget::warnUserEmptySampleFiles()";
 
-    QString startDir = QFileInfo(lastOpennedProject).path();
+    if (fileLoader->getEmptyFiles().size() > 0){
+        QString msg = QString();
 
-    //Issue 852: a file that exists but loaded with zero scans is often a broken
-    //symlink left behind by a cloud-sync client (e.g. Google Drive). Offer the
-    //user a chance to pick an alternate file for it, same as a missing sample.
-    for (const QString &file : fileLoader->getEmptyFiles()) {
-
-        QMessageBox msgBox;
-        msgBox.setText("Sample contained no scans");
-        msgBox.setInformativeText(file + "\n\nThis file loaded but contained no scans "
-                                   "(this can happen with files synced via Google Drive). "
-                                   "Select an alternate file for this sample?");
-        msgBox.setStandardButtons(QMessageBox::Open | QMessageBox::Ignore);
-        msgBox.setDefaultButton(QMessageBox::Open);
-        if (msgBox.exec() != QMessageBox::Open) continue;
-
-        QString newPath = QFileDialog::getOpenFileName(this, "Select Alternate File for " + QFileInfo(file).fileName(), startDir);
-        if (newPath.isEmpty()) continue;
-
-        mzSample* sample = fileLoader->loadSample(newPath);
-        if (sample) {
-            sample->sampleName = QFileInfo(file).completeBaseName().toStdString(); //keep original sample name so saved metadata (color, order, group) still matches
-            _mainwindow->addSample(sample);
-        } else {
-            QMessageBox::critical(this, "Empty sample file", newPath + "\n\nThis file also contained no scans.");
+        int counter = 0;
+        msg.append("mzFileIO::loadSamples(): The samples\n\n");
+        for (auto file : fileLoader->getEmptyFiles()) {
+            msg.append(file);
+            msg.append("\n\n");
+            if (counter >= 5) {
+                msg.append("... and others...");
+                break;
+            }
+            counter++;
         }
+        msg.append("\n\ndid not contain any scans.");
+        msg.append("\n\nPlease consider examining and reloading these file(s).");
+
+        QMessageBox messageBox;
+
+        messageBox.critical(nullptr, "Empty samples files",  msg);
     }
+
+}
+
+//Issue 852: shown (possibly more than once) while resolving a project's missing/
+//unreadable samples. Lists every sample still outstanding - there can be dozens -
+//and asks whether to pick a folder to search for them. Returns true if the user
+//wants to pick a folder (Open), false to give up entirely (Cancel).
+bool ProjectDockWidget::confirmLocateMissingSamples(const QStringList &missingSamples) {
+
+    QDialog dialog(this);
+    dialog.setWindowTitle("Could not load samples");
+    dialog.resize(480, 420);
+
+    QVBoxLayout *layout = new QVBoxLayout(&dialog);
+
+    QLabel *label = new QLabel(QString::number(missingSamples.size()) +
+        " sample(s) could not be found, or contained no scans "
+        "(indicating a malformed file or network sync issue):"
+        , &dialog);
+    label->setWordWrap(true);
+    layout->addWidget(label);
+
+    QListWidget *list = new QListWidget(&dialog);
+    list->addItems(missingSamples);
+    list->setSelectionMode(QAbstractItemView::NoSelection);
+    layout->addWidget(list);
+
+    QLabel *prompt = new QLabel("Please select a folder containing these files", &dialog);
+    prompt->setWordWrap(true);
+    layout->addWidget(prompt);
+
+    QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Open | QDialogButtonBox::Cancel, &dialog);
+    connect(buttons, SIGNAL(accepted()), &dialog, SLOT(accept()));
+    connect(buttons, SIGNAL(rejected()), &dialog, SLOT(reject()));
+    layout->addWidget(buttons);
+
+    return dialog.exec() == QDialog::Accepted;
 }
 
 void ProjectDockWidget::changeSampleColor(QTreeWidgetItem* item, int col) {
@@ -529,6 +563,24 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
     //Issue 734: Cancel the entire load.
     bool isCancelLoading = false;
 
+    //Issue 852: samples whose recorded path is missing, or exists but has zero
+    //scans (e.g. a broken symlink left behind by a cloud-sync client such as
+    //Google Drive). These are all resolved together, after the loop, with a
+    //single folder-picker dialog rather than one dialog per sample.
+    QStringList needsFixSamples;
+    fileLoader->setMainWindow(_mainwindow);
+    auto hasScans = [this](const QString &path) -> bool {
+        //Issue 852: mzML is the common case - check cheaply, without loading
+        //the whole file. Other formats fall back to a full (slower) load.
+        if (path.endsWith(".mzML", Qt::CaseInsensitive)) {
+            return mzSample::isMzMLFileContainsScans(path.toLatin1().data());
+        }
+        mzSample* sample = fileLoader->loadSample(path);
+        bool ok = sample != nullptr;
+        delete sample;
+        return ok;
+    };
+
     while (query.next()) {
         QString filepath   = query.value("filename").toString();
         QString sname   = query.value("name").toString();
@@ -542,61 +594,61 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
 
         if(checkLoaded == true) continue;  // skip files that have been loaded already
 
-        //locate file
+        //locate file, and confirm it actually has scans (a path can "exist" and
+        //still be unreadable, e.g. a broken Google Drive symlink)
         QString locatedpath = ProjectDB::locateSample(filepath, pathlist);
         QFileInfo sampleFile(locatedpath);
-        if (sampleFile.exists()) { filelist << locatedpath; continue; }
+        if (sampleFile.exists() && hasScans(locatedpath)) {
+            filelist << locatedpath;
+        } else {
+            needsFixSamples << sname;
+        }
+    }
 
-        int keepLooking = QMessageBox::Open;
-        while(keepLooking == QMessageBox::Open) {
-            QMessageBox msgBox;
-            msgBox.setText("Could not locate sample");
-            msgBox.setInformativeText(sname + " was not found. Add new sample folder?");
-            msgBox.setStandardButtons(QMessageBox::Open | QMessageBox::Cancel);
-            msgBox.setDefaultButton(QMessageBox::Open);
-            keepLooking = msgBox.exec();
+    //Issue 852: resolve every missing/unreadable sample, looping over as many
+    //folder picks as needed (samples can be split across several folders, or
+    //the user may need more than one attempt). Re-tries the same folder too,
+    //in case the user has since added more files to it. Either every sample
+    //ends up found and readable, or the project does not open at all -
+    //partial loads are more confusing than useful here.
+    while (!needsFixSamples.isEmpty()) {
 
-            if (keepLooking != QMessageBox::Open) {
-                qDebug() << "Canceling load.";
-                isCancelLoading = true;
-                break;
-            }
-
-            if (keepLooking) {
-                QString dirName = QFileDialog::getExistingDirectory( this, "Select Folder with Sample Files", projectPath);
-                if (not dirName.isEmpty()) {
-
-                    QString baseFilepath = dirName + QDir::separator() + sname;
-                    QStringList candidates;
-
-                    if (baseFilepath.endsWith(".mzML", Qt::CaseInsensitive) ||
-                        baseFilepath.endsWith(".mzXML", Qt::CaseInsensitive)) {
-                        candidates << baseFilepath;
-                    } else {
-                        candidates << baseFilepath + ".mzML";
-                        candidates << baseFilepath + ".mzXML";
-                    }
-
-                    bool isFoundFile = false;
-
-                    for (const QString &path : candidates) {
-                        if (QFileInfo::exists(path)) {
-                            filelist << path;
-                            pathlist << dirName;
-                            qDebug() << "Found file: " << path;
-                            isFoundFile = true;
-                            break; // Stop after finding the first valid match
-                        }
-                    }
-
-                    if (isFoundFile) {
-                        break;
-                    }
-                }
-            }
+        if (!confirmLocateMissingSamples(needsFixSamples)) {
+            isCancelLoading = true;
+            break;
         }
 
-        if (isCancelLoading) break;
+        QString dirName = QFileDialog::getExistingDirectory(this, "Select Folder with Sample Files", projectPath);
+        if (dirName.isEmpty()) {
+            isCancelLoading = true;
+            break;
+        }
+
+        QStringList stillMissing;
+        for (const QString &sname : needsFixSamples) {
+
+            QString baseFilepath = dirName + QDir::separator() + sname;
+            QStringList candidates;
+            if (baseFilepath.endsWith(".mzML", Qt::CaseInsensitive) ||
+                baseFilepath.endsWith(".mzXML", Qt::CaseInsensitive)) {
+                candidates << baseFilepath;
+            } else {
+                candidates << baseFilepath + ".mzML";
+                candidates << baseFilepath + ".mzXML";
+            }
+
+            QString found;
+            for (const QString &path : candidates) {
+                if (QFileInfo::exists(path) && hasScans(path)) { found = path; break; }
+            }
+
+            if (found.isEmpty()) {
+                stillMissing << sname;
+            } else {
+                filelist << found;
+            }
+        }
+        needsFixSamples = stillMissing;
     }
 
     if (isCancelLoading) {
@@ -609,7 +661,6 @@ void ProjectDockWidget::loadProjectSQLITE(QString fileName) {
     this->lastOpennedProject = fileName;
     currentProject = selectedProject;
 
-    fileLoader->setMainWindow(_mainwindow);
     fileLoader->loadSamples(filelist);
 }
 
