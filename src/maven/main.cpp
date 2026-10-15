@@ -9,6 +9,36 @@
 Database DB;
 void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 
+//Issue 865: versions are "major.minor.patch" or "major.minor.patch.letter"
+//(e.g. "1.2.3" or "1.2.3.A"), where the lettered form is a later release than
+//its plain "major.minor.patch" counterpart, and later letters are later still.
+struct MavenVersion {
+    int major = 0, minor = 0, patch = 0;
+    QChar letter; // null QChar() if there is no letter suffix
+};
+
+static MavenVersion parseMavenVersion(const QString &versionStr) {
+    QRegularExpression versionRegex("(\\d+)\\.(\\d+)\\.(\\d+)(?:\\.([A-Za-z]))?");
+    QRegularExpressionMatch m = versionRegex.match(versionStr);
+
+    MavenVersion v;
+    if (m.hasMatch()) {
+        v.major = m.captured(1).toInt();
+        v.minor = m.captured(2).toInt();
+        v.patch = m.captured(3).toInt();
+        if (!m.captured(4).isEmpty()) v.letter = m.captured(4).at(0).toUpper();
+    }
+    return v;
+}
+
+//true if "a" is a later release than "b" (null letter sorts before any letter)
+static bool isMavenVersionNewer(const MavenVersion &a, const MavenVersion &b) {
+    if (a.major != b.major) return a.major > b.major;
+    if (a.minor != b.minor) return a.minor > b.minor;
+    if (a.patch != b.patch) return a.patch > b.patch;
+    return a.letter > b.letter;
+}
+
 int main(int argc, char *argv[])
 {
 
@@ -62,7 +92,10 @@ int main(int argc, char *argv[])
 
         QString stdoutString = process.readAllStandardOutput();
 
-        QRegularExpression regex("(?<=eugenemel/maven/releases/tag/)\\d+\\.\\d+\\.\\d+");
+        //Issue 865: New verisons are either number.number.number or number.number.number.letter
+        // regex needs to handle both
+
+        QRegularExpression regex("(?<=eugenemel/maven/releases/tag/)\\d+\\.\\d+\\.\\d+(?:\\.[A-Za-z])?");
         QRegularExpressionMatch match = regex.match(stdoutString);
         QString latestVersion = match.captured(0);
 
@@ -75,7 +108,8 @@ int main(int argc, char *argv[])
         qDebug() << "latestVersion:" << latestVersion;
 
         // if (!latestVersion.isEmpty() && latestVersion != currentVersion){
-        if (!currentVersion.contains("-") && !latestVersion.isEmpty() && latestVersion != currentVersion){
+        if (!currentVersion.contains("-") && !latestVersion.isEmpty() &&
+                isMavenVersionNewer(parseMavenVersion(latestVersion), parseMavenVersion(currentVersion))){
 
             QMessageBox versionMsgBox;
             versionMsgBox.setText("A more recent version of MAVEN is available.");
