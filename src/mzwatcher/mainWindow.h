@@ -168,11 +168,11 @@ class MainWindow: public QMainWindow {
 				void stopConversion();
 				void selectDestFolder();
 				void selectSourceFolder();
-				void selectGcsKeyFile();
                         void clearTables();
                         void updateButtonColors();
                         void selectMailerConfigFile();
                         void addWarningSizeRuleClicked();
+                        void addGcsSyncTargetClicked();
 
 			protected:
 				void timerEvent(QTimerEvent *event);
@@ -234,10 +234,31 @@ class MainWindow: public QMainWindow {
 				BackgroundThread* converter;
 				BackgroundThread* gcsUploader;
 
-				// GCS upload settings (R8). Both empty/unset means the upload
-				// path is never taken (R11).
-				QString gcsKeyFile;
-				QString targetBucket;
+				// One dynamically-added GCS sync target row: the widgets
+				// themselves are the source of truth (read directly at
+				// write-settings/upload time), mirroring the
+				// warningSizeRuleWidgets pattern. A row with either field
+				// empty is skipped at upload time (R11), same gating as the
+				// old single-target settings.
+				struct GcsSyncTargetWidgets {
+					QWidget* rowWidget;
+					QLineEdit* bucketEdit;
+					QLineEdit* keyFileEdit;
+				};
+				QList<GcsSyncTargetWidgets> gcsSyncTargetWidgets;
+				void addGcsSyncTarget(const QString &bucket, const QString &keyFile);
+				void removeGcsSyncTarget(QWidget *rowWidget);
+				// Re-applies alternating backgrounds across all current groups
+				// by list position -- called after every add/delete so the
+				// stripe pattern stays correct even after a middle group is
+				// removed (not just assigned once at creation time).
+				void restripeGcsSyncTargets();
+
+				struct GcsSyncTarget {
+					QString bucket;
+					QString keyFile;
+				};
+				QVector<GcsSyncTarget> collectGcsSyncTargets() const;
 
 				// Automatic Warnings settings. Both automaticWarningsCheckBox
 				// (read directly off the widget) and a
@@ -267,7 +288,7 @@ class MainWindow: public QMainWindow {
 				// parseMailerConfigFile()). Only the path is persisted;
 				// EMAIL_ADDRESS/EMAIL_PASSWORD are read from the file itself
 				// each time a warning email is sent, never duplicated into
-				// QSettings -- same trust model as gcsKeyFile.
+				// QSettings.
 				QString mailerConfigFile;
 
 				BackgroundThread* mailer;

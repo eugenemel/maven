@@ -424,32 +424,33 @@
        <string>Remote Server Updates</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_4">
-       <item row="0" column="0">
+       <item row="0" column="0" colspan="2">
         <widget class="QLabel" name="label_11">
          <property name="text">
-          <string>GCS Service Key File:</string>
+          <string>GCS Sync Targets:</string>
          </property>
         </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="gcsKeyFileEdit"/>
        </item>
        <item row="0" column="2">
-        <widget class="QPushButton" name="gcsKeyFileButton">
+        <widget class="QPushButton" name="addGcsSyncTargetButton">
          <property name="text">
-          <string>Browse...</string>
+          <string>Add Bucket</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_12">
-         <property name="text">
-          <string>Target GCS Bucket:</string>
+       <item row="1" column="0" colspan="3">
+        <widget class="QScrollArea" name="gcsSyncTargetsScrollArea">
+         <property name="widgetResizable">
+          <bool>true</bool>
          </property>
+         <widget class="QWidget" name="gcsSyncTargetsContainer">
+          <layout class="QVBoxLayout" name="gcsSyncTargetsContainerLayout">
+           <property name="margin">
+            <number>0</number>
+           </property>
+          </layout>
+         </widget>
         </widget>
-       </item>
-       <item row="1" column="1" colspan="2">
-        <widget class="QLineEdit" name="targetBucketEdit"/>
        </item>
       </layout>
      </widget>

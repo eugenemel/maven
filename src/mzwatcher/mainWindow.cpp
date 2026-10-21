@@ -15,8 +15,6 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
 	destFolder   = settings->value("destFolder").toString();
 	convertCommand = settings->value("convertCommand").toString();
 	maxDayDiff=settings->value("maxDayDiff").toInt();
-	gcsKeyFile = settings->value("gcs_key_file").toString();
-	targetBucket = settings->value("target_bucket").toString();
 
 	warningComputerName = settings->value("warningComputerName").toString();
 	if (warningComputerNameWasUnset) {
@@ -44,8 +42,6 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
         guiForm->monitorTimeout->setValue(settings->value("monitorTimeout").toInt());
         guiForm->dayDiffBox->setValue(maxDayDiff);
         guiForm->settingsLocationEdit->setText("\"" + settings->fileName() + "\"");
-        guiForm->gcsKeyFileEdit->setText(gcsKeyFile);
-        guiForm->targetBucketEdit->setText(targetBucket);
 
         guiForm->automaticWarningsCheckBox->setChecked(settings->value("automaticWarningsEnabled").toBool());
         guiForm->warningComputerNameEdit->setText(warningComputerName);
@@ -64,6 +60,35 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
             settings->endArray();
         }
 
+        // Trailing stretch keeps rows packed at the top, equally spaced at
+        // their natural height, instead of stretching to fill the tab --
+        // addGcsSyncTarget() always inserts new rows just before this.
+        guiForm->gcsSyncTargetsContainerLayout->addStretch(1);
+
+        {
+            int targetCount = settings->beginReadArray("gcsSyncTargets");
+            for (int i = 0; i < targetCount; ++i) {
+                settings->setArrayIndex(i);
+                QString bucket = settings->value("bucket").toString();
+                QString keyFile = settings->value("keyFile").toString();
+                addGcsSyncTarget(bucket, keyFile);
+            }
+            settings->endArray();
+
+            // One-time migration: carry forward the old single gcs_key_file/
+            // target_bucket pair (from before multiple sync targets existed)
+            // as the first row, rather than silently dropping an
+            // already-configured sync setup -- same spirit as the
+            // extension/convertCommand migrations in readSettings().
+            if (targetCount == 0) {
+                QString legacyKeyFile = settings->value("gcs_key_file").toString();
+                QString legacyBucket = settings->value("target_bucket").toString();
+                if (!legacyKeyFile.isEmpty() || !legacyBucket.isEmpty()) {
+                    addGcsSyncTarget(legacyBucket, legacyKeyFile);
+                }
+            }
+        }
+
         guiForm->watchButton->setCheckable(true);
         guiForm->watchButton->setChecked(settings->value("watchButtonState").toBool());
 
@@ -80,8 +105,7 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
 	connect(guiForm->destFolderButton,SIGNAL(pressed()),this,SLOT(selectDestFolder()));
 	connect(guiForm->sourceFolderButton,SIGNAL(pressed()),this,SLOT(selectSourceFolder()));
         connect(guiForm->clearDatabaseButton,SIGNAL(pressed()),this,SLOT(clearTables()));
-        connect(guiForm->gcsKeyFileButton,SIGNAL(pressed()),this,SLOT(selectGcsKeyFile()));
-        connect(guiForm->targetBucketEdit,SIGNAL(textEdited(QString)),this,SLOT(getFormValues()));
+        connect(guiForm->addGcsSyncTargetButton,SIGNAL(pressed()),this,SLOT(addGcsSyncTargetClicked()));
 
         connect(guiForm->automaticWarningsCheckBox,SIGNAL(toggled(bool)),this,SLOT(getFormValues()));
         connect(guiForm->warningComputerNameEdit,SIGNAL(textEdited(QString)),this,SLOT(getFormValues()));
@@ -191,13 +215,6 @@ void MainWindow::selectSourceFolder() {
 	guiForm->sourceFolderEdit->setText(dir);
 }
 
-void MainWindow::selectGcsKeyFile() {
-	QString file = QFileDialog::getOpenFileName(this, "Select GCS Service Account Key File", ".", "JSON Files (*.json)");
-	if (file.isEmpty()) return;
-	gcsKeyFile = file;
-	guiForm->gcsKeyFileEdit->setText(gcsKeyFile);
-}
-
 void MainWindow::stopConversion() {
 	if (converter->isRunning()) {
 		converter->killProcess();
@@ -268,8 +285,6 @@ void MainWindow::getFormValues() {
 	convertCommand=guiForm->commandEdit->text();
 	extension = guiForm->extensionEdit->text();
 	maxDayDiff = guiForm->dayDiffBox->value();
-	gcsKeyFile = guiForm->gcsKeyFileEdit->text();
-	targetBucket = guiForm->targetBucketEdit->text();
 
 	warningComputerName = guiForm->warningComputerNameEdit->text();
 	warningEmailAddresses = guiForm->warningEmailAddressesEdit->text();
@@ -457,18 +472,22 @@ QStringList MainWindow::buildGcsUploadCommand(const QString &gcsKeyFile, const Q
 }
 
 void MainWindow::uploadConvertedFileToGcs(const QString &localConvertedFile) {
-    if (gcsKeyFile.isEmpty() || targetBucket.isEmpty()) return; // R11: no-op when unset
-
     QString objectPath = buildGcsObjectPath(destFolder, localConvertedFile);
-    QStringList command = buildGcsUploadCommand(gcsKeyFile, targetBucket, localConvertedFile, objectPath);
-    if (command.isEmpty()) return;
 
-    setStatus("Uploading to \"gs://" + targetBucket + "/" + objectPath + "\"");
-    gcsUploader->setSystemCommand(command.first(), command.mid(1));
-    gcsUploader->start();
+    // One gsutil invocation per configured sync target, run sequentially on
+    // the same gcsUploader thread -- a row with either field unset is
+    // skipped (R11), same gating as the old single-target settings.
+    foreach (const GcsSyncTarget &target, collectGcsSyncTargets()) {
+        QStringList command = buildGcsUploadCommand(target.keyFile, target.bucket, localConvertedFile, objectPath);
+        if (command.isEmpty()) continue;
 
-    while (gcsUploader->isRunning()) {
-        QApplication::processEvents();
+        setStatus("Uploading to \"gs://" + target.bucket + "/" + objectPath + "\"");
+        gcsUploader->setSystemCommand(command.first(), command.mid(1));
+        gcsUploader->start();
+
+        while (gcsUploader->isRunning()) {
+            QApplication::processEvents();
+        }
     }
 }
 
@@ -561,6 +580,18 @@ QHash<QString,QString> MainWindow::parseMailerConfigFile(const QString &filePath
     }
     file.close();
     return result;
+}
+
+QVector<MainWindow::GcsSyncTarget> MainWindow::collectGcsSyncTargets() const {
+    QVector<GcsSyncTarget> targets;
+    targets.reserve(gcsSyncTargetWidgets.size());
+    foreach (const GcsSyncTargetWidgets &w, gcsSyncTargetWidgets) {
+        GcsSyncTarget target;
+        target.bucket = w.bucketEdit->text();
+        target.keyFile = w.keyFileEdit->text();
+        targets.append(target);
+    }
+    return targets;
 }
 
 QVector<MainWindow::SizeWarningRule> MainWindow::collectSizeWarningRules() const {
@@ -799,6 +830,90 @@ void MainWindow::removeWarningSizeRule(QWidget *rowWidget) {
     // returns to the event loop.
     guiForm->warningSizeRulesContainerLayout->removeWidget(rowWidget);
     rowWidget->deleteLater();
+}
+
+void MainWindow::addGcsSyncTargetClicked() {
+    addGcsSyncTarget(QString(), QString());
+}
+
+void MainWindow::addGcsSyncTarget(const QString &bucket, const QString &keyFile) {
+    // One group = two rows (bucket, then key file) that are still
+    // deleted/tracked as a single unit -- only the on-screen arrangement is
+    // taller instead of wider. Delete and Browse sit in the same column,
+    // one per row, so they're vertically aligned with each other.
+    QWidget *row = new QWidget(guiForm->gcsSyncTargetsContainer);
+    row->setAutoFillBackground(true);
+    QGridLayout *rowLayout = new QGridLayout(row);
+    // A little padding (rather than 0) so each group's striped background
+    // reads as a distinct block around its fields, not just a thin line
+    // sitting flush against its neighbors.
+    rowLayout->setContentsMargins(4, 4, 4, 4);
+
+    static const QString kBorderedLineEditStyle = "border: 1px solid black;";
+
+    QLabel *bucketLabel = new QLabel("Target GCS Bucket:", row);
+    QLineEdit *bucketEdit = new QLineEdit(row);
+    bucketEdit->setText(bucket);
+    bucketEdit->setStyleSheet(kBorderedLineEditStyle);
+
+    QLabel *keyFileLabel = new QLabel("GCS Service Key File:", row);
+    QLineEdit *keyFileEdit = new QLineEdit(row);
+    keyFileEdit->setText(keyFile);
+    keyFileEdit->setStyleSheet(kBorderedLineEditStyle);
+
+    QPushButton *browseButton = new QPushButton("Browse...", row);
+    QPushButton *deleteButton = new QPushButton("Delete", row);
+
+    rowLayout->addWidget(bucketLabel, 0, 0);
+    rowLayout->addWidget(bucketEdit, 0, 1);
+    rowLayout->addWidget(deleteButton, 0, 2);
+    rowLayout->addWidget(keyFileLabel, 1, 0);
+    rowLayout->addWidget(keyFileEdit, 1, 1);
+    rowLayout->addWidget(browseButton, 1, 2);
+    rowLayout->setColumnStretch(1, 1);
+
+    // Insert before the trailing stretch (see its addStretch() call site)
+    // rather than appending, so new rows land above it, not below.
+    int insertPos = guiForm->gcsSyncTargetsContainerLayout->count() - 1;
+    guiForm->gcsSyncTargetsContainerLayout->insertWidget(insertPos, row);
+
+    GcsSyncTargetWidgets w;
+    w.rowWidget = row;
+    w.bucketEdit = bucketEdit;
+    w.keyFileEdit = keyFileEdit;
+    gcsSyncTargetWidgets.append(w);
+    restripeGcsSyncTargets();
+
+    connect(browseButton, &QPushButton::clicked, this, [this, keyFileEdit]() {
+        QString file = QFileDialog::getOpenFileName(this, "Select GCS Service Account Key File", ".", "JSON Files (*.json)");
+        if (file.isEmpty()) return;
+        keyFileEdit->setText(file);
+    });
+
+    connect(deleteButton, &QPushButton::clicked, this, [this, row]() {
+        removeGcsSyncTarget(row);
+    });
+}
+
+void MainWindow::restripeGcsSyncTargets() {
+    static const QString kEvenStripeStyle = "background-color: #ffffff;";
+    static const QString kOddStripeStyle  = "background-color: #e3e3e3;";
+    for (int i = 0; i < gcsSyncTargetWidgets.size(); ++i) {
+        gcsSyncTargetWidgets[i].rowWidget->setStyleSheet((i % 2 == 0) ? kEvenStripeStyle : kOddStripeStyle);
+    }
+}
+
+void MainWindow::removeGcsSyncTarget(QWidget *rowWidget) {
+    for (int i = 0; i < gcsSyncTargetWidgets.size(); ++i) {
+        if (gcsSyncTargetWidgets.at(i).rowWidget == rowWidget) {
+            gcsSyncTargetWidgets.removeAt(i);
+            break;
+        }
+    }
+    // Same deferred-destruction reasoning as removeWarningSizeRule().
+    guiForm->gcsSyncTargetsContainerLayout->removeWidget(rowWidget);
+    rowWidget->deleteLater();
+    restripeGcsSyncTargets();
 }
 
 void MainWindow::makeBackupCopy(QString file) {
@@ -1047,12 +1162,6 @@ void MainWindow::readSettings() {
          if( ! settings->contains("watchButtonState") )
                          settings->setValue("watchButtonState", false);
 
-         if( ! settings->contains("gcs_key_file") )
-                         settings->setValue("gcs_key_file", QString(""));
-
-         if( ! settings->contains("target_bucket") )
-                         settings->setValue("target_bucket", QString(""));
-
          if( ! settings->contains("automaticWarningsEnabled") )
                          settings->setValue("automaticWarningsEnabled", true);
 
@@ -1084,8 +1193,6 @@ void MainWindow::readSettings() {
 	 settings->setValue("maxDayDiff", maxDayDiff);
          settings->setValue("monitorTimeout", guiForm->monitorTimeout->value());
          settings->setValue("watchButtonState", guiForm->watchButton->isChecked());
-         settings->setValue("gcs_key_file", gcsKeyFile);
-         settings->setValue("target_bucket", targetBucket);
 
          settings->setValue("automaticWarningsEnabled", guiForm->automaticWarningsCheckBox->isChecked());
          settings->setValue("warningComputerName", warningComputerName);
@@ -1100,6 +1207,20 @@ void MainWindow::readSettings() {
              settings->setValue("unit", warningSizeRuleWidgets[i].unitBox->currentText());
          }
          settings->endArray();
+
+         settings->beginWriteArray("gcsSyncTargets");
+         for (int i = 0; i < gcsSyncTargetWidgets.size(); ++i) {
+             settings->setArrayIndex(i);
+             settings->setValue("bucket", gcsSyncTargetWidgets[i].bucketEdit->text());
+             settings->setValue("keyFile", gcsSyncTargetWidgets[i].keyFileEdit->text());
+         }
+         settings->endArray();
+         // Once the array has been written at least once, drop the legacy
+         // scalar keys -- otherwise the one-time migration in the
+         // constructor would re-add a row from them even after the user
+         // deliberately deleted every configured sync target.
+         settings->remove("gcs_key_file");
+         settings->remove("target_bucket");
 
 	 qDebug() << "Settings saved to " << settings->fileName();
  }
