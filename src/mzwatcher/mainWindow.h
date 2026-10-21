@@ -5,10 +5,8 @@
 #include<QFileDialog>
 #include<QtGui>
 #include<QtSql>
-#include<QtNetwork/QNetworkAccessManager>
 #include<QFileSystemWatcher>
 #include<QDebug>
-#include<QUrlQuery>
 #include<QSysInfo>
 #include<QProcessEnvironment>
 #include<QRegularExpression>
@@ -242,7 +240,7 @@ class MainWindow: public QMainWindow {
 				QString targetBucket;
 
 				// Automatic Warnings settings. Both automaticWarningsCheckBox
-				// (read directly off the widget, same as remoteLoging) and a
+				// (read directly off the widget) and a
 				// mailerConfigFile that actually parses (EMAIL_ADDRESS and
 				// EMAIL_PASSWORD both present) must hold for the feature to
 				// do anything -- mirrors the GCS "both settings must be set"
@@ -330,13 +328,6 @@ class MainWindow: public QMainWindow {
 				// there is what gets saved, not re-synced from the file
 				// again until it's reselected.
 				void importMailerConfigFileValues();
-
-
-                        //remote database connection
-                        int connectionId;
-                        QNetworkAccessManager http;
-                        void remoteLogMessage(QString infotype, QString filename, int fileSize, QString msgText);
-                        //void readRemoteData(const QHttpResponseHeader &resp);
 
 };
 

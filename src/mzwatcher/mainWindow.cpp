@@ -41,9 +41,6 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
 	guiForm->commandEdit->setText(convertCommand);
         guiForm->extensionEdit->setText(extension);
         guiForm->progressBar->hide();
-        guiForm->remoteLoging->setChecked( settings->value("remoteLoging").toBool() );
-        guiForm->remoteServerUrl->setText(settings->value("remoteServerUrl").toString());
-        guiForm->instrumentId->setText(settings->value("instrumentId").toString());
         guiForm->monitorTimeout->setValue(settings->value("monitorTimeout").toInt());
         guiForm->dayDiffBox->setValue(maxDayDiff);
         guiForm->settingsLocationEdit->setText("\"" + settings->fileName() + "\"");
@@ -140,7 +137,6 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
         showDataFilesTable();
         getFormValues();
 
-        //remoteLogMessage("service", "", 0 , "mzWatcher started");
         if(guiForm->watchButton->isChecked()) monitor();
 }
 
@@ -988,7 +984,6 @@ void MainWindow::getFileList(const QString &fromDir) {
             if((now.daysTo(fi.lastModified()))*-1 < maxDayDiff ){
                 if(!fileList.contains(absfilepath) || !dbFiles.contains(absfilepath)) {
                     insertFileInfo(absfilepath);
-                    //remoteLogMessage("newfile", absfilepath, fsize,"New File Detected");
                 }
             }
         } else if (fi.isDir() && ! directoryList.contains(fi.absoluteFilePath()) ) {
@@ -1087,9 +1082,6 @@ void MainWindow::readSettings() {
 	 settings->setValue("destFolder", destFolder);
 	 settings->setValue("convertCommand", convertCommand);
 	 settings->setValue("maxDayDiff", maxDayDiff);
-         settings->setValue("remoteServerUrl", guiForm->remoteServerUrl->text());
-         settings->setValue("instrumentId", guiForm->instrumentId->text());
-         settings->setValue("remoteLoging", guiForm->remoteLoging->isChecked());
          settings->setValue("monitorTimeout", guiForm->monitorTimeout->value());
          settings->setValue("watchButtonState", guiForm->watchButton->isChecked());
          settings->setValue("gcs_key_file", gcsKeyFile);
@@ -1128,7 +1120,6 @@ void MainWindow::readSettings() {
  }
 
  void MainWindow::closeEvent(QCloseEvent *event) {
-        //remoteLogMessage("service", "", 0 , "mzWatcher stopped");
          writeSettings();
 	  DB.close();
 	  event->accept();
@@ -1219,8 +1210,6 @@ void MainWindow::readSettings() {
          // immediately reconverted on every subsequent scan until the next
          // DB refresh caught up.
          convertedFiles.insert(absfilepath);
-
-         //remoteLogMessage("fileconverted", absfilepath,fi.size(), "File Converted");
  }
 
 
@@ -1274,57 +1263,7 @@ void MainWindow::readSettings() {
 
                  if(fileChanged) {
                      item->setBackground(0,Qt::yellow);
-                     //remoteLogMessage("filesizechange", filename, fileList[filename], "File Size Changed");
                  }
 	 }
 	 query.clear();
 }
-
- void MainWindow::remoteLogMessage(QString infotype, QString filename, int fileSize, QString msgText) {
-
-     setStatus(infotype + "| \"" + filename + "\" | " + QString::number(fileSize) + " | " + msgText);
-
-     if (guiForm->watchButton->isChecked() == false) return;
-     if (guiForm->remoteLoging->isChecked() == false) return;
-     if (guiForm->remoteServerUrl->text().isEmpty()) return;
-     if (guiForm->instrumentId->text().isEmpty()) return;
-
-
-     QString serverURL = guiForm->remoteServerUrl->text();
-     QString instrumentId = guiForm->instrumentId->text();
-
-     QUrl url(serverURL);
-
-     QUrlQuery urlquery(serverURL);
-     urlquery.addQueryItem("action",  "writelog");
-     urlquery.addQueryItem("infotype", infotype);
-     urlquery.addQueryItem("instrumentId", instrumentId);
-     urlquery.addQueryItem("filename", filename);
-     urlquery.addQueryItem("filesize", QString::number(fileSize));
-     urlquery.addQueryItem("msgText",  msgText);
-
-     url.setQuery(urlquery);
-
-     auto reply = http.get(QNetworkRequest(url));
-
-     //connect(reply, SIGNAL(readyRead()), this, SLOT(httpReadyRead()))
-
-
-     //http.setHost(url.host());
-     //connectionId = http.get(url.toEncoded());
-     //setStatus( url.toEncoded());
-
- }
-
-/*
- void MainWindow::readRemoteData(const QHttpResponseHeader &resp)
- {
-     //qDebug() << "readRemoteData() << " << resp.statusCode();
-
-     if (resp.statusCode() == 200 ) { //redirect
-         QString response=http.readAll();
-     } else {
-         http.abort();
-     }
- }
-*/
