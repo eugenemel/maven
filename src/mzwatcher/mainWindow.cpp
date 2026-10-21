@@ -813,7 +813,10 @@ void MainWindow::makeBackupCopy(QString file) {
         setStatus("\n\n\nProcessing \"" + sourceFileName + "\"");
 
 	//source file is no longer available
-	if(! sourceFileInfo.exists()) return;
+	if(! sourceFileInfo.exists()) {
+	    setStatus("Source file \"" + file + "\" no longer exists -- skipping (it may have been renamed, moved, or removed since being queued)");
+	    return;
+	}
 
 	// The size-warning check moved to after a *successful* conversion (see
 	// below) -- checking here, before conversion even runs, meant a file
