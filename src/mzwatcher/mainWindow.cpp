@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
 
         readSettings();
 
-	extension = settings->value("extension").toString();
+	extension = settings->value("extension").toString().remove(QRegularExpression("^\\."));
 	sourceFolder = settings->value("sourceFolder").toString();
 	destFolder   = settings->value("destFolder").toString();
 	convertCommand = settings->value("convertCommand").toString();
@@ -283,7 +283,7 @@ void MainWindow::getFormValues() {
 	sourceFolder = guiForm->sourceFolderEdit->text();
 	destFolder = guiForm->destFolderEdit->text();
 	convertCommand=guiForm->commandEdit->text();
-	extension = guiForm->extensionEdit->text();
+	extension = guiForm->extensionEdit->text().remove(QRegularExpression("^\\."));
 	maxDayDiff = guiForm->dayDiffBox->value();
 
 	warningComputerName = guiForm->warningComputerNameEdit->text();
