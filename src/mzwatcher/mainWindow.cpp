@@ -401,7 +401,7 @@ void MainWindow::convertFile(QString file) {
 	if(! sourceFileInfo.exists()) return;
         QString tempPathName = createTempPath();
         QString tempConvertedFile = tempPathName + "/" + sourceFileName;
-        tempConvertedFile.replace(extension,destFileFormat);
+        tempConvertedFile.replace(QRegularExpression("\\." + QRegularExpression::escape(extension) + "$", QRegularExpression::CaseInsensitiveOption), "." + destFileFormat);
 
 	setStatus("TempFile=\"" + tempConvertedFile + "\"");
 	QDir tempPath(tempPathName);
@@ -942,7 +942,7 @@ void MainWindow::makeBackupCopy(QString file) {
         QString   destFileName(destFileDir + "/" + sourceFileName);
         QString destFileFormat = guiForm->destFileFormatBox->currentText();
         QString	  convertedFileName = destFile;
-        convertedFileName = convertedFileName.replace(extension,destFileFormat);
+        convertedFileName.replace(QRegularExpression("\\." + QRegularExpression::escape(extension) + "$", QRegularExpression::CaseInsensitiveOption), "." + destFileFormat);
 
         setStatus("Source=\""+sourceFolder+"\"");
         setStatus("Dest=\""+destFolder+"\"");
