@@ -4,6 +4,8 @@ const QString MainWindow::kLegacyExtensionSettingsKey = QString("extention");
 
 MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
 
+        setWindowTitle(QString("mzWatcher (%1)").arg(MAVEN_VERSION));
+
         //initialize
         timerId=0;
 

@@ -13,6 +13,10 @@ TARGET = testmzwatcher
 INCLUDEPATH += . ../../mzwatcher
 DEFINES += QT_DEPRECATED_WARNINGS
 
+#mainWindow.cpp references MAVEN_VERSION -- keep in sync with mzwatcher.pro
+VERSION = $$system("git describe --tags --always")
+DEFINES += MAVEN_VERSION=\\\"$$VERSION\\\"
+
 FORMS += ../../mzwatcher/mzWatcherGui.ui
 RESOURCES += ../../mzwatcher/mzwatcher.qrc
 
