@@ -4,6 +4,7 @@ Makefile
 src/maven/tmp
 src/maven/appdir
 mzWatcher/tmp
+src/maven_tests/testmzwatcher/tmp/
 bin/
 *.moc
 .vim*
