@@ -863,6 +863,10 @@ void MainWindow::addGcsSyncTarget(const QString &bucket, const QString &keyFile)
     keyFileEdit->setText(keyFile);
     keyFileEdit->setStyleSheet(kBorderedLineEditStyle);
 
+    QLabel *additionalFilesLabel = new QLabel("Additional Files:", row);
+    QLineEdit *additionalFilesEdit = new QLineEdit(row);
+    additionalFilesEdit->setStyleSheet(kBorderedLineEditStyle);
+
     QPushButton *browseButton = new QPushButton("Browse...", row);
     QPushButton *deleteButton = new QPushButton("Delete", row);
 
@@ -872,6 +876,8 @@ void MainWindow::addGcsSyncTarget(const QString &bucket, const QString &keyFile)
     rowLayout->addWidget(keyFileLabel, 1, 0);
     rowLayout->addWidget(keyFileEdit, 1, 1);
     rowLayout->addWidget(browseButton, 1, 2);
+    rowLayout->addWidget(additionalFilesLabel, 2, 0);
+    rowLayout->addWidget(additionalFilesEdit, 2, 1);
     rowLayout->setColumnStretch(1, 1);
 
     // Insert before the trailing stretch (see its addStretch() call site)
@@ -883,6 +889,7 @@ void MainWindow::addGcsSyncTarget(const QString &bucket, const QString &keyFile)
     w.rowWidget = row;
     w.bucketEdit = bucketEdit;
     w.keyFileEdit = keyFileEdit;
+    w.additionalFilesEdit = additionalFilesEdit;
     gcsSyncTargetWidgets.append(w);
     restripeGcsSyncTargets();
 

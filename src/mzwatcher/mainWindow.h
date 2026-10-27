@@ -244,6 +244,7 @@ class MainWindow: public QMainWindow {
 					QWidget* rowWidget;
 					QLineEdit* bucketEdit;
 					QLineEdit* keyFileEdit;
+					QLineEdit* additionalFilesEdit;
 				};
 				QList<GcsSyncTargetWidgets> gcsSyncTargetWidgets;
 				void addGcsSyncTarget(const QString &bucket, const QString &keyFile);
