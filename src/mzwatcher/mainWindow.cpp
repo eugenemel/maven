@@ -1124,6 +1124,14 @@ void MainWindow::addOtherSyncTarget(const QString &bucket, const QString &keyFil
         if (checked) startOtherSyncWatch(row); else stopOtherSyncWatch(row);
     });
     if (watching) watchSyncButton->setChecked(true);
+
+    // Always disable watching on bucket or directory changes for safety
+    connect(bucketEdit, &QLineEdit::textChanged, this, [watchSyncButton]() {
+        watchSyncButton->setChecked(false);
+    });
+    connect(localFilePathEdit, &QLineEdit::textChanged, this, [watchSyncButton]() {
+        watchSyncButton->setChecked(false);
+    });
 }
 
 void MainWindow::restripeOtherSyncTargets() {
