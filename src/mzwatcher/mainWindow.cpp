@@ -886,6 +886,7 @@ void MainWindow::addGcsSyncTarget(const QString &bucket, const QString &keyFile)
     QLabel *additionalFilesLabel = new QLabel("Additional Files:", row);
     QLineEdit *additionalFilesEdit = new QLineEdit(row);
     additionalFilesEdit->setStyleSheet(kBorderedLineEditStyle);
+    QPushButton *syncButton = new QPushButton(QIcon(":/images/refresh.png"), "Sync", row);
 
     QPushButton *browseButton = new QPushButton("Browse...", row);
     QPushButton *deleteButton = new QPushButton("Delete", row);
@@ -898,6 +899,7 @@ void MainWindow::addGcsSyncTarget(const QString &bucket, const QString &keyFile)
     rowLayout->addWidget(browseButton, 1, 2);
     rowLayout->addWidget(additionalFilesLabel, 2, 0);
     rowLayout->addWidget(additionalFilesEdit, 2, 1);
+    rowLayout->addWidget(syncButton, 2, 2);
     rowLayout->setColumnStretch(1, 1);
 
     // Insert before the trailing stretch (see its addStretch() call site)
