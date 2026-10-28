@@ -299,6 +299,7 @@ class MainWindow: public QMainWindow {
 				};
 				void syncOtherTarget(const OtherSyncTarget &target);
 				void uploadFileToOtherTarget(const OtherSyncTarget &target, const QString &filePath, const QString &objectPath);
+				void recordOtherSyncUpload(const QString &bucket, const QString &localDirectory, const QString &filePath, qint64 fileSize);
 
 				// Automatic Warnings settings. Both automaticWarningsCheckBox
 				// (read directly off the widget) and a

@@ -572,6 +572,18 @@ void MainWindow::uploadFileToOtherTarget(const OtherSyncTarget &target, const QS
     }
 }
 
+void MainWindow::recordOtherSyncUpload(const QString &bucket, const QString &localDirectory, const QString &filePath, qint64 fileSize) {
+    QSqlQuery query(DB);
+    query.prepare("insert or replace into other_file_sync(bucket,localDirectory,filePath,fileSize,modTime,uploadedTime) values(?,?,?,?,?,?)");
+    query.addBindValue(bucket);
+    query.addBindValue(localDirectory);
+    query.addBindValue(filePath);
+    query.addBindValue(fileSize);
+    query.addBindValue(QFileInfo(filePath).lastModified().toString("yyyy-MM-dd hh:mm:ss"));
+    query.addBindValue(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
+    if (!query.exec()) setStatus("recordOtherSyncUpload: " + query.lastError().text());
+}
+
 void MainWindow::syncOtherTarget(const OtherSyncTarget &target) {
     QRegularExpression nameRegex(target.nameRegex);
 
@@ -1220,6 +1232,7 @@ void MainWindow::scanOtherSyncTarget(QWidget *rowWidget) {
             QString objectPath = QDir(target.localDirectory).relativeFilePath(filePath);
             uploadFileToOtherTarget(target, filePath, objectPath);
             state.lastUploadedSize = currentSize;
+            recordOtherSyncUpload(target.bucket, target.localDirectory, filePath, currentSize);
         }
         return;
     }
@@ -1628,7 +1641,7 @@ void MainWindow::readSettings() {
        query.exec("drop table other_file_sync");
    }
 
-   bool otherFileSyncOk = query.exec("create table if not exists other_file_sync(bucket varchar(255), localDirectory varchar(255), filePath varchar(255), fileSize bigint, modTime timestamp, uploadedTime timestamp );");
+   bool otherFileSyncOk = query.exec("create table if not exists other_file_sync(bucket varchar(255), localDirectory varchar(255), filePath varchar(255), fileSize bigint, modTime timestamp, uploadedTime timestamp, primary key(bucket, filePath) );");
    if(!otherFileSyncOk) setStatus(query.lastError().text());
    query.clear();
  }
