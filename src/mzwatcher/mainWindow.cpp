@@ -1009,11 +1009,11 @@ void MainWindow::addOtherSyncTarget(const QString &bucket, const QString &localF
     bucketEdit->setStyleSheet(kBorderedLineEditStyle);
     QPushButton *deleteButton = new QPushButton("Delete", row);
 
-    QLabel *localFilePathLabel = new QLabel("Local File Path:", row);
+    QLabel *localFilePathLabel = new QLabel("Local Directory:", row);
     QLineEdit *localFilePathEdit = new QLineEdit(row);
     localFilePathEdit->setText(localFilePath);
     localFilePathEdit->setStyleSheet(kBorderedLineEditStyle);
-    QPushButton *browseButton = new QPushButton("Browse...", row);
+    QPushButton *browseButtonOtherSyncTarget = new QPushButton("Browse...", row);
 
     QLabel *nameRegexLabel = new QLabel("Name Regex:", row);
     QLineEdit *nameRegexEdit = new QLineEdit(row);
@@ -1026,7 +1026,7 @@ void MainWindow::addOtherSyncTarget(const QString &bucket, const QString &localF
     rowLayout->addWidget(deleteButton, 0, 2);
     rowLayout->addWidget(localFilePathLabel, 1, 0);
     rowLayout->addWidget(localFilePathEdit, 1, 1);
-    rowLayout->addWidget(browseButton, 1, 2);
+    rowLayout->addWidget(browseButtonOtherSyncTarget, 1, 2);
     rowLayout->addWidget(nameRegexLabel, 2, 0);
     rowLayout->addWidget(nameRegexEdit, 2, 1);
     rowLayout->addWidget(syncButton, 2, 2);
@@ -1045,6 +1045,12 @@ void MainWindow::addOtherSyncTarget(const QString &bucket, const QString &localF
 
     connect(deleteButton, &QPushButton::clicked, this, [this, row]() {
         removeOtherSyncTarget(row);
+    });
+
+    connect(browseButtonOtherSyncTarget, &QPushButton::clicked, this, [this, localFilePathEdit]() {
+        QString dir = QFileDialog::getExistingDirectory(this, "Select Local Directory");
+        if (dir.isEmpty()) return;
+        localFilePathEdit->setText(dir);
     });
 }
 
