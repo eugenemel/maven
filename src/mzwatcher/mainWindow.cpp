@@ -101,7 +101,8 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
                 QString keyFile = settings->value("keyFile").toString();
                 QString localFilePath = settings->value("localFilePath").toString();
                 QString nameRegex = settings->value("nameRegex").toString();
-                addOtherSyncTarget(bucket, keyFile, localFilePath, nameRegex);
+                bool watching = settings->value("watching").toBool();
+                addOtherSyncTarget(bucket, keyFile, localFilePath, nameRegex, watching);
             }
             settings->endArray();
         }
@@ -397,8 +398,18 @@ void MainWindow::processChangedFiles() {
 
 
 void MainWindow::timerEvent(QTimerEvent* event) {
-       getFormValues();
-       if(checkParameters()) updateFileList();
+       if (event->timerId() == timerId) {
+           getFormValues();
+           if(checkParameters()) updateFileList();
+           return;
+       }
+
+       for (int i = 0; i < otherSyncTargetWidgets.size(); ++i) {
+           if (otherSyncTargetWidgets[i].watchTimerId == event->timerId()) {
+               scanOtherSyncTarget(otherSyncTargetWidgets[i].rowWidget);
+               return;
+           }
+       }
 }
 
 
@@ -548,6 +559,19 @@ void MainWindow::syncGcsTarget(const GcsSyncTarget &target) {
     }
 }
 
+void MainWindow::uploadFileToOtherTarget(const OtherSyncTarget &target, const QString &filePath, const QString &objectPath) {
+    QStringList command = buildGcsUploadCommand(target.keyFile, target.bucket, filePath, objectPath);
+    if (command.isEmpty()) return;
+
+    setStatus("Uploading to \"gs://" + target.bucket + "/" + objectPath + "\"");
+    gcsUploader->setSystemCommand(command.first(), command.mid(1));
+    gcsUploader->start();
+
+    while (gcsUploader->isRunning()) {
+        QApplication::processEvents();
+    }
+}
+
 void MainWindow::syncOtherTarget(const OtherSyncTarget &target) {
     QRegularExpression nameRegex(target.nameRegex);
 
@@ -558,16 +582,7 @@ void MainWindow::syncOtherTarget(const OtherSyncTarget &target) {
         if (!target.nameRegex.isEmpty() && !nameRegex.match(fileName).hasMatch()) continue;
 
         QString objectPath = QDir(target.localDirectory).relativeFilePath(filePath);
-        QStringList command = buildGcsUploadCommand(target.keyFile, target.bucket, filePath, objectPath);
-        if (command.isEmpty()) continue;
-
-        setStatus("Uploading to \"gs://" + target.bucket + "/" + objectPath + "\"");
-        gcsUploader->setSystemCommand(command.first(), command.mid(1));
-        gcsUploader->start();
-
-        while (gcsUploader->isRunning()) {
-            QApplication::processEvents();
-        }
+        uploadFileToOtherTarget(target, filePath, objectPath);
     }
 }
 
@@ -1019,7 +1034,7 @@ void MainWindow::addOtherSyncTargetClicked() {
     addOtherSyncTarget(QString(), QString(), QString(), QString());
 }
 
-void MainWindow::addOtherSyncTarget(const QString &bucket, const QString &keyFile, const QString &localFilePath, const QString &nameRegex) {
+void MainWindow::addOtherSyncTarget(const QString &bucket, const QString &keyFile, const QString &localFilePath, const QString &nameRegex, bool watching) {
     QWidget *row = new QWidget(guiForm->otherSyncTargetsContainer);
     row->setAutoFillBackground(true);
     QGridLayout *rowLayout = new QGridLayout(row);
@@ -1102,6 +1117,13 @@ void MainWindow::addOtherSyncTarget(const QString &bucket, const QString &keyFil
         target.nameRegex = nameRegexEdit->text();
         syncOtherTarget(target);
     });
+
+    watchSyncButton->setCheckable(true);
+    watchSyncButton->setStyleSheet("QPushButton:checked { background-color: #3399ff; }");
+    connect(watchSyncButton, &QPushButton::toggled, this, [this, row](bool checked) {
+        if (checked) startOtherSyncWatch(row); else stopOtherSyncWatch(row);
+    });
+    if (watching) watchSyncButton->setChecked(true);
 }
 
 void MainWindow::restripeOtherSyncTargets() {
@@ -1115,6 +1137,9 @@ void MainWindow::restripeOtherSyncTargets() {
 void MainWindow::removeOtherSyncTarget(QWidget *rowWidget) {
     for (int i = 0; i < otherSyncTargetWidgets.size(); ++i) {
         if (otherSyncTargetWidgets.at(i).rowWidget == rowWidget) {
+            if (otherSyncTargetWidgets.at(i).watchTimerId) {
+                this->killTimer(otherSyncTargetWidgets.at(i).watchTimerId);
+            }
             otherSyncTargetWidgets.removeAt(i);
             break;
         }
@@ -1122,6 +1147,74 @@ void MainWindow::removeOtherSyncTarget(QWidget *rowWidget) {
     guiForm->otherSyncTargetsContainerLayout->removeWidget(rowWidget);
     rowWidget->deleteLater();
     restripeOtherSyncTargets();
+}
+
+void MainWindow::startOtherSyncWatch(QWidget *rowWidget) {
+    for (int i = 0; i < otherSyncTargetWidgets.size(); ++i) {
+        if (otherSyncTargetWidgets[i].rowWidget != rowWidget) continue;
+        if (otherSyncTargetWidgets[i].watchTimerId) return;
+        int timeoutMin = guiForm->monitorTimeout->value();
+        if (timeoutMin <= 0) return;
+        otherSyncTargetWidgets[i].watchTimerId = this->startTimer(timeoutMin * 1000);
+        return;
+    }
+}
+
+void MainWindow::stopOtherSyncWatch(QWidget *rowWidget) {
+    for (int i = 0; i < otherSyncTargetWidgets.size(); ++i) {
+        if (otherSyncTargetWidgets[i].rowWidget != rowWidget) continue;
+        if (otherSyncTargetWidgets[i].watchTimerId) {
+            this->killTimer(otherSyncTargetWidgets[i].watchTimerId);
+            otherSyncTargetWidgets[i].watchTimerId = 0;
+        }
+        return;
+    }
+}
+
+void MainWindow::scanOtherSyncTarget(QWidget *rowWidget) {
+    for (int i = 0; i < otherSyncTargetWidgets.size(); ++i) {
+        if (otherSyncTargetWidgets[i].rowWidget != rowWidget) continue;
+
+        OtherSyncTargetWidgets &w = otherSyncTargetWidgets[i];
+        OtherSyncTarget target;
+        target.bucket = w.bucketEdit->text();
+        target.keyFile = w.keyFileEdit->text();
+        target.localDirectory = w.localFilePathEdit->text();
+        target.nameRegex = w.nameRegexEdit->text();
+
+        int minFileSize = guiForm->minimumsFileSize->value();
+        int waitTime = guiForm->converter_waitTime->value() * 60;
+        QDateTime now = QDateTime::currentDateTime();
+        QRegularExpression nameRegex(target.nameRegex);
+
+        QDirIterator it(target.localDirectory, QDir::Files, QDirIterator::Subdirectories);
+        while (it.hasNext()) {
+            QString filePath = it.next();
+            QString fileName = QFileInfo(filePath).fileName();
+            if (!target.nameRegex.isEmpty() && !nameRegex.match(fileName).hasMatch()) continue;
+
+            qint64 currentSize = QFileInfo(filePath).size();
+            WatchedFileState &state = w.watchedFiles[filePath];
+            if (state.lastSize == -1) {
+                state.firstDetected = now;
+                state.lastSizeChangeTime = now;
+                state.lastSize = currentSize;
+            } else if (currentSize != state.lastSize) {
+                state.lastSize = currentSize;
+                state.lastSizeChangeTime = now;
+            }
+
+            if (currentSize <= minFileSize) continue;
+            if (state.firstDetected.secsTo(now) <= waitTime) continue;
+            if (state.lastSizeChangeTime.secsTo(now) <= waitTime) continue;
+            if (state.lastUploadedSize == currentSize) continue;
+
+            QString objectPath = QDir(target.localDirectory).relativeFilePath(filePath);
+            uploadFileToOtherTarget(target, filePath, objectPath);
+            state.lastUploadedSize = currentSize;
+        }
+        return;
+    }
 }
 
 void MainWindow::makeBackupCopy(QString file) {
@@ -1432,6 +1525,7 @@ void MainWindow::readSettings() {
              settings->setValue("keyFile", otherSyncTargetWidgets[i].keyFileEdit->text());
              settings->setValue("localFilePath", otherSyncTargetWidgets[i].localFilePathEdit->text());
              settings->setValue("nameRegex", otherSyncTargetWidgets[i].nameRegexEdit->text());
+             settings->setValue("watching", otherSyncTargetWidgets[i].watchTimerId != 0);
          }
          settings->endArray();
          // Once the array has been written at least once, drop the legacy

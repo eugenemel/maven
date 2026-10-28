@@ -264,17 +264,32 @@ class MainWindow: public QMainWindow {
 				};
 				QVector<GcsSyncTarget> collectGcsSyncTargets() const;
 
+				// Per-file state for the Watch Directory poller below -- lastSize
+				// == -1 means "not seen yet"; lastUploadedSize tracks what was
+				// last successfully uploaded so an unchanged file isn't
+				// re-uploaded on every poll.
+				struct WatchedFileState {
+					QDateTime firstDetected;
+					QDateTime lastSizeChangeTime;
+					qint64 lastSize = -1;
+					qint64 lastUploadedSize = -1;
+				};
 				struct OtherSyncTargetWidgets {
 					QWidget* rowWidget;
 					QLineEdit* bucketEdit;
 					QLineEdit* keyFileEdit;
 					QLineEdit* localFilePathEdit;
 					QLineEdit* nameRegexEdit;
+					int watchTimerId = 0;
+					QHash<QString, WatchedFileState> watchedFiles;
 				};
 				QList<OtherSyncTargetWidgets> otherSyncTargetWidgets;
-				void addOtherSyncTarget(const QString &bucket, const QString &keyFile, const QString &localFilePath, const QString &nameRegex);
+				void addOtherSyncTarget(const QString &bucket, const QString &keyFile, const QString &localFilePath, const QString &nameRegex, bool watching = false);
 				void removeOtherSyncTarget(QWidget *rowWidget);
 				void restripeOtherSyncTargets();
+				void startOtherSyncWatch(QWidget *rowWidget);
+				void stopOtherSyncWatch(QWidget *rowWidget);
+				void scanOtherSyncTarget(QWidget *rowWidget);
 
 				struct OtherSyncTarget {
 					QString bucket;
@@ -283,6 +298,7 @@ class MainWindow: public QMainWindow {
 					QString nameRegex;
 				};
 				void syncOtherTarget(const OtherSyncTarget &target);
+				void uploadFileToOtherTarget(const OtherSyncTarget &target, const QString &filePath, const QString &objectPath);
 
 				// Automatic Warnings settings. Both automaticWarningsCheckBox
 				// (read directly off the widget) and a
