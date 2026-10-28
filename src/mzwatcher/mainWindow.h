@@ -12,6 +12,7 @@
 #include<QRegularExpression>
 #include<QVector>
 #include<QDateTime>
+#include<QDirIterator>
 #include "ui_mzWatcherGui.h"
 
 class BackgroundThread : public QThread
@@ -266,13 +267,22 @@ class MainWindow: public QMainWindow {
 				struct OtherSyncTargetWidgets {
 					QWidget* rowWidget;
 					QLineEdit* bucketEdit;
+					QLineEdit* keyFileEdit;
 					QLineEdit* localFilePathEdit;
 					QLineEdit* nameRegexEdit;
 				};
 				QList<OtherSyncTargetWidgets> otherSyncTargetWidgets;
-				void addOtherSyncTarget(const QString &bucket, const QString &localFilePath, const QString &nameRegex);
+				void addOtherSyncTarget(const QString &bucket, const QString &keyFile, const QString &localFilePath, const QString &nameRegex);
 				void removeOtherSyncTarget(QWidget *rowWidget);
 				void restripeOtherSyncTargets();
+
+				struct OtherSyncTarget {
+					QString bucket;
+					QString keyFile;
+					QString localDirectory;
+					QString nameRegex;
+				};
+				void syncOtherTarget(const OtherSyncTarget &target);
 
 				// Automatic Warnings settings. Both automaticWarningsCheckBox
 				// (read directly off the widget) and a

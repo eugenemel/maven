@@ -98,9 +98,10 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
             for (int i = 0; i < otherTargetCount; ++i) {
                 settings->setArrayIndex(i);
                 QString bucket = settings->value("bucket").toString();
+                QString keyFile = settings->value("keyFile").toString();
                 QString localFilePath = settings->value("localFilePath").toString();
                 QString nameRegex = settings->value("nameRegex").toString();
-                addOtherSyncTarget(bucket, localFilePath, nameRegex);
+                addOtherSyncTarget(bucket, keyFile, localFilePath, nameRegex);
             }
             settings->endArray();
         }
@@ -544,6 +545,29 @@ void MainWindow::syncGcsTarget(const GcsSyncTarget &target) {
         convertedFile.replace(QRegularExpression("\\." + QRegularExpression::escape(extension) + "$", QRegularExpression::CaseInsensitiveOption), "." + destFileFormat);
         if (!QFileInfo::exists(convertedFile)) continue;
         uploadFileToGcsTarget(target, convertedFile);
+    }
+}
+
+void MainWindow::syncOtherTarget(const OtherSyncTarget &target) {
+    QRegularExpression nameRegex(target.nameRegex);
+
+    QDirIterator it(target.localDirectory, QDir::Files, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        QString filePath = it.next();
+        QString fileName = QFileInfo(filePath).fileName();
+        if (!target.nameRegex.isEmpty() && !nameRegex.match(fileName).hasMatch()) continue;
+
+        QString objectPath = QDir(target.localDirectory).relativeFilePath(filePath);
+        QStringList command = buildGcsUploadCommand(target.keyFile, target.bucket, filePath, objectPath);
+        if (command.isEmpty()) continue;
+
+        setStatus("Uploading to \"gs://" + target.bucket + "/" + objectPath + "\"");
+        gcsUploader->setSystemCommand(command.first(), command.mid(1));
+        gcsUploader->start();
+
+        while (gcsUploader->isRunning()) {
+            QApplication::processEvents();
+        }
     }
 }
 
@@ -992,10 +1016,10 @@ void MainWindow::removeGcsSyncTarget(QWidget *rowWidget) {
 }
 
 void MainWindow::addOtherSyncTargetClicked() {
-    addOtherSyncTarget(QString(), QString(), QString());
+    addOtherSyncTarget(QString(), QString(), QString(), QString());
 }
 
-void MainWindow::addOtherSyncTarget(const QString &bucket, const QString &localFilePath, const QString &nameRegex) {
+void MainWindow::addOtherSyncTarget(const QString &bucket, const QString &keyFile, const QString &localFilePath, const QString &nameRegex) {
     QWidget *row = new QWidget(guiForm->otherSyncTargetsContainer);
     row->setAutoFillBackground(true);
     QGridLayout *rowLayout = new QGridLayout(row);
@@ -1008,6 +1032,12 @@ void MainWindow::addOtherSyncTarget(const QString &bucket, const QString &localF
     bucketEdit->setText(bucket);
     bucketEdit->setStyleSheet(kBorderedLineEditStyle);
     QPushButton *deleteButton = new QPushButton("Delete", row);
+
+    QLabel *keyFileLabel = new QLabel("GCS Service Key File:", row);
+    QLineEdit *keyFileEdit = new QLineEdit(row);
+    keyFileEdit->setText(keyFile);
+    keyFileEdit->setStyleSheet(kBorderedLineEditStyle);
+    QPushButton *browseKeyFileButton = new QPushButton("Browse...", row);
 
     QLabel *localFilePathLabel = new QLabel("Local Directory:", row);
     QLineEdit *localFilePathEdit = new QLineEdit(row);
@@ -1024,12 +1054,15 @@ void MainWindow::addOtherSyncTarget(const QString &bucket, const QString &localF
     rowLayout->addWidget(bucketLabel, 0, 0);
     rowLayout->addWidget(bucketEdit, 0, 1);
     rowLayout->addWidget(deleteButton, 0, 2);
-    rowLayout->addWidget(localFilePathLabel, 1, 0);
-    rowLayout->addWidget(localFilePathEdit, 1, 1);
-    rowLayout->addWidget(browseButtonOtherSyncTarget, 1, 2);
-    rowLayout->addWidget(nameRegexLabel, 2, 0);
-    rowLayout->addWidget(nameRegexEdit, 2, 1);
-    rowLayout->addWidget(syncButton, 2, 2);
+    rowLayout->addWidget(keyFileLabel, 1, 0);
+    rowLayout->addWidget(keyFileEdit, 1, 1);
+    rowLayout->addWidget(browseKeyFileButton, 1, 2);
+    rowLayout->addWidget(localFilePathLabel, 2, 0);
+    rowLayout->addWidget(localFilePathEdit, 2, 1);
+    rowLayout->addWidget(browseButtonOtherSyncTarget, 2, 2);
+    rowLayout->addWidget(nameRegexLabel, 3, 0);
+    rowLayout->addWidget(nameRegexEdit, 3, 1);
+    rowLayout->addWidget(syncButton, 3, 2);
     rowLayout->setColumnStretch(1, 1);
 
     int insertPos = guiForm->otherSyncTargetsContainerLayout->count() - 1;
@@ -1038,6 +1071,7 @@ void MainWindow::addOtherSyncTarget(const QString &bucket, const QString &localF
     OtherSyncTargetWidgets w;
     w.rowWidget = row;
     w.bucketEdit = bucketEdit;
+    w.keyFileEdit = keyFileEdit;
     w.localFilePathEdit = localFilePathEdit;
     w.nameRegexEdit = nameRegexEdit;
     otherSyncTargetWidgets.append(w);
@@ -1047,10 +1081,25 @@ void MainWindow::addOtherSyncTarget(const QString &bucket, const QString &localF
         removeOtherSyncTarget(row);
     });
 
+    connect(browseKeyFileButton, &QPushButton::clicked, this, [this, keyFileEdit]() {
+        QString file = QFileDialog::getOpenFileName(this, "Select GCS Service Account Key File", ".", "JSON Files (*.json)");
+        if (file.isEmpty()) return;
+        keyFileEdit->setText(file);
+    });
+
     connect(browseButtonOtherSyncTarget, &QPushButton::clicked, this, [this, localFilePathEdit]() {
         QString dir = QFileDialog::getExistingDirectory(this, "Select Local Directory");
         if (dir.isEmpty()) return;
         localFilePathEdit->setText(dir);
+    });
+
+    connect(syncButton, &QPushButton::clicked, this, [this, bucketEdit, keyFileEdit, localFilePathEdit, nameRegexEdit]() {
+        OtherSyncTarget target;
+        target.bucket = bucketEdit->text();
+        target.keyFile = keyFileEdit->text();
+        target.localDirectory = localFilePathEdit->text();
+        target.nameRegex = nameRegexEdit->text();
+        syncOtherTarget(target);
     });
 }
 
@@ -1379,6 +1428,7 @@ void MainWindow::readSettings() {
          for (int i = 0; i < otherSyncTargetWidgets.size(); ++i) {
              settings->setArrayIndex(i);
              settings->setValue("bucket", otherSyncTargetWidgets[i].bucketEdit->text());
+             settings->setValue("keyFile", otherSyncTargetWidgets[i].keyFileEdit->text());
              settings->setValue("localFilePath", otherSyncTargetWidgets[i].localFilePathEdit->text());
              settings->setValue("nameRegex", otherSyncTargetWidgets[i].nameRegexEdit->text());
          }
