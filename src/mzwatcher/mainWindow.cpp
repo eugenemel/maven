@@ -74,7 +74,8 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
                 settings->setArrayIndex(i);
                 QString bucket = settings->value("bucket").toString();
                 QString keyFile = settings->value("keyFile").toString();
-                addGcsSyncTarget(bucket, keyFile);
+                QString additionalFiles = settings->value("additionalFiles").toString();
+                addGcsSyncTarget(bucket, keyFile, additionalFiles);
             }
             settings->endArray();
 
@@ -90,6 +91,18 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
                     addGcsSyncTarget(legacyBucket, legacyKeyFile);
                 }
             }
+        }
+
+        {
+            int otherTargetCount = settings->beginReadArray("otherSyncTargets");
+            for (int i = 0; i < otherTargetCount; ++i) {
+                settings->setArrayIndex(i);
+                QString bucket = settings->value("bucket").toString();
+                QString localFilePath = settings->value("localFilePath").toString();
+                QString nameRegex = settings->value("nameRegex").toString();
+                addOtherSyncTarget(bucket, localFilePath, nameRegex);
+            }
+            settings->endArray();
         }
 
         guiForm->watchButton->setCheckable(true);
@@ -880,7 +893,7 @@ void MainWindow::addGcsSyncTargetClicked() {
     addGcsSyncTarget(QString(), QString());
 }
 
-void MainWindow::addGcsSyncTarget(const QString &bucket, const QString &keyFile) {
+void MainWindow::addGcsSyncTarget(const QString &bucket, const QString &keyFile, const QString &additionalFiles) {
     // One group = two rows (bucket, then key file) that are still
     // deleted/tracked as a single unit -- only the on-screen arrangement is
     // taller instead of wider. Delete and Browse sit in the same column,
@@ -907,6 +920,7 @@ void MainWindow::addGcsSyncTarget(const QString &bucket, const QString &keyFile)
 
     QLabel *additionalFilesLabel = new QLabel("Additional Files:", row);
     QLineEdit *additionalFilesEdit = new QLineEdit(row);
+    additionalFilesEdit->setText(additionalFiles);
     additionalFilesEdit->setStyleSheet(kBorderedLineEditStyle);
     QPushButton *syncButton = new QPushButton(QIcon(":/images/refresh.png"), "Sync", row);
 
@@ -1351,6 +1365,16 @@ void MainWindow::readSettings() {
              settings->setArrayIndex(i);
              settings->setValue("bucket", gcsSyncTargetWidgets[i].bucketEdit->text());
              settings->setValue("keyFile", gcsSyncTargetWidgets[i].keyFileEdit->text());
+             settings->setValue("additionalFiles", gcsSyncTargetWidgets[i].additionalFilesEdit->text());
+         }
+         settings->endArray();
+
+         settings->beginWriteArray("otherSyncTargets");
+         for (int i = 0; i < otherSyncTargetWidgets.size(); ++i) {
+             settings->setArrayIndex(i);
+             settings->setValue("bucket", otherSyncTargetWidgets[i].bucketEdit->text());
+             settings->setValue("localFilePath", otherSyncTargetWidgets[i].localFilePathEdit->text());
+             settings->setValue("nameRegex", otherSyncTargetWidgets[i].nameRegexEdit->text());
          }
          settings->endArray();
          // Once the array has been written at least once, drop the legacy

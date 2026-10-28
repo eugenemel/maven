@@ -248,7 +248,7 @@ class MainWindow: public QMainWindow {
 					QLineEdit* additionalFilesEdit;
 				};
 				QList<GcsSyncTargetWidgets> gcsSyncTargetWidgets;
-				void addGcsSyncTarget(const QString &bucket, const QString &keyFile);
+				void addGcsSyncTarget(const QString &bucket, const QString &keyFile, const QString &additionalFiles = QString());
 				void removeGcsSyncTarget(QWidget *rowWidget);
 				// Re-applies alternating backgrounds across all current groups
 				// by list position -- called after every add/delete so the
