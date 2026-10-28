@@ -475,6 +475,7 @@ QStringList MainWindow::buildGcsUploadCommand(const QString &gcsKeyFile, const Q
 
 void MainWindow::uploadConvertedFileToGcs(const QString &localConvertedFile) {
     QString objectPath = buildGcsObjectPath(destFolder, localConvertedFile);
+    QString sourceDir = QFileInfo(localConvertedFile).absolutePath();
 
     // One gsutil invocation per configured sync target, run sequentially on
     // the same gcsUploader thread -- a row with either field unset is
@@ -489,6 +490,24 @@ void MainWindow::uploadConvertedFileToGcs(const QString &localConvertedFile) {
 
         while (gcsUploader->isRunning()) {
             QApplication::processEvents();
+        }
+
+        foreach (const QString &additionalFile, target.additionalFiles.split(",")) {
+            QString fileName = additionalFile.trimmed();
+            if (fileName.isEmpty()) continue;
+
+            QString additionalFilePath = sourceDir + "/" + fileName;
+            QString additionalObjectPath = buildGcsObjectPath(destFolder, additionalFilePath);
+            QStringList additionalCommand = buildGcsUploadCommand(target.keyFile, target.bucket, additionalFilePath, additionalObjectPath);
+            if (additionalCommand.isEmpty()) continue;
+
+            setStatus("Uploading to \"gs://" + target.bucket + "/" + additionalObjectPath + "\"");
+            gcsUploader->setSystemCommand(additionalCommand.first(), additionalCommand.mid(1));
+            gcsUploader->start();
+
+            while (gcsUploader->isRunning()) {
+                QApplication::processEvents();
+            }
         }
     }
 }
@@ -591,6 +610,7 @@ QVector<MainWindow::GcsSyncTarget> MainWindow::collectGcsSyncTargets() const {
         GcsSyncTarget target;
         target.bucket = w.bucketEdit->text();
         target.keyFile = w.keyFileEdit->text();
+        target.additionalFiles = w.additionalFilesEdit->text();
         targets.append(target);
     }
     return targets;

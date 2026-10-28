@@ -258,6 +258,7 @@ class MainWindow: public QMainWindow {
 				struct GcsSyncTarget {
 					QString bucket;
 					QString keyFile;
+					QString additionalFiles;
 				};
 				QVector<GcsSyncTarget> collectGcsSyncTargets() const;
 
