@@ -1047,6 +1047,7 @@ void MainWindow::addOtherSyncTarget(const QString &bucket, const QString &keyFil
 
     QLabel *nameRegexLabel = new QLabel("Name Regex:", row);
     QLineEdit *nameRegexEdit = new QLineEdit(row);
+    nameRegexEdit->setPlaceholderText("File Name Regex (only files matching regex are synced)");
     nameRegexEdit->setText(nameRegex);
     nameRegexEdit->setStyleSheet(kBorderedLineEditStyle);
     QPushButton *syncButton = new QPushButton(QIcon(":/images/refresh.png"), "Sync", row);
