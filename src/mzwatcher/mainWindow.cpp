@@ -474,41 +474,61 @@ QStringList MainWindow::buildGcsUploadCommand(const QString &gcsKeyFile, const Q
 }
 
 void MainWindow::uploadConvertedFileToGcs(const QString &localConvertedFile) {
-    QString objectPath = buildGcsObjectPath(destFolder, localConvertedFile);
-    QString sourceDir = QFileInfo(localConvertedFile).absolutePath();
-
     // One gsutil invocation per configured sync target, run sequentially on
     // the same gcsUploader thread -- a row with either field unset is
     // skipped (R11), same gating as the old single-target settings.
     foreach (const GcsSyncTarget &target, collectGcsSyncTargets()) {
-        QStringList command = buildGcsUploadCommand(target.keyFile, target.bucket, localConvertedFile, objectPath);
-        if (command.isEmpty()) continue;
+        uploadFileToGcsTarget(target, localConvertedFile);
+    }
+}
 
-        setStatus("Uploading to \"gs://" + target.bucket + "/" + objectPath + "\"");
-        gcsUploader->setSystemCommand(command.first(), command.mid(1));
+void MainWindow::uploadFileToGcsTarget(const GcsSyncTarget &target, const QString &localConvertedFile) {
+    QString objectPath = buildGcsObjectPath(destFolder, localConvertedFile);
+    QString sourceDir = QFileInfo(localConvertedFile).absolutePath();
+
+    QStringList command = buildGcsUploadCommand(target.keyFile, target.bucket, localConvertedFile, objectPath);
+    if (command.isEmpty()) return;
+
+    setStatus("Uploading to \"gs://" + target.bucket + "/" + objectPath + "\"");
+    gcsUploader->setSystemCommand(command.first(), command.mid(1));
+    gcsUploader->start();
+
+    while (gcsUploader->isRunning()) {
+        QApplication::processEvents();
+    }
+
+    foreach (const QString &additionalFile, target.additionalFiles.split(",")) {
+        QString fileName = additionalFile.trimmed();
+        if (fileName.isEmpty()) continue;
+
+        QString additionalFilePath = sourceDir + "/" + fileName;
+        QString additionalObjectPath = buildGcsObjectPath(destFolder, additionalFilePath);
+        QStringList additionalCommand = buildGcsUploadCommand(target.keyFile, target.bucket, additionalFilePath, additionalObjectPath);
+        if (additionalCommand.isEmpty()) continue;
+
+        setStatus("Uploading to \"gs://" + target.bucket + "/" + additionalObjectPath + "\"");
+        gcsUploader->setSystemCommand(additionalCommand.first(), additionalCommand.mid(1));
         gcsUploader->start();
 
         while (gcsUploader->isRunning()) {
             QApplication::processEvents();
         }
+    }
+}
 
-        foreach (const QString &additionalFile, target.additionalFiles.split(",")) {
-            QString fileName = additionalFile.trimmed();
-            if (fileName.isEmpty()) continue;
+void MainWindow::syncGcsTarget(const GcsSyncTarget &target) {
+    QString destFileFormat = guiForm->destFileFormatBox->currentText();
 
-            QString additionalFilePath = sourceDir + "/" + fileName;
-            QString additionalObjectPath = buildGcsObjectPath(destFolder, additionalFilePath);
-            QStringList additionalCommand = buildGcsUploadCommand(target.keyFile, target.bucket, additionalFilePath, additionalObjectPath);
-            if (additionalCommand.isEmpty()) continue;
+    QSqlQuery query(DB);
+    query.prepare("select filename from datafiles where fileConverted=1");
+    if (!query.exec()) return;
 
-            setStatus("Uploading to \"gs://" + target.bucket + "/" + additionalObjectPath + "\"");
-            gcsUploader->setSystemCommand(additionalCommand.first(), additionalCommand.mid(1));
-            gcsUploader->start();
-
-            while (gcsUploader->isRunning()) {
-                QApplication::processEvents();
-            }
-        }
+    while (query.next()) {
+        QString convertedFile = query.value(0).toString();
+        convertedFile.replace(sourceFolder, destFolder);
+        convertedFile.replace(QRegularExpression("\\." + QRegularExpression::escape(extension) + "$", QRegularExpression::CaseInsensitiveOption), "." + destFileFormat);
+        if (!QFileInfo::exists(convertedFile)) continue;
+        uploadFileToGcsTarget(target, convertedFile);
     }
 }
 
@@ -923,6 +943,14 @@ void MainWindow::addGcsSyncTarget(const QString &bucket, const QString &keyFile)
 
     connect(deleteButton, &QPushButton::clicked, this, [this, row]() {
         removeGcsSyncTarget(row);
+    });
+
+    connect(syncButton, &QPushButton::clicked, this, [this, bucketEdit, keyFileEdit, additionalFilesEdit]() {
+        GcsSyncTarget target;
+        target.bucket = bucketEdit->text();
+        target.keyFile = keyFileEdit->text();
+        target.additionalFiles = additionalFilesEdit->text();
+        syncGcsTarget(target);
     });
 }
 

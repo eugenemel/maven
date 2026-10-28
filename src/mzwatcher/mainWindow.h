@@ -330,6 +330,8 @@ class MainWindow: public QMainWindow {
 				void makeBackupCopy(QString filename);
 				static bool copyRecursively(const QString &sourcePath, const QString &destPath);
 				void uploadConvertedFileToGcs(const QString &localConvertedFile);
+				void uploadFileToGcsTarget(const GcsSyncTarget &target, const QString &localConvertedFile);
+				void syncGcsTarget(const GcsSyncTarget &target);
 				void checkAndSendSizeWarning(const QFileInfo &sourceFileInfo);
 				void sendWarningEmail(const QStringList &recipients, const QString &subject, const QString &body);
 				// Re-reads mailerConfigFile and updates mailerConfigStatusLabel
