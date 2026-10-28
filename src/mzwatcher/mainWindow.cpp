@@ -1611,6 +1611,26 @@ void MainWindow::readSettings() {
    bool ok = query.exec("create table if not exists datafiles(filename varchar(255), fileConverted int, fileAnalyzed int, fileSize bigint, modTime timestamp, firstDetected timestamp );");
    if(!ok) setStatus(query.lastError().text());
    query.clear();
+
+   // Persists Other File Sync's upload history so a restart doesn't re-upload unchanged files.
+   static const QStringList kExpectedOtherFileSyncColumns = {"bucket", "localDirectory", "filePath", "fileSize", "modTime", "uploadedTime"};
+
+   QSqlQuery otherFileSyncSchemaCheck(DB);
+   otherFileSyncSchemaCheck.exec("pragma table_info(other_file_sync)");
+   QStringList actualOtherFileSyncColumns;
+   while (otherFileSyncSchemaCheck.next()) {
+       actualOtherFileSyncColumns << otherFileSyncSchemaCheck.value(1).toString();
+   }
+   otherFileSyncSchemaCheck.clear();
+
+   if (!actualOtherFileSyncColumns.isEmpty() && actualOtherFileSyncColumns != kExpectedOtherFileSyncColumns) {
+       setStatus("Existing other_file_sync table from a previous version has an incompatible layout -- rebuilding it (this only resets the upload-tracking cache, not your synced files)");
+       query.exec("drop table other_file_sync");
+   }
+
+   bool otherFileSyncOk = query.exec("create table if not exists other_file_sync(bucket varchar(255), localDirectory varchar(255), filePath varchar(255), fileSize bigint, modTime timestamp, uploadedTime timestamp );");
+   if(!otherFileSyncOk) setStatus(query.lastError().text());
+   query.clear();
  }
 
 
