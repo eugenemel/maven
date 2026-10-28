@@ -1045,7 +1045,7 @@ void MainWindow::addOtherSyncTarget(const QString &bucket, const QString &keyFil
     localFilePathEdit->setStyleSheet(kBorderedLineEditStyle);
     QPushButton *browseButtonOtherSyncTarget = new QPushButton("Browse...", row);
 
-    QLabel *nameRegexLabel = new QLabel("Name Regex:", row);
+    QPushButton *watchSyncButton = new QPushButton(QIcon(":/images/train.png"), "Watch Directory", row);
     QLineEdit *nameRegexEdit = new QLineEdit(row);
     nameRegexEdit->setPlaceholderText("File Name Regex (only files matching regex are synced)");
     nameRegexEdit->setText(nameRegex);
@@ -1061,7 +1061,7 @@ void MainWindow::addOtherSyncTarget(const QString &bucket, const QString &keyFil
     rowLayout->addWidget(localFilePathLabel, 2, 0);
     rowLayout->addWidget(localFilePathEdit, 2, 1);
     rowLayout->addWidget(browseButtonOtherSyncTarget, 2, 2);
-    rowLayout->addWidget(nameRegexLabel, 3, 0);
+    rowLayout->addWidget(watchSyncButton, 3, 0);
     rowLayout->addWidget(nameRegexEdit, 3, 1);
     rowLayout->addWidget(syncButton, 3, 2);
     rowLayout->setColumnStretch(1, 1);
