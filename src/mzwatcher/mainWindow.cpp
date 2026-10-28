@@ -66,6 +66,7 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
         // their natural height, instead of stretching to fill the tab --
         // addGcsSyncTarget() always inserts new rows just before this.
         guiForm->gcsSyncTargetsContainerLayout->addStretch(1);
+        guiForm->otherSyncTargetsContainerLayout->addStretch(1);
 
         {
             int targetCount = settings->beginReadArray("gcsSyncTargets");
@@ -108,6 +109,7 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
 	connect(guiForm->sourceFolderButton,SIGNAL(pressed()),this,SLOT(selectSourceFolder()));
         connect(guiForm->clearDatabaseButton,SIGNAL(pressed()),this,SLOT(clearTables()));
         connect(guiForm->addGcsSyncTargetButton,SIGNAL(pressed()),this,SLOT(addGcsSyncTargetClicked()));
+        connect(guiForm->addOtherSyncTargetButton,SIGNAL(pressed()),this,SLOT(addOtherSyncTargetClicked()));
 
         connect(guiForm->automaticWarningsCheckBox,SIGNAL(toggled(bool)),this,SLOT(getFormValues()));
         connect(guiForm->warningComputerNameEdit,SIGNAL(textEdited(QString)),this,SLOT(getFormValues()));
@@ -973,6 +975,83 @@ void MainWindow::removeGcsSyncTarget(QWidget *rowWidget) {
     guiForm->gcsSyncTargetsContainerLayout->removeWidget(rowWidget);
     rowWidget->deleteLater();
     restripeGcsSyncTargets();
+}
+
+void MainWindow::addOtherSyncTargetClicked() {
+    addOtherSyncTarget(QString(), QString(), QString());
+}
+
+void MainWindow::addOtherSyncTarget(const QString &bucket, const QString &localFilePath, const QString &nameRegex) {
+    QWidget *row = new QWidget(guiForm->otherSyncTargetsContainer);
+    row->setAutoFillBackground(true);
+    QGridLayout *rowLayout = new QGridLayout(row);
+    rowLayout->setContentsMargins(4, 4, 4, 4);
+
+    static const QString kBorderedLineEditStyle = "border: 1px solid black;";
+
+    QLabel *bucketLabel = new QLabel("Target GCS Bucket:", row);
+    QLineEdit *bucketEdit = new QLineEdit(row);
+    bucketEdit->setText(bucket);
+    bucketEdit->setStyleSheet(kBorderedLineEditStyle);
+    QPushButton *deleteButton = new QPushButton("Delete", row);
+
+    QLabel *localFilePathLabel = new QLabel("Local File Path:", row);
+    QLineEdit *localFilePathEdit = new QLineEdit(row);
+    localFilePathEdit->setText(localFilePath);
+    localFilePathEdit->setStyleSheet(kBorderedLineEditStyle);
+    QPushButton *browseButton = new QPushButton("Browse...", row);
+
+    QLabel *nameRegexLabel = new QLabel("Name Regex:", row);
+    QLineEdit *nameRegexEdit = new QLineEdit(row);
+    nameRegexEdit->setText(nameRegex);
+    nameRegexEdit->setStyleSheet(kBorderedLineEditStyle);
+    QPushButton *syncButton = new QPushButton(QIcon(":/images/refresh.png"), "Sync", row);
+
+    rowLayout->addWidget(bucketLabel, 0, 0);
+    rowLayout->addWidget(bucketEdit, 0, 1);
+    rowLayout->addWidget(deleteButton, 0, 2);
+    rowLayout->addWidget(localFilePathLabel, 1, 0);
+    rowLayout->addWidget(localFilePathEdit, 1, 1);
+    rowLayout->addWidget(browseButton, 1, 2);
+    rowLayout->addWidget(nameRegexLabel, 2, 0);
+    rowLayout->addWidget(nameRegexEdit, 2, 1);
+    rowLayout->addWidget(syncButton, 2, 2);
+    rowLayout->setColumnStretch(1, 1);
+
+    int insertPos = guiForm->otherSyncTargetsContainerLayout->count() - 1;
+    guiForm->otherSyncTargetsContainerLayout->insertWidget(insertPos, row);
+
+    OtherSyncTargetWidgets w;
+    w.rowWidget = row;
+    w.bucketEdit = bucketEdit;
+    w.localFilePathEdit = localFilePathEdit;
+    w.nameRegexEdit = nameRegexEdit;
+    otherSyncTargetWidgets.append(w);
+    restripeOtherSyncTargets();
+
+    connect(deleteButton, &QPushButton::clicked, this, [this, row]() {
+        removeOtherSyncTarget(row);
+    });
+}
+
+void MainWindow::restripeOtherSyncTargets() {
+    static const QString kEvenStripeStyle = "background-color: #ffffff;";
+    static const QString kOddStripeStyle  = "background-color: #e3e3e3;";
+    for (int i = 0; i < otherSyncTargetWidgets.size(); ++i) {
+        otherSyncTargetWidgets[i].rowWidget->setStyleSheet((i % 2 == 0) ? kEvenStripeStyle : kOddStripeStyle);
+    }
+}
+
+void MainWindow::removeOtherSyncTarget(QWidget *rowWidget) {
+    for (int i = 0; i < otherSyncTargetWidgets.size(); ++i) {
+        if (otherSyncTargetWidgets.at(i).rowWidget == rowWidget) {
+            otherSyncTargetWidgets.removeAt(i);
+            break;
+        }
+    }
+    guiForm->otherSyncTargetsContainerLayout->removeWidget(rowWidget);
+    rowWidget->deleteLater();
+    restripeOtherSyncTargets();
 }
 
 void MainWindow::makeBackupCopy(QString file) {

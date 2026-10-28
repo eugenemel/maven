@@ -173,6 +173,7 @@ class MainWindow: public QMainWindow {
                         void selectMailerConfigFile();
                         void addWarningSizeRuleClicked();
                         void addGcsSyncTargetClicked();
+                        void addOtherSyncTargetClicked();
 
 			protected:
 				void timerEvent(QTimerEvent *event);
@@ -261,6 +262,17 @@ class MainWindow: public QMainWindow {
 					QString additionalFiles;
 				};
 				QVector<GcsSyncTarget> collectGcsSyncTargets() const;
+
+				struct OtherSyncTargetWidgets {
+					QWidget* rowWidget;
+					QLineEdit* bucketEdit;
+					QLineEdit* localFilePathEdit;
+					QLineEdit* nameRegexEdit;
+				};
+				QList<OtherSyncTargetWidgets> otherSyncTargetWidgets;
+				void addOtherSyncTarget(const QString &bucket, const QString &localFilePath, const QString &nameRegex);
+				void removeOtherSyncTarget(QWidget *rowWidget);
+				void restripeOtherSyncTargets();
 
 				// Automatic Warnings settings. Both automaticWarningsCheckBox
 				// (read directly off the widget) and a
