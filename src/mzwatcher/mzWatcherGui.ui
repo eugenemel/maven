@@ -427,7 +427,7 @@
        <item row="0" column="0" colspan="2">
         <widget class="QLabel" name="label_11">
          <property name="text">
-          <string>GCS Sync Targets:</string>
+          <string>Converted File GCS Sync Targets:</string>
          </property>
         </widget>
        </item>
