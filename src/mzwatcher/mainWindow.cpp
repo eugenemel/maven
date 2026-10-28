@@ -584,6 +584,15 @@ void MainWindow::recordOtherSyncUpload(const QString &bucket, const QString &loc
     if (!query.exec()) setStatus("recordOtherSyncUpload: " + query.lastError().text());
 }
 
+qint64 MainWindow::lookupOtherSyncUpload(const QString &bucket, const QString &filePath) {
+    QSqlQuery query(DB);
+    query.prepare("select fileSize from other_file_sync where bucket=? and filePath=?");
+    query.addBindValue(bucket);
+    query.addBindValue(filePath);
+    if (!query.exec() || !query.next()) return -1;
+    return query.value(0).toLongLong();
+}
+
 void MainWindow::syncOtherTarget(const OtherSyncTarget &target) {
     QRegularExpression nameRegex(target.nameRegex);
 
@@ -1219,6 +1228,7 @@ void MainWindow::scanOtherSyncTarget(QWidget *rowWidget) {
                 state.firstDetected = now;
                 state.lastSizeChangeTime = now;
                 state.lastSize = currentSize;
+                state.lastUploadedSize = lookupOtherSyncUpload(target.bucket, filePath);
             } else if (currentSize != state.lastSize) {
                 state.lastSize = currentSize;
                 state.lastSizeChangeTime = now;
