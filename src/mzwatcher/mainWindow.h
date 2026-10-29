@@ -13,6 +13,8 @@
 #include<QVector>
 #include<QDateTime>
 #include<QDirIterator>
+#include<QRunnable>
+#include<QThreadPool>
 #include "ui_mzWatcherGui.h"
 
 class BackgroundThread : public QThread
@@ -100,6 +102,31 @@ private:
 	QStringList arguments;
 	QProcessEnvironment environment;
 
+};
+
+// Run via a QThreadPool with setMaxThreadCount(1) so jobs queue and run one at a time.
+class CommandJob : public QObject, public QRunnable
+{
+	Q_OBJECT
+
+public:
+	CommandJob(const QString &program, const QStringList &arguments)
+		: program(program), arguments(arguments) {}
+
+	void run() override {
+		QProcess process;
+		process.start(program, arguments);
+		bool success = process.waitForStarted() && process.waitForFinished(-1)
+			&& process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0;
+		emit finished(success);
+	}
+
+signals:
+	void finished(bool success);
+
+private:
+	QString program;
+	QStringList arguments;
 };
 
 class MainWindow: public QMainWindow {
