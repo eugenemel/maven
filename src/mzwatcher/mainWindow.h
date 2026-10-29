@@ -112,8 +112,12 @@ class CommandJob : public QObject, public QRunnable
 	Q_OBJECT
 
 public:
-	CommandJob(const QString &program, const QStringList &arguments)
-		: program(program), arguments(arguments) {}
+	enum Type { CONVERSION, FILE_SYNC };
+
+	CommandJob(const QString &program, const QStringList &arguments, Type type)
+		: program(program), arguments(arguments), jobType(type) {}
+
+	Type type() const { return jobType; }
 
 	void run() override {
 		QProcess process;
@@ -140,8 +144,9 @@ signals:
 
 private:
 	QString program;
-	std::atomic<bool> cancelled { false };
 	QStringList arguments;
+	Type jobType;
+	std::atomic<bool> cancelled { false };
 };
 
 class MainWindow: public QMainWindow {

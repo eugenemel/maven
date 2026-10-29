@@ -520,7 +520,7 @@ void MainWindow::uploadFileToGcsTarget(const GcsSyncTarget &target, const QStrin
     if (command.isEmpty()) return;
 
     setStatus("Uploading to \"gs://" + target.bucket + "/" + objectPath + "\"");
-    commandQueue->start(new CommandJob(command.first(), command.mid(1)));
+    commandQueue->start(new CommandJob(command.first(), command.mid(1), CommandJob::FILE_SYNC));
 
     foreach (const QString &additionalFile, target.additionalFiles.split(",")) {
         QString fileName = additionalFile.trimmed();
@@ -532,7 +532,7 @@ void MainWindow::uploadFileToGcsTarget(const GcsSyncTarget &target, const QStrin
         if (additionalCommand.isEmpty()) continue;
 
         setStatus("Uploading to \"gs://" + target.bucket + "/" + additionalObjectPath + "\"");
-        commandQueue->start(new CommandJob(additionalCommand.first(), additionalCommand.mid(1)));
+        commandQueue->start(new CommandJob(additionalCommand.first(), additionalCommand.mid(1), CommandJob::FILE_SYNC));
     }
 }
 
@@ -558,7 +558,7 @@ void MainWindow::uploadFileToOtherTarget(const OtherSyncTarget &target, const QS
 
     setStatus("Uploading to \"gs://" + target.bucket + "/" + objectPath + "\"");
     // QProcess wants the executable ("gsutil") and its arguments separately, not one flat list.
-    CommandJob *job = new CommandJob(command.first(), command.mid(1));
+    CommandJob *job = new CommandJob(command.first(), command.mid(1), CommandJob::FILE_SYNC);
     if (onFinished) connect(job, &CommandJob::finished, this, onFinished);
     commandQueue->start(job);
 }
