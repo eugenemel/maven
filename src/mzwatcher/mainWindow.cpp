@@ -127,6 +127,10 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
 
         guiForm->stopAllButton->setIcon(style()->standardIcon(QStyle::SP_BrowserStop));
         connect(guiForm->stopAllButton,SIGNAL(pressed()),this,SLOT(stopAllJobs()));
+
+        QTimer *scheduledActionsTimer = new QTimer(this);
+        connect(scheduledActionsTimer, &QTimer::timeout, this, &MainWindow::updateScheduledActionsLabel);
+        scheduledActionsTimer->start(3000);
         connect(guiForm->addOtherSyncTargetButton,SIGNAL(pressed()),this,SLOT(addOtherSyncTargetClicked()));
 
         connect(guiForm->automaticWarningsCheckBox,SIGNAL(toggled(bool)),this,SLOT(getFormValues()));
@@ -259,6 +263,25 @@ void MainWindow::stopAllJobs() {
 			job->cancel();
 		}
 	}
+}
+
+void MainWindow::updateScheduledActionsLabel() {
+	int conversions = 0;
+	int fileSyncs = 0;
+	foreach (CommandJob *job, outstandingJobs) {
+		if (job->type() == CommandJob::CONVERSION) conversions++;
+		else fileSyncs++;
+	}
+
+	if (conversions == 0 && fileSyncs == 0) {
+		guiForm->scheduledActionsLabel->setText("");
+		return;
+	}
+
+	QStringList parts;
+	if (conversions > 0) parts << QString::number(conversions) + " Conversions";
+	if (fileSyncs > 0) parts << QString::number(fileSyncs) + " File Syncs";
+	guiForm->scheduledActionsLabel->setText("Scheduled Actions: " + parts.join(", "));
 }
 
 

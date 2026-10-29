@@ -224,6 +224,7 @@ class MainWindow: public QMainWindow {
 				void startConversion();
 				void stopConversion();
 				void stopAllJobs();
+				void updateScheduledActionsLabel();
 				void selectDestFolder();
 				void selectSourceFolder();
                         void clearTables();
