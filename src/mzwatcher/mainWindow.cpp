@@ -42,6 +42,7 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
         guiForm->extensionEdit->setText(extension);
         guiForm->progressBar->hide();
         guiForm->monitorTimeout->setValue(settings->value("monitorTimeout").toInt());
+        guiForm->processingThreadsSpinBox->setValue(settings->value("processingThreads").toInt());
         guiForm->dayDiffBox->setValue(maxDayDiff);
         guiForm->settingsLocationEdit->setText("\"" + settings->fileName() + "\"");
 
@@ -141,7 +142,10 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
         connect(guiForm->mailerConfigFileEdit,SIGNAL(textEdited(QString)),this,SLOT(getFormValues()));
 
 	commandQueue = new QThreadPool(this);
-	commandQueue->setMaxThreadCount(1);
+	commandQueue->setMaxThreadCount(guiForm->processingThreadsSpinBox->value());
+	connect(guiForm->processingThreadsSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int value) {
+		commandQueue->setMaxThreadCount(value);
+	});
 
 	mailer = new BackgroundThread(this);
 	connect(mailer,SIGNAL(statusChanged(QString)),this,SLOT(setStatus(QString)));
@@ -1468,6 +1472,9 @@ void MainWindow::readSettings() {
          if( ! settings->contains("monitorTimeout") )
                          settings->setValue("monitorTimeout", 60);
 
+         if( ! settings->contains("processingThreads") )
+                         settings->setValue("processingThreads", 3);
+
 
 	 if( ! settings->contains("maxDayDiff") )
 			 settings->setValue("maxDayDiff", 5);
@@ -1505,6 +1512,7 @@ void MainWindow::readSettings() {
 	 settings->setValue("convertCommand", convertCommand);
 	 settings->setValue("maxDayDiff", maxDayDiff);
          settings->setValue("monitorTimeout", guiForm->monitorTimeout->value());
+         settings->setValue("processingThreads", guiForm->processingThreadsSpinBox->value());
          settings->setValue("watchButtonState", guiForm->watchButton->isChecked());
 
          settings->setValue("automaticWarningsEnabled", guiForm->automaticWarningsCheckBox->isChecked());
