@@ -115,13 +115,19 @@ public:
 	enum Type { CONVERSION, FILE_SYNC };
 
 	CommandJob(const QString &program, const QStringList &arguments, Type type)
-		: program(program), arguments(arguments), jobType(type) {}
+		: program(program), arguments(arguments), jobType(type), useArgumentList(true) {}
+	CommandJob(const QString &command, Type type)
+		: program(command), jobType(type), useArgumentList(false) {}
 
 	Type type() const { return jobType; }
 
 	void run() override {
 		QProcess process;
-		process.start(program, arguments);
+		if (useArgumentList) {
+			process.start(program, arguments);
+		} else {
+			process.start(program);
+		}
 		if (!process.waitForStarted()) { emit finished(false); return; }
 
 		while (!process.waitForFinished(100)) {
@@ -138,6 +144,8 @@ public:
 
 	// Called from the GUI thread; run() (on the worker thread) polls this rather than being killed directly.
 	void cancel() { cancelled = true; }
+	// For a job removed from the queue via QThreadPool::tryTake() before it ever ran -- run() will never fire finished() itself.
+	void skipQueued() { emit finished(false); }
 
 signals:
 	void finished(bool success);
@@ -146,6 +154,7 @@ private:
 	QString program;
 	QStringList arguments;
 	Type jobType;
+	bool useArgumentList;
 	std::atomic<bool> cancelled { false };
 };
 
@@ -214,6 +223,7 @@ class MainWindow: public QMainWindow {
                         void stop_startConversion();
 				void startConversion();
 				void stopConversion();
+				void stopAllJobs();
 				void selectDestFolder();
 				void selectSourceFolder();
                         void clearTables();

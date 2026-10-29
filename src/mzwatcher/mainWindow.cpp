@@ -124,6 +124,9 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
 	connect(guiForm->sourceFolderButton,SIGNAL(pressed()),this,SLOT(selectSourceFolder()));
         connect(guiForm->clearDatabaseButton,SIGNAL(pressed()),this,SLOT(clearTables()));
         connect(guiForm->addGcsSyncTargetButton,SIGNAL(pressed()),this,SLOT(addGcsSyncTargetClicked()));
+
+        guiForm->stopAllButton->setIcon(style()->standardIcon(QStyle::SP_BrowserStop));
+        connect(guiForm->stopAllButton,SIGNAL(pressed()),this,SLOT(stopAllJobs()));
         connect(guiForm->addOtherSyncTargetButton,SIGNAL(pressed()),this,SLOT(addOtherSyncTargetClicked()));
 
         connect(guiForm->automaticWarningsCheckBox,SIGNAL(toggled(bool)),this,SLOT(getFormValues()));
@@ -238,25 +241,30 @@ void MainWindow::selectSourceFolder() {
 }
 
 void MainWindow::stopConversion() {
-	if (converter->isRunning()) {
-		converter->killProcess();
+	foreach (CommandJob *job, outstandingJobs) {
+		if (job->type() != CommandJob::CONVERSION) continue;
+		if (commandQueue->tryTake(job)) {
+			job->skipQueued();
+		} else {
+			job->cancel();
+		}
 	}
+}
 
-        int selectedItemsCount = guiForm->treeWidget->selectedItems().size();
+void MainWindow::stopAllJobs() {
+	foreach (CommandJob *job, outstandingJobs) {
+		if (commandQueue->tryTake(job)) {
+			job->skipQueued();
+		} else {
+			job->cancel();
+		}
+	}
 }
 
 
 void MainWindow::startConversion() {
-	if (converter->isRunning()) {
-		stopConversion();
-		return;
-	}
-
-        guiForm->convertButton->setText("Stop");
-
 	processSelectedFiles();
 	updateFileList();
-        guiForm->convertButton->setText("Convert");
 }
 
 void MainWindow::processSelectedFiles() {
@@ -513,10 +521,14 @@ void MainWindow::uploadConvertedFileToGcs(const QString &localConvertedFile) {
 }
 
 void MainWindow::enqueueCommand(CommandJob *job, std::function<void(bool success)> onFinished) {
+    // tryTake() deletes an autoDelete runnable it successfully evicts, same as a normal run would --
+    // we need the pointer to stay valid until our own finished handling below runs, so we take ownership.
+    job->setAutoDelete(false);
     outstandingJobs.append(job);
     connect(job, &CommandJob::finished, this, [this, job, onFinished](bool success) {
         outstandingJobs.removeOne(job);
         if (onFinished) onFinished(success);
+        job->deleteLater();
     });
     commandQueue->start(job);
 }
@@ -1347,32 +1359,33 @@ void MainWindow::makeBackupCopy(QString file) {
                 }
 
                 QString command = convertCommand.arg(infile,outfile);
-                converter->setSystemCommand(command);
-                converter->start();
 
-                while(converter->isRunning()){
-                        guiForm->convertButton->setText("Stop");
-                        QApplication::processEvents();
-                }
-                guiForm->convertButton->setText("Convert");
+                guiForm->convertButton->setText("Stop");
+                enqueueCommand(new CommandJob(command, CommandJob::CONVERSION), [this, sourceFilePath, localConvertedFile](bool success) {
+                    bool conversionStillRunning = false;
+                    foreach (CommandJob *job, outstandingJobs) {
+                        if (job->type() == CommandJob::CONVERSION) { conversionStillRunning = true; break; }
+                    }
+                    if (!conversionStillRunning) guiForm->convertButton->setText("Convert");
 
-                if (converter->lastRunSucceeded()) {
-                    markFileConverted(sourceFilePath);
-                    uploadConvertedFileToGcs(localConvertedFile);
+                    if (success) {
+                        markFileConverted(sourceFilePath);
+                        uploadConvertedFileToGcs(localConvertedFile);
 
-                    // Only now, after a confirmed-successful conversion, do we
-                    // trust the source file's size enough to decide whether
-                    // it's suspiciously small. A failed conversion is the
-                    // common symptom of having caught a file still mid-
-                    // acquisition (msconvert can't parse an incomplete raw
-                    // file) -- checking size before that point risked reading
-                    // a partial file and sending a false warning for a file
-                    // that was never actually finished at that size.
-                    QFileInfo finishedSourceInfo(sourceFilePath);
-                    checkAndSendSizeWarning(finishedSourceInfo);
-                } else {
-                    setStatus("Conversion failed for \"" + sourceFilePath + "\" -- not marking as converted; will retry automatically once it looks stable again.");
-                }
+                        // Only now, after a confirmed-successful conversion, do we
+                        // trust the source file's size enough to decide whether
+                        // it's suspiciously small. A failed conversion is the
+                        // common symptom of having caught a file still mid-
+                        // acquisition (msconvert can't parse an incomplete raw
+                        // file) -- checking size before that point risked reading
+                        // a partial file and sending a false warning for a file
+                        // that was never actually finished at that size.
+                        QFileInfo finishedSourceInfo(sourceFilePath);
+                        checkAndSendSizeWarning(finishedSourceInfo);
+                    } else {
+                        setStatus("Conversion failed for \"" + sourceFilePath + "\" -- not marking as converted; will retry automatically once it looks stable again.");
+                    }
+                });
         }
 
 	//refresh destination file information
