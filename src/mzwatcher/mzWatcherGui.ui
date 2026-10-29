@@ -601,7 +601,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="3">
+      <item row="0" column="5">
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Orientation::Horizontal</enum>
@@ -625,21 +625,21 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="5">
+      <item row="0" column="3">
        <widget class="QPushButton" name="stopAllButton">
         <property name="text">
          <string>Stop All</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="6">
+      <item row="0" column="4">
        <widget class="QLabel" name="scheduledActionsLabel">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
-      <item row="0" column="4">
+      <item row="0" column="6">
        <widget class="QDial" name="monitorDial">
         <property name="enabled">
          <bool>true</bool>

@@ -140,12 +140,6 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
         connect(guiForm->mailerConfigFileButton,SIGNAL(pressed()),this,SLOT(selectMailerConfigFile()));
         connect(guiForm->mailerConfigFileEdit,SIGNAL(textEdited(QString)),this,SLOT(getFormValues()));
 
-	converter = new BackgroundThread(this);
-	connect(converter,SIGNAL(statusChanged(QString)),this,SLOT(setStatus(QString)));
-
-	gcsUploader = new BackgroundThread(this);
-	connect(gcsUploader,SIGNAL(statusChanged(QString)),this,SLOT(setStatus(QString)));
-
 	commandQueue = new QThreadPool(this);
 	commandQueue->setMaxThreadCount(1);
 
@@ -223,15 +217,6 @@ bool MainWindow::checkParameters() {
 	return ok;
 }
 
-void MainWindow::stop_startConversion() {
-
-	if (converter->isRunning()) {
-		stopConversion();
-	} else{
-		startConversion();
-	}
-}
-
 void MainWindow::selectDestFolder() {
 	QString dir =QFileDialog::getExistingDirectory(this,".");
 	destFolder = dir+ "/";
@@ -242,17 +227,6 @@ void MainWindow::selectSourceFolder() {
 	QString dir = QFileDialog::getExistingDirectory(this,".");
 	sourceFolder = dir + "/";
 	guiForm->sourceFolderEdit->setText(dir);
-}
-
-void MainWindow::stopConversion() {
-	foreach (CommandJob *job, outstandingJobs) {
-		if (job->type() != CommandJob::CONVERSION) continue;
-		if (commandQueue->tryTake(job)) {
-			job->skipQueued();
-		} else {
-			job->cancel();
-		}
-	}
 }
 
 void MainWindow::stopAllJobs() {
@@ -284,11 +258,6 @@ void MainWindow::updateScheduledActionsLabel() {
 	guiForm->scheduledActionsLabel->setText("Scheduled Actions: " + parts.join(", "));
 }
 
-
-void MainWindow::startConversion() {
-	processSelectedFiles();
-	updateFileList();
-}
 
 void MainWindow::processSelectedFiles() {
 	QStringList selectedfiles;
@@ -455,33 +424,6 @@ QString MainWindow::createTempPath() {
 	return tempPathName;
 }
 
-void MainWindow::convertFile(QString file) {
-	if (checkParameters() == 0) return;
-	QFileInfo sourceFileInfo(file);
-	QString   sourceFileName = sourceFileInfo.fileName();
-	QString   destFileFormat = guiForm->destFileFormatBox->currentText();
-
-	if(! sourceFileInfo.exists()) return;
-        QString tempPathName = createTempPath();
-        QString tempConvertedFile = tempPathName + "/" + sourceFileName;
-        tempConvertedFile.replace(QRegularExpression("\\." + QRegularExpression::escape(extension) + "$", QRegularExpression::CaseInsensitiveOption), "." + destFileFormat);
-
-	setStatus("TempFile=\"" + tempConvertedFile + "\"");
-	QDir tempPath(tempPathName);
-
-	if (tempPath.exists()) {
-		QString command = convertCommand.arg(file,tempConvertedFile);
-		converter->setSystemCommand(command);
-		converter->start();
-
-		while(converter->isRunning()){
-                        guiForm->convertButton->setText("Stop");
-			QApplication::processEvents();
-		}
-		markFileConverted(file);
-	}
-}
-
 bool MainWindow::isConvertibleMatch(const QString &entryName, const QString &extension) {
     if (extension.isEmpty()) return false;
     return entryName.endsWith(extension, Qt::CaseInsensitive);
@@ -535,9 +477,9 @@ QStringList MainWindow::buildGcsUploadCommand(const QString &gcsKeyFile, const Q
 }
 
 void MainWindow::uploadConvertedFileToGcs(const QString &localConvertedFile) {
-    // One gsutil invocation per configured sync target, run sequentially on
-    // the same gcsUploader thread -- a row with either field unset is
-    // skipped (R11), same gating as the old single-target settings.
+    // One gsutil invocation per configured sync target, run sequentially via
+    // commandQueue -- a row with either field unset is skipped (R11), same
+    // gating as the old single-target settings.
     foreach (const GcsSyncTarget &target, collectGcsSyncTargets()) {
         uploadFileToGcsTarget(target, localConvertedFile);
     }
@@ -1419,7 +1361,6 @@ void MainWindow::processFile(QString file) {
 	if (checkParameters() == 0) return;
 
         makeBackupCopy(file);
-        //convertFile(file);
 
 }
 

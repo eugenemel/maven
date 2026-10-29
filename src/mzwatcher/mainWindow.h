@@ -220,9 +220,6 @@ class MainWindow: public QMainWindow {
 				void getFormValues();
 				void monitor();
 				void setStatus(QString status);
-                        void stop_startConversion();
-				void startConversion();
-				void stopConversion();
 				void stopAllJobs();
 				void updateScheduledActionsLabel();
 				void selectDestFolder();
@@ -291,8 +288,6 @@ class MainWindow: public QMainWindow {
 				QString sourceFolder;
 				QString destFolder;
 				QString convertCommand;
-				BackgroundThread* converter;
-				BackgroundThread* gcsUploader;
 				QThreadPool* commandQueue;
 				QList<CommandJob*> outstandingJobs;
 				void enqueueCommand(CommandJob *job, std::function<void(bool success)> onFinished = std::function<void(bool success)>());
@@ -427,7 +422,6 @@ class MainWindow: public QMainWindow {
 
 				QString createTempPath();
 
-				void convertFile(QString filename);
 				void makeBackupCopy(QString filename);
 				static bool copyRecursively(const QString &sourcePath, const QString &destPath);
 				void uploadConvertedFileToGcs(const QString &localConvertedFile);
