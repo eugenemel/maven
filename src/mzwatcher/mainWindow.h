@@ -19,100 +19,13 @@
 #include<atomic>
 #include "ui_mzWatcherGui.h"
 
-class BackgroundThread : public QThread
-{
-	Q_OBJECT
-
-public:
-	BackgroundThread(QWidget*) { _stopped=false; _useArgumentList=false; _useCustomEnvironment=false; _lastRunSucceeded=false; }
-	// Whether the most recently completed run exited normally with code 0.
-	// False after a failed start, a non-zero/abnormal exit, or a kill -- the
-	// caller uses this to decide whether to treat the file as actually done
-	// (mark converted, upload, size-check) or leave it alone to be retried
-	// automatically the next time it looks stable.
-	bool lastRunSucceeded() const { return _lastRunSucceeded; }
-	void setSystemCommand(QString cmd) { command = cmd; arguments.clear(); _useArgumentList=false; }
-	void setSystemCommand(QString program, QStringList args) { command = program; arguments = args; _useArgumentList=true; }
-	// Issue 859: the mailer needs to pass a password to a child process
-	// without it ever appearing on that process's own command line (visible
-	// to any user via Task Manager/tasklist without special privileges) --
-	// an inherited-but-overridden environment variable is a meaningfully
-	// better (if not perfect) place for a short-lived secret than argv.
-	void setProcessEnvironment(const QProcessEnvironment &env) { environment = env; _useCustomEnvironment=true; }
-	void killProcess() { _stopped=true; }
-
-signals:
-	void statusChanged(QString);
-
-protected:
-	void run(void) {
-		QProcess converter;
-		if (_useCustomEnvironment) {
-			converter.setProcessEnvironment(environment);
-		}
-		if (_useArgumentList) {
-			converter.start(command, arguments);
-		} else {
-			converter.start(command);
-		}
-
-		_stopped=false;
-		_lastRunSucceeded=false;
-
-		emit statusChanged("Running " + command);
-
-		if (!converter.waitForStarted()) {
-                        emit statusChanged("Command Failed!");
-			converter.kill();
-			return;
-		}
-
-		while (!converter.waitForFinished()) {
-			emit statusChanged("Running conversion");
-			if (_stopped) {
-				converter.terminate();;
-				emit statusChanged("Job killed");
-				_stopped=false;
-				return;
-			}
-			sleep(1);
-		};
-
-		// Previously this unconditionally said "Conversion done!" regardless
-		// of whether the command actually succeeded -- a failing script (e.g.
-		// the mailer's PowerShell script hitting a blocked SMTP port, a bad
-		// TLS negotiation, or a rejected login) would exit non-zero and
-		// finish normally, but its own error output was never read, so
-		// mzWatcher's log looked identical whether the command worked or not.
-		if (converter.exitStatus() == QProcess::NormalExit && converter.exitCode() == 0) {
-			emit statusChanged("Conversion done!");
-			_lastRunSucceeded=true;
-		} else {
-			QString errOutput = QString::fromLocal8Bit(converter.readAllStandardError()).trimmed();
-			emit statusChanged(QString("Command finished with errors (exit code %1): %2")
-			                    .arg(converter.exitCode())
-			                    .arg(errOutput.isEmpty() ? QString("(no error output)") : errOutput));
-		}
-	}
-
-private:
-	bool _stopped;
-	bool _useArgumentList;
-	bool _useCustomEnvironment;
-	bool _lastRunSucceeded;
-	QString command;
-	QStringList arguments;
-	QProcessEnvironment environment;
-
-};
-
-// Run via a QThreadPool with setMaxThreadCount(1) so jobs queue and run one at a time.
+// Run via a QThreadPool (commandQueue) so jobs queue and run without blocking the GUI thread.
 class CommandJob : public QObject, public QRunnable
 {
 	Q_OBJECT
 
 public:
-	enum Type { CONVERSION, FILE_SYNC };
+	enum Type { CONVERSION, FILE_SYNC, WARNING_EMAIL };
 
 	CommandJob(const QString &program, const QStringList &arguments, Type type)
 		: program(program), arguments(arguments), jobType(type), useArgumentList(true) {}
@@ -121,8 +34,14 @@ public:
 
 	Type type() const { return jobType; }
 
+	// For a command (e.g. the mailer) that needs a secret passed via environment variable rather than argv.
+	void setProcessEnvironment(const QProcessEnvironment &env) { environment = env; useCustomEnvironment = true; }
+
 	void run() override {
 		QProcess process;
+		if (useCustomEnvironment) {
+			process.setProcessEnvironment(environment);
+		}
 		if (useArgumentList) {
 			process.start(program, arguments);
 		} else {
@@ -155,6 +74,8 @@ private:
 	QStringList arguments;
 	Type jobType;
 	bool useArgumentList;
+	QProcessEnvironment environment;
+	bool useCustomEnvironment = false;
 	std::atomic<bool> cancelled { false };
 };
 
@@ -388,8 +309,6 @@ class MainWindow: public QMainWindow {
 				// each time a warning email is sent, never duplicated into
 				// QSettings.
 				QString mailerConfigFile;
-
-				BackgroundThread* mailer;
 
 				// Set by readSettings() to indicate "warningComputerName" had
 				// never been persisted before this run, so the constructor

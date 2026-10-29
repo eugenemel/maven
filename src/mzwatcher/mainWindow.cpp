@@ -147,9 +147,6 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
 		commandQueue->setMaxThreadCount(value);
 	});
 
-	mailer = new BackgroundThread(this);
-	connect(mailer,SIGNAL(statusChanged(QString)),this,SLOT(setStatus(QString)));
-
 	updateMailerConfigStatus();
 
 
@@ -246,12 +243,14 @@ void MainWindow::stopAllJobs() {
 void MainWindow::updateScheduledActionsLabel() {
 	int conversions = 0;
 	int fileSyncs = 0;
+	int warningEmails = 0;
 	foreach (CommandJob *job, outstandingJobs) {
 		if (job->type() == CommandJob::CONVERSION) conversions++;
-		else fileSyncs++;
+		else if (job->type() == CommandJob::FILE_SYNC) fileSyncs++;
+		else warningEmails++;
 	}
 
-	if (conversions == 0 && fileSyncs == 0) {
+	if (conversions == 0 && fileSyncs == 0 && warningEmails == 0) {
 		guiForm->scheduledActionsLabel->setText("");
 		return;
 	}
@@ -259,6 +258,7 @@ void MainWindow::updateScheduledActionsLabel() {
 	QStringList parts;
 	if (conversions > 0) parts << QString::number(conversions) + " Conversions";
 	if (fileSyncs > 0) parts << QString::number(fileSyncs) + " File Syncs";
+	if (warningEmails > 0) parts << QString::number(warningEmails) + " Warning Emails";
 	guiForm->scheduledActionsLabel->setText("Scheduled Actions: " + parts.join(", "));
 }
 
@@ -816,13 +816,14 @@ void MainWindow::sendWarningEmail(const QStringList &recipients, const QString &
     env.insert("MZWATCHER_MAIL_SERVER", smtpServer);
     env.insert("MZWATCHER_MAIL_PORT", smtpPort);
 
-    mailer->setProcessEnvironment(env);
-    mailer->setSystemCommand("powershell.exe", QStringList() << "-ExecutionPolicy" << "Bypass" << "-NoProfile" << "-File" << scriptPath);
-    mailer->start();
-    // Fire-and-forget: BackgroundThread runs this on its own QThread, so this
-    // never blocks the conversion pipeline, and any failure just reaches the
-    // log via the existing statusChanged -> setStatus connection -- same
-    // resilience principle as the GCS upload feature (R12).
+    CommandJob *job = new CommandJob("powershell.exe", QStringList() << "-ExecutionPolicy" << "Bypass" << "-NoProfile" << "-File" << scriptPath, CommandJob::WARNING_EMAIL);
+    job->setProcessEnvironment(env);
+    // Fire-and-forget: runs on commandQueue like any other command, so this
+    // never blocks the conversion pipeline -- same resilience principle as
+    // the GCS upload feature (R12).
+    enqueueCommand(job, [this](bool success) {
+        if (!success) setStatus("Failed to send size-warning email -- see mailer config and credentials.");
+    });
 #endif
 }
 
