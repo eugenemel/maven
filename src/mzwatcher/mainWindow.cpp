@@ -139,6 +139,9 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
 	gcsUploader = new BackgroundThread(this);
 	connect(gcsUploader,SIGNAL(statusChanged(QString)),this,SLOT(setStatus(QString)));
 
+	commandQueue = new QThreadPool(this);
+	commandQueue->setMaxThreadCount(1);
+
 	mailer = new BackgroundThread(this);
 	connect(mailer,SIGNAL(statusChanged(QString)),this,SLOT(setStatus(QString)));
 
@@ -559,17 +562,15 @@ void MainWindow::syncGcsTarget(const GcsSyncTarget &target) {
     }
 }
 
-void MainWindow::uploadFileToOtherTarget(const OtherSyncTarget &target, const QString &filePath, const QString &objectPath) {
+void MainWindow::uploadFileToOtherTarget(const OtherSyncTarget &target, const QString &filePath, const QString &objectPath, std::function<void(bool success)> onFinished) {
     QStringList command = buildGcsUploadCommand(target.keyFile, target.bucket, filePath, objectPath);
-    if (command.isEmpty()) return;
+    if (command.isEmpty()) { if (onFinished) onFinished(false); return; }
 
     setStatus("Uploading to \"gs://" + target.bucket + "/" + objectPath + "\"");
-    gcsUploader->setSystemCommand(command.first(), command.mid(1));
-    gcsUploader->start();
-
-    while (gcsUploader->isRunning()) {
-        QApplication::processEvents();
-    }
+    // QProcess wants the executable ("gsutil") and its arguments separately, not one flat list.
+    CommandJob *job = new CommandJob(command.first(), command.mid(1));
+    if (onFinished) connect(job, &CommandJob::finished, this, onFinished);
+    commandQueue->start(job);
 }
 
 void MainWindow::recordOtherSyncUpload(const QString &bucket, const QString &localDirectory, const QString &filePath, qint64 fileSize) {
@@ -1240,9 +1241,15 @@ void MainWindow::scanOtherSyncTarget(QWidget *rowWidget) {
             if (state.lastUploadedSize == currentSize) continue;
 
             QString objectPath = QDir(target.localDirectory).relativeFilePath(filePath);
-            uploadFileToOtherTarget(target, filePath, objectPath);
-            state.lastUploadedSize = currentSize;
-            recordOtherSyncUpload(target.bucket, target.localDirectory, filePath, currentSize);
+            uploadFileToOtherTarget(target, filePath, objectPath, [this, rowWidget, filePath, currentSize, target](bool success) {
+                if (!success) return;
+                for (int j = 0; j < otherSyncTargetWidgets.size(); ++j) {
+                    if (otherSyncTargetWidgets[j].rowWidget != rowWidget) continue;
+                    otherSyncTargetWidgets[j].watchedFiles[filePath].lastUploadedSize = currentSize;
+                    break;
+                }
+                recordOtherSyncUpload(target.bucket, target.localDirectory, filePath, currentSize);
+            });
         }
         return;
     }

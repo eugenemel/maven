@@ -15,6 +15,7 @@
 #include<QDirIterator>
 #include<QRunnable>
 #include<QThreadPool>
+#include<functional>
 #include "ui_mzWatcherGui.h"
 
 class BackgroundThread : public QThread
@@ -262,6 +263,7 @@ class MainWindow: public QMainWindow {
 				QString convertCommand;
 				BackgroundThread* converter;
 				BackgroundThread* gcsUploader;
+				QThreadPool* commandQueue;
 
 				// One dynamically-added GCS sync target row: the widgets
 				// themselves are the source of truth (read directly at
@@ -325,7 +327,7 @@ class MainWindow: public QMainWindow {
 					QString nameRegex;
 				};
 				void syncOtherTarget(const OtherSyncTarget &target);
-				void uploadFileToOtherTarget(const OtherSyncTarget &target, const QString &filePath, const QString &objectPath);
+				void uploadFileToOtherTarget(const OtherSyncTarget &target, const QString &filePath, const QString &objectPath, std::function<void(bool success)> onFinished = std::function<void(bool success)>());
 				void recordOtherSyncUpload(const QString &bucket, const QString &localDirectory, const QString &filePath, qint64 fileSize);
 				qint64 lookupOtherSyncUpload(const QString &bucket, const QString &filePath);
 
