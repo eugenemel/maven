@@ -270,16 +270,10 @@ void MainWindow::processSelectedFiles() {
                 selectedfiles << item->text(2);
 	}
 
-        int count=0;
-        guiForm->progressBar->show();
-        guiForm->progressBar->setMaximum(selectedfiles.size());
 	foreach (QString filename, selectedfiles) {
-                guiForm->progressBar->setValue(++count);
                 processFile(filename);
-
 	}
         guiForm->treeWidget->clearSelection();
-        guiForm->progressBar->hide();
 }
 
 void MainWindow::monitor() {
@@ -490,6 +484,14 @@ void MainWindow::uploadConvertedFileToGcs(const QString &localConvertedFile) {
 }
 
 void MainWindow::enqueueCommand(CommandJob *job, std::function<void(bool success)> onFinished) {
+    foreach (CommandJob *existing, outstandingJobs) {
+        if (existing->commandKey() == job->commandKey()) {
+            setStatus("Skipping duplicate command already queued/running: " + job->commandKey());
+            delete job;
+            return;
+        }
+    }
+
     // tryTake() deletes an autoDelete runnable it successfully evicts, same as a normal run would --
     // we need the pointer to stay valid until our own finished handling below runs, so we take ownership.
     job->setAutoDelete(false);
@@ -1575,6 +1577,16 @@ void MainWindow::readSettings() {
  }
 
  void MainWindow::closeEvent(QCloseEvent *event) {
+         if (!outstandingJobs.isEmpty()) {
+             QMessageBox::StandardButton choice = QMessageBox::question(this, "Jobs still running",
+                 QString("There are %1 job(s) still running or queued (conversions, uploads, or emails). Close anyway? If you close now, these jobs will not be run.").arg(outstandingJobs.size()),
+                 QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+             if (choice != QMessageBox::Yes) {
+                 event->ignore();
+                 return;
+             }
+         }
+
          writeSettings();
 	  DB.close();
 	  event->accept();

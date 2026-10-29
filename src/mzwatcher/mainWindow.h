@@ -3,6 +3,7 @@
 
 #include<QMainWindow>
 #include<QFileDialog>
+#include<QMessageBox>
 #include<QtGui>
 #include<QtSql>
 #include<QFileSystemWatcher>
@@ -33,6 +34,9 @@ public:
 		: program(command), jobType(type), useArgumentList(false) {}
 
 	Type type() const { return jobType; }
+
+	// Identifies "the same command" for dedup purposes -- the full command line, reconstructed if given as (program, arguments).
+	QString commandKey() const { return useArgumentList ? (program + " " + arguments.join(" ")) : program; }
 
 	// For a command (e.g. the mailer) that needs a secret passed via environment variable rather than argv.
 	void setProcessEnvironment(const QProcessEnvironment &env) { environment = env; useCustomEnvironment = true; }
