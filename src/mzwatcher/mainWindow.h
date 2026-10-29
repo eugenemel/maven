@@ -36,7 +36,18 @@ public:
 	Type type() const { return jobType; }
 
 	// Identifies "the same command" for dedup purposes -- the full command line, reconstructed if given as (program, arguments).
-	QString commandKey() const { return useArgumentList ? (program + " " + arguments.join(" ")) : program; }
+	QString commandKey() const {
+		QString key = useArgumentList ? (program + " " + arguments.join(" ")) : program;
+		// The mailer reuses one fixed script path for every email -- recipients/subject/body
+		// vary only via environment variables, which must be in the key or every warning
+		// email looks identical and only the first one of a batch would ever be sent.
+		if (useCustomEnvironment) {
+			QStringList envList = environment.toStringList();
+			envList.sort();
+			key += "\n" + envList.join("\n");
+		}
+		return key;
+	}
 
 	// For a command (e.g. the mailer) that needs a secret passed via environment variable rather than argv.
 	void setProcessEnvironment(const QProcessEnvironment &env) { environment = env; useCustomEnvironment = true; }
