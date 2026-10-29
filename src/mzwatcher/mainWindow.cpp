@@ -520,12 +520,7 @@ void MainWindow::uploadFileToGcsTarget(const GcsSyncTarget &target, const QStrin
     if (command.isEmpty()) return;
 
     setStatus("Uploading to \"gs://" + target.bucket + "/" + objectPath + "\"");
-    gcsUploader->setSystemCommand(command.first(), command.mid(1));
-    gcsUploader->start();
-
-    while (gcsUploader->isRunning()) {
-        QApplication::processEvents();
-    }
+    commandQueue->start(new CommandJob(command.first(), command.mid(1)));
 
     foreach (const QString &additionalFile, target.additionalFiles.split(",")) {
         QString fileName = additionalFile.trimmed();
@@ -537,12 +532,7 @@ void MainWindow::uploadFileToGcsTarget(const GcsSyncTarget &target, const QStrin
         if (additionalCommand.isEmpty()) continue;
 
         setStatus("Uploading to \"gs://" + target.bucket + "/" + additionalObjectPath + "\"");
-        gcsUploader->setSystemCommand(additionalCommand.first(), additionalCommand.mid(1));
-        gcsUploader->start();
-
-        while (gcsUploader->isRunning()) {
-            QApplication::processEvents();
-        }
+        commandQueue->start(new CommandJob(additionalCommand.first(), additionalCommand.mid(1)));
     }
 }
 
