@@ -283,6 +283,8 @@ class MainWindow: public QMainWindow {
 				BackgroundThread* converter;
 				BackgroundThread* gcsUploader;
 				QThreadPool* commandQueue;
+				QList<CommandJob*> outstandingJobs;
+				void enqueueCommand(CommandJob *job, std::function<void(bool success)> onFinished = std::function<void(bool success)>());
 
 				// One dynamically-added GCS sync target row: the widgets
 				// themselves are the source of truth (read directly at

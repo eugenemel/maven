@@ -512,6 +512,15 @@ void MainWindow::uploadConvertedFileToGcs(const QString &localConvertedFile) {
     }
 }
 
+void MainWindow::enqueueCommand(CommandJob *job, std::function<void(bool success)> onFinished) {
+    outstandingJobs.append(job);
+    connect(job, &CommandJob::finished, this, [this, job, onFinished](bool success) {
+        outstandingJobs.removeOne(job);
+        if (onFinished) onFinished(success);
+    });
+    commandQueue->start(job);
+}
+
 void MainWindow::uploadFileToGcsTarget(const GcsSyncTarget &target, const QString &localConvertedFile) {
     QString objectPath = buildGcsObjectPath(destFolder, localConvertedFile);
     QString sourceDir = QFileInfo(localConvertedFile).absolutePath();
@@ -520,7 +529,7 @@ void MainWindow::uploadFileToGcsTarget(const GcsSyncTarget &target, const QStrin
     if (command.isEmpty()) return;
 
     setStatus("Uploading to \"gs://" + target.bucket + "/" + objectPath + "\"");
-    commandQueue->start(new CommandJob(command.first(), command.mid(1), CommandJob::FILE_SYNC));
+    enqueueCommand(new CommandJob(command.first(), command.mid(1), CommandJob::FILE_SYNC));
 
     foreach (const QString &additionalFile, target.additionalFiles.split(",")) {
         QString fileName = additionalFile.trimmed();
@@ -532,7 +541,7 @@ void MainWindow::uploadFileToGcsTarget(const GcsSyncTarget &target, const QStrin
         if (additionalCommand.isEmpty()) continue;
 
         setStatus("Uploading to \"gs://" + target.bucket + "/" + additionalObjectPath + "\"");
-        commandQueue->start(new CommandJob(additionalCommand.first(), additionalCommand.mid(1), CommandJob::FILE_SYNC));
+        enqueueCommand(new CommandJob(additionalCommand.first(), additionalCommand.mid(1), CommandJob::FILE_SYNC));
     }
 }
 
@@ -558,9 +567,7 @@ void MainWindow::uploadFileToOtherTarget(const OtherSyncTarget &target, const QS
 
     setStatus("Uploading to \"gs://" + target.bucket + "/" + objectPath + "\"");
     // QProcess wants the executable ("gsutil") and its arguments separately, not one flat list.
-    CommandJob *job = new CommandJob(command.first(), command.mid(1), CommandJob::FILE_SYNC);
-    if (onFinished) connect(job, &CommandJob::finished, this, onFinished);
-    commandQueue->start(job);
+    enqueueCommand(new CommandJob(command.first(), command.mid(1), CommandJob::FILE_SYNC), onFinished);
 }
 
 void MainWindow::recordOtherSyncUpload(const QString &bucket, const QString &localDirectory, const QString &filePath, qint64 fileSize) {
