@@ -16,6 +16,7 @@
 #include<QRunnable>
 #include<QThreadPool>
 #include<functional>
+#include<atomic>
 #include "ui_mzWatcherGui.h"
 
 class BackgroundThread : public QThread
@@ -117,16 +118,29 @@ public:
 	void run() override {
 		QProcess process;
 		process.start(program, arguments);
-		bool success = process.waitForStarted() && process.waitForFinished(-1)
-			&& process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0;
-		emit finished(success);
+		if (!process.waitForStarted()) { emit finished(false); return; }
+
+		while (!process.waitForFinished(100)) {
+			if (cancelled) {
+				process.terminate();
+				process.waitForFinished(1000);
+				emit finished(false);
+				return;
+			}
+		}
+
+		emit finished(process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0);
 	}
+
+	// Called from the GUI thread; run() (on the worker thread) polls this rather than being killed directly.
+	void cancel() { cancelled = true; }
 
 signals:
 	void finished(bool success);
 
 private:
 	QString program;
+	std::atomic<bool> cancelled { false };
 	QStringList arguments;
 };
 
