@@ -70,8 +70,11 @@
     </widget>
    </item>
    <item row="3" column="0" colspan="3">
-    <widget class="QTextBrowser" name="logWidget">
+    <widget class="QPlainTextEdit" name="logWidget">
      <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="readOnly">
       <bool>true</bool>
      </property>
      <property name="sizePolicy">
@@ -106,15 +109,6 @@
      </property>
      <property name="frameShadow">
       <enum>QFrame::Shadow::Sunken</enum>
-     </property>
-     <property name="documentTitle">
-      <string>Log</string>
-     </property>
-     <property name="readOnly">
-      <bool>true</bool>
-     </property>
-     <property name="openLinks">
-      <bool>false</bool>
      </property>
     </widget>
    </item>

@@ -6,7 +6,6 @@
 #include<QMessageBox>
 #include<QtGui>
 #include<QtSql>
-#include<QFileSystemWatcher>
 #include<QDebug>
 #include<QSysInfo>
 #include<QProcessEnvironment>
@@ -185,6 +184,9 @@ class MainWindow: public QMainWindow {
                         // what a 32-bit int can hold.
                         QHash<QString,qint64>dbFiles;
                         QHash<QString,qint64>fileList;
+                        // Lets showDataFilesTable() update existing rows in place instead of
+                        // destroying and recreating the whole tree every call.
+                        QHash<QString,QTreeWidgetItem*> dataFileItems;
 
                         // "Never detected" and "detected, currently reporting
                         // size N" are different states, even when N is the
@@ -355,8 +357,6 @@ class MainWindow: public QMainWindow {
 				void showDataFilesTable();
 				void markFileConverted(QString filename);
                         void getDBFileList();
-
-				QString createTempPath();
 
 				void makeBackupCopy(QString filename);
 				static bool copyRecursively(const QString &sourcePath, const QString &destPath);

@@ -196,7 +196,16 @@ void MainWindow::setStatus(QString status) {
         QString nowDate = QDate::currentDate().toString("yyyyMMdd");
         QString nowTime = QTime::currentTime().toString("hh:mm:ss ap");
 	//guiForm->statusLabel->setText(status);
-        guiForm->logWidget->append("[" + nowDate + "] " + nowTime + ": " + status);
+        guiForm->logWidget->appendPlainText("[" + nowDate + "] " + nowTime + ": " + status);
+
+        static const int kMaxLogLines = 100000;
+        QTextDocument *logDoc = guiForm->logWidget->document();
+        if (logDoc->blockCount() > kMaxLogLines) {
+            QTextCursor cursor(logDoc);
+            cursor.movePosition(QTextCursor::Start);
+            cursor.movePosition(QTextCursor::NextBlock, QTextCursor::KeepAnchor, logDoc->blockCount() - kMaxLogLines);
+            cursor.removeSelectedText();
+        }
 }
 
 bool MainWindow::checkParameters() {
@@ -425,14 +434,6 @@ void MainWindow::timerEvent(QTimerEvent* event) {
        }
 }
 
-
-QString MainWindow::createTempPath() {
-	//temporary path
-	QString tempPathName = QDir::tempPath() + "/tmp" +  QString::number(qrand());
-	QDir tempPath(tempPathName);
-	if (! tempPath.exists()) { tempPath.mkpath(tempPathName); tempPath=QDir(tempPathName); }
-	return tempPathName;
-}
 
 bool MainWindow::isConvertibleMatch(const QString &entryName, const QString &extension) {
     if (extension.isEmpty()) return false;
@@ -1744,32 +1745,39 @@ void MainWindow::readSettings() {
          query.prepare("select filename, fileConverted, fileSize, modTime, strftime('%s','now') - strftime('%s',modTime) from datafiles where filename like \"%" + extension + "%\"");
          if(!query.exec()) { setStatus("Error: showDataFilesTable:" + query.lastError().text()); return; }
 
-	 guiForm->treeWidget->clear();
+         QSet<QString> currentFilenames;
 	 while (query.next()) {
              QString filename = query.value(0).toString();
              qint64 filesize = query.value(2).toLongLong();
              QString modTime  = query.value(3).toString();
              int age = query.value(4).toInt();
 
-             bool fileChanged=false;
-             if (fileList.contains(filename) && fileList[filename] != filesize) {
-                    fileChanged=true;
-
-             }
-
-
              if (age > maxDayDiff*24*60*60) continue;
-                bool converted   = query.value(1).toBool();
+             currentFilenames.insert(filename);
 
-                 QTreeWidgetItem *item = new QTreeWidgetItem(guiForm->treeWidget);
-                 item->setText(0, modTime);
-                 item->setText(1, QString::number( fileList[filename]  - filesize ));
-                 item->setText(2,filename);
-                 if(converted) item->setBackground(0,Qt::green);
+             bool fileChanged = fileList.contains(filename) && fileList[filename] != filesize;
+             bool converted   = query.value(1).toBool();
 
-                 if(fileChanged) {
-                     item->setBackground(0,Qt::yellow);
-                 }
+             QTreeWidgetItem *item = dataFileItems.value(filename);
+             if (!item) {
+                 item = new QTreeWidgetItem(guiForm->treeWidget);
+                 dataFileItems[filename] = item;
+             }
+             item->setText(0, modTime);
+             item->setText(1, QString::number( fileList[filename]  - filesize ));
+             item->setText(2,filename);
+             // fileChanged takes priority over converted, matching the old
+             // sequential-overwrite order (converted painted green, then
+             // unconditionally repainted yellow if also fileChanged).
+             item->setBackground(0, fileChanged ? QBrush(Qt::yellow) : (converted ? QBrush(Qt::green) : QBrush()));
 	 }
 	 query.clear();
+
+         // Rows no longer in the result (deleted from the DB, or aged out) are the only ones
+         // actually destroyed -- everything else above was updated in place, not recreated.
+         for (auto it = dataFileItems.begin(); it != dataFileItems.end(); ) {
+             if (currentFilenames.contains(it.key())) { ++it; continue; }
+             delete it.value();
+             it = dataFileItems.erase(it);
+         }
 }
