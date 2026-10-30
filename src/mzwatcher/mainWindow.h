@@ -158,6 +158,7 @@ class MainWindow: public QMainWindow {
 				void setStatus(QString status);
 				void stopAllJobs();
 				void updateScheduledActionsLabel();
+				void tickScheduledActionsCountdown();
 				void selectDestFolder();
 				void selectSourceFolder();
                         void clearTables();

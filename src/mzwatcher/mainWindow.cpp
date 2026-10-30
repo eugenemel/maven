@@ -130,8 +130,8 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
         connect(guiForm->stopAllButton,SIGNAL(pressed()),this,SLOT(stopAllJobs()));
 
         QTimer *scheduledActionsTimer = new QTimer(this);
-        connect(scheduledActionsTimer, &QTimer::timeout, this, &MainWindow::updateScheduledActionsLabel);
-        scheduledActionsTimer->start(3000);
+        connect(scheduledActionsTimer, &QTimer::timeout, this, &MainWindow::tickScheduledActionsCountdown);
+        scheduledActionsTimer->start(1000);
         connect(guiForm->addOtherSyncTargetButton,SIGNAL(pressed()),this,SLOT(addOtherSyncTargetClicked()));
 
         connect(guiForm->automaticWarningsCheckBox,SIGNAL(toggled(bool)),this,SLOT(getFormValues()));
@@ -251,7 +251,7 @@ void MainWindow::updateScheduledActionsLabel() {
 	}
 
 	if (conversions == 0 && fileSyncs == 0 && warningEmails == 0) {
-		guiForm->scheduledActionsLabel->setText("");
+        guiForm->scheduledActionsLabel->setText("No Currently Scheduled Actions.");
 		return;
 	}
 
@@ -260,6 +260,18 @@ void MainWindow::updateScheduledActionsLabel() {
 	if (fileSyncs > 0) parts << QString::number(fileSyncs) + " File Syncs";
 	if (warningEmails > 0) parts << QString::number(warningEmails) + " Warning Emails";
 	guiForm->scheduledActionsLabel->setText("Scheduled Actions: " + parts.join(", "));
+}
+
+void MainWindow::tickScheduledActionsCountdown() {
+	static const int kRescanIntervalSeconds = 5;
+	static int secondsRemaining = kRescanIntervalSeconds;
+
+	guiForm->queueCheckLabel->setText(QString("[Queue Check in %1s]").arg(secondsRemaining - 1));
+
+	if (--secondsRemaining <= 0) {
+		updateScheduledActionsLabel();
+		secondsRemaining = kRescanIntervalSeconds;
+	}
 }
 
 
