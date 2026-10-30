@@ -585,8 +585,13 @@ void MainWindow::syncOtherTarget(const OtherSyncTarget &target) {
         QString fileName = QFileInfo(filePath).fileName();
         if (!target.nameRegex.isEmpty() && !nameRegex.match(fileName).hasMatch()) continue;
 
+        qint64 currentSize = QFileInfo(filePath).size();
+        if (lookupOtherSyncUpload(target.bucket, filePath) == currentSize) continue;
+
         QString objectPath = QDir(target.localDirectory).relativeFilePath(filePath);
-        uploadFileToOtherTarget(target, filePath, objectPath);
+        uploadFileToOtherTarget(target, filePath, objectPath, [this, target, filePath, currentSize](bool success) {
+            if (success) recordOtherSyncUpload(target.bucket, target.localDirectory, filePath, currentSize);
+        });
     }
 }
 
