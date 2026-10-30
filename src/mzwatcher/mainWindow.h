@@ -226,6 +226,7 @@ class MainWindow: public QMainWindow {
 				QString convertCommand;
 				QThreadPool* commandQueue;
 				QList<CommandJob*> outstandingJobs;
+				QSet<QString> outstandingCommandKeys;
 				void enqueueCommand(CommandJob *job, std::function<void(bool success)> onFinished = std::function<void(bool success)>());
 
 				// One dynamically-added GCS sync target row: the widgets

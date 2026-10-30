@@ -484,20 +484,21 @@ void MainWindow::uploadConvertedFileToGcs(const QString &localConvertedFile) {
 }
 
 void MainWindow::enqueueCommand(CommandJob *job, std::function<void(bool success)> onFinished) {
-    foreach (CommandJob *existing, outstandingJobs) {
-        if (existing->commandKey() == job->commandKey()) {
-            setStatus("Skipping duplicate command already queued/running: " + job->commandKey());
-            delete job;
-            return;
-        }
+    QString key = job->commandKey();
+    if (outstandingCommandKeys.contains(key)) {
+        setStatus("Skipping duplicate command already queued/running: " + key);
+        delete job;
+        return;
     }
 
     // tryTake() deletes an autoDelete runnable it successfully evicts, same as a normal run would --
     // we need the pointer to stay valid until our own finished handling below runs, so we take ownership.
     job->setAutoDelete(false);
     outstandingJobs.append(job);
-    connect(job, &CommandJob::finished, this, [this, job, onFinished](bool success) {
+    outstandingCommandKeys.insert(key);
+    connect(job, &CommandJob::finished, this, [this, job, key, onFinished](bool success) {
         outstandingJobs.removeOne(job);
+        outstandingCommandKeys.remove(key);
         setStatus(QString(success ? "Job succeeded: " : "Job failed: ") + "'" + job->commandKey() + "'");
         if (onFinished) onFinished(success);
         job->deleteLater();
