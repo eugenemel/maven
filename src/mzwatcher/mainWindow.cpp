@@ -498,6 +498,7 @@ void MainWindow::enqueueCommand(CommandJob *job, std::function<void(bool success
     outstandingJobs.append(job);
     connect(job, &CommandJob::finished, this, [this, job, onFinished](bool success) {
         outstandingJobs.removeOne(job);
+        setStatus(QString(success ? "Job succeeded: " : "Job failed: ") + "'" + job->commandKey() + "'");
         if (onFinished) onFinished(success);
         job->deleteLater();
     });
