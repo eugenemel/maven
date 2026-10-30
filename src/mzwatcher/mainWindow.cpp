@@ -494,10 +494,10 @@ void MainWindow::enqueueCommand(CommandJob *job, std::function<void(bool success
     // tryTake() deletes an autoDelete runnable it successfully evicts, same as a normal run would --
     // we need the pointer to stay valid until our own finished handling below runs, so we take ownership.
     job->setAutoDelete(false);
-    outstandingJobs.append(job);
+    outstandingJobs.insert(job);
     outstandingCommandKeys.insert(key);
     connect(job, &CommandJob::finished, this, [this, job, key, onFinished](bool success) {
-        outstandingJobs.removeOne(job);
+        outstandingJobs.remove(job);
         outstandingCommandKeys.remove(key);
         setStatus(QString(success ? "Job succeeded: " : "Job failed: ") + "'" + job->commandKey() + "'");
         if (onFinished) onFinished(success);

@@ -225,7 +225,7 @@ class MainWindow: public QMainWindow {
 				QString destFolder;
 				QString convertCommand;
 				QThreadPool* commandQueue;
-				QList<CommandJob*> outstandingJobs;
+				QSet<CommandJob*> outstandingJobs;
 				QSet<QString> outstandingCommandKeys;
 				void enqueueCommand(CommandJob *job, std::function<void(bool success)> onFinished = std::function<void(bool success)>());
 
