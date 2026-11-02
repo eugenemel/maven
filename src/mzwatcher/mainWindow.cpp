@@ -522,24 +522,35 @@ void MainWindow::enqueueCommand(CommandJob *job, std::function<void(bool success
 void MainWindow::uploadFileToGcsTarget(const GcsSyncTarget &target, const QString &localConvertedFile) {
     QString objectPath = buildGcsObjectPath(destFolder, localConvertedFile);
     QString sourceDir = QFileInfo(localConvertedFile).absolutePath();
+    QString bucket = target.bucket;
 
-    QStringList command = buildGcsUploadCommand(target.keyFile, target.bucket, localConvertedFile, objectPath);
-    if (command.isEmpty()) return;
-
-    setStatus("Uploading to \"gs://" + target.bucket + "/" + objectPath + "\"");
-    enqueueCommand(new CommandJob(command.first(), command.mid(1), CommandJob::FILE_SYNC));
+    qint64 currentSize = QFileInfo(localConvertedFile).size();
+    if (lookupConvertedFileSyncUpload(bucket, localConvertedFile) != currentSize) {
+        QStringList command = buildGcsUploadCommand(target.keyFile, target.bucket, localConvertedFile, objectPath);
+        if (!command.isEmpty()) {
+            setStatus("Uploading to \"gs://" + target.bucket + "/" + objectPath + "\"");
+            enqueueCommand(new CommandJob(command.first(), command.mid(1), CommandJob::FILE_SYNC), [this, bucket, localConvertedFile, currentSize](bool success) {
+                if (success) recordConvertedFileSyncUpload(bucket, localConvertedFile, currentSize);
+            });
+        }
+    }
 
     foreach (const QString &additionalFile, target.additionalFiles.split(",")) {
         QString fileName = additionalFile.trimmed();
         if (fileName.isEmpty()) continue;
 
         QString additionalFilePath = sourceDir + "/" + fileName;
+        qint64 additionalCurrentSize = QFileInfo(additionalFilePath).size();
+        if (lookupConvertedFileSyncUpload(bucket, additionalFilePath) == additionalCurrentSize) continue;
+
         QString additionalObjectPath = buildGcsObjectPath(destFolder, additionalFilePath);
         QStringList additionalCommand = buildGcsUploadCommand(target.keyFile, target.bucket, additionalFilePath, additionalObjectPath);
         if (additionalCommand.isEmpty()) continue;
 
         setStatus("Uploading to \"gs://" + target.bucket + "/" + additionalObjectPath + "\"");
-        enqueueCommand(new CommandJob(additionalCommand.first(), additionalCommand.mid(1), CommandJob::FILE_SYNC));
+        enqueueCommand(new CommandJob(additionalCommand.first(), additionalCommand.mid(1), CommandJob::FILE_SYNC), [this, bucket, additionalFilePath, additionalCurrentSize](bool success) {
+            if (success) recordConvertedFileSyncUpload(bucket, additionalFilePath, additionalCurrentSize);
+        });
     }
 }
 
@@ -583,6 +594,26 @@ void MainWindow::recordOtherSyncUpload(const QString &bucket, const QString &loc
 qint64 MainWindow::lookupOtherSyncUpload(const QString &bucket, const QString &filePath) {
     QSqlQuery query(DB);
     query.prepare("select fileSize from other_file_sync where bucket=? and filePath=?");
+    query.addBindValue(bucket);
+    query.addBindValue(filePath);
+    if (!query.exec() || !query.next()) return -1;
+    return query.value(0).toLongLong();
+}
+
+void MainWindow::recordConvertedFileSyncUpload(const QString &bucket, const QString &filePath, qint64 fileSize) {
+    QSqlQuery query(DB);
+    query.prepare("insert or replace into converted_file_sync(bucket,filePath,fileSize,modTime,uploadedTime) values(?,?,?,?,?)");
+    query.addBindValue(bucket);
+    query.addBindValue(filePath);
+    query.addBindValue(fileSize);
+    query.addBindValue(QFileInfo(filePath).lastModified().toString("yyyy-MM-dd hh:mm:ss"));
+    query.addBindValue(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
+    if (!query.exec()) setStatus("recordConvertedFileSyncUpload: " + query.lastError().text());
+}
+
+qint64 MainWindow::lookupConvertedFileSyncUpload(const QString &bucket, const QString &filePath) {
+    QSqlQuery query(DB);
+    query.prepare("select fileSize from converted_file_sync where bucket=? and filePath=?");
     query.addBindValue(bucket);
     query.addBindValue(filePath);
     if (!query.exec() || !query.next()) return -1;
@@ -1675,6 +1706,26 @@ void MainWindow::readSettings() {
 
    bool otherFileSyncOk = query.exec("create table if not exists other_file_sync(bucket varchar(255), localDirectory varchar(255), filePath varchar(255), fileSize bigint, modTime timestamp, uploadedTime timestamp, primary key(bucket, filePath) );");
    if(!otherFileSyncOk) setStatus(query.lastError().text());
+   query.clear();
+
+   // Persists Converted File Sync's upload history, same purpose as other_file_sync but for the conversion-triggered/manual-Sync upload path.
+   static const QStringList kExpectedConvertedFileSyncColumns = {"bucket", "filePath", "fileSize", "modTime", "uploadedTime"};
+
+   QSqlQuery convertedFileSyncSchemaCheck(DB);
+   convertedFileSyncSchemaCheck.exec("pragma table_info(converted_file_sync)");
+   QStringList actualConvertedFileSyncColumns;
+   while (convertedFileSyncSchemaCheck.next()) {
+       actualConvertedFileSyncColumns << convertedFileSyncSchemaCheck.value(1).toString();
+   }
+   convertedFileSyncSchemaCheck.clear();
+
+   if (!actualConvertedFileSyncColumns.isEmpty() && actualConvertedFileSyncColumns != kExpectedConvertedFileSyncColumns) {
+       setStatus("Existing converted_file_sync table from a previous version has an incompatible layout -- rebuilding it (this only resets the upload-tracking cache, not your synced files)");
+       query.exec("drop table converted_file_sync");
+   }
+
+   bool convertedFileSyncOk = query.exec("create table if not exists converted_file_sync(bucket varchar(255), filePath varchar(255), fileSize bigint, modTime timestamp, uploadedTime timestamp, primary key(bucket, filePath) );");
+   if(!convertedFileSyncOk) setStatus(query.lastError().text());
    query.clear();
  }
 

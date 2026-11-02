@@ -362,6 +362,8 @@ class MainWindow: public QMainWindow {
 				static bool copyRecursively(const QString &sourcePath, const QString &destPath);
 				void uploadConvertedFileToGcs(const QString &localConvertedFile);
 				void uploadFileToGcsTarget(const GcsSyncTarget &target, const QString &localConvertedFile);
+				void recordConvertedFileSyncUpload(const QString &bucket, const QString &filePath, qint64 fileSize);
+				qint64 lookupConvertedFileSyncUpload(const QString &bucket, const QString &filePath);
 				void syncGcsTarget(const GcsSyncTarget &target);
 				void checkAndSendSizeWarning(const QFileInfo &sourceFileInfo);
 				void sendWarningEmail(const QStringList &recipients, const QString &subject, const QString &body);
