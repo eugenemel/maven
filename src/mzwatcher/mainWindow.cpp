@@ -1618,12 +1618,25 @@ void MainWindow::readSettings() {
      if(!ok) setStatus(query.lastError().text());
      query.clear();
 
+     bool otherFileSyncOk = query.exec("delete from other_file_sync");
+     if(!otherFileSyncOk) setStatus(query.lastError().text());
+     query.clear();
+
+     bool convertedFileSyncOk = query.exec("delete from converted_file_sync");
+     if(!convertedFileSyncOk) setStatus(query.lastError().text());
+     query.clear();
+
      dbFiles.clear();
      fileList.clear();
      directoryList.clear();
      firstDetectedTimes.clear();
      lastSizeChangeTimes.clear();
      convertedFiles.clear();
+     // Otherwise a row's own in-memory cache of "already uploaded at this size" would still
+     // skip re-uploads even though the persisted record backing that decision is now gone.
+     for (int i = 0; i < otherSyncTargetWidgets.size(); ++i) {
+         otherSyncTargetWidgets[i].watchedFiles.clear();
+     }
      showDataFilesTable();
  }
 
