@@ -93,6 +93,39 @@ private:
 	std::atomic<bool> cancelled { false };
 };
 
+// Prepare a large batch of files for upload
+class SyncScanWorker : public QObject, public QRunnable
+{
+	Q_OBJECT
+
+public:
+	SyncScanWorker(const QStringList &candidateFiles, const QHash<QString, qint64> &knownUploads)
+		: candidateFiles(candidateFiles), knownUploads(knownUploads) {}
+
+	void run() override {
+		foreach (const QString &file, candidateFiles) {
+			QFileInfo fi(file);
+			if (!fi.exists()) continue;
+			qint64 size = fi.size();
+			if (knownUploads.value(file, -1) == size) continue;
+			filesToUpload.insert(file, size);
+		}
+		emit finished();
+	}
+
+	// Keyed by local file path, value is the size observed during the scan.
+	QHash<QString, qint64> takeFilesToUpload() { return filesToUpload; }
+
+signals:
+	void finished();
+
+private:
+	QStringList candidateFiles;
+	QHash<QString, qint64> knownUploads;
+	QHash<QString, qint64> filesToUpload;
+    QSet<CommandJob> fileSyncs;
+};
+
 class MainWindow: public QMainWindow {
 	Q_OBJECT
 
