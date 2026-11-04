@@ -93,39 +93,6 @@ private:
 	std::atomic<bool> cancelled { false };
 };
 
-// Prepare a large batch of files for upload
-class SyncScanWorker : public QObject, public QRunnable
-{
-	Q_OBJECT
-
-public:
-	SyncScanWorker(const QStringList &candidateFiles, const QHash<QString, qint64> &knownUploads)
-		: candidateFiles(candidateFiles), knownUploads(knownUploads) {}
-
-	void run() override {
-		foreach (const QString &file, candidateFiles) {
-			QFileInfo fi(file);
-			if (!fi.exists()) continue;
-			qint64 size = fi.size();
-			if (knownUploads.value(file, -1) == size) continue;
-			filesToUpload.insert(file, size);
-		}
-		emit finished();
-	}
-
-	// Keyed by local file path, value is the size observed during the scan.
-	QHash<QString, qint64> takeFilesToUpload() { return filesToUpload; }
-
-signals:
-	void finished();
-
-private:
-	QStringList candidateFiles;
-	QHash<QString, qint64> knownUploads;
-	QHash<QString, qint64> filesToUpload;
-    QSet<CommandJob> fileSyncs;
-};
-
 class MainWindow: public QMainWindow {
 	Q_OBJECT
 
@@ -423,6 +390,51 @@ class MainWindow: public QMainWindow {
 
 };
 
+// Prepare a large batch of files for upload. Declared after MainWindow so it can
+// call MainWindow's static buildGcsObjectPath()/buildGcsUploadCommand() helpers to
+// build its own FILE_SYNC CommandJobs directly, off the GUI thread -- the caller
+// just takes the finished jobs and adds them to the queue.
+class SyncScanWorker : public QObject, public QRunnable
+{
+	Q_OBJECT
 
+public:
+	SyncScanWorker(const QStringList &candidateFiles, const QHash<QString, qint64> &knownUploads,
+			const QString &bucket, const QString &keyFile, const QString &destFolder)
+		: candidateFiles(candidateFiles), knownUploads(knownUploads),
+		  bucket(bucket), keyFile(keyFile), destFolder(destFolder) {}
+
+	void run() override {
+		foreach (const QString &file, candidateFiles) {
+			QFileInfo fi(file);
+			if (!fi.exists()) continue;
+			qint64 size = fi.size();
+			if (knownUploads.value(file, -1) == size) continue;
+			filesToUpload.insert(file, size);
+
+			QString objectPath = MainWindow::buildGcsObjectPath(destFolder, file);
+			QStringList command = MainWindow::buildGcsUploadCommand(keyFile, bucket, file, objectPath);
+			if (command.isEmpty()) continue;
+			fileSyncs.insert(new CommandJob(command.first(), command.mid(1), CommandJob::FILE_SYNC));
+		}
+		emit finished();
+	}
+
+	// Keyed by local file path, value is the size observed during the scan.
+	QHash<QString, qint64> takeFilesToUpload() { return filesToUpload; }
+	QSet<CommandJob*> takeFileSyncJobs() { return fileSyncs; }
+
+signals:
+	void finished();
+
+private:
+	QStringList candidateFiles;
+	QHash<QString, qint64> knownUploads;
+	QString bucket;
+	QString keyFile;
+	QString destFolder;
+	QHash<QString, qint64> filesToUpload;
+	QSet<CommandJob*> fileSyncs;
+};
 
 #endif

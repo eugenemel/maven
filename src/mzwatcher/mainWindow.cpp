@@ -562,19 +562,31 @@ void MainWindow::uploadFileToGcsTarget(const GcsSyncTarget &target, const QStrin
 }
 
 void MainWindow::syncGcsTarget(const GcsSyncTarget &target) {
-    QString destFileFormat = guiForm->destFileFormatBox->currentText();
 
+    // Retrieve all necessary DB information on the GUI thread (required per SQL rules)
     QSqlQuery query(DB);
     query.prepare("select filename from datafiles where fileConverted=1");
     if (!query.exec()) return;
 
+    QStringList convertedFilenames;
     while (query.next()) {
-        QString convertedFile = query.value(0).toString();
-        convertedFile.replace(sourceFolder, destFolder);
-        convertedFile.replace(QRegularExpression("\\." + QRegularExpression::escape(extension) + "$", QRegularExpression::CaseInsensitiveOption), "." + destFileFormat);
-        if (!QFileInfo::exists(convertedFile)) continue;
-        uploadFileToGcsTarget(target, convertedFile);
+        convertedFilenames << query.value(0).toString();
     }
+
+    QSqlQuery syncedQuery(DB);
+    syncedQuery.prepare("select filePath, fileSize from converted_file_sync where bucket=?");
+    syncedQuery.addBindValue(target.bucket);
+    if (!syncedQuery.exec()) return;
+
+    QHash<QString, qint64> knownUploads;
+    while (syncedQuery.next()) {
+        knownUploads.insert(syncedQuery.value(0).toString(), syncedQuery.value(1).toLongLong());
+    }
+
+    //prepare to work in background thread
+    SyncScanWorker *worker = new SyncScanWorker(convertedFilenames, knownUploads, target.bucket, target.keyFile, destFolder);
+
+    QString destFileFormat = guiForm->destFileFormatBox->currentText();
 }
 
 void MainWindow::uploadFileToOtherTarget(const OtherSyncTarget &target, const QString &filePath, const QString &objectPath, std::function<void(bool success)> onFinished) {
