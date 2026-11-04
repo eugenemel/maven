@@ -125,6 +125,7 @@ class MainWindow: public QMainWindow {
 				// Every such check in this class should go through this
 				// instead of calling QFileInfo::size() directly.
 				static qint64 effectiveFileSize(const QFileInfo &fi);
+				static bool isRapidFireRunDisconnected(const QString &dotDPath);
 				static qint64 thresholdInBytes(double threshold, const QString &unit);
 				static QStringList parseEmailRecipients(const QString &commaSeparated);
 				static QString buildWarningEmailSubject(const QString &fileName);

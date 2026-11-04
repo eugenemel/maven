@@ -387,6 +387,13 @@ void MainWindow::processChangedFiles() {
         qint64 currentSize = effectiveFileSize(fi);
         if (currentSize <= minFileSize) continue;
 
+        if (fi.isDir() && fi.suffix().compare("d", Qt::CaseInsensitive) == 0
+                && isRapidFireRunDisconnected(file)) {
+            setStatus(tr("RapidFire disconnect detected -- converting immediately: \"%1\"").arg(file));
+            processFile(file);
+            continue;
+        }
+
         // Two independent "don't rush it" floors, both must have elapsed:
         //
         // 1. secsSinceFirstDetected (persisted in the DB, survives restarts):
@@ -659,6 +666,20 @@ qint64 MainWindow::totalDirectorySize(const QString &dirPath) {
 
 qint64 MainWindow::effectiveFileSize(const QFileInfo &fi) {
     return fi.isDir() ? totalDirectorySize(fi.absoluteFilePath()) : fi.size();
+}
+
+bool MainWindow::isRapidFireRunDisconnected(const QString &dotDPath) {
+    QFile batchLog(QDir(dotDPath).filePath("batch.log"));
+    if (!batchLog.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
+
+    QStringList lastLines;
+    QTextStream in(&batchLog);
+    while (!in.atEnd()) {
+        lastLines.append(in.readLine());
+        if (lastLines.size() > 200) lastLines.removeFirst();
+    }
+
+    return lastLines.join("\n").contains("<RapidFire>: RFMassHunterS:Task: Run Disconnect.");
 }
 
 qint64 MainWindow::thresholdInBytes(double threshold, const QString &unit) {
