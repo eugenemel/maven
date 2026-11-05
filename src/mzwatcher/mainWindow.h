@@ -27,7 +27,7 @@ class MzWatcherBackgroundJob : public QObject, public QRunnable
 	Q_OBJECT
 
 public:
-    enum Type { CONVERSION, FILE_SYNC, WARNING_EMAIL, FILE_SYNC_GROUP, OTHER_FILE_SYNC_GROUP };
+    enum Type { CONVERSION, FILE_SYNC, WARNING_EMAIL, FILE_SYNC_GROUP };
 
 	// Identifies "the same work" for dedup purposes -- enqueueCommand() skips a job
 	// whose key is already outstanding.
@@ -516,7 +516,7 @@ public:
         : localDirectory(localDirectory), nameRegex(nameRegex), knownUploads(knownUploads),
         bucket(bucket), keyFile(keyFile), recordUpload(std::move(recordUpload)) {}
 
-    MzWatcherBackgroundJob::Type type() const override { return OTHER_FILE_SYNC_GROUP; }
+    MzWatcherBackgroundJob::Type type() const override { return FILE_SYNC_GROUP; }
 
     QString commandKey() const override {
         return "OTHER_FILE_SYNC_GROUP: " + bucket + ": " + localDirectory;
