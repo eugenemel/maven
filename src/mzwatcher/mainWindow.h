@@ -450,9 +450,6 @@ public:
     QHash<QString, qint64> takeFilesToUpload() { return filesToUpload; }
     QSet<CommandJob*> takeFileSyncJobs() { return fileSyncs; }
 
-signals:
-    void finished(bool success);
-
 private:
     QStringList candidateFiles;
     QHash<QString, qint64> knownUploads;
