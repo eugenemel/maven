@@ -366,6 +366,9 @@
        </item>
        <item row="5" column="1">
         <widget class="QSpinBox" name="converter_waitTime">
+         <property name="maximum">
+          <number>999999</number>
+         </property>
          <property name="suffix">
           <string> min</string>
          </property>
