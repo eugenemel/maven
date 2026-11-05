@@ -593,6 +593,14 @@ void MainWindow::syncGcsTarget(const GcsSyncTarget &target) {
             [this](const QString &bucket, const QString &filePath, qint64 fileSize) {
                 recordConvertedFileSyncUpload(bucket, filePath, fileSize);
             });
+
+    //inner lambda function is the onFinished callback, once this worker has successfully completed,
+    //all of the file sync jobs it creates make their way into the queue.
+    enqueueCommand(worker, [this, worker](bool success) {
+        foreach (CommandJob *job, worker->takeFileSyncJobs()) {
+            enqueueCommand(job);
+        }
+    });
 }
 
 void MainWindow::uploadFileToOtherTarget(const OtherSyncTarget &target, const QString &filePath, const QString &objectPath, std::function<void(bool success)> onFinished) {
