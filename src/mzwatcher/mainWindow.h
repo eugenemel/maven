@@ -33,16 +33,27 @@ public:
 	// whose key is already outstanding.
 	virtual QString commandKey() const = 0;
 
+    virtual Type type() const = 0;
+
 	// Called from the GUI thread; run() (on the worker thread) polls this rather than being killed directly.
 	void cancel() { cancelled = true; }
 	// For a job removed from the queue via QThreadPool::tryTake() before it ever ran -- run() will never fire finished() itself.
 	void skipQueued() { emit finished(false); }
+
+	// Lets a job carry its own completion callback (e.g. a FILE_SYNC job built inside
+	// SyncScanWorker::run(), far from wherever enqueueCommand() eventually gets called
+	// on it) in addition to whatever onFinished enqueueCommand()'s caller supplies.
+	void setOnFinished(std::function<void(bool)> cb) { onFinishedCallback = std::move(cb); }
+	const std::function<void(bool)>& onFinished() const { return onFinishedCallback; }
 
 signals:
 	void finished(bool success);
 
 protected:
 	std::atomic<bool> cancelled { false };
+
+private:
+	std::function<void(bool)> onFinishedCallback;
 };
 
 
@@ -413,12 +424,17 @@ class SyncScanWorker : public MzWatcherBackgroundJob
     Q_OBJECT
 
 public:
+    // recordUpload is called (on the GUI thread, via enqueueCommand()'s onFinished handling)
+    // after a given FILE_SYNC job succeeds -- injected rather than taking a MainWindow*
+    // directly, since MainWindow::recordConvertedFileSyncUpload() is private and this is
+    // the one piece of it SyncScanWorker actually needs.
     SyncScanWorker(const QStringList &candidateFiles, const QHash<QString, qint64> &knownUploads,
                    const QString &bucket, const QString &keyFile, const QString &sourceFolder,
-                   const QString &destFolder, const QString &extension, const QString &destFileFormat)
+                   const QString &destFolder, const QString &extension, const QString &destFileFormat,
+                   std::function<void(const QString&, const QString&, qint64)> recordUpload)
         : candidateFiles(candidateFiles), knownUploads(knownUploads),
         bucket(bucket), keyFile(keyFile), sourceFolder(sourceFolder), destFolder(destFolder),
-        extension(extension), destFileFormat(destFileFormat) {}
+        extension(extension), destFileFormat(destFileFormat), recordUpload(std::move(recordUpload)) {}
 
     MzWatcherBackgroundJob::Type type() const { return CONVERTED_FILE_SYNC; }
 
@@ -441,7 +457,14 @@ public:
             QString objectPath = MainWindow::buildGcsObjectPath(destFolder, file);
             QStringList command = MainWindow::buildGcsUploadCommand(keyFile, bucket, file, objectPath);
             if (command.isEmpty()) continue;
-            fileSyncs.insert(new CommandJob(command.first(), command.mid(1), CommandJob::FILE_SYNC));
+
+            CommandJob *job = new CommandJob(command.first(), command.mid(1), CommandJob::FILE_SYNC);
+            QString uploadBucket = bucket;
+            auto record = recordUpload;
+            job->setOnFinished([record, uploadBucket, file, size](bool success) {
+                if (success) record(uploadBucket, file, size);
+            });
+            fileSyncs.insert(job);
         }
         emit finished(true);
     }
@@ -459,6 +482,7 @@ private:
     QString destFolder;
     QString extension;
     QString destFileFormat;
+    std::function<void(const QString&, const QString&, qint64)> recordUpload;
     QHash<QString, qint64> filesToUpload;
     QSet<CommandJob*> fileSyncs;
 };

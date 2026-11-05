@@ -522,6 +522,7 @@ void MainWindow::enqueueCommand(MzWatcherBackgroundJob *job, std::function<void(
         outstandingJobs.remove(job);
         outstandingCommandKeys.remove(key);
         setStatus(QString(success ? "Job succeeded: " : "Job failed: ") + "'" + job->commandKey() + "'");
+        if (job->onFinished()) job->onFinished()(success);
         if (onFinished) onFinished(success);
         job->deleteLater();
     });
@@ -588,7 +589,10 @@ void MainWindow::syncGcsTarget(const GcsSyncTarget &target) {
     //prepare to work in background thread
     QString destFileFormat = guiForm->destFileFormatBox->currentText();
     SyncScanWorker *worker = new SyncScanWorker(convertedFilenames, knownUploads, target.bucket, target.keyFile,
-            sourceFolder, destFolder, extension, destFileFormat);
+            sourceFolder, destFolder, extension, destFileFormat,
+            [this](const QString &bucket, const QString &filePath, qint64 fileSize) {
+                recordConvertedFileSyncUpload(bucket, filePath, fileSize);
+            });
 }
 
 void MainWindow::uploadFileToOtherTarget(const OtherSyncTarget &target, const QString &filePath, const QString &objectPath, std::function<void(bool success)> onFinished) {
