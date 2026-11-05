@@ -240,7 +240,7 @@ void MainWindow::selectSourceFolder() {
 }
 
 void MainWindow::stopAllJobs() {
-	foreach (CommandJob *job, outstandingJobs) {
+	foreach (MzWatcherBackgroundJob *job, outstandingJobs) {
 		if (commandQueue->tryTake(job)) {
 			job->skipQueued();
 		} else {
@@ -253,9 +253,11 @@ void MainWindow::updateScheduledActionsLabel() {
 	int conversions = 0;
 	int fileSyncs = 0;
 	int warningEmails = 0;
-	foreach (CommandJob *job, outstandingJobs) {
-		if (job->type() == CommandJob::CONVERSION) conversions++;
-		else if (job->type() == CommandJob::FILE_SYNC) fileSyncs++;
+	foreach (MzWatcherBackgroundJob *job, outstandingJobs) {
+		CommandJob *commandJob = qobject_cast<CommandJob*>(job);
+		if (!commandJob) continue;
+		if (commandJob->type() == CommandJob::CONVERSION) conversions++;
+		else if (commandJob->type() == CommandJob::FILE_SYNC) fileSyncs++;
 		else warningEmails++;
 	}
 
@@ -503,7 +505,7 @@ void MainWindow::uploadConvertedFileToGcs(const QString &localConvertedFile) {
     }
 }
 
-void MainWindow::enqueueCommand(CommandJob *job, std::function<void(bool success)> onFinished) {
+void MainWindow::enqueueCommand(MzWatcherBackgroundJob *job, std::function<void(bool success)> onFinished) {
     QString key = job->commandKey();
     if (outstandingCommandKeys.contains(key)) {
         setStatus("Skipping duplicate command already queued/running: " + key);
@@ -1419,8 +1421,9 @@ void MainWindow::makeBackupCopy(QString file) {
                 guiForm->convertButton->setText("Stop");
                 enqueueCommand(new CommandJob(command, CommandJob::CONVERSION), [this, sourceFilePath, localConvertedFile](bool success) {
                     bool conversionStillRunning = false;
-                    foreach (CommandJob *job, outstandingJobs) {
-                        if (job->type() == CommandJob::CONVERSION) { conversionStillRunning = true; break; }
+                    foreach (MzWatcherBackgroundJob *job, outstandingJobs) {
+                        CommandJob *commandJob = qobject_cast<CommandJob*>(job);
+                        if (commandJob && commandJob->type() == CommandJob::CONVERSION) { conversionStillRunning = true; break; }
                     }
                     if (!conversionStillRunning) guiForm->convertButton->setText("Convert");
 

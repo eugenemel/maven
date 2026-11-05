@@ -244,9 +244,9 @@ class MainWindow: public QMainWindow {
 				QString destFolder;
 				QString convertCommand;
 				QThreadPool* commandQueue;
-				QSet<CommandJob*> outstandingJobs;
+                QSet<MzWatcherBackgroundJob*> outstandingJobs;
 				QSet<QString> outstandingCommandKeys;
-				void enqueueCommand(CommandJob *job, std::function<void(bool success)> onFinished = std::function<void(bool success)>());
+                void enqueueCommand(MzWatcherBackgroundJob *job, std::function<void(bool success)> onFinished = std::function<void(bool success)>());
 
 				// One dynamically-added GCS sync target row: the widgets
 				// themselves are the source of truth (read directly at
