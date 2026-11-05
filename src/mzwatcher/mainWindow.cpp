@@ -592,7 +592,7 @@ void MainWindow::syncGcsTarget(const GcsSyncTarget &target) {
     //prepare to work in background thread
     QString destFileFormat = guiForm->destFileFormatBox->currentText();
     SyncScanWorker *worker = new SyncScanWorker(convertedFilenames, knownUploads, target.bucket, target.keyFile,
-            sourceFolder, destFolder, extension, destFileFormat,
+            sourceFolder, destFolder, extension, destFileFormat, target.additionalFiles,
             [this](const QString &bucket, const QString &filePath, qint64 fileSize) {
                 recordConvertedFileSyncUpload(bucket, filePath, fileSize);
             });

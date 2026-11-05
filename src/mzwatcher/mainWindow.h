@@ -365,7 +365,7 @@ public:
     CommandJob(const QString &command, Type type)
         : program(command), jobType(type), useArgumentList(false) {}
 
-    MzWatcherBackgroundJob::Type type() const { return jobType; }
+    MzWatcherBackgroundJob::Type type() const override { return jobType; }
 
     // Identifies "the same command" for dedup purposes -- the full command line, reconstructed if given as (program, arguments).
     QString commandKey() const override {
@@ -431,12 +431,14 @@ public:
     SyncScanWorker(const QStringList &candidateFiles, const QHash<QString, qint64> &knownUploads,
                    const QString &bucket, const QString &keyFile, const QString &sourceFolder,
                    const QString &destFolder, const QString &extension, const QString &destFileFormat,
+                   const QString &additionalFiles,
                    std::function<void(const QString&, const QString&, qint64)> recordUpload)
         : candidateFiles(candidateFiles), knownUploads(knownUploads),
         bucket(bucket), keyFile(keyFile), sourceFolder(sourceFolder), destFolder(destFolder),
-        extension(extension), destFileFormat(destFileFormat), recordUpload(std::move(recordUpload)) {}
+        extension(extension), destFileFormat(destFileFormat), additionalFiles(additionalFiles),
+        recordUpload(std::move(recordUpload)) {}
 
-    MzWatcherBackgroundJob::Type type() const { return FILE_SYNC_GROUP; }
+    MzWatcherBackgroundJob::Type type() const override { return FILE_SYNC_GROUP; }
 
     QString commandKey() const override {
         return "FILE_SYNC_GROUP: " + bucket;
@@ -448,23 +450,14 @@ public:
             file.replace(sourceFolder, destFolder);
             file.replace(QRegularExpression("\\." + QRegularExpression::escape(extension) + "$", QRegularExpression::CaseInsensitiveOption), "." + destFileFormat);
 
-            QFileInfo fi(file);
-            if (!fi.exists()) continue;
-            qint64 size = fi.size();
-            if (knownUploads.value(file, -1) == size) continue;
-            filesToUpload.insert(file, size);
+            evaluateFile(file);
 
-            QString objectPath = MainWindow::buildGcsObjectPath(destFolder, file);
-            QStringList command = MainWindow::buildGcsUploadCommand(keyFile, bucket, file, objectPath);
-            if (command.isEmpty()) continue;
-
-            CommandJob *job = new CommandJob(command.first(), command.mid(1), CommandJob::FILE_SYNC);
-            QString uploadBucket = bucket;
-            auto record = recordUpload;
-            job->setOnFinished([record, uploadBucket, file, size](bool success) {
-                if (success) record(uploadBucket, file, size);
-            });
-            fileSyncs.insert(job);
+            QString sourceDir = QFileInfo(file).absolutePath();
+            foreach (const QString &additionalFile, additionalFiles.split(",")) {
+                QString fileName = additionalFile.trimmed();
+                if (fileName.isEmpty()) continue;
+                evaluateFile(sourceDir + "/" + fileName);
+            }
         }
         emit finished(true);
     }
@@ -474,6 +467,28 @@ public:
     QSet<CommandJob*> takeFileSyncJobs() { return fileSyncs; }
 
 private:
+    // Stats one candidate file (the main converted file or one of its additional files) and,
+    // if it needs uploading, builds its FILE_SYNC job with the record-on-success callback attached.
+    void evaluateFile(const QString &file) {
+        QFileInfo fi(file);
+        if (!fi.exists()) return;
+        qint64 size = fi.size();
+        if (knownUploads.value(file, -1) == size) return;
+        filesToUpload.insert(file, size);
+
+        QString objectPath = MainWindow::buildGcsObjectPath(destFolder, file);
+        QStringList command = MainWindow::buildGcsUploadCommand(keyFile, bucket, file, objectPath);
+        if (command.isEmpty()) return;
+
+        CommandJob *job = new CommandJob(command.first(), command.mid(1), CommandJob::FILE_SYNC);
+        QString uploadBucket = bucket;
+        auto record = recordUpload;
+        job->setOnFinished([record, uploadBucket, file, size](bool success) {
+            if (success) record(uploadBucket, file, size);
+        });
+        fileSyncs.insert(job);
+    }
+
     QStringList candidateFiles;
     QHash<QString, qint64> knownUploads;
     QString bucket;
@@ -482,6 +497,7 @@ private:
     QString destFolder;
     QString extension;
     QString destFileFormat;
+    QString additionalFiles;
     std::function<void(const QString&, const QString&, qint64)> recordUpload;
     QHash<QString, qint64> filesToUpload;
     QSet<CommandJob*> fileSyncs;
