@@ -43,6 +43,8 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
         guiForm->progressBar->hide();
         guiForm->monitorTimeout->setValue(settings->value("monitorTimeout").toInt());
         guiForm->converter_waitTime->setValue(settings->value("converter_waitTime").toInt());
+        guiForm->minimumsFileSize->setValue(settings->value("minimumsFileSize").toInt());
+        guiForm->destFileFormatBox->setCurrentText(settings->value("destFileFormat").toString());
         guiForm->processingThreadsSpinBox->setValue(settings->value("processingThreads").toInt());
         guiForm->dayDiffBox->setValue(maxDayDiff);
         guiForm->settingsLocationEdit->setText("\"" + settings->fileName() + "\"");
@@ -1624,6 +1626,8 @@ void MainWindow::readSettings() {
 	 settings->setValue("maxDayDiff", maxDayDiff);
          settings->setValue("monitorTimeout", guiForm->monitorTimeout->value());
          settings->setValue("converter_waitTime", guiForm->converter_waitTime->value());
+         settings->setValue("minimumsFileSize", guiForm->minimumsFileSize->value());
+         settings->setValue("destFileFormat", guiForm->destFileFormatBox->currentText());
          settings->setValue("processingThreads", guiForm->processingThreadsSpinBox->value());
          settings->setValue("watchButtonState", guiForm->watchButton->isChecked());
 
