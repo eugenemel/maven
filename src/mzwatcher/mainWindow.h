@@ -27,7 +27,7 @@ class MzWatcherBackgroundJob : public QObject, public QRunnable
 	Q_OBJECT
 
 public:
-    enum Type { CONVERSION, FILE_SYNC, WARNING_EMAIL, FILE_SYNC_GROUP };
+    enum Type { CONVERSION, FILE_SYNC, WARNING_EMAIL, FILE_SYNC_GROUP, OTHER_FILE_SYNC_GROUP };
 
 	// Identifies "the same work" for dedup purposes -- enqueueCommand() skips a job
 	// whose key is already outstanding.
@@ -498,6 +498,70 @@ private:
     QString extension;
     QString destFileFormat;
     QString additionalFiles;
+    std::function<void(const QString&, const QString&, qint64)> recordUpload;
+    QHash<QString, qint64> filesToUpload;
+    QSet<CommandJob*> fileSyncs;
+};
+
+// Used with Other File Sync 'Sync' button
+class OtherFileSyncScanWorker : public MzWatcherBackgroundJob
+{
+    Q_OBJECT
+
+public:
+    OtherFileSyncScanWorker(const QString &localDirectory, const QString &nameRegex,
+                   const QHash<QString, qint64> &knownUploads,
+                   const QString &bucket, const QString &keyFile,
+                   std::function<void(const QString&, const QString&, qint64)> recordUpload)
+        : localDirectory(localDirectory), nameRegex(nameRegex), knownUploads(knownUploads),
+        bucket(bucket), keyFile(keyFile), recordUpload(std::move(recordUpload)) {}
+
+    MzWatcherBackgroundJob::Type type() const override { return OTHER_FILE_SYNC_GROUP; }
+
+    QString commandKey() const override {
+        return "OTHER_FILE_SYNC_GROUP: " + bucket + ": " + localDirectory;
+    }
+
+    void run() override {
+        QRegularExpression regex(nameRegex);
+
+        QDirIterator it(localDirectory, QDir::Files, QDirIterator::Subdirectories);
+        while (it.hasNext()) {
+            QString file = it.next();
+            QString fileName = QFileInfo(file).fileName();
+            if (!nameRegex.isEmpty() && !regex.match(fileName).hasMatch()) continue;
+
+            QFileInfo fi(file);
+            if (!fi.exists()) continue;
+            qint64 size = fi.size();
+            if (knownUploads.value(file, -1) == size) continue;
+            filesToUpload.insert(file, size);
+
+            QString objectPath = QDir(localDirectory).relativeFilePath(file);
+            QStringList command = MainWindow::buildGcsUploadCommand(keyFile, bucket, file, objectPath);
+            if (command.isEmpty()) continue;
+
+            CommandJob *job = new CommandJob(command.first(), command.mid(1), CommandJob::FILE_SYNC);
+            QString uploadBucket = bucket;
+            auto record = recordUpload;
+            job->setOnFinished([record, uploadBucket, file, size](bool success) {
+                if (success) record(uploadBucket, file, size);
+            });
+            fileSyncs.insert(job);
+        }
+        emit finished(true);
+    }
+
+    // Keyed by local file path, value is the size observed during the scan.
+    QHash<QString, qint64> takeFilesToUpload() { return filesToUpload; }
+    QSet<CommandJob*> takeFileSyncJobs() { return fileSyncs; }
+
+private:
+    QString localDirectory;
+    QString nameRegex;
+    QHash<QString, qint64> knownUploads;
+    QString bucket;
+    QString keyFile;
     std::function<void(const QString&, const QString&, qint64)> recordUpload;
     QHash<QString, qint64> filesToUpload;
     QSet<CommandJob*> fileSyncs;
