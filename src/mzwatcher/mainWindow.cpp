@@ -253,15 +253,17 @@ void MainWindow::updateScheduledActionsLabel() {
 	int conversions = 0;
 	int fileSyncs = 0;
 	int warningEmails = 0;
+	int fileSyncGroups = 0;
 	foreach (MzWatcherBackgroundJob *job, outstandingJobs) {
-		CommandJob *commandJob = qobject_cast<CommandJob*>(job);
-		if (!commandJob) continue;
-		if (commandJob->type() == CommandJob::CONVERSION) conversions++;
-		else if (commandJob->type() == CommandJob::FILE_SYNC) fileSyncs++;
-		else warningEmails++;
+		switch (job->type()) {
+			case MzWatcherBackgroundJob::CONVERSION: conversions++; break;
+			case MzWatcherBackgroundJob::FILE_SYNC: fileSyncs++; break;
+			case MzWatcherBackgroundJob::FILE_SYNC_GROUP: fileSyncGroups++; break;
+			default: warningEmails++; break;
+		}
 	}
 
-	if (conversions == 0 && fileSyncs == 0 && warningEmails == 0) {
+	if (conversions == 0 && fileSyncs == 0 && warningEmails == 0 && fileSyncGroups == 0) {
         guiForm->scheduledActionsLabel->setText("No Currently Scheduled Actions.");
 		return;
 	}
@@ -269,6 +271,7 @@ void MainWindow::updateScheduledActionsLabel() {
 	QStringList parts;
 	if (conversions > 0) parts << QString::number(conversions) + " Conversions";
 	if (fileSyncs > 0) parts << QString::number(fileSyncs) + " File Syncs";
+    if (fileSyncGroups > 0) parts << QString::number(fileSyncGroups) + " Batch File Syncs";
 	if (warningEmails > 0) parts << QString::number(warningEmails) + " Warning Emails";
 	guiForm->scheduledActionsLabel->setText("Scheduled Actions: " + parts.join(", "));
 }
