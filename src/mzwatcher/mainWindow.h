@@ -400,12 +400,18 @@ class SyncScanWorker : public QObject, public QRunnable
 
 public:
 	SyncScanWorker(const QStringList &candidateFiles, const QHash<QString, qint64> &knownUploads,
-			const QString &bucket, const QString &keyFile, const QString &destFolder)
+			const QString &bucket, const QString &keyFile, const QString &sourceFolder,
+			const QString &destFolder, const QString &extension, const QString &destFileFormat)
 		: candidateFiles(candidateFiles), knownUploads(knownUploads),
-		  bucket(bucket), keyFile(keyFile), destFolder(destFolder) {}
+		  bucket(bucket), keyFile(keyFile), sourceFolder(sourceFolder), destFolder(destFolder),
+		  extension(extension), destFileFormat(destFileFormat) {}
 
 	void run() override {
-		foreach (const QString &file, candidateFiles) {
+		foreach (const QString &sourceFile, candidateFiles) {
+			QString file = sourceFile;
+			file.replace(sourceFolder, destFolder);
+			file.replace(QRegularExpression("\\." + QRegularExpression::escape(extension) + "$", QRegularExpression::CaseInsensitiveOption), "." + destFileFormat);
+
 			QFileInfo fi(file);
 			if (!fi.exists()) continue;
 			qint64 size = fi.size();
@@ -432,7 +438,10 @@ private:
 	QHash<QString, qint64> knownUploads;
 	QString bucket;
 	QString keyFile;
+	QString sourceFolder;
 	QString destFolder;
+	QString extension;
+	QString destFileFormat;
 	QHash<QString, qint64> filesToUpload;
 	QSet<CommandJob*> fileSyncs;
 };

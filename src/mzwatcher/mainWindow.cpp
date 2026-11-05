@@ -584,9 +584,9 @@ void MainWindow::syncGcsTarget(const GcsSyncTarget &target) {
     }
 
     //prepare to work in background thread
-    SyncScanWorker *worker = new SyncScanWorker(convertedFilenames, knownUploads, target.bucket, target.keyFile, destFolder);
-
     QString destFileFormat = guiForm->destFileFormatBox->currentText();
+    SyncScanWorker *worker = new SyncScanWorker(convertedFilenames, knownUploads, target.bucket, target.keyFile,
+            sourceFolder, destFolder, extension, destFileFormat);
 }
 
 void MainWindow::uploadFileToOtherTarget(const OtherSyncTarget &target, const QString &filePath, const QString &objectPath, std::function<void(bool success)> onFinished) {
