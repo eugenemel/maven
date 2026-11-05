@@ -657,22 +657,28 @@ qint64 MainWindow::lookupConvertedFileSyncUpload(const QString &bucket, const QS
 }
 
 void MainWindow::syncOtherTarget(const OtherSyncTarget &target) {
-    QRegularExpression nameRegex(target.nameRegex);
+    QSqlQuery syncedQuery(DB);
+    syncedQuery.prepare("select filePath, fileSize from other_file_sync where bucket=?");
+    syncedQuery.addBindValue(target.bucket);
+    if (!syncedQuery.exec()) return;
 
-    QDirIterator it(target.localDirectory, QDir::Files, QDirIterator::Subdirectories);
-    while (it.hasNext()) {
-        QString filePath = it.next();
-        QString fileName = QFileInfo(filePath).fileName();
-        if (!target.nameRegex.isEmpty() && !nameRegex.match(fileName).hasMatch()) continue;
-
-        qint64 currentSize = QFileInfo(filePath).size();
-        if (lookupOtherSyncUpload(target.bucket, filePath) == currentSize) continue;
-
-        QString objectPath = QDir(target.localDirectory).relativeFilePath(filePath);
-        uploadFileToOtherTarget(target, filePath, objectPath, [this, target, filePath, currentSize](bool success) {
-            if (success) recordOtherSyncUpload(target.bucket, target.localDirectory, filePath, currentSize);
-        });
+    QHash<QString, qint64> knownUploads;
+    while (syncedQuery.next()) {
+        knownUploads.insert(syncedQuery.value(0).toString(), syncedQuery.value(1).toLongLong());
     }
+
+    QString localDirectory = target.localDirectory;
+    OtherFileSyncScanWorker *worker = new OtherFileSyncScanWorker(target.localDirectory, target.nameRegex,
+            knownUploads, target.bucket, target.keyFile,
+            [this, localDirectory](const QString &bucket, const QString &filePath, qint64 fileSize) {
+                recordOtherSyncUpload(bucket, localDirectory, filePath, fileSize);
+            });
+
+    enqueueCommand(worker, [this, worker](bool success) {
+        foreach (CommandJob *job, worker->takeFileSyncJobs()) {
+            enqueueCommand(job);
+        }
+    });
 }
 
 qint64 MainWindow::totalDirectorySize(const QString &dirPath) {
