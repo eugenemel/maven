@@ -27,6 +27,8 @@ class MzWatcherBackgroundJob : public QObject, public QRunnable
 	Q_OBJECT
 
 public:
+    enum Type { CONVERSION, FILE_SYNC, WARNING_EMAIL, CONVERTED_FILE_SYNC };
+
 	// Identifies "the same work" for dedup purposes -- enqueueCommand() skips a job
 	// whose key is already outstanding.
 	virtual QString commandKey() const = 0;
@@ -43,70 +45,6 @@ protected:
 	std::atomic<bool> cancelled { false };
 };
 
-// Run via a QThreadPool (commandQueue) so jobs queue and run without blocking the GUI thread.
-class CommandJob : public MzWatcherBackgroundJob
-{
-	Q_OBJECT
-
-public:
-	enum Type { CONVERSION, FILE_SYNC, WARNING_EMAIL };
-
-	CommandJob(const QString &program, const QStringList &arguments, Type type)
-		: program(program), arguments(arguments), jobType(type), useArgumentList(true) {}
-	CommandJob(const QString &command, Type type)
-		: program(command), jobType(type), useArgumentList(false) {}
-
-	Type type() const { return jobType; }
-
-	// Identifies "the same command" for dedup purposes -- the full command line, reconstructed if given as (program, arguments).
-	QString commandKey() const override {
-		QString key = useArgumentList ? (program + " " + arguments.join(" ")) : program;
-		// The mailer reuses one fixed script path for every email -- recipients/subject/body
-		// vary only via environment variables, which must be in the key or every warning
-		// email looks identical and only the first one of a batch would ever be sent.
-		if (useCustomEnvironment) {
-			QStringList envList = environment.toStringList();
-			envList.sort();
-			key += "\n" + envList.join("\n");
-		}
-		return key;
-	}
-
-	// For a command (e.g. the mailer) that needs a secret passed via environment variable rather than argv.
-	void setProcessEnvironment(const QProcessEnvironment &env) { environment = env; useCustomEnvironment = true; }
-
-	void run() override {
-		QProcess process;
-		if (useCustomEnvironment) {
-			process.setProcessEnvironment(environment);
-		}
-		if (useArgumentList) {
-			process.start(program, arguments);
-		} else {
-			process.start(program);
-		}
-		if (!process.waitForStarted()) { emit finished(false); return; }
-
-		while (!process.waitForFinished(100)) {
-			if (cancelled) {
-				process.terminate();
-				process.waitForFinished(1000);
-				emit finished(false);
-				return;
-			}
-		}
-
-		emit finished(process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0);
-	}
-
-private:
-	QString program;
-	QStringList arguments;
-	Type jobType;
-	bool useArgumentList;
-	QProcessEnvironment environment;
-	bool useCustomEnvironment = false;
-};
 
 class MainWindow: public QMainWindow {
 	Q_OBJECT
@@ -405,60 +343,127 @@ class MainWindow: public QMainWindow {
 
 };
 
-// Prepare a large batch of files for upload. Declared after MainWindow so it can
-// call MainWindow's static buildGcsObjectPath()/buildGcsUploadCommand() helpers to
-// build its own FILE_SYNC CommandJobs directly, off the GUI thread -- the caller
-// just takes the finished jobs and adds them to the queue.
-class SyncScanWorker : public QObject, public QRunnable
+// Run via a QThreadPool (commandQueue) so jobs queue and run without blocking the GUI thread.
+class CommandJob : public MzWatcherBackgroundJob
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	SyncScanWorker(const QStringList &candidateFiles, const QHash<QString, qint64> &knownUploads,
-			const QString &bucket, const QString &keyFile, const QString &sourceFolder,
-			const QString &destFolder, const QString &extension, const QString &destFileFormat)
-		: candidateFiles(candidateFiles), knownUploads(knownUploads),
-		  bucket(bucket), keyFile(keyFile), sourceFolder(sourceFolder), destFolder(destFolder),
-		  extension(extension), destFileFormat(destFileFormat) {}
+    CommandJob(const QString &program, const QStringList &arguments, Type type)
+        : program(program), arguments(arguments), jobType(type), useArgumentList(true) {}
+    CommandJob(const QString &command, Type type)
+        : program(command), jobType(type), useArgumentList(false) {}
 
-	void run() override {
-		foreach (const QString &sourceFile, candidateFiles) {
-			QString file = sourceFile;
-			file.replace(sourceFolder, destFolder);
-			file.replace(QRegularExpression("\\." + QRegularExpression::escape(extension) + "$", QRegularExpression::CaseInsensitiveOption), "." + destFileFormat);
+    MzWatcherBackgroundJob::Type type() const { return jobType; }
 
-			QFileInfo fi(file);
-			if (!fi.exists()) continue;
-			qint64 size = fi.size();
-			if (knownUploads.value(file, -1) == size) continue;
-			filesToUpload.insert(file, size);
+    // Identifies "the same command" for dedup purposes -- the full command line, reconstructed if given as (program, arguments).
+    QString commandKey() const override {
+        QString key = useArgumentList ? (program + " " + arguments.join(" ")) : program;
+        // The mailer reuses one fixed script path for every email -- recipients/subject/body
+        // vary only via environment variables, which must be in the key or every warning
+        // email looks identical and only the first one of a batch would ever be sent.
+        if (useCustomEnvironment) {
+            QStringList envList = environment.toStringList();
+            envList.sort();
+            key += "\n" + envList.join("\n");
+        }
+        return key;
+    }
 
-			QString objectPath = MainWindow::buildGcsObjectPath(destFolder, file);
-			QStringList command = MainWindow::buildGcsUploadCommand(keyFile, bucket, file, objectPath);
-			if (command.isEmpty()) continue;
-			fileSyncs.insert(new CommandJob(command.first(), command.mid(1), CommandJob::FILE_SYNC));
-		}
-		emit finished();
-	}
+    // For a command (e.g. the mailer) that needs a secret passed via environment variable rather than argv.
+    void setProcessEnvironment(const QProcessEnvironment &env) { environment = env; useCustomEnvironment = true; }
 
-	// Keyed by local file path, value is the size observed during the scan.
-	QHash<QString, qint64> takeFilesToUpload() { return filesToUpload; }
-	QSet<CommandJob*> takeFileSyncJobs() { return fileSyncs; }
+    void run() override {
+        QProcess process;
+        if (useCustomEnvironment) {
+            process.setProcessEnvironment(environment);
+        }
+        if (useArgumentList) {
+            process.start(program, arguments);
+        } else {
+            process.start(program);
+        }
+        if (!process.waitForStarted()) { emit finished(false); return; }
 
-signals:
-	void finished();
+        while (!process.waitForFinished(100)) {
+            if (cancelled) {
+                process.terminate();
+                process.waitForFinished(1000);
+                emit finished(false);
+                return;
+            }
+        }
+
+        emit finished(process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0);
+    }
 
 private:
-	QStringList candidateFiles;
-	QHash<QString, qint64> knownUploads;
-	QString bucket;
-	QString keyFile;
-	QString sourceFolder;
-	QString destFolder;
-	QString extension;
-	QString destFileFormat;
-	QHash<QString, qint64> filesToUpload;
-	QSet<CommandJob*> fileSyncs;
+    QString program;
+    QStringList arguments;
+    MzWatcherBackgroundJob::Type jobType;
+    bool useArgumentList;
+    QProcessEnvironment environment;
+    bool useCustomEnvironment = false;
+};
+
+
+// Used with Converted File Sync 'Sync' button - sync a large batch of already-converted files
+class SyncScanWorker : public MzWatcherBackgroundJob
+{
+    Q_OBJECT
+
+public:
+    SyncScanWorker(const QStringList &candidateFiles, const QHash<QString, qint64> &knownUploads,
+                   const QString &bucket, const QString &keyFile, const QString &sourceFolder,
+                   const QString &destFolder, const QString &extension, const QString &destFileFormat)
+        : candidateFiles(candidateFiles), knownUploads(knownUploads),
+        bucket(bucket), keyFile(keyFile), sourceFolder(sourceFolder), destFolder(destFolder),
+        extension(extension), destFileFormat(destFileFormat) {}
+
+    MzWatcherBackgroundJob::Type type() const { return CONVERTED_FILE_SYNC; }
+
+    QString commandKey() const override {
+        return "CONVERTED_FILE_SYNC: " + bucket;
+    }
+
+    void run() override {
+        foreach (const QString &sourceFile, candidateFiles) {
+            QString file = sourceFile;
+            file.replace(sourceFolder, destFolder);
+            file.replace(QRegularExpression("\\." + QRegularExpression::escape(extension) + "$", QRegularExpression::CaseInsensitiveOption), "." + destFileFormat);
+
+            QFileInfo fi(file);
+            if (!fi.exists()) continue;
+            qint64 size = fi.size();
+            if (knownUploads.value(file, -1) == size) continue;
+            filesToUpload.insert(file, size);
+
+            QString objectPath = MainWindow::buildGcsObjectPath(destFolder, file);
+            QStringList command = MainWindow::buildGcsUploadCommand(keyFile, bucket, file, objectPath);
+            if (command.isEmpty()) continue;
+            fileSyncs.insert(new CommandJob(command.first(), command.mid(1), CommandJob::FILE_SYNC));
+        }
+        emit finished(true);
+    }
+
+    // Keyed by local file path, value is the size observed during the scan.
+    QHash<QString, qint64> takeFilesToUpload() { return filesToUpload; }
+    QSet<CommandJob*> takeFileSyncJobs() { return fileSyncs; }
+
+signals:
+    void finished(bool success);
+
+private:
+    QStringList candidateFiles;
+    QHash<QString, qint64> knownUploads;
+    QString bucket;
+    QString keyFile;
+    QString sourceFolder;
+    QString destFolder;
+    QString extension;
+    QString destFileFormat;
+    QHash<QString, qint64> filesToUpload;
+    QSet<CommandJob*> fileSyncs;
 };
 
 #endif
