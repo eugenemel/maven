@@ -462,8 +462,6 @@ public:
         emit finished(true);
     }
 
-    // Keyed by local file path, value is the size observed during the scan.
-    QHash<QString, qint64> takeFilesToUpload() { return filesToUpload; }
     QSet<CommandJob*> takeFileSyncJobs() { return fileSyncs; }
 
 private:
@@ -474,7 +472,6 @@ private:
         if (!fi.exists()) return;
         qint64 size = fi.size();
         if (knownUploads.value(file, -1) == size) return;
-        filesToUpload.insert(file, size);
 
         QString objectPath = MainWindow::buildGcsObjectPath(destFolder, file);
         QStringList command = MainWindow::buildGcsUploadCommand(keyFile, bucket, file, objectPath);
@@ -499,7 +496,6 @@ private:
     QString destFileFormat;
     QString additionalFiles;
     std::function<void(const QString&, const QString&, qint64)> recordUpload;
-    QHash<QString, qint64> filesToUpload;
     QSet<CommandJob*> fileSyncs;
 };
 
@@ -535,7 +531,6 @@ public:
             if (!fi.exists()) continue;
             qint64 size = fi.size();
             if (knownUploads.value(file, -1) == size) continue;
-            filesToUpload.insert(file, size);
 
             QString objectPath = QDir(localDirectory).relativeFilePath(file);
             QStringList command = MainWindow::buildGcsUploadCommand(keyFile, bucket, file, objectPath);
@@ -552,8 +547,6 @@ public:
         emit finished(true);
     }
 
-    // Keyed by local file path, value is the size observed during the scan.
-    QHash<QString, qint64> takeFilesToUpload() { return filesToUpload; }
     QSet<CommandJob*> takeFileSyncJobs() { return fileSyncs; }
 
 private:
@@ -563,7 +556,6 @@ private:
     QString bucket;
     QString keyFile;
     std::function<void(const QString&, const QString&, qint64)> recordUpload;
-    QHash<QString, qint64> filesToUpload;
     QSet<CommandJob*> fileSyncs;
 };
 
