@@ -1443,8 +1443,7 @@ void MainWindow::makeBackupCopy(QString file) {
                 enqueueCommand(new CommandJob(command, CommandJob::CONVERSION), [this, sourceFilePath, localConvertedFile](bool success) {
                     bool conversionStillRunning = false;
                     foreach (MzWatcherBackgroundJob *job, outstandingJobs) {
-                        CommandJob *commandJob = qobject_cast<CommandJob*>(job);
-                        if (commandJob && commandJob->type() == CommandJob::CONVERSION) { conversionStillRunning = true; break; }
+                        if (job->type() == MzWatcherBackgroundJob::CONVERSION) { conversionStillRunning = true; break; }
                     }
                     if (!conversionStillRunning) guiForm->convertButton->setText("Convert");
 
