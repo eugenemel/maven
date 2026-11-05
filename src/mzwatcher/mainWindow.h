@@ -19,8 +19,32 @@
 #include<atomic>
 #include "ui_mzWatcherGui.h"
 
+// Common base for background work dispatched via commandQueue (a QThreadPool) --
+// lets outstandingJobs/outstandingCommandKeys and enqueueCommand() track different
+// kinds of work (an external command, a scan that builds more jobs, ...) generically.
+class MzWatcherBackgroundJob : public QObject, public QRunnable
+{
+	Q_OBJECT
+
+public:
+	// Identifies "the same work" for dedup purposes -- enqueueCommand() skips a job
+	// whose key is already outstanding.
+	virtual QString commandKey() const = 0;
+
+	// Called from the GUI thread; run() (on the worker thread) polls this rather than being killed directly.
+	void cancel() { cancelled = true; }
+	// For a job removed from the queue via QThreadPool::tryTake() before it ever ran -- run() will never fire finished() itself.
+	void skipQueued() { emit finished(false); }
+
+signals:
+	void finished(bool success);
+
+protected:
+	std::atomic<bool> cancelled { false };
+};
+
 // Run via a QThreadPool (commandQueue) so jobs queue and run without blocking the GUI thread.
-class CommandJob : public QObject, public QRunnable
+class CommandJob : public MzWatcherBackgroundJob
 {
 	Q_OBJECT
 
@@ -35,7 +59,7 @@ public:
 	Type type() const { return jobType; }
 
 	// Identifies "the same command" for dedup purposes -- the full command line, reconstructed if given as (program, arguments).
-	QString commandKey() const {
+	QString commandKey() const override {
 		QString key = useArgumentList ? (program + " " + arguments.join(" ")) : program;
 		// The mailer reuses one fixed script path for every email -- recipients/subject/body
 		// vary only via environment variables, which must be in the key or every warning
@@ -75,14 +99,6 @@ public:
 		emit finished(process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0);
 	}
 
-	// Called from the GUI thread; run() (on the worker thread) polls this rather than being killed directly.
-	void cancel() { cancelled = true; }
-	// For a job removed from the queue via QThreadPool::tryTake() before it ever ran -- run() will never fire finished() itself.
-	void skipQueued() { emit finished(false); }
-
-signals:
-	void finished(bool success);
-
 private:
 	QString program;
 	QStringList arguments;
@@ -90,7 +106,6 @@ private:
 	bool useArgumentList;
 	QProcessEnvironment environment;
 	bool useCustomEnvironment = false;
-	std::atomic<bool> cancelled { false };
 };
 
 class MainWindow: public QMainWindow {
