@@ -730,7 +730,7 @@ bool MainWindow::isRapidFireRunDisconnected(const QString &dotDPath) {
         if (lastLines.size() > 200) lastLines.removeFirst();
     }
 
-    return lastLines.join("\n").contains("<RapidFire>: RFMassHunterS:Task: Run Disconnect.");
+    return lastLines.join("\n").contains("<RapidFire>: RFMassHunterS:Task: Run Disconnect");
 }
 
 qint64 MainWindow::thresholdInBytes(double threshold, const QString &unit) {
