@@ -128,6 +128,7 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
 	connect(guiForm->destFolderButton,SIGNAL(pressed()),this,SLOT(selectDestFolder()));
 	connect(guiForm->sourceFolderButton,SIGNAL(pressed()),this,SLOT(selectSourceFolder()));
         connect(guiForm->clearDatabaseButton,SIGNAL(pressed()),this,SLOT(clearTables()));
+        connect(guiForm->clearLogButton,SIGNAL(pressed()),this,SLOT(clearLog()));
         connect(guiForm->addGcsSyncTargetButton,SIGNAL(pressed()),this,SLOT(addGcsSyncTargetClicked()));
 
         guiForm->stopAllButton->setIcon(style()->standardIcon(QStyle::SP_BrowserStop));
@@ -157,7 +158,6 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
         QString dbDir = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
         QString dbname = dbDir + "/mzWatcher.db";
 
-        setStatus("Using Database: \"" + dbname + "\"");
         // QSqlDatabase/SQLite will not create a missing parent directory on
         // its own -- DB.open() fails silently if dbDir doesn't exist yet
         // (e.g. the first run after an applicationName/organizationName
@@ -165,6 +165,12 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent) {
         // generic "Unable to fetch row" rather than a specific error, since
         // there's no open connection to even check the schema against.
         QDir().mkpath(dbDir);
+
+        logFile.setFileName(dbDir + "/mzWatcher.log");
+        logFile.open(QIODevice::Append | QIODevice::Text);
+        guiForm->clearLogButton->setToolTip(logFile.fileName());
+
+        setStatus("Using Database: \"" + dbname + "\"");
         DB = QSqlDatabase::addDatabase("QSQLITE", dbname);
         DB.setDatabaseName(dbname);
         if (! DB.open()) {
@@ -200,7 +206,13 @@ void MainWindow::setStatus(QString status) {
         QString nowDate = QDate::currentDate().toString("yyyyMMdd");
         QString nowTime = QTime::currentTime().toString("hh:mm:ss ap");
 	//guiForm->statusLabel->setText(status);
-        guiForm->logWidget->appendPlainText("[" + nowDate + "] " + nowTime + ": " + status);
+        QString line = "[" + nowDate + "] " + nowTime + ": " + status;
+        guiForm->logWidget->appendPlainText(line);
+
+        if (logFile.isOpen()) {
+            QTextStream(&logFile) << line << "\n";
+            logFile.flush();
+        }
 
         static const int kMaxLogLines = 100000;
         QTextDocument *logDoc = guiForm->logWidget->document();
@@ -1702,6 +1714,13 @@ void MainWindow::readSettings() {
          otherSyncTargetWidgets[i].watchedFiles.clear();
      }
      showDataFilesTable();
+ }
+
+ void MainWindow::clearLog() {
+     guiForm->logWidget->clear();
+     logFile.close();
+     logFile.remove();
+     logFile.open(QIODevice::Append | QIODevice::Text);
  }
 
  void MainWindow::closeEvent(QCloseEvent *event) {

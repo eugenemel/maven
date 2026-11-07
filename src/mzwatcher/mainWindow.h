@@ -126,6 +126,7 @@ class MainWindow: public QMainWindow {
 				void selectDestFolder();
 				void selectSourceFolder();
                         void clearTables();
+                        void clearLog();
                         void updateButtonColors();
                         void selectMailerConfigFile();
                         void addWarningSizeRuleClicked();
@@ -304,6 +305,10 @@ class MainWindow: public QMainWindow {
 				unsigned int maxDayDiff;
 
 				QSqlDatabase DB;
+				// Mirrors every setStatus() line to disk (same directory as the
+				// sqlite DB) so the Process Log survives the app being closed --
+				// the GUI's logWidget is in-memory only.
+				QFile logFile;
 
 				QSettings* settings;
 				void readSettings();
