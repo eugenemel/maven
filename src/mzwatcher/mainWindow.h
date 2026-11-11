@@ -27,7 +27,7 @@ class MzWatcherBackgroundJob : public QObject, public QRunnable
 	Q_OBJECT
 
 public:
-    enum Type { CONVERSION, FILE_SYNC, WARNING_EMAIL, FILE_SYNC_GROUP };
+    enum Type { CONVERSION, FILE_SYNC, WARNING_EMAIL, FILE_SYNC_GROUP, SOURCE_FOLDER_SCAN };
 
 	// Identifies "the same work" for dedup purposes -- enqueueCommand() skips a job
 	// whose key is already outstanding.
@@ -563,5 +563,215 @@ private:
     std::function<void(const QString&, const QString&, qint64)> recordUpload;
     QSet<CommandJob*> fileSyncs;
 };
+
+// Issue 872
+// Automatically triggered on a Source Folder that is being watched. (File Converter Settings tab)
+//
+// Takes over getFileList()'s directory walk and processChangedFiles()'s readiness checks,
+// and also runs the Converted File Sync catch-up (main file + Additional Files) that
+// syncGcsTarget()/SyncScanWorker only ever ran from the manual Sync button -- so a companion
+// Additional File that doesn't exist yet the instant its mzML finishes converting gets picked
+// up on the very next scan instead of only when a human clicks Sync (Issue 872).
+//
+// SQL and widget access have to stay on the GUI thread (see syncGcsTarget()'s comment on this),
+// so this class never touches MainWindow::DB or any QWidget. Everything it needs comes in as a
+// plain-data snapshot via the constructor, and everything it finds comes back out through the
+// take*() accessors below for the GUI thread to act on.
+class SourceFileScanWorker : public MzWatcherBackgroundJob {
+     Q_OBJECT
+public:
+    // Mirrors MainWindow::GcsSyncTarget's shape -- that struct is private to MainWindow, so it
+    // can't be reused here directly; the caller translates collectGcsSyncTargets() into these.
+    struct GcsTarget {
+        QString bucket;
+        QString keyFile;
+        QString additionalFiles;
+    };
+
+    SourceFileScanWorker(const QString &sourceFolder, const QString &destFolder, const QString &extension,
+                   const QString &destFileFormat, int minFileSize, int waitTimeSecs, int maxDayDiff,
+                   const QHash<QString, qint64> &dbFiles, const QSet<QString> &convertedFiles,
+                   const QHash<QString, QDateTime> &firstDetectedTimes,
+                   const QHash<QString, qint64> &fileList, const QHash<QString, QDateTime> &lastSizeChangeTimes,
+                   const QVector<GcsTarget> &gcsSyncTargets, const QStringList &convertedFilenames,
+                   const QHash<QString, QHash<QString, qint64>> &knownUploadsByBucket,
+                   std::function<void(const QString&, const QString&, qint64)> recordUpload)
+        : sourceFolder(sourceFolder), destFolder(destFolder), extension(extension), destFileFormat(destFileFormat),
+        minFileSize(minFileSize), waitTimeSecs(waitTimeSecs), maxDayDiff(maxDayDiff),
+        dbFiles(dbFiles), convertedFiles(convertedFiles), firstDetectedTimes(firstDetectedTimes),
+        fileList(fileList), lastSizeChangeTimes(lastSizeChangeTimes),
+        gcsSyncTargets(gcsSyncTargets), convertedFilenames(convertedFilenames),
+        knownUploadsByBucket(knownUploadsByBucket), recordUpload(std::move(recordUpload)) {}
+
+    MzWatcherBackgroundJob::Type type() const override { return SOURCE_FOLDER_SCAN; }
+
+    // Key is intentionally set up so there is never more than one key of this type in the queue.
+    // A new key will try to be added periodically, this explicitly prevents piling up too many scan jobs.
+    QString commandKey() const override {
+        return QString("SOURCE_FILE_SCAN_WORKER");
+    }
+
+    void run() override {
+        scanDirectory(sourceFolder);
+        evaluateReadiness();
+        evaluateGcsCatchUp();
+        emit finished(true);
+    }
+
+    QSet<CommandJob*> takeJobs() { return jobs; }
+    QStringList takeNewFiles() const { return newFiles; }
+    QStringList takeReadyToConvertFiles() const { return readyToConvertFiles; }
+    QHash<QString, qint64> takeUpdatedFileList() const { return updatedFileList; }
+    QHash<QString, QDateTime> takeUpdatedLastSizeChangeTimes() const { return updatedLastSizeChangeTimes; }
+
+private:
+    // Mirrors getFileList()'s recursive walk, minus the QApplication::processEvents() calls it
+    // used to need to keep the GUI responsive while blocking it on the GUI thread -- unneeded
+    // now that this runs on a background thread instead.
+    void scanDirectory(const QString &fromDir) {
+        QDir dir(fromDir);
+        if (!dir.exists()) return;
+
+        QFileInfo dirInfo(fromDir);
+        if (visitedDirectories.contains(dirInfo.absoluteFilePath())) return;
+        visitedDirectories.insert(dirInfo.absoluteFilePath());
+
+        const QFileInfoList entries = dir.entryInfoList(QStringList(),
+                                              QDir::Files | QDir::Dirs | QDir::NoSymLinks | QDir::Readable,
+                                              QDir::Name | QDir::DirsFirst | QDir::IgnoreCase);
+
+        QDateTime now = QDateTime::currentDateTime();
+        foreach (const QFileInfo &fi, entries) {
+            if (fi.fileName() == "." || fi.fileName() == "..") continue;
+
+            if (MainWindow::isConvertibleMatch(fi.fileName(), extension)) {
+                QString absFilePath = fi.absoluteFilePath();
+                qint64 size = MainWindow::effectiveFileSize(fi);
+
+                if (!fileList.contains(absFilePath) || fileList.value(absFilePath) != size) {
+                    updatedLastSizeChangeTimes[absFilePath] = now;
+                } else if (lastSizeChangeTimes.contains(absFilePath)) {
+                    updatedLastSizeChangeTimes[absFilePath] = lastSizeChangeTimes.value(absFilePath);
+                }
+                updatedFileList[absFilePath] = size;
+
+                if ((now.daysTo(fi.lastModified())) * -1 < maxDayDiff && !dbFiles.contains(absFilePath)) {
+                    newFiles << absFilePath;
+                }
+            } else if (fi.isDir() && !visitedDirectories.contains(fi.absoluteFilePath())) {
+                scanDirectory(fi.absoluteFilePath());
+            }
+        }
+    }
+
+    // Mirrors processChangedFiles()'s readiness checks, reading the size/change-time
+    // bookkeeping scanDirectory() just produced above, the same way the original ran
+    // getFileList() and then processChangedFiles() in sequence on every timer tick.
+    void evaluateReadiness() {
+        static const int kOneDaySecs = 3600 * 24;
+        QDateTime now = QDateTime::currentDateTime();
+
+        foreach (const QString &file, dbFiles.keys()) {
+            if (convertedFiles.contains(file)) continue;
+
+            QFileInfo fi(file);
+            int ageSec = now.secsTo(fi.lastModified()) * -1;
+            if (ageSec >= kOneDaySecs) continue;
+
+            qint64 currentSize = MainWindow::effectiveFileSize(fi);
+            if (currentSize <= minFileSize) continue;
+
+            if (fi.isDir() && fi.suffix().compare("d", Qt::CaseInsensitive) == 0
+                    && MainWindow::isRapidFireRunDisconnected(file)) {
+                readyToConvertFiles << file;
+                continue;
+            }
+
+            int secsSinceFirstDetected = firstDetectedTimes.value(file, now).secsTo(now);
+            if (secsSinceFirstDetected <= waitTimeSecs) continue;
+
+            QDateTime lastChange = updatedLastSizeChangeTimes.value(file, lastSizeChangeTimes.value(file, now));
+            int secsSinceLastChange = lastChange.secsTo(now);
+            if (secsSinceLastChange <= waitTimeSecs) continue;
+
+            readyToConvertFiles << file;
+        }
+    }
+
+    // Mirrors SyncScanWorker's catch-up scan (main converted file + its configured Additional
+    // Files), run here for every configured GCS sync target on every automatic scan rather than
+    // only when the manual Sync button builds a SyncScanWorker -- this is the actual Issue 872
+    // fix once this worker is wired in.
+    void evaluateGcsCatchUp() {
+        foreach (const GcsTarget &target, gcsSyncTargets) {
+            QHash<QString, qint64> knownUploads = knownUploadsByBucket.value(target.bucket);
+
+            foreach (const QString &sourceFile, convertedFilenames) {
+                QString file = sourceFile;
+                file.replace(sourceFolder, destFolder);
+                file.replace(QRegularExpression("\\." + QRegularExpression::escape(extension) + "$", QRegularExpression::CaseInsensitiveOption), "." + destFileFormat);
+
+                evaluateFile(file, target.bucket, target.keyFile, knownUploads);
+
+                QString fileDir = QFileInfo(file).absolutePath();
+                foreach (const QString &additionalFile, target.additionalFiles.split(",")) {
+                    QString fileName = additionalFile.trimmed();
+                    if (fileName.isEmpty()) continue;
+                    evaluateFile(fileDir + "/" + fileName, target.bucket, target.keyFile, knownUploads);
+                }
+            }
+        }
+    }
+
+    // Stats one candidate file (the main converted file or one of its additional files) and,
+    // if it needs uploading, builds its FILE_SYNC job with the record-on-success callback
+    // attached -- same shape as SyncScanWorker::evaluateFile().
+    void evaluateFile(const QString &file, const QString &bucket, const QString &keyFile, const QHash<QString, qint64> &knownUploads) {
+        QFileInfo fi(file);
+        if (!fi.exists()) return;
+        qint64 size = fi.size();
+        if (knownUploads.value(file, -1) == size) return;
+
+        QString objectPath = MainWindow::buildGcsObjectPath(destFolder, file);
+        QStringList command = MainWindow::buildGcsUploadCommand(keyFile, bucket, file, objectPath);
+        if (command.isEmpty()) return;
+
+        CommandJob *job = new CommandJob(command.first(), command.mid(1), CommandJob::FILE_SYNC);
+        QString uploadBucket = bucket;
+        auto record = recordUpload;
+        job->setOnFinished([record, uploadBucket, file, size](bool success) {
+            if (success) record(uploadBucket, file, size);
+        });
+        jobs.insert(job);
+    }
+
+    QString sourceFolder;
+    QString destFolder;
+    QString extension;
+    QString destFileFormat;
+    int minFileSize;
+    int waitTimeSecs;
+    int maxDayDiff;
+
+    QHash<QString, qint64> dbFiles;
+    QSet<QString> convertedFiles;
+    QHash<QString, QDateTime> firstDetectedTimes;
+    QHash<QString, qint64> fileList;
+    QHash<QString, QDateTime> lastSizeChangeTimes;
+
+    QVector<GcsTarget> gcsSyncTargets;
+    QStringList convertedFilenames;
+    QHash<QString, QHash<QString, qint64>> knownUploadsByBucket;
+    std::function<void(const QString&, const QString&, qint64)> recordUpload;
+
+    QSet<QString> visitedDirectories;
+    QStringList newFiles;
+    QStringList readyToConvertFiles;
+    QHash<QString, qint64> updatedFileList;
+    QHash<QString, QDateTime> updatedLastSizeChangeTimes;
+    QSet<CommandJob*> jobs;
+};
+
+
 
 #endif
