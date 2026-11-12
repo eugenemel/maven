@@ -635,6 +635,14 @@ void MainWindow::enqueueCommand(MzWatcherBackgroundJob *job, std::function<void(
         outstandingJobs.remove(job);
         outstandingCommandKeys.remove(key);
         setStatus(QString(success ? "Job succeeded: " : "Job failed: ") + "'" + job->commandKey() + "'");
+        // Only an actual CommandJob (a real external command -- conversion, gsutil upload,
+        // mailer) failing turns the dial red; the scan/group jobs (SyncScanWorker,
+        // OtherFileSyncScanWorker, SourceFileScanWorker) always report success themselves --
+        // it's whatever CommandJobs they produce that can actually fail.
+        if (!success && dynamic_cast<CommandJob*>(job)) {
+            guiForm->monitorDial->setStyleSheet("background: red;");
+            guiForm->monitorDial->setToolTip("A background command failed -- check the Process Log for details.");
+        }
         if (job->onFinished()) job->onFinished()(success);
         if (onFinished) onFinished(success);
         job->deleteLater();
