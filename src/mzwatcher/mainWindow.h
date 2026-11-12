@@ -81,11 +81,6 @@ class MainWindow: public QMainWindow {
 				static bool isConvertibleMatch(const QString &entryName, const QString &extension);
 				static QString buildGcsObjectPath(const QString &destFolder, const QString &convertedFilePath);
 				static QStringList buildGcsUploadCommand(const QString &gcsKeyFile, const QString &targetBucket, const QString &localFilePath, const QString &objectPath);
-				// Where a configured Additional File might actually be: flat alongside the
-				// converted output (e.g. a nightly RoboCopy drop into destFileDir), or -- when
-				// sourceFile is itself a directory-style source (an Agilent .d bundle) -- inside
-				// it. Not purely string logic like its neighbors above (it stats sourceFile), but
-				// kept here since every caller needs the same two candidates.
 				static QStringList additionalFileCandidates(const QString &sourceFile, const QString &destFileDir, const QString &fileName);
 
 				// Automatic Warnings feature: testable pure-logic helpers.
@@ -474,10 +469,6 @@ public:
             foreach (const QString &additionalFile, additionalFiles.split(",")) {
                 QString fileName = additionalFile.trimmed();
                 if (fileName.isEmpty()) continue;
-                // additionalFileCandidates() covers both a flat drop next to the converted
-                // output and, for a directory-style (.d bundle) source, a file inside it -- the
-                // object path always mirrors the flat location, so the bucket layout is the same
-                // either way.
                 foreach (const QString &candidate, MainWindow::additionalFileCandidates(sourceFile, destDir, fileName)) {
                     evaluateFile(candidate, destDir + "/" + fileName);
                 }
@@ -740,9 +731,6 @@ private:
                 foreach (const QString &additionalFile, target.additionalFiles.split(",")) {
                     QString fileName = additionalFile.trimmed();
                     if (fileName.isEmpty()) continue;
-                    // additionalFileCandidates() covers both a flat drop next to the converted
-                    // output and, for a directory-style (.d bundle) source, a file inside it --
-                    // the object path always mirrors the flat location either way.
                     foreach (const QString &candidate, MainWindow::additionalFileCandidates(sourceFile, destDir, fileName)) {
                         evaluateFile(candidate, target.bucket, target.keyFile, knownUploads, destDir + "/" + fileName);
                     }

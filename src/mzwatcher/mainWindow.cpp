@@ -611,7 +611,14 @@ QStringList MainWindow::buildGcsUploadCommand(const QString &gcsKeyFile, const Q
 
 QStringList MainWindow::additionalFileCandidates(const QString &sourceFile, const QString &destFileDir, const QString &fileName) {
     QStringList candidates;
+
+    //check where the converted file will be sent
     candidates << destFileDir + "/" + fileName;
+
+    //check alongside raw file (e.g., thermo .RAW file or Agilent .d folder)
+    candidates << QFileInfo(sourceFile).absolutePath() + "/" + fileName;
+
+    //check inside the raw file, if it is a directory (e.g., Agilent .d folder)
     if (QFileInfo(sourceFile).isDir()) {
         candidates << sourceFile + "/" + fileName;
     }
@@ -679,10 +686,6 @@ void MainWindow::uploadFileToGcsTarget(const GcsSyncTarget &target, const QStrin
         QString fileName = additionalFile.trimmed();
         if (fileName.isEmpty()) continue;
 
-        // additionalFileCandidates() covers both a flat drop next to the converted output (e.g.
-        // a nightly RoboCopy drop into destFileDir) and, for a directory-style (.d bundle)
-        // source, a file inside it -- the object path always mirrors the flat location, so the
-        // bucket layout is the same either way.
         foreach (const QString &additionalFilePath, additionalFileCandidates(sourceFilePath, destFileDir, fileName)) {
             QFileInfo additionalFileInfo(additionalFilePath);
             if (!additionalFileInfo.exists()) continue;
