@@ -47,6 +47,9 @@ public:
 	const std::function<void(bool)>& onFinished() const { return onFinishedCallback; }
 
 signals:
+	// Emitted as the first thing run() does, on the worker thread -- queued back to whoever
+	// connects from the GUI thread, same as finished() below.
+	void started();
 	void finished(bool success);
 
 protected:
@@ -616,6 +619,7 @@ public:
     }
 
     void run() override {
+        emit started();
         scanDirectory(sourceFolder);
         evaluateReadiness();
         evaluateGcsCatchUp();

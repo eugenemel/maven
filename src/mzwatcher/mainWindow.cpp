@@ -504,6 +504,13 @@ void MainWindow::enqueueSourceFolderScan() {
                 recordConvertedFileSyncUpload(bucket, filePath, fileSize);
             });
 
+    // Connected before enqueueCommand() starts the job -- it may begin running (and emit
+    // started()) on a pool thread as soon as it's queued, so the connection has to exist first.
+    connect(worker, &MzWatcherBackgroundJob::started, this, [this]() {
+        guiForm->monitorDial->setStyleSheet("background: yellow;");
+        guiForm->monitorDial->setToolTip("Scanning the Source Folder right now.");
+    });
+
     enqueueCommand(worker, [this, worker](bool success) {
         foreach (const QString &file, worker->takeNewFiles()) {
             insertFileInfo(file);
@@ -527,6 +534,10 @@ void MainWindow::enqueueSourceFolderScan() {
         foreach (const QString &file, worker->takeReadyToConvertFiles()) {
             processFile(file);
         }
+
+        // Restores monitorDial to green -- this function only ever runs while watching is on
+        // (see timerEvent()), so updateButtonColors() always lands on the "watching" green here.
+        updateButtonColors();
     });
 }
 
