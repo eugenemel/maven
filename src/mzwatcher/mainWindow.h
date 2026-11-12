@@ -81,6 +81,12 @@ class MainWindow: public QMainWindow {
 				static bool isConvertibleMatch(const QString &entryName, const QString &extension);
 				static QString buildGcsObjectPath(const QString &destFolder, const QString &convertedFilePath);
 				static QStringList buildGcsUploadCommand(const QString &gcsKeyFile, const QString &targetBucket, const QString &localFilePath, const QString &objectPath);
+				// Where a configured Additional File might actually be: flat alongside the
+				// converted output (e.g. a nightly RoboCopy drop into destFileDir), or -- when
+				// sourceFile is itself a directory-style source (an Agilent .d bundle) -- inside
+				// it. Not purely string logic like its neighbors above (it stats sourceFile), but
+				// kept here since every caller needs the same two candidates.
+				static QStringList additionalFileCandidates(const QString &sourceFile, const QString &destFileDir, const QString &fileName);
 
 				// Automatic Warnings feature: testable pure-logic helpers.
 				static qint64 totalDirectorySize(const QString &dirPath);
@@ -333,8 +339,8 @@ class MainWindow: public QMainWindow {
 
 				void makeBackupCopy(QString filename);
 				static bool copyRecursively(const QString &sourcePath, const QString &destPath);
-				void uploadConvertedFileToGcs(const QString &localConvertedFile);
-				void uploadFileToGcsTarget(const GcsSyncTarget &target, const QString &localConvertedFile);
+				void uploadConvertedFileToGcs(const QString &sourceFilePath, const QString &localConvertedFile);
+				void uploadFileToGcsTarget(const GcsSyncTarget &target, const QString &sourceFilePath, const QString &localConvertedFile);
 				void recordConvertedFileSyncUpload(const QString &bucket, const QString &filePath, qint64 fileSize);
 				qint64 lookupConvertedFileSyncUpload(const QString &bucket, const QString &filePath);
 				void syncGcsTarget(const GcsSyncTarget &target);
@@ -462,13 +468,19 @@ public:
             file.replace(sourceFolder, destFolder);
             file.replace(QRegularExpression("\\." + QRegularExpression::escape(extension) + "$", QRegularExpression::CaseInsensitiveOption), "." + destFileFormat);
 
-            evaluateFile(file);
+            evaluateFile(file, file);
 
-            QString sourceDir = QFileInfo(file).absolutePath();
+            QString destDir = QFileInfo(file).absolutePath();
             foreach (const QString &additionalFile, additionalFiles.split(",")) {
                 QString fileName = additionalFile.trimmed();
                 if (fileName.isEmpty()) continue;
-                evaluateFile(sourceDir + "/" + fileName);
+                // additionalFileCandidates() covers both a flat drop next to the converted
+                // output and, for a directory-style (.d bundle) source, a file inside it -- the
+                // object path always mirrors the flat location, so the bucket layout is the same
+                // either way.
+                foreach (const QString &candidate, MainWindow::additionalFileCandidates(sourceFile, destDir, fileName)) {
+                    evaluateFile(candidate, destDir + "/" + fileName);
+                }
             }
         }
         emit finished(true);
@@ -478,22 +490,25 @@ public:
 
 private:
     // Stats one candidate file (the main converted file or one of its additional files) and,
-    // if it needs uploading, builds its FILE_SYNC job with the record-on-success callback attached.
-    void evaluateFile(const QString &file) {
-        QFileInfo fi(file);
+    // if it needs uploading, builds its FILE_SYNC job with the record-on-success callback
+    // attached. localFilePath is what actually gets read and uploaded; objectPathSource is only
+    // used to name the GCS object, which lets an Additional File read from inside a .d bundle
+    // still land at the same bucket location as if it had been sitting flat next to the mzML.
+    void evaluateFile(const QString &localFilePath, const QString &objectPathSource) {
+        QFileInfo fi(localFilePath);
         if (!fi.exists()) return;
         qint64 size = fi.size();
-        if (knownUploads.value(file, -1) == size) return;
+        if (knownUploads.value(localFilePath, -1) == size) return;
 
-        QString objectPath = MainWindow::buildGcsObjectPath(destFolder, file);
-        QStringList command = MainWindow::buildGcsUploadCommand(keyFile, bucket, file, objectPath);
+        QString objectPath = MainWindow::buildGcsObjectPath(destFolder, objectPathSource);
+        QStringList command = MainWindow::buildGcsUploadCommand(keyFile, bucket, localFilePath, objectPath);
         if (command.isEmpty()) return;
 
         CommandJob *job = new CommandJob(command.first(), command.mid(1), CommandJob::FILE_SYNC);
         QString uploadBucket = bucket;
         auto record = recordUpload;
-        job->setOnFinished([record, uploadBucket, file, size](bool success) {
-            if (success) record(uploadBucket, file, size);
+        job->setOnFinished([record, uploadBucket, localFilePath, size](bool success) {
+            if (success) record(uploadBucket, localFilePath, size);
         });
         fileSyncs.insert(job);
     }
@@ -719,13 +734,18 @@ private:
                 file.replace(sourceFolder, destFolder);
                 file.replace(QRegularExpression("\\." + QRegularExpression::escape(extension) + "$", QRegularExpression::CaseInsensitiveOption), "." + destFileFormat);
 
-                evaluateFile(file, target.bucket, target.keyFile, knownUploads);
+                evaluateFile(file, target.bucket, target.keyFile, knownUploads, file);
 
-                QString fileDir = QFileInfo(file).absolutePath();
+                QString destDir = QFileInfo(file).absolutePath();
                 foreach (const QString &additionalFile, target.additionalFiles.split(",")) {
                     QString fileName = additionalFile.trimmed();
                     if (fileName.isEmpty()) continue;
-                    evaluateFile(fileDir + "/" + fileName, target.bucket, target.keyFile, knownUploads);
+                    // additionalFileCandidates() covers both a flat drop next to the converted
+                    // output and, for a directory-style (.d bundle) source, a file inside it --
+                    // the object path always mirrors the flat location either way.
+                    foreach (const QString &candidate, MainWindow::additionalFileCandidates(sourceFile, destDir, fileName)) {
+                        evaluateFile(candidate, target.bucket, target.keyFile, knownUploads, destDir + "/" + fileName);
+                    }
                 }
             }
         }
@@ -733,22 +753,24 @@ private:
 
     // Stats one candidate file (the main converted file or one of its additional files) and,
     // if it needs uploading, builds its FILE_SYNC job with the record-on-success callback
-    // attached -- same shape as SyncScanWorker::evaluateFile().
-    void evaluateFile(const QString &file, const QString &bucket, const QString &keyFile, const QHash<QString, qint64> &knownUploads) {
-        QFileInfo fi(file);
+    // attached -- same shape as SyncScanWorker::evaluateFile(). localFilePath is what actually
+    // gets read and uploaded; objectPathSource only names the GCS object, so an Additional File
+    // read from inside a .d bundle still lands at the same bucket location as a flat one would.
+    void evaluateFile(const QString &localFilePath, const QString &bucket, const QString &keyFile, const QHash<QString, qint64> &knownUploads, const QString &objectPathSource) {
+        QFileInfo fi(localFilePath);
         if (!fi.exists()) return;
         qint64 size = fi.size();
-        if (knownUploads.value(file, -1) == size) return;
+        if (knownUploads.value(localFilePath, -1) == size) return;
 
-        QString objectPath = MainWindow::buildGcsObjectPath(destFolder, file);
-        QStringList command = MainWindow::buildGcsUploadCommand(keyFile, bucket, file, objectPath);
+        QString objectPath = MainWindow::buildGcsObjectPath(destFolder, objectPathSource);
+        QStringList command = MainWindow::buildGcsUploadCommand(keyFile, bucket, localFilePath, objectPath);
         if (command.isEmpty()) return;
 
         CommandJob *job = new CommandJob(command.first(), command.mid(1), CommandJob::FILE_SYNC);
         QString uploadBucket = bucket;
         auto record = recordUpload;
-        job->setOnFinished([record, uploadBucket, file, size](bool success) {
-            if (success) record(uploadBucket, file, size);
+        job->setOnFinished([record, uploadBucket, localFilePath, size](bool success) {
+            if (success) record(uploadBucket, localFilePath, size);
         });
         jobs.insert(job);
     }

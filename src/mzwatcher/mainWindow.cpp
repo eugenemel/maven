@@ -609,12 +609,21 @@ QStringList MainWindow::buildGcsUploadCommand(const QString &gcsKeyFile, const Q
         << "cp" << localFilePath << destUrl;
 }
 
-void MainWindow::uploadConvertedFileToGcs(const QString &localConvertedFile) {
+QStringList MainWindow::additionalFileCandidates(const QString &sourceFile, const QString &destFileDir, const QString &fileName) {
+    QStringList candidates;
+    candidates << destFileDir + "/" + fileName;
+    if (QFileInfo(sourceFile).isDir()) {
+        candidates << sourceFile + "/" + fileName;
+    }
+    return candidates;
+}
+
+void MainWindow::uploadConvertedFileToGcs(const QString &sourceFilePath, const QString &localConvertedFile) {
     // One gsutil invocation per configured sync target, run sequentially via
     // commandQueue -- a row with either field unset is skipped (R11), same
     // gating as the old single-target settings.
     foreach (const GcsSyncTarget &target, collectGcsSyncTargets()) {
-        uploadFileToGcsTarget(target, localConvertedFile);
+        uploadFileToGcsTarget(target, sourceFilePath, localConvertedFile);
     }
 }
 
@@ -650,9 +659,9 @@ void MainWindow::enqueueCommand(MzWatcherBackgroundJob *job, std::function<void(
     commandQueue->start(job);
 }
 
-void MainWindow::uploadFileToGcsTarget(const GcsSyncTarget &target, const QString &localConvertedFile) {
+void MainWindow::uploadFileToGcsTarget(const GcsSyncTarget &target, const QString &sourceFilePath, const QString &localConvertedFile) {
     QString objectPath = buildGcsObjectPath(destFolder, localConvertedFile);
-    QString sourceDir = QFileInfo(localConvertedFile).absolutePath();
+    QString destFileDir = QFileInfo(localConvertedFile).absolutePath();
     QString bucket = target.bucket;
 
     qint64 currentSize = QFileInfo(localConvertedFile).size();
@@ -670,18 +679,25 @@ void MainWindow::uploadFileToGcsTarget(const GcsSyncTarget &target, const QStrin
         QString fileName = additionalFile.trimmed();
         if (fileName.isEmpty()) continue;
 
-        QString additionalFilePath = sourceDir + "/" + fileName;
-        qint64 additionalCurrentSize = QFileInfo(additionalFilePath).size();
-        if (lookupConvertedFileSyncUpload(bucket, additionalFilePath) == additionalCurrentSize) continue;
+        // additionalFileCandidates() covers both a flat drop next to the converted output (e.g.
+        // a nightly RoboCopy drop into destFileDir) and, for a directory-style (.d bundle)
+        // source, a file inside it -- the object path always mirrors the flat location, so the
+        // bucket layout is the same either way.
+        foreach (const QString &additionalFilePath, additionalFileCandidates(sourceFilePath, destFileDir, fileName)) {
+            QFileInfo additionalFileInfo(additionalFilePath);
+            if (!additionalFileInfo.exists()) continue;
+            qint64 additionalCurrentSize = additionalFileInfo.size();
+            if (lookupConvertedFileSyncUpload(bucket, additionalFilePath) == additionalCurrentSize) continue;
 
-        QString additionalObjectPath = buildGcsObjectPath(destFolder, additionalFilePath);
-        QStringList additionalCommand = buildGcsUploadCommand(target.keyFile, target.bucket, additionalFilePath, additionalObjectPath);
-        if (additionalCommand.isEmpty()) continue;
+            QString additionalObjectPath = buildGcsObjectPath(destFolder, destFileDir + "/" + fileName);
+            QStringList additionalCommand = buildGcsUploadCommand(target.keyFile, target.bucket, additionalFilePath, additionalObjectPath);
+            if (additionalCommand.isEmpty()) continue;
 
-        setStatus("Uploading to \"gs://" + target.bucket + "/" + additionalObjectPath + "\"");
-        enqueueCommand(new CommandJob(additionalCommand.first(), additionalCommand.mid(1), CommandJob::FILE_SYNC), [this, bucket, additionalFilePath, additionalCurrentSize](bool success) {
-            if (success) recordConvertedFileSyncUpload(bucket, additionalFilePath, additionalCurrentSize);
-        });
+            setStatus("Uploading to \"gs://" + target.bucket + "/" + additionalObjectPath + "\"");
+            enqueueCommand(new CommandJob(additionalCommand.first(), additionalCommand.mid(1), CommandJob::FILE_SYNC), [this, bucket, additionalFilePath, additionalCurrentSize](bool success) {
+                if (success) recordConvertedFileSyncUpload(bucket, additionalFilePath, additionalCurrentSize);
+            });
+        }
     }
 }
 
@@ -1567,7 +1583,7 @@ void MainWindow::makeBackupCopy(QString file) {
 
                     if (success) {
                         markFileConverted(sourceFilePath);
-                        uploadConvertedFileToGcs(localConvertedFile);
+                        uploadConvertedFileToGcs(sourceFilePath, localConvertedFile);
 
                         // Only now, after a confirmed-successful conversion, do we
                         // trust the source file's size enough to decide whether
