@@ -464,12 +464,15 @@
        <item row="3" column="0">
         <widget class="QLabel" name="label_10">
          <property name="text">
-          <string>Monitor Folder and Automatically Convert </string>
+          <string>Poll Interval</string>
          </property>
         </widget>
        </item>
        <item row="3" column="1">
         <widget class="QSpinBox" name="monitorTimeout">
+         <property name="toolTip">
+          <string>Check files regularly at this interval to assess file size changes</string>
+         </property>
          <property name="suffix">
           <string> sec</string>
          </property>
@@ -493,12 +496,15 @@
        <item row="5" column="0">
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>Wait period before file conversion</string>
+          <string>Minimum Stability Time</string>
          </property>
         </widget>
        </item>
        <item row="5" column="1">
         <widget class="QSpinBox" name="converter_waitTime">
+         <property name="toolTip">
+          <string>Files unchanged in size after this time period are scheduled for conversion and transfer jobs (except rapidfire .d files, which convert immediately on completion)</string>
+         </property>
          <property name="suffix">
           <string> min</string>
          </property>
