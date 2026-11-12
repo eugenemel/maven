@@ -335,6 +335,10 @@ class MainWindow: public QMainWindow {
 				void recordConvertedFileSyncUpload(const QString &bucket, const QString &filePath, qint64 fileSize);
 				qint64 lookupConvertedFileSyncUpload(const QString &bucket, const QString &filePath);
 				void syncGcsTarget(const GcsSyncTarget &target);
+
+                // Issue 872: watch-timer-driven dispatch of a SourceFileScanWorker
+				void enqueueSourceFolderScan();
+
 				void checkAndSendSizeWarning(const QFileInfo &sourceFileInfo);
 				void sendWarningEmail(const QStringList &recipients, const QString &subject, const QString &body);
 				// Re-reads mailerConfigFile and updates mailerConfigStatusLabel

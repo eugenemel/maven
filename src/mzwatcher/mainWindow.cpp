@@ -270,16 +270,18 @@ void MainWindow::updateScheduledActionsLabel() {
 	int fileSyncs = 0;
 	int warningEmails = 0;
 	int fileSyncGroups = 0;
+	int sourceFolderScans = 0;
 	foreach (MzWatcherBackgroundJob *job, outstandingJobs) {
 		switch (job->type()) {
 			case MzWatcherBackgroundJob::CONVERSION: conversions++; break;
 			case MzWatcherBackgroundJob::FILE_SYNC: fileSyncs++; break;
 			case MzWatcherBackgroundJob::FILE_SYNC_GROUP: fileSyncGroups++; break;
+			case MzWatcherBackgroundJob::SOURCE_FOLDER_SCAN: sourceFolderScans++; break;
 			default: warningEmails++; break;
 		}
 	}
 
-	if (conversions == 0 && fileSyncs == 0 && warningEmails == 0 && fileSyncGroups == 0) {
+	if (conversions == 0 && fileSyncs == 0 && warningEmails == 0 && fileSyncGroups == 0 && sourceFolderScans == 0) {
         guiForm->scheduledActionsLabel->setText("No Currently Scheduled Actions.");
 		return;
 	}
@@ -288,6 +290,7 @@ void MainWindow::updateScheduledActionsLabel() {
 	if (conversions > 0) parts << QString::number(conversions) + " Conversions";
 	if (fileSyncs > 0) parts << QString::number(fileSyncs) + " File Syncs";
     if (fileSyncGroups > 0) parts << QString::number(fileSyncGroups) + " Batch File Syncs";
+    if (sourceFolderScans > 0) parts << QString::number(sourceFolderScans) + " Source Folder Scans";
 	if (warningEmails > 0) parts << QString::number(warningEmails) + " Warning Emails";
 	guiForm->scheduledActionsLabel->setText("Scheduled Actions: " + parts.join(", "));
 }
@@ -446,11 +449,91 @@ void MainWindow::processChangedFiles() {
 
 }
 
+// Issue 872: the watch-timer's automatic counterpart to processChangedFiles()/getFileList(),
+// run on a background thread via SourceFileScanWorker instead of inline on the GUI thread, so
+// an automatic scan never blocks the GUI. Also runs the Converted File Sync catch-up (main file
+// + Additional Files) on every scan rather than only when the manual Sync button is clicked --
+// this is what actually fixes Issue 872 (an Additional File that doesn't exist yet the instant
+// its mzML finishes converting was never picked up again until someone clicked Sync by hand).
+//
+// Snapshotting dbFiles/fileList/etc. and querying the DB here (not in the worker) is required,
+// not a stylistic choice -- see syncGcsTarget()'s comment: QSqlDatabase/QSqlQuery and widgets
+// both have to stay on the GUI thread.
+void MainWindow::enqueueSourceFolderScan() {
+    getDBFileList();
+
+    int minFileSize = guiForm->minimumsFileSize->value();
+    int waitTime = guiForm->converter_waitTime->value() * 60;
+    QString destFileFormat = guiForm->destFileFormatBox->currentText();
+
+    QSqlQuery query(DB);
+    query.prepare("select filename from datafiles where fileConverted=1");
+    QStringList convertedFilenames;
+    if (query.exec()) {
+        while (query.next()) {
+            convertedFilenames << query.value(0).toString();
+        }
+    }
+
+    QVector<SourceFileScanWorker::GcsTarget> gcsTargets;
+    QHash<QString, QHash<QString, qint64>> knownUploadsByBucket;
+    foreach (const GcsSyncTarget &target, collectGcsSyncTargets()) {
+        SourceFileScanWorker::GcsTarget gcsTarget;
+        gcsTarget.bucket = target.bucket;
+        gcsTarget.keyFile = target.keyFile;
+        gcsTarget.additionalFiles = target.additionalFiles;
+        gcsTargets.append(gcsTarget);
+
+        QSqlQuery syncedQuery(DB);
+        syncedQuery.prepare("select filePath, fileSize from converted_file_sync where bucket=?");
+        syncedQuery.addBindValue(target.bucket);
+        QHash<QString, qint64> knownUploads;
+        if (syncedQuery.exec()) {
+            while (syncedQuery.next()) {
+                knownUploads.insert(syncedQuery.value(0).toString(), syncedQuery.value(1).toLongLong());
+            }
+        }
+        knownUploadsByBucket.insert(target.bucket, knownUploads);
+    }
+
+    SourceFileScanWorker *worker = new SourceFileScanWorker(
+            sourceFolder, destFolder, extension, destFileFormat, minFileSize, waitTime, maxDayDiff,
+            dbFiles, convertedFiles, firstDetectedTimes, fileList, lastSizeChangeTimes,
+            gcsTargets, convertedFilenames, knownUploadsByBucket,
+            [this](const QString &bucket, const QString &filePath, qint64 fileSize) {
+                recordConvertedFileSyncUpload(bucket, filePath, fileSize);
+            });
+
+    enqueueCommand(worker, [this, worker](bool success) {
+        foreach (const QString &file, worker->takeNewFiles()) {
+            insertFileInfo(file);
+        }
+
+        const QHash<QString, qint64> scannedFileList = worker->takeUpdatedFileList();
+        for (auto it = scannedFileList.constBegin(); it != scannedFileList.constEnd(); ++it) {
+            fileList[it.key()] = it.value();
+        }
+        const QHash<QString, QDateTime> scannedChangeTimes = worker->takeUpdatedLastSizeChangeTimes();
+        for (auto it = scannedChangeTimes.constBegin(); it != scannedChangeTimes.constEnd(); ++it) {
+            lastSizeChangeTimes[it.key()] = it.value();
+        }
+
+        showDataFilesTable();
+
+        foreach (CommandJob *job, worker->takeJobs()) {
+            enqueueCommand(job);
+        }
+
+        foreach (const QString &file, worker->takeReadyToConvertFiles()) {
+            processFile(file);
+        }
+    });
+}
 
 void MainWindow::timerEvent(QTimerEvent* event) {
        if (event->timerId() == timerId) {
            getFormValues();
-           if(checkParameters()) updateFileList();
+           if(checkParameters()) enqueueSourceFolderScan();
            return;
        }
 
