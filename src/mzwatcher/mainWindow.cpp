@@ -838,7 +838,12 @@ qint64 MainWindow::effectiveFileSize(const QFileInfo &fi) {
 }
 
 bool MainWindow::isRapidFireRunDisconnected(const QString &dotDPath) {
-    QFile batchLog(QDir(dotDPath).filePath("batch.log"));
+    // priority: batch.log file at same level as .d folder
+    // fallback: look inside .d folder for batch.log
+    QString batchLevelLog = QDir(QFileInfo(dotDPath).absolutePath()).filePath("batch.log");
+    QString batchLogPath = QFileInfo(batchLevelLog).exists() ? batchLevelLog : QDir(dotDPath).filePath("batch.log");
+
+    QFile batchLog(batchLogPath);
     if (!batchLog.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
 
     QStringList lastLines;
